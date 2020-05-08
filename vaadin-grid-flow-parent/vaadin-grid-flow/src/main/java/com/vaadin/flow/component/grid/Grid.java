@@ -48,6 +48,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
@@ -541,8 +542,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
          * <p>
-         * <strong>Note:</strong> Comparator is not serializable. If you need to
-         * write serializable implementation, use inlined class of
+         * <strong>Note:</strong> Comparator is not serializable. If you need
+         * to write serializable implementation, use inlined class of
          * {@link SerializableComparator} instead of Lambda expression.
          *
          * @param comparator
@@ -1031,8 +1032,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Remove the displayed details and remove details item from the list
          *
-         * @param item
-         *            item to removed
+         * @param item item to removed
          */
         @Override
         public void destroyData(T item) {
@@ -2293,13 +2293,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     @Override
-    public void setDataProvider(DataProvider<? extends T, ?> dataProvider) {
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
 
         deselectAll();
-        getDataCommunicator().setDataProvider((DataProvider) dataProvider,
-                null);
+        getDataCommunicator().setDataProvider(dataProvider, null);
 
         /*
          * The visibility of the selectAll checkbox depends on whether the
@@ -2552,9 +2551,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
         JsonArray jsonArray = Json.createArray();
         for (T item : items) {
-            JsonObject jsonObject = item != null
-                    ? generateJsonForSelection(item)
-                    : null;
+            JsonObject jsonObject = item != null ? generateJsonForSelection(item) : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
         final SerializableRunnable jsFunctionCall = () -> getElement()
@@ -2702,11 +2699,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
-     *
      * @param internalId
      *            the internal identifier of the column to get
-     * @return the column corresponding to the given column identifier, or
-     *         {@code null} if no column has such an identifier
+     * @return the column corresponding to the given column identifier, or {@code null}
+     *         if no column has such an identifier
      */
     Column<T> getColumnByInternalId(String internalId) {
         return idToColumnMap.get(internalId);
@@ -3105,13 +3101,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     protected SerializableComparator<T> createSortingComparator() {
         BinaryOperator<SerializableComparator<T>> operator = (comparator1,
                 comparator2) -> {
-                    /*
-                     * thenComparing is defined to return a serializable
-                     * comparator as long as both original comparators are also
-                     * serializable
-                     */
-                    return comparator1.thenComparing(comparator2)::compare;
-                };
+            /*
+             * thenComparing is defined to return a serializable comparator as
+             * long as both original comparators are also serializable
+             */
+            return comparator1.thenComparing(comparator2)::compare;
+        };
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
@@ -3519,8 +3514,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 .compare(a, b);
     }
 
-    private void handleDataProviderChange(
-            DataProvider<? extends T, ?> dataProvider) {
+    private void handleDataProviderChange(DataProvider<T, ?> dataProvider) {
         onDataProviderChange();
 
         if (dataProviderChangeRegistration != null) {
@@ -3795,29 +3789,29 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Sets a new column order for the grid.
      * <p>
-     * The function doesn't support column removal: all columns must be present
-     * in the list, otherwise {@link IllegalArgumentException} is thrown.
+     * The function doesn't support column
+     * removal: all columns must be present in the list, otherwise
+     * {@link IllegalArgumentException} is thrown.
      * <p>
      * The {@link #getColumns()} function will reflect the new column ordering.
      * <p>
-     * Fires the {@link ColumnReorderEvent} with
-     * {@link ColumnReorderEvent#isFromClient()} returning {@code false}.
+     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
+     * returning {@code false}.
      * <p>
-     * The method is atomic: if the requested reordering is not achievable, the
-     * function fails cleanly with {@link IllegalArgumentException} without
+     * The method is atomic: if the requested reordering is not achievable,
+     * the function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
      * @see #setColumnOrder(List)
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
-     *             if the {@code columns} parameter is {@code null}.
-     * @throws IllegalArgumentException
-     *             if a column is present two times in the list, or if the
-     *             column is not owned by this Grid, or if the list doesn't
-     *             contain all columns currently present in the Grid, or if the
-     *             column rearranging would require to split a joined
-     *             header/footer cell group.
+     *            if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException if a column is present two times in the
+     *            list, or if the column is not owned by this Grid, or if the
+     *            list doesn't contain all columns currently present in the Grid,
+     *            or if the column rearranging would require to split a joined
+     *            header/footer cell group.
      */
     public void setColumnOrder(Column<T>... columns) {
         setColumnOrder(Arrays.asList(columns));
@@ -3826,29 +3820,29 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Sets a new column order for the grid.
      * <p>
-     * The function doesn't support column removal: all columns must be present
-     * in the list, otherwise {@link IllegalArgumentException} is thrown.
+     * The function doesn't support column
+     * removal: all columns must be present in the list, otherwise
+     * {@link IllegalArgumentException} is thrown.
      * <p>
      * The {@link #getColumns()} function will reflect the new column ordering.
      * <p>
-     * Fires the {@link ColumnReorderEvent} with
-     * {@link ColumnReorderEvent#isFromClient()} returning {@code false}.
+     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
+     * returning {@code false}.
      * <p>
-     * The method is atomic: if the requested reordering is not achievable, the
-     * function fails cleanly with {@link IllegalArgumentException} without
+     * The method is atomic: if the requested reordering is not achievable,
+     * the function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
      * @see #setColumnOrder(Column[])
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
-     *             if the {@code columns} parameter is {@code null}.
-     * @throws IllegalArgumentException
-     *             if a column is present two times in the list, or if the
-     *             column is not owned by this Grid, or if the list doesn't
-     *             contain all columns currently present in the Grid, or if the
-     *             column rearranging would require to split a joined
-     *             header/footer cell group.
+     *            if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException if a column is present two times in the
+     *            list, or if the column is not owned by this Grid, or if the
+     *            list doesn't contain all columns currently present in the Grid,
+     *            or if the column rearranging would require to split a joined
+     *            header/footer cell group.
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
@@ -3889,16 +3883,15 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
-        ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY,
-                event.getDraggedItems());
-        getUI().ifPresent(
-                ui -> ui.getInternals().setActiveDragSourceComponent(this));
+        ComponentUtil.setData(this,
+                DRAG_SOURCE_DATA_KEY, event.getDraggedItems());
+        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(this));
     }
 
     private void onDragEnd(GridDragEndEvent<T> event) {
-        ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY, null);
-        getUI().ifPresent(
-                ui -> ui.getInternals().setActiveDragSourceComponent(null));
+        ComponentUtil.setData(this,
+                DRAG_SOURCE_DATA_KEY, null);
+        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
 }
