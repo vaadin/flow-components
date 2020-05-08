@@ -48,7 +48,7 @@ public class IconView extends DemoView {
 
         // Creating an icon from the Lumo icons collection
         IronIcon clock = new IronIcon("lumo", "clock");
-
+        add(close, clock);
         // end-source-example
 
         close.getStyle().set("marginRight", "5px");
@@ -65,6 +65,7 @@ public class IconView extends DemoView {
         Icon logo = new Icon(VaadinIcon.VAADIN_H);
         logo.setSize("100px");
         logo.setColor("orange");
+        add(logo);
         // end-source-example
 
         addCard("Styling an icon", logo);
@@ -85,6 +86,7 @@ public class IconView extends DemoView {
         logoH.getStyle().set("cursor", "pointer");
         logoH.addClickListener(
                 event -> message.setText("The VAADIN_H icon was clicked!"));
+        add(logoV, logoH, message);
         // end-source-example
 
         addCard("Clickable icons", new HorizontalLayout(logoV, logoH), message);
