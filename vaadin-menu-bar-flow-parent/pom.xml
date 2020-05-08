@@ -22,7 +22,6 @@
     </organization>
 
     <properties>
-        <flow.version>2.0-SNAPSHOT</flow.version>
         <contextmenu.version>3.0-SNAPSHOT</contextmenu.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -57,8 +56,8 @@
                 </property>
             </activation>
             <modules>
-                <module>vaadin-menu-bar-flow-integration-tests/pom-bower-mode.xml</module>
                 <module>vaadin-menu-bar-flow-integration-tests</module>
+                <module>vaadin-menu-bar-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
