@@ -45,38 +45,38 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-radio-button-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <!-- TODO needs to be updated after date picker is updated due to circular dependency -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-date-picker-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-combo-box-flow</artifactId>
-            <version>4.0-SNAPSHOT</version>
+            <version>4.1-SNAPSHOT</version>
         </dependency>
 
         <!-- externals -->
@@ -94,12 +94,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-form-layout-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-select-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>3.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

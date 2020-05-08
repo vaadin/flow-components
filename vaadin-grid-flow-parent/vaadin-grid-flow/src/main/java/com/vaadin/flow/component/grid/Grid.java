@@ -123,7 +123,7 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.5.1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.6.1")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -2557,7 +2557,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                     : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        getElement().callJsFunction("$connector." + function, jsonArray, false);
+        final SerializableRunnable jsFunctionCall = () -> getElement()
+            .callJsFunction("$connector." + function, jsonArray, false);
+        if (getElement().getNode().isAttached()) {
+            jsFunctionCall.run();
+        } else {
+            getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> jsFunctionCall.run()));
+        }
     }
 
     private JsonObject generateJsonForSelection(T item) {
@@ -3111,9 +3118,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * If <code>true</code>, the grid's height is defined by the number of its
+     * If <code>true</code>, the grid's height is defined by its
      * rows. All items are fetched from the {@link DataProvider}, and the Grid
      * shows no vertical scroll bar.
+     * <p>
+     * Note: <code>setHeightByRows</code> disables the grid's virtual scrolling
+     * so that all the rows are rendered in the DOM at once.
+     * If the grid has a large number of items, using the feature is discouraged
+     * to avoid performance issues.
      *
      * @param heightByRows
      *            <code>true</code> to make Grid compute its height by the

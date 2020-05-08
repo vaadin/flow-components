@@ -364,15 +364,15 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         WebElement toggleIdColumnVisibility = findElement(
                 By.id("toggle-id-column-visibility"));
-        String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('td')[1].hidden;";
-        Assert.assertNotEquals(true, getCommandExecutor()
+        String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('tr')[1].querySelectorAll('td').length;";
+        Assert.assertEquals(4l, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(true, getCommandExecutor()
+        Assert.assertEquals(3l, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertNotEquals(true, getCommandExecutor()
-                .executeScript(firstCellHiddenScript, grid));
+        Assert.assertEquals(4l, getCommandExecutor()
+            .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
                 grid.getAttribute("columnReorderingAllowed"));
