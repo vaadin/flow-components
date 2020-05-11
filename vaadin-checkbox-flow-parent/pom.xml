@@ -15,6 +15,10 @@
     <packaging>pom</packaging>
     <name>Vaadin Checkbox Flow Parent</name>
 
+    <properties>
+        <flow.version>3.2-SNAPSHOT</flow.version>
+    </properties>
+
    <repositories>
         <!-- repositories are configured in parent but still need this
              when parent is a snapshot -->
