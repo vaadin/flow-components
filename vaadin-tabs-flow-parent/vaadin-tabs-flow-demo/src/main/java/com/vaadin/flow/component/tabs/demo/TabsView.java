@@ -18,9 +18,6 @@ package com.vaadin.flow.component.tabs.demo;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
@@ -69,6 +66,8 @@ public class TabsView extends DemoView {
         Tab tab3 = new Tab("Tab three");
         Tabs tabs = new Tabs(tab1, tab2, tab3);
         tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
+
+        add(tabs);
         // end-source-example
 
         addVariantsDemo(() -> {
@@ -85,6 +84,8 @@ public class TabsView extends DemoView {
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
         Tabs tabs = new Tabs(tab1, tab2, tab3);
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("horizontal-tabs");
@@ -100,6 +101,8 @@ public class TabsView extends DemoView {
         Tab tab3 = new Tab("Tab three");
         tabs.add(tab1, tab2, tab3);
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("vertical-tabs");
@@ -115,6 +118,8 @@ public class TabsView extends DemoView {
                 new Tab("Tab nine"), new Tab("Tab ten"), new Tab("Tab eleven"),
                 new Tab("Tab twelve"), new Tab("Tab thirteen"),
                 new Tab("Tab fourteen"), new Tab("Tab fifteen"));
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("scrollable-horizontal-tabs");
@@ -132,6 +137,8 @@ public class TabsView extends DemoView {
                 new Tab("Tab fourteen"), new Tab("Tab fifteen"));
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.setHeight("130px");
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("scrollable-vertical-tabs");
@@ -149,6 +156,8 @@ public class TabsView extends DemoView {
         Tab tab4 = new Tab("Tab four");
         Tab tab5 = new Tab("Tab five");
         tabs.add(tab1, tab2, tab3, tab4, tab5);
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("disabled-tabs");
@@ -163,6 +172,8 @@ public class TabsView extends DemoView {
         Tab tab3 = new Tab("Tab three");
         Tabs tabs = new Tabs(tab1, tab2, tab3);
         tabs.setFlexGrowForEnclosedTabs(1);
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("full-width-tabs");
@@ -178,6 +189,8 @@ public class TabsView extends DemoView {
         Tab tab3 = new Tab("Tab three");
         tabs.add(tab1, tab2, tab3);
         tabs.setSelectedTab(tab2);
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("preselected-tabs");
@@ -213,6 +226,8 @@ public class TabsView extends DemoView {
             Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
             selectedPage.setVisible(true);
         });
+
+        add(tabs, pages);
         // end-source-example
 
         tabs.setId("tabs-with-pages");
@@ -241,6 +256,8 @@ public class TabsView extends DemoView {
         Tab tab2 = new Tab(new Checkbox("What?"));
         Tab tab3 = new Tab(new Icon(VaadinIcon.COG));
         Tabs tabs = new Tabs(tab1, tab2, tab3);
+
+        add(tabs);
         // end-source-example
 
         tabs.setId("tabs-with-custom-content");
@@ -265,6 +282,8 @@ public class TabsView extends DemoView {
                         "Previous tab : " + event.getPreviousTab().getLabel());
             }
         });
+
+        add(tabs, newText, oldText);
         // end-source-example
 
         tabs.setId("tabs-auto-select-false");
