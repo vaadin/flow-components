@@ -258,7 +258,7 @@ import elemental.json.JsonObject;
         "WebComponent: Vaadin.DatePickerElement#4.0.0-alpha1",
         "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.1.0")
+@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.1.1")
 @JsModule("@vaadin/vaadin-date-picker/src/vaadin-date-picker.js")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
