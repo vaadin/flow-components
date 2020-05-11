@@ -41,6 +41,7 @@ public class ConfirmDialogView extends DemoView {
                 "Your next meeting starts in 5 minutes", "OK", this::onOK);
         Button button = new Button("Open dialog");
         button.addClickListener(event -> dialog.open());
+        add(button, dialog);
         // end-source-example
         // @formatter:on
 
@@ -56,6 +57,7 @@ public class ConfirmDialogView extends DemoView {
                 "Cancel", this::onCancel);
         Button button = new Button("Open dialog");
         button.addClickListener(event -> dialog.open());
+        add(button, dialog);
         // end-source-example
         // @formatter:on
 
@@ -72,6 +74,7 @@ public class ConfirmDialogView extends DemoView {
         dialog.setConfirmButtonTheme("error primary");
         Button button = new Button("Open dialog");
         button.addClickListener(event -> dialog.open());
+        add(button, dialog);
         // end-source-example
         // @formatter:on
 
@@ -87,6 +90,7 @@ public class ConfirmDialogView extends DemoView {
                 "Save", this::onSave, "Discard", this::onDiscard, "Cancel", this::onCancel);
         Button button = new Button("Open dialog");
         button.addClickListener(event -> dialog.open());
+        add(button, dialog);
         // end-source-example
         // @formatter:on
 
@@ -117,6 +121,7 @@ public class ConfirmDialogView extends DemoView {
         dialog.setRejectButton(rejectButton.getElement());
 
         dialog.setCancelButton("Cancel", this::onCancel);
+        add(openDialogButton, dialog);
         // end-source-example
         // @formatter:on
 
