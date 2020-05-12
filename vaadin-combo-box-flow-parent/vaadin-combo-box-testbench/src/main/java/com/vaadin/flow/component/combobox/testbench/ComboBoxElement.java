@@ -124,7 +124,7 @@ public class ComboBoxElement extends TestBenchElement
      *
      * @return @{code true} if enabled, {@code false} otherwise
      */
-    public boolean isAutoOpenEnabled() {
+    public boolean isAutoOpen() {
         return !getPropertyBoolean("autoOpenDisabled");
     }
 }
