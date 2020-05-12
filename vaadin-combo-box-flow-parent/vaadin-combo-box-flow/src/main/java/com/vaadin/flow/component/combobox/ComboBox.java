@@ -832,12 +832,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * the dropdown is only opened when clicking the toggle button or pressing
      * Up or Down arrow keys.
      * 
-     * @param autoOpenEnabled
+     * @param autoOpen
      *            {@code false} to prevent the dropdown from opening
      *            automatically
      */
-    public void setAutoOpenEnabled(boolean autoOpenEnabled) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpenEnabled);
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
     }
 
     /**
@@ -845,7 +845,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return @{code true} if enabled, {@code false} otherwise
      */
-    public boolean isAutoOpenEnabled() {
+    public boolean isAutoOpen() {
         return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 

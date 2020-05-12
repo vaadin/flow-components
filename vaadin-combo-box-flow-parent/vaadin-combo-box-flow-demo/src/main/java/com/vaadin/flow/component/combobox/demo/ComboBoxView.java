@@ -65,8 +65,8 @@ public class ComboBoxView extends DemoView {
         displayClearButton();
         valueChangeEvent();
         customValues();
-        autoOpenDisabled();
         storingCustomValues();
+        autoOpenDisabled();
         lazyLoading();
         configurationForReqired(); // Validation
         customFiltering(); // Filtering
@@ -163,7 +163,7 @@ public class ComboBoxView extends DemoView {
         // source-example-heading: Auto open disabled
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("Option one", "Option two");
-        comboBox.setAutoOpenEnabled(false);
+        comboBox.setAutoOpen(false);
         // end-source-example
 
         addCard("Auto open disabled", note, comboBox);

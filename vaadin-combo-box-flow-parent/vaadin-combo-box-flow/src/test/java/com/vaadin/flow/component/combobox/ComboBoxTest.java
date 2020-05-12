@@ -169,10 +169,10 @@ public class ComboBoxTest {
     @Test
     public void setAutoOpenDisabled() {
         ComboBox<String> comboBox = new ComboBox<>();
-        Assert.assertTrue(comboBox.isAutoOpenEnabled());
-        comboBox.setAutoOpenEnabled(false);
+        Assert.assertTrue(comboBox.isAutoOpen());
+        comboBox.setAutoOpen(false);
         Assert.assertTrue(comboBox.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false));
-        Assert.assertFalse(comboBox.isAutoOpenEnabled());
+        Assert.assertFalse(comboBox.isAutoOpen());
     }
 
     @Test

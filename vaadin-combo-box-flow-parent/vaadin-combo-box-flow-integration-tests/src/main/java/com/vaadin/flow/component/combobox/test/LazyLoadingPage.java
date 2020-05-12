@@ -66,7 +66,7 @@ public class LazyLoadingPage extends Div {
         addTitle("ListDataProvider with strings and AutoOpenDisabled");
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("lazy-strings-autoopendisabled");
-        comboBox.setAutoOpenEnabled(false);
+        comboBox.setAutoOpen(false);
 
         List<String> items = generateStrings(1000);
         ListDataProvider<String> dp = DataProvider.ofCollection(items);

@@ -474,7 +474,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         stringBoxAutoOpenDisabled.selectByText(item);
         assertMessage(item);
         Assert.assertEquals(item, getSelectedItemLabel(stringBoxAutoOpenDisabled));
-        Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpenEnabled());
+        Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpen());
     }
 
     @Test
