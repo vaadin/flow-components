@@ -232,4 +232,14 @@ public class TimePickerElement extends TestBenchElement
     public String getSelectedText() {
         return getTimePickerTextFieldElement().getValue();
     }
+
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpen() {
+        return !getPropertyBoolean("autoOpenDisabled");
+    }
+
 }

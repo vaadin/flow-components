@@ -50,6 +50,21 @@ public class TimePickerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void selectTimeOnAutoOpenDisabledTimePicker() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("autoopendisabled-picker");
+        TestBenchElement message = $("div")
+                .id("autoopendisabled-picker-message");
+
+        picker.setValue("10:08");
+        waitUntil(driver -> message.getText().contains("Hour: 10\nMinute: 8"));
+
+        picker.setValue("");
+        waitUntil(driver -> "No time is selected".equals(message.getText()));
+        Assert.assertFalse(picker.isAutoOpen());
+    }
+
+    @Test
     public void selectTimeOnDisabledTimePicker() {
         TimePickerElement picker = $(TimePickerElement.class)
                 .id("disabled-picker");

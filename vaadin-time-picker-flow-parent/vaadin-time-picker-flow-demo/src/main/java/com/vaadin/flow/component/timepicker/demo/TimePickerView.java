@@ -51,6 +51,7 @@ public class TimePickerView extends DemoView {
         createLocalizedTimePicker();
         createDisabledTimePicker();
         createWithClearButton();
+        autoOpenDisabled();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
     }
@@ -183,6 +184,19 @@ public class TimePickerView extends DemoView {
         // end-source-example
 
         addCard("Clear button", timePicker);
+    }
+
+    private void autoOpenDisabled() {
+        Span note = new Span(
+                "Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        TimePicker timePicker = new TimePicker();
+        timePicker.setValue(LocalTime.now());
+        timePicker.setAutoOpen(false);
+        // end-source-example
+
+        addCard("Auto open disabled", note, timePicker);
     }
 
     private void createTimePickerWithMinAndMaxSetting() {
