@@ -169,7 +169,7 @@ import com.vaadin.flow.dom.Element;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.FormItemElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-item")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.1.7")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.2.0")
 @JsModule("@vaadin/vaadin-form-layout/src/vaadin-form-item.js")
 @HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-item.html")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
