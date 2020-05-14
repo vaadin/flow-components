@@ -6,7 +6,6 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 public class DynamicChangingChartIT extends AbstractTBTest {
     @Override
