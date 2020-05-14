@@ -72,6 +72,8 @@ public class ServerSideEvents extends AbstractChartExample {
         configuration.getChart().setAnimation(false);
         configuration.getChart().setZoomType(Dimension.XY);
 
+        configuration.getAccessibility().setEnabled(false);
+
         XAxis xAxis = configuration.getxAxis();
         xAxis.setMinPadding(0.2);
         xAxis.setMaxPadding(0.2);
