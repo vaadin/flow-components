@@ -29,7 +29,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * wide.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.3.0")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-vertical-layout.html")
 public class VerticalLayout extends Component implements ThemableLayout,
