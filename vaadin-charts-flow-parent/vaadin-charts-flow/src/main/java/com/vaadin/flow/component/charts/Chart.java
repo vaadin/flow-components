@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.events.ChartAddSeriesEvent;
 import com.vaadin.flow.component.charts.events.ChartAfterPrintEvent;
 import com.vaadin.flow.component.charts.events.ChartBeforePrintEvent;
@@ -75,6 +76,8 @@ public class Chart extends Component implements HasStyle, HasSize {
 
     private Configuration configuration;
 
+    private Registration configurationUpdateRegistration;
+
     private transient JreJsonFactory jsonFactory = new JreJsonFactory();
 
     private final ConfigurationChangeListener changeListener = new ProxyChangeForwarder(
@@ -106,14 +109,24 @@ public class Chart extends Component implements HasStyle, HasSize {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        attachEvent.getUI().beforeClientResponse(this, context -> {
-            drawChart();
-            if (configuration != null) {
-                // Start listening to data series events once the chart has been
-                // drawn.
-                configuration.addChangeListener(changeListener);
-            }
-        });
+        beforeClientResponse(attachEvent.getUI(), false);
+    }
+
+    private void beforeClientResponse(UI ui, boolean resetConfiguration) {
+        if (configurationUpdateRegistration != null) {
+            configurationUpdateRegistration.remove();
+        }
+        configurationUpdateRegistration = ui
+            .beforeClientResponse(this, context -> {
+                drawChart(resetConfiguration);
+
+                if (configuration != null) {
+                    // Start listening to data series events once the chart has been
+                    // drawn.
+                    configuration.addChangeListener(changeListener);
+                }
+                configurationUpdateRegistration = null;
+            });
     }
 
     JreJsonFactory getJsonFactory() {
@@ -209,6 +222,20 @@ public class Chart extends Component implements HasStyle, HasSize {
      */
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * @param configuration new configuration for this chart.
+     */
+    public void setConfiguration(Configuration configuration) {
+        if (this.configuration != null) {
+            // unbound old configuration
+            this.configuration.removeChangeListener(changeListener);
+        }
+        this.configuration = configuration;
+        if(getElement().getNode().isAttached()) {
+            getUI().ifPresent(ui -> beforeClientResponse(ui, true));
+        }
     }
 
     /**
