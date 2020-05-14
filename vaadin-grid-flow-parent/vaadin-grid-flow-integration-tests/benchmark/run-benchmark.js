@@ -68,7 +68,7 @@ const startJetty = (cwd) => {
     jetty.stdout.on('data', (data) => {
       console.log(data.toString());
 
-      if (data.toString().includes('Started Jetty Server')) {
+      if (data.toString().includes('Frontend compiled successfully')) {
         resolve();
       }
     });

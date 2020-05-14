@@ -81,7 +81,7 @@ public class GridBenchmark extends Div implements HasUrlParameter<String> {
         String metric = parametersMap.get("metric").get(0);
         String variant = parametersMap.get("variant").get(0);
 
-        LoggerFactory.getLogger(GridBenchmark.class).warn("Sample: " + variant + "-" + metric);
+        LoggerFactory.getLogger(GridBenchmark.class).info("Sample: " + variant + "-" + metric);
 
         switch (variant) {
             case "simple":
