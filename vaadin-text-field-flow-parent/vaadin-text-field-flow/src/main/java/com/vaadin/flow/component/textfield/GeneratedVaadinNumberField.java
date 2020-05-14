@@ -43,7 +43,7 @@ import javax.annotation.Generated;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-number-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-number-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.0")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
