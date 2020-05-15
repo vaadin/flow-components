@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-select-flow-parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>2.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-select-integration-tests</artifactId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-testbench</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -68,7 +68,7 @@
             <artifactId>vaadin-lumo-theme</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
