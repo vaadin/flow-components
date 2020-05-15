@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -54,6 +55,7 @@ public class HiddenColumnIT extends AbstractNoW3c {
     }
 
     @Test
+    @Ignore
     public void hideColumnWithEditor_replaceItems_unhideColumn_dataIsRendered() {
         // open an editor
         grid.getRow(0).doubleClick();
