@@ -374,6 +374,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @param renderer
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
+     *
+     * Note that filtering of the ComboBox is not affected by the renderer that
+     * is set here. Filtering is done on the original values and can be affected
+     * by {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
