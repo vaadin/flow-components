@@ -5,11 +5,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>2.3-SNAPSHOT</version>
         <relativePath />
     </parent>
     <artifactId>vaadin-charts-flow-parent</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -187,15 +187,7 @@
     <repositories>
         <repository>
             <id>vaadin-prereleases</id>
-            <name>Vaadin Pre-releases</name>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
-        <repository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -205,15 +197,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>vaadin-prereleases</id>
-            <name>Vaadin Pre-releases</name>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
