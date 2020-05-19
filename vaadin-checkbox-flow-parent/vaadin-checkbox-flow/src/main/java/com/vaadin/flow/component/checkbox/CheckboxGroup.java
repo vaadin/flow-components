@@ -26,12 +26,19 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
-import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.DataController;
+import com.vaadin.flow.data.provider.SizeChangeEvent;
+import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.SizeChangeListener;
+import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -54,13 +61,16 @@ import elemental.json.JsonArray;
 public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
         implements HasItemsAndComponents<T>, HasSize, HasValidation,
-        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T> {
+        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T>,
+        HasListDataView<T, CheckboxGroupListDataView<T>> {
 
     private static final String VALUE = "value";
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+
+    private final CheckboxGroupDataController dataController = new CheckboxGroupDataController();
 
     private boolean isReadOnly;
 
@@ -71,6 +81,62 @@ public class CheckboxGroup<T>
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
+
+    public CheckboxGroup() {
+        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
+                CheckboxGroup::presentationToModel,
+                CheckboxGroup::modelToPresentation);
+        registerValidation();
+    }
+
+    /**
+     * {@link DataController} implementation responsible for data supply from
+     * tied data provider to {@link DataView} and handling {@link SizeChangeEvent}.
+     */
+    protected class CheckboxGroupDataController implements DataController<T> {
+
+        // TODO: Implement SizeChangeEvent handling for DataView #8345
+
+        @Override
+        public DataProvider<T, ?> getDataProvider() {
+            return dataProvider;
+        }
+
+        @Override
+        public Registration addSizeChangeListener(SizeChangeListener listener) {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+
+        @Override
+        public int getDataSize() {
+            return dataProvider.size(new Query<>());
+        }
+
+        @Override
+        public Stream<T> getAllItems() {
+            return dataProvider.fetch(new Query<>());
+        }
+
+        /**
+         * Notifies {@link SizeChangeListener}'s about data set size change.
+         * Data set size change normally occurs on initial data load, filter change,
+         * or other data reset.
+         */
+        protected void fireSizeChangeEvent() {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+    }
+
+    @Override
+    public CheckboxGroupListDataView<T> setDataProvider(ListDataProvider<T> dataProvider) {
+        this.setDataProvider((DataProvider<T, ?>) dataProvider);
+        return getListDataView();
+    }
+
+    @Override
+    public CheckboxGroupListDataView<T> getListDataView() {
+        return new CheckboxGroupListDataView<>(dataController);
+    }
 
     private static class CheckBoxItem<T> extends Checkbox
             implements ItemComponent<T> {
@@ -87,13 +153,6 @@ public class CheckboxGroup<T>
             return item;
         }
 
-    }
-
-    public CheckboxGroup() {
-        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
-                CheckboxGroup::presentationToModel,
-                CheckboxGroup::modelToPresentation);
-        registerValidation();
     }
 
     @Override

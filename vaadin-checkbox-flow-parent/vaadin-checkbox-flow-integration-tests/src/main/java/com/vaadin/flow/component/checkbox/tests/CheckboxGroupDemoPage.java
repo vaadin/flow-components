@@ -1,9 +1,5 @@
 package com.vaadin.flow.component.checkbox.tests;
 
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.checkbox.GeneratedVaadinCheckboxGroup;
@@ -12,8 +8,11 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
- * View for {@link CheckboxGroup} demo.
+ * View for {@link CheckboxGroup} integration tests.
  *
  * @author Vaadin Ltd
  */
@@ -58,7 +57,9 @@ public class CheckboxGroupDemoPage extends DemoView {
 
     @Override
     public void populateSources() {
-
+        // The body of this method is kept empty because no source population
+        // is needed for integration tests. CheckboxGroupDemoPage is only used for testing.
+        // Old demos have been moved to integration tests and separated from demos.
     }
 
     private void addBasicFeatures() {
@@ -179,9 +180,8 @@ public class CheckboxGroupDemoPage extends DemoView {
         group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
-        addVariantsDemo(() -> {
-                    return group;
-                }, GeneratedVaadinCheckboxGroup::addThemeVariants,
+        addVariantsDemo(() -> group,
+                GeneratedVaadinCheckboxGroup::addThemeVariants,
                 GeneratedVaadinCheckboxGroup::removeThemeVariants,
                 CheckboxGroupVariant::getVariantName,
                 CheckboxGroupVariant.LUMO_VERTICAL);
