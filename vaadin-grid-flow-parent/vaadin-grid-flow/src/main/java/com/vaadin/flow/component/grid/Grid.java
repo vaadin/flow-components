@@ -48,13 +48,14 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.dataview.GridDataView;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
@@ -79,7 +80,10 @@ import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.HasDataGenerators;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -131,9 +135,10 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
-public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
-        HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
-        HasTheme, HasDataGenerators<T> {
+public class Grid<T> extends Component
+        implements HasDataProvider<T>, HasStyle, HasSize, Focusable<Grid<T>>,
+        SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme, HasDataGenerators<T>,
+        HasListDataView<T, GridListDataView<T>> {
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
@@ -1158,6 +1163,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
+
+    private GridDataView<T> dataView;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -2319,6 +2326,26 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public DataProvider<T, ?> getDataProvider() {
         return getDataCommunicator().getDataProvider();
+    }
+
+    @Override
+    public GridListDataView<T> setDataProvider(
+            ListDataProvider<T> dataProvider) {
+        setDataProvider((DataProvider)dataProvider);
+        return getListDataView();
+    }
+
+    @Override
+    public GridListDataView<T> getListDataView() {
+        if (getDataProvider() instanceof ListDataProvider) {
+            if (dataView == null || !(dataView instanceof ListDataView)) {
+                dataView = new GridListDataView<>(this);
+            }
+            return (GridListDataView) dataView;
+        }
+        throw new IllegalStateException(
+                "Required ListDataProvider, but got " + getDataProvider()
+                        .getClass().getSuperclass().getSimpleName());
     }
 
     /**
