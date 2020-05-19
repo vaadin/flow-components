@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-custom-field-flow-parent</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-custom-field-flow</artifactId>
@@ -44,12 +44,12 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-custom-field</artifactId>
-            <version>1.0.11</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-lumo-styles</artifactId>
-            <version>1.5.0</version>
+            <version>1.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
@@ -74,12 +74,12 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-themable-mixin</artifactId>
-            <version>1.4.4</version>
+            <version>1.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-material-styles</artifactId>
-            <version>1.2.3</version>
+            <version>1.3.2</version>
         </dependency>
 
         <!--Test scoped-->
