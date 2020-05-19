@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-rich-text-editor-flow-root</artifactId>
-        <version>2.1-SNAPSHOT</version>
+        <version>2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-rich-text-editor-integration-tests</artifactId>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-testbench</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <!--System under test -->
@@ -81,27 +81,27 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dialog-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-notification-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -165,7 +165,7 @@
         </plugins>
     </build>
     <profiles>
-        <!--This profile is only present for quick testing against the element 
+        <!--This profile is only present for quick testing against the element
             from GitHub -->
         <!--Do not use with production mode -->
         <profile>
@@ -262,7 +262,7 @@
                             </dependency>
                         </dependencies>
                         <executions>
-                            <!-- Start Sauce Connect prior to running the 
+                            <!-- Start Sauce Connect prior to running the
                                 integration tests -->
                             <execution>
                                 <id>start-sauceconnect</id>
@@ -271,7 +271,7 @@
                                     <goal>start-sauceconnect</goal>
                                 </goals>
                             </execution>
-                            <!-- Stop the Sauce Connect process after the 
+                            <!-- Stop the Sauce Connect process after the
                                 integration tests have finished -->
                             <execution>
                                 <id>stop-sauceconnect</id>
@@ -314,7 +314,7 @@
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>
-                    <!-- Plugin for automatically download Chrome Driver 
+                    <!-- Plugin for automatically download Chrome Driver
                         for tests -->
                     <plugin>
                         <groupId>com.lazerycode.selenium</groupId>
@@ -322,7 +322,7 @@
                         <version>1.0.17</version>
                         <configuration
                             combine.self="override">
-                            <!-- root directory that downloaded driver binaries 
+                            <!-- root directory that downloaded driver binaries
                                 will be stored in -->
                             <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
                             <overwriteFilesThatExist>true</overwriteFilesThatExist>
