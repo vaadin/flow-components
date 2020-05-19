@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  * @param <E> the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version="1.1.0")
+@NpmPackage(value = "@vaadin/vaadin-crud", version="1.2.0")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
@@ -452,7 +452,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     /**
      * Gets whether click on row to edit item is enabled or not.
      *
-     * @return @{code true} if enabled, {@code false} otherwise
+     * @return {@code true} if enabled, {@code false} otherwise
      */
     public boolean isEditOnClick() {
         return getElement().getProperty("editOnClick", false);
