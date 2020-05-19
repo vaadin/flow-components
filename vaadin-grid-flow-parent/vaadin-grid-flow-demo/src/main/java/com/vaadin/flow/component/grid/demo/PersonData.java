@@ -1,7 +1,11 @@
 package com.vaadin.flow.component.grid.demo;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import com.vaadin.flow.component.grid.demo.GridDemo.MaritalStatus;
 
 public class PersonData {
 
@@ -57,11 +61,14 @@ public class PersonData {
 
     public List<GridDemo.Person> getPersons() {
         if (people.isEmpty()) {
+            final int maxAge = 100 * 12 * 31;
             for (int i = 91; i <= 199; i++) {
+                LocalDate birthDate =  LocalDate.now().minusDays(new Random().nextInt(maxAge));
+                MaritalStatus maritalStatus = MaritalStatus.values()[Math.round(new Random().nextFloat())];
                 people.add(new GridDemo.Person(i, names[i % names.length], surnames[i % surnames.length],
                         ages[i % ages.length],
                         new GridDemo.Address(numbers[i % numbers.length], cities[i % cities.length]),
-                        phones[i % phones.length]));
+                        phones[i % phones.length], maritalStatus, birthDate));
             }
         }
         return people;
