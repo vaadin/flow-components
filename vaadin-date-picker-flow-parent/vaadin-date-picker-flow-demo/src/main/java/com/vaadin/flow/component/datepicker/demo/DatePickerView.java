@@ -47,6 +47,7 @@ public class DatePickerView extends DemoView {
         disabledAndReadonly();
         clearButton();
         valueChangeEvent();
+        autoOpenDisabled();
         configurationForRequired(); // Validation
         minAndMaXDateValidation();
         customValidator();
@@ -133,6 +134,18 @@ public class DatePickerView extends DemoView {
         VerticalLayout verticalLayout = new VerticalLayout(datePicker, value);
         verticalLayout.setPadding(false);
         addCard("Value change event", verticalLayout);
+    }
+
+    private void autoOpenDisabled() {
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        DatePicker datePicker = new DatePicker();
+
+        // Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.
+        datePicker.setAutoOpen(false);
+        // end-source-example
+
+        addCard("Auto open disabled", datePicker);
     }
 
     private void configurationForRequired() {

@@ -50,6 +50,8 @@ import elemental.json.JsonObject;
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation {
 
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
     private DatePickerI18n i18n;
 
     private final static SerializableFunction<String, LocalDate> PARSER = s -> {
@@ -595,6 +597,24 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public String getName() {
         return getNameString();
+    }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @param autoOpen Value for the auto open property,
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+    }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
     }
 
     /**
