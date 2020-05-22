@@ -68,8 +68,7 @@ public class GridListDataView<T> extends AbstractListDataView<T>
      * @return this
      */
     public GridListDataView<T> addFilter(SerializablePredicate<T> filter) {
-        ((ListDataProvider<T>) getDataController().getDataProvider())
-                .addFilter(filter);
+        getDataProvider().addFilter(filter);
         return this;
     }
 
@@ -80,40 +79,7 @@ public class GridListDataView<T> extends AbstractListDataView<T>
      * @return this
      */
     public GridListDataView<T> clearFilters() {
-        ((ListDataProvider<T>) getDataController().getDataProvider())
-                .clearFilters();
-        return this;
-    }
-
-    /**
-     * Add an item to the data list.
-     * To be removed after #8382
-     *
-     * @param item
-     *         item to add
-     * @return this ListDataView instance
-     */
-    public GridListDataView<T> addItem(T item) {
-        final ListDataProvider<T> dataProvider = (ListDataProvider<T>) getDataController()
-                .getDataProvider();
-        dataProvider.getItems().add(item);
-        dataProvider.refreshAll();
-        return this;
-    }
-
-    /**
-     * Remove an item from the data list.
-     * To be removed after #8382
-     *
-     * @param item
-     *         item to remove
-     * @return this ListDataView instance
-     */
-    public GridListDataView<T> removeItem(T item) {
-        final ListDataProvider<T> dataProvider = (ListDataProvider<T>) getDataController()
-                .getDataProvider();
-        dataProvider.getItems().remove(item);
-        dataProvider.refreshAll();
+        getDataProvider().clearFilters();
         return this;
     }
 

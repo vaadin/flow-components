@@ -23,7 +23,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataController;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.SizeChangeListener;
 import com.vaadin.flow.shared.Registration;
 
@@ -63,8 +63,8 @@ public class GridDataController<T> implements DataController<T> {
     }
 
     @Override
-    public DataProvider<T, ?> getDataProvider() {
-        return dataCommunicator.getDataProvider();
+    public ListDataProvider<T> getDataProvider() {
+        return (ListDataProvider<T>) dataCommunicator.getDataProvider();
     }
 
     @Override
