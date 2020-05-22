@@ -69,6 +69,8 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
         Focusable<DateTimePicker>, HasHelper {
 
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
     private DatePickerI18n i18n;
@@ -678,4 +680,25 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         this.required = requiredIndicatorVisible;
     }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @param autoOpen Value for the auto open property,
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+        datePicker.setAutoOpen(autoOpen);
+        timePicker.setAutoOpen(autoOpen);
+    }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
+    }
+
 }
