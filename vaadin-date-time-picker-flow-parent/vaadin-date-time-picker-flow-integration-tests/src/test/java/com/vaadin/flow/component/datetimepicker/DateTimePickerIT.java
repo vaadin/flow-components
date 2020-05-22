@@ -22,6 +22,7 @@ import java.time.LocalTime;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -121,6 +122,21 @@ public class DateTimePickerIT extends AbstractComponentIT {
                 picker.getDateTime());
         Assert.assertEquals(LocalDate.of(2019, 10, 15), picker.getDate());
         Assert.assertEquals(LocalTime.of(9, 40), picker.getTime());
+    }
+
+    @Test
+    @Ignore
+    // https://github.com/vaadin/vaadin-date-time-picker-flow/issues/40
+    public void hasInitialValue_clearFromServer_valueNull_fieldsEmpty() {
+        DateTimePickerElement picker = $(DateTimePickerElement.class)
+                .id("date-time-picker-value-from-server");
+        TestBenchElement message = $("div").id("message-value-from-server");
+        clickElementWithJs("clear-from-server");
+        Assert.assertEquals("No date is selected", message.getText());
+        Assert.assertNull("Expected internal date picker to be empty",
+                picker.getDate());
+        Assert.assertNull("Expected internal time picker to be empty",
+                picker.getTime());
     }
 
     @Test

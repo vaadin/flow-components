@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
@@ -53,7 +54,11 @@ public class DateTimePickerPage extends Div {
         button2.addClickListener(event -> picker2
                 .setValue(LocalDateTime.of(2019, 10, 15, 9, 40)));
 
-        add(picker2, message2, button2);
+        NativeButton clearFromServerButton = new NativeButton("Clear from server",
+                e -> picker2.clear());
+        clearFromServerButton.setId("clear-from-server");
+
+        add(new Hr(), picker2, message2, button2, clearFromServerButton);
 
         // 3
         NativeButton button3 = new NativeButton("Set locale");
@@ -65,7 +70,7 @@ public class DateTimePickerPage extends Div {
         picker3.setId("date-time-picker-locale");
         button3.addClickListener(event -> picker3.setLocale(Locale.US));
 
-        add(picker3, button3);
+        add(new Hr(), picker3, button3);
     }
 
     private void updateMessage(Div message, DateTimePicker dateTimePicker) {
