@@ -20,9 +20,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -54,7 +53,6 @@ import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
@@ -85,7 +83,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
+import org.apache.commons.lang3.StringUtils;
 import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES;
 
 @Route("vaadin-grid")
@@ -2511,8 +2509,11 @@ public class GridDemo extends DemoView {
                         ? Collections.max(persons.stream().collect(Collectors
                                 .mapping(Person::getId, Collectors.toList())))
                         : 0;
-                persons.add(index, new Person(maxId + 1, dataArray[0],
-                        dataArray[1], -1, null, dataArray[2]));
+                if (dataArray.length == 3) {
+                    persons.add(index,
+                          new Person(maxId + 1, dataArray[0], dataArray[1], -1,
+                                null, dataArray[2]));
+                }
             });
             grid.getDataProvider().refreshAll();
         });
