@@ -7,32 +7,42 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>2.3-SNAPSHOT</version>
     </parent>
 
     <properties>
-        <timepicker.version>2.1-SNAPSHOT</timepicker.version>
-        <datepicker.version>2.0-SNAPSHOT</datepicker.version>
+        <timepicker.version>2.2-SNAPSHOT</timepicker.version>
+        <datepicker.version>2.1-SNAPSHOT</datepicker.version>
     </properties>
 
     <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin DateTimePicker Flow Parent</name>
 
    <repositories>
+        <!-- repositories are configured in parent but still need this
+             when parent is a snapshot -->
         <repository>
             <id>vaadin-prereleases</id>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
-        <repository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
             <releases>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <modules>
         <module>vaadin-date-time-picker-flow</module>

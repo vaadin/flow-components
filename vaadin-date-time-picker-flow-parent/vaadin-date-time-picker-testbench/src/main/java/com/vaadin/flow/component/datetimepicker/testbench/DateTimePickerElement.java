@@ -231,6 +231,15 @@ public class DateTimePickerElement extends TestBenchElement
                 VALUE_PROPERTY);
     }
 
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getPropertyBoolean("autoOpenDisabled");
+    }
+
     private TestBenchElement getDatePicker() {
         return $("vaadin-date-time-picker-date-picker").attribute("slot", "date-picker").first();
     }
