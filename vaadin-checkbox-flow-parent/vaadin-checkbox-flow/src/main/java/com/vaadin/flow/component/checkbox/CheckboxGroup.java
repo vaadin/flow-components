@@ -32,10 +32,6 @@ import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.DataController;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
-import com.vaadin.flow.data.provider.DataView;
-import com.vaadin.flow.data.provider.SizeChangeListener;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -70,8 +66,6 @@ public class CheckboxGroup<T>
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
 
-    private final CheckboxGroupDataController dataController = new CheckboxGroupDataController();
-
     private boolean isReadOnly;
 
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
@@ -89,43 +83,6 @@ public class CheckboxGroup<T>
         registerValidation();
     }
 
-    /**
-     * {@link DataController} implementation responsible for data supply from
-     * tied data provider to {@link DataView} and handling {@link SizeChangeEvent}.
-     */
-    protected class CheckboxGroupDataController implements DataController<T> {
-
-        // TODO: Implement SizeChangeEvent handling for DataView #8345
-
-        @Override
-        public DataProvider<T, ?> getDataProvider() {
-            return dataProvider;
-        }
-
-        @Override
-        public Registration addSizeChangeListener(SizeChangeListener listener) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-
-        @Override
-        public int getDataSize() {
-            return dataProvider.size(new Query<>());
-        }
-
-        @Override
-        public Stream<T> getAllItems() {
-            return dataProvider.fetch(new Query<>());
-        }
-
-        /**
-         * Notifies {@link SizeChangeListener}'s about data set size change.
-         * Data set size change normally occurs on initial data load, filter change,
-         * or other data reset.
-         */
-        protected void fireSizeChangeEvent() {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-    }
 
     @Override
     public CheckboxGroupListDataView<T> setDataProvider(ListDataProvider<T> dataProvider) {
@@ -135,7 +92,7 @@ public class CheckboxGroup<T>
 
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
-        return new CheckboxGroupListDataView<>(dataController);
+        return new CheckboxGroupListDataView<>(() -> getDataProvider(), this);
     }
 
     private static class CheckBoxItem<T> extends Checkbox

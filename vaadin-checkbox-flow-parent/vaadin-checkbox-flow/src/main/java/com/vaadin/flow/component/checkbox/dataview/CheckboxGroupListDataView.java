@@ -15,34 +15,49 @@
  */
 package com.vaadin.flow.component.checkbox.dataview;
 
-import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.data.provider.AbstractListDataView;
-import com.vaadin.flow.data.provider.DataController;
-
 import java.util.List;
 
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.data.provider.AbstractListDataView;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.function.SerializableSupplier;
+
 /**
- * {@link CheckboxGroup} component list data view implementation which takes into
+ * {@link CheckboxGroup} component list data view implementation which takes
+ * into
  * account the component-specific and common list data API.
  *
  * @param <T>
- *        data type
+ *         data type
  */
-public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> implements CheckboxGroupDataView<T> {
+public class CheckboxGroupListDataView<T> extends AbstractListDataView<T>
+        implements CheckboxGroupDataView<T> {
 
-    public CheckboxGroupListDataView(DataController<T> dataController) {
-        super(dataController);
+    /**
+     * Checkbox DataView constructor.
+     *
+     * @param dataProviderSupplier
+     *         data provider supplier
+     * @param checkboxGroup
+     *         checkbox instance for this DataView
+     */
+    public CheckboxGroupListDataView(
+            SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
+            CheckboxGroup<T> checkboxGroup) {
+        super(dataProviderSupplier, checkboxGroup);
     }
 
     @Override
     public T getItemOnIndex(int index) {
         if (index < 0) {
-            throw new IndexOutOfBoundsException("Expected zero or greater index, but was given: " + index);
+            throw new IndexOutOfBoundsException(
+                    "Expected zero or greater index, but was given: " + index);
         }
 
         List<T> allItems = getAllItemsAsList();
         if (allItems.isEmpty()) {
-            throw new IndexOutOfBoundsException("Item requested on an empty data set");
+            throw new IndexOutOfBoundsException(
+                    "Item requested on an empty data set");
         }
         return allItems.get(index);
     }
