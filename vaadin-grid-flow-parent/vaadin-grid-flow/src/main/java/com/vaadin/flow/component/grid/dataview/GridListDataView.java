@@ -20,7 +20,8 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
-import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.function.SerializablePredicate;
 
 /**
@@ -32,20 +33,21 @@ import com.vaadin.flow.function.SerializablePredicate;
  */
 public class GridListDataView<T> extends AbstractListDataView<T>
         implements GridDataView<T> {
+    private DataCommunicator<T> dataCommunicator;
+    private Grid<T> grid;
 
-    /**
-     * Construct a new GridListDataView.
-     *
-     * @param grid
-     *         DataView Grid instance
-     */
-    public GridListDataView(Grid grid) {
-        super(new GridDataController<>(grid));
+    public GridListDataView(DataCommunicator<T> dataCommunicator,
+            Grid<T> grid) {
+        super(() -> dataCommunicator.getDataProvider(), grid);
+        this.dataCommunicator = dataCommunicator;
+        this.grid = grid;
     }
 
     @Override
     public Stream<T> getCurrentItems() {
-        return getDataController().getCurrentItems();
+        final DataKeyMapper<T> keyMapper = dataCommunicator.getKeyMapper();
+        return dataCommunicator.getActiveKeyOrdering().stream()
+                .map(keyMapper::get);
     }
 
     @Override
@@ -56,7 +58,8 @@ public class GridListDataView<T> extends AbstractListDataView<T>
 
     @Override
     public void selectItemOnRow(int rowIndex) {
-        getDataController().selectAndScrollTo(getItemOnRow(rowIndex), rowIndex);
+        grid.select(getItemOnRow(rowIndex));
+        grid.scrollToIndex(rowIndex);
     }
 
     /**
@@ -104,7 +107,14 @@ public class GridListDataView<T> extends AbstractListDataView<T>
         }
     }
 
-    private GridDataController<T> getDataController() {
-        return (GridDataController) dataController;
+    @Override
+    public Stream<T> getAllItems() {
+        return getDataProvider()
+                .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
+    }
+
+    @Override
+    public int getDataSize() {
+        return dataCommunicator.getDataSize();
     }
 }
