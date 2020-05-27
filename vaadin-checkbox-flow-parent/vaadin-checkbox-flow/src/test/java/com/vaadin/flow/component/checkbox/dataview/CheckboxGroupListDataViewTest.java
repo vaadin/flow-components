@@ -54,7 +54,7 @@ public class CheckboxGroupListDataViewTest {
     public void getItemOnIndex_negativeIndex_throwsException() {
         exceptionRule.expect(IndexOutOfBoundsException.class);
         exceptionRule.expectMessage(
-                "Expected zero or greater index, but was given: -1");
+                "Given index -1 is outside of the accepted range '0 - 2'");
         dataView.getItemOnIndex(-1);
     }
 
@@ -62,7 +62,7 @@ public class CheckboxGroupListDataViewTest {
     public void getItemOnIndex_emptyDataSet_throwsException() {
         dataProvider = DataProvider.ofItems();
         exceptionRule.expect(IndexOutOfBoundsException.class);
-        exceptionRule.expectMessage("Item requested on an empty data set");
+        exceptionRule.expectMessage("Requested index 0 on empty data.");
         dataView.getItemOnIndex(0);
     }
 

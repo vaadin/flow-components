@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.checkbox.dataview;
 
-import java.util.List;
-
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -49,16 +47,7 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T>
 
     @Override
     public T getItemOnIndex(int index) {
-        if (index < 0) {
-            throw new IndexOutOfBoundsException(
-                    "Expected zero or greater index, but was given: " + index);
-        }
-
-        List<T> allItems = getAllItemsAsList();
-        if (allItems.isEmpty()) {
-            throw new IndexOutOfBoundsException(
-                    "Item requested on an empty data set");
-        }
-        return allItems.get(index);
+        validateItemIndex(index);
+        return getAllItems().skip(index).findFirst().orElse(null);
     }
 }
