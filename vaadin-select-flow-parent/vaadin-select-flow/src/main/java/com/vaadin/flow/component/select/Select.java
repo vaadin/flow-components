@@ -30,12 +30,17 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.select.data.SelectDataView;
+import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -61,11 +66,36 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @JsModule("./selectConnector.js")
-public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
-        implements HasDataProvider<T>, HasItemsAndComponents<T>, HasSize,
-        HasValidation, SingleSelect<Select<T>, T> {
+public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
+        HasDataProvider<T>, HasItemsAndComponents<T>, HasSize, HasValidation,
+        SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>> {
 
     public static final String LABEL_ATTRIBUTE = "label";
+
+    private final InternalListBox listBox = new InternalListBox();
+
+    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+
+    private ComponentRenderer<? extends Component, T> itemRenderer;
+
+    private SerializablePredicate<T> itemEnabledProvider = null;
+
+    private ItemLabelGenerator<T> itemLabelGenerator = null;
+
+    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
+    private Registration validationRegistration;
+    private Registration dataProviderListenerRegistration;
+    private boolean resetPending = true;
+
+    private boolean emptySelectionAllowed;
+
+    private String emptySelectionCaption;
+
+    private VaadinItem<T> emptySelectionItem;
+
+    private final KeyMapper<T> keyMapper = new KeyMapper<>();
+
+    private SelectDataView<T> dataView;
 
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
@@ -84,8 +114,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
         return select.keyMapper.key(model);
     }
-
-    private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
     /*
      * Internal version of list box that is just used to delegate the child
@@ -126,27 +154,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             }
         }
     }
-
-    private final InternalListBox listBox = new InternalListBox();
-
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
-
-    private ComponentRenderer<? extends Component, T> itemRenderer;
-
-    private SerializablePredicate<T> itemEnabledProvider = null;
-
-    private ItemLabelGenerator<T> itemLabelGenerator = null;
-
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
-    private Registration dataProviderListenerRegistration;
-    private boolean resetPending = true;
-
-    private boolean emptySelectionAllowed;
-
-    private String emptySelectionCaption;
-
-    private VaadinItem<T> emptySelectionItem;
 
     /**
      * Constructs a select.
@@ -431,6 +438,28 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     public DataProvider<T, ?> getDataProvider() {
         return dataProvider;
+    }
+
+
+    @Override
+    public SelectListDataView<T> setDataProvider(
+            ListDataProvider<T> dataProvider) {
+        this.setDataProvider((DataProvider<T, ?>) dataProvider);
+        return getListDataView();
+    }
+
+    @Override
+    public SelectListDataView<T> getListDataView() {
+        if (getDataProvider() instanceof ListDataProvider) {
+            if (dataView == null || !(dataView instanceof ListDataView)) {
+                dataView = new SelectListDataView<>(this::getDataProvider,
+                        this);
+            }
+            return (SelectListDataView) dataView;
+        }
+        throw new IllegalStateException(
+                "Required ListDataProvider, but got " + getDataProvider()
+                        .getClass().getSuperclass().getSimpleName());
     }
 
     @Override
