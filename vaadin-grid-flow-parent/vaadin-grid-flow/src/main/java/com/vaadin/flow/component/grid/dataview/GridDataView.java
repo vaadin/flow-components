@@ -36,7 +36,7 @@ public interface GridDataView<T> extends DataView<T> {
     Stream<T> getCurrentItems();
 
     /**
-     * Get the item at the given row in the sorted and filetered data set.
+     * Get the item at the given row in the sorted and filtered data set.
      *
      * @param rowIndex
      *         row to get item at

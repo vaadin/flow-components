@@ -1777,7 +1777,6 @@ public class GridDemo extends DemoView {
     }
 
     // Context sub Menu begin
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private void createContextSubMenu() {
         // begin-source-example
         // source-example-heading: Using Context Sub Menu With Grid
@@ -1797,9 +1796,7 @@ public class GridDemo extends DemoView {
                 // no selected row
                 return;
             }
-            List<Person> items = dataView.getItems();
-            items.add(items.indexOf(item.get()), createItems(1).get(0));
-            grid.getDataProvider().refreshAll();
+            dataView.addItemBefore(item.get(), createItems(1).get(0));
         });
         insert.getSubMenu().add(new Hr());
         insert.getSubMenu().addItem("Insert a row below", event -> {
@@ -1808,9 +1805,7 @@ public class GridDemo extends DemoView {
                 // no selected row
                 return;
             }
-            List<Person> items = dataView.getItems();
-            items.add(items.indexOf(item.get()) + 1, createItems(1).get(0));
-            grid.getDataProvider().refreshAll();
+            dataView.addItemAfter(item.get(), createItems(1).get(0));
         });
         // end-source-example
         grid.setId("context-sub-menu-grid");

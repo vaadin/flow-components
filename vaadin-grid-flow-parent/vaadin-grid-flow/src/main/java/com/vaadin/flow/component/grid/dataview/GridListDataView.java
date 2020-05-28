@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.dataview;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -38,7 +39,7 @@ public class GridListDataView<T> extends AbstractListDataView<T>
 
     public GridListDataView(DataCommunicator<T> dataCommunicator,
             Grid<T> grid) {
-        super(() -> dataCommunicator.getDataProvider(), grid);
+        super(dataCommunicator::getDataProvider, grid);
         this.dataCommunicator = dataCommunicator;
         this.grid = grid;
     }
@@ -52,8 +53,8 @@ public class GridListDataView<T> extends AbstractListDataView<T>
 
     @Override
     public T getItemOnRow(int rowIndex) {
-        validateRowIndex(rowIndex);
-        return getAllItemsAsList().get(rowIndex);
+        validateItemIndex(rowIndex);
+        return getAllItems().skip(rowIndex).findFirst().orElse(null);
     }
 
     @Override
@@ -92,19 +93,12 @@ public class GridListDataView<T> extends AbstractListDataView<T>
      * @return List of all items
      */
     public List<T> getItems() {
-        return getAllItemsAsList();
-    }
-
-    private void validateRowIndex(int rowIndex) {
-        if (getDataSize() == 0) {
-            throw new IndexOutOfBoundsException(
-                    String.format("Requested row %d on empty data.", rowIndex));
+        final Collection<T> items = getDataProvider().getItems();
+        if (items instanceof List) {
+            return (List) items;
         }
-        if (rowIndex < 0 || rowIndex >= getDataSize()) {
-            throw new IndexOutOfBoundsException(String.format(
-                    "Give row %d is outside of the accepted range '0 - %d'",
-                    rowIndex, getDataSize() - 1));
-        }
+        throw new IllegalArgumentException(
+                "DataProvider collection is not a list.");
     }
 
     @Override
