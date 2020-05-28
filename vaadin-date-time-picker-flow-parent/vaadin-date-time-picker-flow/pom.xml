@@ -153,7 +153,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-custom-field</artifactId>
-            <version>1.0.11</version>
+            <version>1.1.0</version>
         </dependency>
 
         <dependency>
