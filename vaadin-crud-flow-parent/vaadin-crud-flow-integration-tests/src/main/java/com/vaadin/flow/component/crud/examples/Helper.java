@@ -19,7 +19,7 @@ class Helper {
         FormLayout form = new FormLayout(firstName, lastName);
 
         Binder<Person> binder = new Binder<>(Person.class);
-        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
+        binder.forField(firstName).asRequired().bind(Person::getFirstName, Person::setFirstName);
         binder
                 .forField(lastName)
                 .withValidator(

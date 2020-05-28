@@ -163,6 +163,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     public Crud() {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
+        addAttachListener(e -> getElement()
+                .executeJs("this.__validate = function () {return true;}"));
     }
 
     private void registerHandlers() {

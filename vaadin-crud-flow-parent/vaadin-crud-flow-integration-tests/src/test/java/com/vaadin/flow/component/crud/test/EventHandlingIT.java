@@ -177,6 +177,28 @@ public class EventHandlingIT extends AbstractParallelTest {
     }
 
     @Test
+    public void emptyInvalidFieldsIndicatedOnSave() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        crud.getNewItemButton().get().click();
+
+        TextFieldElement firstNameField = crud.getEditor()
+                .$(TextFieldElement.class).attribute("editor-role", "first-name")
+                .first();
+
+        Assert.assertFalse(firstNameField.hasAttribute("invalid"));
+
+        // To avoid editor being dirty
+        TextFieldElement lastNameField = crud.getEditor()
+                .$(TextFieldElement.class).attribute("editor-role", "last-name")
+                .first();
+        lastNameField.setValue("Oladeji");
+
+        crud.getEditorSaveButton().click();
+
+        Assert.assertTrue(firstNameField.hasAttribute("invalid"));
+    }
+
+    @Test
     public void invalidFieldsIndicatedOnSave() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(1);
