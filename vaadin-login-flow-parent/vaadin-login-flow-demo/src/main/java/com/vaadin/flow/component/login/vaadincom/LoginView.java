@@ -42,6 +42,8 @@ public class LoginView extends DemoView {
                 component.setError(true);
             }
         });
+
+        add(component);
         // end-source-example
 
         addCard("Login Form", createLayout(component));
@@ -61,7 +63,9 @@ public class LoginView extends DemoView {
         // source-example-heading: Login Form with internationalization
         LoginForm component = new LoginForm();
         Button updateI18nButton = new Button("Switch to Brazilian Portuguese",
-            event -> component.setI18n(createPortugueseI18n()));
+                event -> component.setI18n(createPortugueseI18n()));
+
+        add(component, updateI18nButton);
         // end-source-example
 
         addCard("Login Form with internationalization", createLayout(component), updateI18nButton);
@@ -80,6 +84,7 @@ public class LoginView extends DemoView {
         // Setting error to true also enables the login button.
         Button showError = new Button("Show error",
             event -> component.setError(true));
+        add(component, restoreLogin, showError);
         // end-source-example
         final String message =
             "The login button is disabled when clicked to prevent multiple submissions."
@@ -101,6 +106,8 @@ public class LoginView extends DemoView {
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setAdditionalInformation("To close the login form submit non-empty username and password");
         component.setI18n(i18n);
+
+        add(component, open);
         // end-source-example
 
         addCard("Login Overlay", component, open);
@@ -126,6 +133,8 @@ public class LoginView extends DemoView {
 
         Button open = new Button("Open login overlay",
                 e -> component.setOpened(true));
+
+        add(component, open);
         // end-source-example
 
         addCard("Title with custom HTML", component, open);
