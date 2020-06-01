@@ -26,9 +26,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.AbstractListDataView;
+import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
-public class GridListDataViewTest {
+public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -156,5 +159,10 @@ public class GridListDataViewTest {
 
         Assert.assertEquals("Wrong item on row for filtered data.", items[3],
                 dataView.getItemOnRow(0));
+    }
+
+    @Override
+    protected HasListDataView<String, ? extends AbstractListDataView<String>> getComponent() {
+        return new Grid<>();
     }
 }
