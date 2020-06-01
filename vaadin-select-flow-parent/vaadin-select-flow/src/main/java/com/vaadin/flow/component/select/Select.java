@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -42,6 +44,7 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
@@ -72,9 +75,12 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
 
     public static final String LABEL_ATTRIBUTE = "label";
 
+    private static final String VALUE_PROPERTY_NAME = "value";
+
     private final InternalListBox listBox = new InternalListBox();
 
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final AtomicReference<DataProvider<T, ?>> dataProvider =
+            new AtomicReference<>(DataProvider.ofItems());
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -96,6 +102,39 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
     private SelectDataView<T> dataView;
+
+    private int lastNotifiedDataSize = -1;
+
+    private volatile int lastFetchedDataSize = -1;
+
+    private SerializableConsumer<UI> sizeRequest;
+
+    /**
+     * Constructs a select.
+     */
+    public Select() {
+        super(null, null, String.class, Select::presentationToModel,
+                Select::modelToPresentation);
+
+        getElement().setProperty("invalid", false);
+        getElement().setProperty("opened", false);
+
+        getElement().appendChild(listBox.getElement());
+
+        registerValidation();
+    }
+
+    /**
+     * Constructs a select with the given items.
+     *
+     * @param items
+     *            the items for the select
+     */
+    public Select(T... items) {
+        this();
+
+        setItems(items);
+    }
 
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
@@ -153,33 +192,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
                 return HasItemsAndComponents.super.getItemPosition(item);
             }
         }
-    }
-
-    /**
-     * Constructs a select.
-     */
-    public Select() {
-        super(null, null, String.class, Select::presentationToModel,
-                Select::modelToPresentation);
-
-        getElement().setProperty("invalid", false);
-        getElement().setProperty("opened", false);
-
-        getElement().appendChild(listBox.getElement());
-
-        registerValidation();
-    }
-
-    /**
-     * Constructs a select with the given items.
-     *
-     * @param items
-     *            the items for the select
-     */
-    public Select(T... items) {
-        this();
-
-        setItems(items);
     }
 
     /**
@@ -421,7 +433,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
 
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        this.dataProvider = dataProvider;
+        this.dataProvider.set(dataProvider);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -437,7 +449,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
      * @return the data provider, not {@code null}
      */
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
+        return dataProvider.get();
     }
 
 
@@ -662,7 +674,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         // the _value_ of this field. E.g, it might be a value that is
         // acceptable,
         // but the component status should still be _invalid_.
-        String selectedKey = getElement().getProperty("value");
+        String selectedKey = getElement().getProperty(VALUE_PROPERTY_NAME);
         T item = keyMapper.get(selectedKey);
         if (item == null) {
             return isEmptySelectionAllowed() && isItemEnabled(item);
@@ -755,8 +767,28 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         if (isEmptySelectionAllowed()) {
             addEmptySelectionItem();
         }
-        getDataProvider().fetch(new Query<>()).map(this::createItem)
-                .forEach(this::add);
+
+        synchronized (dataProvider) {
+            final AtomicInteger itemCounter = new AtomicInteger(0);
+            getDataProvider().fetch(new Query<>()).map(this::createItem)
+                    .forEach(component -> {
+                        add(component);
+                        itemCounter.incrementAndGet();
+                    });
+            lastFetchedDataSize = itemCounter.get();
+
+            // Ignore new size requests unless the last one has been executed
+            // so as to avoid multiple beforeClientResponses.
+            if (sizeRequest == null) {
+                sizeRequest = context -> {
+                    fireSizeEvent();
+                    sizeRequest = null;
+                };
+                // Size event is fired before client response so as to avoid
+                // multiple size change events during server round trips
+                runBeforeClientResponse(sizeRequest);
+            }
+        }
     }
 
     private void callClientSideRenderIfNotPending() {
@@ -820,7 +852,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
             // return the value back on the client side
             try {
                 validationRegistration.remove();
-                getElement().setProperty("value", keyMapper.key(oldValue));
+                getElement().setProperty(VALUE_PROPERTY_NAME, keyMapper.key(oldValue));
             } finally {
                 registerValidation();
             }
@@ -837,12 +869,20 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         if (validationRegistration != null) {
             validationRegistration.remove();
         }
-        validationRegistration = getElement().addPropertyChangeListener("value",
+        validationRegistration = getElement().addPropertyChangeListener(VALUE_PROPERTY_NAME,
                 validationListener);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void fireSizeEvent() {
+        final int newSize = lastFetchedDataSize;
+        if (lastNotifiedDataSize != newSize) {
+            lastNotifiedDataSize = newSize;
+            fireEvent(new SizeChangeEvent<>(this, newSize));
+        }
     }
 }
