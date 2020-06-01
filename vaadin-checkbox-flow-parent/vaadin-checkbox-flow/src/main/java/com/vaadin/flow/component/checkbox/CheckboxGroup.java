@@ -20,12 +20,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasListDataView;
@@ -35,11 +38,13 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -64,7 +69,8 @@ public class CheckboxGroup<T>
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final AtomicReference<DataProvider<T, ?>> dataProvider =
+            new AtomicReference<>(DataProvider.ofItems());
 
     private boolean isReadOnly;
 
@@ -75,6 +81,12 @@ public class CheckboxGroup<T>
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
+
+    private int lastNotifiedDataSize = -1;
+
+    private volatile int lastFetchedDataSize = -1;
+
+    private SerializableConsumer<UI> sizeRequest;
 
     public CheckboxGroup() {
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
@@ -92,7 +104,7 @@ public class CheckboxGroup<T>
 
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
-        return new CheckboxGroupListDataView<>(() -> getDataProvider(), this);
+        return new CheckboxGroupListDataView<>(this::getDataProvider, this);
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -114,7 +126,7 @@ public class CheckboxGroup<T>
 
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        this.dataProvider = dataProvider;
+        this.dataProvider.set(dataProvider);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -185,7 +197,7 @@ public class CheckboxGroup<T>
      * @return the data provider, not {@code null}
      */
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
+        return dataProvider != null ? dataProvider.get() : null;
     }
 
     @Override
@@ -351,8 +363,28 @@ public class CheckboxGroup<T>
         keyMapper.removeAll();
         removeAll();
         clear();
-        getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
-                .forEach(this::add);
+
+        synchronized (dataProvider) {
+            final AtomicInteger itemCounter = new AtomicInteger(0);
+            getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
+                    .forEach(component -> {
+                        add(component);
+                        itemCounter.incrementAndGet();
+                    });
+            lastFetchedDataSize = itemCounter.get();
+
+            // Ignore new size requests unless the last one has been executed
+            // so as to avoid multiple beforeClientResponses.
+            if (sizeRequest == null) {
+                sizeRequest = ui -> {
+                    fireSizeEvent();
+                    sizeRequest = null;
+                };
+                // Size event is fired before client response so as to avoid
+                // multiple size change events during server round trips
+                runBeforeClientResponse(sizeRequest);
+            }
+        }
     }
 
     private void refreshCheckboxes() {
@@ -452,5 +484,18 @@ public class CheckboxGroup<T>
             return item;
         }
         return getDataProvider().getId(item);
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void fireSizeEvent() {
+        final int newSize = lastFetchedDataSize;
+        if (lastNotifiedDataSize != newSize) {
+            lastNotifiedDataSize = newSize;
+            fireEvent(new SizeChangeEvent<>(this, newSize));
+        }
     }
 }

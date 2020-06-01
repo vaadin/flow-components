@@ -18,6 +18,10 @@ package com.vaadin.flow.component.checkbox.dataview;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
+import com.vaadin.flow.data.provider.AbstractListDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,7 +30,7 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.data.provider.DataProvider;
 
-public class CheckboxGroupListDataViewTest {
+public class CheckboxGroupListDataViewTest extends AbstractListDataViewListenerTest {
 
     private final static Collection<String> ITEMS = Arrays
             .asList("first", "middle", "last");
@@ -70,6 +74,11 @@ public class CheckboxGroupListDataViewTest {
     public void getItemOnIndex_indexOutsideOfSize_throwsException() {
         exceptionRule.expect(IndexOutOfBoundsException.class);
         dataView.getItemOnIndex(ITEMS.size());
+    }
+
+    @Override
+    protected HasListDataView<String, ? extends AbstractListDataView<String>> getComponent() {
+        return new CheckboxGroup<>();
     }
 
 }
