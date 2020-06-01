@@ -780,7 +780,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
             // Ignore new size requests unless the last one has been executed
             // so as to avoid multiple beforeClientResponses.
             if (sizeRequest == null) {
-                sizeRequest = context -> {
+                sizeRequest = ui -> {
                     fireSizeEvent();
                     sizeRequest = null;
                 };
