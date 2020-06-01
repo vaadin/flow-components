@@ -1085,7 +1085,8 @@ public class GridDemo extends DemoView {
         final GridListDataView<Person> dataView = grid
                 .setDataProvider(personList);
 
-        grid.addColumn(Person::getFirstName).setHeader("Name");
+        final Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
         grid.addColumn(person -> person.getBirthDate()).setHeader("Birth Date");
         grid.addColumn(person -> person.getAddress().getPostalCode())
@@ -1093,11 +1094,20 @@ public class GridDemo extends DemoView {
 
         maritalStatus = new ComboBox<>("Filter by marital status: ");
         maritalStatus.setItems(MaritalStatus.values());
+        maritalStatus.setClearButtonVisible(true);
         birthDateField = new DatePicker("Filter by birth date: ");
 
         maritalStatus.addValueChangeListener(event -> applyFilter(dataView));
 
         birthDateField.addValueChangeListener(event -> applyFilter(dataView));
+
+        final Label sizeLabel = new Label();
+        grid.appendFooterRow().getCell(nameColumn).setComponent(
+                sizeLabel);
+
+        // Show total amount of matching items
+        dataView.addSizeChangeListener(event -> sizeLabel
+                .setText("Total: " + event.getSize()));
 
         layout.add(maritalStatus, birthDateField, grid);
         return layout;
@@ -1106,12 +1116,14 @@ public class GridDemo extends DemoView {
 
     private void applyFilter(GridListDataView<Person> dataView) {
         dataView.clearFilters();
-        if (birthDateField.getValue() != null)
+        if (birthDateField.getValue() != null) {
             dataView.addFilter(person -> Objects
                     .equals(birthDateField.getValue(), person.getBirthDate()));
-        if (maritalStatus.getValue() != null)
+        }
+        if (maritalStatus.getValue() != null) {
             dataView.addFilter(person -> maritalStatus.getValue() == person
                     .getMaritalStatus());
+        }
     }
     // end-source-example
 
@@ -1400,10 +1412,9 @@ public class GridDemo extends DemoView {
     private void createHeaderAndFooterUsingComponents() {
         // begin-source-example
         // source-example-heading: Using components
-        List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         final GridListDataView<Person> dataView = grid
-                .setDataProvider(personList);
+                .setDataProvider(getItems());
 
         Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader(new Label("Name")).setComparator((p1, p2) -> p1
@@ -1438,9 +1449,13 @@ public class GridDemo extends DemoView {
                 twentyToForty, overForty);
         buttonsCell.setComponent(filter);
 
+        final Label sizeLabel = new Label();
         grid.appendFooterRow().getCell(nameColumn).setComponent(
-                new Label("Total: " + personList.size() + " people"));
+                sizeLabel);
 
+        // Set the total amount of people when the size changes due to filters
+        dataView.addSizeChangeListener(event -> sizeLabel
+                .setText("Total: " + event.getSize() + " people"));
         // end-source-example
         grid.setId("using-components");
         addCard("Header and footer", "Using components", grid);

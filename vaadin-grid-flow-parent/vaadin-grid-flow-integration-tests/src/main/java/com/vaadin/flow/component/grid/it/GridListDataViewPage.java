@@ -87,15 +87,13 @@ public class GridListDataViewPage extends Div {
                     dataView.withFilter(
                             item -> item.getFirstName().toLowerCase()
                                     .contains(event.getValue().toLowerCase()));
-                    // TODO: this is not needed after size change events are fired.
-                    count.setText(Integer.toString(dataView.getDataSize()));
                 });
         filterByFirstName.setId(FIRST_NAME_FILTER);
 
         dataView.addSizeChangeListener(event -> {
             count.setText(Integer.toString(event.getSize()));
             showPreviousData.setEnabled(rowSelect.getValue() > 0);
-            showNextData.setEnabled(rowSelect.getValue() < event.getSize());
+            showNextData.setEnabled(rowSelect.getValue() < event.getSize() - 1);
         });
 
         rowSelect.setValue(0);
