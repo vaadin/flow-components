@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.2-SNAPSHOT</version>
         <relativePath />
     </parent>
 
     <artifactId>vaadin-details-flow-parent</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Details Parent</name>
     <inceptionYear>2018</inceptionYear>
@@ -34,7 +34,7 @@
         <module>vaadin-details-testbench</module>
         <module>vaadin-details-flow-demo</module>
     </modules>
-    
+
     <repositories>
         <repository>
             <id>vaadin-prereleases</id>
