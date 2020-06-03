@@ -10,7 +10,7 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 Run from the command line:
 - `mvn  -pl vaadin-date-picker-flow-demo -Pwar install jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-grid`
+Then navigate to `http://localhost:9998/vaadin-date-picker`
 
 ## Running Integration tests
 
