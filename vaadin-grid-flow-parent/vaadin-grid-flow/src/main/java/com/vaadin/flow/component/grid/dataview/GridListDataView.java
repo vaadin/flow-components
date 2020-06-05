@@ -64,30 +64,6 @@ public class GridListDataView<T> extends AbstractListDataView<T>
     }
 
     /**
-     * Add a new data filter.
-     * To be removed after #8313
-     *
-     * @param filter
-     *         the filter to add, not <code>null</code>
-     * @return this
-     */
-    public GridListDataView<T> addFilter(SerializablePredicate<T> filter) {
-        getDataProvider().addFilter(filter);
-        return this;
-    }
-
-    /**
-     * Remove all in-memory filters.
-     * To be removed after #8313
-     *
-     * @return this
-     */
-    public GridListDataView<T> clearFilters() {
-        getDataProvider().clearFilters();
-        return this;
-    }
-
-    /**
      * Get all items as a List.
      *
      * @return List of all items
