@@ -75,23 +75,6 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     }
 
     @Test
-    public void dataProviderOnSet_exceptionThrownForGetItems() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException
-                .expectMessage("DataProvider collection is not a list.");
-
-        Set<String> items = new HashSet<>();
-        items.add("item1");
-        items.add("item2");
-
-        Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid
-                .setDataProvider(new ListDataProvider<>(items));
-
-        dataView.getItems();
-    }
-
-    @Test
     public void dataViewWithItems_returnsExpectedItemsForMethods() {
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();

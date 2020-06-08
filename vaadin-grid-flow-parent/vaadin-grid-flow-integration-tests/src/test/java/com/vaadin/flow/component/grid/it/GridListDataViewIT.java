@@ -80,15 +80,15 @@ public class GridListDataViewIT extends AbstractComponentIT {
         grid.getHeaderCell(0).$("vaadin-grid-sorter").first().click();
 
         $(ButtonElement.class).id(SHOW_ITEM_DATA).click();
-        Assert.assertEquals("Wrong row item", "Item: Person 94",
+        Assert.assertEquals("Wrong row item for sorted data", "Item: Person 94",
                 $("span").id(ITEM_DATA).getText());
 
         $(ButtonElement.class).id(SHOW_NEXT_DATA).click();
-        Assert.assertEquals("Wrong next item.", "Item: Person 93",
+        Assert.assertEquals("Wrong next item for sorted data.", "Item: Person 93",
                 $("span").id(ITEM_DATA).getText());
 
         $(ButtonElement.class).id(SHOW_PREVIOUS_DATA).click();
-        Assert.assertEquals("Wrong previous item.", "Item: Person 95",
+        Assert.assertEquals("Wrong previous item for sorted data.", "Item: Person 95",
                 $("span").id(ITEM_DATA).getText());
 
         $(TextFieldElement.class).id(FIRST_NAME_FILTER).setValue("9");

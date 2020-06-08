@@ -2366,27 +2366,24 @@ public class GridDemo extends DemoView {
             // Remove the items from the source grid
             final GridListDataView<Person> sourceDataView = dragSource
                     .getListDataView();
-            List<Person> sourceItems = sourceDataView.getItems();
-            sourceItems.removeAll(draggedItems);
-            dragSource.setItems(sourceItems);
+            sourceDataView.removeItems(draggedItems);
 
             // Add dragged items to the target Grid
             Grid<Person> targetGrid = event.getSource();
             final GridListDataView<Person> targetDataView = targetGrid
                     .getListDataView();
-            List<Person> targetItems = targetDataView.getItems();
 
-            int index = target.map(person -> targetItems.indexOf(person)
-                    + (event.getDropLocation() == GridDropLocation.BELOW ? 1
-                            : 0))
-                    .orElse(0);
-            targetItems.addAll(index, draggedItems);
-            targetGrid.setItems(targetItems);
+            if (event.getDropLocation() == GridDropLocation.BELOW) {
+                targetDataView.addItemsAfter(draggedItems, target.get());
+            } else {
+                targetDataView.addItemsBefore(draggedItems, target.get());
+            }
         };
 
-        PersonService personService = new PersonService();
+        // Note! PersonService.fetch returns a sublist.
+        PersonService service = new PersonService();
 
-        grid.setItems(personService.fetch(0, 5));
+        grid.setDataProvider(new ArrayList<>(service.fetch(0, 5)));
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addDropListener(dropListener);
         grid.addDragStartListener(dragStartListener);
@@ -2394,7 +2391,7 @@ public class GridDemo extends DemoView {
         grid.setRowsDraggable(true);
         grid.setColumns("firstName", "lastName");
 
-        grid2.setItems(personService.fetch(5, 1));
+        grid2.setDataProvider(new ArrayList<>(service.fetch(5, 1)));
         grid2.setSelectionMode(Grid.SelectionMode.MULTI);
         grid2.addDropListener(dropListener);
         grid2.addDragStartListener(dragStartListener);

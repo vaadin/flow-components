@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.dataview;
 
-import java.util.stream.Stream;
-
 import com.vaadin.flow.data.provider.DataView;
 
 /**
@@ -29,30 +27,16 @@ import com.vaadin.flow.data.provider.DataView;
 public interface GridDataView<T> extends DataView<T> {
 
     /**
-     * Get the items that are active on the client.
-     *
-     * @return Stream of items that the client side has currently in memory
-     */
-    Stream<T> getCurrentItems();
-
-    /**
      * Get the item at the given row in the sorted and filtered data set.
+     * <p>
+     * All filters set to the data will be reflected on the row index request,
+     * as will any sorting set to the data.
      *
      * @param rowIndex
      *         row to get item at
-     * @return item on row
+     * @return item on row in the sorted and filtered data
      * @throws IndexOutOfBoundsException
      *         requested row is outside of the available data set.
      */
     T getItemOnRow(int rowIndex);
-
-    /**
-     * Select an item at the given row index and scroll row into view.
-     *
-     * @param rowIndex
-     *         row index to select item at
-     * @throws IndexOutOfBoundsException
-     *         requested row is outside of the available data set.
-     */
-    void selectItemOnRow(int rowIndex);
 }

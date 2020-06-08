@@ -65,8 +65,8 @@ public class GridListDataViewPage extends Div {
         // For selecting a row to manipulate through the data view
         IntegerField rowSelect = new IntegerField("Target row");
         rowSelect.setId(ROW_SELECT);
-        Button selectItemOnRow = new Button("Select item",
-                event -> dataView.selectItemOnRow(rowSelect.getValue()));
+        Button selectItemOnRow = new Button("Select item", event -> grid
+                .select(dataView.getItemOnRow(rowSelect.getValue())));
         selectItemOnRow.setId("selectItemOnRow");
         Button showItemData = new Button("Person data", event -> itemData
                 .setText("Item: " + dataView.getItemOnRow(rowSelect.getValue())
