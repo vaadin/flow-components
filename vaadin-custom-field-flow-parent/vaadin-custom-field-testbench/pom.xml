@@ -6,7 +6,7 @@
     <parent>
         <artifactId>vaadin-custom-field-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>4.1-SNAPSHOT</version>
+        <version>4.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-custom-field-testbench</artifactId>
