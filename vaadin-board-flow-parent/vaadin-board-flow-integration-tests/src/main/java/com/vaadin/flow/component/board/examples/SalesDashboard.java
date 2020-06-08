@@ -5,12 +5,10 @@ import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 
 @Route("SalesDashboard")
-@BodySize
 @CssImport("styles.css")
 public class SalesDashboard extends Div {
 
@@ -50,7 +48,7 @@ public class SalesDashboard extends Div {
 
                 // Third row
                 board.addRow(
-                        createColoredBox("Sales & Marketing pipeline", PURPLE, HEIGHT_400), 
+                        createColoredBox("Sales & Marketing pipeline", PURPLE, HEIGHT_400),
                         createColoredBox("Working Today", YELLOW, HEIGHT_400));
 
                 add(board);
