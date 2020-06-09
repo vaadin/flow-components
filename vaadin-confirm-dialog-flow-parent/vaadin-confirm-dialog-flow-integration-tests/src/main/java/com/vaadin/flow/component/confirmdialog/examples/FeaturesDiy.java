@@ -7,11 +7,9 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
 @Route("FeaturesDiy")
-@BodySize
 public class FeaturesDiy extends Features {
 
     @Override

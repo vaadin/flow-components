@@ -3,14 +3,12 @@ package com.vaadin.flow.component.confirmdialog.examples;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
 /**
  * Dimensions
  */
 @Route("Dimensions")
-@BodySize
 public class Dimensions extends Div {
 
     public static String VIEW_ID = "dimensions";
