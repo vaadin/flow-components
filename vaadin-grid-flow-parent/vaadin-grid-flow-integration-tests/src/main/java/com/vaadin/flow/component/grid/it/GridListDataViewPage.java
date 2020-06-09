@@ -56,7 +56,7 @@ public class GridListDataViewPage extends Div {
         // The Grid<>(Person.class) sorts the properties and in order to
         // reorder the properties we use the 'setColumns' method.
         grid.setColumns("firstName", "lastName", "age");
-        Span count = new Span(Integer.toString(dataView.getDataSize()));
+        Span count = new Span(Integer.toString(dataView.getSize()));
         count.setId(ITEM_COUNT);
         Span itemData = new Span("Item: ");
         itemData.setId(ITEM_DATA);
@@ -74,17 +74,17 @@ public class GridListDataViewPage extends Div {
         showItemData.setId(SHOW_ITEM_DATA);
         Button showNextData = new Button("Next person", event -> itemData
                 .setText("Item: " + dataView.getNextItem(
-                        dataView.getItemOnRow(rowSelect.getValue()))
+                        dataView.getItemOnRow(rowSelect.getValue())).get()
                         .getFirstName()));
         showNextData.setId(SHOW_NEXT_DATA);
         Button showPreviousData = new Button("Previous person",
                 event -> itemData.setText("Item: " + dataView.getPreviousItem(
-                        dataView.getItemOnRow(rowSelect.getValue()))
+                        dataView.getItemOnRow(rowSelect.getValue())).get()
                         .getFirstName()));
         showPreviousData.setId(SHOW_PREVIOUS_DATA);
         TextField filterByFirstName = new TextField("Firstname filter",
                 event -> {
-                    dataView.withFilter(
+                    dataView.setFilter(
                             item -> item.getFirstName().toLowerCase()
                                     .contains(event.getValue().toLowerCase()));
                 });
@@ -99,16 +99,16 @@ public class GridListDataViewPage extends Div {
         rowSelect.setValue(0);
         showPreviousData.setEnabled(false);
         rowSelect.addValueChangeListener(event -> {
-            if (event.getValue() >= dataView.getDataSize()) {
+            if (event.getValue() >= dataView.getSize()) {
                 itemData.setText("Action: Item outside of data rage of [0," + (
-                        dataView.getDataSize() - 1)
+                        dataView.getSize() - 1)
                         + "]. Resetting to previous");
                 rowSelect.setValue(event.getOldValue());
                 return;
             }
             showPreviousData.setEnabled(event.getValue() > 0);
             showNextData
-                    .setEnabled(event.getValue() < dataView.getDataSize() - 1);
+                    .setEnabled(event.getValue() < dataView.getSize() - 1);
         });
 
         add(grid, rowSelect, filterByFirstName, selectItemOnRow, showItemData,

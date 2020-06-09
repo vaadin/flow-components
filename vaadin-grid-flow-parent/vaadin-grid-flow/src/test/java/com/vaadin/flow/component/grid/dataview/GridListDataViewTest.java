@@ -84,23 +84,6 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         Assert.assertEquals("Wrong item returned for row", items[2],
                 dataView.getItemOnRow(2));
 
-        // Test hasNext-/-PreviousItem
-        Assert.assertTrue("Item in middle should have next item",
-                dataView.hasNextItem(items[2]));
-        Assert.assertTrue("Item in middle should have previous item",
-                dataView.hasPreviousItem(items[1]));
-
-        Assert.assertTrue("First item should have next item",
-                dataView.hasNextItem(items[0]));
-        Assert.assertTrue("Last item should have previous item",
-                dataView.hasPreviousItem(items[3]));
-
-        Assert.assertFalse("No next item for last item should be available",
-                dataView.hasNextItem(items[3]));
-        Assert.assertFalse(
-                "No previous item for first item should be available",
-                dataView.hasPreviousItem(items[0]));
-
         // Test getNext-/-PreviousItem
         Assert.assertEquals("Faulty next item", items[3],
                 dataView.getNextItem(items[2]));
@@ -114,13 +97,13 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
         // Test getSize
         Assert.assertEquals("Unexpected size for data", items.length,
-                dataView.getDataSize());
+                dataView.getSize());
 
         // Test containsItem
         Assert.assertTrue("Set item was not found in the data",
-                dataView.isItemPresent(items[3]));
+                dataView.contains(items[3]));
         Assert.assertFalse("Non existent item found in data",
-                dataView.isItemPresent("item6"));
+                dataView.contains("item6"));
     }
 
     @Test
@@ -129,16 +112,16 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setDataProvider(items);
 
-        dataView.withFilter(s -> s.endsWith("4"));
+        dataView.setFilter(s -> s.endsWith("4"));
 
         Assert.assertEquals("Filter was not applied to data size", 1,
-                dataView.getDataSize());
+                dataView.getSize());
 
         Assert.assertTrue("Expected item is missing from filtered data",
-                dataView.isItemPresent(items[3]));
+                dataView.contains(items[3]));
         Assert.assertFalse(
                 "Item that should be filtered out is available in the data",
-                dataView.isItemPresent(items[1]));
+                dataView.contains(items[1]));
 
         Assert.assertEquals("Wrong item on row for filtered data.", items[3],
                 dataView.getItemOnRow(0));

@@ -43,17 +43,17 @@ public class GridListDataView<T> extends AbstractListDataView<T>
     @Override
     public T getItemOnRow(int rowIndex) {
         validateItemIndex(rowIndex);
-        return getAllItems().skip(rowIndex).findFirst().orElse(null);
+        return getItems().skip(rowIndex).findFirst().orElse(null);
     }
 
     @Override
-    public Stream<T> getAllItems() {
+    public Stream<T> getItems() {
         return getDataProvider()
                 .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
     @Override
-    public int getDataSize() {
+    public int getSize() {
         return dataCommunicator.getDataSize();
     }
 

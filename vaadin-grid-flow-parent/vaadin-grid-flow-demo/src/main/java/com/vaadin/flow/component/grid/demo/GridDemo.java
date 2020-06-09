@@ -1115,7 +1115,7 @@ public class GridDemo extends DemoView {
     }
 
     private void applyFilter(GridListDataView<Person> dataView) {
-        dataView.clearFilters();
+        dataView.removeFilters();
         if (birthDateField.getValue() != null) {
             dataView.addFilter(person -> Objects
                     .equals(birthDateField.getValue(), person.getBirthDate()));
@@ -1349,7 +1349,7 @@ public class GridDemo extends DemoView {
                 .setDataProvider(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name")
-                .setFooter("Total: " + dataView.getDataSize() + " people");
+                .setFooter("Total: " + dataView.getSize() + " people");
 
         long averageOfAge = Math.round(personList.stream()
                 .mapToInt(Person::getAge).average().orElse(0));
@@ -1436,14 +1436,14 @@ public class GridDemo extends DemoView {
 
         // Create and add buttons
         Button lessThanTwentyYearsold = new Button("-20 years old",
-                event -> dataView.withFilter(person -> person.getAge() < 20));
+                event -> dataView.setFilter(person -> person.getAge() < 20));
 
         Button twentyToForty = new Button("Between 20-40 years old",
-                event -> dataView.withFilter(person -> (person.getAge() >= 20
+                event -> dataView.setFilter(person -> (person.getAge() >= 20
                         && person.getAge() <= 40)));
 
         Button overForty = new Button("+40 years old",
-                event -> dataView.withFilter(person -> person.getAge() > 40));
+                event -> dataView.setFilter(person -> person.getAge() > 40));
 
         HorizontalLayout filter = new HorizontalLayout(lessThanTwentyYearsold,
                 twentyToForty, overForty);
@@ -1697,9 +1697,9 @@ public class GridDemo extends DemoView {
         public DataDialog(GridListDataView<Person> dataView, Person item) {
             this.dataView = dataView;
             next = new Button("Next",
-                    event -> setItem(dataView.getNextItem(currentItem)));
+                    event -> setItem(dataView.getNextItem(currentItem).get()));
             previous = new Button("Previous",
-                    event -> setItem(dataView.getPreviousItem(currentItem)));
+                    event -> setItem(dataView.getPreviousItem(currentItem).get()));
             setItem(item);
             setModal(true);
             HorizontalLayout layout = new HorizontalLayout(previous, data, next);
@@ -1712,8 +1712,8 @@ public class GridDemo extends DemoView {
         private void setItem(Person item) {
             currentItem = item;
             data.setText(String.format("%s %s", item.getFirstName(), item.getLastName()));
-            next.setEnabled(dataView.hasNextItem(currentItem));
-            previous.setEnabled(dataView.hasPreviousItem(currentItem));
+            next.setEnabled(dataView.getNextItem(currentItem).isPresent());
+            previous.setEnabled(dataView.getPreviousItem(currentItem).isPresent());
         }
     }
     // end-source-example
