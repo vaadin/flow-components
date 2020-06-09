@@ -57,11 +57,11 @@ public class TabsView extends DemoView {
         createPreselectedTabs();
         createTabsWithPages();
         createTabsWithCustomContent();
-        createTebsWithThemeVariants();
+        createTabsWithThemeVariants();
         createTabsAutoselectFalse();
     }
 
-    private void createTebsWithThemeVariants() {
+    private void createTabsWithThemeVariants() {
         // begin-source-example
         // source-example-heading: Theme variants usage
         Tab tab1 = new Tab("Tab one");
