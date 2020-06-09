@@ -5,12 +5,10 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@BodySize
 @Theme(Lumo.class)
 public class AppRouterLayout extends AppLayout {
 
