@@ -21,13 +21,11 @@ import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -71,47 +69,6 @@ public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
                 .setDataProvider(new ListDataProvider<>(new ArrayList<>()));
 
         dataView.getItemOnIndex(5);
-    }
-
-    @Test
-    public void selectItemOnIndex_correctItemSelected() {
-        Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataProvider(items);
-
-        dataView.selectItem(1);
-
-        Assert.assertEquals("Unexpected item selected", items[1],
-                select.getValue());
-    }
-
-    @Test
-    public void selectNextItem_correctItemSelected() {
-        Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataProvider(items);
-
-        dataView.selectItem(1);
-        final Optional<String> nextItem = dataView.selectNextItem();
-
-        Assert.assertTrue("No next item found.", nextItem.isPresent());
-        Assert.assertEquals("Unexpected item selected as next", items[2],
-                select.getValue());
-        Assert.assertEquals("Unexpected item selected as next", items[2],
-                nextItem.get());
-    }
-
-    @Test
-    public void selectPreviousItem_correctItemSelected() {
-        Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataProvider(items);
-
-        dataView.selectItem(1);
-        final Optional<String> previousItem = dataView.selectPreviousItem();
-
-        Assert.assertTrue("No previous item found.", previousItem.isPresent());
-        Assert.assertEquals("Unexpected item selected as previous", items[0],
-                select.getValue());
-        Assert.assertEquals("Unexpected item selected as previous", items[0],
-                previousItem.get());
     }
 
     @Override

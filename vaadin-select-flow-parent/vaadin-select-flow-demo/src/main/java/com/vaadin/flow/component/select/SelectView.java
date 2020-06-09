@@ -83,7 +83,6 @@ public class SelectView extends DemoView {
         entityList();
         valueChanged();
         disabledItem();
-        simpleDataNavigationDemo();
         configurationForRequiredDemo();// Validation
         formFieldDemo();
         separatorDemo();// Presentation
@@ -201,49 +200,6 @@ public class SelectView extends DemoView {
 
         // end-source-example
         addCard("Disabled item", select);
-    }
-
-    private void simpleDataNavigationDemo() {
-        // begin-source-example
-        // source-example-heading: Data navigation
-        Select<Country> select = new Select<>();
-        select.setLabel("Country");
-        select.setTextRenderer(Country::getName);
-
-        //
-        final SelectListDataView<Country> dataView = select
-                .setDataProvider(getCountries());
-
-        // Navigate data using dataView selectNextItem and selectPreviousItem
-        Button previous = new Button(VaadinIcon.ARROW_LEFT.create(),
-                event -> dataView.selectPreviousItem());
-        Button next = new Button(VaadinIcon.ARROW_RIGHT.create(),
-                event -> dataView.selectNextItem());
-
-        // Arrow buttons to the side and select in the middle
-        HorizontalLayout horizontalLayout = new HorizontalLayout(previous,
-                select, next);
-        horizontalLayout.setDefaultVerticalComponentAlignment(
-                FlexComponent.Alignment.END);
-
-        Span continent = new Span();
-        Span capital = new Span();
-
-        select.addValueChangeListener(event -> {
-            capital.setText("Capital: " + event.getValue().getCapital());
-            continent.setText("Continent: " + event.getValue().getContinent());
-
-            // enabled/disable buttons depending on if we have next or previous item
-            previous.setEnabled(dataView.hasPreviousItem(event.getValue()));
-            next.setEnabled(dataView.hasNextItem(event.getValue()));
-        });
-
-        dataView.selectItem(0);
-        // end-source-example
-
-        VerticalLayout verticalLayout = new VerticalLayout(horizontalLayout,
-                continent, capital);
-        addCard("Data navigation", verticalLayout);
     }
 
     private void configurationForRequiredDemo() {
