@@ -48,6 +48,6 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T>
     @Override
     public T getItemOnIndex(int index) {
         validateItemIndex(index);
-        return getAllItems().skip(index).findFirst().orElse(null);
+        return getItems().skip(index).findFirst().orElse(null);
     }
 }

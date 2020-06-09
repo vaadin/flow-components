@@ -46,31 +46,31 @@ public class CheckboxGroupListDataViewPage extends Div {
         CheckboxGroupListDataView<String> dataView =
                 checkboxGroup.setDataProvider("foo", "bar", "baz");
 
-        Span sizeSpan = new Span(String.valueOf(dataView.getDataSize()));
-        Span containsItemSpan = new Span(String.valueOf(dataView.isItemPresent("foo")));
-        Span allItemsSpan = new Span(dataView.getAllItems().collect(Collectors.joining(",")));
+        Span sizeSpan = new Span(String.valueOf(dataView.getSize()));
+        Span containsItemSpan = new Span(String.valueOf(dataView.contains("foo")));
+        Span allItemsSpan = new Span(dataView.getItems().collect(Collectors.joining(",")));
         Span itemOnIndexSpan = new Span(dataView.getItemOnIndex(0));
 
         AtomicReference<String> currentItem = new AtomicReference<>("bar");
 
         Span currentItemSpan = new Span(currentItem.get());
-        Span hasNextItemSpan = new Span(String.valueOf(dataView.hasNextItem("foo")));
-        Span hasPrevItemSpan = new Span(String.valueOf(dataView.hasPreviousItem("bar")));
+        Span hasNextItemSpan = new Span(String.valueOf(dataView.getNextItem("foo").isPresent()));
+        Span hasPrevItemSpan = new Span(String.valueOf(dataView.getPreviousItem("bar").isPresent()));
 
         Button nextItemButton = new Button("Next Item", event -> {
-            String nextItem = dataView.getNextItem(currentItem.get());
+            String nextItem = dataView.getNextItem(currentItem.get()).get();
             currentItem.set(nextItem);
             currentItemSpan.setText(currentItem.get());
         });
         Button prevItemButton = new Button("Previous Item", event -> {
-            String prevItem = dataView.getPreviousItem(currentItem.get());
+            String prevItem = dataView.getPreviousItem(currentItem.get()).get();
             currentItem.set(prevItem);
             currentItemSpan.setText(currentItem.get());
         });
         Button filterButton = new Button("Filter Items",
-                event -> dataView.withFilter("bar"::equals));
+                event -> dataView.setFilter("bar"::equals));
         Button sortButton = new Button("Sort Items",
-                event -> dataView.withSortComparator(String::compareTo));
+                event -> dataView.setSortComparator(String::compareTo));
 
         checkboxGroup.setId(CHECKBOX_GROUP);
         sizeSpan.setId(ITEMS_SIZE);

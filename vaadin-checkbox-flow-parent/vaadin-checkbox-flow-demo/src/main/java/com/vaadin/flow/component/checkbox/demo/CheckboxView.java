@@ -428,15 +428,15 @@ public class CheckboxView extends DemoView {
                 setDataProvider(DishData.getDishes());
 
         Checkbox showVegetarianDishes = new Checkbox("Show only vegetarian dishes",
-                event -> dataView.withFilter(event.getValue() ? Dish::isVegetarian : null));
+                event -> dataView.setFilter(event.getValue() ? Dish::isVegetarian : null));
 
         Div allDishesAvailable = new Div();
         allDishesAvailable.setText(String.format("%d dishes available in total",
-                dataView.getDataSize()));
+                dataView.getSize()));
 
         Button askForDishOfTheDay = new Button("Check availability of Dish Of The Day", event -> {
             Dish dishOfTheDay = DishData.getDishOfTheDay();
-            Notification.show(dataView.isItemPresent(dishOfTheDay) ?
+            Notification.show(dataView.contains(dishOfTheDay) ?
                             "Dish of the day is available" :
                             "Dish of the day is not available, sorry",
                             2000,
