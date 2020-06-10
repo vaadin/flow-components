@@ -39,13 +39,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-testbench</artifactId>
-            <version>3.1-SNAPSHOT</version>
+            <version>3.2-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-testbench</artifactId>
-            <version>3.1-SNAPSHOT</version>
+            <version>3.2-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -81,14 +81,14 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>3.1-SNAPSHOT</version>
+            <version>3.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>3.1-SNAPSHOT</version>
+            <version>3.2-SNAPSHOT</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -109,7 +109,7 @@
                             <directory>${project.basedir}</directory>
                             <includes>
                                 <include>package.json</include>
-                                <include>webpack.config.js</include>    
+                                <include>webpack.config.js</include>
                             </includes>
                         </fileset>
 
@@ -135,7 +135,7 @@
                     </webAppConfig>
                 </configuration>
                 <executions>
-                    <!-- start and stop jetty (running our app) when running 
+                    <!-- start and stop jetty (running our app) when running
                         integration tests -->
                     <execution>
                         <id>start-jetty</id>
@@ -216,7 +216,7 @@
                             </dependency>
                         </dependencies>
                         <executions>
-                            <!-- Start Sauce Connect prior to running the 
+                            <!-- Start Sauce Connect prior to running the
                                 integration tests -->
                             <execution>
                                 <id>start-sauceconnect</id>
@@ -225,7 +225,7 @@
                                     <goal>start-sauceconnect</goal>
                                 </goals>
                             </execution>
-                            <!-- Stop the Sauce Connect process after the 
+                            <!-- Stop the Sauce Connect process after the
                                 integration tests have finished -->
                             <execution>
                                 <id>stop-sauceconnect</id>
