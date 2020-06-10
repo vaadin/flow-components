@@ -69,6 +69,7 @@ public class Configuration extends AbstractConfigurationObject
     private Navigation navigation;
     private NoData noData;
     private Navigator navigator;
+    private Time time;
 
     @JsonIgnore
     private final List<ConfigurationChangeListener> changeListeners = new ArrayList<>();
@@ -820,6 +821,22 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void setNavigator(Navigator navigator) {
         this.navigator = navigator;
+    }
+
+    /**
+     * @see #setTime(Time)
+     */
+    public Time getTime() {
+        return time;
+    }
+
+    /**
+     * Set configuration for time options
+     * 
+     * @param time
+     */
+    public void setTime(Time time) {
+        this.time = time;
     }
 
     /**
