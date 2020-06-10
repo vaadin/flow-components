@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,22 +33,29 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
+	private Color color;
 	private Number colorIndex;
 	private Boolean connectEnds;
 	private Boolean connectNulls;
 	private Number cropThreshold;
 	private Cursor cursor;
+	private DashStyle dashStyle;
 	private DataLabels dataLabels;
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
+	private Color fillColor;
+	private Number fillOpacity;
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
+	private Color lineColor;
+	private Number lineWidth;
 	private String linecap;
 	private String linkedTo;
 	private Marker marker;
-	private boolean negativeColor;
+	private Color negativeColor;
+	private Color negativeFillColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -154,6 +162,37 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	}
 
 	/**
+	 * @see #setColor(Color)
+	 */
+	public Color getColor() {
+		return color;
+	}
+
+	/**
+	 * <p>
+	 * The main color or the series. In line type series it applies to the line
+	 * and the point markers unless otherwise specified. In bar type series it
+	 * applies to the bars unless a color is specified per point. The default
+	 * value is pulled from the <code>options.colors</code> array.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the color can be defined by the <a
+	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
+	 * series color can be set with the <code>.highcharts-series</code>,
+	 * <code>.highcharts-color-{n}</code>,
+	 * <code>.highcharts-{type}-series</code> or
+	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
+	 * the <code>className</code> option.
+	 * </p>
+	 */
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -241,6 +280,38 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	 */
 	public void setCursor(Cursor cursor) {
 		this.cursor = cursor;
+	}
+
+	/**
+	 * @see #setDashStyle(DashStyle)
+	 */
+	public DashStyle getDashStyle() {
+		return dashStyle;
+	}
+
+	/**
+	 * A name for the dash style to use for the graph. Applies only to series
+	 * type having a graph, like <code>line</code>, <code>spline</code>,
+	 * <code>area</code> and <code>scatter</code> in case it has a
+	 * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
+	 * <ul>
+	 * <li>Solid</li>
+	 * <li>ShortDash</li>
+	 * <li>ShortDot</li>
+	 * <li>ShortDashDot</li>
+	 * <li>ShortDashDotDot</li>
+	 * <li>Dot</li>
+	 * <li>Dash</li>
+	 * <li>LongDash</li>
+	 * <li>DashDot</li>
+	 * <li>LongDashDot</li>
+	 * <li>LongDashDotDot</li>
+	 * </ul>
+	 * <p>
+	 * Defaults to: Solid
+	 */
+	public void setDashStyle(DashStyle dashStyle) {
+		this.dashStyle = dashStyle;
 	}
 
 	/**
@@ -338,6 +409,42 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	}
 
 	/**
+	 * @see #setFillColor(Color)
+	 */
+	public Color getFillColor() {
+		return fillColor;
+	}
+
+	/**
+	 * Fill color or gradient for the area. When <code>null</code>, the series'
+	 * <code>color</code> is used with the series' <code>fillOpacity</code>.
+	 */
+	public void setFillColor(Color fillColor) {
+		this.fillColor = fillColor;
+	}
+
+	/**
+	 * @see #setFillOpacity(Number)
+	 */
+	public Number getFillOpacity() {
+		return fillOpacity;
+	}
+
+	/**
+	 * Fill opacity for the area. When you set an explicit
+	 * <code>fillColor</code>, the <code>fillOpacity</code> is not applied.
+	 * Instead, you should define the opacity in the <code>fillColor</code> with
+	 * an rgba color definition. The <code>fillOpacity</code> setting, also the
+	 * default setting, overrides the alpha component of the <code>color</code>
+	 * setting.
+	 * <p>
+	 * Defaults to: 0.75
+	 */
+	public void setFillOpacity(Number fillOpacity) {
+		this.fillOpacity = fillOpacity;
+	}
+
+	/**
 	 * @see #setFindNearestPointBy(Dimension)
 	 */
 	public Dimension getFindNearestPointBy() {
@@ -426,6 +533,39 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	}
 
 	/**
+	 * @see #setLineColor(Color)
+	 */
+	public Color getLineColor() {
+		return lineColor;
+	}
+
+	/**
+	 * A separate color for the graph line. By default the line takes the
+	 * <code>color</code> of the series, but the lineColor setting allows
+	 * setting a separate color for the line without altering the
+	 * <code>fillColor</code>.
+	 */
+	public void setLineColor(Color lineColor) {
+		this.lineColor = lineColor;
+	}
+
+	/**
+	 * @see #setLineWidth(Number)
+	 */
+	public Number getLineWidth() {
+		return lineWidth;
+	}
+
+	/**
+	 * Pixel with of the graph line.
+	 * <p>
+	 * Defaults to: 2
+	 */
+	public void setLineWidth(Number lineWidth) {
+		this.lineWidth = lineWidth;
+	}
+
+	/**
 	 * @see #setLinecap(String)
 	 */
 	public String getLinecap() {
@@ -490,20 +630,34 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(boolean)
+	 * @see #setNegativeColor(Color)
 	 */
-	public boolean isNegativeColor() {
+	public Color getNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * Enable or disable the color for parts of the graph that are bellow
-	 * {@link #getThreshold()}. A negative color is applied by setting this
-	 * option to <code>true</code> combined with the
-	 * <code>.highcharts-negative</code> class name.
+	 * The color for the parts of the graph or points that are below the <a
+	 * href="#plotOptions.series.threshold">threshold</a>.
+	 * <p>
+	 * Defaults to: null
 	 */
-	public void setNegativeColor(boolean negativeColor) {
+	public void setNegativeColor(Color negativeColor) {
 		this.negativeColor = negativeColor;
+	}
+
+	/**
+	 * @see #setNegativeFillColor(Color)
+	 */
+	public Color getNegativeFillColor() {
+		return negativeFillColor;
+	}
+
+	/**
+	 * A separate color for the negative part of the area.
+	 */
+	public void setNegativeFillColor(Color negativeFillColor) {
+		this.negativeFillColor = negativeFillColor;
 	}
 
 	public String getPointDescriptionFormatter() {

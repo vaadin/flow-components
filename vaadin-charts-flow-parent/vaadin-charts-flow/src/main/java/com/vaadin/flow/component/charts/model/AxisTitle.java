@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The axis title, showing next to the axis line.
@@ -31,6 +32,7 @@ public class AxisTitle extends AbstractConfigurationObject {
 	private Number offset;
 	private Boolean reserveSpace;
 	private Number rotation;
+	private Style style;
 	private String text;
 	private Number x;
 	private Number y;
@@ -120,6 +122,35 @@ public class AxisTitle extends AbstractConfigurationObject {
 	 */
 	public void setRotation(Number rotation) {
 		this.rotation = rotation;
+	}
+
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * <p>
+	 * CSS styles for the title. When titles are rotated they are rendered using
+	 * vector graphic techniques and not all styles are applicable.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the stroke width is given in the
+	 * <code>.highcharts-axis-title</code> class.
+	 * </p>
+	 * <p>
+	 * Defaults to: { "color": "#666666" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
 	}
 
 	public AxisTitle(String text) {

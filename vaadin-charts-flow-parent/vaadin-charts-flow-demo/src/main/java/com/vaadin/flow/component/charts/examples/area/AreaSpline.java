@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.charts.model.style.Color;
+import com.vaadin.flow.component.charts.model.style.SolidColor;
 
 public class AreaSpline extends AbstractChartExample {
 
@@ -39,7 +41,7 @@ public class AreaSpline extends AbstractChartExample {
         XAxis xAxis = new XAxis();
         xAxis.setCategories(new String[] { "Monday", "Tuesday", "Wednesday",
                 "Thursday", "Friday", "Saturday", "Sunday" });
-        PlotBand plotBand = new PlotBand(4.5, 6.5);
+        PlotBand plotBand = new PlotBand(4.5, 6.5, SolidColor.BLUE);
         plotBand.setZIndex(1);
         xAxis.setPlotBands(plotBand);
         conf.addxAxis(xAxis);

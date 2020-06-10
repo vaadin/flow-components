@@ -28,8 +28,10 @@ import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.serializers.AxisListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.ChartEnumSerializer;
+import com.vaadin.flow.component.charts.model.serializers.ChartOptionsBeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.serializers.DateSerializer;
 import com.vaadin.flow.component.charts.model.serializers.DefaultBeanSerializerModifier;
+import com.vaadin.flow.component.charts.model.serializers.GradientColorStopsSerializer;
 import com.vaadin.flow.component.charts.model.serializers.InstantSerializer;
 import com.vaadin.flow.component.charts.model.serializers.PaneListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.SolidColorSerializer;
@@ -46,7 +48,16 @@ public class ChartSerialization implements Serializable {
 
     private static ObjectWriter jsonWriter;
 
+    final static ObjectWriter jsonWriterChartOptions;
+
     static {
+        ObjectMapper defaultMapper = ChartSerialization.createObjectMapper();
+        jsonWriterChartOptions = defaultMapper
+                .setSerializerFactory(defaultMapper.getSerializerFactory()
+                        .withSerializerModifier(
+                                new ChartOptionsBeanSerializerModifier()))
+                .writer();
+
         // writer is thread safe so we can use a shared instance
         jsonWriter = createObjectMapper().writer();
     }
@@ -69,6 +80,7 @@ public class ChartSerialization implements Serializable {
                 .registerModule(StopSerializer.getModule())
                 .registerModule(TimeUnitMultiplesSerializer.getModule())
                 .registerModule(SolidColorSerializer.getModule())
+                .registerModule(GradientColorStopsSerializer.getModule())
                 .registerModule(AxisListSerializer.getModule())
                 .registerModule(PaneListSerializer.getModule())
                 .registerModule(DateSerializer.getModule())

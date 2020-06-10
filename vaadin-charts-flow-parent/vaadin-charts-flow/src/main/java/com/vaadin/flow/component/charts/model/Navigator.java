@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * The navigator is a small series below the main series, displaying a view of
@@ -30,10 +31,14 @@ public class Navigator extends AbstractConfigurationObject {
 
 	private Boolean adaptToUpdatedData;
 	private Boolean enabled;
+	private Handles handles;
 	private Number height;
 	private Number margin;
+	private Color maskFill;
 	private Boolean maskInside;
 	private Boolean opposite;
+	private Color outlineColor;
+	private Number outlineWidth;
 	private PlotOptionsSeries series;
 	private XAxis xAxis;
 	private YAxis yAxis;
@@ -83,6 +88,34 @@ public class Navigator extends AbstractConfigurationObject {
 	}
 
 	/**
+	 * @see #setHandles(Handles)
+	 */
+	public Handles getHandles() {
+		if (handles == null) {
+			handles = new Handles();
+		}
+		return handles;
+	}
+
+	/**
+	 * <p>
+	 * Options for the handles for dragging the zoomed area.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the navigator handles are styled with the
+	 * <code>.highcharts-navigator-handle</code>,
+	 * <code>.highcharts-navigator-handle-left</code> and
+	 * <code>.highcharts-navigator-handle-right</code> classes.
+	 * </p>
+	 */
+	public void setHandles(Handles handles) {
+		this.handles = handles;
+	}
+
+	/**
 	 * @see #setHeight(Number)
 	 */
 	public Number getHeight() {
@@ -112,6 +145,24 @@ public class Navigator extends AbstractConfigurationObject {
 	 */
 	public void setMargin(Number margin) {
 		this.margin = margin;
+	}
+
+	/**
+	 * @see #setMaskFill(Color)
+	 */
+	public Color getMaskFill() {
+		return maskFill;
+	}
+
+	/**
+	 * The color of the mask covering the areas of the navigator series that are
+	 * currently not visible in the main series. The default color is bluish
+	 * with an opacity of 0.3 to see the series below.
+	 * <p>
+	 * Defaults to: rgba(102,133,194,0.3)
+	 */
+	public void setMaskFill(Color maskFill) {
+		this.maskFill = maskFill;
 	}
 
 	/**
@@ -146,6 +197,38 @@ public class Navigator extends AbstractConfigurationObject {
 	 */
 	public void setOpposite(Boolean opposite) {
 		this.opposite = opposite;
+	}
+
+	/**
+	 * @see #setOutlineColor(Color)
+	 */
+	public Color getOutlineColor() {
+		return outlineColor;
+	}
+
+	/**
+	 * The color of the line marking the currently zoomed area in the navigator.
+	 * <p>
+	 * Defaults to: #cccccc
+	 */
+	public void setOutlineColor(Color outlineColor) {
+		this.outlineColor = outlineColor;
+	}
+
+	/**
+	 * @see #setOutlineWidth(Number)
+	 */
+	public Number getOutlineWidth() {
+		return outlineWidth;
+	}
+
+	/**
+	 * The width of the line marking the currently zoomed area in the navigator.
+	 * <p>
+	 * Defaults to: 2
+	 */
+	public void setOutlineWidth(Number outlineWidth) {
+		this.outlineWidth = outlineWidth;
 	}
 
 	/**

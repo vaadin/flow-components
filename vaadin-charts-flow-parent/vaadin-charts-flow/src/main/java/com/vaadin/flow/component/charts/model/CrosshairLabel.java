@@ -19,7 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
-
+import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * A label on the axis next to the crosshair.
@@ -36,7 +36,10 @@ import javax.annotation.Generated;
 public class CrosshairLabel extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;
+	private Color backgroundColor;
+	private Color borderColor;
 	private Number borderRadius;
+	private Number borderWidth;
 	private String format;
 	private String _fn_formatter;
 	private Number padding;
@@ -63,6 +66,35 @@ public class CrosshairLabel extends AbstractConfigurationObject {
 	}
 
 	/**
+	 * @see #setBackgroundColor(Color)
+	 */
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	/**
+	 * The background color for the label. Defaults to the related series color,
+	 * or <code>#666666</code> if that is not available.
+	 */
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	/**
+	 * @see #setBorderColor(Color)
+	 */
+	public Color getBorderColor() {
+		return borderColor;
+	}
+
+	/**
+	 * The border color for the crosshair label
+	 */
+	public void setBorderColor(Color borderColor) {
+		this.borderColor = borderColor;
+	}
+
+	/**
 	 * @see #setBorderRadius(Number)
 	 */
 	public Number getBorderRadius() {
@@ -76,6 +108,22 @@ public class CrosshairLabel extends AbstractConfigurationObject {
 	 */
 	public void setBorderRadius(Number borderRadius) {
 		this.borderRadius = borderRadius;
+	}
+
+	/**
+	 * @see #setBorderWidth(Number)
+	 */
+	public Number getBorderWidth() {
+		return borderWidth;
+	}
+
+	/**
+	 * The border width for the crosshair label.
+	 * <p>
+	 * Defaults to: 0
+	 */
+	public void setBorderWidth(Number borderWidth) {
+		this.borderWidth = borderWidth;
 	}
 
 	/**

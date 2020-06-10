@@ -17,8 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-import com.vaadin.flow.component.charts.model.style.LabelStyle;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * A HTML label that can be positioned anywhere in the chart area.
@@ -26,7 +25,7 @@ import com.vaadin.flow.component.charts.model.style.LabelStyle;
 @SuppressWarnings("serial")
 public class HTMLLabelItem extends AbstractConfigurationObject {
     private String html;
-    private LabelStyle style;
+    private Style style;
 
     /**
      * Constructs a HTMLLabelItem with the given HTML content
@@ -43,7 +42,7 @@ public class HTMLLabelItem extends AbstractConfigurationObject {
      * @param html
      * @param style
      */
-    public HTMLLabelItem(String html, LabelStyle style) {
+    public HTMLLabelItem(String html, Style style) {
         this(html);
         setStyle(style);
     }
@@ -65,19 +64,19 @@ public class HTMLLabelItem extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setStyle(LabelStyle)
+     * @see #setStyle(Style)
      */
-    public LabelStyle getStyle() {
+    public Style getStyle() {
         return style;
     }
 
     /**
      * Sets the CSS style for the label. To position the label, use
-     * {@link LabelStyle#setLeft(String)} and {@link LabelStyle#setTop(String)}.
+     * {@link Style#setLeft(String)} and {@link Style#setTop(String)}.
      * 
      * @param style
      */
-    public void setStyle(LabelStyle style) {
+    public void setStyle(Style style) {
         this.style = style;
     }
 }

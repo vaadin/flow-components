@@ -19,8 +19,10 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * 
@@ -31,7 +33,9 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Boolean allowPointSelect;
 	private Number animationLimit;
 	private String className;
+	private Color color;
 	private Number colorIndex;
+	private ArrayList<Color> colors;
 	private Number compareBase;
 	private Number cropThreshold;
 	private Cursor cursor;
@@ -43,10 +47,12 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private Number legendIndex;
+	private Color lineColor;
+	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private PlotOptionsSeries navigatorOptions;
-	private boolean negativeColor;
+	private Color negativeColor;
 	private String onKey;
 	private String onSeries;
 	private String _fn_pointDescriptionFormatter;
@@ -62,6 +68,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Number stackDistance;
 	private States states;
 	private Boolean stickyTracking;
+	private Style style;
 	private String textAlign;
 	private Number threshold;
 	private SeriesTooltip tooltip;
@@ -129,6 +136,37 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
+	 * @see #setColor(Color)
+	 */
+	public Color getColor() {
+		return color;
+	}
+
+	/**
+	 * <p>
+	 * The main color of the series. In line type series it applies to the line
+	 * and the point markers unless otherwise specified. In bar type series it
+	 * applies to the bars unless a color is specified per point. The default
+	 * value is pulled from the <code>options.colors</code> array.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the color can be defined by the <a
+	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
+	 * series color can be set with the <code>.highcharts-series</code>,
+	 * <code>.highcharts-color-{n}</code>,
+	 * <code>.highcharts-{type}-series</code> or
+	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
+	 * the <code>className</code> option.
+	 * </p>
+	 */
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -144,6 +182,52 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColors(Color...)
+	 */
+	public Color[] getColors() {
+		if (colors == null) {
+			return new Color[]{};
+		}
+		Color[] arr = new Color[colors.size()];
+		colors.toArray(arr);
+		return arr;
+	}
+
+	/**
+	 * A series specific or series type specific color set to apply instead of
+	 * the global <a href="#colors">colors</a> when <a
+	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+	 */
+	public void setColors(Color... colors) {
+		this.colors = new ArrayList<Color>(Arrays.asList(colors));
+	}
+
+	/**
+	 * Adds color to the colors array
+	 * 
+	 * @param color
+	 *            to add
+	 * @see #setColors(Color...)
+	 */
+	public void addColor(Color color) {
+		if (this.colors == null) {
+			this.colors = new ArrayList<Color>();
+		}
+		this.colors.add(color);
+	}
+
+	/**
+	 * Removes first occurrence of color in colors array
+	 * 
+	 * @param color
+	 *            to remove
+	 * @see #setColors(Color...)
+	 */
+	public void removeColor(Color color) {
+		this.colors.remove(color);
 	}
 
 	/**
@@ -391,6 +475,48 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
+	 * @see #setLineColor(Color)
+	 */
+	public Color getLineColor() {
+		return lineColor;
+	}
+
+	/**
+	 * <p>
+	 * The color of the line/border of the flag.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the stroke is set in the
+	 * <code>.highcharts-flag-series .highcharts-point</code> rule.
+	 * </p>
+	 * <p>
+	 * Defaults to: #000000
+	 */
+	public void setLineColor(Color lineColor) {
+		this.lineColor = lineColor;
+	}
+
+	/**
+	 * @see #setLineWidth(Number)
+	 */
+	public Number getLineWidth() {
+		return lineWidth;
+	}
+
+	/**
+	 * The pixel width of the candlestick line/border. Defaults to
+	 * <code>1</code>.
+	 * <p>
+	 * Defaults to: 1
+	 */
+	public void setLineWidth(Number lineWidth) {
+		this.lineWidth = lineWidth;
+	}
+
+	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -454,19 +580,19 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(boolean)
+	 * @see #setNegativeColor(Color)
 	 */
-	public boolean isNegativeColor() {
+	public Color getNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * Enable or disable the color for parts of the graph that are bellow
-	 * {@link #getThreshold()}. A negative color is applied by setting this
-	 * option to <code>true</code> combined with the
-	 * <code>.highcharts-negative</code> class name.
+	 * The color for the parts of the graph or points that are below the <a
+	 * href="#plotOptions.series.threshold">threshold</a>.
+	 * <p>
+	 * Defaults to: null
 	 */
-	public void setNegativeColor(boolean negativeColor) {
+	public void setNegativeColor(Color negativeColor) {
 		this.negativeColor = negativeColor;
 	}
 
@@ -741,6 +867,34 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setStickyTracking(Boolean stickyTracking) {
 		this.stickyTracking = stickyTracking;
+	}
+
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * <p>
+	 * The text styles of the flag.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the styles are set in the
+	 * <code>.highcharts-flag-series .highcharts-point</code> rule.
+	 * </p>
+	 * <p>
+	 * Defaults to: { "fontSize": "11px", "fontWeight": "bold" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
 	}
 
 	/**

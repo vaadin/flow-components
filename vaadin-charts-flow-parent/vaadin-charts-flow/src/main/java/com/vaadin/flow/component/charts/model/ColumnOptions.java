@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.util.Date;
 
@@ -51,6 +52,16 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract void setAnimation(Boolean animation);
 
     /**
+     * @see #setBorderColor(Color)
+     */
+    public abstract Color getBorderColor();
+
+    /**
+     * The color of the border of each waterfall column.
+     */
+    public abstract void setBorderColor(Color borderColor);
+
+    /**
      * @see #setBorderRadius(Number)
      */
     public abstract Number getBorderRadius();
@@ -59,6 +70,16 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * The corner radius of the border surrounding each column or bar.
      */
     public abstract void setBorderRadius(Number borderRadius);
+
+    /**
+     * @see #setBorderWidth(Number)
+     */
+    public abstract Number getBorderWidth();
+
+    /**
+     * The width of the border surrounding each column or bar.
+     */
+    public abstract void setBorderWidth(Number borderWidth);
 
     /**
      * @see #setColorByPoint(Boolean)
@@ -71,6 +92,35 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * the chart should receive one color per series or one color per point.
      */
     public abstract void setColorByPoint(Boolean colorByPoint);
+
+    /**
+     * @see #setColors(Color...)
+     */
+    public abstract Color[] getColors();
+
+    /**
+     * A series specific or series type specific color set to apply instead of
+     * the theme colors when {@link #setColorByPoint(Boolean)} is true.
+     */
+    public abstract void setColors(Color... colors);
+
+    /**
+     * Adds color to the colors array
+     * 
+     * @param color
+     *            to add
+     * @see #setColors(Color...)
+     */
+    public abstract void addColor(Color color);
+
+    /**
+     * Removes first occurrence of color in colors array
+     * 
+     * @param color
+     *            to remove
+     * @see #setColors(Color...)
+     */
+    public abstract void removeColor(Color color);
 
     /**
      * @see #setCursor(Cursor)
@@ -93,6 +143,16 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * Depth of the columns in a 3D column chart.
      */
     public abstract void setDepth(Number depth);
+
+    /**
+     * @see #setEdgeColor(Color)
+     */
+    public abstract Color getEdgeColor();
+
+    /**
+     * 3D columns only. The color of the edges.
+     */
+    public abstract void setEdgeColor(Color edgeColor);
 
     /**
      * @see #setEdgeWidth(Number)
@@ -427,7 +487,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract void setVisible(Boolean visible);
 
     /**
-     * @see #setZoneAxis(String)
+     * @see #setZoneAxis(ZoneAxis)
      */
     public abstract ZoneAxis getZoneAxis();
 

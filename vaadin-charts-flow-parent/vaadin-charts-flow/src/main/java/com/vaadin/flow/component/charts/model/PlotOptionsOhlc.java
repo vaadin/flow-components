@@ -19,9 +19,9 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.Date;
 import java.time.Instant;
 import com.vaadin.flow.component.charts.util.Util;
@@ -36,8 +36,10 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
+	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
+	private ArrayList<Color> colors;
 	private Compare compare;
 	private Number compareBase;
 	private Number cropThreshold;
@@ -53,11 +55,12 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private Boolean grouping;
 	private ArrayList<String> keys;
 	private Number legendIndex;
+	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Number minPointLength;
 	private PlotOptionsSeries navigatorOptions;
-	private boolean negativeColor;
+	private Color negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -158,6 +161,37 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
+	 * @see #setColor(Color)
+	 */
+	public Color getColor() {
+		return color;
+	}
+
+	/**
+	 * <p>
+	 * The main color of the series. In line type series it applies to the line
+	 * and the point markers unless otherwise specified. In bar type series it
+	 * applies to the bars unless a color is specified per point. The default
+	 * value is pulled from the <code>options.colors</code> array.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the color can be defined by the <a
+	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
+	 * series color can be set with the <code>.highcharts-series</code>,
+	 * <code>.highcharts-color-{n}</code>,
+	 * <code>.highcharts-{type}-series</code> or
+	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
+	 * the <code>className</code> option.
+	 * </p>
+	 */
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	/**
 	 * @see #setColorByPoint(Boolean)
 	 */
 	public Boolean getColorByPoint() {
@@ -191,6 +225,52 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColors(Color...)
+	 */
+	public Color[] getColors() {
+		if (colors == null) {
+			return new Color[]{};
+		}
+		Color[] arr = new Color[colors.size()];
+		colors.toArray(arr);
+		return arr;
+	}
+
+	/**
+	 * A series specific or series type specific color set to apply instead of
+	 * the global <a href="#colors">colors</a> when <a
+	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+	 */
+	public void setColors(Color... colors) {
+		this.colors = new ArrayList<Color>(Arrays.asList(colors));
+	}
+
+	/**
+	 * Adds color to the colors array
+	 * 
+	 * @param color
+	 *            to add
+	 * @see #setColors(Color...)
+	 */
+	public void addColor(Color color) {
+		if (this.colors == null) {
+			this.colors = new ArrayList<Color>();
+		}
+		this.colors.add(color);
+	}
+
+	/**
+	 * Removes first occurrence of color in colors array
+	 * 
+	 * @param color
+	 *            to remove
+	 * @see #setColors(Color...)
+	 */
+	public void removeColor(Color color) {
+		this.colors.remove(color);
 	}
 
 	/**
@@ -507,6 +587,22 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
+	 * @see #setLineWidth(Number)
+	 */
+	public Number getLineWidth() {
+		return lineWidth;
+	}
+
+	/**
+	 * The pixel width of the line/border. Defaults to <code>1</code>.
+	 * <p>
+	 * Defaults to: 1
+	 */
+	public void setLineWidth(Number lineWidth) {
+		this.lineWidth = lineWidth;
+	}
+
+	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -589,19 +685,19 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(boolean)
+	 * @see #setNegativeColor(Color)
 	 */
-	public boolean isNegativeColor() {
+	public Color getNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * Enable or disable the color for parts of the graph that are bellow
-	 * {@link #getThreshold()}. A negative color is applied by setting this
-	 * option to <code>true</code> combined with the
-	 * <code>.highcharts-negative</code> class name.
+	 * The color for the parts of the graph or points that are below the <a
+	 * href="#plotOptions.series.threshold">threshold</a>.
+	 * <p>
+	 * Defaults to: null
 	 */
-	public void setNegativeColor(boolean negativeColor) {
+	public void setNegativeColor(Color negativeColor) {
 		this.negativeColor = negativeColor;
 	}
 

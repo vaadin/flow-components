@@ -19,6 +19,8 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * <p>
@@ -40,7 +42,12 @@ public class DataLabels extends AbstractDataLabels {
 
 	private HorizontalAlign align;
 	private Boolean allowOverlap;
+	private Color backgroundColor;
+	private Color borderColor;
+	private Number borderRadius;
+	private Number borderWidth;
 	private String className;
+	private Color color;
 	private Boolean crop;
 	private Boolean defer;
 	private Boolean enabled;
@@ -52,12 +59,15 @@ public class DataLabels extends AbstractDataLabels {
 	private Number rotation;
 	private Boolean shadow;
 	private Shape shape;
+	private Style style;
 	private Boolean useHTML;
 	private VerticalAlign verticalAlign;
 	private Number x;
 	private Number y;
 	private Number zIndex;
+	private Color connectorColor;
 	private Number connectorPadding;
+	private Number connectorWidth;
 	private Number distance;
 	private Boolean softConnector;
 
@@ -105,6 +115,67 @@ public class DataLabels extends AbstractDataLabels {
 	}
 
 	/**
+	 * @see #setBackgroundColor(Color)
+	 */
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	/**
+	 * The background color or gradient for the data label. Defaults to
+	 * <code>undefined</code>.
+	 */
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	/**
+	 * @see #setBorderColor(Color)
+	 */
+	public Color getBorderColor() {
+		return borderColor;
+	}
+
+	/**
+	 * The border color for the data label. Defaults to <code>undefined</code>.
+	 */
+	public void setBorderColor(Color borderColor) {
+		this.borderColor = borderColor;
+	}
+
+	/**
+	 * @see #setBorderRadius(Number)
+	 */
+	public Number getBorderRadius() {
+		return borderRadius;
+	}
+
+	/**
+	 * The border radius in pixels for the data label.
+	 * <p>
+	 * Defaults to: 0
+	 */
+	public void setBorderRadius(Number borderRadius) {
+		this.borderRadius = borderRadius;
+	}
+
+	/**
+	 * @see #setBorderWidth(Number)
+	 */
+	public Number getBorderWidth() {
+		return borderWidth;
+	}
+
+	/**
+	 * The border width in pixels for the data label.
+	 * <p>
+	 * Defaults to: 0
+	 */
+	public void setBorderWidth(Number borderWidth) {
+		this.borderWidth = borderWidth;
+	}
+
+	/**
 	 * @see #setClassName(String)
 	 */
 	public String getClassName() {
@@ -122,6 +193,20 @@ public class DataLabels extends AbstractDataLabels {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
+	}
+
+	/**
+	 * @see #setColor(Color)
+	 */
+	public Color getColor() {
+		return color;
+	}
+
+	/**
+	 * The text color for the data labels. Defaults to <code>null</code>.
+	 */
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 	/**
@@ -313,6 +398,35 @@ public class DataLabels extends AbstractDataLabels {
 	}
 
 	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * Styles for the label. The default <code>color</code> setting is
+	 * <code>"contrast"</code>, which is a pseudo color that Highcharts picks up
+	 * and applies the maximum contrast to the underlying point item, for
+	 * example the bar in a bar chart. The <code>textOutline</code> is a pseudo
+	 * property that applies an outline of the given width with the given color,
+	 * which by default is the maximum contrast to the text. So a bright text
+	 * color will result in a black text outline for maximum readability on a
+	 * mixed background. In some cases, especially with grayscale text, the text
+	 * outline doesn't work well, in which cases it can be disabled by setting
+	 * it to <code>"none"</code>.
+	 * <p>
+	 * Defaults to: {"color": "contrast", "fontSize": "11px", "fontWeight":
+	 * "bold", "textOutline": "1px contrast" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
+	}
+
+	/**
 	 * @see #setUseHTML(Boolean)
 	 */
 	public Boolean getUseHTML() {
@@ -397,6 +511,32 @@ public class DataLabels extends AbstractDataLabels {
 	}
 
 	/**
+	 * @see #setConnectorColor(Color)
+	 */
+	public Color getConnectorColor() {
+		return connectorColor;
+	}
+
+	/**
+	 * <p>
+	 * The color of the line connecting the data label to the pie slice. The
+	 * default color is the same as the point's color.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the connector stroke is given in the
+	 * <code>.highcharts-data-label-connector</code> class.
+	 * </p>
+	 * <p>
+	 * Defaults to: {point.color}
+	 */
+	public void setConnectorColor(Color connectorColor) {
+		this.connectorColor = connectorColor;
+	}
+
+	/**
 	 * @see #setConnectorPadding(Number)
 	 */
 	public Number getConnectorPadding() {
@@ -410,6 +550,31 @@ public class DataLabels extends AbstractDataLabels {
 	 */
 	public void setConnectorPadding(Number connectorPadding) {
 		this.connectorPadding = connectorPadding;
+	}
+
+	/**
+	 * @see #setConnectorWidth(Number)
+	 */
+	public Number getConnectorWidth() {
+		return connectorWidth;
+	}
+
+	/**
+	 * <p>
+	 * The width of the line connecting the data label to the pie slice.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the connector stroke width is given in the
+	 * <code>.highcharts-data-label-connector</code> class.
+	 * </p>
+	 * <p>
+	 * Defaults to: 1
+	 */
+	public void setConnectorWidth(Number connectorWidth) {
+		this.connectorWidth = connectorWidth;
 	}
 
 	/**

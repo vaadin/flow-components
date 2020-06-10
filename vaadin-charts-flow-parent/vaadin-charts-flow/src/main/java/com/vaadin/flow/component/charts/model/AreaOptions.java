@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.time.Instant;
 import java.util.Date;
@@ -143,6 +144,32 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setDescription(String description);
 
     /**
+     * @see #setDashStyle(DashStyle)
+     */
+    public abstract DashStyle getDashStyle();
+
+    /**
+     * A name for the dash style to use for the graph. Applies only to series
+     * type having a graph, like <code>line</code>, <code>spline</code>,
+     * <code>area</code> and <code>scatter</code> in case it has a
+     * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
+     * <ul>
+     * <li>Solid</li>
+     * <li>ShortDash</li>
+     * <li>ShortDot</li>
+     * <li>ShortDashDot</li>
+     * <li>ShortDashDotDot</li>
+     * <li>Dot</li>
+     * <li>Dash</li>
+     * <li>LongDash</li>
+     * <li>DashDot</li>
+     * <li>LongDashDot</li>
+     * <li>LongDashDotDot</li>
+     * </ul>
+     */
+    public abstract void setDashStyle(DashStyle dashStyle);
+
+    /**
      * @see #setEnableMouseTracking(Boolean)
      */
     public abstract Boolean getEnableMouseTracking();
@@ -167,6 +194,30 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * series.
      */
     public abstract void setExposeElementToA11y(Boolean exposeElementToA11y);
+
+    /**
+     * @see #setFillColor(Color)
+     */
+    public abstract Color getFillColor();
+
+    /**
+     * Fill color or gradient for the area. When <code>null</code>, the series'
+     * <code>color</code> is used with the series' <code>fillOpacity</code>.
+     */
+    public abstract void setFillColor(Color fillColor);
+
+    /**
+     * @see #setFillOpacity(Number)
+     */
+    public abstract Number getFillOpacity();
+
+    /**
+     * Fill opacity for the area. Note that when you set an explicit
+     * <code>fillColor</code>, the <code>fillOpacity</code> is not applied.
+     * Instead, you should define the opacity in the <code>fillColor</code> with
+     * an rgba color definition.
+     */
+    public abstract void setFillOpacity(Number fillOpacity);
 
     /**
      * @see #setFindNearestPointBy(Dimension)
@@ -230,6 +281,29 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void removeKey(String key);
 
     /**
+     * @see #setLineColor(Color)
+     */
+    public abstract Color getLineColor();
+
+    /**
+     * A separate color for the graph line. By default the line takes the
+     * <code>color</code> of the series, but the lineColor setting allows
+     * setting a separate color for the line without altering the
+     * <code>fillColor</code>.
+     */
+    public abstract void setLineColor(Color lineColor);
+
+    /**
+     * @see #setLineWidth(Number)
+     */
+    public abstract Number getLineWidth();
+
+    /**
+     * Pixel with of the graph line.
+     */
+    public abstract void setLineWidth(Number lineWidth);
+
+    /**
      * @see #setLinecap(String)
      */
     public abstract String getLinecap();
@@ -253,17 +327,26 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setLinkedTo(String linkedTo);
 
     /**
-     * @see #setNegativeColor(boolean)
+     * @see #setNegativeColor(Color)
      */
-    public abstract boolean isNegativeColor();
+    public abstract Color getNegativeColor();
 
     /**
-     * Enable or disable the color for parts of the graph that are bellow
-     * <code>threshold</code>. A negative color is applied by setting this
-     * option to <code>true</code> combined with the
-     * <code>.highcharts-negative</code> class name.
+     * The color for the parts of the graph or points that are below the
+     * threshold.
      */
-    public abstract void setNegativeColor(boolean negativeColor);
+    public abstract void setNegativeColor(Color negativeColor);
+
+    /**
+     * @see #setNegativeFillColor(Color)
+     */
+    public abstract Color getNegativeFillColor();
+
+    /**
+     * A separate color for the negative part of the area.
+     */
+    public abstract void setNegativeFillColor(Color negativeFillColor);
+
 
     public abstract String getPointDescriptionFormatter();
 

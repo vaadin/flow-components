@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+/*
  * #%L
  * Vaadin Charts for Flow
  * %%
@@ -17,9 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.ButtonTheme;
-
-
 /**
  * Options for the drill up button that appears when drilling down on a series.
  * The text for the button is defined in {@link Lang#setDrillUpText(String)}.
@@ -28,7 +25,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
 
     private ButtonPosition position;
     private DrillUpButtonRelativeTo relativeTo;
-    private ButtonTheme theme;
+    private DrillUpButtonTheme theme;
 
     /**
      * @see #setPosition(ButtonPosition)
@@ -69,10 +66,10 @@ public class DrillUpButton extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setTheme(ButtonTheme)
+     * @see #setTheme(DrillUpButtonTheme)
      * @return theme
      */
-    public ButtonTheme getTheme() {
+    public DrillUpButtonTheme getTheme() {
         return theme;
     }
 
@@ -81,7 +78,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
      * 
      * @param theme
      */
-    public void setTheme(ButtonTheme theme) {
+    public void setTheme(DrillUpButtonTheme theme) {
         this.theme = theme;
     }
 

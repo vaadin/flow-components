@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -37,16 +38,21 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 	private Boolean allowPointSelect;
 	private Boolean animation;
 	private Number animationLimit;
+	private Color borderColor;
 	private Number borderRadius;
+	private Number borderWidth;
 	private String className;
+	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
+	private ArrayList<Color> colors;
 	private Boolean crisp;
 	private Number cropThreshold;
 	private Cursor cursor;
 	private DataLabelsRange dataLabels;
 	private Number depth;
 	private String description;
+	private Color edgeColor;
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
@@ -148,6 +154,31 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 	}
 
 	/**
+	 * @see #setBorderColor(Color)
+	 */
+	public Color getBorderColor() {
+		return borderColor;
+	}
+
+	/**
+	 * <p>
+	 * The color of the border surrounding each column or bar.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the border stroke can be set with the
+	 * <code>.highcharts-point</code> rule.
+	 * </p>
+	 * <p>
+	 * Defaults to: #ffffff
+	 */
+	public void setBorderColor(Color borderColor) {
+		this.borderColor = borderColor;
+	}
+
+	/**
 	 * @see #setBorderRadius(Number)
 	 */
 	public Number getBorderRadius() {
@@ -164,6 +195,31 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 	}
 
 	/**
+	 * @see #setBorderWidth(Number)
+	 */
+	public Number getBorderWidth() {
+		return borderWidth;
+	}
+
+	/**
+	 * <p>
+	 * The width of the border surrounding each column or bar.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the stroke width can be set with the
+	 * <code>.highcharts-point</code> rule.
+	 * </p>
+	 * <p>
+	 * Defaults to: 1
+	 */
+	public void setBorderWidth(Number borderWidth) {
+		this.borderWidth = borderWidth;
+	}
+
+	/**
 	 * @see #setClassName(String)
 	 */
 	public String getClassName() {
@@ -175,6 +231,37 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
+	}
+
+	/**
+	 * @see #setColor(Color)
+	 */
+	public Color getColor() {
+		return color;
+	}
+
+	/**
+	 * <p>
+	 * The main color or the series. In line type series it applies to the line
+	 * and the point markers unless otherwise specified. In bar type series it
+	 * applies to the bars unless a color is specified per point. The default
+	 * value is pulled from the <code>options.colors</code> array.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the color can be defined by the <a
+	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
+	 * series color can be set with the <code>.highcharts-series</code>,
+	 * <code>.highcharts-color-{n}</code>,
+	 * <code>.highcharts-{type}-series</code> or
+	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
+	 * the <code>className</code> option.
+	 * </p>
+	 */
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 	/**
@@ -211,6 +298,52 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColors(Color...)
+	 */
+	public Color[] getColors() {
+		if (colors == null) {
+			return new Color[]{};
+		}
+		Color[] arr = new Color[colors.size()];
+		colors.toArray(arr);
+		return arr;
+	}
+
+	/**
+	 * A series specific or series type specific color set to apply instead of
+	 * the global <a href="#colors">colors</a> when <a
+	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+	 */
+	public void setColors(Color... colors) {
+		this.colors = new ArrayList<Color>(Arrays.asList(colors));
+	}
+
+	/**
+	 * Adds color to the colors array
+	 * 
+	 * @param color
+	 *            to add
+	 * @see #setColors(Color...)
+	 */
+	public void addColor(Color color) {
+		if (this.colors == null) {
+			this.colors = new ArrayList<Color>();
+		}
+		this.colors.add(color);
+	}
+
+	/**
+	 * Removes first occurrence of color in colors array
+	 * 
+	 * @param color
+	 *            to remove
+	 * @see #setColors(Color...)
+	 */
+	public void removeColor(Color color) {
+		this.colors.remove(color);
 	}
 
 	/**
@@ -331,6 +464,22 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	/**
+	 * @see #setEdgeColor(Color)
+	 */
+	public Color getEdgeColor() {
+		return edgeColor;
+	}
+
+	/**
+	 * 3D columns only. The color of the edges. Similar to
+	 * <code>borderColor</code>, except it defaults to the same color as the
+	 * column.
+	 */
+	public void setEdgeColor(Color edgeColor) {
+		this.edgeColor = edgeColor;
 	}
 
 	/**

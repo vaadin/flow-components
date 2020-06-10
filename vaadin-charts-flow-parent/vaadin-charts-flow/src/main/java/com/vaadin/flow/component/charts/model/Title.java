@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The chart's main title.
@@ -29,6 +30,7 @@ public class Title extends AbstractConfigurationObject {
 	private HorizontalAlign align;
 	private Boolean floating;
 	private Number margin;
+	private Style style;
 	private String text;
 	private Boolean useHTML;
 	private VerticalAlign verticalAlign;
@@ -88,6 +90,35 @@ public class Title extends AbstractConfigurationObject {
 	 */
 	public void setMargin(Number margin) {
 		this.margin = margin;
+	}
+
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * <p>
+	 * CSS styles for the title. Use this for font styling, but use
+	 * <code>align</code>, <code>x</code> and <code>y</code> for text alignment.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the title style is given in the
+	 * <code>.highcharts-title</code> class.
+	 * </p>
+	 * <p>
+	 * Defaults to: { "color": "#333333", "fontSize": "18px" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
 	}
 
 	public Title(String text) {

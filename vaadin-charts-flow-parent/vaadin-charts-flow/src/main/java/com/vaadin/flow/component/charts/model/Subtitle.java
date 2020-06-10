@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The chart's subtitle
@@ -28,6 +29,7 @@ public class Subtitle extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;
 	private Boolean floating;
+	private Style style;
 	private String text;
 	private Boolean useHTML;
 	private VerticalAlign verticalAlign;
@@ -70,6 +72,34 @@ public class Subtitle extends AbstractConfigurationObject {
 	 */
 	public void setFloating(Boolean floating) {
 		this.floating = floating;
+	}
+
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * <p>
+	 * CSS styles for the title.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the subtitle style is given in the
+	 * <code>.highcharts-subtitle</code> class.
+	 * </p>
+	 * <p>
+	 * Defaults to: { "color": "#666666" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
 	}
 
 	public Subtitle(String text) {

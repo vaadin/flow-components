@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class PyramidOptions extends AbstractPlotOptions {
 
@@ -75,6 +76,35 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
+
+    /**
+     * @see #setColors(Color...)
+     */
+    public abstract Color[] getColors();
+
+    /**
+     * A series specific or series type specific color set to use instead of the
+     * theme colors.
+     */
+    public abstract void setColors(Color... colors);
+
+    /**
+     * Adds color to the colors array
+     *
+     * @param color
+     *            to add
+     * @see #setColors(Color...)
+     */
+    public abstract void addColor(Color color);
+
+    /**
+     * Removes first occurrence of color in colors array
+     *
+     * @param color
+     *            to remove
+     * @see #setColors(Color...)
+     */
+    public abstract void removeColor(Color color);
 
     /**
      * @see #setCursor(Cursor)

@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     public static final String OVERFLOW_JUSTIFY = "justify";
@@ -32,6 +31,26 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * A class name for the data label.
      */
     public abstract void setClassName(String className);
+
+    /**
+     * @see #setBorderRadius(Number)
+     */
+    public abstract Number getBorderRadius();
+
+    /**
+     * The border radius in pixels for the data label.
+     */
+    public abstract void setBorderRadius(Number borderRadius);
+
+    /**
+     * @see #setBorderWidth(Number)
+     */
+    public abstract Number getBorderWidth();
+
+    /**
+     * The border width in pixels for the data label.
+     */
+    public abstract void setBorderWidth(Number borderWidth);
 
     /**
      * @see #setCrop(Boolean)
@@ -175,6 +194,7 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * The vertical alignment of a data label.
      */
     public abstract void setVerticalAlign(VerticalAlign verticalAlign);
+
 
     /**
      * @see #setZIndex(Number)

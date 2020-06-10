@@ -19,7 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
-
+import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * Options for the pivot or the center point of the gauge.
@@ -35,9 +35,61 @@ import javax.annotation.Generated;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Pivot extends AbstractConfigurationObject {
 
+	private Color backgroundColor;
+	private Color borderColor;
+	private Number borderWidth;
 	private Number radius;
 
 	public Pivot() {
+	}
+
+	/**
+	 * @see #setBackgroundColor(Color)
+	 */
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	/**
+	 * The background color or fill of the pivot.
+	 * <p>
+	 * Defaults to: #000000
+	 */
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	/**
+	 * @see #setBorderColor(Color)
+	 */
+	public Color getBorderColor() {
+		return borderColor;
+	}
+
+	/**
+	 * The border or stroke color of the pivot. In able to change this, the
+	 * borderWidth must also be set to something other than the default 0.
+	 * <p>
+	 * Defaults to: #cccccc
+	 */
+	public void setBorderColor(Color borderColor) {
+		this.borderColor = borderColor;
+	}
+
+	/**
+	 * @see #setBorderWidth(Number)
+	 */
+	public Number getBorderWidth() {
+		return borderWidth;
+	}
+
+	/**
+	 * The border or stroke width of the pivot.
+	 * <p>
+	 * Defaults to: 0
+	 */
+	public void setBorderWidth(Number borderWidth) {
+		this.borderWidth = borderWidth;
 	}
 
 	/**

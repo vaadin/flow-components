@@ -22,7 +22,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * Options for drill down, the concept of inspecting increasingly high
@@ -30,6 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 public class Drilldown extends AbstractConfigurationObject {
 
+    private Style activeAxisLabelStyle;
+    private Style activeDataLabelStyle;
     private Boolean allowPointDrilldown;
     private Boolean animation;
     private DrillUpButton drillUpButton;
@@ -65,6 +67,42 @@ public class Drilldown extends AbstractConfigurationObject {
     @JsonIgnoreProperties
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * @see #setActiveAxisLabelStyle(Style)
+     * @return
+     */
+    public Style getActiveAxisLabelStyle() {
+        return activeAxisLabelStyle;
+    }
+
+    /**
+     * Additional styles to apply to the X axis label for a point that has
+     * drilldown data.
+     * 
+     * @param activeAxisLabelStyle
+     */
+    public void setActiveAxisLabelStyle(Style activeAxisLabelStyle) {
+        this.activeAxisLabelStyle = activeAxisLabelStyle;
+    }
+
+    /**
+     * @see #setActiveDataLabelStyle(Style)
+     * @return
+     */
+    public Style getActiveDataLabelStyle() {
+        return activeDataLabelStyle;
+    }
+
+    /**
+     * Additional styles to apply to the data label of a point that has
+     * drilldown data.
+     * 
+     * @param activeDataLabelStyle
+     */
+    public void setActiveDataLabelStyle(Style activeDataLabelStyle) {
+        this.activeDataLabelStyle = activeDataLabelStyle;
     }
 
     /**

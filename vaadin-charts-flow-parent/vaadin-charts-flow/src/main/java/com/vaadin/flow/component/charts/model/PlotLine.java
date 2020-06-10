@@ -19,7 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
-
+import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * An array of lines stretching across the plot area, marking a specific value
@@ -38,9 +38,12 @@ import javax.annotation.Generated;
 public class PlotLine extends AbstractConfigurationObject {
 
 	private String className;
+	private Color color;
+	private DashStyle dashStyle;
 	private String id;
 	private Label label;
 	private Number value;
+	private Number width;
 	private Number zIndex;
 
 	public PlotLine() {
@@ -59,6 +62,39 @@ public class PlotLine extends AbstractConfigurationObject {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
+	}
+
+	/**
+	 * @see #setColor(Color)
+	 */
+	public Color getColor() {
+		return color;
+	}
+
+	/**
+	 * The color of the line.
+	 */
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	/**
+	 * @see #setDashStyle(DashStyle)
+	 */
+	public DashStyle getDashStyle() {
+		return dashStyle;
+	}
+
+	/**
+	 * The dashing or dot style for the plot line. For possible values see <a
+	 * href=
+	 * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-dashstyle-all/"
+	 * >this overview</a>.
+	 * <p>
+	 * Defaults to: Solid
+	 */
+	public void setDashStyle(DashStyle dashStyle) {
+		this.dashStyle = dashStyle;
 	}
 
 	/**
@@ -107,6 +143,20 @@ public class PlotLine extends AbstractConfigurationObject {
 	}
 
 	/**
+	 * @see #setWidth(Number)
+	 */
+	public Number getWidth() {
+		return width;
+	}
+
+	/**
+	 * The width or thickness of the plot line.
+	 */
+	public void setWidth(Number width) {
+		this.width = width;
+	}
+
+	/**
 	 * @see #setZIndex(Number)
 	 */
 	public Number getZIndex() {
@@ -120,7 +170,9 @@ public class PlotLine extends AbstractConfigurationObject {
 		this.zIndex = zIndex;
 	}
 
-	public PlotLine(Number value) {
+	public PlotLine(Number value, Number width, Color color) {
 		this.value = value;
+		this.width = width;
+		this.color = color;
 	}
 }

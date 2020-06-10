@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.time.Instant;
 import java.util.Date;
@@ -72,13 +73,13 @@ public class DataSeriesItem extends AbstractSeriesItem {
      *            Name of the item.
      * @param y
      *            Y-value of the item.
-     * @param colorIndex
-     *            Color index of the item.
+     * @param color
+     *            Color of the item.
      */
-    public DataSeriesItem(String name, Number y, Number colorIndex) {
+    public DataSeriesItem(String name, Number y, Color color) {
         setName(name);
         setY(y);
-        setColorIndex(colorIndex);
+        setColor(color);
         makeCustomized();
     }
 
@@ -93,6 +94,24 @@ public class DataSeriesItem extends AbstractSeriesItem {
     public DataSeriesItem(Number x, Number y) {
         setX(x);
         setY(y);
+    }
+
+    /**
+     * Constructs an item with numerical values for the X and Y axes and assigns
+     * the specified color to the item.
+     *
+     * @param x
+     *            X-value of the item.
+     * @param y
+     *            Y-value of the item.
+     * @param color
+     *            Color of the item.
+     */
+    public DataSeriesItem(Number x, Number y, Color color) {
+        setX(x);
+        setY(y);
+        setColor(color);
+        makeCustomized();
     }
 
     /**
@@ -233,8 +252,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * {@inheritDoc}
      */
     @Override
-    public void setColorIndex(Number colorIndex) {
-        super.setColorIndex(colorIndex);
+    public void setColor(Color color) {
+        super.setColor(color);
         makeCustomized();
     }
 

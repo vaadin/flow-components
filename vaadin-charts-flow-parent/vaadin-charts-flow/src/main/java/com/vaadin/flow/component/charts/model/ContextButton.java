@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.ButtonTheme;
 
 /**
@@ -32,6 +33,10 @@ public class ContextButton extends AbstractConfigurationObject {
 	private Number height;
 	private ContextButtonMenuItem[] menuItems;
 	private String symbol;
+	private Color symbolFill;
+	private Number symbolSize;
+	private Color symbolStroke;
+	private Number symbolStrokeWidth;
 	private Number symbolX;
 	private Number symbolY;
 	private String text;
@@ -137,6 +142,72 @@ public class ContextButton extends AbstractConfigurationObject {
 	 */
 	public void setSymbol(String symbol) {
 		this.symbol = symbol;
+	}
+
+	/**
+	 * @see #setSymbolFill(Color)
+	 */
+	public Color getSymbolFill() {
+		return symbolFill;
+	}
+
+	/**
+	 * See <a class="internal"
+	 * href="#navigation.buttonOptions">navigation.buttonOptions</a> =&gt;
+	 * symbolFill.
+	 * <p>
+	 * Defaults to: #666666
+	 */
+	public void setSymbolFill(Color symbolFill) {
+		this.symbolFill = symbolFill;
+	}
+
+	/**
+	 * @see #setSymbolSize(Number)
+	 */
+	public Number getSymbolSize() {
+		return symbolSize;
+	}
+
+	/**
+	 * The pixel size of the symbol on the button.
+	 * <p>
+	 * Defaults to: 14
+	 */
+	public void setSymbolSize(Number symbolSize) {
+		this.symbolSize = symbolSize;
+	}
+
+	/**
+	 * @see #setSymbolStroke(Color)
+	 */
+	public Color getSymbolStroke() {
+		return symbolStroke;
+	}
+
+	/**
+	 * The color of the symbol's stroke or line.
+	 * <p>
+	 * Defaults to: #666666
+	 */
+	public void setSymbolStroke(Color symbolStroke) {
+		this.symbolStroke = symbolStroke;
+	}
+
+	/**
+	 * @see #setSymbolStrokeWidth(Number)
+	 */
+	public Number getSymbolStrokeWidth() {
+		return symbolStrokeWidth;
+	}
+
+	/**
+	 * The pixel stroke width of the symbol on the button.
+	 * <p>
+	 * Defaults to: 1
+	 */
+	public void setSymbolStrokeWidth(Number symbolStrokeWidth) {
+		this.symbolStrokeWidth = symbolStrokeWidth;
 	}
 
 	/**

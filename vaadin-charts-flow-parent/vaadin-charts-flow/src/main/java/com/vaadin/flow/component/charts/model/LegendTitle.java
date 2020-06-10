@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * A title to be added on top of the legend.
@@ -26,9 +27,29 @@ import javax.annotation.Generated;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class LegendTitle extends AbstractConfigurationObject {
 
+	private Style style;
 	private String text;
 
 	public LegendTitle() {
+	}
+
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * Generic CSS styles for the legend title.
+	 * <p>
+	 * Defaults to: {"fontWeight":"bold"}
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
 	}
 
 	public LegendTitle(String text) {

@@ -17,7 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.LabelStyle;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 
 /**
@@ -26,7 +26,7 @@ import com.vaadin.flow.component.charts.model.style.LabelStyle;
 @SuppressWarnings("serial")
 public class HTMLLabels extends AbstractConfigurationObject {
     private HTMLLabelItem[] items;
-    private LabelStyle style;
+    private Style style;
 
     public HTMLLabels() {
     }
@@ -46,7 +46,7 @@ public class HTMLLabels extends AbstractConfigurationObject {
      * 
      * @param items
      */
-    public HTMLLabels(LabelStyle style, HTMLLabelItem... items) {
+    public HTMLLabels(Style style, HTMLLabelItem... items) {
         setItems(items);
         setStyle(style);
     }
@@ -68,9 +68,9 @@ public class HTMLLabels extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setStyle(LabelStyle)
+     * @see #setStyle(Style)
      */
-    public LabelStyle getStyle() {
+    public Style getStyle() {
         return style;
     }
 
@@ -79,7 +79,7 @@ public class HTMLLabels extends AbstractConfigurationObject {
      * 
      * @param style
      */
-    public void setStyle(LabelStyle style) {
+    public void setStyle(Style style) {
         this.style = style;
     }
 }

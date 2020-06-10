@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The loading options control the appearance of the loading screen that covers
@@ -33,7 +34,9 @@ import javax.annotation.Generated;
 public class Loading extends AbstractConfigurationObject {
 
 	private Number hideDuration;
+	private Style labelStyle;
 	private Number showDuration;
+	private Style style;
 
 	public Loading() {
 	}
@@ -55,6 +58,26 @@ public class Loading extends AbstractConfigurationObject {
 	}
 
 	/**
+	 * @see #setLabelStyle(Style)
+	 */
+	public Style getLabelStyle() {
+		if (labelStyle == null) {
+			labelStyle = new Style();
+		}
+		return labelStyle;
+	}
+
+	/**
+	 * CSS styles for the loading label <code>span</code>.
+	 * <p>
+	 * Defaults to: { "fontWeight": "bold", "position": "relative", "top": "45%"
+	 * }
+	 */
+	public void setLabelStyle(Style labelStyle) {
+		this.labelStyle = labelStyle;
+	}
+
+	/**
 	 * @see #setShowDuration(Number)
 	 */
 	public Number getShowDuration() {
@@ -68,5 +91,25 @@ public class Loading extends AbstractConfigurationObject {
 	 */
 	public void setShowDuration(Number showDuration) {
 		this.showDuration = showDuration;
+	}
+
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
+
+	/**
+	 * CSS styles for the loading screen that covers the plot area.
+	 * <p>
+	 * Defaults to: { "position": "absolute", "backgroundColor": "#ffffff",
+	 * "opacity": 0.5, "textAlign": "center" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
 	}
 }

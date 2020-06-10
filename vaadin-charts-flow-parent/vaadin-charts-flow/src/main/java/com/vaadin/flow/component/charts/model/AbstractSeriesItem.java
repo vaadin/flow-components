@@ -17,7 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
+import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
 import java.time.Instant;
@@ -34,6 +34,7 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     private Number x;
     private Boolean sliced;
     private Number colorIndex;
+    private Color color;
     private Number legendIndex;
     private Marker marker;
     private String id;
@@ -146,6 +147,27 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
+     * Returns the color of the item.
+     *
+     * @see #setColor(Color)
+     * @return The color of the item.
+     */
+    public Color getColor() {
+        return color;
+    }
+
+    /**
+     * Sets the individual color for the point. Defaults to null. This might not
+     * work for all chart types.
+     *
+     * @param color
+     *            Color of the item.
+     */
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+   /**
      * Returns the colorIndex of the item.
      *
      * @see #setColorIndex(Number)
