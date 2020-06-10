@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>3.1-SNAPSHOT</version>
+            <version>3.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
