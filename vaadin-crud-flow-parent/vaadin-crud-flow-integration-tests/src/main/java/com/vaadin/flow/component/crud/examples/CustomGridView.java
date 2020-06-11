@@ -5,14 +5,12 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route
 @Theme(Lumo.class)
-@BodySize(height = "100vh", width = "100vw")
 public class CustomGridView extends VerticalLayout {
 
     boolean hasBorder = true;
@@ -42,14 +40,14 @@ public class CustomGridView extends VerticalLayout {
                 });
         toggleBordersButton.setId("toggleBorders");
 
-        final Button customGridClickToEditButton = new Button("Set click row to open", 
+        final Button customGridClickToEditButton = new Button("Set click row to open",
                 event -> {
                     grid.addItemClickListener(
                         listener -> crud.edit(listener.getItem(), Crud.EditMode.EXISTING_ITEM));
                 });
         customGridClickToEditButton.setId("clickToEdit");
 
-        final Button openNewItemButton = new Button("Open new item editor", 
+        final Button openNewItemButton = new Button("Open new item editor",
                 event -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
         openNewItemButton.setId("newItemEditor");
 

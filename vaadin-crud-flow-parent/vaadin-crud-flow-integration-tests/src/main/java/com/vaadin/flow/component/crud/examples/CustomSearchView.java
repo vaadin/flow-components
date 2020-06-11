@@ -15,7 +15,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
@@ -28,7 +27,6 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route
 @Theme(Lumo.class)
-@BodySize(height = "100vh", width = "100vw")
 public class CustomSearchView extends VerticalLayout {
 
     final private List<Person> data = PersonCrudDataProvider.generatePersonsList();
