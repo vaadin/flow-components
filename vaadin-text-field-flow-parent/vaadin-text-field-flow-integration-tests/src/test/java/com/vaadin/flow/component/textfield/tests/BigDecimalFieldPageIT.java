@@ -48,8 +48,8 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void shouldHaveInputModeNumeric() {
-        Assert.assertEquals("numeric",
+    public void shouldHaveInputModeDecimal() {
+        Assert.assertEquals("decimal",
                 field.$("input").first().getAttribute("inputmode"));
     }
 

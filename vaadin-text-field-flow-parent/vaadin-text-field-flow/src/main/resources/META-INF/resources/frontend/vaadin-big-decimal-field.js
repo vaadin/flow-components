@@ -85,7 +85,7 @@
 
       ready() {
         super.ready();
-        this.inputElement.setAttribute('inputmode', 'numeric');
+        this.inputElement.setAttribute('inputmode', 'decimal');
       }
 
       __decimalSeparatorChanged(separator, oldSeparator) {
