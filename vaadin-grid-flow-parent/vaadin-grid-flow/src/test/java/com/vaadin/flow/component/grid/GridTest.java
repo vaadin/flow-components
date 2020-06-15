@@ -39,7 +39,7 @@ public class GridTest {
 
         Grid<String> grid = new Grid<>();
         final GridListDataView<String> listDataView = grid
-                .setDataProvider(Arrays.asList("one", "two"));
+                .setDataSource(Arrays.asList("one", "two"));
 
         final GridListDataView<String> gridDataView = grid.getListDataView();
 

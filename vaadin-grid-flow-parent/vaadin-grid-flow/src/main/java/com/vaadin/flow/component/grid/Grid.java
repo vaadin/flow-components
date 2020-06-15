@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
+import com.vaadin.flow.component.grid.dataview.GridDataViewImpl;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
@@ -80,6 +82,8 @@ import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.HasDataGenerators;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -138,7 +142,8 @@ import elemental.json.JsonValue;
 public class Grid<T> extends Component
         implements HasDataProvider<T>, HasStyle, HasSize, Focusable<Grid<T>>,
         SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme, HasDataGenerators<T>,
-        HasListDataView<T, GridListDataView<T>> {
+        HasListDataView<T, GridListDataView<T>>,
+        HasDataView<T, GridDataView<T>> {
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
@@ -2299,7 +2304,13 @@ public class Grid<T> extends Component
         return -1;
     }
 
+    /**
+     * @inheritDocs
+     * @deprecated use instead one of the {@code setDataSource} methods which
+     * provide access to either {@link GridListDataView} or GridLazyDataView
+     */
     @Override
+    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
@@ -2320,6 +2331,36 @@ public class Grid<T> extends Component
     }
 
     /**
+     * @inheritDocs
+     * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
+     */
+    @Override
+    @Deprecated
+    public void setItems(T... items) {
+        setDataSource(items);
+    }
+
+    /**
+     * @inheritDocs
+     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
+     */
+    @Override
+    @Deprecated
+    public void setItems(Collection<T> items) {
+        setDataSource(items);
+    }
+
+    /**
+     * @inheritDocs
+     * @deprecated use {@link HasListDataView#setDataSource(Stream)}
+     */
+    @Override
+    @Deprecated
+    public void setItems(Stream<T> streamOfItems) {
+        setDataSource(streamOfItems);
+    }
+
+    /**
      * Returns the data provider of this grid.
      *
      * @return the data provider of this grid, not {@code null}
@@ -2329,9 +2370,28 @@ public class Grid<T> extends Component
     }
 
     @Override
-    public GridListDataView<T> setDataProvider(
-            ListDataProvider<T> dataProvider) {
-        setDataProvider((DataProvider)dataProvider);
+    public GridDataView<T> setDataSource(DataProvider<T, ?> dataProvider) {
+        setDataProvider(dataProvider);
+        return getDataView();
+    }
+
+    /**
+     * Getter for getting a generic GridDataView. This should be used only when
+     * neither {@link #getListDataView()} nor #getLazyDataView are applicable
+     * for the underlying dataSource.
+     *
+     * @return DataView instance implementing {@link GridDataView}
+     */
+    public GridDataView<T> getDataView() {
+        if (dataView == null) {
+            dataView = new GridDataViewImpl(dataCommunicator, this);
+        }
+        return dataView;
+    }
+
+    @Override
+    public GridListDataView<T> setDataSource(ListDataProvider<T> dataProvider) {
+        setDataProvider(dataProvider);
         return getListDataView();
     }
 

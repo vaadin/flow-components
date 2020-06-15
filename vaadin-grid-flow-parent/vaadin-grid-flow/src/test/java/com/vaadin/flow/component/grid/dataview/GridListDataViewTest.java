@@ -44,7 +44,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid
-                .setDataProvider("one", "two", "three", "four");
+                .setDataSource("one", "two", "three", "four");
 
         dataView.getItemOnRow(7);
     }
@@ -57,7 +57,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid
-                .setDataProvider("one", "two", "three", "four");
+                .setDataSource("one", "two", "three", "four");
 
         dataView.getItemOnRow(-7);
     }
@@ -69,7 +69,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid
-                .setDataProvider(new ListDataProvider<>(new ArrayList<>()));
+                .setDataSource(new ListDataProvider<>(new ArrayList<>()));
 
         dataView.getItemOnRow(5);
     }
@@ -78,7 +78,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     public void dataViewWithItems_returnsExpectedItemsForMethods() {
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid.setDataProvider(items);
+        GridListDataView<String> dataView = grid.setDataSource(items);
 
         // Test getItemOnRow returns correct item
         Assert.assertEquals("Wrong item returned for row", items[2],
@@ -86,14 +86,14 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
         // Test getNext-/-PreviousItem
         Assert.assertEquals("Faulty next item", items[3],
-                dataView.getNextItem(items[2]));
+                dataView.getNextItem(items[2]).get());
         Assert.assertEquals("Faulty previous item", items[1],
-                dataView.getPreviousItem(items[2]));
+                dataView.getPreviousItem(items[2]).get());
 
-        Assert.assertNull("Got next item for last item",
-                dataView.getNextItem(items[3]));
-        Assert.assertNull("Got previous item for first index",
-                dataView.getPreviousItem(items[0]));
+        Assert.assertFalse("Got next item for last item",
+                dataView.getNextItem(items[3]).isPresent());
+        Assert.assertFalse("Got previous item for first index",
+                dataView.getPreviousItem(items[0]).isPresent());
 
         // Test getSize
         Assert.assertEquals("Unexpected size for data", items.length,
@@ -110,7 +110,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     public void dataView_withFilter_methodsUseFilteredData() {
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid.setDataProvider(items);
+        GridListDataView<String> dataView = grid.setDataSource(items);
 
         dataView.setFilter(s -> s.endsWith("4"));
 
