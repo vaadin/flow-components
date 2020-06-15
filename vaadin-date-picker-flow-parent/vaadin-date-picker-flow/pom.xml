@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-date-picker</artifactId>
-            <version>4.2.0-alpha1</version>
+            <version>4.2.0</version>
         </dependency>
 
         <dependency>
