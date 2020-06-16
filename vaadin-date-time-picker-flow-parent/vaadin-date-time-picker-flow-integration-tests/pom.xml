@@ -46,11 +46,6 @@
             <artifactId>vaadin-date-time-picker-flow-demo</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-grid-flow</artifactId>
-            <version>5.2-SNAPSHOT</version>
-        </dependency>
 
         <!-- Test util -->
         <dependency>
