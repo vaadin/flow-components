@@ -33,12 +33,14 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.select.data.SelectDataView;
+import com.vaadin.flow.component.select.data.SelectDataViewImpl;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -71,7 +73,8 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./selectConnector.js")
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         HasDataProvider<T>, HasItemsAndComponents<T>, HasSize, HasValidation,
-        SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>> {
+        SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
+        HasDataView<T, SelectDataView<T>> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -431,7 +434,44 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         return super.isAutofocusBoolean();
     }
 
+
+    /**
+     * {@inheritDoc}
+     * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
+     */
     @Override
+    @Deprecated
+    public void setItems(T... items) {
+        setDataSource(items);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
+     */
+    @Override
+    @Deprecated
+    public void setItems(Collection<T> items) {
+        setDataSource(items);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated use {@link HasListDataView#setDataSource(Stream)}
+     */
+    @Override
+    @Deprecated
+    public void setItems(Stream<T> streamOfItems) {
+        setDataSource(streamOfItems);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated use instead one of the setDataSource methods from
+     * {@link HasListDataView}
+     */
+    @Override
+    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         reset();
@@ -452,12 +492,32 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         return dataProvider.get();
     }
 
+    @Override
+    public SelectDataView<T> setDataSource(DataProvider<T, ?> dataProvider) {
+        this.setDataProvider(dataProvider);
+        return getDataView();
+    }
 
     @Override
-    public SelectListDataView<T> setDataProvider(
+    public SelectListDataView<T> setDataSource(
             ListDataProvider<T> dataProvider) {
-        this.setDataProvider((DataProvider<T, ?>) dataProvider);
+        this.setDataProvider(dataProvider);
         return getListDataView();
+    }
+
+    /**
+     * Getter for getting a generic SelectDataView.
+     * <p>
+     * {@link #getListDataView()} is recommended when the backing data source is
+     * a List.
+     *
+     * @return DataView instance implementing {@link SelectDataView}
+     */
+    public SelectDataView<T> getDataView() {
+        if (dataView == null) {
+            dataView = new SelectDataViewImpl(this::getDataProvider, this);
+        }
+        return dataView;
     }
 
     @Override

@@ -42,7 +42,7 @@ public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
                 "Given index 7 is outside of the accepted range '0 - 3'");
 
         Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataProvider(items);
+        SelectListDataView<String> dataView = select.setDataSource(items);
 
         dataView.getItemOnIndex(7);
     }
@@ -54,7 +54,7 @@ public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
                 "Given index -7 is outside of the accepted range '0 - 3'");
 
         Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataProvider(items);
+        SelectListDataView<String> dataView = select.setDataSource(items);
 
         dataView.getItemOnIndex(-7);
     }
@@ -66,7 +66,7 @@ public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
 
         Select<String> select = new Select<>();
         SelectListDataView<String> dataView = select
-                .setDataProvider(new ListDataProvider<>(new ArrayList<>()));
+                .setDataSource(new ListDataProvider<>(new ArrayList<>()));
 
         dataView.getItemOnIndex(5);
     }

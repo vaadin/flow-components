@@ -98,15 +98,15 @@ public class SelectView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic usage
         Select<String> labelSelect = new Select<>();
-        labelSelect.setDataProvider("Option one", "Option two");
+        labelSelect.setDataSource("Option one", "Option two");
         labelSelect.setLabel("Label");
 
         Select<String> placeholderSelect = new Select<>();
-        placeholderSelect.setDataProvider("Option one", "Option two");
+        placeholderSelect.setDataSource("Option one", "Option two");
         placeholderSelect.setPlaceholder("Placeholder");
 
         Select<String> valueSelect = new Select<>();
-        valueSelect.setDataProvider("Value", "Option one", "Option two");
+        valueSelect.setDataSource("Value", "Option one", "Option two");
         valueSelect.setValue("Value");
 
         // end-source-example
@@ -161,7 +161,7 @@ public class SelectView extends DemoView {
 
         // Choose which property from Department is the presentation value
         select.setItemLabelGenerator(Department::getName);
-        select.setDataProvider(departmentList);
+        select.setDataSource(departmentList);
         // end-source-example
         addCard("Entity list", select);
     }
@@ -171,7 +171,7 @@ public class SelectView extends DemoView {
         // source-example-heading: Value change event
         Select<String> select = new Select<>();
         select.setLabel("Name");
-        select.setDataProvider("Option one", "Option two");
+        select.setDataSource("Option one", "Option two");
 
         Div value = new Div();
         value.setText("Select a value");
@@ -193,7 +193,7 @@ public class SelectView extends DemoView {
         // Convenience setter for creating a TextRenderer from the given
         // function that converts the item to a string.
         select.setTextRenderer(Team::getName);
-        select.setDataProvider(teamList);
+        select.setDataSource(teamList);
         select.setItemEnabledProvider(
                 item -> !"Developers Journey and Onboarding"
                         .equals(item.getName()));
@@ -209,7 +209,7 @@ public class SelectView extends DemoView {
         requiredSelect.setRequiredIndicatorVisible(true);
         requiredSelect.setLabel("Required");
 
-        requiredSelect.setDataProvider("Option one", "Option two", "Option three");
+        requiredSelect.setDataSource("Option one", "Option two", "Option three");
 
         // The empty selection item is the first item that maps to an null item.
         // As the item is not selectable, using it also as placeholder
@@ -233,7 +233,7 @@ public class SelectView extends DemoView {
 
         Select<String> titleSelect = new Select<>();
         titleSelect.setLabel("Title");
-        titleSelect.setDataProvider("Account Manager", "Designer", "Marketing Manager",
+        titleSelect.setDataSource("Account Manager", "Designer", "Marketing Manager",
                 "Developer");
 
         titleSelect.setEmptySelectionAllowed(true);
@@ -269,7 +269,7 @@ public class SelectView extends DemoView {
         select.setEmptySelectionCaption("Weekdays");
         select.setItemEnabledProvider(Objects::nonNull);
         select.setEmptySelectionAllowed(true);
-        select.setDataProvider(Weekday.values());
+        select.setDataSource(Weekday.values());
         select.addComponents(null, new Hr());
         select.addComponents(Weekday.FRIDAY, new Hr());
         // end-source-example
@@ -282,7 +282,7 @@ public class SelectView extends DemoView {
         Select<Emotion> select = new Select<>();
         select.setLabel("How are you feeling today?");
 
-        select.setDataProvider(new Emotion("Good", VaadinIcon.THUMBS_UP),
+        select.setDataSource(new Emotion("Good", VaadinIcon.THUMBS_UP),
                 new Emotion("Bad", VaadinIcon.THUMBS_DOWN),
                 new Emotion("Meh", VaadinIcon.MEH_O),
                 new Emotion("This is fine", VaadinIcon.FIRE));
@@ -310,17 +310,17 @@ public class SelectView extends DemoView {
         // begin-source-example
         // source-example-heading: Text align
         Select<String> leftSelect = new Select<>();
-        leftSelect.setDataProvider("Left", "Center", "Right");
+        leftSelect.setDataSource("Left", "Center", "Right");
         leftSelect.setValue("Left");
         leftSelect.getElement().setAttribute("theme", "align-left");
 
         Select<String> centerSelect = new Select<>();
-        centerSelect.setDataProvider("Left", "Center", "Right");
+        centerSelect.setDataSource("Left", "Center", "Right");
         centerSelect.setValue("Center");
         centerSelect.getElement().setAttribute("theme", "align-center");
 
         Select<String> rightSelect = new Select<>();
-        rightSelect.setDataProvider("Left", "Center", "Right");
+        rightSelect.setDataSource("Left", "Center", "Right");
         rightSelect.setValue("Right");
         rightSelect.getElement().setAttribute("theme", "align-right");
         // end-source-example
@@ -335,7 +335,7 @@ public class SelectView extends DemoView {
         // begin-source-example
         // source-example-heading: Small size
         Select<String> select = new Select<>("Label");
-        select.setDataProvider("Option one", "Option two");
+        select.setDataSource("Option one", "Option two");
         select.setPlaceholder("Placeholder");
         select.getElement().setAttribute("theme", "small");
         // end-source-example
