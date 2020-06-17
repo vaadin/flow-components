@@ -77,7 +77,7 @@ import elemental.json.JsonValue;
  */
 @Tag("iron-list")
 // NPM MODE
-@NpmPackage(value = "@polymer/iron-list", version = "3.0.2")
+@NpmPackage(value = "@polymer/iron-list", version = "3.1.0")
 @JsModule("@polymer/iron-list/iron-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./ironListConnector-es6.js")
