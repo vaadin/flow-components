@@ -10,15 +10,22 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.select.data.SelectListDataView;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class SelectTest {
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     private Select<String> select;
     private Supplier<Select> selectSupplier = () -> select;
@@ -525,6 +532,26 @@ public class SelectTest {
 
         Assert.assertEquals("Invalid number of items", 2, getListBox().getChildren().count());
         Assert.assertEquals("Invalid number of items", 0, select.getChildren().count());
+    }
+
+    @Test
+    public void dataViewForFaultyDataProvider_throwsException() {
+        exceptionRule.expect(IllegalStateException.class);
+        exceptionRule.expectMessage(
+                "Required ListDataProvider, but got 'AbstractBackEndDataProvider'. "
+                        + "Use 'getDataView()' to get a generic DataView instance.");
+
+        Select<String> select = new Select<>();
+        final SelectListDataView<String> listDataView = select
+                .setDataSource(Arrays.asList("one", "two"));
+
+        DataProvider<String, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> Arrays.asList("one").stream(),
+                        query -> 1);
+
+        select.setDataProvider(dataProvider);
+
+        select.getListDataView();
     }
 
     private void validateItem(int index, String textContent, String label, boolean enabled) {
