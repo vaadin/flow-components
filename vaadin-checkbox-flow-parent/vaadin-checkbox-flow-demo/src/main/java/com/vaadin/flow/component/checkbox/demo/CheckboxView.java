@@ -425,7 +425,7 @@ public class CheckboxView extends DemoView {
         CheckboxGroup<Dish> checkboxGroup = new CheckboxGroup<>();
 
         CheckboxGroupListDataView<Dish> dataView = checkboxGroup.
-                setDataProvider(DishData.getDishes());
+                setDataSource(DishData.getDishes());
 
         Checkbox showVegetarianDishes = new Checkbox("Show only vegetarian dishes",
                 event -> dataView.setFilter(event.getValue() ? Dish::isVegetarian : null));

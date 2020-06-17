@@ -44,7 +44,7 @@ public class CheckboxGroupListDataViewPage extends Div {
     public CheckboxGroupListDataViewPage() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         CheckboxGroupListDataView<String> dataView =
-                checkboxGroup.setDataProvider("foo", "bar", "baz");
+                checkboxGroup.setDataSource("foo", "bar", "baz");
 
         Span sizeSpan = new Span(String.valueOf(dataView.getSize()));
         Span containsItemSpan = new Span(String.valueOf(dataView.contains("foo")));

@@ -38,7 +38,7 @@ public class DetachReattachPage extends Div {
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar", "baz"));
-        group.setDataProvider(new ListDataProvider<>(items));
+        group.setDataSource(new ListDataProvider<>(items));
 
         NativeButton detach = new NativeButton("detach", e -> remove(group));
         detach.setId("detach");
