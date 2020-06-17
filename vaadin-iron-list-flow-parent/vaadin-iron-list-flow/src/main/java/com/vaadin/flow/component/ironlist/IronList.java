@@ -73,7 +73,7 @@ import elemental.json.JsonValue;
  *      webcomponent documentation</a>
  */
 @Tag("iron-list")
-@NpmPackage(value = "@polymer/iron-list", version = "3.0.2")
+@NpmPackage(value = "@polymer/iron-list", version = "3.1.0")
 @JsModule("@polymer/iron-list/iron-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./ironListConnector.js")
