@@ -34,17 +34,13 @@ public class GridTest {
     @Test
     public void dataViewForFaultyDataProvider_throwsException() {
         exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage(
-                "Required ListDataProvider, but got AbstractBackEndDataProvider");
+                exceptionRule.expectMessage(
+                        "Required ListDataProvider, but got 'AbstractBackEndDataProvider'. "
+                                + "Use 'getDataView()' to get a generic DataView instance.");
 
         Grid<String> grid = new Grid<>();
         final GridListDataView<String> listDataView = grid
                 .setDataSource(Arrays.asList("one", "two"));
-
-        final GridListDataView<String> gridDataView = grid.getListDataView();
-
-        Assert.assertEquals("Same DataView instance should be returned",
-                listDataView, gridDataView);
 
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Arrays.asList("one").stream(),

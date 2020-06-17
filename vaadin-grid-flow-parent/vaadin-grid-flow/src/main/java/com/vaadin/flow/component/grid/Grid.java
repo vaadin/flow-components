@@ -1169,8 +1169,6 @@ public class Grid<T> extends Component
 
     private Registration dataProviderChangeRegistration;
 
-    private GridDataView<T> dataView;
-
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -2305,7 +2303,7 @@ public class Grid<T> extends Component
     }
 
     /**
-     * @inheritDocs
+     * {@inheritDoc}
      * @deprecated use instead one of the {@code setDataSource} methods which
      * provide access to either {@link GridListDataView} or GridLazyDataView
      */
@@ -2331,7 +2329,7 @@ public class Grid<T> extends Component
     }
 
     /**
-     * @inheritDocs
+     * {@inheritDoc}
      * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
      */
     @Override
@@ -2341,7 +2339,7 @@ public class Grid<T> extends Component
     }
 
     /**
-     * @inheritDocs
+     * {@inheritDoc}
      * @deprecated use {@link HasListDataView#setDataSource(Collection)}
      */
     @Override
@@ -2351,7 +2349,7 @@ public class Grid<T> extends Component
     }
 
     /**
-     * @inheritDocs
+     * {@inheritDoc}
      * @deprecated use {@link HasListDataView#setDataSource(Stream)}
      */
     @Override
@@ -2382,11 +2380,9 @@ public class Grid<T> extends Component
      *
      * @return DataView instance implementing {@link GridDataView}
      */
+    @Override
     public GridDataView<T> getDataView() {
-        if (dataView == null) {
-            dataView = new GridDataViewImpl(dataCommunicator, this);
-        }
-        return dataView;
+        return new GridDataViewImpl(dataCommunicator, this);
     }
 
     @Override
@@ -2398,14 +2394,12 @@ public class Grid<T> extends Component
     @Override
     public GridListDataView<T> getListDataView() {
         if (getDataProvider() instanceof ListDataProvider) {
-            if (dataView == null || !(dataView instanceof ListDataView)) {
-                dataView = new GridListDataView<>(dataCommunicator, this);
-            }
-            return (GridListDataView) dataView;
+            return new GridListDataView<>(dataCommunicator, this);
         }
-        throw new IllegalStateException(
-                "Required ListDataProvider, but got " + getDataProvider()
-                        .getClass().getSuperclass().getSimpleName());
+        throw new IllegalStateException(String.format(
+                "Required ListDataProvider, but got '%s'. Use 'getDataView()' "
+                        + "to get a generic DataView instance.",
+                getDataProvider().getClass().getSuperclass().getSimpleName()));
     }
 
     /**

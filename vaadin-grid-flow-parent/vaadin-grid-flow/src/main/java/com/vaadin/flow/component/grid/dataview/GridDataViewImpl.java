@@ -16,26 +16,22 @@
 
 package com.vaadin.flow.component.grid.dataview;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
-import com.vaadin.flow.shared.Registration;
 
-public class GridDataViewImpl<T> implements GridDataView<T> {
+public class GridDataViewImpl<T> extends AbstractDataView<T>
+        implements GridDataView<T> {
 
     private DataCommunicator<T> dataCommunicator;
-    private Grid<T> grid;
 
     public GridDataViewImpl(DataCommunicator<T> dataCommunicator,
             Grid<T> grid) {
+        super(dataCommunicator::getDataProvider, grid);
         this.dataCommunicator = dataCommunicator;
-        this.grid = grid;
     }
 
     @Override
@@ -59,11 +55,8 @@ public class GridDataViewImpl<T> implements GridDataView<T> {
     }
 
     @Override
-    public Registration addSizeChangeListener(
-            ComponentEventListener<SizeChangeEvent<?>> listener) {
-        Objects.requireNonNull(listener, "SizeChangeListener cannot be null");
-        return ComponentUtil.addListener(grid, SizeChangeEvent.class,
-                (ComponentEventListener) listener);
+    protected Class<?> getSupportedDataProviderType() {
+        return DataProvider.class;
     }
 
     @Override
