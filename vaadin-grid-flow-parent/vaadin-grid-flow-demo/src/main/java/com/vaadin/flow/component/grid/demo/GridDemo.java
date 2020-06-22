@@ -2305,7 +2305,8 @@ public class GridDemo extends DemoView {
 
         Grid<Person> grid = new Grid<>(Person.class);
         grid.setColumns("firstName", "lastName", "phoneNumber");
-        grid.setDataSource(gridItems);
+        final GridListDataView<Person> dataView = grid
+                .setDataSource(new ArrayList<>(gridItems));
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setRowsDraggable(true);
 
@@ -2322,12 +2323,11 @@ public class GridDemo extends DemoView {
         grid.addDropListener(event -> {
             Person dropOverItem = event.getDropTargetItem().get();
             if (!dropOverItem.equals(draggedItem)) {
-                gridItems.remove(draggedItem);
-                int dropIndex = gridItems.indexOf(dropOverItem)
-                        + (event.getDropLocation() == GridDropLocation.BELOW ? 1
-                                : 0);
-                gridItems.add(dropIndex, draggedItem);
-                grid.getDataProvider().refreshAll();
+                if (event.getDropLocation().equals(GridDropLocation.BELOW)) {
+                    dataView.addItemAfter(draggedItem, dropOverItem);
+                } else {
+                    dataView.addItemBefore(draggedItem, dropOverItem);
+                }
             }
         });
 
