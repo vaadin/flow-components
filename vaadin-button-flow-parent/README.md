@@ -1,4 +1,4 @@
-# Button Component for Vaadin Flow
+# Button Component for Vaadin
 
 This project is the Component wrapper implementation of [`<vaadin-button>`](https://github.com/vaadin/vaadin-button) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
