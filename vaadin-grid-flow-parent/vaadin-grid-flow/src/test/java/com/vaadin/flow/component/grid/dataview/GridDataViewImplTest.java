@@ -19,9 +19,13 @@ package com.vaadin.flow.component.grid.dataview;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +100,36 @@ public class GridDataViewImplTest {
         Assert.assertEquals(items.get(2), dataView.getItemOnRow(2));
     }
 
+    @Test
+    public void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
+        Item first = new Item(1L, "first");
+        Item second = new Item(2L, "middle");
+
+        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
+
+        DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
+        Grid<Item> component = new Grid<>();
+
+        // Generic grid data view
+        GridDataView<Item> dataView = component.setDataSource(dataProvider);
+        DataKeyMapper<Item> keyMapper =
+                component.getDataCommunicator().getKeyMapper();
+        items.forEach(keyMapper::key);
+
+        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        dataView.setIdentifierProvider(Item::getId);
+        Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+
+        dataView.setIdentifierProvider(IdentifierProvider.identity());
+
+        // In-memory grid data view
+        dataView = component.getListDataView();
+
+        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        dataView.setIdentifierProvider(Item::getId);
+        Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+    }
+
     private static class InMemoryProvider
             implements InMemoryDataProvider<String> {
 
@@ -154,6 +188,55 @@ public class GridDataViewImplTest {
                 DataProviderListener<String> listener) {
             return () -> {
             };
+        }
+    }
+
+    private static class Item {
+        private long id;
+        private String value;
+
+        public Item(long id) {
+            this.id = id;
+        }
+
+        public Item(long id, String value) {
+            this.id = id;
+            this.value = value;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Item item = (Item) o;
+            return id == item.id &&
+                    Objects.equals(value, item.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, value);
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
         }
     }
 }

@@ -22,6 +22,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 
 public class GridDataViewImpl<T> extends AbstractDataView<T>
         implements GridDataView<T> {
@@ -68,5 +69,11 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
                     rowIndex, dataSize - 1));
         }
         return getItems().skip(rowIndex).findFirst().orElse(null);
+    }
+
+    @Override
+    public void setIdentifierProvider(IdentifierProvider<T> identifierProvider) {
+        super.setIdentifierProvider(identifierProvider);
+        dataCommunicator.getKeyMapper().setIdentifierGetter(identifierProvider);
     }
 }
