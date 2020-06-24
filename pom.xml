@@ -67,6 +67,20 @@
         <module>vaadin-text-field-flow-parent</module>
         <module>vaadin-time-picker-flow-parent</module>
         <module>vaadin-upload-flow-parent</module>
+
+        <!-- pro components-->
+        <module>vaadin-accordion-flow-parent</module>
+        <module>vaadin-app-layout-flow-parent</module>
+        <module>vaadin-board-flow-parent</module>
+        <module>vaadin-charts-flow-parent</module>
+        <module>vaadin-confirm-dialog-flow-parent</module>
+        <module>vaadin-cookie-consent-flow-parent</module>
+        <module>vaadin-crud-flow-parent</module>
+        <module>vaadin-custom-field-flow-parent</module>
+        <module>vaadin-details-flow-parent</module>
+        <module>vaadin-grid-pro-flow-parent</module>
+        <module>vaadin-login-flow-parent</module>
+        <module>vaadin-rich-text-editor-flow-parent</module>
     </modules>
 
     <repositories>
