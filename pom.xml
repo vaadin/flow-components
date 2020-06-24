@@ -46,10 +46,27 @@
 
     <modules>
         <module>vaadin-button-flow-parent</module>
+        <module>vaadin-checkbox-flow-parent</module>
         <module>vaadin-combo-box-flow-parent</module>
         <module>vaadin-context-menu-flow-parent</module>
-        <module>vaadin-text-field-flow-parent</module>
+        <module>vaadin-date-picker-flow-parent</module>
+        <module>vaadin-date-time-picker-flow-parent</module>
+        <module>vaadin-form-layout-flow-parent</module>
         <module>vaadin-grid-flow-parent</module>
+        <module>vaadin-icons-flow-parent</module>
+        <module>vaadin-iron-list-flow-parent</module>
+        <module>vaadin-list-box-flow-parent</module>
+        <module>vaadin-menu-bar-flow-parent</module>
+        <module>vaadin-notification-flow-parent</module>
+        <module>vaadin-ordered-layout-flow-parent</module>
+        <module>vaadin-progress-bar-flow-parent</module>
+        <module>vaadin-radio-button-flow-parent</module>
+        <module>vaadin-select-flow-parent</module>
+        <module>vaadin-split-layout-flow-parent</module>
+        <module>vaadin-tabs-flow-parent</module>
+        <module>vaadin-text-field-flow-parent</module>
+        <module>vaadin-time-picker-flow-parent</module>
+        <module>vaadin-upload-flow-parent</module>
     </modules>
 
     <repositories>
