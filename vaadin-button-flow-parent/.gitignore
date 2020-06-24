@@ -1,19 +1,25 @@
 # Maven files
 target/
 
-# Npm
-node_modules
-
 # Eclipse files
 .project
 .settings
 .classpath
 
 # Selenium driver folders
+selenium_standalone
+selenium_standalone_zips
 error-screenshots
 reference-screenshots
+driver_zips
+driver
 
 # IntelliJ IDEA files
 .idea/
 *.iml
 
+# The following files are generated/updated by flow-maven-plugin
+package*.json
+webpack.*.js
+tsconfig.json
+node_modules/
