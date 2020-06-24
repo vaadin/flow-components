@@ -1,0 +1,22 @@
+target/
+.classpath
+.project
+.settings
+*~
+node_modules
+bower_components
+node
+yarn.lock
+.idea/
+**.iml
+.DS_Store
+local.properties
+.vscode
+
+# The following files are generated/updated by flow-maven-plugin
+package*.json
+pnpm-lock.yaml
+webpack.*.js
+tsconfig.json
+types.d.ts
+node_modules/
