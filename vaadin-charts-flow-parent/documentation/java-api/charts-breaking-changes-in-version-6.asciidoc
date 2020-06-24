@@ -1,0 +1,101 @@
+---
+title: Charts 6 Breaking Changes
+order: 8
+layout: page
+---
+
+[[charts.differentcharttypes]]
+= Breaking Changes in Version 6
+
+Vaadin Charts 6 comes with some good enhancements, most notably: CSS styling.
+This necessitated removal of many Java style configuration API among other changes.
+
+== Summary
+
+* Upgraded to HighCharts 5
+* Styling is now primarily done with CSS
+* Dropped "size with units" sizing properties in favor of strings to take full advantage of browser capabilities
+* [classname]#ZAxis# is now a subclass of [classname]#Axis#
+* Getting [classname]#PlotOptionsSeries# no longer automatically creates a new instance
+* Gradient is no longer supported
+* Plot background image is no longer supported
+* SVG Generator is no longer supported
+
+== Replaced types
+
+[options="header"]
+|===
+| Old Type | Replaced By
+| [classname]#PinchType# | [classname]#Dimension#
+| [classname]#ZoomType# | [classname]#Dimension#
+|===
+
+== Dropped types
+
+[options="header"]
+|===
+| Type | Used In
+| [classname]#Handles# | Navigator.handles
+|===
+
+== Dropped properties
+
+[cols="2,5",options="header"]
+|===
+| Type | Properties
+| [classname]#AbstractDataLabels# (and subclasses) | backgroundColor, borderColor, borderRadius, borderWidth, color, reservedSpace, style
+| [classname]#AreaOptions# (and subclasses) | color, dashStyle, lineColor, lineWidth, negativeColor
+| [classname]#Axis# (and subclasses) | gridLineColor, gridLineWidth, minorGridLineColor, minorGridLineWidth, tickColor
+| [classname]#AxisTitle# | reserveSpace
+| [classname]#AxisStyle# | tickWidth, tickColor, gridLineColor, gridLineWidth
+| [classname]#Background# | backgroundColor, borderColor, borderWidth
+| [classname]#ChartModel# | backgroundColor, borderColor, plotBackgroundColor, plotBackgroundImage, plotBorderColor, selectionMarkerFill
+| [classname]#ChartStyle# | backgroundColor, plotBackgroundColor, plotBorderWidth, plotBorderColor, borderWidth, borderColor
+| [classname]#ColumnOptions# (and subclasses) | color
+| [classname]#ContextButton# | symbolFill, symbolSize, symbolStroke, symbolStrokeWidth
+| [classname]#Credits# | style
+| [classname]#GaugeOptions# (and subclasses) | zoneAxis, zones
+| [classname]#Global# | canvasToolsURL
+| [classname]#Hover# | lineWidth, lineWidthPlus, fillColor, lineColor
+| [classname]#Labels# | style
+| [classname]#Legend# | backgroundColor, borderColor, borderWidth, itemHiddenStyle, itemHoverStyle, itemStyle
+| [classname]#LegendNavigation# | activeColor, inactiveColor, style
+| [classname]#LegendTitle# | style
+| [classname]#Loading# | labelStyle, style
+| [classname]#Marker# | fillColor, lineColor, lineWidth
+| [classname]#Navigation# | menuItemHoverStyle, menuItemStyle, menuStyle
+| [classname]#Navigator# | handles, maskFill, outlineColor, outlineWidth
+| [classname]#NoData# | style
+| [classname]#OhlcOptions# (and subclasses) | color,lineWidth
+| [classname]#PlotOptionsBoxplot# | color, lineWidth, negativeColor
+| [classname]#PlotOptionsBubble# | color, dashStyle, lineWidth, negativeColor
+| [classname]#PlotOptionsCandlestick# | lineColor
+| [classname]#PlotOptionsFlags# | color, lineColor, lineWidth
+| [classname]#PlotOptionsPolygon# | color, dashStyle, lineWidth, negativeColor
+| [classname]#PlotOptionsSeries# | color, dashStyle, lineWidth, negativeColor
+| [classname]#PlotOptionsTreemap# | color
+| [classname]#PlotOptionsWaterfall# | dashStyle, lineColor
+| [classname]#PointOptions# (and subclasses) | color, dashStyle, lineWidth, negativeColor
+| [classname]#PyramidOptions# (and subclasses) | heightUnit, widthUnit
+| [classname]#RangeSelector# | buttonTheme, inputStyle, labelStyle
+| [classname]#Select# | fillColor, lineColor, lineWidth
+| [classname]#StackLabels# | style
+| [classname]#Subtitle# | style
+| [classname]#Title# | style
+|===
+
+More information about Charts styling can be obtained in <<dummy/../../../charts/java-api/css-styling#css.styling,"CSS Styling">>.
+
+== Properties with new types
+
+[options="header"]
+|===
+| Property | New Type
+| ZAxis.title | [classname]#AxisTitle#
+| ZAxis.type | [classname]#AxisType#
+| ColumnOptions.zoneAxis | [classname]#ZoneAxis#
+| Label.textAlign | [classname]#TextAlign#
+| ChartModel.panKey | [classname]#PanKey#
+| Exporting.type | [classname]#ExportingFileType#
+| Background.shape | [classname]#BackgroundShape#
+|===
