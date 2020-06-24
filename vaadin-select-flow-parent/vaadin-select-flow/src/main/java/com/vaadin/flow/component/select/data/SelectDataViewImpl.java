@@ -71,5 +71,4 @@ public class SelectDataViewImpl<T> extends AbstractDataView<T>
     protected Class<?> getSupportedDataProviderType() {
         return DataProvider.class;
     }
-
 }

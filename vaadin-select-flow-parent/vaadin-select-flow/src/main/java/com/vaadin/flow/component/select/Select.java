@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -42,9 +43,9 @@ import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -861,10 +862,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         if (event instanceof DataChangeEvent.DataRefreshEvent) {
             T updatedItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
                     .getItem();
-            Object updatedItemId = getDataProvider().getId(updatedItem);
+            IdentifierProvider<T> identifierProvider = getIdentifierProvider();
+            Object updatedItemId = identifierProvider.apply(updatedItem);
             getItems()
                     .filter(vaadinItem -> updatedItemId.equals(
-                            getDataProvider().getId(vaadinItem.getItem())))
+                            identifierProvider.apply(vaadinItem.getItem())))
                     .findAny().ifPresent(this::updateItem);
         } else {
             reset();
@@ -937,6 +939,23 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         if (lastNotifiedDataSize != newSize) {
             lastNotifiedDataSize = newSize;
             fireEvent(new SizeChangeEvent<>(this, newSize));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private IdentifierProvider<T> getIdentifierProvider() {
+        IdentifierProvider<T> identifierProviderObject =
+                (IdentifierProvider<T>) ComponentUtil.getData(this,
+                        IdentifierProvider.class);
+        if (identifierProviderObject == null) {
+            DataProvider<T, ?> dataProvider = getDataProvider();
+            if (dataProvider != null) {
+                return dataProvider::getId;
+            } else {
+                return IdentifierProvider.identity();
+            }
+        } else {
+            return identifierProviderObject;
         }
     }
 }
