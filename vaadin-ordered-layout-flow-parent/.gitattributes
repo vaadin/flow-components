@@ -1,0 +1,9 @@
+# The default behavior
+* text=auto
+
+*.java text
+*.xml text
+*.md text
+
+.gitattributes text
+.gitignore text
