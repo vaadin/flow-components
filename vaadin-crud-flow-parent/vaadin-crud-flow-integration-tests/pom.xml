@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-crud-flow-root</artifactId>
+        <artifactId>vaadin-crud-flow-parent</artifactId>
         <version>3.2-SNAPSHOT</version>
     </parent>
 
