@@ -18,10 +18,15 @@ package com.vaadin.flow.component.checkbox.dataview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +101,77 @@ public class CheckboxGroupDataViewImplTest {
         Assert.assertEquals(items.get(2), dataView.getItemOnIndex(2));
     }
 
+    @Test
+    public void setIdentifierProvider_customIdentity_itemRefreshed() {
+        Item first = new Item(1L, "first");
+        Item second = new Item(2L, "middle");
+
+        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
+
+        DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
+        CheckboxGroup<Item> component = new CheckboxGroup<>();
+
+        CheckboxGroupDataView<Item> dataView =
+                component.setDataSource(dataProvider);
+
+        dataView.setIdentifierProvider(Item::getId);
+
+        first.setValue("changed-1");
+        second.setValue("changed-2");
+
+        dataProvider.refreshItem(new Item(1L));
+
+        Assert.assertTrue(containsLabel(component, "changed-1"));
+        Assert.assertFalse(containsLabel(component, "changed-2"));
+    }
+
+    @Test
+    public void setIdentifierProvider_customDataProviderIdentity_itemRefreshed() {
+        Item first = new Item(1L, "first");
+        Item second = new Item(2L, "middle");
+
+        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
+
+        DataProvider<Item, ?> dataProvider =
+                new CustomIdentityItemDataProvider(items);
+
+        CheckboxGroup<Item> component = new CheckboxGroup<>();
+        component.setDataSource(dataProvider);
+
+        first.setValue("changed-1");
+        second.setValue("changed-2");
+
+        dataProvider.refreshItem(new Item(1L));
+
+        Assert.assertTrue(containsLabel(component, "changed-1"));
+        Assert.assertFalse(containsLabel(component, "changed-2"));
+    }
+
+    @Test
+    public void setIdentifierProvider_defaultIdentity_itemRefreshed() {
+        Item first = new Item(1L, "first");
+        Item second = new Item(2L, "middle");
+
+        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
+
+        DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
+        CheckboxGroup<Item> component = new CheckboxGroup<>();
+        component.setDataSource(dataProvider);
+
+        first.setValue("changed-1");
+        second.setValue("changed-2");
+
+        dataProvider.refreshItem(new Item(1L, "changed-1"));
+
+        Assert.assertTrue(containsLabel(component, "changed-1"));
+        Assert.assertFalse(containsLabel(component, "changed-2"));
+    }
+
+    private boolean containsLabel(CheckboxGroup<Item> component, String label) {
+        return component.getChildren()
+                .anyMatch(c -> ((Checkbox) c).getLabel().equals(label));
+    }
+
     private static class InMemoryProvider
             implements InMemoryDataProvider<String> {
 
@@ -154,6 +230,68 @@ public class CheckboxGroupDataViewImplTest {
                 DataProviderListener<String> listener) {
             return () -> {
             };
+        }
+    }
+
+    private static class CustomIdentityItemDataProvider
+            extends ListDataProvider<Item> {
+
+        public CustomIdentityItemDataProvider(Collection<Item> items) {
+            super(items);
+        }
+
+        @Override
+        public Object getId(Item item) {
+            return item.getId();
+        }
+    }
+
+    private static class Item {
+        private long id;
+        private String value;
+
+        public Item(long id) {
+            this.id = id;
+        }
+
+        public Item(long id, String value) {
+            this.id = id;
+            this.value = value;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Item item = (Item) o;
+            return id == item.id &&
+                    Objects.equals(value, item.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, value);
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
         }
     }
 }
