@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-accordion-flow-root</artifactId>
+    <artifactId>vaadin-accordion-flow-parent</artifactId>
     <version>3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 

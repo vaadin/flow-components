@@ -9,10 +9,10 @@
         <artifactId>vaadin-flow-components</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-cookie-consent-flow-root</artifactId>
+    <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
     <packaging>pom</packaging>
     <version>3.2-SNAPSHOT</version>
-    <name>vaadin-cookie-consent-flow-root</name>
+    <name>vaadin-cookie-consent-flow-parent</name>
     <inceptionYear>2018</inceptionYear>
     <organization>
         <name>Vaadin Ltd</name>

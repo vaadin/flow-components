@@ -7,7 +7,7 @@
         <artifactId>vaadin-flow-components</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-board-flow-root</artifactId>
+    <artifactId>vaadin-board-flow-parent</artifactId>
     <packaging>pom</packaging>
     <version>4.2-SNAPSHOT</version>
     <name>vaadin-board-root</name>
