@@ -1,0 +1,44 @@
+@import "mytheme.scss";
+@import "addons.scss";
+
+// This file prefixes all rules with the theme name to avoid causing conflicts with other themes.
+// The actual styles should be defined in mytheme.scss
+
+.mytheme {
+  @include addons;
+  @include mytheme;
+
+  .box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 3px solid #FFF;
+    padding: 10px;
+    background-color: #D3DCE0;
+    font-size: 12px;
+
+    .box__number.v-label-box__number {
+      background-color: white;
+      color: #9BA7A7;
+      /* font-size: 16px; */
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+  }
+
+  .image-collage-item {
+    height: 100%;
+    width: 100%;
+    min-height: 300px;
+    overflow: hidden;
+    padding: 10px;
+    background: #dedede;
+    border: 5px solid #FFF;
+    object-fit: cover;
+  }
+}
