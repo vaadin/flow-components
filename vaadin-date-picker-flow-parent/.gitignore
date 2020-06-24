@@ -1,0 +1,20 @@
+# Maven files
+target/
+
+# Eclipse files
+.project
+.settings
+.classpath
+error-screenshots/
+
+# Idea files
+*.iml
+.idea
+
+# The following files are generated/updated by flow-maven-plugin
+package*.json
+pnpm-lock.yaml
+webpack.*.js
+tsconfig.json
+types.d.ts
+node_modules/

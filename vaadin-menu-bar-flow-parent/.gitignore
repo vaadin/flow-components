@@ -1,0 +1,30 @@
+# Maven files
+target/
+
+# Eclipse files
+.project
+.settings
+.classpath
+
+# Selenium driver folders
+selenium_standalone
+selenium_standalone_zips
+error-screenshots
+reference-screenshots
+driver_zips
+driver
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+
+**/bower_components/**
+
+# The following files are generated/updated by flow-maven-plugin
+package*.json
+pnpm-lock.yaml
+webpack.*.js
+tsconfig.json
+types.d.ts
+node_modules/
+
