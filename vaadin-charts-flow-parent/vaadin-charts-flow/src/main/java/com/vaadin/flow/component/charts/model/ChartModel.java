@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -68,7 +68,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	private Number spacingRight;
 	private Number spacingTop;
 	private Style style;
-	private Boolean styledMode = Boolean.TRUE;
+	private Boolean styledMode = Boolean.FALSE;
 	private ChartType type;
 	private String typeDescription;
 	private Number width;
@@ -90,7 +90,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * automatically be aligned by adding ticks to the axis or axes with the
 	 * least ticks, as if <code>tickAmount</code> were specified.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * This can be prevented by setting <code>alignTicks</code> to false. If the
 	 * grid lines look messy, it's a good idea to hide them for the secondary
@@ -119,7 +119,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * animation, see <a class="internal"
 	 * href="#plotOptions.series.animation">plotOptions.series.animation</a>.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The animation can either be set as a boolean or a configuration object.
 	 * If <code>true</code>, it will use the 'swing' jQuery easing and a
@@ -129,7 +129,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * <dl>
 	 * <dt>duration</dt>
 	 * <dd>The duration of the animation in milliseconds.</dd>
-	 * 
+	 *
 	 * <dt>easing</dt>
 	 * <dd>A string reference to an easing function set on the <code>Math</code>
 	 * object. See <a href=
@@ -255,7 +255,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * <p>
 	 * A text description of the chart.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * If the Accessibility module is loaded, this is included by default as a
 	 * long description of the chart and its contents in the hidden screen
@@ -283,7 +283,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * chart width. This allows for preserving the aspect ratio across
 	 * responsive sizes.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * By default (when <code>null</code>) the height is calculated from the
 	 * offset height of the containing element, or 400 pixels if the containing
@@ -330,7 +330,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * href="#xAxis.reversed">reversed</a> by default. If a bar series is
 	 * present in the chart, it will be inverted automatically.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Inverting the chart doesn't have an effect if there are no cartesian
 	 * series in the chart, or if the chart is <a href="#chart.polar">polar</a>.
@@ -467,7 +467,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * Allow panning in a chart. Best used with <a
 	 * href="#chart.panKey">panKey</a> to combine zooming and panning.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * On touch devices, when the <a
 	 * href="#tooltip.followTouchMove">tooltip.followTouchMove</a> option is
@@ -907,5 +907,19 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setMargin(Number top, Number right, Number bottom, Number left) {
 		margin = new Number[]{top, right, bottom, left};
+	}
+
+	public Boolean getStyledMode() {
+		return styledMode;
+	}
+
+    /**
+     * Whether to apply styled mode. When in styled mode, no presentational
+     * attributes or CSS are applied to the chart SVG. Instead, CSS rules are
+     * required to style the chart. The default style sheet is available from
+     * https://code.highcharts.com/css/highcharts.css.
+     */
+	public void setStyledMode(Boolean styledMode) {
+		this.styledMode = styledMode;
 	}
 }
