@@ -7,17 +7,16 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-grid-flow-parent</artifactId>
-    <version>5.1-SNAPSHOT</version>
+    <version>5.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Grid Flow Parent</name>
 
     <properties>
-        <contextmenu.version>4.1-SNAPSHOT</contextmenu.version>
-        <flow.version>3.2.dataprovider-SNAPSHOT</flow.version>
+        <contextmenu.version>4.2-SNAPSHOT</contextmenu.version>
     </properties>
 
    <repositories>
