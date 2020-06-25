@@ -44,8 +44,6 @@ import java.util.Objects;
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
         .propertyWithDefault("primarySection", Section.NAVBAR.toWebcomponentValue());
-    private static final PropertyDescriptor<Boolean, Boolean> drawerOpenedProperty = PropertyDescriptors
-        .propertyWithDefault("drawerOpened", true);
     private static final PropertyDescriptor<Boolean, Boolean> overlayProperty = PropertyDescriptors
         .propertyWithDefault("overlay", false);
 
@@ -88,7 +86,7 @@ public class AppLayout extends Component implements RouterLayout {
      */
     @Synchronize("drawer-opened-changed")
     public boolean isDrawerOpened() {
-        return drawerOpenedProperty.get(this);
+        return getElement().getProperty("drawerOpened", true);
     }
 
     /**
@@ -99,7 +97,7 @@ public class AppLayout extends Component implements RouterLayout {
      * @see DrawerToggle for a component that allows the user to open and close the drawer.
      */
     public void setDrawerOpened(boolean drawerOpened) {
-        drawerOpenedProperty.set(this, drawerOpened);
+        getElement().setProperty("drawerOpened", drawerOpened);
     }
 
     /**
