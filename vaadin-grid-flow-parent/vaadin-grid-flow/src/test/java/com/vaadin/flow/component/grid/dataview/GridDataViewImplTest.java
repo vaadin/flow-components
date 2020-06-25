@@ -130,6 +130,23 @@ public class GridDataViewImplTest {
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
     }
 
+    @Test
+    public void contains_itemPresentedInDataSet_itemFound() {
+        Assert.assertTrue("The item was not found in the data",
+                dataView.contains("first"));
+
+        dataView.setIdentifierProvider(item -> item.substring(0, 1));
+
+        Assert.assertTrue("The item was not found in the data",
+                dataView.contains("fourth"));
+    }
+
+    @Test
+    public void contains_itemNotPresentedInDataSet_itemNotFound() {
+        Assert.assertFalse("Non existent item found in data",
+                dataView.contains("absent item"));
+    }
+
     private static class InMemoryProvider
             implements InMemoryDataProvider<String> {
 

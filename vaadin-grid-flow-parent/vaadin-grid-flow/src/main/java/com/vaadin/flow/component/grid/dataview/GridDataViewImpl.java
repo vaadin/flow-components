@@ -16,6 +16,7 @@
 
 package com.vaadin.flow.component.grid.dataview;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -48,11 +49,15 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
 
     @Override
     public boolean contains(T item) {
-        final DataProvider<T, ?> dataProvider = dataCommunicator
-                .getDataProvider();
-        final Object itemIdentifier = dataProvider.getId(item);
-        return getItems()
-                .anyMatch(i -> itemIdentifier.equals(dataProvider.getId(i)));
+        final IdentifierProvider<T> identifierProvider =
+                getIdentifierProvider();
+
+        Object itemIdentifier = identifierProvider.apply(item);
+        Objects.requireNonNull(itemIdentifier,
+                "Identity provider should not return null");
+        return getItems().anyMatch(i ->
+                itemIdentifier.equals(
+                                identifierProvider.apply(i)));
     }
 
     @Override
