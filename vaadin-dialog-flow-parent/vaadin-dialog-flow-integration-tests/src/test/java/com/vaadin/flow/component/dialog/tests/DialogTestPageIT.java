@@ -30,6 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -69,7 +70,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 eventSourceMessage.getText());
 
         assertDialogContent(
-                "There is a opened change listener for this dialog");
+                "There is an opened change listener for this dialog");
 
         executeScript("document.body.click()");
         checkDialogIsClosed();
@@ -86,6 +87,16 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 findElement(By.id("dialog")));
         Assert.assertEquals("The event came from client",
                 eventSourceMessage.getText());
+    }
+
+    @Test
+    public void dialogWithContentMargin_wrapperDoesNotCollapse() {
+        findElement(By.id("dialog-open")).click();
+
+        WebElement overlay = findElement(By.id("overlay"));
+        TestBenchElement content = (TestBenchElement) findInShadowRoot(overlay, By.id("content")).get(0);
+
+        Assert.assertEquals(content.getProperty("offsetHeight"), content.getProperty("scrollHeight"));
     }
 
     @Test

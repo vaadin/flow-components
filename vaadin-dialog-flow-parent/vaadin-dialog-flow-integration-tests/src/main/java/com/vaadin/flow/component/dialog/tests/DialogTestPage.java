@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -65,8 +66,10 @@ public class DialogTestPage extends Div {
         dialog.addDialogCloseActionListener(e -> dialog.close());
 
         message.setText("The open state of the dialog is " + dialog.isOpened());
-        dialog.add(
-                new Label("There is a opened change listener for this dialog"));
+        Div content = new Div(new Text("There is an opened change listener for this dialog"));
+        content.getElement().getStyle().set("margin-top", "100px");
+
+        dialog.add(content);
         button.addClickListener(event -> dialog.open());
 
         eventCounter = 0;
