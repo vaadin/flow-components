@@ -48,6 +48,12 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
                 .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <em>NOTE:</em> calling this method might trigger a count call to the
+     * backend when a lazy data source is used.
+     */
     @Override
     public int getSize() {
         return dataCommunicator.getDataSize();
@@ -55,13 +61,17 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
 
     @Override
     public boolean contains(T item) {
-        final IdentifierProvider<T> identifierProvider = getIdentifierProvider();
+        final IdentifierProvider<T> identifierProvider =
+                getIdentifierProvider();
 
         Object itemIdentifier = identifierProvider.apply(item);
         Objects.requireNonNull(itemIdentifier,
                 "Identity provider should not return null");
+        //@formatter:off
         return getItems().anyMatch(
-                i -> itemIdentifier.equals(identifierProvider.apply(i)));
+                i -> itemIdentifier.equals(
+                        identifierProvider.apply(i)));
+        //@formatter:on
     }
 
     @Override

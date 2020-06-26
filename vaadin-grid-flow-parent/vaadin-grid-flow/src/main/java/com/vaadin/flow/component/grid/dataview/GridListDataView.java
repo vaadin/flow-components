@@ -24,8 +24,8 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 
 /**
- * GridListDataView for in-memory list data. Provides information on the data
- * and allows operations on it.
+ * Data view implementation for Grid with in-memory list data. Provides
+ * information on the data and allows operations on it.
  *
  * @param <T>
  *            data type
@@ -55,15 +55,6 @@ public class GridListDataView<T> extends AbstractListDataView<T>
                 .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
-    /**
-     * Gets the size of the data source with filters applied if any are set.
-     * <p>
-     * <em>NOTE:</em> calling this method might trigger a count call to the
-     * backend when lazy data source is used.
-     * 
-     * @return the filtered data size
-     * @see #addSizeChangeListener(ComponentEventListener)
-     */
     @Override
     public int getSize() {
         return dataCommunicator.getDataSize();
