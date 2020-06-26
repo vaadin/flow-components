@@ -2374,15 +2374,15 @@ public class Grid<T> extends Component
     }
 
     /**
-     * Getter for getting a generic GridDataView. This should be used only when
-     * neither {@link #getListDataView()} nor #getLazyDataView are applicable
-     * for the underlying dataSource.
+     * Gets the generic data view for the grid. This data view should only be
+     * used when {@link #getListDataView()} is not applicable for the
+     * underlying dataSource.
      *
-     * @return DataView instance implementing {@link GridDataView}
+     * @return the generic DataView instance implementing {@link GridDataView}
      */
     @Override
     public GridDataView<T> getDataView() {
-        return new GridDataViewImpl(dataCommunicator, this);
+        return new GridDataViewImpl<>(getDataCommunicator(), this);
     }
 
     @Override
@@ -2391,15 +2391,22 @@ public class Grid<T> extends Component
         return getListDataView();
     }
 
+    /**
+     * Gets the list data view for the grid. This data view should only be
+     * used when the used data source is of in-memory type and set with:
+     * <ul>
+     * <li>{@link #setDataSource(Collection)}</li>
+     * <li>{@link #setDataSource(Object[])}</li>
+     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * </ul>
+     * If the data source is of wrong type (lazy), an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         grid
+     */
     @Override
     public GridListDataView<T> getListDataView() {
-        if (getDataProvider() instanceof ListDataProvider) {
-            return new GridListDataView<>(dataCommunicator, this);
-        }
-        throw new IllegalStateException(String.format(
-                "Required ListDataProvider, but got '%s'. Use 'getDataView()' "
-                        + "to get a generic DataView instance.",
-                getDataProvider().getClass().getSuperclass().getSimpleName()));
+            return new GridListDataView<>(getDataCommunicator(), this);
     }
 
     /**
