@@ -135,6 +135,11 @@ public class ChartType implements ChartEnum {
     public static final ChartType FLAGS = new ChartType("flags");
 
     /**
+     * @see PlotOptionsTimeline
+     */
+    public static final ChartType TIMELINE = new ChartType("timeline");
+
+    /**
      * @see PlotOptionsOhlc
      */
     public static final ChartType OHLC = new ChartType("ohlc");
