@@ -17,8 +17,6 @@
 package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Rule;

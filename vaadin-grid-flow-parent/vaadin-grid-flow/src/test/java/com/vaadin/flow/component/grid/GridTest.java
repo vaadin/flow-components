@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,8 +34,9 @@ public class GridTest {
     public void dataViewForFaultyDataProvider_throwsException() {
         exceptionRule.expect(IllegalStateException.class);
                 exceptionRule.expectMessage(
-                        "Required ListDataProvider, but got 'AbstractBackEndDataProvider'. "
-                                + "Use 'getDataView()' to get a generic DataView instance.");
+                        "GridListDataView only supports 'ListDataProvider' " +
+                                "or it's subclasses, but was given a " +
+                                "'AbstractBackEndDataProvider'");
 
         Grid<String> grid = new Grid<>();
         final GridListDataView<String> listDataView = grid
