@@ -17,16 +17,18 @@ package com.vaadin.flow.component.grid.dataview;
 
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 
 /**
- * GridListDataView for in-memory list data handling.
+ * GridListDataView for in-memory list data. Provides information on the data
+ * and allows operations on it.
  *
  * @param <T>
- *         data type
+ *            data type
  * @since
  */
 public class GridListDataView<T> extends AbstractListDataView<T>
@@ -53,13 +55,23 @@ public class GridListDataView<T> extends AbstractListDataView<T>
                 .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
+    /**
+     * Gets the size of the data source with filters applied if any are set.
+     * <p>
+     * <em>NOTE:</em> calling this method might trigger a count call to the
+     * backend when lazy data source is used.
+     * 
+     * @return the filtered data size
+     * @see #addSizeChangeListener(ComponentEventListener)
+     */
     @Override
     public int getSize() {
         return dataCommunicator.getDataSize();
     }
 
     @Override
-    public void setIdentifierProvider(IdentifierProvider<T> identifierProvider) {
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
         dataCommunicator.getKeyMapper().setIdentifierGetter(identifierProvider);
     }

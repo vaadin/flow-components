@@ -25,6 +25,12 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 
+/**
+ * Implementation of generic data view for grid.
+ * 
+ * @param <T> the item type
+ * @since
+ */
 public class GridDataViewImpl<T> extends AbstractDataView<T>
         implements GridDataView<T> {
 
@@ -49,15 +55,13 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
 
     @Override
     public boolean contains(T item) {
-        final IdentifierProvider<T> identifierProvider =
-                getIdentifierProvider();
+        final IdentifierProvider<T> identifierProvider = getIdentifierProvider();
 
         Object itemIdentifier = identifierProvider.apply(item);
         Objects.requireNonNull(itemIdentifier,
                 "Identity provider should not return null");
-        return getItems().anyMatch(i ->
-                itemIdentifier.equals(
-                                identifierProvider.apply(i)));
+        return getItems().anyMatch(
+                i -> itemIdentifier.equals(identifierProvider.apply(i)));
     }
 
     @Override
@@ -77,7 +81,8 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
     }
 
     @Override
-    public void setIdentifierProvider(IdentifierProvider<T> identifierProvider) {
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
         dataCommunicator.getKeyMapper().setIdentifierGetter(identifierProvider);
     }
