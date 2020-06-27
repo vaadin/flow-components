@@ -18,9 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -730,9 +728,8 @@ public class GridDemo extends DemoView {
 
         // end-source-example
 
-        addVariantsDemo(() -> {
-            return grid;
-        }, Grid::addThemeVariants, Grid::removeThemeVariants,
+        addVariantsDemo(() -> grid, Grid::addThemeVariants,
+                Grid::removeThemeVariants,
                 GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
     }
@@ -764,14 +761,13 @@ public class GridDemo extends DemoView {
         Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge)
                 .setHeader("Age");
 
-        Button addButton = new Button("Add Item", event -> {
-            dataView.addItem(new Person(106, "X", "Y", 16,
-                    new Address("95632", "New York"), "187-338-588"));
-        });
+        Button addButton = new Button("Add Item", event ->
+                dataView.addItem(new Person(106, "X", "Y", 16,
+                new Address("95632", "New York"), "187-338-588")));
 
-        Button removeButton = new Button("Remove last", event -> {
-            dataView.removeItem(dataView.getItemOnRow(dataView.getSize() - 1));
-        });
+        Button removeButton = new Button("Remove last", event ->
+                dataView.removeItem(dataView.getItemOnRow(
+                        dataView.getSize() - 1)));
 
         FooterRow footerRow = grid.appendFooterRow();
         footerRow.getCell(firstNameColumn).setComponent(addButton);
@@ -1038,7 +1034,7 @@ public class GridDemo extends DemoView {
         final Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
-        grid.addColumn(person -> person.getBirthDate()).setHeader("Birth Date");
+        grid.addColumn(Person::getBirthDate).setHeader("Birth Date");
         grid.addColumn(person -> person.getAddress().getPostalCode())
                 .setHeader("Postal Code");
 
@@ -1568,9 +1564,8 @@ public class GridDemo extends DemoView {
                 .withProperty("lastname", Person::getLastName)
                 .withProperty("address", Person::getAddress)
                 .withProperty("image", Person::getImage)
-                .withEventHandler("handleClick", person -> {
-                    grid.getListDataView().updateItem(person);
-                }));
+                .withEventHandler("handleClick", person ->
+                        grid.getListDataView().updateItem(person)));
 
         // end-source-example
         grid.setId("item-details");
@@ -1602,9 +1597,8 @@ public class GridDemo extends DemoView {
                         + "</div>")
                 .withProperty("firstName", Person::getFirstName)
                 // This is now how we open the details
-                .withEventHandler("handleClick", person -> {
-                    grid.getListDataView().updateItem(person);
-                }));
+                .withEventHandler("handleClick", person ->
+                        grid.getListDataView().updateItem(person)));
 
         // Disable the default way of opening item details:
         grid.setDetailsVisibleOnClick(false);
@@ -1701,25 +1695,20 @@ public class GridDemo extends DemoView {
         GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
         GridMenuItem<Task> insert = contextMenu.addItem("Insert");
 
-        insert.getSubMenu().addItem("Add a task before", event -> {
-            event.getItem()
-                    .ifPresent(item -> dataView.addItemBefore(
-                            new Task(100, "New Task",
-                                    LocalDate.parse("02/01/2019", formatter)),
-                            item));
-        });
+        insert.getSubMenu().addItem("Add a task before", event ->
+                event.getItem().ifPresent(item -> dataView.addItemBefore(
+                        new Task(100, "New Task",
+                                LocalDate.parse("02/01/2019", formatter)),
+                        item)));
         insert.getSubMenu().add(new Hr());
-        insert.getSubMenu().addItem("Add a task after", event -> {
-            event.getItem()
-                    .ifPresent(item -> dataView.addItemAfter(
-                            new Task(100, "New Task",
-                                    LocalDate.parse("02/01/2019", formatter)),
-                            item));
-        });
+        insert.getSubMenu().addItem("Add a task after", event ->
+                event.getItem().ifPresent(item -> dataView.addItemAfter(
+                        new Task(100, "New Task",
+                                LocalDate.parse("02/01/2019", formatter)),
+                        item)));
 
-        contextMenu.addItem("Remove", event -> {
-            event.getItem().ifPresent(dataView::removeItem);
-        });
+        contextMenu.addItem("Remove", event ->
+                event.getItem().ifPresent(dataView::removeItem));
 
         contextMenu.addGridContextMenuOpenedListener(event -> message.setValue(
                 String.format("Menu opened on\n Row: '%s'\n Column: '%s'",
@@ -2476,7 +2465,7 @@ public class GridDemo extends DemoView {
                     + (event.getDropLocation() == GridDropLocation.BELOW ? 1
                             : 0))
                     .orElse(0);
-            
+
             String personsData = event.getDataTransferText();
             Arrays.asList(personsData.split(";")).forEach(personData -> {
                 String[] dataArray = personData.split(",");
@@ -2590,10 +2579,6 @@ public class GridDemo extends DemoView {
     private List<Person> getItems() {
         PersonService personService = new PersonService();
         return personService.fetchAll();
-    }
-
-    private static List<Person> createItems() {
-        return createItems(500);
     }
 
     private static List<Person> createItems(int number) {
