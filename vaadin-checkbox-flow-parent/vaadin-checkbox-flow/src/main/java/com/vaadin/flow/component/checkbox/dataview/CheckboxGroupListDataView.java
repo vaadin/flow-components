@@ -21,12 +21,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
- * {@link CheckboxGroup} component list data view implementation which takes
- * into
- * account the component-specific and common list data API.
+ * Data view implementation for Checkbox Group with in-memory list data.
+ * Provides information on the data and allows operations on it.
  *
- * @param <T>
- *         data type
+ * @param <T> data type
+ * @since
  */
 public class CheckboxGroupListDataView<T> extends AbstractListDataView<T>
         implements CheckboxGroupDataView<T> {
@@ -34,10 +33,8 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T>
     /**
      * Checkbox DataView constructor.
      *
-     * @param dataProviderSupplier
-     *         data provider supplier
-     * @param checkboxGroup
-     *         checkbox instance for this DataView
+     * @param dataProviderSupplier data provider supplier
+     * @param checkboxGroup        checkbox instance for this DataView
      */
     public CheckboxGroupListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,

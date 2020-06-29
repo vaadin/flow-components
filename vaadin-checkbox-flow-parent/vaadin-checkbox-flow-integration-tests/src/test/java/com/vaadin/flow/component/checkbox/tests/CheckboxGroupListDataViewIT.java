@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @TestPath("vaadin-checkbox-group-list-data-view")
 public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
@@ -32,60 +32,90 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
     public void checkboxGroupListDataView_dataViewApiRequested_dataAvailable() {
         open();
 
-        TestBenchElement checkboxGroup = $("vaadin-checkbox-group").id(CheckboxGroupListDataViewPage.CHECKBOX_GROUP);
-        List<TestBenchElement> checkboxes = checkboxGroup.$("vaadin-checkbox").all();
+        TestBenchElement checkboxGroup = $("vaadin-checkbox-group")
+                .id(CheckboxGroupListDataViewPage.CHECKBOX_GROUP);
+
+        List<TestBenchElement> checkboxes =
+                checkboxGroup.$("vaadin-checkbox").all();
 
         // Checkbox items size
         Assert.assertEquals("Unexpected checkbox count", 3, checkboxes.size());
 
         // Data set size
         Assert.assertEquals("Unexpected item count", "3",
-                $("span").id(CheckboxGroupListDataViewPage.ITEMS_SIZE).getText());
+                $("span").id(CheckboxGroupListDataViewPage.ITEMS_SIZE)
+                        .getText());
 
         // Data set content
-        Assert.assertEquals("Unexpected checkbox labels", "foo,bar,baz",
-                $("span").id(CheckboxGroupListDataViewPage.ALL_ITEMS).getText());
+        Assert.assertEquals("Unexpected checkbox labels", "John,Paul,Mike",
+                $("span").id(CheckboxGroupListDataViewPage.ALL_ITEMS)
+                        .getText());
 
         // Item present
-        Assert.assertEquals("Item 'foo' is expected to be present", "true",
-                $("span").id(CheckboxGroupListDataViewPage.ITEM_PRESENT).getText());
+        Assert.assertEquals("Person 'John' is expected to be present", "true",
+                $("span").id(CheckboxGroupListDataViewPage.ITEM_PRESENT)
+                        .getText());
 
         // Item on index
-        Assert.assertEquals("Item 'foo' is expected on index 0", "foo",
-                $("span").id(CheckboxGroupListDataViewPage.ITEM_ON_INDEX).getText());
+        Assert.assertEquals("Person 'John' is expected on index 0", "John",
+                $("span").id(CheckboxGroupListDataViewPage.ITEM_ON_INDEX)
+                        .getText());
 
         // Has next item
         Assert.assertEquals("Next item is expected", "true",
-                $("span").id(CheckboxGroupListDataViewPage.HAS_NEXT_ITEM).getText());
+                $("span").id(CheckboxGroupListDataViewPage.HAS_NEXT_ITEM)
+                        .getText());
 
         // Has previous item
         Assert.assertEquals("Previous item is expected", "true",
-                $("span").id(CheckboxGroupListDataViewPage.HAS_PREVIOUS_ITEM).getText());
+                $("span").id(CheckboxGroupListDataViewPage.HAS_PREVIOUS_ITEM)
+                        .getText());
 
         findElement(By.id(CheckboxGroupListDataViewPage.NEXT_ITEM)).click();
 
         // Next item
-        Assert.assertEquals("Unexpected next item", "baz",
-                $("span").id(CheckboxGroupListDataViewPage.CURRENT_ITEM).getText());
+        Assert.assertEquals("Unexpected next item", "Mike",
+                $("span").id(CheckboxGroupListDataViewPage.CURRENT_ITEM)
+                        .getText());
 
         findElement(By.id(CheckboxGroupListDataViewPage.PREVIOUS_ITEM)).click();
 
         // Previous item
-        Assert.assertEquals("Unexpected previous item", "bar",
-                $("span").id(CheckboxGroupListDataViewPage.CURRENT_ITEM).getText());
+        Assert.assertEquals("Unexpected previous item", "Paul",
+                $("span").id(CheckboxGroupListDataViewPage.CURRENT_ITEM)
+                        .getText());
 
-        findElement(By.id(CheckboxGroupListDataViewPage.SORT_BUTTON)).click();
+        // Add item
+        findElement(By.id(CheckboxGroupListDataViewPage.ADD_ITEM)).click();
+        Assert.assertEquals("Wrong name for added person",
+                "Peter",
+                checkboxGroup.$("vaadin-checkbox").all().get(3).getText());
+
+        // Update item
+        findElement(By.id(CheckboxGroupListDataViewPage.UPDATE_ITEM)).click();
+        Assert.assertEquals("Wrong name for updated person",
+                "Jack",
+                checkboxGroup.$("vaadin-checkbox").all().get(3).getText());
+
+        // Delete item
+        findElement(By.id(CheckboxGroupListDataViewPage.DELETE_ITEM)).click();
+        Assert.assertEquals("Item count not expected", 3,
+                checkboxGroup.$("vaadin-checkbox").all().size());
 
         // Sort order
-        Assert.assertEquals("Unexpected sort order", "bar,baz,foo",
+        findElement(By.id(CheckboxGroupListDataViewPage.SORT_BUTTON)).click();
+        Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
                 checkboxGroup.$("vaadin-checkbox").all().stream()
-                        .map(TestBenchElement::getText).collect(Collectors.joining(",")));
+                        .map(TestBenchElement::getText)
+                        .collect(Collectors.joining(",")));
 
         findElement(By.id(CheckboxGroupListDataViewPage.FILTER_BUTTON)).click();
 
         // Filtering
         checkboxes = checkboxGroup.$("vaadin-checkbox").all();
-        Assert.assertEquals("Unexpected filtered checkbox count", 1, checkboxes.size());
-        Assert.assertEquals("Unexpected filtered checkbox item", "bar", checkboxes.get(0).getText());
+        Assert.assertEquals("Unexpected filtered checkbox count", 1,
+                checkboxes.size());
+        Assert.assertEquals("Unexpected filtered checkbox item", "Paul",
+                checkboxes.get(0).getText());
     }
 }

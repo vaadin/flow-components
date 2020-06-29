@@ -19,22 +19,19 @@ import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.DataView;
 
 /**
- * {@link CheckboxGroup} component {@link DataView} interface for getting specific information on current
- * data set of a {@link CheckboxGroup} instance.
+ * {@link CheckboxGroup} component {@link DataView} interface for getting
+ * specific information on current data set of a {@link CheckboxGroup} instance.
  *
- * @param <T>
- *         data type
+ * @param <T> data type
  */
 public interface CheckboxGroupDataView<T> extends DataView<T> {
 
     /**
      * Get the item at the given index in the sorted and filtered data set.
      *
-     * @param index
-     *         index number
+     * @param index index number
      * @return item on index
-     * @throws IndexOutOfBoundsException
-     *         requested index is outside of the available data set.
+     * @throws IndexOutOfBoundsException requested index is outside of the available data set.
      */
     T getItemOnIndex(int index);
 }

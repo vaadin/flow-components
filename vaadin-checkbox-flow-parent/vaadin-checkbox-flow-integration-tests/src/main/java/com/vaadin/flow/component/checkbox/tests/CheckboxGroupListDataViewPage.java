@@ -15,15 +15,17 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Route("vaadin-checkbox-group-list-data-view")
 public class CheckboxGroupListDataViewPage extends Div {
@@ -40,37 +42,75 @@ public class CheckboxGroupListDataViewPage extends Div {
     static final String PREVIOUS_ITEM = "prev-item-button-list-data-view";
     static final String FILTER_BUTTON = "filter-button-list-data-view";
     static final String SORT_BUTTON = "sort-button-list-data-view";
+    static final String ADD_ITEM = "add-person-button-list-data-view";
+    static final String UPDATE_ITEM = "update-person-button-list-data-view";
+    static final String DELETE_ITEM = "delete-person-button-list-data-view";
 
     public CheckboxGroupListDataViewPage() {
-        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
-        CheckboxGroupListDataView<String> dataView =
-                checkboxGroup.setDataSource("foo", "bar", "baz");
-
+        CheckboxGroup<CheckboxGroupDemoPage.Person> checkboxGroup =
+                new CheckboxGroup<>();
+        CheckboxGroupDemoPage.Person john =
+                new CheckboxGroupDemoPage.Person(1, "John");
+        CheckboxGroupDemoPage.Person paul =
+                new CheckboxGroupDemoPage.Person(2, "Paul");
+        CheckboxGroupDemoPage.Person mike =
+                new CheckboxGroupDemoPage.Person(3, "Mike");
+        CheckboxGroupListDataView<CheckboxGroupDemoPage.Person> dataView =
+                checkboxGroup.setDataSource(new ArrayList<>(Arrays.asList(
+                        john, paul, mike)
+                ));
         Span sizeSpan = new Span(String.valueOf(dataView.getSize()));
-        Span containsItemSpan = new Span(String.valueOf(dataView.contains("foo")));
-        Span allItemsSpan = new Span(dataView.getItems().collect(Collectors.joining(",")));
-        Span itemOnIndexSpan = new Span(dataView.getItemOnIndex(0));
+        Span containsItemSpan = new Span(String.valueOf(
+                dataView.contains(john)));
+        Span allItemsSpan = new Span(dataView.getItems()
+                .map(CheckboxGroupDemoPage.Person::getName).collect(
+                Collectors.joining(",")));
+        Span itemOnIndexSpan = new Span(dataView.getItemOnIndex(0).getName());
 
-        AtomicReference<String> currentItem = new AtomicReference<>("bar");
+        AtomicReference<CheckboxGroupDemoPage.Person> currentItem =
+                new AtomicReference<>(paul);
 
-        Span currentItemSpan = new Span(currentItem.get());
-        Span hasNextItemSpan = new Span(String.valueOf(dataView.getNextItem("foo").isPresent()));
-        Span hasPrevItemSpan = new Span(String.valueOf(dataView.getPreviousItem("bar").isPresent()));
+        Span currentItemSpan = new Span(currentItem.get().getName());
+        Span hasNextItemSpan = new Span(String.valueOf(
+                dataView.getNextItem(john).isPresent()));
+        Span hasPrevItemSpan = new Span(String.valueOf(
+                dataView.getPreviousItem(paul).isPresent()));
 
         Button nextItemButton = new Button("Next Item", event -> {
-            String nextItem = dataView.getNextItem(currentItem.get()).get();
+            CheckboxGroupDemoPage.Person nextItem =
+                    dataView.getNextItem(currentItem.get()).get();
             currentItem.set(nextItem);
-            currentItemSpan.setText(currentItem.get());
+            currentItemSpan.setText(currentItem.get().getName());
         });
         Button prevItemButton = new Button("Previous Item", event -> {
-            String prevItem = dataView.getPreviousItem(currentItem.get()).get();
+            CheckboxGroupDemoPage.Person prevItem =
+                    dataView.getPreviousItem(currentItem.get()).get();
             currentItem.set(prevItem);
-            currentItemSpan.setText(currentItem.get());
+            currentItemSpan.setText(currentItem.get().getName());
         });
         Button filterButton = new Button("Filter Items",
-                event -> dataView.setFilter("bar"::equals));
+                event -> dataView.setFilter(p -> p.getName().equals("Paul")));
         Button sortButton = new Button("Sort Items",
-                event -> dataView.setSortComparator(String::compareTo));
+                event -> dataView.setSortComparator((p1, p2) ->
+                        p1.getName().compareToIgnoreCase(p2.getName())));
+
+        dataView.setIdentifierProvider(CheckboxGroupDemoPage.Person::getId);
+        Button addNew = new Button("Add new item",
+                event -> {
+                    CheckboxGroupDemoPage.Person newItem =
+                            new CheckboxGroupDemoPage.Person(4, "Peter");
+                    dataView.addItem(newItem);
+                });
+        Button updateName = new Button("Update first name",
+                event -> {
+                    CheckboxGroupDemoPage.Person updatedPerson =
+                            dataView.getItemOnIndex(3);
+                    updatedPerson.setName("Jack");
+                    dataView.updateItem(updatedPerson);
+                });
+        Button deletePerson = new Button("Delete person",
+                event -> dataView.removeItem(
+                        new CheckboxGroupDemoPage.Person(4, null)));
 
         checkboxGroup.setId(CHECKBOX_GROUP);
         sizeSpan.setId(ITEMS_SIZE);
@@ -84,9 +124,13 @@ public class CheckboxGroupListDataViewPage extends Div {
         prevItemButton.setId(PREVIOUS_ITEM);
         filterButton.setId(FILTER_BUTTON);
         sortButton.setId(SORT_BUTTON);
+        addNew.setId(ADD_ITEM);
+        updateName.setId(UPDATE_ITEM);
+        deletePerson.setId(DELETE_ITEM);
 
-        add(checkboxGroup, sizeSpan, containsItemSpan, allItemsSpan, itemOnIndexSpan,
-                currentItemSpan, hasNextItemSpan, hasPrevItemSpan, filterButton,
-                sortButton, nextItemButton, prevItemButton);
+        add(checkboxGroup, sizeSpan, containsItemSpan, allItemsSpan,
+                itemOnIndexSpan, currentItemSpan, hasNextItemSpan,
+                hasPrevItemSpan, filterButton, sortButton, nextItemButton,
+                prevItemButton, addNew, updateName, deletePerson);
     }
 }

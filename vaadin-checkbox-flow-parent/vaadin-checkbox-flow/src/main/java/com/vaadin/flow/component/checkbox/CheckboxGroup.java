@@ -116,29 +116,35 @@ public class CheckboxGroup<T>
         return getListDataView();
     }
 
+    /**
+     * Gets the list data view for the checkbox group. This data view should
+     * only be used when the used data source is of in-memory type and set with:
+     * <ul>
+     * <li>{@link #setDataSource(Collection)}</li>
+     * <li>{@link #setDataSource(Object[])}</li>
+     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * </ul>
+     * If the data source is of wrong type (lazy), an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     * checkbox group
+     */
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
-        if (getDataProvider() instanceof ListDataProvider) {
-            return new CheckboxGroupListDataView<>(this::getDataProvider, this);
-        }
-        throw new IllegalStateException(String.format(
-                "Required ListDataProvider, but got '%s'. Use 'getDataView()' "
-                        + "to get a generic DataView instance.",
-                getDataProvider().getClass().getSuperclass().getSimpleName()));
+        return new CheckboxGroupListDataView<>(this::getDataProvider, this);
     }
 
     /**
-     * Getter for getting a generic CheckboxGroupDataView.
-     * <p>
-     * {@link #getListDataView()} is recommended when the backing data source is
-     * a List.
+     * Gets the generic data view for the checkbox group. This data view
+     * should only be used when {@link #getListDataView()} is not applicable
+     * for the underlying dataSource.
      *
-     * @return DataView instance implementing {@link CheckboxGroupDataView}
+     * @return the generic DataView instance implementing
+     * {@link CheckboxGroupDataView}
      */
     @Override
     public CheckboxGroupDataView<T> getDataView() {
-        return new CheckboxGroupDataViewImpl(this::getDataProvider,
-                    this);
+        return new CheckboxGroupDataViewImpl<>(this::getDataProvider, this);
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -180,12 +186,12 @@ public class CheckboxGroup<T>
 
     /**
      * {@inheritDoc}
-     * @deprecated use {@link HasListDataView#setDataSource(Stream)}
+     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
      */
     @Override
     @Deprecated
     public void setItems(Stream<T> streamOfItems) {
-        setDataSource(streamOfItems);
+        setDataSource(DataProvider.fromStream(streamOfItems));
     }
 
     /**
@@ -234,10 +240,8 @@ public class CheckboxGroup<T>
      * group without any selected items is an empty set. You can use the
      * {@link #clear()} method to set the empty value.
      *
-     * @param value
-     *            the new value to set, not {@code null}
-     * @throws NullPointerException
-     *             if value is {@code null}
+     * @param value the new value to set, not {@code null}
+     * @throws NullPointerException if value is {@code null}
      */
     @Override
     public void setValue(Set<T> value) {
@@ -313,8 +317,7 @@ public class CheckboxGroup<T>
      * as grayed out and the user cannot select them. The default predicate
      * always returns true (all the items are enabled).
      *
-     * @param itemEnabledProvider
-     *            the item enable predicate, not {@code null}
+     * @param itemEnabledProvider the item enable predicate, not {@code null}
      */
     public void setItemEnabledProvider(
             SerializablePredicate<T> itemEnabledProvider) {
@@ -327,8 +330,7 @@ public class CheckboxGroup<T>
      * in the checkbox group for each item. By default,
      * {@link String#valueOf(Object)} is used.
      *
-     * @param itemLabelGenerator
-     *            the item label provider to use, not null
+     * @param itemLabelGenerator the item label provider to use, not null
      */
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
@@ -531,7 +533,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
-            JsonArray presentation) {
+                                                  JsonArray presentation) {
         JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
@@ -541,7 +543,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> JsonArray modelToPresentation(CheckboxGroup<T> group,
-            Set<T> model) {
+                                                     Set<T> model) {
         JsonArray array = Json.createArray();
         if (model.isEmpty()) {
             return array;

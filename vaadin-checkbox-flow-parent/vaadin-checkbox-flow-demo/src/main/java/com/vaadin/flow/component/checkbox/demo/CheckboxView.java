@@ -15,6 +15,15 @@
  */
 package com.vaadin.flow.component.checkbox.demo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -31,15 +40,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * View for {@link CheckboxGroup} demo.
@@ -162,7 +162,8 @@ public class CheckboxView extends DemoView {
 
     public static class DepartmentData {
 
-        private static final List<Department> DEPARTMENT_LIST = createDepartmentList();
+        private static final List<Department> DEPARTMENT_LIST =
+                createDepartmentList();
 
         public List<Department> getDepartments() {
             return DEPARTMENT_LIST;
@@ -171,11 +172,13 @@ public class CheckboxView extends DemoView {
         private static List<Department> createDepartmentList() {
             List<Department> departmentList = new ArrayList<>();
             departmentList.add(new Department(1, "Product",
-                    "Development and maintenance of the official software products"));
+                    "Development and maintenance of the official " +
+                            "software products"));
             departmentList.add(new Department(2, "Services",
-                    "Customer consulting projects and service product delivery and development"));
-            departmentList.add(
-                    new Department(3, "HR", "Employee well-being and development"));
+                    "Customer consulting projects and service " +
+                            "product delivery and development"));
+            departmentList.add(new Department(3, "HR",
+                    "Employee well-being and development"));
             departmentList.add(new Department(4, "Accounting",
                     "Finance, billing and reporting"));
 
@@ -244,7 +247,7 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Basic usage with checkbox group
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Label");
-        checkboxGroup.setItems("Option one", "Option two", "Option three");
+        checkboxGroup.setDataSource("Option one", "Option two", "Option three");
         checkboxGroup.setValue(Collections.singleton("Option one"));
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
@@ -257,14 +260,15 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Disabled state
         CheckboxGroup<String> disabledCheckGroup = new CheckboxGroup<>();
         disabledCheckGroup.setLabel("Disabled");
-        disabledCheckGroup.setItems("Option one", "Option two", "Option three");
+        disabledCheckGroup.setDataSource(
+                "Option one", "Option two", "Option three");
         disabledCheckGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         disabledCheckGroup.setValue(Collections.singleton("Option one"));
         disabledCheckGroup.setEnabled(false);
 
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Disabled item");
-        checkboxGroup.setItems("Option one", "Option two", "Option three");
+        checkboxGroup.setDataSource("Option one", "Option two", "Option three");
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         checkboxGroup
                 .setItemEnabledProvider(item -> !"Option three".equals(item));
@@ -288,7 +292,7 @@ public class CheckboxView extends DemoView {
         CheckboxGroup<Department> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Department");
         List<Department> departmentList = getDepartments();
-        checkboxGroup.setItems(departmentList);
+        checkboxGroup.setDataSource(departmentList);
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
@@ -300,7 +304,7 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Value change event
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Label");
-        checkboxGroup.setItems("Option one", "Option two", "Option three");
+        checkboxGroup.setDataSource("Option one", "Option two", "Option three");
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
         Div value = new Div();
@@ -324,7 +328,7 @@ public class CheckboxView extends DemoView {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         Set<String> items = new LinkedHashSet<>(
                 Arrays.asList("Option one", "Option two"));
-        checkboxGroup.setItems(items);
+        checkboxGroup.setDataSource(items);
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         checkboxGroup.addValueChangeListener(event -> {
             if (event.getValue().size() == items.size()) {
@@ -359,7 +363,7 @@ public class CheckboxView extends DemoView {
 
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Employee titles");
-        checkboxGroup.setItems("Account Manager", "Designer",
+        checkboxGroup.setDataSource("Account Manager", "Designer",
                 "Marketing Manager", "Developer");
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
@@ -387,12 +391,12 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Orientation
         CheckboxGroup<String> horizontal = new CheckboxGroup<>();
         horizontal.setLabel("Horizontal");
-        horizontal.setItems("Option one", "Option two", "Option three");
+        horizontal.setDataSource("Option one", "Option two", "Option three");
         horizontal.setValue(Collections.singleton("Option one"));
 
         CheckboxGroup<String> vertical = new CheckboxGroup<>();
         vertical.setLabel("Vertical");
-        vertical.setItems("Option one", "Option two", "Option three");
+        vertical.setDataSource("Option one", "Option two", "Option three");
         vertical.setValue(Collections.singleton("Option one"));
         vertical.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
@@ -427,24 +431,27 @@ public class CheckboxView extends DemoView {
         CheckboxGroupListDataView<Dish> dataView = checkboxGroup.
                 setDataSource(DishData.getDishes());
 
-        Checkbox showVegetarianDishes = new Checkbox("Show only vegetarian dishes",
-                event -> dataView.setFilter(event.getValue() ? Dish::isVegetarian : null));
+        Checkbox showVegetarianDishes = new Checkbox(
+                "Show only vegetarian dishes",
+                event -> dataView.setFilter(event.getValue() ?
+                        Dish::isVegetarian : null));
 
         Div allDishesAvailable = new Div();
         allDishesAvailable.setText(String.format("%d dishes available in total",
                 dataView.getSize()));
 
-        Button askForDishOfTheDay = new Button("Check availability of Dish Of The Day", event -> {
+        Button askForDishOfTheDay = new Button(
+                "Check availability of Dish Of The Day", event -> {
             Dish dishOfTheDay = DishData.getDishOfTheDay();
             Notification.show(dataView.contains(dishOfTheDay) ?
                             "Dish of the day is available" :
                             "Dish of the day is not available, sorry",
-                            2000,
-                            Notification.Position.MIDDLE);
+                    2000,
+                    Notification.Position.MIDDLE);
         });
         // end-source-example
 
-        addCard("Filtering and accessing items", checkboxGroup, showVegetarianDishes,
-                allDishesAvailable, askForDishOfTheDay);
+        addCard("Filtering and accessing items", checkboxGroup,
+                showVegetarianDishes, allDishesAvailable, askForDishOfTheDay);
     }
 }
