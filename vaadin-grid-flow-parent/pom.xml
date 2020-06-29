@@ -15,10 +15,6 @@
     <packaging>pom</packaging>
     <name>Vaadin Grid Flow Parent</name>
 
-    <properties>
-        <contextmenu.version>4.2-SNAPSHOT</contextmenu.version>
-    </properties>
-
     <modules>
         <module>vaadin-grid-flow</module>
         <module>vaadin-grid-flow-testbench</module>
