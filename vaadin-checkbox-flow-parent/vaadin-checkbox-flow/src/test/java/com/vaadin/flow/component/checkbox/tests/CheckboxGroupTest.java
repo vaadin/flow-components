@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
@@ -344,15 +345,16 @@ public class CheckboxGroupTest {
     public void dataViewForFaultyDataProvider_throwsException() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(
-                "Required ListDataProvider, but got 'AbstractBackEndDataProvider'. "
-                        + "Use 'getDataView()' to get a generic DataView instance.");
+                "CheckboxGroupListDataView only supports 'ListDataProvider' " +
+                        "or it's subclasses, but was given a " +
+                        "'AbstractBackEndDataProvider'");
 
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         final CheckboxGroupListDataView<String> listDataView = checkboxGroup
                 .setDataSource(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Arrays.asList("one").stream(),
+                .fromCallbacks(query -> Stream.of("one"),
                         query -> 1);
 
         checkboxGroup.setDataProvider(dataProvider);

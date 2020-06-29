@@ -17,7 +17,6 @@ package com.vaadin.flow.component.checkbox.dataview;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
@@ -75,24 +74,6 @@ public class CheckboxGroupListDataViewTest
     public void getItemOnIndex_indexOutsideOfSize_throwsException() {
         exceptionRule.expect(IndexOutOfBoundsException.class);
         dataView.getItemOnIndex(ITEMS.size());
-    }
-
-    @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage(
-                "CheckboxGroupListDataView only supports 'ListDataProvider' " +
-                        "or it's subclasses, but was given a " +
-                        "'AbstractBackEndDataProvider'");
-
-        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
-        checkboxGroup.setDataSource(Arrays.asList("one", "two"));
-
-        DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Stream.of("one"), query -> 1);
-
-        checkboxGroup.setDataProvider(dataProvider);
-        checkboxGroup.getListDataView();
     }
 
     @Override
