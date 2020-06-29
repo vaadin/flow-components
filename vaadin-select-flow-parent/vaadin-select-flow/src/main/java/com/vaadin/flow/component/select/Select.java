@@ -92,7 +92,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
 
     private ItemLabelGenerator<T> itemLabelGenerator = null;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
+    private final PropertyChangeListener validationListener =
+            this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
     private boolean resetPending = true;
@@ -182,7 +183,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         public void setItems(Collection<T> collection) {
             // NOOP, never used directly, just need to have it here
             throw new UnsupportedOperationException(
-                    "The setItems method of the internal ListBox of the Select component should never be called.");
+                    "The setItems method of the internal ListBox of the " +
+                            "Select component should never be called.");
         }
 
         @Override
@@ -433,9 +435,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         return super.isAutofocusBoolean();
     }
 
-
     /**
      * {@inheritDoc}
+     * 
      * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
      */
     @Override
@@ -446,6 +448,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
 
     /**
      * {@inheritDoc}
+     * 
      * @deprecated use {@link HasListDataView#setDataSource(Collection)}
      */
     @Override
@@ -456,18 +459,20 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
 
     /**
      * {@inheritDoc}
-     * @deprecated use {@link HasListDataView#setDataSource(Stream)}
+     * 
+     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
      */
     @Override
     @Deprecated
     public void setItems(Stream<T> streamOfItems) {
-        setDataSource(streamOfItems);
+        setDataSource(DataProvider.fromStream(streamOfItems));
     }
 
     /**
      * {@inheritDoc}
+     * 
      * @deprecated use instead one of the setDataSource methods from
-     * {@link HasListDataView}
+     *             {@link HasListDataView}
      */
     @Override
     @Deprecated
@@ -505,28 +510,33 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
     }
 
     /**
-     * Getter for getting a generic SelectDataView.
-     * <p>
-     * {@link #getListDataView()} is recommended when the backing data source is
-     * a List.
+     * Gets the generic data view for the {@link Select}. This data view should
+     * only be used when {@link #getListDataView()} is not applicable for the
+     * underlying dataSource.
      *
-     * @return DataView instance implementing {@link SelectDataView}
+     * @return the generic DataView instance implementing {@link Select}
      */
     @Override
     public SelectDataView<T> getDataView() {
-        return new SelectDataViewImpl(this::getDataProvider, this);
+        return new SelectDataViewImpl<>(this::getDataProvider, this);
     }
 
+    /**
+     * Gets the list data view for the {@link Select}. This data view should
+     * only be used when the used data source is of in-memory type and set with:
+     * <ul>
+     * <li>{@link #setDataSource(Collection)}</li>
+     * <li>{@link #setDataSource(Object[])}</li>
+     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * </ul>
+     * If the data source is of wrong type (lazy), an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         {@link Select}
+     */
     @Override
     public SelectListDataView<T> getListDataView() {
-        if (getDataProvider() instanceof ListDataProvider) {
-            return new SelectListDataView<>(this::getDataProvider,
-                        this);
-        }
-        throw new IllegalStateException(String.format(
-                "Required ListDataProvider, but got '%s'. Use 'getDataView()' "
-                        + "to get a generic DataView instance.",
-                getDataProvider().getClass().getSuperclass().getSimpleName()));
+        return new SelectListDataView<>(this::getDataProvider, this);
     }
 
     @Override
@@ -908,7 +918,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
             // return the value back on the client side
             try {
                 validationRegistration.remove();
-                getElement().setProperty(VALUE_PROPERTY_NAME, keyMapper.key(oldValue));
+                getElement().setProperty(VALUE_PROPERTY_NAME,
+                        keyMapper.key(oldValue));
             } finally {
                 registerValidation();
             }
@@ -925,8 +936,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         if (validationRegistration != null) {
             validationRegistration.remove();
         }
-        validationRegistration = getElement().addPropertyChangeListener(VALUE_PROPERTY_NAME,
-                validationListener);
+        validationRegistration = getElement().addPropertyChangeListener(
+                VALUE_PROPERTY_NAME, validationListener);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

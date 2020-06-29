@@ -129,8 +129,8 @@ public class SelectDataViewImplTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        DataProvider<Item, ?> dataProvider =
-                new CustomIdentityItemDataProvider(items);
+        DataProvider<Item, ?> dataProvider = new CustomIdentityItemDataProvider(
+                items);
 
         Select<Item> component = new Select<>();
         component.setDataSource(dataProvider);
@@ -274,11 +274,12 @@ public class SelectDataViewImplTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             Item item = (Item) o;
-            return id == item.id &&
-                    Objects.equals(value, item.value);
+            return id == item.id && Objects.equals(value, item.value);
         }
 
         @Override

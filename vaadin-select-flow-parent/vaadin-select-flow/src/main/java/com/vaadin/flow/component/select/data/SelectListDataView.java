@@ -6,10 +6,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
- * An implementation of {@link SelectDataView} for in-memory list data handling
+ * Data view implementation for {@link Select} with in-memory list data.
+ * Provides information on the data and allows operations on it.
  *
  * @param <T>
- *         item type
+ *            item type
  */
 public class SelectListDataView<T> extends AbstractListDataView<T>
         implements SelectDataView<T> {
@@ -18,9 +19,9 @@ public class SelectListDataView<T> extends AbstractListDataView<T>
      * Constructs a new SelectListDataView
      *
      * @param dataProviderSupplier
-     *         supplier from which the DataProvider can be gotten
+     *            supplier from which the DataProvider can be gotten
      * @param select
-     *         select component that the dataView is bound to
+     *            select component that the dataView is bound to
      */
     public SelectListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,

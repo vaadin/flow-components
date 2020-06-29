@@ -14,7 +14,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.data.CountryData;
 import com.vaadin.flow.component.select.data.DepartmentData;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.data.TeamData;
@@ -28,53 +27,6 @@ import com.vaadin.flow.router.Route;
 
 @Route("vaadin-select")
 public class SelectView extends DemoView {
-
-
-    // begin-source-example
-    // source-example-heading: Select example model
-    public static class Country {
-        private String name;
-        private String continent;
-        private String capital;
-
-        public Country(String name, String continent, String capital) {
-            this.name = name;
-            this.continent = continent;
-            this.capital = capital;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getContinent() {
-            return continent;
-        }
-
-        public String getCapital() {
-            return capital;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Country country = (Country) o;
-            return name.equals(country.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name);
-        }
-    }
-
-    // end-source-example
-
 
     @Override
     protected void initView() {
@@ -90,6 +42,7 @@ public class SelectView extends DemoView {
         themeVariantsTextAlign(); // ThemeVariants
         themeVariantsSmallSize();
         styling();// Styling
+        externalDataNavigation(); // External Navigation
     }
 
     private void basicDemo() {
@@ -145,11 +98,6 @@ public class SelectView extends DemoView {
     private List<Team> getTeams() {
         TeamData teamData = new TeamData();
         return teamData.getTeams();
-    }
-
-    private List<Country> getCountries() {
-        CountryData countryData = new CountryData();
-        return countryData.getCountries();
     }
 
     private void entityList() {
@@ -209,7 +157,8 @@ public class SelectView extends DemoView {
         requiredSelect.setRequiredIndicatorVisible(true);
         requiredSelect.setLabel("Required");
 
-        requiredSelect.setDataSource("Option one", "Option two", "Option three");
+        requiredSelect.setDataSource("Option one", "Option two",
+                "Option three");
 
         // The empty selection item is the first item that maps to an null item.
         // As the item is not selectable, using it also as placeholder
@@ -233,8 +182,8 @@ public class SelectView extends DemoView {
 
         Select<String> titleSelect = new Select<>();
         titleSelect.setLabel("Title");
-        titleSelect.setDataSource("Account Manager", "Designer", "Marketing Manager",
-                "Developer");
+        titleSelect.setDataSource("Account Manager", "Designer",
+                "Marketing Manager", "Developer");
 
         titleSelect.setEmptySelectionAllowed(true);
         titleSelect.setEmptySelectionCaption("Select your title");
@@ -367,6 +316,47 @@ public class SelectView extends DemoView {
         // end-source-example
         addCard("Styling", "Styling references", firstHorizontalLayout,
                 secondHorizontalLayout);
+    }
+
+    // begin-source-example
+    // source-example-heading: Navigating Select items externally
+    private Select<String> select;
+    private Button next;
+    private Button previous;
+    private Span selectedOption;
+    private String currentOption;
+    private SelectListDataView<String> dataView;
+    private HorizontalLayout layout;
+
+    private void createExternalDataNavigation() {
+        select = new Select<>();
+        dataView = select.setDataSource("Option one", "Option two",
+                "Option three");
+        selectedOption = new Span();
+        next = new Button("Next", event -> selectOption(
+                dataView.getNextItem(currentOption).get()));
+        previous = new Button("Previous", event -> selectOption(
+                dataView.getPreviousItem(currentOption).get()));
+        select.addValueChangeListener(event -> selectOption(event.getValue()));
+        select.setValue(dataView.getItemOnIndex(0));
+        layout = new HorizontalLayout(select, previous, selectedOption, next);
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+    }
+
+    private void selectOption(String currentOption) {
+        this.currentOption = currentOption;
+        selectedOption.setText(currentOption);
+        select.setValue(currentOption);
+        next.setEnabled(dataView.getNextItem(currentOption).isPresent());
+        previous.setEnabled(
+                dataView.getPreviousItem(currentOption).isPresent());
+    }
+    // end-source-example
+
+    private void externalDataNavigation() {
+        createExternalDataNavigation();
+        addCard("External Navigation", "Navigating Select items externally",
+                layout);
     }
 
     private static class Employee {

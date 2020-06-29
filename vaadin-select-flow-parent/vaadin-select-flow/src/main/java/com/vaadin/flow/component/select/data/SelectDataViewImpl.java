@@ -16,19 +16,19 @@
 
 package com.vaadin.flow.component.select.data;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
- * Implementation of the base DataView applicable for use with any
- * DataProvider.
- * Note that this has a minimal API and using {@link SelectListDataView}
- * is advised.
+ * Implementation of generic data view for {@link Select}.
  *
  * @param <T>
- *         item type
+ *            item type
  * @since
  */
 public class SelectDataViewImpl<T> extends AbstractDataView<T>
@@ -38,9 +38,9 @@ public class SelectDataViewImpl<T> extends AbstractDataView<T>
      * Constructs a new DataView.
      *
      * @param dataProviderSupplier
-     *         data provider supplier
+     *            data provider supplier
      * @param select
-     *         select instance for this DataView
+     *            select instance for this DataView
      */
     public SelectDataViewImpl(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
@@ -61,10 +61,17 @@ public class SelectDataViewImpl<T> extends AbstractDataView<T>
 
     @Override
     public boolean contains(T item) {
-        final DataProvider<T, ?> dataProvider = dataProviderSupplier.get();
-        final Object itemIdentifier = dataProvider.getId(item);
-        return getItems()
-                .anyMatch(i -> itemIdentifier.equals(dataProvider.getId(i)));
+        final IdentifierProvider<T> identifierProvider =
+                getIdentifierProvider();
+
+        Object itemIdentifier = identifierProvider.apply(item);
+        Objects.requireNonNull(itemIdentifier,
+                "Identity provider should not return null");
+        //@formatter:off
+        return getItems().anyMatch(
+                i -> itemIdentifier.equals(
+                        identifierProvider.apply(i)));
+        //@formatter:on
     }
 
     @Override
