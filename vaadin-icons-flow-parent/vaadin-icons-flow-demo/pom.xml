@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-icons-flow-parent</artifactId>
-        <version>3.2-SNAPSHOT</version>
+        <version>17.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-icons-flow-demo</artifactId>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>17.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

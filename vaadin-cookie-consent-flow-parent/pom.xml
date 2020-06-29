@@ -7,11 +7,10 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>17.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.2-SNAPSHOT</version>
     <name>vaadin-cookie-consent-flow-parent</name>
     <inceptionYear>2018</inceptionYear>
     <organization>

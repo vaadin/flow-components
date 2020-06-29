@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-custom-field-flow-parent</artifactId>
-        <version>4.2-SNAPSHOT</version>
+        <version>17.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-custom-field-integration-tests</artifactId>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-testbench</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>17.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>17.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
