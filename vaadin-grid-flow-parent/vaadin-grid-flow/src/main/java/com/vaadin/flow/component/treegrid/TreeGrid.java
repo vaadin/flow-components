@@ -282,7 +282,7 @@ public class TreeGrid<T> extends Grid<T>
         if (!(dataProvider instanceof HierarchicalDataProvider)) {
             throw new IllegalArgumentException(
                     "TreeGrid only accepts hierarchical data providers. "
-                            + "An example of interface to be used: HierarchicalDataProvider");
+                        + "An example of interface to be used: HierarchicalDataProvider");
         }
         if (dataProviderRegistration != null) {
             dataProviderRegistration.remove();

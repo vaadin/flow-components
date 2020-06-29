@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -48,13 +49,15 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.dataview.GridDataView;
+import com.vaadin.flow.component.grid.dataview.GridDataViewImpl;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
@@ -79,7 +82,12 @@ import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.HasDataGenerators;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -131,9 +139,11 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
-public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
-        HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
-        HasTheme, HasDataGenerators<T> {
+public class Grid<T> extends Component
+        implements HasDataProvider<T>, HasStyle, HasSize, Focusable<Grid<T>>,
+        SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme, HasDataGenerators<T>,
+        HasListDataView<T, GridListDataView<T>>,
+        HasDataView<T, GridDataView<T>> {
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
@@ -2292,7 +2302,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         return -1;
     }
 
+    /**
+     * {@inheritDoc}
+     * @deprecated use instead one of the {@code setDataSource} methods which
+     * provide access to either {@link GridListDataView} or GridLazyDataView
+     */
     @Override
+    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
@@ -2313,12 +2329,84 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
+     * {@inheritDoc}
+     * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
+     */
+    @Override
+    @Deprecated
+    public void setItems(T... items) {
+        setDataSource(items);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
+     */
+    @Override
+    @Deprecated
+    public void setItems(Collection<T> items) {
+        setDataSource(items);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
+     */
+    @Override
+    @Deprecated
+    public void setItems(Stream<T> streamOfItems) {
+        setDataSource(DataProvider.fromStream(streamOfItems));
+    }
+
+    /**
      * Returns the data provider of this grid.
      *
      * @return the data provider of this grid, not {@code null}
      */
     public DataProvider<T, ?> getDataProvider() {
         return getDataCommunicator().getDataProvider();
+    }
+
+    @Override
+    public GridDataView<T> setDataSource(DataProvider<T, ?> dataProvider) {
+        setDataProvider(dataProvider);
+        return getDataView();
+    }
+
+    /**
+     * Gets the generic data view for the grid. This data view should only be
+     * used when {@link #getListDataView()} is not applicable for the
+     * underlying dataSource.
+     *
+     * @return the generic DataView instance implementing {@link GridDataView}
+     */
+    @Override
+    public GridDataView<T> getDataView() {
+        return new GridDataViewImpl<>(getDataCommunicator(), this);
+    }
+
+    @Override
+    public GridListDataView<T> setDataSource(ListDataProvider<T> dataProvider) {
+        setDataProvider(dataProvider);
+        return getListDataView();
+    }
+
+    /**
+     * Gets the list data view for the grid. This data view should only be
+     * used when the used data source is of in-memory type and set with:
+     * <ul>
+     * <li>{@link #setDataSource(Collection)}</li>
+     * <li>{@link #setDataSource(Object[])}</li>
+     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * </ul>
+     * If the data source is of wrong type (lazy), an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         grid
+     */
+    @Override
+    public GridListDataView<T> getListDataView() {
+            return new GridListDataView<>(getDataCommunicator(), this);
     }
 
     /**
