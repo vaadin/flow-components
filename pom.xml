@@ -51,6 +51,7 @@
         <module>vaadin-context-menu-flow-parent</module>
         <module>vaadin-date-picker-flow-parent</module>
         <module>vaadin-date-time-picker-flow-parent</module>
+        <module>vaadin-dialog-flow-parent</module>
         <module>vaadin-form-layout-flow-parent</module>
         <module>vaadin-grid-flow-parent</module>
         <module>vaadin-icons-flow-parent</module>
