@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
 
 /**
@@ -72,15 +73,29 @@ public abstract class AbstractLayout extends DemoView {
         return boxSizing;
     }
 
+    public <T extends Enum> RadioButtonGroup<T> createRadioButtonGroup(
+          T[] values, Consumer<T> consumer, T defaultValue) {
+        RadioButtonGroup<T> rbg = new RadioButtonGroup<>();
+        rbg.setItems(values);
+        rbg.setValue(defaultValue);
+        rbg.setRenderer(
+              new TextRenderer<>(enumValue -> enumValue.name().toLowerCase()));
+
+        rbg.addValueChangeListener(e -> {
+            consumer.accept(e.getValue());
+        });
+        return rbg;
+    }
+
     protected Div createLoremIpsum() {
         Div component = new Div();
-        component.setText("Lorem ipsum dolor sit amet, consectetur " +
-                "adipiscing elit, sed do eiusmod tempor incididunt " +
-                "ut labore et dolore magna aliqua. Ut enim ad minim " +
-                "veniam, quis nostrud exercitation ullamco laboris " +
-                "nisi ut aliquip ex ea commodo consequat. Duis aute " +
-                "irure dolor in reprehenderit in voluptate velit " +
-                "esse cillum dolore eu fugiat nulla pariatur.");
+        component.setText("Lorem ipsum dolor sit amet, consectetur "
+              + "adipiscing elit, sed do eiusmod tempor incididunt "
+              + "ut labore et dolore magna aliqua. Ut enim ad minim "
+              + "veniam, quis nostrud exercitation ullamco laboris "
+              + "nisi ut aliquip ex ea commodo consequat. Duis aute "
+              + "irure dolor in reprehenderit in voluptate velit "
+              + "esse cillum dolore eu fugiat nulla pariatur.");
         component.getStyle().set("border", "1px solid #CCCCCC");
 
         return component;
