@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.orderedlayout.demo;
 
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -82,7 +81,7 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setWidth("130px");
         layout.setHeight("150px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
-        layout.setWrapMode(FlexLayout.WrapMode.WRAP);
+        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
 
         Component component1 = createComponent(1, "#78909C");
         Component component2 = createComponent(2, "#546E7A");
@@ -90,18 +89,15 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.add(component1, component2, component3);
 
-        Div buttons = new Div();
-        Stream.of(FlexLayout.ContentAlignment.values()).forEach(alignment -> {
-            NativeButton button = new NativeButton(alignment.name());
-            button.addClickListener(event -> layout.setAlignContent(alignment));
-            buttons.add(button);
-        });
         // end-source-example
 
         layout.setId("flex-layout-with-alignment-content");
 
+        Consumer<FlexLayout.ContentAlignment> changeLayout = alignment -> layout
+              .setAlignContent(alignment);
         addCard("FlexLayout", "FlexLayout with alignment content", layout,
-                buttons);
+              createRadioButtonGroup(FlexLayout.ContentAlignment.values(),
+                    changeLayout, layout.getAlignContent()));
     }
 
     private void createFlexLayoutWithFlexBasis() {
@@ -117,20 +113,17 @@ public class OrderedLayoutView extends AbstractLayout {
         Component component3 = createComponent(3, "#37474F");
 
         layout.add(component1, component2, component3);
-
-        Div buttons = new Div();
-        String[] widths = { "200px", "100%", "auto" };
-        Stream.of(widths).forEach(width -> {
-            NativeButton button = new NativeButton(width);
-            button.addClickListener(
-                    event -> layout.setFlexBasis(width, component1));
-            buttons.add(button);
-        });
         // end-source-example
+
+        RadioButtonGroup<String> widths = new RadioButtonGroup<>();
+        widths.setItems("200px", "100%", "auto");
+        widths.setValue("auto");
+        widths.addValueChangeListener(
+              event -> layout.setFlexBasis(event.getValue(), component1));
 
         layout.setId("flex-layout-with-flex-basis");
 
-        addCard("FlexLayout", "FlexLayout with flex basis", layout, buttons);
+        addCard("FlexLayout", "FlexLayout with flex basis", layout, widths);
     }
 
     private void createFlexLayoutWithFlexDirection() {
@@ -147,19 +140,16 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.add(component1, component2, component3);
 
-        Div buttons = new Div();
-        Stream.of(FlexLayout.FlexDirection.values()).forEach(direction -> {
-            NativeButton button = new NativeButton(direction.name());
-            button.addClickListener(
-                    event -> layout.setFlexDirection(direction));
-            buttons.add(button);
-        });
         // end-source-example
+        Consumer<FlexLayout.FlexDirection> flexDirectionConsumer = flexDirection -> layout
+              .setFlexDirection(flexDirection);
+        RadioButtonGroup<FlexLayout.FlexDirection> rbg = createRadioButtonGroup(
+              FlexLayout.FlexDirection.values(), flexDirectionConsumer,
+              FlexLayout.FlexDirection.ROW);
 
         layout.setId("flex-layout-with-flex-direction");
 
-        addCard("FlexLayout", "FlexLayout with flex direction", layout,
-                buttons);
+        addCard("FlexLayout", "FlexLayout with flex direction", layout, rbg);
     }
 
     private void createFlexLayoutWithFlexShrink() {
@@ -176,20 +166,18 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setFlexBasis("500px", component1, component2, component3);
         layout.add(component1, component2, component3);
-
-        Div buttons = new Div();
-        Integer[] shrinkValues = { 0, 1, 2 };
-        Stream.of(shrinkValues).forEach(shrink -> {
-            NativeButton button = new NativeButton(String.valueOf(shrink));
-            button.addClickListener(
-                    event -> layout.setFlexShrink(shrink, component1));
-            buttons.add(button);
-        });
         // end-source-example
+
+        RadioButtonGroup<Integer> shrinkValues = new RadioButtonGroup<>();
+        shrinkValues.setItems(0, 1, 2);
+        shrinkValues.setValue(1);
+        shrinkValues.addValueChangeListener(
+              event -> layout.setFlexShrink(event.getValue(), component1));
 
         layout.setId("flex-layout-with-flex-shrink");
 
-        addCard("FlexLayout", "FlexLayout with flex shrink", layout, buttons);
+        addCard("FlexLayout", "FlexLayout with flex shrink", layout,
+              shrinkValues);
     }
 
     private void createFlexLayoutWithOrderedItems() {
