@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>17.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-text-field-flow-parent</artifactId>
-    <version>3.2-SNAPSHOT</version>
+    <version>17.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin TextField Flow Parent</name>
 
