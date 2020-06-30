@@ -677,7 +677,7 @@ public class GridDemo extends DemoView {
                 new Address("95632", "New York"), "187-338-588"));
 
         Grid<Person> grid = new Grid<>(Person.class);
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.removeColumnByKey("id");
 
@@ -697,7 +697,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Theme variants usage
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(personList);
+        grid.setItems(personList);
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
@@ -726,9 +726,9 @@ public class GridDemo extends DemoView {
          * based on offset and limit.
          *
          * When the user scrolls to the end grid will automatically extend and
-         * fetch more rows until the data source runs out of items.
+         * fetch more rows until the backend runs out of items.
          */
-        grid.setDataSource(query -> personService
+        grid.setItems(query -> personService
                 .fetch(query.getOffset(), query.getLimit()).stream());
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
@@ -748,15 +748,15 @@ public class GridDemo extends DemoView {
         PersonService personService = new PersonService();
 
         GridLazyDataView<Person> lazyDataView = grid
-                .setDataSource(query -> personService
+                .setItems(query -> personService
                         .fetch(query.getOffset(), query.getLimit()).stream());
         /*
          * By default the grid will initially adjust the scrollbar to 200 rows
          * and as the user scrolls down it automatically increases the size by
-         * 200 until the data source runs out of items.
+         * 200 until the backend runs out of items.
          *
          * Both the estimated row count and its increase can be customized
-         * to allow the user to scroll down faster when the data source will
+         * to allow the user to scroll down faster when the backend will
          * have a lot of rows.
          */
         lazyDataView.setRowCountEstimate(1000);
@@ -780,10 +780,10 @@ public class GridDemo extends DemoView {
 
         /*
          * In case it is desired to show to the user the exact number of rows in
-         * the data source, that can be done providing another callback that
-         * fetches the row count from the data source.
+         * the backend, that can be done providing another callback that
+         * fetches the row count from the backend.
          */
-        GridLazyDataView<Person> lazyDataView = grid.setDataSource(
+        GridLazyDataView<Person> lazyDataView = grid.setItems(
                 query -> personService
                         .fetch(query.getOffset(), query.getLimit()).stream(),
                 query -> personService.count());
@@ -811,7 +811,7 @@ public class GridDemo extends DemoView {
 
         // Providing a bean-type generates columns for all of it's properties
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         Grid.Column<Person> firstNameColumn = grid
                 .addColumn(Person::getFirstName).setHeader("First Name");
@@ -869,7 +869,7 @@ public class GridDemo extends DemoView {
         grid.setHeightByRows(true);
 
         final GridListDataView<Person> dataView = grid
-                .setDataSource(personList);
+                .setItems(personList);
 
         Grid.Column<Person> firstNameColumn = grid
                 .addColumn(Person::getFirstName).setHeader("First Name");
@@ -905,7 +905,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Grid Single Selection
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
@@ -927,7 +927,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Grid Multi Selection
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
@@ -956,11 +956,11 @@ public class GridDemo extends DemoView {
 
         H3 firstHeader = new H3("Grid with single select");
         Grid<Person> firstGrid = new Grid<>();
-        firstGrid.setDataSource(personList);
+        firstGrid.setItems(personList);
 
         H3 secondHeader = new H3("Grid with multi select");
         Grid<Person> secondGrid = new Grid<>();
-        secondGrid.setDataSource(personList);
+        secondGrid.setItems(personList);
         secondGrid.setSelectionMode(SelectionMode.MULTI);
 
         TextField filterField = new TextField();
@@ -1014,7 +1014,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Grid with sortable columns
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(personList);
+        grid.setItems(personList);
         grid.setSelectionMode(SelectionMode.NONE);
 
         grid.addColumn(Person::getFirstName, "First Name")
@@ -1066,7 +1066,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         final GridListDataView<Person> dataView = grid
-                .setDataSource(personList);
+                .setItems(personList);
 
         Grid.Column<Person> firstNameColumn = grid
                 .addColumn(Person::getFirstName).setHeader("Name");
@@ -1146,7 +1146,7 @@ public class GridDemo extends DemoView {
 
         Grid<Person> grid = new Grid<>();
         final GridListDataView<Person> dataView = grid
-                .setDataSource(personList);
+                .setItems(personList);
 
         final Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader("Name");
@@ -1213,7 +1213,7 @@ public class GridDemo extends DemoView {
         grid.setColumns("firstName", "lastName", "age", "address",
                 "phoneNumber");
 
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         // Columns for sub-properties can be added easily
         grid.addColumn("address.postalCode");
@@ -1230,7 +1230,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         Grid.Column<Person> idColumn = grid.addColumn(Person::getId)
                 .setHeader("ID").setFlexGrow(0).setWidth("75px");
@@ -1268,7 +1268,7 @@ public class GridDemo extends DemoView {
 
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>(Person.class);
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.setColumns("firstName", "lastName", "age", "birthDate", "address",
                 "phoneNumber");
@@ -1294,7 +1294,7 @@ public class GridDemo extends DemoView {
         H3 firstHeader = new H3("Freezing the selection column");
         Grid<Person> firstGrid = new Grid<>();
 
-        firstGrid.setDataSource(personList);
+        firstGrid.setItems(personList);
 
         firstGrid.addColumn(Person::getId).setHeader("ID").setWidth("75px");
         firstGrid.addColumn(Person::getFirstName).setHeader("First Name");
@@ -1316,7 +1316,7 @@ public class GridDemo extends DemoView {
 
         H3 secondHeader = new H3("Freezing the data columns");
         Grid<Person> secondGrid = new Grid<>();
-        secondGrid.setDataSource(personList);
+        secondGrid.setItems(personList);
 
         // Freezing any column
         secondGrid.addColumn(Person::getId).setHeader("ID").setWidth("75px")
@@ -1347,7 +1347,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
 
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
 
@@ -1378,7 +1378,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
 
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name")
                 .setKey("firstName");
@@ -1412,7 +1412,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         final GridListDataView<Person> dataView = grid
-                .setDataSource(personList);
+                .setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name")
                 .setFooter("Total: " + dataView.getSize() + " people");
@@ -1441,7 +1441,7 @@ public class GridDemo extends DemoView {
         benefitList.add(new Benefit(2021, sum += 10, sum, sum, sum));
 
         Grid<Benefit> grid = new Grid<>();
-        grid.setDataSource(benefitList);
+        grid.setItems(benefitList);
 
         grid.addColumn(Benefit::getYear).setHeader("Year");
         // Setting the alignment of columns
@@ -1480,7 +1480,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Using components
         Grid<Person> grid = new Grid<>();
         final GridListDataView<Person> dataView = grid
-                .setDataSource(getItems());
+                .setItems(getItems());
 
         Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader(new Label("Name")).setComparator((p1, p2) -> p1
@@ -1544,7 +1544,7 @@ public class GridDemo extends DemoView {
         itemList.add(new Item("Games", 250, dateTime, localDate));
 
         Grid<Item> grid = new Grid<>();
-        grid.setDataSource(itemList);
+        grid.setItems(itemList);
 
         grid.addColumn(Item::getName).setHeader("Name").setWidth("20px");
 
@@ -1588,7 +1588,7 @@ public class GridDemo extends DemoView {
                 new Address("86829", "New York")));
 
         Grid<Order> grid = new Grid<>();
-        grid.setDataSource(orderList);
+        grid.setItems(orderList);
 
         grid.addColumn(Order::getName).setHeader("Buyer").setFlexGrow(1);
 
@@ -1626,7 +1626,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         final GridListDataView<Person> dataView = grid
-                .setDataSource(personList);
+                .setItems(personList);
 
         // Use the component constructor that accepts an item ->
         // new PersonComponent(Person person)
@@ -1663,7 +1663,7 @@ public class GridDemo extends DemoView {
         H3 header = new H3("Clicking on a row will show more details");
         Grid<Person> grid = new Grid<>();
 
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
@@ -1699,7 +1699,7 @@ public class GridDemo extends DemoView {
         H3 header = new H3("Clicking on buttons will show more details");
         Grid<Person> grid = new Grid<>();
 
-        grid.setDataSource(personList);
+        grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
@@ -1735,7 +1735,7 @@ public class GridDemo extends DemoView {
     private Grid createExternalDataNavigationGrid() {
         Grid<Person> grid = new Grid<>(Person.class);
         final GridListDataView<Person> dataView = grid
-                .setDataSource(new PersonService().fetchAll());
+                .setItems(new PersonService().fetchAll());
 
         grid.removeColumnByKey("id");
 
@@ -1806,7 +1806,7 @@ public class GridDemo extends DemoView {
         Grid<Task> grid = new Grid<>();
         List<Task> tasks = taskData.getTasks();
 
-        GridListDataView<Task> dataView = grid.setDataSource(tasks);
+        GridListDataView<Task> dataView = grid.setItems(tasks);
         grid.addColumn(Task::getName).setHeader("Task Name");
         grid.addColumn(Task::getDueDate).setHeader("Due Date");
         GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
@@ -1845,7 +1845,7 @@ public class GridDemo extends DemoView {
         Grid<Person> grid = new Grid<>();
 
         final GridListDataView<Person> dataView = grid
-                .setDataSource(new PersonService().fetchAll());
+                .setItems(new PersonService().fetchAll());
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
@@ -1883,7 +1883,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Dynamic Context Menu
         Grid<Task> grid = new Grid<>();
 
-        grid.setDataSource(taskData.getTasks());
+        grid.setItems(taskData.getTasks());
         grid.addColumn(Task::getName).setHeader("Task Name");
         grid.addColumn(Task::getDueDate).setHeader("Due Date");
         GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
@@ -1912,7 +1912,7 @@ public class GridDemo extends DemoView {
         // begin-source-example
         // source-example-heading: Item Click Listener
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(getItems());
+        grid.setItems(getItems());
         grid.addColumn(Person::getFirstName).setHeader("First Name")
                 .setKey("First Name");
         grid.addColumn(Person::getAge).setHeader("Age").setKey("Age");
@@ -1946,7 +1946,7 @@ public class GridDemo extends DemoView {
         // begin-source-example
         // source-example-heading: Item Double Click Listener
         Grid<Person> grid = new Grid<>();
-        grid.setDataSource(getItems());
+        grid.setItems(getItems());
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getAge).setHeader("Age");
 
@@ -1977,7 +1977,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Editor in Buffered Mode
         Grid<Person> grid = new Grid<>();
         List<Person> persons = getItems();
-        grid.setDataSource(persons);
+        grid.setItems(persons);
         Grid.Column<Person> firstNameColumn = grid
                 .addColumn(Person::getFirstName).setHeader("First Name");
         Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge)
@@ -2058,7 +2058,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Editor in Not Buffered Mode
         Grid<Person> grid = new Grid<>();
         List<Person> persons = getItems();
-        grid.setDataSource(persons);
+        grid.setItems(persons);
         Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader("First Name");
         Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge)
@@ -2121,7 +2121,7 @@ public class GridDemo extends DemoView {
         // begin-source-example
         // source-example-heading: Dynamic Editor in Buffered Mode
         Grid<Customer> grid = new Grid<>();
-        grid.setDataSource(customerList);
+        grid.setItems(customerList);
 
         Grid.Column<Customer> firstNameColumn = grid
                 .addColumn(Customer::getFirstName).setHeader("First Name");
@@ -2258,7 +2258,7 @@ public class GridDemo extends DemoView {
         // begin-source-example
         // source-example-heading: Dynamic Editor in Not Buffered Mode
         Grid<Customer> grid = new Grid<>();
-        grid.setDataSource(customerList);
+        grid.setItems(customerList);
 
         Grid.Column<Customer> firstNameColumn = grid
                 .addColumn(Customer::getFirstName).setHeader("First Name");
@@ -2351,7 +2351,7 @@ public class GridDemo extends DemoView {
         Grid<Person> grid = new Grid<>(Person.class);
         grid.setColumns("firstName", "lastName", "phoneNumber");
         final GridListDataView<Person> dataView = grid
-                .setDataSource(new ArrayList<>(gridItems));
+                .setItems(new ArrayList<>(gridItems));
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setRowsDraggable(true);
 
@@ -2428,7 +2428,7 @@ public class GridDemo extends DemoView {
         // Note! PersonService.fetch returns a sublist.
         PersonService service = new PersonService();
 
-        grid.setDataSource(new ArrayList<>(service.fetch(0, 5)));
+        grid.setItems(new ArrayList<>(service.fetch(0, 5)));
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addDropListener(dropListener);
         grid.addDragStartListener(dragStartListener);
@@ -2436,7 +2436,7 @@ public class GridDemo extends DemoView {
         grid.setRowsDraggable(true);
         grid.setColumns("firstName", "lastName");
 
-        grid2.setDataSource(new ArrayList<>(service.fetch(5, 1)));
+        grid2.setItems(new ArrayList<>(service.fetch(5, 1)));
         grid2.setSelectionMode(Grid.SelectionMode.MULTI);
         grid2.addDropListener(dropListener);
         grid2.addDragStartListener(dragStartListener);
@@ -2460,7 +2460,7 @@ public class GridDemo extends DemoView {
         TreeGrid<Person> treeGrid = new TreeGrid<>();
         Grid<Person> grid = new Grid<>(Person.class);
         grid.setSelectionMode(SelectionMode.NONE);
-        grid.setDataSource(new ArrayList<>(personService.fetch(0, 50)));
+        grid.setItems(new ArrayList<>(personService.fetch(0, 50)));
 
         grid.addDragStartListener(event -> {
             draggedItem = event.getDraggedItems().get(0);
@@ -2533,7 +2533,7 @@ public class GridDemo extends DemoView {
         Grid<Person> grid = new Grid<>(Person.class);
         List<Person> persons = new ArrayList<>(personService.fetch(0, 50));
 
-        grid.setDataSource(persons);
+        grid.setItems(persons);
 
         grid.addDragStartListener(event -> {
             // event.getDraggedItems() can only contain items from the visible

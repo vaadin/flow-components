@@ -68,7 +68,6 @@ import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.binder.Setter;
@@ -90,7 +89,6 @@ import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -142,7 +140,7 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
-public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
+public class Grid<T> extends Component implements HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
         HasTheme, HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
         HasDataView<T, GridDataView<T>>,
@@ -2309,11 +2307,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * {@inheritDoc}
      * 
-     * @deprecated use instead one of the {@code setDataSource} methods which
+     * @deprecated use instead one of the {@code setItems} methods which
      *             provide access to either {@link GridListDataView} or
      *             {@link GridLazyDataView}
      */
-    @Override
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
@@ -2336,40 +2333,22 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * {@inheritDoc}
-     * 
-     * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} or
+     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
+     *             instead.
      */
-    @Override
-    @Deprecated
-    public void setItems(T... items) {
-        setDataSource(items);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
-     */
-    @Override
-    @Deprecated
-    public void setItems(Collection<T> items) {
-        setDataSource(items);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated use {@link HasListDataView#setDataSource(Collection)} or {@
-     *             code setDataSource(DataProvider.fromStream(streamOfItems))}.
-     */
-    @Override
     @Deprecated
     public void setItems(Stream<T> streamOfItems) {
-        setDataSource(DataProvider.fromStream(streamOfItems));
+        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**
      * Returns the data provider of this grid.
+     * <p>
+     * To get information and control over the items in the grid, use either
+     * {@link #getListDataView()} or {@link #getLazyDataView()} instead.
      *
      * @return the data provider of this grid, not {@code null}
      */
@@ -2378,17 +2357,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     @Override
-    public GridDataView<T> setDataSource(DataProvider<T, ?> dataProvider) {
+    public GridDataView<T> setItems(DataProvider<T, ?> dataProvider) {
         setDataProvider(dataProvider);
         return getDataView();
     }
 
     /**
      * Gets the generic data view for the grid. This data view should only be
-     * used when {@link #getListDataView()} is not applicable for the
-     * underlying dataSource.
+     * used when {@link #getListDataView()} or {@link #getLazyDataView()} is not
+     * applicable for the underlying data provider.
      *
      * @return the generic DataView instance implementing {@link GridDataView}
+     * @see #getListDataView()
+     * @see #getLazyDataView()
      */
     @Override
     public GridDataView<T> getDataView() {
@@ -2396,23 +2377,23 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     @Override
-    public GridListDataView<T> setDataSource(ListDataProvider<T> dataProvider) {
+    public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
         setDataProvider(dataProvider);
         return getListDataView();
     }
 
     /**
-     * Gets the list data view for the grid. This data view should only be
-     * used when the used data source is of in-memory type and set with:
+     * Gets the list data view for the grid. This data view should only be used
+     * when the items are in-memory set with:
      * <ul>
-     * <li>{@link #setDataSource(Collection)}</li>
-     * <li>{@link #setDataSource(Object[])}</li>
-     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
      * </ul>
-     * If the data source is of wrong type (lazy), an exception is thrown.
+     * If the items are not in-memory an exception is thrown. When the items are
+     * fetched lazily, use {@link #getLazyDataView()} instead.
      *
-     * @return the list data view that provides access to the data bound to the
-     *         grid
+     * @return the list data view that provides access to the items in the grid
      */
     @Override
     public GridListDataView<T> getListDataView() {
@@ -2421,7 +2402,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     // Overridden for now to delegate to setDataProvider for setup
     @Override
-    public GridLazyDataView<T> setDataSource(
+    public GridLazyDataView<T> setItems(
             BackEndDataProvider<T, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getLazyDataView();
@@ -2429,13 +2410,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets the lazy data view for the grid. This data view should only be used
-     * when the used data source is of lazy type and set with:
+     * when the items are provided lazily from the backend with:
      * <ul>
-     * <li>{@link #setDataSource(CallbackDataProvider.FetchCallback)}</li>
-     * <li>{@link #setDataSource(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}</li>
-     * <li>{@link #setDataSource(BackEndDataProvider)}</li>
+     * <li>{@link #setItems(CallbackDataProvider.FetchCallback)}</li>
+     * <li>{@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}</li>
+     * <li>{@link #setItems(BackEndDataProvider)}</li>
      * </ul>
-     * If the data source is of wrong type (in-memory), a exception is thrown.
+     * If the items are not fetched lazily an exception is thrown. When the
+     * items are in-memory, use {@link #getListDataView()} instead.
      * 
      * @return the lazy data view that provides access to the data bound to the
      *         grid
@@ -2466,7 +2448,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Sets the page size, which is the number of items fetched at a time from
-     * the data source. With the default value of {@code 50}, the grid might
+     * the data provider. With the default value of {@code 50}, the grid might
      * fetch items for example as: {@code 0-49, 50-149, 150-200...}.
      * <p>
      * <em>Note:</em> the number of items in the server-side memory can be

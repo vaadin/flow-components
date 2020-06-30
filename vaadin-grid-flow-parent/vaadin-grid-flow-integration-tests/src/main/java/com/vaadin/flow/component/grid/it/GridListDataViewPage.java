@@ -49,7 +49,7 @@ public class GridListDataViewPage extends Div {
         List<Person> personList = generatePersonItems();
         Grid<Person> grid = new Grid<>(Person.class);
         final GridListDataView<Person> dataView = grid
-                .setDataSource(personList);
+                .setItems(personList);
 
         grid.removeColumnByKey("id");
 

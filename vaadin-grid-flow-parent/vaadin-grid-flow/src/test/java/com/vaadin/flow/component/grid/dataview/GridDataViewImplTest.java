@@ -57,7 +57,7 @@ public class GridDataViewImplTest {
 
         dataProvider = new InMemoryProvider(items);
         component = new Grid<>();
-        dataView = component.setDataSource(dataProvider);
+        dataView = component.setItems(dataProvider);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class GridDataViewImplTest {
         Grid<Item> component = new Grid<>();
 
         // Generic grid data view
-        GridDataView<Item> dataView = component.setDataSource(dataProvider);
+        GridDataView<Item> dataView = component.setItems(dataProvider);
         DataKeyMapper<Item> keyMapper =
                 component.getDataCommunicator().getKeyMapper();
         items.forEach(keyMapper::key);

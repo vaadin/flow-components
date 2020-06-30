@@ -127,7 +127,7 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
 
     private void initGrid() {
         grid = new Grid<>();
-        grid.setDataSource(this::fakeFetch);
+        grid.setItems(this::fakeFetch);
         grid.setSizeFull();
 
         grid.addColumn(ValueProvider.identity()).setHeader("Name");
@@ -215,7 +215,7 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     }
 
     protected void switchToDataProvider() {
-        grid.setDataSource(dataProvider);
+        grid.setItems(dataProvider);
         dataProviderSizeInput.setEnabled(true);
     }
 
@@ -225,7 +225,7 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     }
 
     protected void switchToUndefinedSizeCallback() {
-        grid.setDataSource(this::fakeFetch);
+        grid.setItems(this::fakeFetch);
         dataProviderSizeInput.setEnabled(false);
     }
 

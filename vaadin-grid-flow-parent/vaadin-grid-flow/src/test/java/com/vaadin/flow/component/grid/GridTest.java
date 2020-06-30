@@ -40,7 +40,7 @@ public class GridTest {
 
         Grid<String> grid = new Grid<>();
         final GridListDataView<String> listDataView = grid
-                .setDataSource(Arrays.asList("one", "two"));
+                .setItems(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Arrays.asList("one").stream(),
