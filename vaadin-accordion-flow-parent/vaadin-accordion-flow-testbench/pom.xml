@@ -6,7 +6,7 @@
     <parent>
         <artifactId>vaadin-accordion-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>3.2-SNAPSHOT</version>
+        <version>17.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-accordion-testbench</artifactId>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-details-testbench</artifactId>
-            <version>${vaadin.details.flow.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
