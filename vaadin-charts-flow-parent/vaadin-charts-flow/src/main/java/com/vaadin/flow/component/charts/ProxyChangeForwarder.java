@@ -43,7 +43,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void dataAdded(DataAddedEvent event) {
         if (event.getItem() != null) {
-            chart.getElement().callFunction("__callSeriesFunction",
+            chart.getElement().callJsFunction("__callSeriesFunction",
                     "addPoint", getSeriesIndex(event),
                     chart.getJsonFactory().parse(
                             ChartSerialization.toJSON(event.getItem())),
@@ -53,18 +53,18 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     @Override
     public void dataRemoved(DataRemovedEvent event) {
-        chart.getElement().callFunction("__callPointFunction", "remove",
+        chart.getElement().callJsFunction("__callPointFunction", "remove",
                 getSeriesIndex(event), event.getIndex());
     }
 
     @Override
     public void dataUpdated(DataUpdatedEvent event) {
         if (event.getValue() != null) {
-            chart.getElement().callFunction("__callPointFunction", "update",
+            chart.getElement().callJsFunction("__callPointFunction", "update",
                     getSeriesIndex(event), event.getPointIndex(),
                     event.getValue().doubleValue());
         } else {
-            chart.getElement().callFunction("__callPointFunction", "update",
+            chart.getElement().callJsFunction("__callPointFunction", "update",
                     getSeriesIndex(event), event.getPointIndex(),
                     chart.getJsonFactory().parse(
                             ChartSerialization.toJSON(event.getItem())));
@@ -74,17 +74,17 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void seriesStateChanged(SeriesStateEvent event) {
         if (event.isEnabled()) {
-            chart.getElement().callFunction("__callSeriesFunction", "show",
+            chart.getElement().callJsFunction("__callSeriesFunction", "show",
                     getSeriesIndex(event));
         } else {
-            chart.getElement().callFunction("__callSeriesFunction", "hide",
+            chart.getElement().callJsFunction("__callSeriesFunction", "hide",
                     getSeriesIndex(event));
         }
     }
 
     @Override
     public void axisRescaled(AxisRescaledEvent event) {
-        chart.getElement().callFunction("__callAxisFunction", "setExtremes",
+        chart.getElement().callJsFunction("__callAxisFunction", "setExtremes",
                 event.getAxis(), event.getAxisIndex(),
                 event.getMinimum().doubleValue(),
                 event.getMaximum().doubleValue(), event.isRedrawingNeeded(),
@@ -93,21 +93,21 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     @Override
     public void itemSliced(ItemSlicedEvent event) {
-        chart.getElement().callFunction("__callPointFunction", "slice",
+        chart.getElement().callJsFunction("__callPointFunction", "slice",
                 getSeriesIndex(event), event.getIndex(), event.isSliced(),
                 event.isRedraw(), event.isAnimation());
     }
 
     @Override
     public void seriesAdded(SeriesAddedEvent event) {
-        chart.getElement().callFunction("__callChartFunction", "addSeries",
+        chart.getElement().callJsFunction("__callChartFunction", "addSeries",
                 chart.getJsonFactory().parse(ChartSerialization.toJSON(
                         (AbstractConfigurationObject) event.getSeries())));
     }
 
     @Override
     public void seriesChanged(SeriesChangedEvent event) {
-        chart.getElement().callFunction("__callSeriesFunction", "update",
+        chart.getElement().callJsFunction("__callSeriesFunction", "update",
                 getSeriesIndex(event),
                 chart.getJsonFactory().parse(ChartSerialization.toJSON(
                         (AbstractConfigurationObject) event.getSeries())));
@@ -117,13 +117,13 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     public void resetZoom(boolean redraw, boolean animate) {
         for (int i = 0; i < chart.getConfiguration()
                 .getNumberOfxAxes(); i++) {
-            chart.getElement().callFunction("__callAxisFunction",
+            chart.getElement().callJsFunction("__callAxisFunction",
                     "setExtremes", AxisDimension.X_AXIS.getIndex(), i, null, null, redraw,
                     animate);
         }
         for (int i = 0; i < chart.getConfiguration()
                 .getNumberOfyAxes(); i++) {
-            chart.getElement().callFunction("__callAxisFunction",
+            chart.getElement().callJsFunction("__callAxisFunction",
                     "setExtremes", AxisDimension.Y_AXIS.getIndex(), i, null, null, redraw,
                     animate);
         }
