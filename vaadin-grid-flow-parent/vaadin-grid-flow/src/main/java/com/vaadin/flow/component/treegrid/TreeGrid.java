@@ -462,9 +462,9 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Deprecated
     @Override
-    public GridDataView<T> getDataView() {
+    public GridDataView<T> getGenericDataView() {
         throw new UnsupportedOperationException(
-                "TreeGrid does not support data view.");
+                "TreeGrid does not support generic data view.");
     }
 
     /**

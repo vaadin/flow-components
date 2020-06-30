@@ -2359,7 +2359,7 @@ public class Grid<T> extends Component implements HasStyle,
     @Override
     public GridDataView<T> setItems(DataProvider<T, ?> dataProvider) {
         setDataProvider(dataProvider);
-        return getDataView();
+        return getGenericDataView();
     }
 
     /**
@@ -2372,7 +2372,7 @@ public class Grid<T> extends Component implements HasStyle,
      * @see #getLazyDataView()
      */
     @Override
-    public GridDataView<T> getDataView() {
+    public GridDataView<T> getGenericDataView() {
         return new GridDataViewImpl<>(getDataCommunicator(), this);
     }
 
