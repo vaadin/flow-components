@@ -56,7 +56,7 @@ public class GridListDataViewPage extends Div {
         // The Grid<>(Person.class) sorts the properties and in order to
         // reorder the properties we use the 'setColumns' method.
         grid.setColumns("firstName", "lastName", "age");
-        Span count = new Span(Integer.toString(dataView.getSize()));
+        Span count = new Span(Integer.toString(dataView.getItemCount()));
         count.setId(ITEM_COUNT);
         Span itemData = new Span("Item: ");
         itemData.setId(ITEM_DATA);
@@ -90,25 +90,25 @@ public class GridListDataViewPage extends Div {
                 });
         filterByFirstName.setId(FIRST_NAME_FILTER);
 
-        dataView.addSizeChangeListener(event -> {
-            count.setText(Integer.toString(event.getSize()));
+        dataView.addItemCountChangeListener(event -> {
+            count.setText(Integer.toString(event.getItemCount()));
             showPreviousData.setEnabled(rowSelect.getValue() > 0);
-            showNextData.setEnabled(rowSelect.getValue() < event.getSize() - 1);
+            showNextData.setEnabled(rowSelect.getValue() < event.getItemCount() - 1);
         });
 
         rowSelect.setValue(0);
         showPreviousData.setEnabled(false);
         rowSelect.addValueChangeListener(event -> {
-            if (event.getValue() >= dataView.getSize()) {
+            if (event.getValue() >= dataView.getItemCount()) {
                 itemData.setText("Action: Item outside of data rage of [0," + (
-                        dataView.getSize() - 1)
+                        dataView.getItemCount() - 1)
                         + "]. Resetting to previous");
                 rowSelect.setValue(event.getOldValue());
                 return;
             }
             showPreviousData.setEnabled(event.getValue() > 0);
             showNextData
-                    .setEnabled(event.getValue() < dataView.getSize() - 1);
+                    .setEnabled(event.getValue() < dataView.getItemCount() - 1);
         });
 
         add(grid, rowSelect, filterByFirstName, selectItemOnRow, showItemData,

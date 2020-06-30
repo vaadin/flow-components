@@ -20,11 +20,11 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
-@TestPath("row-count-estimate")
-public class RowCountEstimateGridIT extends AbstractRowCountGridIT {
+@TestPath("item-count-estimate")
+public class ItemCountEstimateGridIT extends AbstractItemCountGridIT {
 
     @Test
-    public void rowCountEstimateGrid_scrollingPastEstimate_keepsScrolling() {
+    public void itemCountEstimateGrid_scrollingPastEstimate_keepsScrolling() {
         int initialEstimate = 300;
         open(initialEstimate);
         verifyRows(initialEstimate);
@@ -39,7 +39,7 @@ public class RowCountEstimateGridIT extends AbstractRowCountGridIT {
     }
 
     @Test
-    public void rowCountEstimateGrid_reachesEndBeforeEstimate_sizeChanges() {
+    public void itemCountEstimateGrid_reachesEndBeforeEstimate_sizeChanges() {
         int initialEstimate = 500;
         open(initialEstimate);
         verifyRows(initialEstimate);
@@ -62,7 +62,7 @@ public class RowCountEstimateGridIT extends AbstractRowCountGridIT {
     }
 
     @Test
-    public void rowCountEstimateGrid_switchesToDefinedSize_sizeChanges() {
+    public void itemCountEstimateGrid_switchesToDefinedSize_sizeChanges() {
         int initialEstimate = 500;
         open(initialEstimate);
         verifyRows(initialEstimate);
@@ -75,7 +75,7 @@ public class RowCountEstimateGridIT extends AbstractRowCountGridIT {
     }
 
     @Test
-    public void rowCountEstimateGrid_estimateChanged_newEstimateApplied() {
+    public void itemCountEstimateGrid_estimateChanged_newEstimateApplied() {
         int initialEstimate = 1000;
         open(initialEstimate);
         verifyRows(initialEstimate);
@@ -91,7 +91,7 @@ public class RowCountEstimateGridIT extends AbstractRowCountGridIT {
     }
 
     @Test
-    public void rowCountEstimateGrid_estimateLessThanCurrentRange_estimateNotChanged() {
+    public void itemCountEstimateGrid_estimateLessThanCurrentRange_estimateNotChanged() {
         int initialEstimate = 1000;
         open(initialEstimate);
 

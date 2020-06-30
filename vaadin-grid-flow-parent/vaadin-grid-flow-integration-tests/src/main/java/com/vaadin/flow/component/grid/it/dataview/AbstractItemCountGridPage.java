@@ -34,7 +34,7 @@ import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.RouterLink;
 
-public abstract class AbstractRowCountGridPage extends VerticalLayout
+public abstract class AbstractItemCountGridPage extends VerticalLayout
         implements BeforeEnterObserver {
 
     private class LazyLoadingProvider
@@ -66,8 +66,8 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     public static final String UNDEFINED_SIZE_BUTTON_ID = "undefined-size";
     public static final String DEFINED_SIZE_BUTTON_ID = "defined-size";
     public static final String DATA_PROVIDER_BUTTON_ID = "data-provider";
-    public static final String ROW_COUNT_ESTIMATE_INPUT = "row-count-estimate-input";
-    public static final String ROW_COUNT_ESTIMATE_STEP_INPUT = "row-count-estimate-step-input";
+    public static final String ITEM_COUNT_ESTIMATE_INPUT = "item-count-estimate-input";
+    public static final String ITEM_COUNT_ESTIMATE_STEP_INPUT = "item-count-estimate-step-input";
     public static final String DATA_PROVIDER_SIZE_INPUT_ID = "data-provider-size-input";
     public static final String UNDEFINED_SIZE_BACKEND_SIZE_INPUT_ID = "fetchcallback";
     public static final int DEFAULT_DATA_PROVIDER_SIZE = 1000;
@@ -75,8 +75,8 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     private LazyLoadingProvider dataProvider;
     private VerticalLayout menuBar;
     private Div logPanel;
-    protected IntegerField rowCountEstimateInput;
-    protected IntegerField rowCountEstimateStepInput;
+    protected IntegerField itemCountEstimateInput;
+    protected IntegerField itemCountEstimateStepInput;
     protected IntegerField fetchCallbackSizeInput;
     protected IntegerField dataProviderSizeInput;
     protected Grid<String> grid;
@@ -88,7 +88,7 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     private int sizeCallbackEstimate = -1;
     private int initialSizeEstimate = -1;
 
-    public AbstractRowCountGridPage() {
+    public AbstractItemCountGridPage() {
         initGrid();
 
         logPanel = new Div();
@@ -116,13 +116,13 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     private void initNavigationLinks() {
         menuBar.add("Open initially with");
         menuBar.add(
-                new RouterLink("UndefinedSize", RowCountUnknownGridPage.class));
+                new RouterLink("UndefinedSize", ItemCountUnknownGridPage.class));
         menuBar.add(new RouterLink("InitialSizeEstimate",
-                RowCountEstimateGridPage.class));
+                ItemCountEstimateGridPage.class));
         menuBar.add(new RouterLink("SizeEstimateCallback",
-                RowCountEstimateStepGridPage.class));
+                ItemCountEstimateStepGridPage.class));
         menuBar.add(new RouterLink("DefinedSize",
-                RowCountCallbackGridPage.class));
+                ItemCountCallbackGridPage.class));
     }
 
     private void initGrid() {
@@ -187,20 +187,21 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     }
 
     private void initEstimateOptions() {
-        menuBar.add("RowCount Estimate Configuration");
+        menuBar.add("Item Count Estimate Configuration");
 
-        rowCountEstimateInput = new IntegerField(
-                "setRowCountEstimate",
+        itemCountEstimateInput = new IntegerField(
+                "setItemCountEstimate",
                 event -> grid.getLazyDataView()
-                        .setRowCountEstimate(event.getValue()));
-        rowCountEstimateInput.setId(ROW_COUNT_ESTIMATE_INPUT);
-        rowCountEstimateInput.setWidthFull();
+                        .setItemCountEstimate(event.getValue()));
+        itemCountEstimateInput.setId(ITEM_COUNT_ESTIMATE_INPUT);
+        itemCountEstimateInput.setWidthFull();
 
-        rowCountEstimateStepInput = new IntegerField("setRowCountEstimateStep",
-                event -> grid.getLazyDataView().setRowCountEstimateIncrease(event.getValue()));
-        rowCountEstimateStepInput.setId(ROW_COUNT_ESTIMATE_STEP_INPUT);
-        rowCountEstimateStepInput.setWidthFull();
-        menuBar.add(rowCountEstimateInput, rowCountEstimateStepInput);
+        itemCountEstimateStepInput = new IntegerField(
+                "setItemCountEstimateStep",
+                event -> grid.getLazyDataView().setItemCountEstimateIncrease(event.getValue()));
+        itemCountEstimateStepInput.setId(ITEM_COUNT_ESTIMATE_STEP_INPUT);
+        itemCountEstimateStepInput.setWidthFull();
+        menuBar.add(itemCountEstimateInput, itemCountEstimateStepInput);
     }
 
     private void initDataCommunicatorOptions() {
@@ -220,7 +221,7 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     }
 
     protected void switchToDefinedSize() {
-        grid.getLazyDataView().setRowCountCallback(dataProvider::size);
+        grid.getLazyDataView().setItemCountCallback(dataProvider::size);
         dataProviderSizeInput.setEnabled(true);
     }
 
@@ -230,7 +231,7 @@ public abstract class AbstractRowCountGridPage extends VerticalLayout
     }
 
     protected void switchToUndefinedSize() {
-        grid.getLazyDataView().setRowCountUnknown();
+        grid.getLazyDataView().setItemCountUnknown();
         dataProviderSizeInput.setEnabled(false);
     }
 

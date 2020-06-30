@@ -19,16 +19,14 @@ package com.vaadin.flow.component.grid.it.dataview;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
 
-@Route("row-count-estimate/:estimate?([0-9]{1,9})")
-public class RowCountEstimateGridPage extends AbstractRowCountGridPage {
-
-    public RowCountEstimateGridPage() {
-    }
+@Route("item-count-callback/:count?([0-9]{1,9})")
+public class ItemCountCallbackGridPage extends AbstractItemCountGridPage {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        event.getRouteParameters().get("estimate")
-                .ifPresent(string -> rowCountEstimateInput
+        event.getRouteParameters().get("count")
+                .ifPresent(string -> dataProviderSizeInput
                         .setValue(Integer.parseInt(string)));
+        switchToDefinedSize();
     }
 }

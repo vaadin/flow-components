@@ -34,8 +34,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -68,19 +68,13 @@ public class GridDataViewImplTest {
     }
 
     @Test
-    public void getDataSize_noFiltersSet_dataSizeObtained() {
-        Assert.assertEquals("Unexpected size for data", items.size(),
-                dataView.getSize());
-    }
-
-    @Test
     public void addListener_fireEvent_listenerIsCalled() {
         AtomicInteger fired = new AtomicInteger(0);
-        dataView.addSizeChangeListener(
-                event -> fired.compareAndSet(0, event.getSize()));
+        dataView.addItemCountChangeListener(
+                event -> fired.compareAndSet(0, event.getItemCount()));
 
         ComponentUtil
-                .fireEvent(component, new SizeChangeEvent<>(component, 10));
+                .fireEvent(component, new ItemCountChangeEvent<>(component, 10));
 
         Assert.assertEquals(10, fired.get());
     }

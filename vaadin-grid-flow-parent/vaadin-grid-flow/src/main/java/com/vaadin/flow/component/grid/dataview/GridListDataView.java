@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.dataview;
 
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -56,8 +55,8 @@ public class GridListDataView<T> extends AbstractListDataView<T>
     }
 
     @Override
-    public int getSize() {
-        return dataCommunicator.getDataSize();
+    public int getItemCount() {
+        return dataCommunicator.getItemCount();
     }
 
     @Override

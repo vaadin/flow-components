@@ -20,19 +20,19 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
-@TestPath("row-count-estimate-step")
-public class RowCountEstimateStepGridIT extends AbstractRowCountGridIT {
+@TestPath("item-count-estimate-step")
+public class ItemCountEstimateStepGridIT extends AbstractItemCountGridIT {
 
     @Test
     public void customStep_scrollingPastEstimate_estimateIncreased() {
         int customStep = 333;
         open(customStep);
 
-        verifyRows(getDefaultInitialRowCount());
+        verifyRows(getDefaultInitialItemCount());
 
         grid.scrollToRow(190);
 
-        int newCount = getDefaultInitialRowCount() + customStep;
+        int newCount = getDefaultInitialItemCount() + customStep;
         verifyRows(newCount);
 
         customStep = 500;

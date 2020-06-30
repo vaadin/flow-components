@@ -19,15 +19,16 @@ package com.vaadin.flow.component.grid.it.dataview;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
 
-@Route("row-count-estimate-step/:step?([0-9]{1,9})")
-public class RowCountEstimateStepGridPage
-        extends AbstractRowCountGridPage {
+@Route("item-count-estimate/:estimate?([0-9]{1,9})")
+public class ItemCountEstimateGridPage extends AbstractItemCountGridPage {
+
+    public ItemCountEstimateGridPage() {
+    }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        event.getRouteParameters().get("step").ifPresent(string -> {
-            int size = Integer.parseInt(string);
-            rowCountEstimateStepInput.setValue(size);
-        });
+        event.getRouteParameters().get("estimate")
+                .ifPresent(string -> itemCountEstimateInput
+                        .setValue(Integer.parseInt(string)));
     }
 }

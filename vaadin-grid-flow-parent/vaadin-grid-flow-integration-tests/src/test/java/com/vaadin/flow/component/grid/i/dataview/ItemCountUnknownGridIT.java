@@ -21,20 +21,20 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.vaadin.flow.component.grid.it.dataview.AbstractRowCountGridPage.DEFAULT_DATA_PROVIDER_SIZE;
+import static com.vaadin.flow.component.grid.it.dataview.AbstractItemCountGridPage.DEFAULT_DATA_PROVIDER_SIZE;
 
-@TestPath("row-count-unknown")
-public class RowCountUnknownGridIT extends AbstractRowCountGridIT {
+@TestPath("item-count-unknown")
+public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
 
     @Test
     public void undefinedSizeGrid_defaultPageSizeEvenToDatasetSize_scrollingToEnd() {
         final int datasetSize = 500;
         open(datasetSize);
 
-        verifyRows(getDefaultInitialRowCount());
+        verifyRows(getDefaultInitialItemCount());
         verifyFetchForUndefinedSizeCallback(0, Range.withLength(0, pageSize));
 
-        doScroll(45, getDefaultInitialRowCount(), 1, 50, 150);
+        doScroll(45, getDefaultInitialItemCount(), 1, 50, 150);
 
         // trigger next page fetch and size buffer increase
         doScroll(110, 400, 2, 150, 200);
@@ -59,7 +59,7 @@ public class RowCountUnknownGridIT extends AbstractRowCountGridIT {
         int actualSize = 300;
         open(actualSize);
 
-        verifyRows(getDefaultInitialRowCount());
+        verifyRows(getDefaultInitialItemCount());
         verifyFetchForUndefinedSizeCallback(0, Range.withLength(0, pageSize));
 
         doScroll(120, 400, 1, 50, 200);

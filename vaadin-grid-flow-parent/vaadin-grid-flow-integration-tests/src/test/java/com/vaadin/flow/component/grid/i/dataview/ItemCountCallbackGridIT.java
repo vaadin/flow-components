@@ -21,11 +21,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 
-@TestPath("row-count-callback")
-public class RowCountCallbackGridIT extends AbstractRowCountGridIT {
+@TestPath("item-count-callback")
+public class ItemCountCallbackGridIT extends AbstractItemCountGridIT {
 
     @Test
-    public void rowCountCallbackCallbackGrid_scrolledToMiddleAndSwitchesToUndefinedSize_canScrollPastOldKnownSize() {
+    public void itemCountCallbackCallbackGrid_scrolledToMiddleAndSwitchesToUndefinedSize_canScrollPastOldKnownSize() {
         open(500);
 
         grid.scrollToRow(250);
@@ -43,7 +43,7 @@ public class RowCountCallbackGridIT extends AbstractRowCountGridIT {
     }
 
     @Test
-    public void rowCountCallbackCallbackGrid_scrolledToEndAndSwitchesToUndefinedSize_sizeIsIncreased() {
+    public void itemCountCallbackCallbackGrid_scrolledToEndAndSwitchesToUndefinedSize_sizeIsIncreased() {
         open(5800);
 
         verifyRows(5800);

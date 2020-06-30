@@ -48,17 +48,6 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
                 .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <em>NOTE:</em> calling this method might trigger a count call to the
-     * backend when a lazy data source is used.
-     */
-    @Override
-    public int getSize() {
-        return dataCommunicator.getDataSize();
-    }
-
     @Override
     public boolean contains(T item) {
         final IdentifierProvider<T> identifierProvider =
@@ -81,7 +70,7 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
 
     @Override
     public T getItemOnRow(int rowIndex) {
-        final int dataSize = getSize();
+        final int dataSize = dataCommunicator.getItemCount();
         if (rowIndex < 0 || rowIndex >= dataSize) {
             throw new IndexOutOfBoundsException(String.format(
                     "Given index %d is outside of the accepted range '0 - %d'",

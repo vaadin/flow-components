@@ -93,9 +93,9 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         Assert.assertFalse("Got previous item for first index",
                 dataView.getPreviousItem(items[0]).isPresent());
 
-        // Test getSize
+        // Test getItemCount
         Assert.assertEquals("Unexpected size for data", items.length,
-                dataView.getSize());
+                dataView.getItemCount());
 
         // Test containsItem
         Assert.assertTrue("Set item was not found in the data",
@@ -113,7 +113,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         dataView.setFilter(s -> s.endsWith("4"));
 
         Assert.assertEquals("Filter was not applied to data size", 1,
-                dataView.getSize());
+                dataView.getItemCount());
 
         Assert.assertTrue("Expected item is missing from filtered data",
                 dataView.contains(items[3]));

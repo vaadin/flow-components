@@ -610,8 +610,8 @@ public class GridDemo extends DemoView {
         createBasicUsage();// Basic Grid
         addVariantFeature();
         createGridWithLazyLoading(); // Lazy Loading
-        createGridWithCustomRowCountEstimate();
-        createGridWithExactRowCount();
+        createGridWithCustomItemCountEstimate();
+        createGridWithExactItemCount();
         createSingleSelect(); // Selection
         createMultiSelect();
         createProgrammaticSelect();
@@ -741,7 +741,7 @@ public class GridDemo extends DemoView {
         addCard("Lazy Loading", "Grid with lazy loading", grid);
     }
 
-    private void createGridWithCustomRowCountEstimate() {
+    private void createGridWithCustomItemCountEstimate() {
         // begin-source-example
         // source-example-heading: Faster Scrolling with Custom Row Count Estimate
         Grid<Person> grid = new Grid<>();
@@ -759,20 +759,20 @@ public class GridDemo extends DemoView {
          * to allow the user to scroll down faster when the backend will
          * have a lot of rows.
          */
-        lazyDataView.setRowCountEstimate(1000);
-        lazyDataView.setRowCountEstimateIncrease(1000);
+        lazyDataView.setItemCountEstimate(1000);
+        lazyDataView.setItemCountEstimateIncrease(1000);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getLastName).setHeader("Last Name");
         grid.addColumn(Person::getAge).setHeader("Age");
         // end-source-example
 
-        grid.setId("custom-row-count-estimate");
+        grid.setId("custom-item-count-estimate");
 
         addCard("Lazy Loading", "Faster Scrolling with Custom Row Count Estimate", grid);
     }
 
-    private void createGridWithExactRowCount() {
+    private void createGridWithExactItemCount() {
         // begin-source-example
         // source-example-heading: Exact row count
         Grid<Person> grid = new Grid<>();
@@ -790,7 +790,7 @@ public class GridDemo extends DemoView {
 
         // The grid can be on switched back to unknown row count through the
         // API in the lazy data view:
-        // lazyDataView.setRowCountUnknown();
+        // lazyDataView.setItemCountUnknown();
 
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getLastName).setHeader("Last Name");
@@ -884,7 +884,7 @@ public class GridDemo extends DemoView {
 
         Button removeButton = new Button("Remove last", event ->
                 dataView.removeItem(dataView.getItemOnRow(
-                        dataView.getSize() - 1)));
+                        dataView.getItemCount() - 1)));
 
         FooterRow footerRow = grid.appendFooterRow();
         footerRow.getCell(firstNameColumn).setComponent(addButton);
@@ -1168,8 +1168,8 @@ public class GridDemo extends DemoView {
         grid.appendFooterRow().getCell(nameColumn).setComponent(sizeLabel);
 
         // Show total amount of matching items
-        dataView.addSizeChangeListener(
-                event -> sizeLabel.setText("Total: " + event.getSize()));
+        dataView.addItemCountChangeListener(
+                event -> sizeLabel.setText("Total: " + event.getItemCount()));
 
         layout.add(maritalStatus, birthDateField, grid);
         return layout;
@@ -1415,7 +1415,7 @@ public class GridDemo extends DemoView {
                 .setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name")
-                .setFooter("Total: " + dataView.getSize() + " people");
+                .setFooter("Total: " + dataView.getItemCount() + " people");
 
         long averageOfAge = Math.round(personList.stream()
                 .mapToInt(Person::getAge).average().orElse(0));
@@ -1519,8 +1519,8 @@ public class GridDemo extends DemoView {
         grid.appendFooterRow().getCell(nameColumn).setComponent(sizeLabel);
 
         // Set the total amount of people when the size changes due to filters
-        dataView.addSizeChangeListener(event -> sizeLabel
-                .setText("Total: " + event.getSize() + " people"));
+        dataView.addItemCountChangeListener(event -> sizeLabel
+                .setText("Total: " + event.getItemCount() + " people"));
         // end-source-example
         grid.setId("using-components");
         addCard("Header and footer", "Using components", grid);

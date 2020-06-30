@@ -17,7 +17,7 @@
 package com.vaadin.flow.component.grid.i.dataview;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.it.dataview.AbstractRowCountGridPage;
+import com.vaadin.flow.component.grid.it.dataview.AbstractItemCountGridPage;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.internal.Range;
@@ -27,7 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
-public abstract class AbstractRowCountGridIT extends AbstractComponentIT {
+public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
 
     // changing the dimension might get grid change what it fetches and how many
     // items it shows, so changing this is a bad idea ...
@@ -65,34 +65,34 @@ public abstract class AbstractRowCountGridIT extends AbstractComponentIT {
 
     protected void setUnknownCount() {
         findElement(
-                By.id(AbstractRowCountGridPage.UNDEFINED_SIZE_BUTTON_ID))
+                By.id(AbstractItemCountGridPage.UNDEFINED_SIZE_BUTTON_ID))
                         .click();
     }
 
     protected void setCountCallback() {
-        findElement(By.id(AbstractRowCountGridPage.DEFINED_SIZE_BUTTON_ID))
+        findElement(By.id(AbstractItemCountGridPage.DEFINED_SIZE_BUTTON_ID))
                 .click();
     }
 
     protected void setUnknownCountBackendSize(int size) {
         $(IntegerFieldElement.class).id(
-                AbstractRowCountGridPage.UNDEFINED_SIZE_BACKEND_SIZE_INPUT_ID)
+                AbstractItemCountGridPage.UNDEFINED_SIZE_BACKEND_SIZE_INPUT_ID)
                 .setValue(size + "");
     }
 
     protected void setEstimateStep(int estimate) {
         $(IntegerFieldElement.class).id(
-                AbstractRowCountGridPage.ROW_COUNT_ESTIMATE_STEP_INPUT)
+                AbstractItemCountGridPage.ITEM_COUNT_ESTIMATE_STEP_INPUT)
                 .setValue(estimate + "");
     }
 
     protected void setEstimate(int estimate) {
         $(IntegerFieldElement.class).id(
-                AbstractRowCountGridPage.ROW_COUNT_ESTIMATE_INPUT)
+                AbstractItemCountGridPage.ITEM_COUNT_ESTIMATE_INPUT)
                 .setValue(estimate + "");
     }
 
-    protected int getDefaultInitialRowCount() {
+    protected int getDefaultInitialItemCount() {
         return pageSize * sizeIncreasePageCount;
     }
 
