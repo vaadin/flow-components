@@ -41,7 +41,7 @@ public class TemplatedColumnsPage extends PolymerTemplate<TemplateModel> {
     private Grid<Person> grid;
 
     public TemplatedColumnsPage() {
-        grid.setDataProvider(DataProvider.fromCallbacks(this::fetchPeople,
+        grid.setDataSource(DataProvider.fromCallbacks(this::fetchPeople,
                 this::countPeople));
         grid.addDataGenerator(new BeanDataGenerator<>());
     }

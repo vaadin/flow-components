@@ -52,7 +52,7 @@ public class ChangingDataSizePage extends Div {
 
         CallbackDataProvider<String, Void> dataProvider = DataProvider
                 .<String> fromCallbacks(this::getItems, this::count);
-        grid.setDataProvider(dataProvider);
+        grid.setDataSource(dataProvider);
         add(grid, removeItems);
     }
 

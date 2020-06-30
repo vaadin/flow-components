@@ -304,7 +304,7 @@ public class GridView extends DemoView {
          * portion of the data.
          */
         PeopleGenerator generator = new PeopleGenerator();
-        grid.setDataProvider(DataProvider.fromCallbacks(
+        grid.setDataSource(DataProvider.fromCallbacks(
                 query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
@@ -1081,7 +1081,7 @@ public class GridView extends DemoView {
         grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
         grid.addColumn(HierarchicalTestBean::getIndex)
                 .setHeader("Index on this depth");
-        grid.setDataProvider(
+        grid.setDataSource(
                 new AbstractBackEndHierarchicalDataProvider<HierarchicalTestBean, Void>() {
 
                     private final int nodesPerLevel = 3;

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.ComponentEventListener;
@@ -71,8 +72,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
@@ -322,7 +321,12 @@ public class GridDemo extends DemoView {
         private PersonData personData = new PersonData();
 
         public List<Person> fetch(int offset, int limit) {
-            return personData.getPersons().subList(offset, offset + limit);
+            int end = offset + limit;
+            int size = personData.getPersons().size();
+            if (size <= end) {
+                end = size;
+            }
+            return personData.getPersons().subList(offset, end);
         }
 
         public int count() {
@@ -604,8 +608,10 @@ public class GridDemo extends DemoView {
     @Override
     protected void initView() {
         createBasicUsage();// Basic Grid
-        createGridWithLazyLoading();
         addVariantFeature();
+        createGridWithLazyLoading(); // Lazy Loading
+        createGridWithCustomRowCountEstimate();
+        createGridWithExactRowCount();
         createSingleSelect(); // Selection
         createMultiSelect();
         createProgrammaticSelect();
@@ -686,35 +692,6 @@ public class GridDemo extends DemoView {
         addCard("Grid Basics", grid);
     }
 
-    private void createGridWithLazyLoading() {
-        // begin-source-example
-        // source-example-heading: Grid with lazy loading
-        Grid<Person> grid = new Grid<>();
-        PersonService personService = new PersonService();
-
-        /*
-         * This Data Provider doesn't load all items into the memory right away.
-         * Grid will request only the data that should be shown in its current
-         * view "window". The Data Provider will use callbacks to load only a
-         * portion of the data.
-         */
-        CallbackDataProvider<Person, Void> provider = DataProvider
-                .fromCallbacks(query -> personService
-                        .fetch(query.getOffset(), query.getLimit()).stream(),
-                        query -> personService.count());
-        grid.setDataProvider(provider);
-
-        grid.addColumn(Person::getFirstName).setHeader("First Name");
-        grid.addColumn(Person::getLastName).setHeader("Last Name");
-        grid.addColumn(Person::getAge).setHeader("Age");
-
-        // end-source-example
-
-        grid.setId("lazy-loading");
-
-        addCard("Grid with lazy loading", grid);
-    }
-
     private void addVariantFeature() {
         // begin-source-example
         // source-example-heading: Theme variants usage
@@ -728,10 +705,150 @@ public class GridDemo extends DemoView {
 
         // end-source-example
 
-        addVariantsDemo(() -> grid, Grid::addThemeVariants,
-                Grid::removeThemeVariants,
+        addVariantsDemo(() -> {
+                    return grid;
+                }, Grid::addThemeVariants, Grid::removeThemeVariants,
                 GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+    }
+
+    // Lazy Loading Begin
+    private void createGridWithLazyLoading() {
+        // begin-source-example
+        // source-example-heading: Grid with lazy loading
+        Grid<Person> grid = new Grid<>();
+        PersonService personService = new PersonService();
+
+        /*
+         * When provided a callback, the grid doesn't load all items from
+         * backend to server memory right away. It will request only the data
+         * that is shown in its current view "window". The data is provided
+         * based on offset and limit.
+         *
+         * When the user scrolls to the end grid will automatically extend and
+         * fetch more rows until the data source runs out of items.
+         */
+        grid.setDataSource(query -> personService
+                .fetch(query.getOffset(), query.getLimit()).stream());
+
+        grid.addColumn(Person::getFirstName).setHeader("First Name");
+        grid.addColumn(Person::getLastName).setHeader("Last Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        // end-source-example
+        grid.setId("lazy-loading");
+
+        addCard("Lazy Loading", "Grid with lazy loading", grid);
+    }
+
+    private void createGridWithCustomRowCountEstimate() {
+        // begin-source-example
+        // source-example-heading: Faster Scrolling with Custom Row Count Estimate
+        Grid<Person> grid = new Grid<>();
+        PersonService personService = new PersonService();
+
+        GridLazyDataView<Person> lazyDataView = grid
+                .setDataSource(query -> personService
+                        .fetch(query.getOffset(), query.getLimit()).stream());
+        /*
+         * By default the grid will initially adjust the scrollbar to 200 rows
+         * and as the user scrolls down it automatically increases the size by
+         * 200 until the data source runs out of items.
+         *
+         * Both the estimated row count and its increase can be customized
+         * to allow the user to scroll down faster when the data source will
+         * have a lot of rows.
+         */
+        lazyDataView.setRowCountEstimate(1000);
+        lazyDataView.setRowCountEstimateIncrease(1000);
+
+        grid.addColumn(Person::getFirstName).setHeader("First Name");
+        grid.addColumn(Person::getLastName).setHeader("Last Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+        // end-source-example
+
+        grid.setId("custom-row-count-estimate");
+
+        addCard("Lazy Loading", "Faster Scrolling with Custom Row Count Estimate", grid);
+    }
+
+    private void createGridWithExactRowCount() {
+        // begin-source-example
+        // source-example-heading: Exact row count
+        Grid<Person> grid = new Grid<>();
+        PersonService personService = new PersonService();
+
+        /*
+         * In case it is desired to show to the user the exact number of rows in
+         * the data source, that can be done providing another callback that
+         * fetches the row count from the data source.
+         */
+        GridLazyDataView<Person> lazyDataView = grid.setDataSource(
+                query -> personService
+                        .fetch(query.getOffset(), query.getLimit()).stream(),
+                query -> personService.count());
+
+        // The grid can be on switched back to unknown row count through the
+        // API in the lazy data view:
+        // lazyDataView.setRowCountUnknown();
+
+        grid.addColumn(Person::getFirstName).setHeader("First Name");
+        grid.addColumn(Person::getLastName).setHeader("Last Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+        // end-source-example
+
+        grid.setId("count-callback");
+
+        addCard("Lazy Loading", "Exact row count", grid);
+    }
+
+    // Assigning Data Begin
+    private void createArrayData() {
+        // begin-source-example
+        // source-example-heading: Assigning Array Data
+
+        List<Person> personList = getItems();
+
+        // Providing a bean-type generates columns for all of it's properties
+        Grid<Person> grid = new Grid<>();
+        grid.setDataSource(personList);
+
+        Grid.Column<Person> firstNameColumn = grid
+                .addColumn(Person::getFirstName).setHeader("First Name");
+        Grid.Column<Person> lastNameColumn = grid.addColumn(Person::getLastName)
+                .setHeader("Last Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        Button addButton = new Button("Add Item", event -> {
+
+            personList.add(new Person(10000, "X", "Y", 16,
+                    new Address("95632", "New York"), "187-338-588"));
+            // The dataProvider knows which List it is based on, so when you
+            // edit the list
+            // you edit the dataprovider.
+            grid.getDataProvider().refreshAll();
+
+        });
+
+        Button removeButton = new Button("Remove last", event -> {
+
+            personList.remove(personList.size() - 1);
+            // The dataProvider knows which List it is based on, so when you
+            // edit the list
+            // you edit the dataprovider.
+            grid.getDataProvider().refreshAll();
+        });
+
+        FooterRow footerRow = grid.appendFooterRow();
+        footerRow.getCell(firstNameColumn).setComponent(addButton);
+        footerRow.getCell(lastNameColumn).setComponent(removeButton);
+
+        // end-source-example
+        grid.setId("assigning-array-data");
+        addButton.setId("assigning-array-data-add");
+        removeButton.setId("assigning-array-data-remove");
+        addCard("Assigning Data", "Assigning Array Data", grid, addButton,
+                removeButton);
     }
 
     private void createDynamicHeight() {
@@ -1687,9 +1804,9 @@ public class GridDemo extends DemoView {
         // begin-source-example
         // source-example-heading: Using ContextMenu With Grid
         Grid<Task> grid = new Grid<>();
+        List<Task> tasks = taskData.getTasks();
 
-        GridListDataView<Task> dataView = grid
-                .setDataSource(taskData.getTasks());
+        GridListDataView<Task> dataView = grid.setDataSource(tasks);
         grid.addColumn(Task::getName).setHeader("Task Name");
         grid.addColumn(Task::getDueDate).setHeader("Due Date");
         GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
