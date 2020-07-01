@@ -1081,7 +1081,7 @@ public class GridView extends DemoView {
         grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
         grid.addColumn(HierarchicalTestBean::getIndex)
                 .setHeader("Index on this depth");
-        grid.setItems(
+        grid.setDataProvider(
                 new AbstractBackEndHierarchicalDataProvider<HierarchicalTestBean, Void>() {
 
                     private final int nodesPerLevel = 3;
