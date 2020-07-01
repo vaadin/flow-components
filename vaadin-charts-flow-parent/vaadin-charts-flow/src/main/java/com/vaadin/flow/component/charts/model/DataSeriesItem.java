@@ -37,6 +37,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
     private Object drilldown;
     private DataLabels dataLabels;
     private String cursor;
+    private String description;
 
     /*
      * Flag to indicate if this item can be passed in optimized form to
@@ -401,6 +402,29 @@ public class DataSeriesItem extends AbstractSeriesItem {
      */
     public void setCursor(String cursor) {
         this.cursor = cursor;
+        makeCustomized();
+    }
+
+    /**
+     * @see #setDescription(String)
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * <p>
+     * <i>Requires Accessibility module</i>
+     * </p>
+     * <p>
+     * A description of the series to add to the screen reader information about the
+     * series.
+     * </p>
+     * <p>
+     * Defaults to: undefined
+     */
+    public void setDescription(String description) {
+        this.description = description;
         makeCustomized();
     }
 

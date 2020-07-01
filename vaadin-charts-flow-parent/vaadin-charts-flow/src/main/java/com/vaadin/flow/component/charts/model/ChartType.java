@@ -149,6 +149,11 @@ public class ChartType implements ChartEnum {
      */
     public static final ChartType ORGANIZATION = new ChartType("organization");
 
+    /**
+     * @see PlotOptionsXrange
+     */
+    public static final ChartType XRANGE = new ChartType("xrange");
+
     public static ChartType getDefault() {
         return ChartType.LINE;
     }

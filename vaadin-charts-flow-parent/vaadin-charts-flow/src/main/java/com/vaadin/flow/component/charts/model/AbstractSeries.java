@@ -43,6 +43,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
 
     private Integer xAxis;
     private Integer yAxis;
+    private Integer colorAxis;
 
     public AbstractSeries() {
     }
@@ -217,6 +218,27 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      */
     public void setyAxis(Integer yAxis) {
         this.yAxis = yAxis;
+    }
+
+    /**
+     * @see #setColorAxis(Number)
+     * @return The index of the color-axis that this data series is bound to.
+     *         Returns null if undefined.
+     */
+    public Integer getColorAxis() {
+        return colorAxis;
+    }
+
+    /**
+     * When using dual or multiple color-axes, this number defines which color-axis the
+     * particular series is connected to. It refers to the index of the axis in
+     * the color-axis array, with 0 being the first. Defaults to 0.
+     *
+     * @param colorAxis
+     *            The index of the color-axis to bind this data series to.
+     */
+    public void setColorAxis(Integer colorAxis) {
+        this.colorAxis = colorAxis;
     }
 
     /**

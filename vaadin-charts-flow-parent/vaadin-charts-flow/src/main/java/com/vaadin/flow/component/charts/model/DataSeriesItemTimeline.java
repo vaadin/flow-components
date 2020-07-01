@@ -20,12 +20,12 @@ import java.time.Instant;
  */
 
 /**
- * DataSeriesItem that can hold also Label and Description values. Used in e.g. timeline series.
+ * DataSeriesItem that can hold also Label and Description values. Used in e.g.
+ * timeline series.
  */
 public class DataSeriesItemTimeline extends DataSeriesItem {
 
     private String label;
-    private String description;
 
     public DataSeriesItemTimeline() {
         super();
@@ -38,7 +38,8 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
      * @param label
      * @param description
      */
-    public DataSeriesItemTimeline(String name, String label, String description) {
+    public DataSeriesItemTimeline(String name, String label,
+            String description) {
         super();
         setName(name);
         setLabel(label);
@@ -53,7 +54,8 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
      * @param label
      * @param description
      */
-    public DataSeriesItemTimeline(Number x, String name, String label, String description) {
+    public DataSeriesItemTimeline(Number x, String name, String label,
+            String description) {
         this(name, label, description);
         setX(x);
     }
@@ -66,35 +68,13 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
      * @param label
      * @param description
      */
-    public DataSeriesItemTimeline(Instant x, String name, String label, String description) {
+    public DataSeriesItemTimeline(Instant x, String name, String label,
+            String description) {
         super();
         setX(x);
         setName(name);
         setLabel(label);
         setDescription(description);
-    }
-
-    /**
-     * @see #setDescription(String)
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * <p>
-     * <i>Requires Accessibility module</i>
-     * </p>
-     * <p>
-     * A description of the series to add to the screen reader information about the
-     * series.
-     * </p>
-     * <p>
-     * Defaults to: undefined
-     */
-    public void setDescription(String description) {
-        this.description = description;
-        makeCustomized();
     }
 
     /**
@@ -105,18 +85,20 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
     }
 
     /**
-     * <p>
-     * <i>Requires Accessibility module</i>
-     * </p>
-     * <p>
-     * A description of the series to add to the screen reader information about the
-     * series.
-     * </p>
-     * <p>
-     * Defaults to: undefined
+     * The label of event.
      */
     public void setLabel(String label) {
         this.label = label;
         makeCustomized();
+    }
+
+    /**
+     * The description of event. This description will be shown in tooltip.
+     * <p>
+     * Defaults to: undefined
+     */
+    @Override
+    public void setDescription(String description) {
+        super.setDescription(description);
     }
 }
