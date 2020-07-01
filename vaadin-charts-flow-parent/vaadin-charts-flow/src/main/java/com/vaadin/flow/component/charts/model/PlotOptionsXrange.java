@@ -17,12 +17,14 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * Options for the xrange series type.
+ */
 public class PlotOptionsXrange extends AbstractPlotOptions {
 
     private Boolean allowPointSelect;
