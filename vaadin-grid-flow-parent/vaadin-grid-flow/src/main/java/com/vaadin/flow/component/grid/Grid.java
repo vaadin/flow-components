@@ -56,7 +56,6 @@ import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
-import com.vaadin.flow.component.grid.dataview.GridDataViewImpl;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
@@ -83,12 +82,15 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
+import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.LazyDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -140,9 +142,9 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
-public class Grid<T> extends Component implements HasStyle,
-        HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
-        HasTheme, HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
+public class Grid<T> extends Component implements HasStyle, HasSize,
+        Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
+        HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
         HasDataView<T, GridDataView<T>>,
         HasLazyDataView<T, GridLazyDataView<T>> {
 
@@ -2307,8 +2309,8 @@ public class Grid<T> extends Component implements HasStyle,
     /**
      * {@inheritDoc}
      * 
-     * @deprecated use instead one of the {@code setItems} methods which
-     *             provide access to either {@link GridListDataView} or
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link GridListDataView} or
      *             {@link GridLazyDataView}
      */
     @Deprecated
@@ -2367,13 +2369,13 @@ public class Grid<T> extends Component implements HasStyle,
      * used when {@link #getListDataView()} or {@link #getLazyDataView()} is not
      * applicable for the underlying data provider.
      *
-     * @return the generic DataView instance implementing {@link GridDataView}
+     * @return the generic {@link DataView} implementation for grid
      * @see #getListDataView()
      * @see #getLazyDataView()
      */
     @Override
     public GridDataView<T> getGenericDataView() {
-        return new GridDataViewImpl<>(getDataCommunicator(), this);
+        return new GridDataView<>(getDataCommunicator(), this);
     }
 
     @Override
@@ -2397,7 +2399,7 @@ public class Grid<T> extends Component implements HasStyle,
      */
     @Override
     public GridListDataView<T> getListDataView() {
-            return new GridListDataView<>(getDataCommunicator(), this);
+        return new GridListDataView<>(getDataCommunicator(), this);
     }
 
     // Overridden for now to delegate to setDataProvider for setup

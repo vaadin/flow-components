@@ -21,13 +21,13 @@ import com.vaadin.flow.data.provider.AbstractLazyDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 
 /**
- * Interface for lazy data view for grid.
+ * Data view implementation for Grid with lazy data fetching. Provides
+ * information on the data and allows operations on it.
  *
  * @param <T>
  *            the type of the items in grid
  */
-public class GridLazyDataView<T> extends AbstractLazyDataView<T>
-        implements GridDataView<T> {
+public class GridLazyDataView<T> extends AbstractLazyDataView<T> {
 
     /**
      * Creates a new lazy data view for grid and verifies the passed data
@@ -41,10 +41,5 @@ public class GridLazyDataView<T> extends AbstractLazyDataView<T>
     public GridLazyDataView(DataCommunicator<T> dataCommunicator,
             Grid<T> component) {
         super(dataCommunicator, component);
-    }
-
-    @Override
-    public T getItemOnRow(int rowIndex) {
-        return getDataCommunicator().getActiveItemOnIndex(rowIndex);
     }
 }

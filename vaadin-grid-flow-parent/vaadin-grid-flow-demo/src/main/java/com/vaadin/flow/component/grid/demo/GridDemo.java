@@ -884,7 +884,7 @@ public class GridDemo extends DemoView {
                 new Address("95632", "New York"), "187-338-588")));
 
         Button removeButton = new Button("Remove last", event ->
-                dataView.removeItem(dataView.getItemOnRow(
+                dataView.removeItem(dataView.getItem(
                         dataView.getItemCount() - 1)));
 
         FooterRow footerRow = grid.appendFooterRow();

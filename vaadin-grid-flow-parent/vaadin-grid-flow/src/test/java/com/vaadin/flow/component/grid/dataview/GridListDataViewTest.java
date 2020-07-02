@@ -43,7 +43,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         GridListDataView<String> dataView = grid
                 .setItems("one", "two", "three", "four");
 
-        dataView.getItemOnRow(7);
+        dataView.getItem(7);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         GridListDataView<String> dataView = grid
                 .setItems("one", "two", "three", "four");
 
-        dataView.getItemOnRow(-7);
+        dataView.getItem(-7);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         GridListDataView<String> dataView = grid
                 .setItems(new ListDataProvider<>(new ArrayList<>()));
 
-        dataView.getItemOnRow(5);
+        dataView.getItem(5);
     }
 
     @Test
@@ -77,9 +77,9 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems(items);
 
-        // Test getItemOnRow returns correct item
+        // Test getItem returns correct item
         Assert.assertEquals("Wrong item returned for row", items[2],
-                dataView.getItemOnRow(2));
+                dataView.getItem(2));
 
         // Test getNext-/-PreviousItem
         Assert.assertEquals("Faulty next item", items[3],
@@ -121,13 +121,14 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
                 dataView.contains(items[1]));
 
         Assert.assertEquals("Wrong item on row for filtered data.", items[3],
-                dataView.getItemOnRow(0));
+                dataView.getItem(0));
     }
 
     @Test
     public void dataViewWithItems_contains_returnsCorrectItems() {
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid.setItems("first","middle","last");
+        GridListDataView<String> dataView = grid
+                .setItems("first", "middle", "last");
 
         Assert.assertTrue("Returned false for item that should exist",
                 dataView.contains("middle"));
@@ -136,7 +137,8 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     @Test
     public void contains_itemPresentedInDataSet_itemFound() {
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid.setItems("first","middle","last");
+        GridListDataView<String> dataView = grid
+                .setItems("first", "middle", "last");
 
         Assert.assertTrue("The item was not found in the data",
                 dataView.contains("first"));
@@ -150,7 +152,8 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     @Test
     public void contains_itemNotPresentedInDataSet_itemNotFound() {
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid.setItems("first","middle","last");
+        GridListDataView<String> dataView = grid.setItems("first", "middle",
+                "last");
         Assert.assertFalse("Non existent item found in data",
                 dataView.contains("absent item"));
     }
