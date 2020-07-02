@@ -85,9 +85,6 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
     private int dataProviderSize = DEFAULT_DATA_PROVIDER_SIZE;
     private int fetchCallbackSize = -1;
 
-    private int sizeCallbackEstimate = -1;
-    private int initialSizeEstimate = -1;
-
     public AbstractItemCountGridPage() {
         initGrid();
 

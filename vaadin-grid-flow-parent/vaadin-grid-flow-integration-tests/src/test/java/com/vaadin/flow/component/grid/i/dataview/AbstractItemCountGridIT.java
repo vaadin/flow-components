@@ -97,7 +97,7 @@ public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
     }
 
     protected void verifyRows(int size) {
-        Assert.assertEquals("Row count doesn't match", size,
+        Assert.assertEquals("Item count doesn't match", size,
                 grid.getRowCount());
     }
 

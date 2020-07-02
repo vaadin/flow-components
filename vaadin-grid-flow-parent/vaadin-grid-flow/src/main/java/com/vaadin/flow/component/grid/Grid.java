@@ -2458,8 +2458,8 @@ public class Grid<T> extends Component implements HasStyle,
      * Setting the pageSize after the Grid has been rendered effectively resets
      * the component, and the current page(s) and sent over again.
      * <p>
-     * With automatically extending grid, controlling the row count and how much
-     * it is increased when scrolling is possible via
+     * With automatically extending grid, controlling the item count and how
+     * much it is increased when scrolling is possible via
      * {@link #getLazyDataView()}.
      *
      * @param pageSize

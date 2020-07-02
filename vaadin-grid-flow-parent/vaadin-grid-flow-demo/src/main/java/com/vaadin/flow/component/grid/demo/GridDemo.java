@@ -726,7 +726,7 @@ public class GridDemo extends DemoView {
          * based on offset and limit.
          *
          * When the user scrolls to the end grid will automatically extend and
-         * fetch more rows until the backend runs out of items.
+         * fetch more items until the backend runs out of items.
          */
         grid.setItems(query -> personService
                 .fetch(query.getOffset(), query.getLimit()).stream());
@@ -743,7 +743,7 @@ public class GridDemo extends DemoView {
 
     private void createGridWithCustomItemCountEstimate() {
         // begin-source-example
-        // source-example-heading: Faster Scrolling with Custom Row Count Estimate
+        // source-example-heading: Fast Scroll with Custom Item Count Estimate
         Grid<Person> grid = new Grid<>();
         PersonService personService = new PersonService();
 
@@ -751,13 +751,13 @@ public class GridDemo extends DemoView {
                 .setItems(query -> personService
                         .fetch(query.getOffset(), query.getLimit()).stream());
         /*
-         * By default the grid will initially adjust the scrollbar to 200 rows
+         * By default the grid will initially adjust the scrollbar to 200 items
          * and as the user scrolls down it automatically increases the size by
          * 200 until the backend runs out of items.
          *
-         * Both the estimated row count and its increase can be customized
+         * Both the estimated item count and its increase can be customized
          * to allow the user to scroll down faster when the backend will
-         * have a lot of rows.
+         * have a lot of items.
          */
         lazyDataView.setItemCountEstimate(1000);
         lazyDataView.setItemCountEstimateIncrease(1000);
@@ -769,26 +769,27 @@ public class GridDemo extends DemoView {
 
         grid.setId("custom-item-count-estimate");
 
-        addCard("Lazy Loading", "Faster Scrolling with Custom Row Count Estimate", grid);
+        addCard("Lazy Loading", "Fast Scroll with Custom Item Count Estimate",
+                grid);
     }
 
     private void createGridWithExactItemCount() {
         // begin-source-example
-        // source-example-heading: Exact row count
+        // source-example-heading: Exact item count
         Grid<Person> grid = new Grid<>();
         PersonService personService = new PersonService();
 
         /*
-         * In case it is desired to show to the user the exact number of rows in
-         * the backend, that can be done providing another callback that
-         * fetches the row count from the backend.
+         * In case it is desired to show to the user the exact number of
+         * items in the backend, that can be done providing another callback
+         * that fetches the item count from the backend.
          */
         GridLazyDataView<Person> lazyDataView = grid.setItems(
                 query -> personService
                         .fetch(query.getOffset(), query.getLimit()).stream(),
                 query -> personService.count());
 
-        // The grid can be on switched back to unknown row count through the
+        // The grid can be on switched back to unknown item count through the
         // API in the lazy data view:
         // lazyDataView.setItemCountUnknown();
 
@@ -799,7 +800,7 @@ public class GridDemo extends DemoView {
 
         grid.setId("count-callback");
 
-        addCard("Lazy Loading", "Exact row count", grid);
+        addCard("Lazy Loading", "Exact item count", grid);
     }
 
     // Assigning Data Begin

@@ -22,9 +22,6 @@ import com.vaadin.flow.router.Route;
 @Route("item-count-estimate/:estimate?([0-9]{1,9})")
 public class ItemCountEstimateGridPage extends AbstractItemCountGridPage {
 
-    public ItemCountEstimateGridPage() {
-    }
-
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         event.getRouteParameters().get("estimate")
