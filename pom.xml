@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>vaadin-flow-components</artifactId>
-    <version>17.0-SNAPSHOT</version>
+    <version>16.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Components flow</name>
 
@@ -29,7 +29,7 @@
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <driver.binary.downloader.maven.plugin.version>1.0.14
         </driver.binary.downloader.maven.plugin.version>
-        <flow.version>3.2-SNAPSHOT</flow.version>
+        <flow.version>3.1-SNAPSHOT</flow.version>
         <testbench.version>6.2.2</testbench.version>
 
         <!-- OSGi support -->
