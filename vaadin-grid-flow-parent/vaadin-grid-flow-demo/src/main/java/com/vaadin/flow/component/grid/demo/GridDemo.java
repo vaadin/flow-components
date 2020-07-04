@@ -1683,7 +1683,7 @@ public class GridDemo extends DemoView {
                 .withProperty("address", Person::getAddress)
                 .withProperty("image", Person::getImage)
                 .withEventHandler("handleClick", person ->
-                        grid.getListDataView().updateItem(person)));
+                        grid.getListDataView().refreshItem(person)));
 
         // end-source-example
         grid.setId("item-details");
@@ -1716,7 +1716,7 @@ public class GridDemo extends DemoView {
                 .withProperty("firstName", Person::getFirstName)
                 // This is now how we open the details
                 .withEventHandler("handleClick", person ->
-                        grid.getListDataView().updateItem(person)));
+                        grid.getListDataView().refreshItem(person)));
 
         // Disable the default way of opening item details:
         grid.setDetailsVisibleOnClick(false);
