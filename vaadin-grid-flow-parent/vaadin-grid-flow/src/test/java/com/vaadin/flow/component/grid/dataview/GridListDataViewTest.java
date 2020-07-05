@@ -18,16 +18,15 @@ package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -123,6 +122,37 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
         Assert.assertEquals("Wrong item on row for filtered data.", items[3],
                 dataView.getItemOnRow(0));
+    }
+
+    @Test
+    public void dataViewWithItems_contains_returnsCorrectItems() {
+        Grid<String> grid = new Grid<>();
+        GridListDataView<String> dataView = grid.setItems("first","middle","last");
+
+        Assert.assertTrue("Returned false for item that should exist",
+                dataView.contains("middle"));
+    }
+
+    @Test
+    public void contains_itemPresentedInDataSet_itemFound() {
+        Grid<String> grid = new Grid<>();
+        GridListDataView<String> dataView = grid.setItems("first","middle","last");
+
+        Assert.assertTrue("The item was not found in the data",
+                dataView.contains("first"));
+
+        dataView.setIdentifierProvider(item -> item.substring(0, 1));
+
+        Assert.assertTrue("The item was not found in the data",
+                dataView.contains("fourth"));
+    }
+
+    @Test
+    public void contains_itemNotPresentedInDataSet_itemNotFound() {
+        Grid<String> grid = new Grid<>();
+        GridListDataView<String> dataView = grid.setItems("first","middle","last");
+        Assert.assertFalse("Non existent item found in data",
+                dataView.contains("absent item"));
     }
 
     @Override

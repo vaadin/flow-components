@@ -49,21 +49,6 @@ public class GridDataViewImpl<T> extends AbstractDataView<T>
     }
 
     @Override
-    public boolean contains(T item) {
-        final IdentifierProvider<T> identifierProvider =
-                getIdentifierProvider();
-
-        Object itemIdentifier = identifierProvider.apply(item);
-        Objects.requireNonNull(itemIdentifier,
-                "Identity provider should not return null");
-        //@formatter:off
-        return getItems().anyMatch(
-                i -> itemIdentifier.equals(
-                        identifierProvider.apply(i)));
-        //@formatter:on
-    }
-
-    @Override
     protected Class<?> getSupportedDataProviderType() {
         return DataProvider.class;
     }

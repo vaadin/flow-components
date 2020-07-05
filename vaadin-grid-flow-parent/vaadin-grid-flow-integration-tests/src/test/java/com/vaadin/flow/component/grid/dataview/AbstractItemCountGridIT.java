@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.flow.component.grid.i.dataview;
+package com.vaadin.flow.component.grid.dataview;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.it.dataview.AbstractItemCountGridPage;

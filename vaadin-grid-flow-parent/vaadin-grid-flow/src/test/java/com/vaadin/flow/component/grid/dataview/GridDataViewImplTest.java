@@ -80,14 +80,6 @@ public class GridDataViewImplTest {
     }
 
     @Test
-    public void dataViewWithItems_contains_returnsCorrectItems() {
-        Assert.assertTrue("Returned false for item that should exist",
-                dataView.contains("middle"));
-        Assert.assertFalse("Returned false for item that should exist",
-                dataView.contains("non existing"));
-    }
-
-    @Test
     public void dataViewWithItems_getItemOnRow_returnsCorrectItem() {
         Assert.assertEquals(items.get(0), dataView.getItemOnRow(0));
         Assert.assertEquals(items.get(1), dataView.getItemOnRow(1));
@@ -122,23 +114,6 @@ public class GridDataViewImplTest {
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
-    }
-
-    @Test
-    public void contains_itemPresentedInDataSet_itemFound() {
-        Assert.assertTrue("The item was not found in the data",
-                dataView.contains("first"));
-
-        dataView.setIdentifierProvider(item -> item.substring(0, 1));
-
-        Assert.assertTrue("The item was not found in the data",
-                dataView.contains("fourth"));
-    }
-
-    @Test
-    public void contains_itemNotPresentedInDataSet_itemNotFound() {
-        Assert.assertFalse("Non existent item found in data",
-                dataView.contains("absent item"));
     }
 
     private static class InMemoryProvider
