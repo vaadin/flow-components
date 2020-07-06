@@ -166,13 +166,15 @@ public class GridDataViewTest {
 
         @Override
         public int size(Query<String, SerializablePredicate<String>> query) {
-            return (int) items.stream().filter(filter::test).count();
+            return (int) items.stream().skip(query.getOffset())
+                    .limit(query.getLimit()).filter(filter).count();
         }
 
         @Override
         public Stream<String> fetch(
                 Query<String, SerializablePredicate<String>> query) {
-            return items.stream().filter(filter::test);
+            return items.stream().skip(query.getOffset())
+                    .limit(query.getLimit()).filter(filter);
         }
 
         @Override
