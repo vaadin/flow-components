@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>com.vaadin</groupId>
 		<artifactId>flow-component-base</artifactId>
-		<version>3.2-SNAPSHOT</version>
+		<version>4.0-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 
 	<artifactId>vaadin-select-flow-parent</artifactId>
-	<version>3.2-SNAPSHOT</version>
+	<version>4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Vaadin Select Flow Parent</name>
 	<inceptionYear>2019</inceptionYear>
