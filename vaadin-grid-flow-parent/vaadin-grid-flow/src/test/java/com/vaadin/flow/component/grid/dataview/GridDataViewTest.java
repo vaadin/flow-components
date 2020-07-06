@@ -77,7 +77,7 @@ public class GridDataViewTest {
                 event -> fired.compareAndSet(0, event.getItemCount()));
 
         ComponentUtil.fireEvent(component,
-                new ItemCountChangeEvent<>(component, 10));
+                new ItemCountChangeEvent<>(component, 10, false));
 
         Assert.assertEquals(10, fired.get());
     }

@@ -109,4 +109,15 @@ public class ItemCountEstimateGridIT extends AbstractItemCountGridIT {
         verifyRows(1300);
     }
 
+    @Test
+    public void customIncrease_scrollsFarFromExactCount_countIsResolved() {
+        open(3000);
+        verifyRows(3000);
+        setUnknownCountBackendSize(469);
+
+        grid.scrollToRow(1000);
+
+        verifyRows(469);
+    }
+
 }

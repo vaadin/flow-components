@@ -20,31 +20,31 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
-@TestPath("item-count-estimate-step")
-public class ItemCountEstimateStepGridIT extends AbstractItemCountGridIT {
+@TestPath("item-count-estimate-increase")
+public class ItemCountEstimateIncreaseGridIT extends AbstractItemCountGridIT {
 
     @Test
-    public void customStep_scrollingPastEstimate_estimateIncreased() {
-        int customStep = 333;
-        open(customStep);
+    public void customIncrease_scrollingPastEstimate_estimateIncreased() {
+        int customIncrease = 333;
+        open(customIncrease);
 
         verifyRows(getDefaultInitialItemCount());
 
         grid.scrollToRow(190);
 
-        int newCount = getDefaultInitialItemCount() + customStep;
+        int newCount = getDefaultInitialItemCount() + customIncrease;
         verifyRows(newCount);
 
-        customStep = 500;
-        setEstimateStep(customStep);
+        customIncrease = 500;
+        setEstimateIncrease(customIncrease);
 
         grid.scrollToRow(newCount - 10);
 
-        verifyRows(newCount + customStep);
+        verifyRows(newCount + customIncrease);
     }
 
     @Test
-    public void customStep_reachesEndBeforeEstimate_sizeChanges() {
+    public void customIncrease_reachesEndBeforeEstimate_sizeChanges() {
         open(300);
 
         verifyRows(200);
@@ -61,7 +61,19 @@ public class ItemCountEstimateStepGridIT extends AbstractItemCountGridIT {
     }
 
     @Test
-    public void customStepScrolledToEnd_newStepSet_newEstimateSizeNotApplied() {
+    public void customIncrease_scrollsFarFromExactCount_countIsResolved() {
+        open(3000);
+        setUnknownCountBackendSize(469);
+        grid.scrollToRow(200);
+        verifyRows(3200);
+
+        grid.scrollToRow(1000);
+
+        verifyRows(469);
+    }
+
+    @Test
+    public void customIncreaseScrolledToEnd_newIncreaseSet_newEstimateSizeNotApplied() {
         open(300);
         int unknownCountBackendSize = 444;
         setUnknownCountBackendSize(unknownCountBackendSize);
@@ -76,7 +88,7 @@ public class ItemCountEstimateStepGridIT extends AbstractItemCountGridIT {
 
         // since the end was reached, only a reset() to data provider will reset
         // estimated size
-        setEstimateStep(600);
+        setEstimateIncrease(600);
         verifyRows(unknownCountBackendSize);
         Assert.assertEquals("Last visible row wrong",
                 unknownCountBackendSize - 1, grid.getLastVisibleRowIndex());

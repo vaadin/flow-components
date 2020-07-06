@@ -67,7 +67,7 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
     public static final String DEFINED_SIZE_BUTTON_ID = "defined-size";
     public static final String DATA_PROVIDER_BUTTON_ID = "data-provider";
     public static final String ITEM_COUNT_ESTIMATE_INPUT = "item-count-estimate-input";
-    public static final String ITEM_COUNT_ESTIMATE_STEP_INPUT = "item-count-estimate-step-input";
+    public static final String ITEM_COUNT_ESTIMATE_INCREASE_INPUT = "item-count-estimate-increase-input";
     public static final String DATA_PROVIDER_SIZE_INPUT_ID = "data-provider-size-input";
     public static final String UNDEFINED_SIZE_BACKEND_SIZE_INPUT_ID = "fetchcallback";
     public static final int DEFAULT_DATA_PROVIDER_SIZE = 1000;
@@ -76,7 +76,7 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
     private VerticalLayout menuBar;
     private Div logPanel;
     protected IntegerField itemCountEstimateInput;
-    protected IntegerField itemCountEstimateStepInput;
+    protected IntegerField itemCountEstimateIncreaseInput;
     protected IntegerField fetchCallbackSizeInput;
     protected IntegerField dataProviderSizeInput;
     protected Grid<String> grid;
@@ -117,7 +117,7 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
         menuBar.add(new RouterLink("InitialSizeEstimate",
                 ItemCountEstimateGridPage.class));
         menuBar.add(new RouterLink("SizeEstimateCallback",
-                ItemCountEstimateStepGridPage.class));
+                ItemCountEstimateIncreaseGridPage.class));
         menuBar.add(new RouterLink("DefinedSize",
                 ItemCountCallbackGridPage.class));
     }
@@ -193,12 +193,12 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
         itemCountEstimateInput.setId(ITEM_COUNT_ESTIMATE_INPUT);
         itemCountEstimateInput.setWidthFull();
 
-        itemCountEstimateStepInput = new IntegerField(
-                "setItemCountEstimateStep",
+        itemCountEstimateIncreaseInput = new IntegerField(
+                "setItemCountEstimateIncrease",
                 event -> grid.getLazyDataView().setItemCountEstimateIncrease(event.getValue()));
-        itemCountEstimateStepInput.setId(ITEM_COUNT_ESTIMATE_STEP_INPUT);
-        itemCountEstimateStepInput.setWidthFull();
-        menuBar.add(itemCountEstimateInput, itemCountEstimateStepInput);
+        itemCountEstimateIncreaseInput.setId(ITEM_COUNT_ESTIMATE_INCREASE_INPUT);
+        itemCountEstimateIncreaseInput.setWidthFull();
+        menuBar.add(itemCountEstimateInput, itemCountEstimateIncreaseInput);
     }
 
     private void initDataCommunicatorOptions() {

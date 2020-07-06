@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import org.apache.commons.lang3.StringUtils;
 
@@ -744,12 +745,13 @@ public class GridDemo extends DemoView {
     private void createGridWithCustomItemCountEstimate() {
         // begin-source-example
         // source-example-heading: Fast Scroll with Custom Item Count Estimate
-        Grid<Person> grid = new Grid<>();
-        PersonService personService = new PersonService();
+        // The backend will have 12345 items
+        final ItemGenerator fakeBackend = new ItemGenerator(12345);
+        Grid<Item> grid = new Grid<>();
 
-        GridLazyDataView<Person> lazyDataView = grid
-                .setItems(query -> personService
-                        .fetch(query.getOffset(), query.getLimit()).stream());
+        GridLazyDataView<Item> lazyDataView = grid
+                .setItems(query -> fakeBackend
+                        .generateItems(query.getOffset(), query.getLimit()));
         /*
          * By default the grid will initially adjust the scrollbar to 200 items
          * and as the user scrolls down it automatically increases the size by
@@ -762,15 +764,35 @@ public class GridDemo extends DemoView {
         lazyDataView.setItemCountEstimate(1000);
         lazyDataView.setItemCountEstimateIncrease(1000);
 
-        grid.addColumn(Person::getFirstName).setHeader("First Name");
-        grid.addColumn(Person::getLastName).setHeader("Last Name");
-        grid.addColumn(Person::getAge).setHeader("Age");
+        // Showing the item count for demo purposes
+        Div countText = new Div();
+        lazyDataView.addItemCountChangeListener(event -> {
+            if (event.isItemCountEstimated()) {
+                countText
+                        .setText("Item Count Estimate: " + event.getItemCount());
+            } else {
+                countText.setText("Exact Item Count: " + event.getItemCount());
+            }
+        });
+        
+        VerticalLayout layout = new VerticalLayout(grid, countText);
+
+        grid.addColumn(Item::getName).setHeader("Name").setWidth("20px");
+        grid.addColumn(new NumberRenderer<>(Item::getPrice, "$ %(,.2f",
+                Locale.US, "$ 0.00")).setHeader("Price");
+        grid.addColumn(new LocalDateTimeRenderer<>(Item::getPurchaseDate,
+                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,
+                        FormatStyle.MEDIUM)))
+                .setHeader("Purchase Date and Time").setFlexGrow(2);
+        grid.addColumn(new LocalDateRenderer<>(Item::getEstimatedDeliveryDate,
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                .setHeader("Estimated Delivery Date");
         // end-source-example
 
         grid.setId("custom-item-count-estimate");
 
         addCard("Lazy Loading", "Fast Scroll with Custom Item Count Estimate",
-                grid);
+                layout);
     }
 
     private void createGridWithExactItemCount() {
