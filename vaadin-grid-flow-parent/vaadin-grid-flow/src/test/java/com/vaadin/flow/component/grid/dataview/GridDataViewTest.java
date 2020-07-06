@@ -23,8 +23,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,8 +41,9 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import org.mockito.Mockito;
 
-public class GridDataViewImplTest {
+public class GridDataViewTest {
 
     private List<String> items;
 
@@ -73,17 +76,17 @@ public class GridDataViewImplTest {
         dataView.addItemCountChangeListener(
                 event -> fired.compareAndSet(0, event.getItemCount()));
 
-        ComponentUtil
-                .fireEvent(component, new ItemCountChangeEvent<>(component, 10));
+        ComponentUtil.fireEvent(component,
+                new ItemCountChangeEvent<>(component, 10));
 
         Assert.assertEquals(10, fired.get());
     }
 
     @Test
-    public void dataViewWithItems_getItemOnRow_returnsCorrectItem() {
-        Assert.assertEquals(items.get(0), dataView.getItemOnRow(0));
-        Assert.assertEquals(items.get(1), dataView.getItemOnRow(1));
-        Assert.assertEquals(items.get(2), dataView.getItemOnRow(2));
+    public void dataViewWithItems_getItem_returnsCorrectItem() {
+        Assert.assertEquals(items.get(0), dataView.getItem(0));
+        Assert.assertEquals(items.get(1), dataView.getItem(1));
+        Assert.assertEquals(items.get(2), dataView.getItem(2));
     }
 
     @Test
@@ -97,7 +100,7 @@ public class GridDataViewImplTest {
         Grid<Item> component = new Grid<>();
 
         // Generic grid data view
-        GridDataView<Item> dataView = component.setItems(dataProvider);
+        DataView<Item> dataView = component.setItems(dataProvider);
         DataKeyMapper<Item> keyMapper =
                 component.getDataCommunicator().getKeyMapper();
         items.forEach(keyMapper::key);
@@ -114,6 +117,19 @@ public class GridDataViewImplTest {
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void getItem_itemRequested_dataCommunicatorInvoked() {
+        DataCommunicator<String> dataCommunicator = Mockito
+                .mock(DataCommunicator.class);
+        Mockito.when(dataCommunicator.getDataProvider())
+                .thenReturn((DataProvider) DataProvider.ofItems());
+        GridDataView<String> dataView = new GridDataView<>(dataCommunicator,
+                component);
+        dataView.getItem(42);
+        Mockito.verify(dataCommunicator).getItem(42);
     }
 
     private static class InMemoryProvider
@@ -150,13 +166,15 @@ public class GridDataViewImplTest {
 
         @Override
         public int size(Query<String, SerializablePredicate<String>> query) {
-            return (int) items.stream().filter(filter::test).count();
+            return (int) items.stream().skip(query.getOffset())
+                    .limit(query.getLimit()).filter(filter).count();
         }
 
         @Override
         public Stream<String> fetch(
                 Query<String, SerializablePredicate<String>> query) {
-            return items.stream().filter(filter::test);
+            return items.stream().skip(query.getOffset())
+                    .limit(query.getLimit()).filter(filter);
         }
 
         @Override

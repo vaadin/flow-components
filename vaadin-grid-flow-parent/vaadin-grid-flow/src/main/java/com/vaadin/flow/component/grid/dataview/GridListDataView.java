@@ -30,8 +30,7 @@ import com.vaadin.flow.data.provider.IdentifierProvider;
  *            data type
  * @since
  */
-public class GridListDataView<T> extends AbstractListDataView<T>
-        implements GridDataView<T> {
+public class GridListDataView<T> extends AbstractListDataView<T> {
     private DataCommunicator<T> dataCommunicator;
     private Grid<T> grid;
 
@@ -40,12 +39,6 @@ public class GridListDataView<T> extends AbstractListDataView<T>
         super(dataCommunicator::getDataProvider, grid);
         this.dataCommunicator = dataCommunicator;
         this.grid = grid;
-    }
-
-    @Override
-    public T getItemOnRow(int rowIndex) {
-        validateItemIndex(rowIndex);
-        return getItems().skip(rowIndex).findFirst().orElse(null);
     }
 
     @Override

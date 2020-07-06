@@ -66,20 +66,20 @@ public class GridListDataViewPage extends Div {
         IntegerField rowSelect = new IntegerField("Target row");
         rowSelect.setId(ROW_SELECT);
         Button selectItemOnRow = new Button("Select item", event -> grid
-                .select(dataView.getItemOnRow(rowSelect.getValue())));
+                .select(dataView.getItem(rowSelect.getValue())));
         selectItemOnRow.setId("selectItemOnRow");
         Button showItemData = new Button("Person data", event -> itemData
-                .setText("Item: " + dataView.getItemOnRow(rowSelect.getValue())
+                .setText("Item: " + dataView.getItem(rowSelect.getValue())
                         .getFirstName()));
         showItemData.setId(SHOW_ITEM_DATA);
         Button showNextData = new Button("Next person", event -> itemData
                 .setText("Item: " + dataView.getNextItem(
-                        dataView.getItemOnRow(rowSelect.getValue())).get()
+                        dataView.getItem(rowSelect.getValue())).get()
                         .getFirstName()));
         showNextData.setId(SHOW_NEXT_DATA);
         Button showPreviousData = new Button("Previous person",
                 event -> itemData.setText("Item: " + dataView.getPreviousItem(
-                        dataView.getItemOnRow(rowSelect.getValue())).get()
+                        dataView.getItem(rowSelect.getValue())).get()
                         .getFirstName()));
         showPreviousData.setId(SHOW_PREVIOUS_DATA);
         TextField filterByFirstName = new TextField("Firstname filter",

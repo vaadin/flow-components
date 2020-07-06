@@ -13,30 +13,54 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.vaadin.flow.component.grid.dataview;
 
-import com.vaadin.flow.data.provider.DataView;
+import java.util.stream.Stream;
+
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.AbstractDataView;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 
 /**
- * GridDataView interface that extends the base data view features.
- *
+ * Implementation of generic data view for grid.
+ * 
  * @param <T>
- *         data type
+ *            the item type
  * @since
  */
-public interface GridDataView<T> extends DataView<T> {
+public class GridDataView<T> extends AbstractDataView<T> {
 
-    /**
-     * Get the item at the given row in the sorted and filtered data set.
-     * <p>
-     * All filters set to the data will be reflected on the row index request,
-     * as will any sorting set to the data.
-     *
-     * @param rowIndex
-     *         row to get item at
-     * @return item on row in the sorted and filtered data
-     * @throws IndexOutOfBoundsException
-     *         requested row is outside of the available data set.
-     */
-    T getItemOnRow(int rowIndex);
+    private DataCommunicator<T> dataCommunicator;
+
+    public GridDataView(DataCommunicator<T> dataCommunicator,
+                        Grid<T> grid) {
+        super(dataCommunicator::getDataProvider, grid);
+        this.dataCommunicator = dataCommunicator;
+    }
+
+    @Override
+    public T getItem(int index) {
+        return dataCommunicator.getItem(index);
+    }
+
+    @Override
+    protected Class<?> getSupportedDataProviderType() {
+        return DataProvider.class;
+    }
+
+    @Override
+    public Stream<T> getItems() {
+        return dataCommunicator.getDataProvider()
+                .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
+    }
+
+    @Override
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
+        super.setIdentifierProvider(identifierProvider);
+        dataCommunicator.getKeyMapper().setIdentifierGetter(identifierProvider);
+    }
 }
