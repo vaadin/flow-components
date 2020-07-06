@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,10 +17,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,18 +140,18 @@ public class DataSeries extends AbstractSeries {
      * @param values
      *            An array of the values for each category in the categoryNames
      *            parameter.
-     * @param colors
-     *            An array of colors for each category name, value pair.
+     * @param colorIndexes
+     *            An array of color indexes for each category name, value pair.
      */
     public void setData(String[] categoryNames, Number[] values,
-            Color[] colors) {
+            Number[] colorIndexes) {
         assert (categoryNames.length == values.length);
-        assert (categoryNames.length == colors.length);
+        assert (categoryNames.length == colorIndexes.length);
         data.clear();
         for (int i = 0; i < categoryNames.length; i++) {
             DataSeriesItem item = new DataSeriesItem(categoryNames[i],
                     values[i]);
-            item.setColor(colors[i]);
+            item.setColorIndex(colorIndexes[i]);
             data.add(item);
         }
     }
@@ -230,7 +228,7 @@ public class DataSeries extends AbstractSeries {
     /**
      * Adds a new item to the series data and enables drilldown for it. Used for
      * lazy loading drilldown. Using async drilldown requires setting
-     * {@link Chart#setDrilldownCallback(DrilldownCallback)}
+     * {@link Chart#setDrilldownCallback(com.vaadin.flow.component.charts.DrilldownCallbackHandler)}
      * to return a {@link Series} when drilldown is done.
      * 
      * The remaining drilldown configurations can be set in

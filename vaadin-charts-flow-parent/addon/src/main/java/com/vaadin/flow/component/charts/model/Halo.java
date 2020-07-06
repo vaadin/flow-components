@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -16,7 +16,6 @@ package com.vaadin.flow.component.charts.model;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
 
 import javax.annotation.Generated;
 
@@ -39,48 +38,9 @@ import javax.annotation.Generated;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Halo extends AbstractConfigurationObject {
 
-	private Attributes attributes;
-	private Number opacity;
 	private Number size;
 
 	public Halo() {
-	}
-
-	/**
-	 * @see #setAttributes(Attributes)
-	 */
-	public Attributes getAttributes() {
-		if (attributes == null) {
-			attributes = new Attributes();
-		}
-		return attributes;
-	}
-
-	/**
-	 * A collection of SVG attributes to override the appearance of the halo,
-	 * for example <code>fill</code>, <code>stroke</code> and
-	 * <code>stroke-width</code>.
-	 */
-	public void setAttributes(Attributes attributes) {
-		this.attributes = attributes;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity for the halo unless a specific fill is overridden using the
-	 * <code>attributes</code> setting. Note that Highcharts is only able to
-	 * apply opacity to colors of hex or rgb(a) formats.
-	 * <p>
-	 * Defaults to: 0.25
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	/**

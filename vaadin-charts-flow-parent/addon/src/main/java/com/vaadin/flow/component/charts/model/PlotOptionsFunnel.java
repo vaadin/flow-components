@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,11 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Funnel charts are a type of chart often used to visualize stages in a sales
@@ -33,8 +32,6 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
 	private Boolean allowPointSelect;
 	private Number animationLimit;
-	private Color borderColor;
-	private Number borderWidth;
 	private String[] center;
 	private String className;
 	private Number colorIndex;
@@ -109,66 +106,6 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	 */
 	public void setAnimationLimit(Number animationLimit) {
 		this.animationLimit = animationLimit;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the border surrounding each slice. When <code>null</code>,
-	 * the border takes the same color as the slice fill. This can be used
-	 * together with a <code>borderWidth</code> to fill drawing gaps created by
-	 * antialiazing artefacts in borderless pies.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke is given in the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the border surrounding each slice.
-	 * </p>
-	 * 
-	 * <p>
-	 * When setting the border width to 0, there may be small gaps between the
-	 * slices due to SVG antialiasing artefacts. To work around this, keep the
-	 * border width at 0.5 or 1, but set the <code>borderColor</code> to
-	 * <code>null</code> instead.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke width is given in the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	/**

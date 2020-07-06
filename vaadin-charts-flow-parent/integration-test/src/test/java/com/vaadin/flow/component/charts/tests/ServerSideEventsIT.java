@@ -4,12 +4,12 @@ import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -20,7 +20,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.ChartClickEvent;
@@ -36,6 +35,7 @@ import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.tests.elements.LabelElement;
 
@@ -45,6 +45,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     @Before
     public void setup() throws Exception {
         super.setup();
+        driver.manage().window().setSize(new Dimension(1600, 1600));
         resetHistory();
     }
 
@@ -89,7 +90,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertHasEventOfType(SeriesHideEvent.class);
+        assertLastEventIsType(SeriesHideEvent.class);
         assertFirstHistoryEventIsType(SeriesLegendItemClickEvent.class);
     }
 
@@ -128,7 +129,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertHasEventOfType(SeriesHideEvent.class);
+        assertLastEventIsType(SeriesHideEvent.class);
     }
 
     @Test
@@ -137,7 +138,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         hideSeries.click();
 
-        assertHasEventOfType(SeriesHideEvent.class);
+        assertLastEventIsType(SeriesHideEvent.class);
     }
 
     @Test
@@ -147,7 +148,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertHasEventOfType(SeriesShowEvent.class);
+        assertLastEventIsType(SeriesShowEvent.class);
     }
 
     @Test
@@ -157,7 +158,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         hideSeriesToggle.click();
 
-        assertHasEventOfType(SeriesShowEvent.class);
+        assertLastEventIsType(SeriesShowEvent.class);
     }
 
     @Test
@@ -200,17 +201,6 @@ public class ServerSideEventsIT extends AbstractTBTest {
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
         Assert.assertEquals(expectedEvent.getSimpleName(), eventType);
-    }
-
-    private void assertHasEventOfType(Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        List<LabelElement> labels = $(LabelElement.class).all();
-        String expected = expectedEvent.getSimpleName();
-        Optional<String> actual = labels.stream().map(label -> {
-            String eventHistory = label.getText();
-            assertNotNull(eventHistory);
-            return eventHistory.split(":")[0];
-        }).filter(text -> text.equals(expected)).findFirst();
-        Assert.assertTrue("Expect to find " + expected, actual.isPresent());
     }
 
     private void assertNthHistoryEventIsType(

@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -16,7 +16,6 @@ package com.vaadin.flow.component.charts.model;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
@@ -44,7 +43,6 @@ import java.util.Map;
 public class Configuration extends AbstractConfigurationObject
         implements ChartConfiguration {
 
-    private Accessibility accessibility;
     private ChartModel chart;
     private Title title;
     private Subtitle subtitle;
@@ -69,29 +67,9 @@ public class Configuration extends AbstractConfigurationObject
     private Navigation navigation;
     private NoData noData;
     private Navigator navigator;
-    private Time time;
 
     @JsonIgnore
     private final List<ConfigurationChangeListener> changeListeners = new ArrayList<>();
-
-    /**
-     * @see #setAccessibility(Accessibility)
-     */
-    public Accessibility getAccessibility() {
-        if (accessibility == null) {
-            setAccessibility(new Accessibility());
-        }
-        return accessibility;
-    }
-
-    /**
-     * Sets options for configuring accessibility for the chart.
-     * 
-     * @param accessibility
-     */
-    public void setAccessibility(Accessibility accessibility) {
-        this.accessibility = accessibility;
-    }
 
     /**
      * @see #setChart(ChartModel)
@@ -821,22 +799,6 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void setNavigator(Navigator navigator) {
         this.navigator = navigator;
-    }
-
-    /**
-     * @see #setTime(Time)
-     */
-    public Time getTime() {
-        return time;
-    }
-
-    /**
-     * Set configuration for time options
-     * 
-     * @param time
-     */
-    public void setTime(Time time) {
-        this.time = time;
     }
 
     /**

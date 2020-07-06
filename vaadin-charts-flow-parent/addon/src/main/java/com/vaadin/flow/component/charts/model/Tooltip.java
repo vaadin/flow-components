@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,10 +17,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
+
 /**
  * Options for the tooltip that appears when the user hovers over a series or
  * point.
@@ -29,8 +27,6 @@ import com.vaadin.flow.component.charts.model.style.Style;
 public class Tooltip extends AbstractConfigurationObject {
 
 	private Boolean animation;
-	private Color backgroundColor;
-	private Color borderColor;
 	private Number borderRadius;
 	private Number borderWidth;
 	private DateTimeLabelFormats dateTimeLabelFormats;
@@ -50,7 +46,6 @@ public class Tooltip extends AbstractConfigurationObject {
 	private Boolean shared;
 	private Number snap;
 	private Boolean split;
-	private Style style;
 	private Boolean useHTML;
 	private Number valueDecimals;
 	private String valuePrefix;
@@ -76,48 +71,6 @@ public class Tooltip extends AbstractConfigurationObject {
 	 */
 	public void setAnimation(Boolean animation) {
 		this.animation = animation;
-	}
-
-	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * <p>
-	 * The background color or gradient for the tooltip.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is set in the
-	 * <code>.highcharts-tooltip-box</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: rgba(247,247,247,0.85)
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The color of the tooltip border. When <code>null</code>, the border takes
-	 * the color of the corresponding series or point.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
 	}
 
 	/**
@@ -502,27 +455,6 @@ public class Tooltip extends AbstractConfigurationObject {
 	 */
 	public void setSplit(Boolean split) {
 		this.split = split;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * CSS styles for the tooltip. The tooltip can also be styled through the
-	 * CSS class <code>.highcharts-tooltip</code>.
-	 * <p>
-	 * Defaults to: { "color": "#333333", "cursor": "default", "fontSize":
-	 * "12px", "pointerEvents": "none", "whiteSpace": "nowrap" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

@@ -5,8 +5,8 @@
 
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-board-flow-parent</artifactId>
-        <version>17.0-SNAPSHOT</version>
+        <artifactId>vaadin-board-flow-root</artifactId>
+        <version>10.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-board-integration-tests</artifactId>
 
@@ -14,16 +14,16 @@
     <name>vaadin-board-integration-tests</name>
 
     <properties>
-        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
+        <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <ci-sauce.version>1.138</ci-sauce.version>
+        <ci-sauce.version>1.132</ci-sauce.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -43,8 +43,19 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-components-testbench</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-board-flow</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow</artifactId>
+            <version>6.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -72,21 +83,26 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
                 <version>${flow.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>copy-production-files</goal>
+                            <goal>package-for-production</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.plugin.version}</version>
-                <configuration combine.self="override">
+                <configuration>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <stopKey>STOP</stopKey>
                     <stopPort>8005</stopPort>
-                    <httpConnector>
-                        <port>8080</port>
-                    </httpConnector>
                 </configuration>
                 <executions>
-                    <!-- start and stop jetty (running our app) when running
+                    <!-- start and stop jetty (running our app) when running 
                         integration tests -->
                     <execution>
                         <id>start-jetty</id>
@@ -134,12 +150,7 @@
             <plugin>
                 <groupId>com.saucelabs.maven.plugin</groupId>
                 <artifactId>sauce-connect-plugin</artifactId>
-                <version>2.1.25</version>
-                <configuration>
-                    <sauceUsername>${sauce.user}</sauceUsername>
-                    <sauceAccessKey>${sauce.sauceAccessKey}</sauceAccessKey>
-                    <options>${sauce.options}</options>
-                </configuration>
+                <version>2.1.23</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.saucelabs</groupId>
@@ -148,7 +159,7 @@
                     </dependency>
                 </dependencies>
                 <executions>
-                    <!-- Start Sauce Connect prior to running the integration
+                    <!-- Start Sauce Connect prior to running the integration 
                         tests -->
                     <execution>
                         <id>start-sauceconnect</id>
@@ -157,7 +168,7 @@
                             <goal>start-sauceconnect</goal>
                         </goals>
                     </execution>
-                    <!-- Stop the Sauce Connect process after the integration
+                    <!-- Stop the Sauce Connect process after the integration 
                         tests have finished -->
                     <execution>
                         <id>stop-sauceconnect</id>
@@ -168,24 +179,34 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>read-local-properties-if-present</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>../local.properties</file>
+                            </files>
+                            <quiet>true</quiet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <configuration>
-                            <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

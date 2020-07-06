@@ -1,22 +1,21 @@
 package com.vaadin.flow.component.charts.util;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,10 +27,8 @@ import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.serializers.AxisListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.ChartEnumSerializer;
-import com.vaadin.flow.component.charts.model.serializers.ChartOptionsBeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.serializers.DateSerializer;
 import com.vaadin.flow.component.charts.model.serializers.DefaultBeanSerializerModifier;
-import com.vaadin.flow.component.charts.model.serializers.GradientColorStopsSerializer;
 import com.vaadin.flow.component.charts.model.serializers.InstantSerializer;
 import com.vaadin.flow.component.charts.model.serializers.PaneListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.SolidColorSerializer;
@@ -48,16 +45,7 @@ public class ChartSerialization implements Serializable {
 
     private static ObjectWriter jsonWriter;
 
-    final static ObjectWriter jsonWriterChartOptions;
-
     static {
-        ObjectMapper defaultMapper = ChartSerialization.createObjectMapper();
-        jsonWriterChartOptions = defaultMapper
-                .setSerializerFactory(defaultMapper.getSerializerFactory()
-                        .withSerializerModifier(
-                                new ChartOptionsBeanSerializerModifier()))
-                .writer();
-
         // writer is thread safe so we can use a shared instance
         jsonWriter = createObjectMapper().writer();
     }
@@ -80,7 +68,6 @@ public class ChartSerialization implements Serializable {
                 .registerModule(StopSerializer.getModule())
                 .registerModule(TimeUnitMultiplesSerializer.getModule())
                 .registerModule(SolidColorSerializer.getModule())
-                .registerModule(GradientColorStopsSerializer.getModule())
                 .registerModule(AxisListSerializer.getModule())
                 .registerModule(PaneListSerializer.getModule())
                 .registerModule(DateSerializer.getModule())

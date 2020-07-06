@@ -13,9 +13,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.RangeSelector;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.YAxis;
-import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value="./styles/CompareMultipleSeries.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class CompareMultipleSeries extends AbstractChartExample {
 
     @Override
@@ -33,7 +31,6 @@ public class CompareMultipleSeries extends AbstractChartExample {
 
         PlotLine plotLine = new PlotLine();
         plotLine.setValue(2);
-        plotLine.setWidth(2);
         yAxis.setPlotLines(plotLine);
         configuration.addyAxis(yAxis);
 

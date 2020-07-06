@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,10 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * Options for the paging or navigation appearing when the legend is overflown.
@@ -32,30 +29,11 @@ import com.vaadin.flow.component.charts.model.style.Style;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class LegendNavigation extends AbstractConfigurationObject {
 
-	private Color activeColor;
 	private Boolean animation;
 	private Number arrowSize;
 	private Boolean enabled;
-	private Color inactiveColor;
-	private Style style;
 
 	public LegendNavigation() {
-	}
-
-	/**
-	 * @see #setActiveColor(Color)
-	 */
-	public Color getActiveColor() {
-		return activeColor;
-	}
-
-	/**
-	 * The color for the active up or down arrow in the legend page navigation.
-	 * <p>
-	 * Defaults to: #003399
-	 */
-	public void setActiveColor(Color activeColor) {
-		this.activeColor = activeColor;
 	}
 
 	/**
@@ -122,39 +100,5 @@ public class LegendNavigation extends AbstractConfigurationObject {
 	 */
 	public void setEnabled(Boolean enabled) {
 		this.enabled = enabled;
-	}
-
-	/**
-	 * @see #setInactiveColor(Color)
-	 */
-	public Color getInactiveColor() {
-		return inactiveColor;
-	}
-
-	/**
-	 * The color of the inactive up or down arrow in the legend page navigation.
-	 * .
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setInactiveColor(Color inactiveColor) {
-		this.inactiveColor = inactiveColor;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * Text styles for the legend page navigation.
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 }

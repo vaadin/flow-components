@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,11 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * Options regarding the chart area and plot area as well as general chart
@@ -32,10 +28,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
 	private Boolean alignTicks;
 	private Boolean animation;
-	private Color backgroundColor;
-	private Color borderColor;
 	private Number borderRadius;
-	private Number borderWidth;
 	private String className;
 	private Number colorCount;
 	private String description;
@@ -51,24 +44,15 @@ public class ChartModel extends AbstractConfigurationObject {
 	private PanKey panKey;
 	private Boolean panning;
 	private Dimension pinchType;
-	private Color plotBackgroundColor;
-	private String plotBackgroundImage;
-	private Color plotBorderColor;
-	private Number plotBorderWidth;
-	private Boolean plotShadow;
 	private Boolean polar;
 	private Boolean reflow;
 	private ResetZoomButton resetZoomButton;
-	private Color selectionMarkerFill;
-	private Boolean shadow;
 	private Boolean showAxes;
 	private Number[] spacing;
 	private Number spacingBottom;
 	private Number spacingLeft;
 	private Number spacingRight;
 	private Number spacingTop;
-	private Style style;
-	private Boolean styledMode = Boolean.TRUE;
 	private ChartType type;
 	private String typeDescription;
 	private Number width;
@@ -111,68 +95,16 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * <p>
 	 * Set the overall animation for all chart updating. Animation can be
-	 * disabled throughout the chart by setting it to false here. It can be
-	 * overridden for each individual API method as a function parameter. The
-	 * only animation not affected by this option is the initial series
-	 * animation, see <a class="internal"
-	 * href="#plotOptions.series.animation">plotOptions.series.animation</a>.
-	 * </p>
-	 * 
+	 * disabled throughout the chart by setting it to false here
 	 * <p>
-	 * The animation can either be set as a boolean or a configuration object.
-	 * If <code>true</code>, it will use the 'swing' jQuery easing and a
-	 * duration of 500 ms. If used as a configuration object, the following
-	 * properties are supported:
-	 * </p>
-	 * <dl>
-	 * <dt>duration</dt>
-	 * <dd>The duration of the animation in milliseconds.</dd>
-	 * 
-	 * <dt>easing</dt>
-	 * <dd>A string reference to an easing function set on the <code>Math</code>
-	 * object. See <a href=
-	 * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-animation-easing/"
-	 * >the easing demo</a>.</dd>
-	 * </dl>
+	 * The only animation not affected by this option is the initial series
+	 * animation, see <code>setAnimation</code> method in plot option classes
 	 * <p>
 	 * Defaults to: true
 	 */
 	public void setAnimation(Boolean animation) {
 		this.animation = animation;
-	}
-
-	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * The background color or gradient for the outer chart area.
-	 * <p>
-	 * Defaults to: #FFFFFF
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The color of the outer chart border.
-	 * <p>
-	 * Defaults to: #335cad
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
 	}
 
 	/**
@@ -189,22 +121,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setBorderRadius(Number borderRadius) {
 		this.borderRadius = borderRadius;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * The pixel width of the outer chart border.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	/**
@@ -505,88 +421,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setPlotBackgroundColor(Color)
-	 */
-	public Color getPlotBackgroundColor() {
-		return plotBackgroundColor;
-	}
-
-	/**
-	 * The background color or gradient for the plot area.
-	 */
-	public void setPlotBackgroundColor(Color plotBackgroundColor) {
-		this.plotBackgroundColor = plotBackgroundColor;
-	}
-
-	/**
-	 * @see #setPlotBackgroundImage(String)
-	 */
-	public String getPlotBackgroundImage() {
-		return plotBackgroundImage;
-	}
-
-	/**
-	 * The URL for an image to use as the plot background. To set an image as
-	 * the background for the entire chart, set a CSS background image to the
-	 * container element. Note that for the image to be applied to exported
-	 * charts, its URL needs to be accessible by the export server.
-	 */
-	public void setPlotBackgroundImage(String plotBackgroundImage) {
-		this.plotBackgroundImage = plotBackgroundImage;
-	}
-
-	/**
-	 * @see #setPlotBorderColor(Color)
-	 */
-	public Color getPlotBorderColor() {
-		return plotBorderColor;
-	}
-
-	/**
-	 * The color of the inner chart or plot area border.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setPlotBorderColor(Color plotBorderColor) {
-		this.plotBorderColor = plotBorderColor;
-	}
-
-	/**
-	 * @see #setPlotBorderWidth(Number)
-	 */
-	public Number getPlotBorderWidth() {
-		return plotBorderWidth;
-	}
-
-	/**
-	 * The pixel width of the plot area border.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setPlotBorderWidth(Number plotBorderWidth) {
-		this.plotBorderWidth = plotBorderWidth;
-	}
-
-	/**
-	 * @see #setPlotShadow(Boolean)
-	 */
-	public Boolean getPlotShadow() {
-		return plotShadow;
-	}
-
-	/**
-	 * Whether to apply a drop shadow to the plot area. Requires that
-	 * plotBackgroundColor be set. The shadow can be an object configuration
-	 * containing <code>color</code>, <code>offsetX</code>, <code>offsetY</code>
-	 * , <code>opacity</code> and <code>width</code>.
-	 * <p>
-	 * Defaults to: false
-	 */
-	public void setPlotShadow(Boolean plotShadow) {
-		this.plotShadow = plotShadow;
-	}
-
-	/**
 	 * @see #setPolar(Boolean)
 	 */
 	public Boolean getPolar() {
@@ -637,42 +471,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setResetZoomButton(ResetZoomButton resetZoomButton) {
 		this.resetZoomButton = resetZoomButton;
-	}
-
-	/**
-	 * @see #setSelectionMarkerFill(Color)
-	 */
-	public Color getSelectionMarkerFill() {
-		return selectionMarkerFill;
-	}
-
-	/**
-	 * The background color of the marker square when selecting (zooming in on)
-	 * an area of the chart.
-	 * <p>
-	 * Defaults to: rgba(51,92,173,0.25)
-	 */
-	public void setSelectionMarkerFill(Color selectionMarkerFill) {
-		this.selectionMarkerFill = selectionMarkerFill;
-	}
-
-	/**
-	 * @see #setShadow(Boolean)
-	 */
-	public Boolean getShadow() {
-		return shadow;
-	}
-
-	/**
-	 * Whether to apply a drop shadow to the outer chart area. Requires that
-	 * backgroundColor be set. The shadow can be an object configuration
-	 * containing <code>color</code>, <code>offsetX</code>, <code>offsetY</code>
-	 * , <code>opacity</code> and <code>width</code>.
-	 * <p>
-	 * Defaults to: false
-	 */
-	public void setShadow(Boolean shadow) {
-		this.shadow = shadow;
 	}
 
 	/**
@@ -787,29 +585,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setSpacingTop(Number spacingTop) {
 		this.spacingTop = spacingTop;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * Additional CSS styles to apply inline to the container <code>div</code>.
-	 * Note that since the default font styles are applied in the renderer, it
-	 * is ignorant of the individual chart options and must be set globally.
-	 * <p>
-	 * Defaults to: {"fontFamily":
-	 * "\"Lucida Grande\", \"Lucida Sans Unicode\", Verdana, Arial, Helvetica, sans-serif"
-	 * ,"fontSize":"12px"}
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

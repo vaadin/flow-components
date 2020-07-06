@@ -37,26 +37,6 @@ public class StockPrices {
         }
     }
 
-    public static class RangeData extends TimeData {
-
-        private double min;
-        private double max;
-
-        private RangeData(long date, double min, double max) {
-            super(date);
-            this.min = min;
-            this.max = max;
-        }
-
-        public double getMin() {
-            return min;
-        }
-
-        public double getMax() {
-            return max;
-        }
-    }
-
     public static class OhlcData extends TimeData {
 
         private double open;
@@ -128,11 +108,6 @@ public class StockPrices {
         return Collections.unmodifiableList(data);
     }
 
-    public static List<RangeData> fetchDailyTempRanges() {
-        List<RangeData> data = readRangeData("daily-temp-ranges.json");
-        return Collections.unmodifiableList(data);
-    }
-
     private static List<PriceData> readValueData(String filename) {
         JsonData jsonData = readJsonDataFrom(filename);
 
@@ -140,18 +115,6 @@ public class StockPrices {
         for(int i = 0; i < jsonData.data.length; ++i) {
             Number[] row = jsonData.data[i];
             data.add(new PriceData(row[0].longValue(), row[1].doubleValue()));
-        }
-
-        return data;
-    }
-
-    private static List<RangeData> readRangeData(String filename) {
-        JsonData jsonData = readJsonDataFrom(filename);
-
-        List<RangeData> data = new ArrayList<>();
-        for(int i = 0; i < jsonData.data.length; ++i) {
-            Number[] row = jsonData.data[i];
-            data.add(new RangeData(row[0].longValue(), row[1].doubleValue(), row[2].doubleValue()));
         }
 
         return data;

@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.board;
 
-/*-
+/*
  * #%L
  * Vaadin Board for Vaadin 10
  * %%
@@ -23,8 +23,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.board.internal.FunctionCaller;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
  * Vaadin Board allows creating responsive layouts in an easy way.
@@ -46,10 +45,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </pre>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "2.2.0-alpha1")
-@JsModule("@vaadin/vaadin-board/vaadin-board.js")
+@HtmlImport("frontend://bower_components/vaadin-board/vaadin-board.html")
 public class Board extends Component
-        implements HasSize, HasStyle, HasOrderedComponents {
+        implements HasSize, HasStyle, HasOrderedComponents<Board> {
 
     /**
      * Creates an empty board.

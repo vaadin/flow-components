@@ -1,0 +1,20 @@
+# Maven files
+target/
+
+# Eclipse files
+.project
+.settings
+.classpath
+
+# Selenium driver folders
+selenium_standalone
+selenium_standalone_zips
+error-screenshots
+reference-screenshots
+driver_zips
+driver
+
+# IntelliJ IDEA files
+.idea/
+vaadin-button-flow.iml
+

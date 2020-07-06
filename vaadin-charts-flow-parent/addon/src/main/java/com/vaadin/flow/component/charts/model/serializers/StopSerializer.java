@@ -1,10 +1,12 @@
 package com.vaadin.flow.component.charts.model.serializers;
 
-/*-
+import java.io.IOException;
+
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -16,9 +18,6 @@ package com.vaadin.flow.component.charts.model.serializers;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
-import java.io.IOException;
-
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,7 +45,6 @@ public class StopSerializer extends JsonSerializer<Stop> {
             throws IOException, JsonProcessingException {
         gen.writeStartArray();
         gen.writeNumber(value.getPosition());
-        gen.writeString(value.getColor().toString());
         gen.writeEndArray();
     }
 }

@@ -1,10 +1,15 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.vaadin.flow.component.charts.Chart;
+
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -16,12 +21,6 @@ package com.vaadin.flow.component.charts.model;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.vaadin.flow.component.charts.Chart;
-
 
 /**
  * Abstract base class for series

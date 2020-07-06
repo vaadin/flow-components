@@ -47,9 +47,9 @@ public class ColumnWithMultiLevelDrilldown extends AbstractChartExample {
         regionsSeries.setPlotOptions(plotOptionsColumn);
 
         DataSeriesItem regionItem = new DataSeriesItem(
-                "Latin America and Caribbean", 60);
+                "Latin America and Carribean", 60);
         DataSeries countriesSeries = new DataSeries("Countries");
-        countriesSeries.setId("Latin America and Caribbean Countries");
+        countriesSeries.setId("Latin America and Carribean Countries");
 
         DataSeriesItem countryItem = new DataSeriesItem("Costa Rica", 64);
         DataSeries detailsSeries = new DataSeries("Details");

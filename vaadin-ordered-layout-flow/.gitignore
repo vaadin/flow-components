@@ -1,0 +1,16 @@
+# Maven files
+target/
+
+# IDE
+.project
+.settings
+.classpath
+.idea/
+*.iml
+
+# Selenium
+error-screenshots
+reference-screenshots
+
+# Os specific
+.DS_Store

@@ -11,11 +11,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsGauge;
 import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.TickPosition;
 import com.vaadin.flow.component.charts.model.YAxis;
-import com.vaadin.flow.component.dependency.CssImport;
 
 import java.util.Random;
 
-@CssImport(value="./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class GaugeWithDualAxes extends AbstractChartExample {
 
     @Override
@@ -25,6 +23,7 @@ public class GaugeWithDualAxes extends AbstractChartExample {
 
         final Configuration configuration = chart.getConfiguration();
         configuration.getChart().setType(ChartType.GAUGE);
+        configuration.getChart().setAlignTicks(false);
         configuration.setTitle("Speedometer with dual axes");
         configuration.getChart().setWidth(500);
 
@@ -38,7 +37,7 @@ public class GaugeWithDualAxes extends AbstractChartExample {
         yAxis.setOffset(-25);
         Labels labels = new Labels();
         labels.setDistance(-20);
-        labels.setRotation("auto");
+        labels.setRotationPerpendicular();
         yAxis.setLabels(labels);
         yAxis.setTickLength(5);
         yAxis.setMinorTickLength(5);
@@ -51,13 +50,13 @@ public class GaugeWithDualAxes extends AbstractChartExample {
         yAxis2.setOffset(-20);
         labels = new Labels();
         labels.setDistance(12);
-        labels.setRotation("auto");
+        labels.setRotationPerpendicular();
         yAxis2.setLabels(labels);
-        yAxis2.setTickPosition(TickPosition.OUTSIDE);
-        yAxis2.setMinorTickPosition(TickPosition.OUTSIDE);
         yAxis2.setTickLength(5);
         yAxis2.setMinorTickLength(5);
         yAxis2.setEndOnTick(false);
+        yAxis2.setTickPosition(TickPosition.OUTSIDE);
+        yAxis2.setMinorTickPosition(TickPosition.OUTSIDE);
 
         configuration.addyAxis(yAxis);
         configuration.addyAxis(yAxis2);
@@ -74,7 +73,7 @@ public class GaugeWithDualAxes extends AbstractChartExample {
         plotOptionsGauge.getTooltip().setValueSuffix(" km/h");
         series.setPlotOptions(plotOptionsGauge);
 
-        configuration.addSeries(series);
+        configuration.setSeries(series);
 
         runWhileAttached(chart, () -> {
             Integer oldValue = series.getData()[0].intValue();

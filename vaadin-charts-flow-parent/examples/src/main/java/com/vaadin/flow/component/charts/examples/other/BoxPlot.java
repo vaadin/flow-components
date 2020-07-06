@@ -4,20 +4,15 @@ import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.BoxPlotItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.Label;
 import com.vaadin.flow.component.charts.model.Legend;
 import com.vaadin.flow.component.charts.model.PlotLine;
 import com.vaadin.flow.component.charts.model.PlotOptionsBoxplot;
-import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
-import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value="./styles/BoxPlot.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class BoxPlot extends AbstractChartExample {
 
     @Override
@@ -43,7 +38,15 @@ public class BoxPlot extends AbstractChartExample {
         Label label = new Label("Theoretical mean: 932");
         label.setAlign(HorizontalAlign.CENTER);
         plotLine.setLabel(label);
-        yAxis.setPlotLines(plotLine);
+
+        PlotLine plotLine2 = new PlotLine();
+        plotLine2.setValue(800);
+        plotLine2.setZIndex(500);
+        Label label2 = new Label("Second plotline: 800");
+        label2.setAlign(HorizontalAlign.CENTER);
+        plotLine2.setLabel(label2);
+
+        yAxis.setPlotLines(plotLine, plotLine2);
 
         final DataSeries observations = new DataSeries();
         observations.setName("Observations");
@@ -63,28 +66,8 @@ public class BoxPlot extends AbstractChartExample {
         observations.add(new BoxPlotItem(714, 762, 817, 870, 918));
         observations.add(new BoxPlotItem(724, 802, 806, 871, 950));
         observations.add(new BoxPlotItem(834, 836, 864, 882, 910));
-        PlotOptionsBoxplot plotOptions = new PlotOptionsBoxplot();
-        SeriesTooltip observationsTooltip = new SeriesTooltip();
-        observationsTooltip.setHeaderFormat("<em>Experiment No {point.key}</em><br/>");
-        plotOptions.setTooltip(observationsTooltip);
-        observations.setPlotOptions(plotOptions);
+        observations.setPlotOptions(new PlotOptionsBoxplot());
         chart.getConfiguration().addSeries(observations);
-
-        final DataSeries outlier = new DataSeries();
-        outlier.setName("Outlier");
-
-        outlier.add(new DataSeriesItem(0, 644));
-        outlier.add(new DataSeriesItem(4, 718));
-        outlier.add(new DataSeriesItem(4, 951));
-        outlier.add(new DataSeriesItem(4, 969));
-
-        PlotOptionsScatter outlierOptions = new PlotOptionsScatter();
-        SeriesTooltip outlierTooltip = new SeriesTooltip();
-        outlierTooltip.setPointFormat("Observation: {point.y}");
-        outlierOptions.setTooltip(outlierTooltip);
-        outlier.setPlotOptions(outlierOptions);
-
-        chart.getConfiguration().addSeries(outlier);
 
         Checkbox useCustomStyles = new Checkbox("Use custom styling");
         useCustomStyles.addValueChangeListener(e -> {

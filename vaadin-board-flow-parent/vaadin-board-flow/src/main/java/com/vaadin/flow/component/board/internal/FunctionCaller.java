@@ -40,7 +40,7 @@ public class FunctionCaller {
         }
         element.setProperty(trackingProperty, true);
 
-        element.callJsFunction(function);
+        element.callFunction(function);
         element.getNode().runWhenAttached(ui -> {
             ui.beforeClientResponse(component, context -> {
                 element.removeProperty(trackingProperty);

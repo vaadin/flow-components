@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.time.Instant;
 import java.util.Date;
@@ -73,13 +71,13 @@ public class DataSeriesItem extends AbstractSeriesItem {
      *            Name of the item.
      * @param y
      *            Y-value of the item.
-     * @param color
-     *            Color of the item.
+     * @param colorIndex
+     *            Color index of the item.
      */
-    public DataSeriesItem(String name, Number y, Color color) {
+    public DataSeriesItem(String name, Number y, Number colorIndex) {
         setName(name);
         setY(y);
-        setColor(color);
+        setColorIndex(colorIndex);
         makeCustomized();
     }
 
@@ -94,24 +92,6 @@ public class DataSeriesItem extends AbstractSeriesItem {
     public DataSeriesItem(Number x, Number y) {
         setX(x);
         setY(y);
-    }
-
-    /**
-     * Constructs an item with numerical values for the X and Y axes and assigns
-     * the specified color to the item.
-     *
-     * @param x
-     *            X-value of the item.
-     * @param y
-     *            Y-value of the item.
-     * @param color
-     *            Color of the item.
-     */
-    public DataSeriesItem(Number x, Number y, Color color) {
-        setX(x);
-        setY(y);
-        setColor(color);
-        makeCustomized();
     }
 
     /**
@@ -252,8 +232,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * {@inheritDoc}
      */
     @Override
-    public void setColor(Color color) {
-        super.setColor(color);
+    public void setColorIndex(Number colorIndex) {
+        super.setColorIndex(colorIndex);
         makeCustomized();
     }
 

@@ -6,7 +6,6 @@ target/
 .project
 .settings
 rebel.xml
-.vscode
 
 **/bower_components/
 **/build-tools/bin/
@@ -25,14 +24,6 @@ demo/src/main/webapp/frontend/bower_components/
 demo/src/main/webapp/frontend/build/
 demo/src/main/webapp/frontend-es5/
 demo/src/main/webapp/frontend-es6/
-
-# The following files are generated/updated by flow-maven-plugin
-package*.json
-pnpm-lock.yaml
-webpack.*.js
-tsconfig.json
-types.d.ts
-node_modules/
 
 # Mac
 *.DS_Store

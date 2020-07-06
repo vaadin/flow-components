@@ -1,5 +1,4 @@
-[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/vaadin-board)
-[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-board.svg)](https://vaadin.com/directory/component/vaadin-board)
+[![Published on vaadin.com/directory](https://img.shields.io/vaadin-directory/status/vaadin-board.svg)](https://vaadin.com/directory/component/vaadin-board)
 
 ### Overview
 Vaadin Board allows to create flexible responsive layouts and build nice looking dashboards.

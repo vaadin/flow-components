@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Labels extends AbstractConfigurationObject {
@@ -35,7 +33,6 @@ public class Labels extends AbstractConfigurationObject {
 	private Boolean reserveSpace;
 	private Number staggerLines;
 	private Number step;
-	private Style style;
 	private Boolean useHTML;
 	private Number x;
 	private Number y;
@@ -209,7 +206,7 @@ public class Labels extends AbstractConfigurationObject {
 
 	/**
 	 * Horizontal axes only. The number of lines to spread the labels over to
-	 * make room or tighter labels.
+	 * make room or tighter labels. .
 	 */
 	public void setStaggerLines(Number staggerLines) {
 		this.staggerLines = staggerLines;
@@ -238,37 +235,6 @@ public class Labels extends AbstractConfigurationObject {
 	 */
 	public void setStep(Number step) {
 		this.step = step;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * CSS styles for the label. Use <code>whiteSpace: 'nowrap'</code> to
-	 * prevent wrapping of category labels. Use
-	 * <code>textOverflow: 'none'</code> to prevent ellipsis (dots).
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the labels are styled with the
-	 * <code>.highcharts-axis-labels</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: { "color": "#666666", "cursor": "default", "fontSize":
-	 * "11px" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

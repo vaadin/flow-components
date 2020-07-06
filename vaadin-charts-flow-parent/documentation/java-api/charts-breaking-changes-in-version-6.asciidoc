@@ -4,7 +4,7 @@ order: 8
 layout: page
 ---
 
-[[charts.differentcharttypes]]
+[[charts.charttypes]]
 = Breaking Changes in Version 6
 
 Vaadin Charts 6 comes with some good enhancements, most notably: CSS styling.

@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,15 +17,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 public class Stop extends AbstractConfigurationObject {
     private float position;
-    private Color color;
 
-    public Stop(float position, Color color) {
+    public Stop(float position) {
         this.position = position;
-        this.color = color;
     }
 
     public float getPosition() {
@@ -35,14 +31,5 @@ public class Stop extends AbstractConfigurationObject {
     public void setPosition(float position) {
         this.position = position;
     }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
 
 }

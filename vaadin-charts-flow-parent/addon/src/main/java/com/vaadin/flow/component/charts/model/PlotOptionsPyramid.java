@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -33,12 +31,9 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
 	private Boolean allowPointSelect;
 	private Number animationLimit;
-	private Color borderColor;
-	private Number borderWidth;
 	private String[] center;
 	private String className;
 	private Number colorIndex;
-	private ArrayList<Color> colors;
 	private Cursor cursor;
 	private DataLabelsFunnel dataLabels;
 	private Number depth;
@@ -110,66 +105,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	}
 
 	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the border surrounding each slice. When <code>null</code>,
-	 * the border takes the same color as the slice fill. This can be used
-	 * together with a <code>borderWidth</code> to fill drawing gaps created by
-	 * antialiazing artefacts in borderless pies.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke is given in the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the border surrounding each slice.
-	 * </p>
-	 * 
-	 * <p>
-	 * When setting the border width to 0, there may be small gaps between the
-	 * slices due to SVG antialiasing artefacts. To work around this, keep the
-	 * border width at 0.5 or 1, but set the <code>borderColor</code> to
-	 * <code>null</code> instead.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke width is given in the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
-	}
-
-	/**
 	 * The center of the series. By default, it is centered in the middle of the
 	 * plot area, so it fills the plot area height.
 	 * <p>
@@ -209,51 +144,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to use instead of the
-	 * global <a href="#colors">colors</a>.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**

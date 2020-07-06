@@ -1,24 +1,21 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2012 - 2016 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
-
-import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.time.Instant;
 import java.util.Date;
@@ -120,42 +117,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * clicked.
      */
     public abstract void setCursor(Cursor cursor);
-    /**
-     * @see #setDescription(String)
-     */
-    public abstract String getDescription();
-
-    /**
-     * A description of the series to add to the screen reader information about
-     * the series.
-     */
-    public abstract void setDescription(String description);
-
-    /**
-     * @see #setDashStyle(DashStyle)
-     */
-    public abstract DashStyle getDashStyle();
-
-    /**
-     * A name for the dash style to use for the graph. Applies only to series
-     * type having a graph, like <code>line</code>, <code>spline</code>,
-     * <code>area</code> and <code>scatter</code> in case it has a
-     * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-     * <ul>
-     * <li>Solid</li>
-     * <li>ShortDash</li>
-     * <li>ShortDot</li>
-     * <li>ShortDashDot</li>
-     * <li>ShortDashDotDot</li>
-     * <li>Dot</li>
-     * <li>Dash</li>
-     * <li>LongDash</li>
-     * <li>DashDot</li>
-     * <li>LongDashDot</li>
-     * <li>LongDashDotDot</li>
-     * </ul>
-     */
-    public abstract void setDashStyle(DashStyle dashStyle);
 
     /**
      * @see #setDataLabels(DataLabels)
@@ -168,6 +129,17 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * @param dataLabels
      */
     public abstract void setDataLabels(DataLabels dataLabels);
+
+    /**
+     * @see #setDescription(String)
+     */
+    public abstract String getDescription();
+
+    /**
+     * A description of the series to add to the screen reader information about
+     * the series.
+     */
+    public abstract void setDescription(String description);
 
     /**
      * @see #setEnableMouseTracking(Boolean)
@@ -258,16 +230,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void removeKey(String key);
 
     /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * The width of the line connecting the data points.
-     */
-    public abstract void setLineWidth(Number lineWidth);
-
-    /**
      * @see #setLinkedTo(String)
      */
     public abstract String getLinkedTo();
@@ -289,17 +251,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * Options for the point markers of line-like series.
      */
     public abstract void setMarker(Marker marker);
-
-    /**
-     * @see #setNegativeColor(Color)
-     */
-    public abstract Color getNegativeColor();
-
-    /**
-     * The color for the parts of the graph or points that are below the
-     * threshold.
-     */
-    public abstract void setNegativeColor(Color negativeColor);
 
     public abstract String getPointDescriptionFormatter();
 

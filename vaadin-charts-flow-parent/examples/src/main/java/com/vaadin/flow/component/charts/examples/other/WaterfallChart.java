@@ -11,9 +11,7 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsWaterfall;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.WaterFallSum;
-import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value="./styles/WaterfallChart.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class WaterfallChart extends AbstractChartExample {
 
     @Override

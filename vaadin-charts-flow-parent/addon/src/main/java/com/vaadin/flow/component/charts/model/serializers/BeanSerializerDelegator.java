@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.charts.model.serializers;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model.serializers;
  * #L%
  */
 
-
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -26,7 +25,6 @@ import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * Delegates serialization calls to the given instance of
@@ -71,12 +69,12 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     }
 
     @Override
-    protected BeanSerializerBase withIgnorals(Set<String> toIgnore) {
+    protected BeanSerializerBase withIgnorals(String[] toIgnore) {
         return new BeanSerializerDelegator(this, toIgnore);
     }
 
     @Override
-    public BeanSerializerBase withFilterId(Object filterId) {
+    protected BeanSerializerBase withFilterId(Object filterId) {
         return new BeanSerializerDelegator(this, filterId);
     }
 

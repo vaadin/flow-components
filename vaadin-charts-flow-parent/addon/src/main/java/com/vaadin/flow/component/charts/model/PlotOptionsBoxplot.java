@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -38,31 +36,25 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	private Boolean allowPointSelect;
 	private Number animationLimit;
 	private String className;
-	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
-	private ArrayList<Color> colors;
 	private Boolean crisp;
 	private Cursor cursor;
 	private Number depth;
 	private String description;
-	private Color edgeColor;
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private Color fillColor;
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private Number groupPadding;
 	private Number groupZPadding;
 	private Boolean grouping;
 	private ArrayList<String> keys;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
-	private Color medianColor;
 	private Number medianWidth;
-	private Color negativeColor;
+	private boolean negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -76,16 +68,11 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	private Boolean showInLegend;
 	private Boolean skipKeyboardNavigation;
 	private States states;
-	private Color stemColor;
-	private DashStyle stemDashStyle;
-	private Number stemWidth;
 	private Boolean stickyTracking;
 	private SeriesTooltip tooltip;
 	private Number turboThreshold;
 	private Boolean visible;
-	private Color whiskerColor;
 	private String whiskerLength;
-	private Number whiskerWidth;
 	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 
@@ -147,37 +134,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * <p>
-	 * The main color or the series. In line type series it applies to the line
-	 * and the point markers unless otherwise specified. In bar type series it
-	 * applies to the bars unless a color is specified per point. The default
-	 * value is pulled from the <code>options.colors</code> array.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the color can be defined by the <a
-	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
-	 * series color can be set with the <code>.highcharts-series</code>,
-	 * <code>.highcharts-color-{n}</code>,
-	 * <code>.highcharts-{type}-series</code> or
-	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
-	 * the <code>className</code> option.
-	 * </p>
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
 	 * @see #setColorByPoint(Boolean)
 	 */
 	public Boolean getColorByPoint() {
@@ -211,52 +167,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**
@@ -336,22 +246,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setEdgeColor(Color)
-	 */
-	public Color getEdgeColor() {
-		return edgeColor;
-	}
-
-	/**
-	 * 3D columns only. The color of the edges. Similar to
-	 * <code>borderColor</code>, except it defaults to the same color as the
-	 * column.
-	 */
-	public void setEdgeColor(Color edgeColor) {
-		this.edgeColor = edgeColor;
-	}
-
-	/**
 	 * @see #setEdgeWidth(Number)
 	 */
 	public Number getEdgeWidth() {
@@ -408,22 +302,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	 */
 	public void setExposeElementToA11y(Boolean exposeElementToA11y) {
 		this.exposeElementToA11y = exposeElementToA11y;
-	}
-
-	/**
-	 * @see #setFillColor(Color)
-	 */
-	public Color getFillColor() {
-		return fillColor;
-	}
-
-	/**
-	 * The fill color of the box.
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setFillColor(Color fillColor) {
-		this.fillColor = fillColor;
 	}
 
 	/**
@@ -566,26 +444,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line surrounding the box. If any of <a
-	 * href="#plotOptions.boxplot.stemWidth">stemWidth</a>, <a
-	 * href="#plotOptions.boxplot.medianWidth">medianWidth</a> or <a
-	 * href="#plotOptions.boxplot.whiskerWidth">whiskerWidth</a> are
-	 * <code>null</code>, the lineWidth also applies to these lines.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -621,23 +479,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setMedianColor(Color)
-	 */
-	public Color getMedianColor() {
-		return medianColor;
-	}
-
-	/**
-	 * The color of the median line. If <code>null</code>, the general series
-	 * color applies.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setMedianColor(Color medianColor) {
-		this.medianColor = medianColor;
-	}
-
-	/**
 	 * @see #setMedianWidth(Number)
 	 */
 	public Number getMedianWidth() {
@@ -655,19 +496,19 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(Color)
+	 * @see #setNegativeColor(boolean)
 	 */
-	public Color getNegativeColor() {
+	public boolean isNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
 	 */
-	public void setNegativeColor(Color negativeColor) {
+	public void setNegativeColor(boolean negativeColor) {
 		this.negativeColor = negativeColor;
 	}
 
@@ -917,58 +758,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setStemColor(Color)
-	 */
-	public Color getStemColor() {
-		return stemColor;
-	}
-
-	/**
-	 * The color of the stem, the vertical line extending from the box to the
-	 * whiskers. If <code>null</code>, the series color is used.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setStemColor(Color stemColor) {
-		this.stemColor = stemColor;
-	}
-
-	/**
-	 * @see #setStemDashStyle(DashStyle)
-	 */
-	public DashStyle getStemDashStyle() {
-		return stemDashStyle;
-	}
-
-	/**
-	 * The dash style of the stem, the vertical line extending from the box to
-	 * the whiskers.
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setStemDashStyle(DashStyle stemDashStyle) {
-		this.stemDashStyle = stemDashStyle;
-	}
-
-	/**
-	 * @see #setStemWidth(Number)
-	 */
-	public Number getStemWidth() {
-		return stemWidth;
-	}
-
-	/**
-	 * The width of the stem, the vertical line extending from the box to the
-	 * whiskers. If <code>null</code>, the width is inherited from the <a
-	 * href="#plotOptions.boxplot.lineWidth">lineWidth</a> option.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setStemWidth(Number stemWidth) {
-		this.stemWidth = stemWidth;
-	}
-
-	/**
 	 * @see #setStickyTracking(Boolean)
 	 */
 	public Boolean getStickyTracking() {
@@ -1048,23 +837,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setWhiskerColor(Color)
-	 */
-	public Color getWhiskerColor() {
-		return whiskerColor;
-	}
-
-	/**
-	 * The color of the whiskers, the horizontal lines marking low and high
-	 * values. When <code>null</code>, the general series color is used.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setWhiskerColor(Color whiskerColor) {
-		this.whiskerColor = whiskerColor;
-	}
-
-	/**
 	 * @see #setWhiskerLength(String)
 	 */
 	public String getWhiskerLength() {
@@ -1080,24 +852,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	 */
 	public void setWhiskerLength(String whiskerLength) {
 		this.whiskerLength = whiskerLength;
-	}
-
-	/**
-	 * @see #setWhiskerWidth(Number)
-	 */
-	public Number getWhiskerWidth() {
-		return whiskerWidth;
-	}
-
-	/**
-	 * The line width of the whiskers, the horizontal lines marking low and high
-	 * values. When <code>null</code>, the general <a
-	 * href="#plotOptions.boxplot.lineWidth">lineWidth</a> applies.
-	 * <p>
-	 * Defaults to: 2
-	 */
-	public void setWhiskerWidth(Number whiskerWidth) {
-		this.whiskerWidth = whiskerWidth;
 	}
 
 	/**

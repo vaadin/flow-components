@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -16,9 +16,6 @@ package com.vaadin.flow.component.charts.model;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
-
-import java.util.Objects;
 
 /**
  * The default series type for the chart. Can be one of LINE, SPLINE, AREA,
@@ -152,27 +149,11 @@ public class ChartType implements ChartEnum {
      *            the actual type string passed for client side
      */
     protected ChartType(String type) {
-        Objects.requireNonNull(type, "Chart type required");
         this.type = type;
     }
 
     @Override
     public String toString() {
         return type;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChartType)) return false;
-
-        ChartType chartType = (ChartType) o;
-
-        return type.equals(chartType.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return type.hashCode();
     }
 }

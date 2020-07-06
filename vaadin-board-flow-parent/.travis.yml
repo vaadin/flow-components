@@ -1,17 +1,20 @@
 language: java
-jdk: openjdk8
-dist: xenial
-
-install: true
-
-script: mvn -B clean verify -Dvaadin.productionMode -Dcom.vaadin.testbench.Parameters.testsInParallel=2 -Dvaadin.proKey=$VAADIN_PRO_KEY -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESSKEY
+jdk: oraclejdk8
+dist: trusty
+before_install: echo "sauce.user=$SAUCE_USER" > local.properties && echo "sauce.sauceAccessKey=$SAUCE_ACCESSKEY" >> local.properties && mkdir ~/.vaadin && echo $PRO_KEY > ~/.vaadin/proKey
+script: mvn -B verify
+deploy:
+  - provider: script
+    script: ./.travis.deploy.sh
+    skip_cleanup: true
+    on:
+      branch: master
 
 # Cache requires a master build
 branches:
   only:
     - master
     - /^\d+\.\d+$/
-
 cache:
   directories:
   - $HOME/.m2

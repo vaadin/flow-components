@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,10 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The legend is a box containing a symbol and name for each series item or
@@ -30,18 +27,12 @@ import com.vaadin.flow.component.charts.model.style.Style;
 public class Legend extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;
-	private Color backgroundColor;
-	private Color borderColor;
 	private Number borderRadius;
-	private Number borderWidth;
 	private Boolean enabled;
 	private Boolean floating;
 	private Number itemDistance;
-	private Style itemHiddenStyle;
-	private Style itemHoverStyle;
 	private Number itemMarginBottom;
 	private Number itemMarginTop;
-	private Style itemStyle;
 	private Number itemWidth;
 	private String labelFormat;
 	private String _fn_labelFormatter;
@@ -95,36 +86,6 @@ public class Legend extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * The background color of the legend.
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The color of the drawn border around the legend.
-	 * <p>
-	 * Defaults to: #999999
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
 	 * @see #setBorderRadius(Number)
 	 */
 	public Number getBorderRadius() {
@@ -138,22 +99,6 @@ public class Legend extends AbstractConfigurationObject {
 	 */
 	public void setBorderRadius(Number borderRadius) {
 		this.borderRadius = borderRadius;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * The width of the drawn border around the legend.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	public Legend(Boolean enabled) {
@@ -211,49 +156,6 @@ public class Legend extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setItemHiddenStyle(Style)
-	 */
-	public Style getItemHiddenStyle() {
-		if (itemHiddenStyle == null) {
-			itemHiddenStyle = new Style();
-		}
-		return itemHiddenStyle;
-	}
-
-	/**
-	 * CSS styles for each legend item when the corresponding series or point is
-	 * hidden. Only a subset of CSS is supported, notably those options related
-	 * to text. Properties are inherited from <code>style</code> unless
-	 * overridden here.
-	 * <p>
-	 * Defaults to: { "color": "#cccccc" }
-	 */
-	public void setItemHiddenStyle(Style itemHiddenStyle) {
-		this.itemHiddenStyle = itemHiddenStyle;
-	}
-
-	/**
-	 * @see #setItemHoverStyle(Style)
-	 */
-	public Style getItemHoverStyle() {
-		if (itemHoverStyle == null) {
-			itemHoverStyle = new Style();
-		}
-		return itemHoverStyle;
-	}
-
-	/**
-	 * CSS styles for each legend item in hover mode. Only a subset of CSS is
-	 * supported, notably those options related to text. Properties are
-	 * inherited from <code>style</code> unless overridden here.
-	 * <p>
-	 * Defaults to: { "color": "#000000" }
-	 */
-	public void setItemHoverStyle(Style itemHoverStyle) {
-		this.itemHoverStyle = itemHoverStyle;
-	}
-
-	/**
 	 * @see #setItemMarginBottom(Number)
 	 */
 	public Number getItemMarginBottom() {
@@ -283,30 +185,6 @@ public class Legend extends AbstractConfigurationObject {
 	 */
 	public void setItemMarginTop(Number itemMarginTop) {
 		this.itemMarginTop = itemMarginTop;
-	}
-
-	/**
-	 * @see #setItemStyle(Style)
-	 */
-	public Style getItemStyle() {
-		if (itemStyle == null) {
-			itemStyle = new Style();
-		}
-		return itemStyle;
-	}
-
-	/**
-	 * CSS styles for each legend item. Only a subset of CSS is supported,
-	 * notably those options related to text. The default
-	 * <code>textOverflow</code> property makes long texts truncate. Set it to
-	 * <code>null</code> to wrap text instead. A <code>width</code> property can
-	 * be added to control the text width.
-	 * <p>
-	 * Defaults to: { "color": "#333333", "cursor": "pointer", "fontSize":
-	 * "12px", "fontWeight": "bold", "textOverflow": "ellipsis" }
-	 */
-	public void setItemStyle(Style itemStyle) {
-		this.itemStyle = itemStyle;
 	}
 
 	/**

@@ -1253,7 +1253,7 @@ Tree maps have chart type [literal]#++TREEMAP++#.
 In order to create a Tree Map chart,you need to create a class that extends
 [classname]#TreeSeriesItem# and add an [propertyname]#colorIndex# property:
 
-[source, java]
+[source, jave]
 ----
 public static class MapTreeSeriesItem extends TreeSeriesItem {
     private Number colorIndex;
@@ -1270,7 +1270,7 @@ public static class MapTreeSeriesItem extends TreeSeriesItem {
 
 Then, you need to specify a color index for each of the top levels series items:
 
-[source, java]
+[source, jave]
 ----
 TreeSeries series = new TreeSeries();
 

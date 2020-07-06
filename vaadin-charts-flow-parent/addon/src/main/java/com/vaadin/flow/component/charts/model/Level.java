@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Set options on specific levels. Takes precedence over series options, but not
@@ -28,76 +26,12 @@ import com.vaadin.flow.component.charts.model.style.Color;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Level extends AbstractConfigurationObject {
 
-	private Color borderColor;
-	private DashStyle borderDashStyle;
-	private Number borderWidth;
-	private Color color;
 	private DataLabels dataLabels;
 	private TreeMapLayoutAlgorithm layoutAlgorithm;
 	private TreeMapLayoutStartingDirection layoutStartingDirection;
 	private Number level;
 
 	public Level() {
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * Can set a <code>borderColor</code> on all points which lies on the same
-	 * level.
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
-	 * @see #setBorderDashStyle(DashStyle)
-	 */
-	public DashStyle getBorderDashStyle() {
-		return borderDashStyle;
-	}
-
-	/**
-	 * Set the dash style of the border of all the point which lies on the
-	 * level. See <a
-	 * href"#plotOptions.scatter.dashStyle">plotOptions.scatter.dashStyle</a>
-	 * for possible options.
-	 */
-	public void setBorderDashStyle(DashStyle borderDashStyle) {
-		this.borderDashStyle = borderDashStyle;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * Can set the borderWidth on all points which lies on the same level.
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * Can set a color on all points which lies on the same level.
-	 */
-	public void setColor(Color color) {
-		this.color = color;
 	}
 
 	/**

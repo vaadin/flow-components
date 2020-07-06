@@ -1,0 +1,13 @@
+# Maven files
+target/
+error-screenshots/
+
+# Eclipse files
+.project
+.settings
+.classpath
+
+# IntelliJ files
+.idea/
+*.iml
+

@@ -1,27 +1,25 @@
 package com.vaadin.flow.component.charts.model;
 
-/*-
+import java.util.Date;
+
+/*
  * #%L
- * Vaadin Charts for Flow
+ * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2012 - 2015 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
 
-import java.util.Date;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
 public abstract class Axis extends AbstractConfigurationObject {
@@ -166,7 +164,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            Whether or not to animate the rescaling.
      */
     public void setExtremes(Number minimum, Number maximum, boolean redraw,
-            boolean animate) {
+                            boolean animate) {
         min = minimum;
         max = maximum;
         if (configuration != null) {
@@ -181,12 +179,12 @@ public abstract class Axis extends AbstractConfigurationObject {
      * @see #setExtremes(Number, Number, boolean, boolean)
      */
     public void setExtremes(Date minimum, Date maximum, boolean redraw,
-        boolean animate) {
+                            boolean animate) {
         setMin(minimum);
         setMax(maximum);
         if (configuration != null) {
             configuration.fireAxesRescaled(this, min, max, redraw,
-                animate);
+                    animate);
         }
     }
 
@@ -225,13 +223,13 @@ public abstract class Axis extends AbstractConfigurationObject {
     /**
      * @see #setAlternateGridColor(Color)
      */
-    public abstract Color getAlternateGridColor();
+    public abstract Boolean getAlternateGridColor();
 
     /**
      * When using an alternate grid color, a band is painted across the plot
      * area between every other grid line.
      */
-    public abstract void setAlternateGridColor(Color alternateGridColor);
+    public abstract void setAlternateGridColor(Boolean alternateGridColor);
 
     /**
      * @see #setCategories(String...)
@@ -319,7 +317,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * dateFormat.
      */
     public abstract void setDateTimeLabelFormats(
-        DateTimeLabelFormats dateTimeLabelFormats);
+            DateTimeLabelFormats dateTimeLabelFormats);
 
     /**
      * @see #setDescription(String)
@@ -382,26 +380,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The axis labels show the number or category for each tick.
      */
     public abstract void setLabels(Labels labels);
-
-    /**
-     * @see #setLineColor(Color)
-     */
-    public abstract Color getLineColor();
-
-    /**
-     * The color of the line marking the axis itself.
-     */
-    public abstract void setLineColor(Color lineColor);
-
-    /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * The width of the line marking the axis itself.
-     */
-    public abstract void setLineWidth(Number lineWidth);
 
     /**
      * @see #setLinkedTo(Number)
@@ -730,16 +708,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * </p>
      */
     public abstract void setTickAmount(Number tickAmount);
-
-    /**
-     * @see #setTickColor(Color)
-     */
-    public abstract Color getTickColor();
-
-    /**
-     * Color for the main tick marks.
-     */
-    public abstract void setTickColor(Color tickColor);
 
     /**
      * @see #setTickInterval(Number)

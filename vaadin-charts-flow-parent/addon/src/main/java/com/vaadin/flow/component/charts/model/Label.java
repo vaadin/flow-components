@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Style;
+
 /**
  * Text labels for the plot bands
  */
@@ -28,7 +27,6 @@ public class Label extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;
 	private Number rotation;
-	private Style style;
 	private String text;
 	private TextAlign textAlign;
 	private Boolean useHTML;
@@ -69,32 +67,6 @@ public class Label extends AbstractConfigurationObject {
 	 */
 	public void setRotation(Number rotation) {
 		this.rotation = rotation;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * CSS styles for the text label.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the labels are styled by the
-	 * <code>.highcharts-plot-band-label</code> class.
-	 * </p>
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	public Label(String text) {

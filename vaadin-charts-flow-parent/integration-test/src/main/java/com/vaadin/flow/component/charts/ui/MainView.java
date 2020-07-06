@@ -18,20 +18,17 @@ package com.vaadin.flow.component.charts.ui;
 
 import java.util.Optional;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.area.AreaChart;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.WildcardParameter;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route("")
-@Theme(value = Lumo.class)
 @StyleSheet("context://styles.css")
 public class MainView extends Div implements HasUrlParameter<String> {
     public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.examples.";

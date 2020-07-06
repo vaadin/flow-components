@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2018 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -17,9 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The stack labels show the total value for each bar in a stacked column or bar
@@ -35,7 +33,6 @@ public class StackLabels extends AbstractConfigurationObject {
 	private String format;
 	private String _fn_formatter;
 	private Number rotation;
-	private Style style;
 	private String textAlign;
 	private Boolean useHTML;
 	private VerticalAlign verticalAlign;
@@ -122,37 +119,6 @@ public class StackLabels extends AbstractConfigurationObject {
 	 */
 	public void setRotation(Number rotation) {
 		this.rotation = rotation;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * CSS styles for the label.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the styles are set in the
-	 * <code>.highcharts-stack-label</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: { "color": "#000000", "fontSize": "11px", "fontWeight":
-	 * "bold", "textShadow":
-	 * "1px 1px contrast, -1px -1px contrast, -1px 1px contrast, 1px -1px contrast"
-	 * }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

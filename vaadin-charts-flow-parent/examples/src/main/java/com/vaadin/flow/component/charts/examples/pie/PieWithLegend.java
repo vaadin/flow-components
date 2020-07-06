@@ -20,10 +20,11 @@ public class PieWithLegend extends AbstractChartExample {
 
         Configuration conf = chart.getConfiguration();
 
-        conf.setTitle("Browser market shares in January, 2018");
+        conf.setTitle("Browser market shares at a specific website, 2010");
 
         Tooltip tooltip = new Tooltip();
         tooltip.setValueDecimals(1);
+        tooltip.setPointFormat("{series.name}: <b>{point.percentage}%</b>");
         conf.setTooltip(tooltip);
 
         PlotOptionsPie plotOptions = new PlotOptionsPie();
@@ -33,18 +34,15 @@ public class PieWithLegend extends AbstractChartExample {
         conf.setPlotOptions(plotOptions);
 
         DataSeries series = new DataSeries();
-        DataSeriesItem chrome = new DataSeriesItem("Chrome", 61.41);
+        series.add(new DataSeriesItem("Firefox", 45.0));
+        series.add(new DataSeriesItem("IE", 26.8));
+        DataSeriesItem chrome = new DataSeriesItem("Chrome", 12.8);
         chrome.setSliced(true);
         chrome.setSelected(true);
         series.add(chrome);
-        series.add(new DataSeriesItem("Internet Explorer", 11.84));
-        series.add(new DataSeriesItem("Firefox", 10.85));
-        series.add(new DataSeriesItem("Edge", 4.67));
-        series.add(new DataSeriesItem("Safari", 4.18));
-        series.add(new DataSeriesItem("Sogou Explorer", 1.64));
+        series.add(new DataSeriesItem("Safari", 8.5));
         series.add(new DataSeriesItem("Opera", 6.2));
-        series.add(new DataSeriesItem("QQ", 1.2));
-        series.add(new DataSeriesItem("Others", 2.61));
+        series.add(new DataSeriesItem("Others", 0.7));
         conf.setSeries(series);
         chart.setVisibilityTogglingDisabled(true);
 
