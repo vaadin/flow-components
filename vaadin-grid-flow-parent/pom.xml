@@ -16,7 +16,7 @@
     <name>Vaadin Grid Flow Parent</name>
 
     <properties>
-        <contextmenu.version>4.2-SNAPSHOT</contextmenu.version>
+        <contextmenu.version>5.0-SNAPSHOT</contextmenu.version>
     </properties>
 
    <repositories>
