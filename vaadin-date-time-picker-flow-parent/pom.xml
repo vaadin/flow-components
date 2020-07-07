@@ -11,8 +11,8 @@
     </parent>
 
     <properties>
-        <timepicker.version>3.2-SNAPSHOT</timepicker.version>
-        <datepicker.version>3.2-SNAPSHOT</datepicker.version>
+        <timepicker.version>4.0-SNAPSHOT</timepicker.version>
+        <datepicker.version>4.0-SNAPSHOT</datepicker.version>
     </properties>
 
     <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
