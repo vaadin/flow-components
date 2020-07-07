@@ -57,7 +57,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-combo-box-flow</artifactId>
-            <version>4.2-SNAPSHOT</version>
+            <version>5.0-SNAPSHOT</version>
         </dependency>
 
         <!--Test scoped -->
