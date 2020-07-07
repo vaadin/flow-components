@@ -38,19 +38,19 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-confirm-dialog-testbench</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-testbench</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dialog-testbench</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -87,32 +87,32 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-combo-box-flow</artifactId>
-            <version>4.2-SNAPSHOT</version>
+            <version>5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dialog-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-form-layout-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
