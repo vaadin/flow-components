@@ -27,7 +27,7 @@
     </licenses>
 
     <properties>
-        <button.version>3.2-SNAPSHOT</button.version>
+        <button.version>4.0-SNAPSHOT</button.version>
 
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
