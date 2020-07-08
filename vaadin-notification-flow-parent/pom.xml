@@ -23,7 +23,6 @@
     <modules>
         <module>vaadin-notification-flow</module>
         <module>vaadin-notification-flow-testbench</module>
-        <module>vaadin-notification-flow-demo</module>
     </modules>
 
     <pluginRepositories>
@@ -56,6 +55,17 @@
             </activation>
             <modules>
                 <module>vaadin-notification-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-notification-flow-demo</module>
             </modules>
         </profile>
     </profiles>

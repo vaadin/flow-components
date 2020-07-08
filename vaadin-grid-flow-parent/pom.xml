@@ -18,7 +18,6 @@
     <modules>
         <module>vaadin-grid-flow</module>
         <module>vaadin-grid-flow-testbench</module>
-        <module>vaadin-grid-flow-demo</module>
     </modules>
 
     <profiles>
@@ -31,6 +30,17 @@
             </activation>
             <modules>
                 <module>vaadin-grid-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-grid-flow-demo</module>
             </modules>
         </profile>
     </profiles>

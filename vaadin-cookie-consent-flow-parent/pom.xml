@@ -31,7 +31,6 @@
     </properties>
     <modules>
         <module>vaadin-cookie-consent-flow</module>
-        <module>vaadin-cookie-consent-flow-demo</module>
         <module>vaadin-cookie-consent-testbench</module>
     </modules>
 
@@ -45,6 +44,17 @@
             </activation>
             <modules>
                 <module>vaadin-cookie-consent-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-cookie-consent-flow-demo</module>
             </modules>
         </profile>
     </profiles>

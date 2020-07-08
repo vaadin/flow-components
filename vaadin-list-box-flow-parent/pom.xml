@@ -30,7 +30,6 @@
 
     <modules>
         <module>vaadin-list-box-flow</module>
-        <module>vaadin-list-box-flow-demo</module>
         <module>vaadin-list-box-flow-testbench</module>
     </modules>
 
@@ -64,6 +63,17 @@
             </activation>
             <modules>
                 <module>vaadin-list-box-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-list-box-flow-demo</module>
             </modules>
         </profile>
     </profiles>

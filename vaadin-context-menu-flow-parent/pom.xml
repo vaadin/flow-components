@@ -39,7 +39,6 @@
     <modules>
         <module>vaadin-context-menu-flow</module>
         <module>vaadin-context-menu-flow-testbench</module>
-        <module>vaadin-context-menu-flow-demo</module>
     </modules>
 
     <profiles>
@@ -52,6 +51,17 @@
             </activation>
             <modules>
                 <module>vaadin-context-menu-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-context-menu-flow-demo</module>
             </modules>
         </profile>
     </profiles>

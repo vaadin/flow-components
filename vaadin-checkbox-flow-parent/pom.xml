@@ -40,7 +40,6 @@
     <modules>
         <module>vaadin-checkbox-flow</module>
         <module>vaadin-checkbox-flow-testbench</module>
-        <module>vaadin-checkbox-flow-demo</module>
     </modules>
 
     <profiles>
@@ -53,6 +52,17 @@
             </activation>
             <modules>
                 <module>vaadin-checkbox-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-checkbox-flow-demo</module>
             </modules>
         </profile>
     </profiles>

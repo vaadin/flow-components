@@ -18,7 +18,6 @@
 
     <modules>
         <module>addon</module>
-        <module>examples</module>
         <module>testbench</module>
     </modules>
 
@@ -32,6 +31,17 @@
             </activation>
             <modules>
                 <module>integration-test</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>examples</module>
             </modules>
         </profile>
     </profiles>

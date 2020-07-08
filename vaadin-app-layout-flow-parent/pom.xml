@@ -29,7 +29,6 @@
     <modules>
         <module>vaadin-app-layout-flow</module>
         <module>vaadin-app-layout-testbench</module>
-        <module>vaadin-app-layout-flow-demo</module>
     </modules>
     <repositories>
         <repository>
@@ -60,6 +59,17 @@
             </activation>
             <modules>
                 <module>vaadin-app-layout-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-app-layout-flow-demo</module>
             </modules>
         </profile>
     </profiles>

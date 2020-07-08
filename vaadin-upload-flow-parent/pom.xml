@@ -28,7 +28,6 @@
 
     <modules>
         <module>vaadin-upload-flow</module>
-        <module>vaadin-upload-flow-demo</module>
         <module>vaadin-upload-flow-testbench</module>
     </modules>
 
@@ -62,6 +61,17 @@
             </activation>
             <modules>
                 <module>vaadin-upload-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>build-demo</id>
+            <activation>
+                <property>
+                    <name>!noDemo</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-upload-flow-demo</module>
             </modules>
         </profile>
     </profiles>
