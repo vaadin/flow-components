@@ -79,7 +79,7 @@ import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
 @NpmPackage(value="@vaadin/vaadin-charts", version = "7.0.0-alpha8")
-@JsModule("@vaadin/vaadin-charts/vaadin-chart.js")
+@JsModule("@vaadin/vaadin-charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize {
 
     private Configuration configuration;

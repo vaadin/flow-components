@@ -51,6 +51,10 @@ public class ChartType implements ChartEnum {
      */
     public static final ChartType AREASPLINE = new ChartType("areaspline");
     /**
+     * @see PlotOptionsBullet
+     */
+    public static final ChartType BULLET = new ChartType("bullet");
+    /**
      * @see PlotOptionsColumn
      */
     public static final ChartType COLUMN = new ChartType("column");
