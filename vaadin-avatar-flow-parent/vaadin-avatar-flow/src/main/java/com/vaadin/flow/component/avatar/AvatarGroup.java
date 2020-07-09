@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha3")
 public class AvatarGroup extends Component
     implements HasStyle, HasSize, HasTheme {
 
@@ -255,6 +255,31 @@ public class AvatarGroup extends Component
         }
 
         return jsonItems;
+    }
+
+    /**
+     * Adds the items to the list of displayed as avatars.
+     *
+     * @param items
+     *            the items to add
+     */
+    public void add(AvatarGroupItem... items) {
+        setItems(Stream.concat(this.items.stream(),
+                Arrays.stream(items)).collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes the items from the list of displayed as avatars.
+     *
+     * @param items
+     *            the items to remove
+     */
+    public void remove(AvatarGroupItem... items) {
+        List<AvatarGroupItem> itemsToRemove = Arrays.asList(items);
+
+        setItems(this.items.stream()
+                .filter(item -> !itemsToRemove.contains(item))
+                .collect(Collectors.toList()));
     }
 
     /**
