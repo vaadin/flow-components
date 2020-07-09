@@ -254,7 +254,7 @@ public class CheckboxGroup<T>
      */
     @Deprecated
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider != null ? dataProvider.get() : null;
+        return dataProvider.get();
     }
 
     @Override
