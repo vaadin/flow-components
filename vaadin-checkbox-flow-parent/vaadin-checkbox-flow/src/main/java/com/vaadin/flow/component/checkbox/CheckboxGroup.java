@@ -146,7 +146,7 @@ public class CheckboxGroup<T>
     }
 
     private static class CheckBoxItem<T> extends Checkbox
-            implements ItemComponent<T> {
+            implements HasItemComponents.ItemComponent<T> {
 
         private final T item;
 
