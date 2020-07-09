@@ -158,6 +158,23 @@ public class AppLayoutTest {
         testAfterNavigationClosesDrawerOnOverlay(expectedDrawerOpened);
     }
 
+    @Test
+    public void testDrawerOpen() {
+        systemUnderTest.setDrawerOpened(true);
+        testDrawerOpened(true);
+    }
+
+    @Test
+    public void testDrawerClose() {
+        systemUnderTest.setDrawerOpened(false);
+        testDrawerOpened(false);
+    }
+
+    private void testDrawerOpened(boolean expectedDrawerOpened) {
+        assertEquals(expectedDrawerOpened, systemUnderTest.getElement().getProperty("drawerOpened", false));
+        assertEquals(expectedDrawerOpened, systemUnderTest.isDrawerOpened());
+    }
+
     private void testAfterNavigationClosesDrawerOnOverlay(
         boolean expectedDrawerOpened) {
         systemUnderTest.setDrawerOpened(true);
