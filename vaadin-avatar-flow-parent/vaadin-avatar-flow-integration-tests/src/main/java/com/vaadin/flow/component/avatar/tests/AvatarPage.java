@@ -17,14 +17,58 @@ package com.vaadin.flow.component.avatar.tests;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("avatar")
+@Route("avatar-test")
 public class AvatarPage extends Div {
 
     public AvatarPage() {
         Avatar avatar = new Avatar();
 
-        add(avatar);
+        NativeButton toggleImage = new NativeButton("Toggle img", e -> {
+            if (avatar.getImage() == null || avatar.getImage().isEmpty()) {
+                avatar.setImage("https://vaadin.com/");
+            } else {
+                avatar.setImage(null);
+            }
+        });
+        toggleImage.setId("toggle-img");
+
+        NativeButton toggleAbbr = new NativeButton("Toggle abbr", e -> {
+            if (avatar.getAbbreviation() == null || avatar.getAbbreviation().isEmpty()) {
+                avatar.setAbbreviation("BB");
+            } else {
+                avatar.setAbbreviation(null);
+            }
+        });
+        toggleAbbr.setId("toggle-abbr");
+
+        NativeButton toggleName = new NativeButton("Toggle name", e -> {
+            if (avatar.getName() == null || avatar.getName().isEmpty()) {
+                avatar.setName("Foo Bar");
+            } else {
+                avatar.setName(null);
+            }
+        });
+        toggleName.setId("toggle-name");
+
+        Div dataImg = new Div();
+        dataImg.setId("data-block-img");
+
+        Div dataAbbr = new Div();
+        dataAbbr.setId("data-block-abbr");
+
+        Div dataName = new Div();
+        dataName.setId("data-block-name");
+
+        NativeButton getPropertyValues = new NativeButton("Get properties", e -> {
+            dataImg.setText(avatar.getElement().getProperty("img"));
+            dataAbbr.setText(avatar.getElement().getProperty("abbr"));
+            dataName.setText(avatar.getElement().getProperty("name"));
+        });
+        getPropertyValues.setId("get-props");
+
+        add(avatar, toggleImage, toggleAbbr, toggleName, dataImg, dataAbbr, dataName, getPropertyValues);
     }
 }
