@@ -43,17 +43,17 @@ public class SelectListDataViewPage extends Div {
         Person mike = new Person(3, "Mike");
 
         SelectListDataView<Person> dataView =
-                select.setDataSource(new ArrayList<>(Arrays.asList(
+                select.setItems(new ArrayList<>(Arrays.asList(
                 john, paul, mike)
         ));
 
-        Span sizeSpan = new Span(String.valueOf(dataView.getSize()));
+        Span sizeSpan = new Span(String.valueOf(dataView.getItemCount()));
         Span containsItemSpan = new Span(String.valueOf(
                 dataView.contains(john)));
         Span allItemsSpan = new Span(dataView.getItems()
                 .map(Person::getName).collect(
                         Collectors.joining(",")));
-        Span itemOnIndexSpan = new Span(dataView.getItemOnIndex(0).getName());
+        Span itemOnIndexSpan = new Span(dataView.getItem(0).getName());
 
         AtomicReference<Person> currentItem =
                 new AtomicReference<>(paul);
@@ -92,9 +92,9 @@ public class SelectListDataViewPage extends Div {
         Button updateName = new Button("Update first name",
                 event -> {
                     Person updatedPerson =
-                            dataView.getItemOnIndex(3);
+                            dataView.getItem(3);
                     updatedPerson.setName("Jack");
-                    dataView.updateItem(updatedPerson);
+                    dataView.refreshItem(updatedPerson);
                 });
         Button deletePerson = new Button("Delete person",
                 event -> dataView.removeItem(

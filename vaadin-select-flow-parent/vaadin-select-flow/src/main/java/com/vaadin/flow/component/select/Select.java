@@ -34,20 +34,19 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.select.data.SelectDataView;
-import com.vaadin.flow.component.select.data.SelectDataViewImpl;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
-import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
@@ -72,8 +71,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @JsModule("./selectConnector.js")
-public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
-        HasDataProvider<T>, HasItemsAndComponents<T>, HasSize, HasValidation,
+public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
+        implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
         HasDataView<T, SelectDataView<T>> {
 
@@ -437,44 +436,22 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
 
     /**
      * {@inheritDoc}
-     * 
-     * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} instead.
      */
-    @Override
-    @Deprecated
-    public void setItems(T... items) {
-        setDataSource(items);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
-     */
-    @Override
-    @Deprecated
-    public void setItems(Collection<T> items) {
-        setDataSource(items);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
-     */
-    @Override
     @Deprecated
     public void setItems(Stream<T> streamOfItems) {
-        setDataSource(DataProvider.fromStream(streamOfItems));
+        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**
      * {@inheritDoc}
-     * 
-     * @deprecated use instead one of the setDataSource methods from
-     *             {@link HasListDataView}
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link SelectListDataView} or
+     *             {@link SelectDataView}
      */
-    @Override
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
@@ -497,14 +474,13 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
     }
 
     @Override
-    public SelectDataView<T> setDataSource(DataProvider<T, ?> dataProvider) {
+    public SelectDataView<T> setItems(DataProvider<T, ?> dataProvider) {
         this.setDataProvider(dataProvider);
-        return getDataView();
+        return getGenericDataView();
     }
 
     @Override
-    public SelectListDataView<T> setDataSource(
-            ListDataProvider<T> dataProvider) {
+    public SelectListDataView<T> setItems(ListDataProvider<T> dataProvider) {
         this.setDataProvider(dataProvider);
         return getListDataView();
     }
@@ -512,24 +488,24 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
     /**
      * Gets the generic data view for the {@link Select}. This data view should
      * only be used when {@link #getListDataView()} is not applicable for the
-     * underlying dataSource.
+     * underlying data provider.
      *
      * @return the generic DataView instance implementing {@link Select}
      */
     @Override
-    public SelectDataView<T> getDataView() {
-        return new SelectDataViewImpl<>(this::getDataProvider, this);
+    public SelectDataView<T> getGenericDataView() {
+        return new SelectDataView<>(this::getDataProvider, this);
     }
 
     /**
      * Gets the list data view for the {@link Select}. This data view should
-     * only be used when the used data source is of in-memory type and set with:
+     * only be used when the items are in-memory and set with:
      * <ul>
-     * <li>{@link #setDataSource(Collection)}</li>
-     * <li>{@link #setDataSource(Object[])}</li>
-     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
      * </ul>
-     * If the data source is of wrong type (lazy), an exception is thrown.
+     * If the items are not in-memory, an exception is thrown.
      *
      * @return the list data view that provides access to the data bound to the
      *         {@link Select}
@@ -623,7 +599,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         Objects.requireNonNull(components, "Components should not be null");
         for (Component component : components) {
             if (component.getElement().hasAttribute("slot")) {
-                HasItemsAndComponents.super.add(component);
+                HasItemComponents.super.add(component);
             } else {
                 listBox.add(component);
             }
@@ -651,7 +627,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
     public void addComponentAtIndex(int index, Component component) {
         Objects.requireNonNull(component, "Component should not be null");
         if (component.getElement().hasAttribute("slot")) {
-            HasItemsAndComponents.super.addComponentAtIndex(index, component);
+            HasItemComponents.super.addComponentAtIndex(index, component);
         } else {
             listBox.addComponentAtIndex(index, component);
         }
@@ -668,7 +644,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
     public void addComponentAsFirst(Component component) {
         Objects.requireNonNull(component, "Component should not be null");
         if (component.getElement().hasAttribute("slot")) {
-            HasItemsAndComponents.super.addComponentAsFirst(component);
+            HasItemComponents.super.addComponentAsFirst(component);
         } else {
             listBox.addComponentAsFirst(component);
         }
@@ -949,7 +925,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T> implements
         final int newSize = lastFetchedDataSize;
         if (lastNotifiedDataSize != newSize) {
             lastNotifiedDataSize = newSize;
-            fireEvent(new SizeChangeEvent<>(this, newSize));
+            fireEvent(new ItemCountChangeEvent<>(this, newSize, false));
         }
     }
 

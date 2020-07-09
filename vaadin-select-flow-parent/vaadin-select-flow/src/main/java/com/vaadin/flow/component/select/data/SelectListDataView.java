@@ -12,11 +12,11 @@ import com.vaadin.flow.function.SerializableSupplier;
  * @param <T>
  *            item type
  */
-public class SelectListDataView<T> extends AbstractListDataView<T>
-        implements SelectDataView<T> {
+public class SelectListDataView<T> extends AbstractListDataView<T> {
 
     /**
-     * Constructs a new SelectListDataView
+     * Creates a new in-memory data view for Select and verifies the passed data
+     * provider is compatible with this data view implementation.
      *
      * @param dataProviderSupplier
      *            supplier from which the DataProvider can be gotten
@@ -27,11 +27,5 @@ public class SelectListDataView<T> extends AbstractListDataView<T>
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             Select<T> select) {
         super(dataProviderSupplier, select);
-    }
-
-    @Override
-    public T getItemOnIndex(int index) {
-        validateItemIndex(index);
-        return getItems().skip(index).findFirst().orElse(null);
     }
 }

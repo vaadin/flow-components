@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,12 +36,11 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
-public class SelectDataViewImplTest {
+public class SelectDataViewTest {
     private List<String> items;
 
     private InMemoryDataProvider<String> dataProvider;
@@ -56,47 +56,33 @@ public class SelectDataViewImplTest {
 
         dataProvider = new InMemoryProvider(items);
         component = new Select<>();
-        dataView = component.setDataSource(dataProvider);
+        dataView = component.setItems(dataProvider);
     }
 
     @Test
-    public void getAllItems_noFiltersSet_allItemsObtained() {
+    public void getItems_noFiltersSet_allItemsObtained() {
         Stream<String> allItems = dataView.getItems();
         Assert.assertArrayEquals("Unexpected data set", items.toArray(),
                 allItems.toArray());
     }
 
     @Test
-    public void getDataSize_noFiltersSet_dataSizeObtained() {
-        Assert.assertEquals("Unexpected size for data", items.size(),
-                dataView.getSize());
-    }
-
-    @Test
     public void addListener_fireEvent_listenerIsCalled() {
         AtomicInteger fired = new AtomicInteger(0);
-        dataView.addSizeChangeListener(
-                event -> fired.compareAndSet(0, event.getSize()));
+        dataView.addItemCountChangeListener(
+                event -> fired.compareAndSet(0, event.getItemCount()));
 
         ComponentUtil.fireEvent(component,
-                new SizeChangeEvent<>(component, 10));
+                new ItemCountChangeEvent<>(component, 10, false));
 
         Assert.assertEquals(10, fired.get());
     }
 
     @Test
-    public void dataViewWithItems_contains_returnsCorrectItems() {
-        Assert.assertTrue("Returned false for item that should exist",
-                dataView.contains("middle"));
-        Assert.assertFalse("Returned false for item that should exist",
-                dataView.contains("non existing"));
-    }
-
-    @Test
-    public void dataViewWithItems_getItemOnRow_returnsCorrectItem() {
-        Assert.assertEquals(items.get(0), dataView.getItemOnIndex(0));
-        Assert.assertEquals(items.get(1), dataView.getItemOnIndex(1));
-        Assert.assertEquals(items.get(2), dataView.getItemOnIndex(2));
+    public void getItem_dataViewWithItems_returnsCorrectItem() {
+        Assert.assertEquals(items.get(0), dataView.getItem(0));
+        Assert.assertEquals(items.get(1), dataView.getItem(1));
+        Assert.assertEquals(items.get(2), dataView.getItem(2));
     }
 
     @Test
@@ -109,7 +95,7 @@ public class SelectDataViewImplTest {
         DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
         Select<Item> component = new Select<>();
 
-        SelectDataView<Item> dataView = component.setDataSource(dataProvider);
+        SelectDataView<Item> dataView = component.setItems(dataProvider);
 
         dataView.setIdentifierProvider(Item::getId);
 
@@ -133,7 +119,7 @@ public class SelectDataViewImplTest {
                 items);
 
         Select<Item> component = new Select<>();
-        component.setDataSource(dataProvider);
+        component.setItems(dataProvider);
 
         first.setValue("changed-1");
         second.setValue("changed-2");
@@ -153,7 +139,7 @@ public class SelectDataViewImplTest {
 
         DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
         Select<Item> component = new Select<>();
-        component.setDataSource(dataProvider);
+        component.setItems(dataProvider);
 
         first.setValue("changed-1");
         second.setValue("changed-2");

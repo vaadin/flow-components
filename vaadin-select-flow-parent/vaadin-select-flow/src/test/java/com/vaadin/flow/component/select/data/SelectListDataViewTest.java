@@ -20,56 +20,14 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import java.util.ArrayList;
 
 public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
 
-    private final String[] items = new String[] { "one", "two", "three",
-            "four" };
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Test
-    public void dataViewWithItem_rowOutsideSetRequested_exceptionThrown() {
-        expectedException.expect(IndexOutOfBoundsException.class);
-        expectedException.expectMessage(
-                "Given index 7 is outside of the accepted range '0 - 3'");
-
-        Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataSource(items);
-
-        dataView.getItemOnIndex(7);
-    }
-
-    @Test
-    public void dataViewWithItem_negativeRowRequested_exceptionThrown() {
-        expectedException.expect(IndexOutOfBoundsException.class);
-        expectedException.expectMessage(
-                "Given index -7 is outside of the accepted range '0 - 3'");
-
-        Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select.setDataSource(items);
-
-        dataView.getItemOnIndex(-7);
-    }
-
-    @Test
-    public void dataViewWithoutItems_exceptionThrown() {
-        expectedException.expect(IndexOutOfBoundsException.class);
-        expectedException.expectMessage("Requested index 5 on empty data.");
-
-        Select<String> select = new Select<>();
-        SelectListDataView<String> dataView = select
-                .setDataSource(new ListDataProvider<>(new ArrayList<>()));
-
-        dataView.getItemOnIndex(5);
-    }
+    /*
+     * ListDataView implementation is tested in AbstractListDataViewTest. No
+     * tests included here because SelectListDataView does not override any
+     * methods or add any new ones.
+     */
 
     @Override
     protected HasListDataView<String, ? extends AbstractListDataView<String>> getComponent() {

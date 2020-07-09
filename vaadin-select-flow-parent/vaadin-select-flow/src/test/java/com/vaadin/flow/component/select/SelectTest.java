@@ -641,7 +641,7 @@ public class SelectTest {
                         + "'AbstractBackEndDataProvider'");
 
         Select<String> select = new Select<>();
-        select.setDataSource(Arrays.asList("one", "two"));
+        select.setItems(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Stream.of("one"), query -> 1);
