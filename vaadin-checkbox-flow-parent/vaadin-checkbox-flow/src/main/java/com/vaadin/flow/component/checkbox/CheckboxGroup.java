@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -250,11 +251,15 @@ public class CheckboxGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or getLazyDataView() instead
+     * @deprecated use {@link #getListDataView()} or
+     *             {@link #getGenericDataView()} instead
      */
     @Deprecated
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider.get();
+        // dataProvider reference won't have been initialized before
+        // calling from CheckboxGroup constructor
+        return Optional.ofNullable(dataProvider).map(AtomicReference::get)
+                .orElse(null);
     }
 
     @Override
