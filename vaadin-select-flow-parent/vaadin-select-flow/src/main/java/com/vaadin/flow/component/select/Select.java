@@ -37,7 +37,6 @@ import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.binder.HasItemComponents;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasDataView;
@@ -176,15 +175,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Tag("vaadin-list-box")
     private class InternalListBox<T> extends Component
-            implements HasItemsAndComponents<T> {
-
-        @Override
-        public void setItems(Collection<T> collection) {
-            // NOOP, never used directly, just need to have it here
-            throw new UnsupportedOperationException(
-                    "The setItems method of the internal ListBox of the " +
-                            "Select component should never be called.");
-        }
+            implements HasItemComponents<T> {
 
         @Override
         public int getItemPosition(T item) {
@@ -192,7 +183,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             if (item == null && isEmptySelectionAllowed()) {
                 return 0;
             } else {
-                return HasItemsAndComponents.super.getItemPosition(item);
+                return HasItemComponents.super.getItemPosition(item);
             }
         }
     }
