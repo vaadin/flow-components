@@ -78,6 +78,11 @@
             <artifactId>vaadin-combo-box-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dialog-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- externals -->
         <dependency>
