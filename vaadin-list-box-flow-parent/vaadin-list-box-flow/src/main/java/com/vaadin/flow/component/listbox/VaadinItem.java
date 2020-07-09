@@ -20,7 +20,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
+import com.vaadin.flow.data.binder.HasItemComponents.ItemComponent;
+
 
 /**
  * Server-side component for the {@code vaadin-item} element, used to represent

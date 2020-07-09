@@ -17,7 +17,8 @@ package com.vaadin.flow.component.radiobutton;
 
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
+import com.vaadin.flow.data.binder.HasItemComponents.ItemComponent;
+
 
 /**
  * Server-side component for the {@code vaadin-radio-button} element.
