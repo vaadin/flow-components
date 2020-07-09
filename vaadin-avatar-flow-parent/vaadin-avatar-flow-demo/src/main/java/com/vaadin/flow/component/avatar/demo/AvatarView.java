@@ -100,5 +100,4 @@ public class AvatarView extends DemoView {
 
         addCard("Combined properties", avatar, checkboxGroup);
     }
-
 }
