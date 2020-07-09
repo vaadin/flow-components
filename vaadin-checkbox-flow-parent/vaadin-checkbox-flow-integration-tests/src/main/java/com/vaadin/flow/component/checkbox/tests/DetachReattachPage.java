@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Test view for {@link Checkbox}.
@@ -38,7 +38,7 @@ public class DetachReattachPage extends Div {
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar", "baz"));
-        group.setDataSource(new ListDataProvider<>(items));
+        group.setItems(new ListDataProvider<>(items));
 
         NativeButton detach = new NativeButton("detach", e -> remove(group));
         detach.setId("detach");

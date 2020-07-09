@@ -15,66 +15,19 @@
  */
 package com.vaadin.flow.component.checkbox.dataview;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasListDataView;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class CheckboxGroupListDataViewTest
         extends AbstractListDataViewListenerTest {
 
-    private final static Collection<String> ITEMS = Arrays
-            .asList("first", "middle", "last");
-
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
-
-    private DataProvider dataProvider;
-
-    private CheckboxGroupListDataView<String> dataView;
-
-    @Before
-    public void init() {
-        dataProvider = DataProvider.ofCollection(ITEMS);
-        dataView = new CheckboxGroupListDataView<>(() -> dataProvider, null);
-    }
-
-    @Test
-    public void getItemOnIndex_correctIndex_itemFound() {
-        Assert.assertEquals("Wrong item returned for index", "first",
-                dataView.getItemOnIndex(0));
-    }
-
-    @Test
-    public void getItemOnIndex_negativeIndex_throwsException() {
-        exceptionRule.expect(IndexOutOfBoundsException.class);
-        exceptionRule.expectMessage(
-                "Given index -1 is outside of the accepted range '0 - 2'");
-        dataView.getItemOnIndex(-1);
-    }
-
-    @Test
-    public void getItemOnIndex_emptyDataSet_throwsException() {
-        dataProvider = DataProvider.ofItems();
-        exceptionRule.expect(IndexOutOfBoundsException.class);
-        exceptionRule.expectMessage("Requested index 0 on empty data.");
-        dataView.getItemOnIndex(0);
-    }
-
-    @Test
-    public void getItemOnIndex_indexOutsideOfSize_throwsException() {
-        exceptionRule.expect(IndexOutOfBoundsException.class);
-        dataView.getItemOnIndex(ITEMS.size());
-    }
+    /*
+     * ListDataView implementation is tested in AbstractListDataViewTest. No
+     * tests included here because CheckboxGroupListDataView does not override
+     * any methods or add any new ones.
+     */
 
     @Override
     protected HasListDataView<String, ? extends AbstractListDataView<String>> getComponent() {

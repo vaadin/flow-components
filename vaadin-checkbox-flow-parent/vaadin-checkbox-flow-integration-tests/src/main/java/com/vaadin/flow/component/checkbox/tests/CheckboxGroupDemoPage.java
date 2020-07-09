@@ -76,7 +76,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Basic checkbox group
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setDataSource("foo", "bar", "baz");
+        group.setItems("foo", "bar", "baz");
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Checkbox group value changed from '%s' to '%s'",
                 toString(event.getOldValue()), toString(event.getValue()))));
@@ -92,7 +92,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Group with label and error message
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setDataSource("foo", "bar", "baz");
+        group.setItems("foo", "bar", "baz");
         group.setLabel("Group label");
         group.setErrorMessage("Field has been set to invalid from server side");
         NativeButton button = new NativeButton("Switch validity state",
@@ -110,7 +110,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Checkbox group with label generator
         CheckboxGroup<Person> group = new CheckboxGroup<>();
-        group.setDataSource(new Person("Joe"), new Person("John"),
+        group.setItems(new Person("Joe"), new Person("John"),
                 new Person("Bill"));
         group.setItemLabelGenerator(Person::getName);
         group.addValueChangeListener(event -> message.setText(String.format(
@@ -129,7 +129,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Disabled checkbox group
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setDataSource("foo", "bar", "baz");
+        group.setItems("foo", "bar", "baz");
         group.setEnabled(false);
         // end-source-example
 
@@ -145,7 +145,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         // source-example-heading: Checkbox group with item enabled
         // provider
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setDataSource("foo", "bar", "baz");
+        group.setItems("foo", "bar", "baz");
         group.setItemEnabledProvider(item -> !"bar".equals(item));
         // end-source-example
 
@@ -164,7 +164,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         Div valueInfo = new Div();
 
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setDataSource("foo", "bar", "baz");
+        group.setItems("foo", "bar", "baz");
         group.setReadOnly(true);
 
         NativeButton button = new NativeButton("Switch read-only state",
@@ -184,7 +184,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Theme variants usage
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setDataSource("foo", "bar", "baz");
+        group.setItems("foo", "bar", "baz");
         group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
 

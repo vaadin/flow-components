@@ -56,16 +56,16 @@ public class CheckboxGroupListDataViewPage extends Div {
         CheckboxGroupDemoPage.Person mike =
                 new CheckboxGroupDemoPage.Person(3, "Mike");
         CheckboxGroupListDataView<CheckboxGroupDemoPage.Person> dataView =
-                checkboxGroup.setDataSource(new ArrayList<>(Arrays.asList(
+                checkboxGroup.setItems(new ArrayList<>(Arrays.asList(
                         john, paul, mike)
                 ));
-        Span sizeSpan = new Span(String.valueOf(dataView.getSize()));
+        Span sizeSpan = new Span(String.valueOf(dataView.getItemCount()));
         Span containsItemSpan = new Span(String.valueOf(
                 dataView.contains(john)));
         Span allItemsSpan = new Span(dataView.getItems()
                 .map(CheckboxGroupDemoPage.Person::getName).collect(
                 Collectors.joining(",")));
-        Span itemOnIndexSpan = new Span(dataView.getItemOnIndex(0).getName());
+        Span itemOnIndexSpan = new Span(dataView.getItem(0).getName());
 
         AtomicReference<CheckboxGroupDemoPage.Person> currentItem =
                 new AtomicReference<>(paul);
@@ -104,9 +104,9 @@ public class CheckboxGroupListDataViewPage extends Div {
         Button updateName = new Button("Update first name",
                 event -> {
                     CheckboxGroupDemoPage.Person updatedPerson =
-                            dataView.getItemOnIndex(3);
+                            dataView.getItem(3);
                     updatedPerson.setName("Jack");
-                    dataView.updateItem(updatedPerson);
+                    dataView.refreshItem(updatedPerson);
                 });
         Button deletePerson = new Button("Delete person",
                 event -> dataView.removeItem(

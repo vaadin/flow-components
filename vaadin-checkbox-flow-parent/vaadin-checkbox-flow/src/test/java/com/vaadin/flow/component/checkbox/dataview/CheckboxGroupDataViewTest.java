@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,12 +37,11 @@ import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
-public class CheckboxGroupDataViewImplTest {
+public class CheckboxGroupDataViewTest {
 
     private List<String> items;
 
@@ -58,47 +58,33 @@ public class CheckboxGroupDataViewImplTest {
 
         dataProvider = new InMemoryProvider(items);
         component = new CheckboxGroup<>();
-        dataView = component.setDataSource(dataProvider);
+        dataView = component.setItems(dataProvider);
     }
 
     @Test
-    public void getAllItems_noFiltersSet_allItemsObtained() {
+    public void getItems_noFiltersSet_itemsObtained() {
         Stream<String> allItems = dataView.getItems();
         Assert.assertArrayEquals("Unexpected data set", items.toArray(),
                 allItems.toArray());
     }
 
     @Test
-    public void getDataSize_noFiltersSet_dataSizeObtained() {
-        Assert.assertEquals("Unexpected size for data", items.size(),
-                dataView.getSize());
-    }
-
-    @Test
     public void addListener_fireEvent_listenerIsCalled() {
         AtomicInteger fired = new AtomicInteger(0);
-        dataView.addSizeChangeListener(
-                event -> fired.compareAndSet(0, event.getSize()));
+        dataView.addItemCountChangeListener(
+                event -> fired.compareAndSet(0, event.getItemCount()));
 
-        ComponentUtil
-                .fireEvent(component, new SizeChangeEvent<>(component, 10));
+        ComponentUtil.fireEvent(component,
+                new ItemCountChangeEvent<>(component, 10, false));
 
         Assert.assertEquals(10, fired.get());
     }
 
     @Test
-    public void dataViewWithItems_contains_returnsCorrectItems() {
-        Assert.assertTrue("Returned false for item that should exist",
-                dataView.contains("middle"));
-        Assert.assertFalse("Returned false for item that should exist",
-                dataView.contains("non existing"));
-    }
-
-    @Test
-    public void dataViewWithItems_getItemOnRow_returnsCorrectItem() {
-        Assert.assertEquals(items.get(0), dataView.getItemOnIndex(0));
-        Assert.assertEquals(items.get(1), dataView.getItemOnIndex(1));
-        Assert.assertEquals(items.get(2), dataView.getItemOnIndex(2));
+    public void getItem_dataViewWithItems_returnsCorrectItem() {
+        Assert.assertEquals(items.get(0), dataView.getItem(0));
+        Assert.assertEquals(items.get(1), dataView.getItem(1));
+        Assert.assertEquals(items.get(2), dataView.getItem(2));
     }
 
     @Test
@@ -111,8 +97,7 @@ public class CheckboxGroupDataViewImplTest {
         DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
         CheckboxGroup<Item> component = new CheckboxGroup<>();
 
-        CheckboxGroupDataView<Item> dataView =
-                component.setDataSource(dataProvider);
+        CheckboxGroupDataView<Item> dataView = component.setItems(dataProvider);
 
         dataView.setIdentifierProvider(Item::getId);
 
@@ -136,7 +121,7 @@ public class CheckboxGroupDataViewImplTest {
                 new CustomIdentityItemDataProvider(items);
 
         CheckboxGroup<Item> component = new CheckboxGroup<>();
-        component.setDataSource(dataProvider);
+        component.setItems(dataProvider);
 
         first.setValue("changed-1");
         second.setValue("changed-2");
@@ -156,7 +141,7 @@ public class CheckboxGroupDataViewImplTest {
 
         DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
         CheckboxGroup<Item> component = new CheckboxGroup<>();
-        component.setDataSource(dataProvider);
+        component.setItems(dataProvider);
 
         first.setValue("changed-1");
         second.setValue("changed-2");
@@ -277,11 +262,12 @@ public class CheckboxGroupDataViewImplTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             Item item = (Item) o;
-            return id == item.id &&
-                    Objects.equals(value, item.value);
+            return id == item.id && Objects.equals(value, item.value);
         }
 
         @Override

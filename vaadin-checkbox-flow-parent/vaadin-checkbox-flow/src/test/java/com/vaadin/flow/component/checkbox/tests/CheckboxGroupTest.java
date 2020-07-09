@@ -351,7 +351,7 @@ public class CheckboxGroupTest {
 
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         final CheckboxGroupListDataView<String> listDataView = checkboxGroup
-                .setDataSource(Arrays.asList("one", "two"));
+                .setItems(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Stream.of("one"),
@@ -367,7 +367,7 @@ public class CheckboxGroupTest {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
         ListDataProvider<Wrapper> dataProvider = new ListDataProvider<>(items);
-        checkboxGroup.setDataSource(dataProvider);
+        checkboxGroup.setItems(dataProvider);
         return checkboxGroup;
     }
 
@@ -376,7 +376,7 @@ public class CheckboxGroupTest {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
         ListDataProvider<Wrapper> dataProvider = new CustomDataProvider(items);
-        checkboxGroup.setDataSource(dataProvider);
+        checkboxGroup.setItems(dataProvider);
         return checkboxGroup;
     }
 

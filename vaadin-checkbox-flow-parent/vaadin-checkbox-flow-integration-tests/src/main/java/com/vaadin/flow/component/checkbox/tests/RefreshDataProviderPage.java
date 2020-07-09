@@ -33,7 +33,7 @@ public class RefreshDataProviderPage extends Div {
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar"));
-        group.setDataSource(new ListDataProvider<>(items));
+        group.setItems(new ListDataProvider<>(items));
 
         NativeButton button = new NativeButton("Update items", e -> {
             items.add("baz");

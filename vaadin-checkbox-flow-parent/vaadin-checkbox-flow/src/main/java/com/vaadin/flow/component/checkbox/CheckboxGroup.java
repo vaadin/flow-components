@@ -32,19 +32,17 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
-import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataViewImpl;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
-import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.SizeChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -67,8 +65,8 @@ import elemental.json.JsonArray;
  */
 public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
-        implements HasItemsAndComponents<T>, HasSize, HasValidation,
-        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T>,
+        implements HasItemComponents<T>, HasSize, HasValidation,
+        MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasDataView<T, CheckboxGroupDataView<T>> {
 
@@ -103,31 +101,30 @@ public class CheckboxGroup<T>
     }
 
     @Override
-    public CheckboxGroupDataView<T> setDataSource(
-            DataProvider<T, ?> dataProvider) {
+    public CheckboxGroupDataView<T> setItems(DataProvider<T, ?> dataProvider) {
         setDataProvider(dataProvider);
-        return getDataView();
+        return getGenericDataView();
     }
 
     @Override
-    public CheckboxGroupListDataView<T> setDataSource(
+    public CheckboxGroupListDataView<T> setItems(
             ListDataProvider<T> dataProvider) {
-        this.setDataProvider(dataProvider);
+        setDataProvider(dataProvider);
         return getListDataView();
     }
 
     /**
      * Gets the list data view for the checkbox group. This data view should
-     * only be used when the used data source is of in-memory type and set with:
+     * only be used when the items are in-memory and set with:
      * <ul>
-     * <li>{@link #setDataSource(Collection)}</li>
-     * <li>{@link #setDataSource(Object[])}</li>
-     * <li>{@link #setDataSource(ListDataProvider)}</li>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
      * </ul>
-     * If the data source is of wrong type (lazy), an exception is thrown.
+     * If the items are not in-memory an exception is thrown.
      *
      * @return the list data view that provides access to the data bound to the
-     * checkbox group
+     *         checkbox group
      */
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
@@ -135,16 +132,16 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Gets the generic data view for the checkbox group. This data view
-     * should only be used when {@link #getListDataView()} is not applicable
-     * for the underlying dataSource.
+     * Gets the generic data view for the checkbox group. This data view should
+     * only be used when {@link #getListDataView()} is not applicable for the
+     * underlying data provider.
      *
      * @return the generic DataView instance implementing
-     * {@link CheckboxGroupDataView}
+     *         {@link CheckboxGroupDataView}
      */
     @Override
-    public CheckboxGroupDataView<T> getDataView() {
-        return new CheckboxGroupDataViewImpl<>(this::getDataProvider, this);
+    public CheckboxGroupDataView<T> getGenericDataView() {
+        return new CheckboxGroupDataView<>(this::getDataProvider, this);
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -166,40 +163,22 @@ public class CheckboxGroup<T>
 
     /**
      * {@inheritDoc}
-     * @deprecated use {@link HasListDataView#setDataSource(Object[])} )}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} instead.
      */
-    @Override
-    @Deprecated
-    public void setItems(T... items) {
-        setDataSource(items);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
-     */
-    @Override
-    @Deprecated
-    public void setItems(Collection<T> items) {
-        setDataSource(items);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated use {@link HasListDataView#setDataSource(Collection)}
-     */
-    @Override
     @Deprecated
     public void setItems(Stream<T> streamOfItems) {
-        setDataSource(DataProvider.fromStream(streamOfItems));
+        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**
      * {@inheritDoc}
-     * @deprecated use instead one of the setDataSource methods from
-     * {@link HasListDataView}
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link CheckboxGroupListDataView} or
+     *             {@link CheckboxGroupDataView}
      */
-    @Override
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
@@ -240,8 +219,10 @@ public class CheckboxGroup<T>
      * group without any selected items is an empty set. You can use the
      * {@link #clear()} method to set the empty value.
      *
-     * @param value the new value to set, not {@code null}
-     * @throws NullPointerException if value is {@code null}
+     * @param value
+     *            the new value to set, not {@code null}
+     * @throws NullPointerException
+     *             if value is {@code null}
      */
     @Override
     public void setValue(Set<T> value) {
@@ -317,7 +298,8 @@ public class CheckboxGroup<T>
      * as grayed out and the user cannot select them. The default predicate
      * always returns true (all the items are enabled).
      *
-     * @param itemEnabledProvider the item enable predicate, not {@code null}
+     * @param itemEnabledProvider
+     *            the item enable predicate, not {@code null}
      */
     public void setItemEnabledProvider(
             SerializablePredicate<T> itemEnabledProvider) {
@@ -330,7 +312,8 @@ public class CheckboxGroup<T>
      * in the checkbox group for each item. By default,
      * {@link String#valueOf(Object)} is used.
      *
-     * @param itemLabelGenerator the item label provider to use, not null
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
      */
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
@@ -567,7 +550,7 @@ public class CheckboxGroup<T>
         final int newSize = lastFetchedDataSize;
         if (lastNotifiedDataSize != newSize) {
             lastNotifiedDataSize = newSize;
-            fireEvent(new SizeChangeEvent<>(this, newSize));
+            fireEvent(new ItemCountChangeEvent<>(this, newSize, false));
         }
     }
 

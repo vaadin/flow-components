@@ -86,7 +86,7 @@ public class DataProviderIdPage extends Div {
                 return item.getId();
             }
         };
-        idGroup.setDataSource(provider);
+        idGroup.setItems(provider);
         idGroup.setItemLabelGenerator(Message::getText);
         idGroup.setId("id-data-provider");
 

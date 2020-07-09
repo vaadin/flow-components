@@ -16,22 +16,51 @@
 package com.vaadin.flow.component.checkbox.dataview;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.AbstractDataView;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializableSupplier;
 
 /**
- * {@link CheckboxGroup} component {@link DataView} interface for getting
- * specific information on current data set of a {@link CheckboxGroup} instance.
+ * Implementation of generic data view for checkbox group.
  *
- * @param <T> data type
+ * @param <T>
+ *            the item type
+ * @since
  */
-public interface CheckboxGroupDataView<T> extends DataView<T> {
+public class CheckboxGroupDataView<T> extends AbstractDataView<T> {
 
     /**
-     * Get the item at the given index in the sorted and filtered data set.
+     * Constructs a new DataView.
      *
-     * @param index index number
-     * @return item on index
-     * @throws IndexOutOfBoundsException requested index is outside of the available data set.
+     * @param dataProviderSupplier
+     *            data provider supplier
+     * @param checkboxGroup
+     *            checkbox instance for this DataView
      */
-    T getItemOnIndex(int index);
+    public CheckboxGroupDataView(
+            SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
+            CheckboxGroup<T> checkboxGroup) {
+        super(dataProviderSupplier, checkboxGroup);
+    }
+
+    @Override
+    public T getItem(int index) {
+        final int dataSize = dataProviderSupplier.get().size(new Query<>());
+        if (dataSize == 0) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Requested index %d on empty data.", index));
+        }
+        if (index < 0 || index >= dataSize) {
+            throw new IndexOutOfBoundsException(String.format(
+                    "Given index %d is outside of the accepted range '0 - %d'",
+                    index, dataSize - 1));
+        }
+        return getItems().skip(index).findFirst().orElse(null);
+    }
+
+    @Override
+    protected Class<?> getSupportedDataProviderType() {
+        return DataProvider.class;
+    }
 }

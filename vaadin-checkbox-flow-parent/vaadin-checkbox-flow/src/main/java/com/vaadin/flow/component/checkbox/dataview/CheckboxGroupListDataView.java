@@ -24,27 +24,24 @@ import com.vaadin.flow.function.SerializableSupplier;
  * Data view implementation for Checkbox Group with in-memory list data.
  * Provides information on the data and allows operations on it.
  *
- * @param <T> data type
+ * @param <T>
+ *            data type
  * @since
  */
-public class CheckboxGroupListDataView<T> extends AbstractListDataView<T>
-        implements CheckboxGroupDataView<T> {
+public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
 
     /**
-     * Checkbox DataView constructor.
+     * Creates a new in-memory data view for Checkbox Group and verifies the
+     * passed data provider is compatible with this data view implementation.
      *
-     * @param dataProviderSupplier data provider supplier
-     * @param checkboxGroup        checkbox instance for this DataView
+     * @param dataProviderSupplier
+     *            data provider supplier
+     * @param checkboxGroup
+     *            checkbox group instance for this DataView
      */
     public CheckboxGroupListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             CheckboxGroup<T> checkboxGroup) {
         super(dataProviderSupplier, checkboxGroup);
-    }
-
-    @Override
-    public T getItemOnIndex(int index) {
-        validateItemIndex(index);
-        return getItems().skip(index).findFirst().orElse(null);
     }
 }
