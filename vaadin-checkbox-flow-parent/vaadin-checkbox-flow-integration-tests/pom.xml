@@ -68,7 +68,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-testbench</artifactId>
-            <version>${project.version}</version>
+            <version>4.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-testbench</artifactId>
+            <version>4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
