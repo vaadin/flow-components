@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha5")
 public class AvatarGroup extends Component
     implements HasStyle, HasSize, HasTheme {
 
