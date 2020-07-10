@@ -10,3 +10,9 @@
 # Idea files
 .idea/
 *.iml
+
+.vscode
+types.d.ts
+tsconfig.json
+webpack.*
+node_modules
