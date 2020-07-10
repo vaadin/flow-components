@@ -111,7 +111,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void gridWithSwappedDataProvider_selectAllIsNotVisible_swapingDataProvidersChangeItsState() {
+    public void gridWithSwappedDataProvider_selectAllIsNotVisible_swappingDataProvidersChangeItsState() {
         open();
 
         WebElement grid = findElement(By.id("swapped-grid"));

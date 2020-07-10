@@ -60,7 +60,7 @@ public class GridMultiSelectionColumnPage extends Div {
 
     private void createLazyGrid() {
         Grid<String> lazyGrid = new Grid<>();
-        lazyGrid.setDataProvider(DataProvider.fromCallbacks(query -> {
+        lazyGrid.setItems(DataProvider.fromCallbacks(query -> {
             return IntStream
                     .range(query.getOffset(),
                             query.getOffset() + query.getLimit())
@@ -85,7 +85,7 @@ public class GridMultiSelectionColumnPage extends Div {
         Grid<String> grid = new Grid<>();
         setUp(grid);
         grid.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
-        grid.setDataProvider(
+        grid.setItems(
                 new CallbackDataProvider<>(this::fetch, this::count));
         grid.setId("swapped-grid");
 
@@ -94,7 +94,7 @@ public class GridMultiSelectionColumnPage extends Div {
                         .setItems(Arrays.asList("Item 1", "Item 2", "Item 3")));
         inMemory.setId("set-in-memory-button");
         NativeButton backEnd = new NativeButton("Set backend DataProvider",
-                evt -> grid.setDataProvider(
+                evt -> grid.setItems(
                         new CallbackDataProvider<>(this::fetch, this::count)));
         backEnd.setId("set-backend-button");
         add(new H2("Swapped grid"), grid, inMemory, backEnd);

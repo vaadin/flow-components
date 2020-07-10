@@ -304,7 +304,7 @@ public class GridView extends DemoView {
          * portion of the data.
          */
         PeopleGenerator generator = new PeopleGenerator();
-        grid.setDataProvider(DataProvider.fromCallbacks(
+        grid.setItems(DataProvider.fromCallbacks(
                 query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
