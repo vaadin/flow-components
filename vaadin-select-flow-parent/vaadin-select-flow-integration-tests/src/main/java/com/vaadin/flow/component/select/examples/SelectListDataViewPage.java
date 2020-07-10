@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.select.data.SelectListDataView;
@@ -64,39 +64,39 @@ public class SelectListDataViewPage extends Div {
         Span hasPrevItemSpan = new Span(String.valueOf(
                 dataView.getPreviousItem(paul).isPresent()));
 
-        Button nextItemButton = new Button("Next Item", event -> {
+        NativeButton nextItemButton = new NativeButton("Next Item", event -> {
             Person nextItem =
                     dataView.getNextItem(currentItem.get()).get();
             currentItem.set(nextItem);
             currentItemSpan.setText(currentItem.get().getName());
         });
-        Button prevItemButton = new Button("Previous Item", event -> {
+        NativeButton prevItemButton = new NativeButton("Previous Item", event -> {
             Person prevItem =
                     dataView.getPreviousItem(currentItem.get()).get();
             currentItem.set(prevItem);
             currentItemSpan.setText(currentItem.get().getName());
         });
-        Button filterButton = new Button("Filter Items",
+        NativeButton filterButton = new NativeButton("Filter Items",
                 event -> dataView.setFilter(p -> p.getName().equals("Paul")));
-        Button sortButton = new Button("Sort Items",
+        NativeButton sortButton = new NativeButton("Sort Items",
                 event -> dataView.setSortComparator((p1, p2) ->
                         p1.getName().compareToIgnoreCase(p2.getName())));
 
         dataView.setIdentifierProvider(Person::getId);
-        Button addNew = new Button("Add new item",
+        NativeButton addNew = new NativeButton("Add new item",
                 event -> {
                     Person newItem =
                             new Person(4, "Peter");
                     dataView.addItem(newItem);
                 });
-        Button updateName = new Button("Update first name",
+        NativeButton updateName = new NativeButton("Update first name",
                 event -> {
                     Person updatedPerson =
                             dataView.getItem(3);
                     updatedPerson.setName("Jack");
                     dataView.refreshItem(updatedPerson);
                 });
-        Button deletePerson = new Button("Delete person",
+        NativeButton deletePerson = new NativeButton("Delete person",
                 event -> dataView.removeItem(
                         new Person(4, null)));
 
