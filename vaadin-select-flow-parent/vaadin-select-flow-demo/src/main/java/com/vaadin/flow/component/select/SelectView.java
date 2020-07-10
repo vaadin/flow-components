@@ -1,9 +1,13 @@
 package com.vaadin.flow.component.select;
 
+import java.util.List;
+import java.util.Objects;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -11,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.data.DepartmentData;
+import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.data.TeamData;
 import com.vaadin.flow.component.select.entity.Department;
 import com.vaadin.flow.component.select.entity.Team;
@@ -19,9 +24,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.List;
-import java.util.Objects;
 
 @Route("vaadin-select")
 public class SelectView extends DemoView {
@@ -33,13 +35,14 @@ public class SelectView extends DemoView {
         entityList();
         valueChanged();
         disabledItem();
-        configurationForReqiredDemo();// Validation
+        configurationForRequiredDemo();// Validation
         formFieldDemo();
         separatorDemo();// Presentation
         customOptionsDemo();
-        themeVariantsTextAlign(); //ThemeVariants
+        themeVariantsTextAlign(); // ThemeVariants
         themeVariantsSmallSize();
         styling();// Styling
+        externalDataNavigation(); // External Navigation
     }
 
     private void basicDemo() {
@@ -147,7 +150,7 @@ public class SelectView extends DemoView {
         addCard("Disabled item", select);
     }
 
-    private void configurationForReqiredDemo() {
+    private void configurationForRequiredDemo() {
         // begin-source-example
         // source-example-heading: Required
         Select<String> requiredSelect = new Select<>();
@@ -312,6 +315,46 @@ public class SelectView extends DemoView {
         // end-source-example
         addCard("Styling", "Styling references", firstHorizontalLayout,
                 secondHorizontalLayout);
+    }
+
+    // begin-source-example
+    // source-example-heading: Navigating Select items externally
+    private Select<String> select;
+    private Button next;
+    private Button previous;
+    private Span selectedOption;
+    private String currentOption;
+    private SelectListDataView<String> dataView;
+    private HorizontalLayout layout;
+
+    private void createExternalDataNavigation() {
+        select = new Select<>();
+        dataView = select.setItems("Option one", "Option two", "Option three");
+        selectedOption = new Span();
+        next = new Button("Next", event -> selectOption(
+                dataView.getNextItem(currentOption).get()));
+        previous = new Button("Previous", event -> selectOption(
+                dataView.getPreviousItem(currentOption).get()));
+        select.addValueChangeListener(event -> selectOption(event.getValue()));
+        select.setValue(dataView.getItem(0));
+        layout = new HorizontalLayout(select, previous, selectedOption, next);
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+    }
+
+    private void selectOption(String currentOption) {
+        this.currentOption = currentOption;
+        selectedOption.setText(currentOption);
+        select.setValue(currentOption);
+        next.setEnabled(dataView.getNextItem(currentOption).isPresent());
+        previous.setEnabled(
+                dataView.getPreviousItem(currentOption).isPresent());
+    }
+    // end-source-example
+
+    private void externalDataNavigation() {
+        createExternalDataNavigation();
+        addCard("External Navigation", "Navigating Select items externally",
+                layout);
     }
 
     private static class Employee {

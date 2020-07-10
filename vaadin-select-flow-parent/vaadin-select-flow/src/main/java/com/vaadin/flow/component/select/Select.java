@@ -19,10 +19,13 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -30,12 +33,18 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.select.data.SelectDataView;
+import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
-import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -62,74 +71,18 @@ import com.vaadin.flow.shared.Registration;
  */
 @JsModule("./selectConnector.js")
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
-        implements HasDataProvider<T>, HasItemsAndComponents<T>, HasSize,
-        HasValidation, SingleSelect<Select<T>, T> {
+        implements HasItemComponents<T>, HasSize, HasValidation,
+        SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
+        HasDataView<T, SelectDataView<T>> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
-    private static <T> T presentationToModel(Select<T> select,
-            String presentation) {
-        if (!select.keyMapper.containsKey(presentation)) {
-            return null;
-        }
-        return select.keyMapper.get(presentation);
-    }
-
-    private static <T> String modelToPresentation(Select<T> select, T model) {
-        if (model == null) {
-            return "";
-        }
-        if (!select.keyMapper.has(model)) {
-            return null;
-        }
-        return select.keyMapper.key(model);
-    }
-
-    private final KeyMapper<T> keyMapper = new KeyMapper<>();
-
-    /*
-     * Internal version of list box that is just used to delegate the child
-     * components to. vaadin-select.html imports vaadin-list-box.html.
-     *
-     * Using this internally allows all events and updates to the children
-     * (items, possible child components) to work even though the list box
-     * element is moved on the client side in the renderer method from light-dom
-     * to be a child of the select overlay.
-     *
-     * Not using the proper ListBox because all communication & updates are
-     * going through the Select. Using ListBox would just duplicate things, and
-     * cause e.g. unnecessary synchronizations and dependency to the Java
-     * integration.
-     *
-     * The known side effect is that at the element level, the child components
-     * are not the correct ones, e.g. the list box is the only child of select,
-     * even though that is not visible from the component level.
-     */
-    @Tag("vaadin-list-box")
-    private class InternalListBox<T> extends Component
-            implements HasItemsAndComponents<T> {
-
-        @Override
-        public void setItems(Collection<T> collection) {
-            // NOOP, never used directly, just need to have it here
-            throw new UnsupportedOperationException(
-                    "The setItems method of the internal ListBox of the Select component should never be called.");
-        }
-
-        @Override
-        public int getItemPosition(T item) {
-            // null item is the empty selection item and that is always first
-            if (item == null && isEmptySelectionAllowed()) {
-                return 0;
-            } else {
-                return HasItemsAndComponents.super.getItemPosition(item);
-            }
-        }
-    }
+    private static final String VALUE_PROPERTY_NAME = "value";
 
     private final InternalListBox listBox = new InternalListBox();
 
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final AtomicReference<DataProvider<T, ?>> dataProvider =
+            new AtomicReference<>(DataProvider.ofItems());
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -137,7 +90,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = null;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
+    private final PropertyChangeListener validationListener =
+            this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
     private boolean resetPending = true;
@@ -147,6 +101,14 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private String emptySelectionCaption;
 
     private VaadinItem<T> emptySelectionItem;
+
+    private final KeyMapper<T> keyMapper = new KeyMapper<>();
+
+    private int lastNotifiedDataSize = -1;
+
+    private volatile int lastFetchedDataSize = -1;
+
+    private SerializableConsumer<UI> sizeRequest;
 
     /**
      * Constructs a select.
@@ -173,6 +135,57 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         this();
 
         setItems(items);
+    }
+
+    private static <T> T presentationToModel(Select<T> select,
+            String presentation) {
+        if (!select.keyMapper.containsKey(presentation)) {
+            return null;
+        }
+        return select.keyMapper.get(presentation);
+    }
+
+    private static <T> String modelToPresentation(Select<T> select, T model) {
+        if (model == null) {
+            return "";
+        }
+        if (!select.keyMapper.has(model)) {
+            return null;
+        }
+        return select.keyMapper.key(model);
+    }
+
+    /*
+     * Internal version of list box that is just used to delegate the child
+     * components to. vaadin-select.html imports vaadin-list-box.html.
+     *
+     * Using this internally allows all events and updates to the children
+     * (items, possible child components) to work even though the list box
+     * element is moved on the client side in the renderer method from light-dom
+     * to be a child of the select overlay.
+     *
+     * Not using the proper ListBox because all communication & updates are
+     * going through the Select. Using ListBox would just duplicate things, and
+     * cause e.g. unnecessary synchronizations and dependency to the Java
+     * integration.
+     *
+     * The known side effect is that at the element level, the child components
+     * are not the correct ones, e.g. the list box is the only child of select,
+     * even though that is not visible from the component level.
+     */
+    @Tag("vaadin-list-box")
+    private class InternalListBox<T> extends Component
+            implements HasItemComponents<T> {
+
+        @Override
+        public int getItemPosition(T item) {
+            // null item is the empty selection item and that is always first
+            if (item == null && isEmptySelectionAllowed()) {
+                return 0;
+            } else {
+                return HasItemComponents.super.getItemPosition(item);
+            }
+        }
     }
 
     /**
@@ -412,9 +425,27 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         return super.isAutofocusBoolean();
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} instead.
+     */
+    @Deprecated
+    public void setItems(Stream<T> streamOfItems) {
+        setItems(DataProvider.fromStream(streamOfItems));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link SelectListDataView} or
+     *             {@link SelectDataView}
+     */
+    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        this.dataProvider = dataProvider;
+        this.dataProvider.set(dataProvider);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -430,7 +461,49 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @return the data provider, not {@code null}
      */
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
+        return dataProvider.get();
+    }
+
+    @Override
+    public SelectDataView<T> setItems(DataProvider<T, ?> dataProvider) {
+        this.setDataProvider(dataProvider);
+        return getGenericDataView();
+    }
+
+    @Override
+    public SelectListDataView<T> setItems(ListDataProvider<T> dataProvider) {
+        this.setDataProvider(dataProvider);
+        return getListDataView();
+    }
+
+    /**
+     * Gets the generic data view for the {@link Select}. This data view should
+     * only be used when {@link #getListDataView()} is not applicable for the
+     * underlying data provider.
+     *
+     * @return the generic DataView instance implementing {@link Select}
+     */
+    @Override
+    public SelectDataView<T> getGenericDataView() {
+        return new SelectDataView<>(this::getDataProvider, this);
+    }
+
+    /**
+     * Gets the list data view for the {@link Select}. This data view should
+     * only be used when the items are in-memory and set with:
+     * <ul>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
+     * </ul>
+     * If the items are not in-memory, an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         {@link Select}
+     */
+    @Override
+    public SelectListDataView<T> getListDataView() {
+        return new SelectListDataView<>(this::getDataProvider, this);
     }
 
     @Override
@@ -517,7 +590,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         Objects.requireNonNull(components, "Components should not be null");
         for (Component component : components) {
             if (component.getElement().hasAttribute("slot")) {
-                HasItemsAndComponents.super.add(component);
+                HasItemComponents.super.add(component);
             } else {
                 listBox.add(component);
             }
@@ -545,7 +618,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     public void addComponentAtIndex(int index, Component component) {
         Objects.requireNonNull(component, "Component should not be null");
         if (component.getElement().hasAttribute("slot")) {
-            HasItemsAndComponents.super.addComponentAtIndex(index, component);
+            HasItemComponents.super.addComponentAtIndex(index, component);
         } else {
             listBox.addComponentAtIndex(index, component);
         }
@@ -562,7 +635,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     public void addComponentAsFirst(Component component) {
         Objects.requireNonNull(component, "Component should not be null");
         if (component.getElement().hasAttribute("slot")) {
-            HasItemsAndComponents.super.addComponentAsFirst(component);
+            HasItemComponents.super.addComponentAsFirst(component);
         } else {
             listBox.addComponentAsFirst(component);
         }
@@ -633,7 +706,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         // the _value_ of this field. E.g, it might be a value that is
         // acceptable,
         // but the component status should still be _invalid_.
-        String selectedKey = getElement().getProperty("value");
+        String selectedKey = getElement().getProperty(VALUE_PROPERTY_NAME);
         T item = keyMapper.get(selectedKey);
         if (item == null) {
             return isEmptySelectionAllowed() && isItemEnabled(item);
@@ -726,8 +799,28 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         if (isEmptySelectionAllowed()) {
             addEmptySelectionItem();
         }
-        getDataProvider().fetch(new Query<>()).map(this::createItem)
-                .forEach(this::add);
+
+        synchronized (dataProvider) {
+            final AtomicInteger itemCounter = new AtomicInteger(0);
+            getDataProvider().fetch(new Query<>()).map(this::createItem)
+                    .forEach(component -> {
+                        add(component);
+                        itemCounter.incrementAndGet();
+                    });
+            lastFetchedDataSize = itemCounter.get();
+
+            // Ignore new size requests unless the last one has been executed
+            // so as to avoid multiple beforeClientResponses.
+            if (sizeRequest == null) {
+                sizeRequest = ui -> {
+                    fireSizeEvent();
+                    sizeRequest = null;
+                };
+                // Size event is fired before client response so as to avoid
+                // multiple size change events during server round trips
+                runBeforeClientResponse(sizeRequest);
+            }
+        }
     }
 
     private void callClientSideRenderIfNotPending() {
@@ -746,10 +839,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         if (event instanceof DataChangeEvent.DataRefreshEvent) {
             T updatedItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
                     .getItem();
-            Object updatedItemId = getDataProvider().getId(updatedItem);
+            IdentifierProvider<T> identifierProvider = getIdentifierProvider();
+            Object updatedItemId = identifierProvider.apply(updatedItem);
             getItems()
                     .filter(vaadinItem -> updatedItemId.equals(
-                            getDataProvider().getId(vaadinItem.getItem())))
+                            identifierProvider.apply(vaadinItem.getItem())))
                     .findAny().ifPresent(this::updateItem);
         } else {
             reset();
@@ -791,7 +885,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             // return the value back on the client side
             try {
                 validationRegistration.remove();
-                getElement().setProperty("value", keyMapper.key(oldValue));
+                getElement().setProperty(VALUE_PROPERTY_NAME,
+                        keyMapper.key(oldValue));
             } finally {
                 registerValidation();
             }
@@ -808,12 +903,37 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         if (validationRegistration != null) {
             validationRegistration.remove();
         }
-        validationRegistration = getElement().addPropertyChangeListener("value",
-                validationListener);
+        validationRegistration = getElement().addPropertyChangeListener(
+                VALUE_PROPERTY_NAME, validationListener);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void fireSizeEvent() {
+        final int newSize = lastFetchedDataSize;
+        if (lastNotifiedDataSize != newSize) {
+            lastNotifiedDataSize = newSize;
+            fireEvent(new ItemCountChangeEvent<>(this, newSize, false));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private IdentifierProvider<T> getIdentifierProvider() {
+        IdentifierProvider<T> identifierProviderObject =
+                (IdentifierProvider<T>) ComponentUtil.getData(this,
+                        IdentifierProvider.class);
+        if (identifierProviderObject == null) {
+            DataProvider<T, ?> dataProvider = getDataProvider();
+            if (dataProvider != null) {
+                return dataProvider::getId;
+            } else {
+                return IdentifierProvider.identity();
+            }
+        } else {
+            return identifierProviderObject;
+        }
     }
 }

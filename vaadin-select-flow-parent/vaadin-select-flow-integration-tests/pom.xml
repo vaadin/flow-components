@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-select-testbench</artifactId>
-            <version>${project.version}</version>
+            <version>4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
