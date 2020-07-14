@@ -7,7 +7,19 @@ layout: page
 [[css.styling]]
 = CSS Styling
 
-Chart appearance is primarily controlled by CSS style rules.
+Starting from Vaadin 17, Chart appearance is primarily controlled by using Java API.
+
+NOTE: CSS styling is not the default, but can be enabled by setting [propertyname]#styledMode# to [literal]#++true++#.
+
+[source, java]
+----
+Chart chart = new Chart();
+Configuration conf = chart.getConfiguration();
+conf.getChart().setStyledMode(true);
+----
+
+After enabling [propertyname]#styledMode# and creating a theme module including [literal]#++vaadin-chart-default-theme++#, as described later, the chart appearance is primarily controlled by CSS style rules.
+
 A comprehensive list of the supported style classes can be found https://www.highcharts.com/docs/chart-design-and-style/style-by-css[here].
 
 [[css.styling.steps]]
