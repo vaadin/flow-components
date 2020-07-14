@@ -20,6 +20,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -149,6 +150,36 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void assertCantMakeInvalidValueValidThroughClientManipulation() {
         ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
             $(TextAreaElement.class).id("invalid-test-field"));
+    }
+
+    @Test
+    public void assertHelperText () {
+        TextAreaElement textAreaElement = $(TextAreaElement.class).id("helper-text-field");
+        Assert.assertEquals("Helper text",textAreaElement.getHelperText());
+    }
+
+    @Test
+    public void clearHelper (){
+        TextAreaElement textAreaElement = $(TextAreaElement.class).id("helper-text-field");
+        Assert.assertEquals("Helper text",textAreaElement.getHelperText());
+
+        $(TestBenchElement.class).id("clear-helper-text-button").click();
+        Assert.assertEquals("", textAreaElement.getHelperText());
+    }
+
+    @Test
+    public void assertHelperComponent () {
+        TextAreaElement textAreaElement = $(TextAreaElement.class).id("helper-component-field");
+        Assert.assertEquals("helper-component",textAreaElement.getHelperComponent().getAttribute("id"));
+    }
+
+    @Test
+    public void clearHelperComponent(){
+        TextAreaElement textAreaElement = $(TextAreaElement.class).id("helper-component-field");
+        Assert.assertEquals("helper-component",textAreaElement.getHelperComponent().getAttribute("id"));
+
+        $(TestBenchElement.class).id("clear-helper-component-button").click();
+        Assert.assertNull(textAreaElement.getHelperComponent());
     }
 
 }

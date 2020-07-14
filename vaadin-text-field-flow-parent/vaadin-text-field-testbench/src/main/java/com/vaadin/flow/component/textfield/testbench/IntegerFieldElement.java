@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield.testbench;
 
 import java.util.Collections;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasStringValueProperty;
@@ -29,7 +30,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-integer-field")
 public class IntegerFieldElement extends TestBenchElement
-        implements HasStringValueProperty, HasLabel, HasPlaceholder {
+        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
     @Override
     public void setValue(String string) {

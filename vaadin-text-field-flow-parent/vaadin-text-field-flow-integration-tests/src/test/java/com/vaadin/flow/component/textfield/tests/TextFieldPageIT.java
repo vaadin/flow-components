@@ -20,6 +20,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -152,6 +153,36 @@ public class TextFieldPageIT extends AbstractComponentIT {
         Assert.assertTrue("TextField should be focused after the shortcut event is triggered.",
                 shortcutField.getAttribute("focused").equals("true")
                         || shortcutField.getAttribute("focused").equals(""));
+    }
+
+    @Test
+    public void assertHelperText () {
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-text-field");
+        Assert.assertEquals("Helper text",textFieldElement.getHelperText());
+    }
+
+    @Test
+    public void clearHelper (){
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-text-field");
+        Assert.assertEquals("Helper text",textFieldElement.getHelperText());
+
+        $(TestBenchElement.class).id("clear-helper-text-button").click();
+        Assert.assertEquals("", textFieldElement.getHelperText());
+    }
+
+    @Test
+    public void assertHelperComponent () {
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-component-field");
+        Assert.assertEquals("helper-component",textFieldElement.getHelperComponent().getAttribute("id"));
+    }
+
+    @Test
+    public void clearHelperComponent(){
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-component-field");
+        Assert.assertEquals("helper-component",textFieldElement.getHelperComponent().getAttribute("id"));
+
+        $(TestBenchElement.class).id("clear-helper-component-button").click();
+        Assert.assertNull(textFieldElement.getHelperComponent());
     }
 
     private void updateValues(WebElement textFieldValueDiv,
