@@ -955,6 +955,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
+            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }

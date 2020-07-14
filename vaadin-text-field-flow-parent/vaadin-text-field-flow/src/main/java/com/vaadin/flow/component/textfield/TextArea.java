@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -32,7 +33,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

@@ -20,6 +20,7 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
@@ -81,6 +82,8 @@ public class TextFieldPage extends Div {
         addBasicFeatures();
         addFocusShortcut();
         addInvalidCheck();
+        addHelperText();
+        addHelperComponent();
     }
 
     private void handleTextFieldValue(TextField field) {
@@ -134,5 +137,35 @@ public class TextFieldPage extends Div {
         field.setMaxLength(10);
         field.setMinLength(5);
         TextFieldTestPageUtil.addInvalidCheck(this, field);
+    }
+
+    private void addHelperText() {
+        TextField  textField = new TextField();
+        textField.setLabel("Helper text should be visible");
+        textField.setHelperText("Helper text");
+        textField.setId("helper-text-field");
+
+        NativeButton clearButton = new NativeButton(
+              "Clear helper text");
+        clearButton.setId("clear-helper-text-button");
+        clearButton.addClickListener(
+              event -> textField.setHelperText(null));
+        add(textField, clearButton);
+    }
+
+    private void addHelperComponent() {
+        TextField  textField = new TextField();
+        textField.setLabel("Helper component should be visible");
+        Span span = new Span("Helper Component");
+        span.setId("helper-component");
+        textField.setHelperComponent(span);
+        textField.setId("helper-component-field");
+
+        NativeButton clearButton = new NativeButton(
+              "Clear helper component");
+        clearButton.setId("clear-helper-component-button");
+        clearButton.addClickListener(
+              event -> textField.setHelperComponent(null));
+        add(textField, clearButton);
     }
 }
