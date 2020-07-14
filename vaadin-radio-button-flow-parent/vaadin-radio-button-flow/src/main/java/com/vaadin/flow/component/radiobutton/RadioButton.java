@@ -17,7 +17,7 @@ package com.vaadin.flow.component.radiobutton;
 
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasItemComponents.ItemComponent;
+import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
  * Server-side component for the {@code vaadin-radio-button} element.
@@ -26,7 +26,7 @@ import com.vaadin.flow.data.binder.HasItemComponents.ItemComponent;
  */
 @NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.4.0-alpha3")
 class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
-        implements ItemComponent<T>, HasComponents {
+        implements HasItemComponents.ItemComponent<T>, HasComponents {
 
     private T item;
 
