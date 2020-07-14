@@ -16,27 +16,40 @@
 package com.vaadin.flow.component.checkbox;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
+import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -53,14 +66,17 @@ import elemental.json.JsonArray;
  */
 public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
-        implements HasItemsAndComponents<T>, HasSize, HasValidation,
-        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T> {
+        implements HasItemComponents<T>, HasSize, HasValidation,
+        MultiSelect<CheckboxGroup<T>, T>,
+        HasListDataView<T, CheckboxGroupListDataView<T>>,
+        HasDataView<T, CheckboxGroupDataView<T>> {
 
     private static final String VALUE = "value";
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final AtomicReference<DataProvider<T, ?>> dataProvider =
+            new AtomicReference<>(DataProvider.ofItems());
 
     private boolean isReadOnly;
 
@@ -72,8 +88,65 @@ public class CheckboxGroup<T>
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
+    private int lastNotifiedDataSize = -1;
+
+    private volatile int lastFetchedDataSize = -1;
+
+    private SerializableConsumer<UI> sizeRequest;
+
+    public CheckboxGroup() {
+        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
+                CheckboxGroup::presentationToModel,
+                CheckboxGroup::modelToPresentation);
+        registerValidation();
+    }
+
+    @Override
+    public CheckboxGroupDataView<T> setItems(DataProvider<T, ?> dataProvider) {
+        setDataProvider(dataProvider);
+        return getGenericDataView();
+    }
+
+    @Override
+    public CheckboxGroupListDataView<T> setItems(
+            ListDataProvider<T> dataProvider) {
+        setDataProvider(dataProvider);
+        return getListDataView();
+    }
+
+    /**
+     * Gets the list data view for the checkbox group. This data view should
+     * only be used when the items are in-memory and set with:
+     * <ul>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
+     * </ul>
+     * If the items are not in-memory an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         checkbox group
+     */
+    @Override
+    public CheckboxGroupListDataView<T> getListDataView() {
+        return new CheckboxGroupListDataView<>(this::getDataProvider, this);
+    }
+
+    /**
+     * Gets the generic data view for the checkbox group. This data view should
+     * only be used when {@link #getListDataView()} is not applicable for the
+     * underlying data provider.
+     *
+     * @return the generic DataView instance implementing
+     *         {@link CheckboxGroupDataView}
+     */
+    @Override
+    public CheckboxGroupDataView<T> getGenericDataView() {
+        return new CheckboxGroupDataView<>(this::getDataProvider, this);
+    }
+
     private static class CheckBoxItem<T> extends Checkbox
-            implements ItemComponent<T> {
+            implements HasItemComponents.ItemComponent<T> {
 
         private final T item;
 
@@ -89,16 +162,27 @@ public class CheckboxGroup<T>
 
     }
 
-    public CheckboxGroup() {
-        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
-                CheckboxGroup::presentationToModel,
-                CheckboxGroup::modelToPresentation);
-        registerValidation();
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} instead.
+     */
+    @Deprecated
+    public void setItems(Stream<T> streamOfItems) {
+        setItems(DataProvider.fromStream(streamOfItems));
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link CheckboxGroupListDataView} or
+     *             {@link CheckboxGroupDataView}
+     */
+    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        this.dataProvider = dataProvider;
+        this.dataProvider.set(dataProvider);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -135,7 +219,7 @@ public class CheckboxGroup<T>
      * The component doesn't accept {@code null} values. The value of a checkbox
      * group without any selected items is an empty set. You can use the
      * {@link #clear()} method to set the empty value.
-     * 
+     *
      * @param value
      *            the new value to set, not {@code null}
      * @throws NullPointerException
@@ -167,9 +251,15 @@ public class CheckboxGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
+     * @deprecated use {@link #getListDataView()} or
+     *             {@link #getGenericDataView()} instead
      */
+    @Deprecated
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
+        // dataProvider reference won't have been initialized before
+        // calling from CheckboxGroup constructor
+        return Optional.ofNullable(dataProvider).map(AtomicReference::get)
+                .orElse(null);
     }
 
     @Override
@@ -314,9 +404,10 @@ public class CheckboxGroup<T>
         if (getDataProvider() == null) {
             return super.valueEquals(value1, value2);
         }
-        Set<Object> ids1 = value1.stream().map(getDataProvider()::getId)
+        IdentifierProvider<T> identifierProvider = getIdentifierProvider();
+        Set<Object> ids1 = value1.stream().map(identifierProvider)
                 .collect(Collectors.toSet());
-        Set<Object> ids2 = value2.stream().map(getDataProvider()::getId)
+        Set<Object> ids2 = value2.stream().map(identifierProvider)
                 .collect(Collectors.toSet());
         return ids1.equals(ids2);
     }
@@ -335,8 +426,28 @@ public class CheckboxGroup<T>
         keyMapper.removeAll();
         removeAll();
         clear();
-        getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
-                .forEach(this::add);
+
+        synchronized (dataProvider) {
+            final AtomicInteger itemCounter = new AtomicInteger(0);
+            getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
+                    .forEach(component -> {
+                        add(component);
+                        itemCounter.incrementAndGet();
+                    });
+            lastFetchedDataSize = itemCounter.get();
+
+            // Ignore new size requests unless the last one has been executed
+            // so as to avoid multiple beforeClientResponses.
+            if (sizeRequest == null) {
+                sizeRequest = ui -> {
+                    fireSizeEvent();
+                    sizeRequest = null;
+                };
+                // Size event is fired before client response so as to avoid
+                // multiple size change events during server round trips
+                runBeforeClientResponse(sizeRequest);
+            }
+        }
     }
 
     private void refreshCheckboxes() {
@@ -410,7 +521,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
-            JsonArray presentation) {
+                                                  JsonArray presentation) {
         JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
@@ -420,7 +531,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> JsonArray modelToPresentation(CheckboxGroup<T> group,
-            Set<T> model) {
+                                                     Set<T> model) {
         JsonArray array = Json.createArray();
         if (model.isEmpty()) {
             return array;
@@ -432,9 +543,36 @@ public class CheckboxGroup<T>
     }
 
     private Object getItemId(T item) {
-        if (getDataProvider() == null) {
-            return item;
+        return getIdentifierProvider().apply(item);
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void fireSizeEvent() {
+        final int newSize = lastFetchedDataSize;
+        if (lastNotifiedDataSize != newSize) {
+            lastNotifiedDataSize = newSize;
+            fireEvent(new ItemCountChangeEvent<>(this, newSize, false));
         }
-        return getDataProvider().getId(item);
+    }
+
+    @SuppressWarnings("unchecked")
+    private IdentifierProvider<T> getIdentifierProvider() {
+        IdentifierProvider<T> identifierProviderObject =
+                (IdentifierProvider<T>) ComponentUtil.getData(this,
+                        IdentifierProvider.class);
+        if (identifierProviderObject == null) {
+            DataProvider<T, ?> dataProvider = getDataProvider();
+            if (dataProvider != null) {
+                return dataProvider::getId;
+            } else {
+                return IdentifierProvider.identity();
+            }
+        } else {
+            return identifierProviderObject;
+        }
     }
 }

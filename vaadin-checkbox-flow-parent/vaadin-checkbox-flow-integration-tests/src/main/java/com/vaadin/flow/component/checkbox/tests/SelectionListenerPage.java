@@ -33,7 +33,7 @@ public class SelectionListenerPage extends Div {
         checkboxGroup.setItems("foo", "bar");
 
         checkboxGroup.addSelectionListener(event -> {
-            Set<String> addedSelection = event.getNewSelection();
+            Set<String> addedSelection = event.getAllSelectedItems();
             String selected = addedSelection.stream().sorted()
                     .collect(Collectors.joining(", "));
             selectedInfo.setText(selected);
