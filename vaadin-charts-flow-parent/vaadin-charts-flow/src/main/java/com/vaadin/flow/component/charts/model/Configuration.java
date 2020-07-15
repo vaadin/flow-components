@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Chart's configuration root object containing all the child objects that are
@@ -45,7 +46,7 @@ public class Configuration extends AbstractConfigurationObject
         implements ChartConfiguration {
 
     private Accessibility accessibility;
-    private ChartModel chart;
+    private ChartModel chart = new ChartModel();
     private Title title;
     private Subtitle subtitle;
     private AxisList<XAxis> xAxis;
@@ -108,8 +109,10 @@ public class Configuration extends AbstractConfigurationObject
      * options.
      * 
      * @param chart
+     *            ChartModel to set, not <code>null</code>
      */
     public void setChart(ChartModel chart) {
+        Objects.requireNonNull(chart, "Given ChartModel may not be null");
         this.chart = chart;
     }
 
