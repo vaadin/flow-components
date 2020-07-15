@@ -70,15 +70,7 @@ public class FormLayoutView extends DemoView {
         private String phone = "";
         private String email = "";
         private LocalDate birthDate;
-        private boolean doNotCall;
-
-        public boolean isDoNotCall() {
-            return doNotCall;
-        }
-
-        public void setDoNotCall(boolean doNotCall) {
-            this.doNotCall = doNotCall;
-        }
+        private String address = "";
 
         public String getFirstName() {
             return firstName;
@@ -120,23 +112,33 @@ public class FormLayoutView extends DemoView {
             this.birthDate = birthDate;
         }
 
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append(firstName).append(" ").append(lastName);
+            if ((firstName != null && !firstName.isEmpty()) || (lastName != null
+                  && !lastName.isEmpty())) {
+                builder.append(firstName).append(" ").append(lastName)
+                      .append(", ");
+            }
             if (birthDate != null) {
-                builder.append(", born on ").append(birthDate);
+                builder.append("born on ").append(birthDate).append(", ");
             }
             if (phone != null && !phone.isEmpty()) {
-                builder.append(", phone ").append(phone);
-                if (doNotCall) {
-                    builder.append(" (don't call me!)");
-                } else {
-                    builder.append(" (you can call me)");
-                }
+                builder.append("phone ").append(phone).append(", ");
             }
             if (email != null && !email.isEmpty()) {
-                builder.append(", e-mail ").append(email);
+                builder.append("e-mail ").append(email).append(", ");
+            }
+            if (address != null && !address.isEmpty()) {
+                builder.append("address ").append(address);
             }
             return builder.toString();
         }
@@ -193,12 +195,25 @@ public class FormLayoutView extends DemoView {
 
         TextField firstName = new TextField();
         firstName.setPlaceholder("John");
-        layoutWithFormItems.addFormItem(firstName, "First name");
 
         TextField lastName = new TextField();
         lastName.setPlaceholder("Doe");
+
+        TextField phone = new TextField();
+        TextField email = new TextField();
+        DatePicker birthDate = new DatePicker();
+        Checkbox doNotCall = new Checkbox("Do not call");
+
+        layoutWithFormItems.addFormItem(firstName, "First name");
         layoutWithFormItems.addFormItem(lastName, "Last name");
+
+        layoutWithFormItems.addFormItem(birthDate, "Birthdate");
+        layoutWithFormItems.addFormItem(email, "E-mail");
+        FormItem phoneItem = layoutWithFormItems.addFormItem(phone, "Phone");
+        phoneItem.add(doNotCall);
+
         add(layoutWithFormItems);
+
         // end-source-example
 
         addCard("A form layout with fields wrapped in items",
@@ -254,68 +269,53 @@ public class FormLayoutView extends DemoView {
         Contact contactBeingEdited = new Contact();
 
         // Create the fields
-        TextField firstName = new TextField();
-        firstName.setValueChangeMode(ValueChangeMode.EAGER);
-        TextField lastName = new TextField();
-        lastName.setValueChangeMode(ValueChangeMode.EAGER);
+        TextField address = new TextField();
+        address.setValueChangeMode(ValueChangeMode.EAGER);
         TextField phone = new TextField();
         phone.setValueChangeMode(ValueChangeMode.EAGER);
         TextField email = new TextField();
         email.setValueChangeMode(ValueChangeMode.EAGER);
-        DatePicker birthDate = new DatePicker();
-        Checkbox doNotCall = new Checkbox("Do not call");
         Label infoLabel = new Label();
         NativeButton save = new NativeButton("Save");
         NativeButton reset = new NativeButton("Reset");
 
-        layoutWithBinder.addFormItem(firstName, "First name");
-        layoutWithBinder.addFormItem(lastName, "Last name");
-        layoutWithBinder.addFormItem(birthDate, "Birthdate");
+        layoutWithBinder.addFormItem(address, "Address");
         layoutWithBinder.addFormItem(email, "E-mail");
-        FormItem phoneItem = layoutWithBinder.addFormItem(phone, "Phone");
-        phoneItem.add(doNotCall);
+        layoutWithBinder.addFormItem(phone, "Phone");
 
         // Button bar
         HorizontalLayout actions = new HorizontalLayout();
         actions.add(save, reset);
         save.getStyle().set("marginRight", "10px");
 
+        // Both phone and email cannot be empty
         SerializablePredicate<String> phoneOrEmailPredicate = value -> !phone
                 .getValue().trim().isEmpty()
                 || !email.getValue().trim().isEmpty();
 
         // E-mail and phone have specific validators
         Binding<Contact, String> emailBinding = binder.forField(email)
+                .withNullRepresentation("")
                 .withValidator(phoneOrEmailPredicate,
-                        "Both phone and email cannot be empty")
+                        "Please specify your email")
                 .withValidator(new EmailValidator("Incorrect email address"))
                 .bind(Contact::getEmail, Contact::setEmail);
 
         Binding<Contact, String> phoneBinding = binder.forField(phone)
                 .withValidator(phoneOrEmailPredicate,
-                        "Both phone and email cannot be empty")
+                        "Please specify your phone")
                 .bind(Contact::getPhone, Contact::setPhone);
 
         // Trigger cross-field validation when the other field is changed
         email.addValueChangeListener(event -> phoneBinding.validate());
         phone.addValueChangeListener(event -> emailBinding.validate());
 
-        // First name and last name are required fields
-        firstName.setRequiredIndicatorVisible(true);
-        lastName.setRequiredIndicatorVisible(true);
-
-        binder.forField(firstName)
+        // Address is a required field
+        address.setRequiredIndicatorVisible(true);
+        binder.forField(address)
                 .withValidator(new StringLengthValidator(
-                        "Please add the first name", 1, null))
-                .bind(Contact::getFirstName, Contact::setFirstName);
-        binder.forField(lastName)
-                .withValidator(new StringLengthValidator(
-                        "Please add the last name", 1, null))
-                .bind(Contact::getLastName, Contact::setLastName);
-
-        // Birthdate and doNotCall don't need any special validators
-        binder.bind(doNotCall, Contact::isDoNotCall, Contact::setDoNotCall);
-        binder.bind(birthDate, Contact::getBirthDate, Contact::setBirthDate);
+                        "Please add the address", 1, null))
+                .bind(Contact::getAddress, Contact::setAddress);
 
         // Click listeners for the buttons
         save.addClickListener(event -> {
@@ -335,18 +335,14 @@ public class FormLayoutView extends DemoView {
             // clear fields by setting null
             binder.readBean(null);
             infoLabel.setText("");
-            doNotCall.setValue(false);
         });
         add(layoutWithBinder, actions, infoLabel);
         // end-source-example
 
         infoLabel.setId("binder-info");
-        firstName.setId("binder-first-name");
-        lastName.setId("binder-last-name");
+        address.setId("binder-address");
         phone.setId("binder-phone");
         email.setId("binder-email");
-        birthDate.setId("binder-birth-date");
-        doNotCall.setId("binder-do-not-call");
         save.setId("binder-save");
         reset.setId("binder-reset");
 
