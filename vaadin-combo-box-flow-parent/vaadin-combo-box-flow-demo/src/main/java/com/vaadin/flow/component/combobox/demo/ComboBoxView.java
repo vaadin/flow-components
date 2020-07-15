@@ -66,7 +66,8 @@ public class ComboBoxView extends DemoView {
         customValues();
         storingCustomValues();
         lazyLoading();
-        configurationForReqired(); // Validation
+        pagedRepository();
+        configurationForRequired(); // Validation
         customFiltering(); // Filtering
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
@@ -272,7 +273,30 @@ public class ComboBoxView extends DemoView {
         addCard("Lazy loading with callbacks", comboBox);
     }
 
-    private void configurationForReqired() {
+    private void pagedRepository() {
+        //@formatter:off
+        // begin-source-example
+        // source-example-heading: Lazy loading from paged repository
+        // PersonService can be found:
+        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
+
+        ComboBox<Person> comboBox = new ComboBox<>();
+        PersonService service = new PersonService();
+        /*
+         * For those backend repositories which use paged data fetching, it
+         * is possible to get the page number and page size from Query API.
+         */
+        comboBox.setDataProvider(DataProvider.fromFilteringCallbacks(
+                query -> service.fetchPage(query.getFilter().orElse(""),
+                        query.getPage(), query.getPageSize()),
+                query -> service.count(query.getFilter().orElse(""))));
+        // end-source-example
+        //@formatter:on
+        comboBox.setId("paged-box");
+        addCard("Lazy loading from paged repository", comboBox);
+    }
+
+    private void configurationForRequired() {
         // begin-source-example
         // source-example-heading: Required
         ComboBox<String> requiredComboBox = new ComboBox<>();

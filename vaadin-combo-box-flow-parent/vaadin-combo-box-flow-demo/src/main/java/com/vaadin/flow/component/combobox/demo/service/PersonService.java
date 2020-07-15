@@ -23,6 +23,13 @@ public class PersonService {
                 .count();
     }
 
+    public Stream<Person> fetchPage(String filter, int page, int pageSize) {
+        return personData.getPersons().stream()
+                .filter(person -> filter == null || person.toString()
+                        .toLowerCase().startsWith(filter.toLowerCase()))
+                .skip(page * pageSize).limit(pageSize);
+    }
+
     public int count() {
         return personData.getPersons().size();
     }
