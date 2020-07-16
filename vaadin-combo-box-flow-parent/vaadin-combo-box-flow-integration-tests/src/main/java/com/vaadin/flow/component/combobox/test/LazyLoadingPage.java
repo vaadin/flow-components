@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.test.template.ComboBoxInATemplate;
@@ -58,6 +59,7 @@ public class LazyLoadingPage extends Div {
         createComboBoxInATemplate();
         addSeparator();
         createCallbackDataProviderWhichReturnsZeroItems();
+        createComboBoxWithCustomPageSizeAndLazyLoading();
     }
 
     private void createListDataProviderWithStrings() {
@@ -222,6 +224,27 @@ public class LazyLoadingPage extends Div {
         CallbackDataProvider.CountCallback<String, String> count = query -> 0;
         comboBox.setDataProvider(
                 DataProvider.fromFilteringCallbacks(fetch, count));
+
+        add(comboBox);
+    }
+
+    private void createComboBoxWithCustomPageSizeAndLazyLoading() {
+        addTitle("Callback data provider with custom page size 42");
+        ComboBox<String> comboBox = new ComboBox<>(42);
+        comboBox.setId("lazy-custom-page-size");
+
+        comboBox.setDataProvider(
+                DataProvider.fromFilteringCallbacks(query -> {
+                    Stream<String> stream = IntStream.of(0, 100)
+                            .mapToObj(String::valueOf);
+                    message.setText(String.valueOf(query.getPageSize()));
+                    return stream.skip(query.getOffset())
+                            .limit(query.getLimit());
+                }, query -> {
+                    Stream<String> stream = IntStream.of(0, 100)
+                            .mapToObj(String::valueOf);
+                    return (int) stream.limit(query.getLimit()).count();
+                }));
 
         add(comboBox);
     }

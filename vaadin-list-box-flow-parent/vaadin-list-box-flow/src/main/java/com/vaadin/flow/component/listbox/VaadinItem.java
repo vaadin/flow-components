@@ -20,7 +20,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasItemComponents.ItemComponent;
+import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
  * Server-side component for the {@code vaadin-item} element, used to represent
@@ -35,7 +35,7 @@ import com.vaadin.flow.data.binder.HasItemComponents.ItemComponent;
 @NpmPackage(value = "@vaadin/vaadin-item", version = "2.3.0-alpha1")
 @JsModule("@vaadin/vaadin-item/src/vaadin-item.js")
 class VaadinItem<T> extends Component
-        implements ItemComponent<T>, HasComponents {
+        implements HasItemComponents.ItemComponent<T>, HasComponents {
 
     private final T item;
 
