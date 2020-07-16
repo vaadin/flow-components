@@ -17,11 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.time.Instant;
 import java.util.Date;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class PointOptions extends AbstractPlotOptions {
 
@@ -56,6 +55,19 @@ public abstract class PointOptions extends AbstractPlotOptions {
      */
     public abstract void setAnimation(Boolean animation);
 
+    /** 
+     * @see #setColor(Color)
+     */ 
+    public abstract Color getColor();
+
+    /** 
+     * The main color or the series. In line type series it applies to the line 
+     * and the point markers unless otherwise specified. In bar type series it
+     * applies to the bars unless a color is specified per point. The default
+     * value is pulled from the <code>options.colors</code> array.
+     */ 
+    public abstract void setColor(Color color);
+
     /**
      * @see #setAnimationLimit(Number)
      */
@@ -81,6 +93,17 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setClassName(String className);
 
     /**
+     * @see #setClip(Boolean)
+     */
+    public abstract Boolean getClip();
+
+    /**
+     * Disable this option to allow series rendering in the whole plotting area.
+     * Note that clipping should be always enabled when chart.zoomType is set
+     */
+    public abstract void setClip(Boolean clip);
+
+    /**
      * @see #setColorIndex(Number)
      */
     public abstract Number getColorIndex();
@@ -91,6 +114,32 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
+
+    public abstract String getColorKey();
+
+    /**
+     * Determines what data value should be used to calculate point color
+     * if <code>colorAxis</code> is used. Requires to set <code>min</code>
+     * and <code>max</code> if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>.
+     */
+    public abstract void setColorKey(String colorKey);
+
+    /**
+     * @see #setCrisp(Boolean)
+     */
+    public abstract Boolean getCrisp();
+
+    /**
+     * When true, each point or column edge is rounded to its nearest pixel
+     * in order to render sharp on screen.
+     * In some cases, when there are a lot of densely packed columns,
+     * this leads to visible difference in column widths
+     * or distance between columns. In these cases, setting <code>crisp</code>
+     * to <code>false</code> may look better,
+     * even though each column is rendered blurry.
+     */
+    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCropThreshold(Number)
@@ -300,6 +349,16 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * threshold.
      */
     public abstract void setNegativeColor(Color negativeColor);
+
+    /**
+     * @see #setOpacity(Number)
+     */
+    public abstract Number getOpacity();
+
+    /**
+     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     */
+    public abstract void setOpacity(Number opacity);
 
     public abstract String getPointDescriptionFormatter();
 

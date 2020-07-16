@@ -4,13 +4,17 @@ This is a maven multi-module project including all vaadin flow components.
 
 `master` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
 
-## Compiling all the components and their modules
+## Compiling all the components and their modules including ITs
 
-- `mvn clean compile -DskipTests -T C2` 
+- `mvn clean compile -DskipTests -T C2`
 
-## Packaging all the modules
+## Compiling all modules but excluding ITs
 
-- `mvn clean package -DskipTests -T C2` 
+- `mvn clean compile -DskipTests -Drelease -T C2`
+
+## Installing all modules
+
+- `mvn clean install -DskipTests -Drelease -T C2`
 
 ## Running one component demo
 
@@ -26,7 +30,30 @@ Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
 
 NOTE: this takes a long while and consumes a lot of resources in your computer
 
-- `mvn clean verify -T C2` 
+- `mvn clean verify -T C2`
+
+## Merging ITs of all components in one module
+
+There is a able to visit all IT modules and merge then into one unique module.
+It does substitutions in sources so as routes do no conflict, and also adjust ports etc.
+
+- `scripts/mergeITs.js`
+
+By default it merges all modules, but it's also possible to merge certain modules by passing arguments
+
+- `scripts/mergeITs.js button text-field crud`
+
+## Updating modules from original master branches
+
+By running `./scripts/updateFromMaster.sh` all components are replaced with their origin master branches.
+It also aligns component poms and folder naming.
+
+## Build script
+
+The `./build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
+It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
+Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid combo-box`
+
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
@@ -35,7 +62,7 @@ add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-checkbox-flow</artifactId>
-    <version>${component.version}</version>
+    <version>${platform.version}</version>
 </dependency>
 ```
 

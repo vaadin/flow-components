@@ -17,13 +17,13 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.time.Instant;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
 /**
@@ -36,9 +36,11 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
+	private Boolean clip;
 	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
+	private String colorKey;
 	private ArrayList<Color> colors;
 	private Compare compare;
 	private Number compareBase;
@@ -61,6 +63,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private Number minPointLength;
 	private PlotOptionsSeries navigatorOptions;
 	private Color negativeColor;
+	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -161,6 +164,23 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
+	 * @see #setClip(Boolean)
+	 */
+	public Boolean getClip() {
+		return clip;
+	}
+
+	/**
+	 * Disable this option to allow series rendering in the whole plotting area.
+	 * Note that clipping should be always enabled when chart.zoomType is set
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setClip(Boolean clip) {
+		this.clip = clip;
+	}
+
+	/**
 	 * @see #setColor(Color)
 	 */
 	public Color getColor() {
@@ -225,6 +245,26 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColorKey(String)
+	 */
+	public String getColorKey() {
+		return colorKey;
+	}
+
+	/**
+	 * Determines what data value should be used to calculate point color
+   * if <code>colorAxis</code> is used.
+	 * Requires to set <code>min</code> and <code>max</code> if some custom point
+   * property is used or if approximation for data grouping
+   * is set to <code>'sum'</code>.
+	 * <p>
+	 * Defaults to <code>close</code>.
+	 */
+	public void setColorKey(String colorKey) {
+		this.colorKey = colorKey;
 	}
 
 	/**
@@ -682,6 +722,22 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 */
 	public void setNavigatorOptions(PlotOptionsSeries navigatorOptions) {
 		this.navigatorOptions = navigatorOptions;
+	}
+
+	/**
+	 * @see #setOpacity(Number)
+	 */
+	public Number getOpacity() {
+		return opacity;
+	}
+
+	/**
+	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+	 * <p>
+	 * Defaults to <code>1</code>.
+	 */
+	public void setOpacity(Number opacity) {
+		this.opacity = opacity;
 	}
 
 	/**

@@ -82,6 +82,17 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setClassName(String className);
 
     /**
+     * @see #setClip(Boolean)
+     */
+    public abstract Boolean getClip();
+
+    /**
+     * Disable this option to allow series rendering
+     * in the whole plotting area.
+     */
+    public abstract void setClip(Boolean clip);
+
+    /**
      * @see #setColorIndex(Number)
      */
     public abstract Number getColorIndex();
@@ -94,6 +105,18 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setColorIndex(Number colorIndex);
 
     /**
+     * @see #setColorKey(String)
+     */
+    public abstract String getColorKey();
+
+    /**
+     * Determines what data value should be used to calculate point color if <code>colorAxis</code> is used.
+     * Requires to set <code>min</code> and <code>max</code> if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>.
+     */
+    public abstract void setColorKey(String colorKey);
+
+    /**
      * @see #setConnectNulls(Boolean)
      */
     public abstract Boolean getConnectNulls();
@@ -102,6 +125,19 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * Whether to connect a graph line across null points.
      */
     public abstract void setConnectNulls(Boolean connectNulls);
+
+    /**
+     * @see #setCrisp(Boolean)
+     */
+    public abstract Boolean getCrisp();
+
+    /**
+     * When true, each point or column edge is rounded to its nearest pixel
+     * in order to render sharp on screen. In some cases, when there are a lot of densely packed columns,
+     * this leads to visible difference in column widths or distance between columns.
+     * In these cases, setting crisp to false may look better, even though each column is rendered blurry.
+     */
+    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCropThreshold(Number)
@@ -346,6 +382,16 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * A separate color for the negative part of the area.
      */
     public abstract void setNegativeFillColor(Color negativeFillColor);
+
+    /**
+     * @see #setOpacity(Number)
+     */
+    public abstract Number getOpacity();
+
+    /**
+     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     */
+    public abstract void setOpacity(Number opacity);
 
 
     public abstract String getPointDescriptionFormatter();

@@ -36,9 +36,11 @@ public class PlotOptionsColumn extends ColumnOptions {
 	private Number borderRadius;
 	private Number borderWidth;
 	private String className;
+	private Boolean clip;
 	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
+	private String colorKey;
 	private ArrayList<Color> colors;
 	private Boolean crisp;
 	private Number cropThreshold;
@@ -60,6 +62,7 @@ public class PlotOptionsColumn extends ColumnOptions {
 	private Number maxPointWidth;
 	private Number minPointLength;
 	private Color negativeColor;
+	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -232,6 +235,23 @@ public class PlotOptionsColumn extends ColumnOptions {
 	}
 
 	/**
+	 * @see #setClip(Boolean)
+	 */
+	public Boolean getClip() {
+		return clip;
+	}
+
+	/**
+	 * Disable this option to allow series rendering in the whole plotting area.
+	 * Note that clipping should be always enabled when chart.zoomType is set
+	 * <p>
+	 * Defaults to <code>false</code>.
+	 */
+	public void setClip(Boolean clip) {
+		this.clip = clip;
+	}
+
+	/**
 	 * @see #setColor(Color)
 	 */
 	public Color getColor() {
@@ -296,6 +316,27 @@ public class PlotOptionsColumn extends ColumnOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColorKey(String)
+	 */
+	public String getColorKey() {
+		return colorKey;
+	}
+
+	/**
+	 * Determines what data value should be used to calculate point
+	 * color if <code>colorAxis</code> is used.
+	 * Requires to set min and max if some custom point property is used or if approximation
+	 * for data grouping is set to <code>'sum'</code>.
+	 * <p>
+	 * Defaults to <code>y</code>.
+	 *
+	 * @param colorKey
+	 */
+	public void setColorKey(String colorKey) {
+		this.colorKey = colorKey;
 	}
 
 	/**
@@ -701,6 +742,24 @@ public class PlotOptionsColumn extends ColumnOptions {
 	 */
 	public void setLinkedTo(String linkedTo) {
 		this.linkedTo = linkedTo;
+	}
+
+	/**
+	 * @see #setOpacity(Number)
+	 */
+	@Override
+	public Number getOpacity() {
+		return opacity;
+	}
+
+	/**
+	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+	 * <p>
+	 * Defaults to <code>1</code>.
+	 */
+	@Override
+	public void setOpacity(Number opacity) {
+		this.opacity = opacity;
 	}
 
 	/**

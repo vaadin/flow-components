@@ -235,18 +235,18 @@ public class LazyLoadingPage extends Div {
 
         comboBox.setDataProvider(
                 DataProvider.fromFilteringCallbacks(query -> {
-                    Stream<String> stream = IntStream.of(0, 100)
+                    Stream<String> stream = IntStream.range(0, 500)
                             .mapToObj(String::valueOf);
                     message.setText(String.valueOf(query.getPageSize()));
                     return stream.skip(query.getOffset())
                             .limit(query.getLimit());
-                }, query -> {
-                    Stream<String> stream = IntStream.of(0, 100)
-                            .mapToObj(String::valueOf);
-                    return (int) stream.limit(query.getLimit()).count();
-                }));
+                }, query -> 500));
 
-        add(comboBox);
+        NativeButton changePageSizeButton = new NativeButton(
+                "Change page size", event -> comboBox.setPageSize(41));
+        changePageSizeButton.setId("change-page-size-button");
+
+        add(comboBox, changePageSizeButton);
     }
 
     public static List<String> generateStrings(int count) {
