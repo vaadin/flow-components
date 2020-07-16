@@ -17,3 +17,5 @@ tsconfig.json
 webpack.*
 node_modules
 .driver
+package*json
+pnpm*json
