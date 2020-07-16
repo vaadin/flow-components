@@ -50,7 +50,6 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
     private Boolean enableMouseTracking;
     private Boolean getExtremesFromAll;
     private Number hangingIndent;
-    private Boolean includeInDataExport;
     private Label label;
     private Color linkColor;
     private String linkedTo;
@@ -324,23 +323,6 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      */
     public void setHangingIndent(Number hangingIndent) {
         this.hangingIndent = hangingIndent;
-    }
-
-    /**
-     * @see #setIncludeInDataExport(Boolean)
-     */
-    public Boolean getIncludeInDataExport() {
-        return includeInDataExport;
-    }
-
-    /**
-     * <p>When set to <code>false</code> will prevent the series data from being included in
-     * any form of data export.</p>
-     * <p>Since version 6.0.0 until 7.1.0 the option was existing undocumented
-     * as <code>includeInCSVExport</code>.</p>
-     */
-    public void setIncludeInDataExport(Boolean includeInDataExport) {
-        this.includeInDataExport = includeInDataExport;
     }
 
     /**

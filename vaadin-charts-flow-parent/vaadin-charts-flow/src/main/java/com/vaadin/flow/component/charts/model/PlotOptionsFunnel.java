@@ -17,11 +17,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Funnel charts are a type of chart often used to visualize stages in a sales
@@ -37,8 +37,11 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	private Number borderWidth;
 	private String[] center;
 	private String className;
+	private Boolean clip;
 	private Number colorIndex;
+	private String colorKey;
 	private ArrayList<Color> colors;
+	private Boolean crisp;
 	private Cursor cursor;
 	private DataLabelsFunnel dataLabels;
 	private Number depth;
@@ -48,11 +51,13 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private String height;
+	private Boolean ignoreHiddenPoint;
 	private ArrayList<String> keys;
 	private String linkedTo;
 	private Number minSize;
 	private String neckHeight;
 	private String neckWidth;
+	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Boolean reversed;
 	private Boolean selected;
@@ -196,6 +201,23 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	}
 
 	/**
+	 * @see #setClip(Boolean)
+	 */
+	public Boolean getClip() {
+		return clip;
+	}
+
+	/**
+	 * Disable this option to allow series rendering in the whole plotting area.
+	 * Note that clipping should be always enabled when chart.zoomType is set.
+	 * <p>
+	 * Defaults to <code>false</code>.
+	 */
+	public void setClip(Boolean clip) {
+		this.clip = clip;
+	}
+
+	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -211,6 +233,25 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColorKey(String)
+	 */
+	public String getColorKey() {
+		return colorKey;
+	}
+
+	/**
+	 * Determines what data value should be used to calculate point color
+	 * if <code>colorAxis</code> is used. Requires to set <code>min</code> and
+	 * <code>max</code> if some custom point property is used or if approximation
+	 * for data grouping is set to <code>'sum'</code>.
+	 * <p>
+	 * Defaults to <code>y</code>.
+	 */
+	public void setColorKey(String colorKey) {
+		this.colorKey = colorKey;
 	}
 
 	/**
@@ -256,6 +297,27 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	 */
 	public void removeColor(Color color) {
 		this.colors.remove(color);
+	}
+
+	/**
+	 * @see #setCrisp(Boolean)
+	 */
+	public Boolean getCrisp() {
+		return crisp;
+	}
+
+	/**
+	 * When true, each point or column edge is rounded to its nearest pixel
+	 * in order to render sharp on screen. In some cases, when there are a lot of
+	 * densely packed columns, this leads to visible difference in column widths
+	 * or distance between columns. In these cases, setting <code>crisp</code>
+	 * to <code>false</code> may look better, even though each column
+	 * is rendered blurry.
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setCrisp(Boolean crisp) {
+		this.crisp = crisp;
 	}
 
 	/**
@@ -428,6 +490,23 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	}
 
 	/**
+	 * @see #setIgnoreHiddenPoint(Boolean)
+	 */
+	public Boolean getIgnoreHiddenPoint() {
+		return ignoreHiddenPoint;
+	}
+
+	/**
+	 * This option tells whether the series shall be redrawn as if
+	 * the hidden point were null.
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint) {
+		this.ignoreHiddenPoint = ignoreHiddenPoint;
+	}
+
+	/**
 	 * @see #setKeys(String...)
 	 */
 	public String[] getKeys() {
@@ -506,6 +585,22 @@ public class PlotOptionsFunnel extends PyramidOptions {
 	 */
 	public void setMinSize(Number minSize) {
 		this.minSize = minSize;
+	}
+
+	/**
+	 * @see #setOpacity(Number)
+	 */
+	public Number getOpacity() {
+		return opacity;
+	}
+
+	/**
+	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+	 * <p>
+	 * Defaults to <code>1</code>.
+	 */
+	public void setOpacity(Number opacity) {
+		this.opacity = opacity;
 	}
 
 	/**

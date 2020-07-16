@@ -82,6 +82,16 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract void setBorderWidth(Number borderWidth);
 
     /**
+     * @see #setClip(Boolean)
+     */
+    public abstract Boolean getClip();
+
+    /**
+     * Disable this option to allow series rendering in the whole plotting area.
+     */
+    public abstract void setClip(Boolean clip);
+
+    /**
      * @see #setColorByPoint(Boolean)
      */
     public abstract Boolean getColorByPoint();
@@ -92,6 +102,18 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * the chart should receive one color per series or one color per point.
      */
     public abstract void setColorByPoint(Boolean colorByPoint);
+
+    /**
+     * @see #setColorKey(String)
+     */
+    public abstract String getColorKey();
+
+    /**
+     * Determines what data value should be used to calculate point color if colorAxis is used.
+     * Requires to set <code>min</code> and <code>max</code> if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>'.
+     */
+    public abstract void setColorKey(String colorKey);
 
     /**
      * @see #setColors(Color...)
@@ -121,6 +143,20 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * @see #setColors(Color...)
      */
     public abstract void removeColor(Color color);
+
+    /**
+     * @see #setCrisp(Boolean)
+     */
+    public abstract Boolean getCrisp();
+
+    /**
+     * When true, each point or column edge is rounded to its nearest pixel in order to render sharp on screen.
+     * In some cases, when there are a lot of densely packed columns, this leads to visible difference
+     * in column widths or distance between columns.
+     * In these cases, setting crisp to false may look better,
+     * even though each column is rendered blurry.
+     */
+    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCursor(Cursor)
@@ -262,6 +298,16 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * also toggles the linked series.
      */
     public abstract void setLinkedTo(String linkedTo);
+
+    /**
+     * @see #setOpacity(Number)
+     */
+    public abstract Number getOpacity();
+
+    /**
+     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     */
+    public abstract void setOpacity(Number opacity);
 
     /**
      * @see #setMaxPointWidth(Number)

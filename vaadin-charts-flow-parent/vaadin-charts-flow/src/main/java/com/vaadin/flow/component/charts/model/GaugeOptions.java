@@ -38,6 +38,32 @@ public abstract class GaugeOptions extends AbstractPlotOptions {
     public abstract void setAnimation(Boolean animation);
 
     /**
+     * @see #setClip(Boolean)
+     */
+    public abstract Boolean getClip();
+
+    /**
+     * Disable this option to allow series rendering in the whole plotting area.
+     * Note that clipping should be always enabled when chart.zoomType is set
+     */
+    public abstract void setClip(Boolean clip);
+
+    /**
+     * @see #setCrisp(Boolean)
+     */
+    public abstract Boolean getCrisp();
+
+    /**
+     * When true, each point or column edge is rounded to its nearest pixel
+     * in order to render sharp on screen. In some cases,
+     * when there are a lot of densely packed columns, this leads to
+     * visible difference in column widths or distance between columns.
+     * In these cases, setting <code>crisp</code> to <code>false</code>
+     * may look better, even though each column is rendered blurry.
+     */
+    public abstract void setCrisp(Boolean crisp);
+
+    /**
      * @see #setCursor(Cursor)
      */
     public abstract Cursor getCursor();
@@ -113,6 +139,16 @@ public abstract class GaugeOptions extends AbstractPlotOptions {
      * @see #setKeys(String...)
      */
     public abstract void removeKey(String key);
+
+    /**
+     * @see #setOpacity(Number)
+     */
+    public abstract Number getOpacity();
+
+    /**
+     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     */
+    public abstract void setOpacity(Number opacity);
 
     /**
      * @see #setOvershoot(Number)

@@ -18,4 +18,5 @@ webpack.*
 node_modules
 .driver
 package*json
-pnpm*json
+pnpm*
+error-screenshots

@@ -12,7 +12,7 @@
 
 set -e
 pom='pom.xml'
-mods=`grep '<module>' $pom   | cut -d ">" -f2 | cut -d "<" -f1`
+mods=`grep '<module>' $pom  | grep -v '>integration-tests<' | cut -d ">" -f2 | cut -d "<" -f1`
 
 checkoutProject() {
   mod=$1
@@ -29,6 +29,7 @@ renameModule() {
   new=$3
   [ ! -d $mod/$old ] && return
   echo Renaming $mod/$old $mod/$new
+  [ -d $mod/$new ] && rm -rf $mod/$new
   mv $mod/$old $mod/$new
   perl -pi -e "s,>$old<,>$new<,g" $mod/pom.xml $mod/$new/pom.xml
 }

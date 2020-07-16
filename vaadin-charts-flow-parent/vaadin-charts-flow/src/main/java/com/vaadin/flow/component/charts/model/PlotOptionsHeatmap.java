@@ -17,11 +17,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * <p>
@@ -44,9 +44,11 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	private Number borderRadius;
 	private Number borderWidth;
 	private String className;
+	private Boolean clip;
 	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
+	private String colorKey;
 	private ArrayList<Color> colors;
 	private Number colsize;
 	private Boolean crisp;
@@ -61,6 +63,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	private ArrayList<String> keys;
 	private String linkedTo;
 	private Number maxPointWidth;
+	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Number rowsize;
 	private Boolean selected;
@@ -217,6 +220,23 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	}
 
 	/**
+	 * @see #setClip(Boolean)
+	 */
+	public Boolean getClip() {
+		return clip;
+	}
+
+	/**
+	 * Disable this option to allow series rendering in the whole plotting area.
+	 * Note that clipping should be always enabled when chart.zoomType is set.
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setClip(Boolean clip) {
+		this.clip = clip;
+	}
+
+	/**
 	 * @see #setColor(Color)
 	 */
 	public Color getColor() {
@@ -269,6 +289,25 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setColorKey(String)
+	 */
+	public String getColorKey() {
+		return colorKey;
+	}
+
+	/**
+	 * Determines what data value should be used to calculate point color
+	 * if <code>colorAxis</code> is used. Requires to set <code>min</code> and
+	 * <code>max</code> if some custom point property is used or if approximation
+	 * for data grouping is set to <code>'sum'</code>.
+	 * <p>
+	 * Defaults to <code>value</code>.
+	 */
+	public void setColorKey(String colorKey) {
+		this.colorKey = colorKey;
 	}
 
 	/**
@@ -609,6 +648,22 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	 */
 	public void setMaxPointWidth(Number maxPointWidth) {
 		this.maxPointWidth = maxPointWidth;
+	}
+
+	/**
+	 * @see #setOpacity(Number)
+	 */
+	public Number getOpacity() {
+		return opacity;
+	}
+
+	/**
+	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+	 * <p>
+	 * Defaults to <code>1</code>.
+	 */
+	public void setOpacity(Number opacity) {
+		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {
