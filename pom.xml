@@ -420,8 +420,15 @@
                                 <directory>${project.basedir}</directory>
                                 <includes>
                                     <include>package*.json</include>
-                                    <include>webpack.config.js</include>
+                                    <include>webpack.*</include>
+                                    <include>node_modules/*</include>
+                                    <include>types.d.ts</include>
+                                    <include>tsconfig.json</include>
+                                    <include>pnpm*</include>
                                 </includes>
+                            </fileset>
+                            <fileset>
+                                <directory>${project.basedir}/node_modules</directory>
                             </fileset>
                         </filesets>
                     </configuration>

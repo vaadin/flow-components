@@ -516,6 +516,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     arrayUpdater, data -> getElement()
                             .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
+            dataCommunicator.setPageSize(getPageSize());
         }
 
         scheduleRender();
