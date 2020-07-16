@@ -526,7 +526,17 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void customPageSize_pageSizePopulatedToDataCommunicator() {
         lazyCustomPageSize.openPopup();
         scrollToItem(lazyCustomPageSize, 100);
+        waitUntilTextInContent("100");
+        // page size should be 42
         assertMessage("42");
+
+        clickButton("change-page-size-button");
+        lazyCustomPageSize.closePopup();
+        lazyCustomPageSize.openPopup();
+        scrollToItem(lazyCustomPageSize, 300);
+        waitUntilTextInContent("300");
+        // page size should be 41
+        assertMessage("41");
     }
 
     private void assertMessage(String expectedMessage) {

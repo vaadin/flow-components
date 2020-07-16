@@ -25,6 +25,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsAreasplinerange;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsBoxplot;
 import com.vaadin.flow.component.charts.model.PlotOptionsBubble;
+import com.vaadin.flow.component.charts.model.PlotOptionsBullet;
 import com.vaadin.flow.component.charts.model.PlotOptionsCandlestick;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumnrange;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsGauge;
 import com.vaadin.flow.component.charts.model.PlotOptionsHeatmap;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.PlotOptionsOhlc;
+import com.vaadin.flow.component.charts.model.PlotOptionsOrganization;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsPolygon;
 import com.vaadin.flow.component.charts.model.PlotOptionsPyramid;
@@ -42,8 +44,10 @@ import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsSolidgauge;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
+import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
 import com.vaadin.flow.component.charts.model.PlotOptionsTreemap;
 import com.vaadin.flow.component.charts.model.PlotOptionsWaterfall;
+import com.vaadin.flow.component.charts.model.PlotOptionsXrange;
 
 /**
  * Styles for PlotOptions of different plot types
@@ -57,13 +61,18 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
     private PlotOptionsBar bar = new PlotOptionsBar();
     private PlotOptionsBoxplot boxplot = new PlotOptionsBoxplot();
     private PlotOptionsBubble bubble = new PlotOptionsBubble();
+    private PlotOptionsBullet bullet = new PlotOptionsBullet();
+    private PlotOptionsCandlestick candlestick = new PlotOptionsCandlestick();
     private PlotOptionsColumn column = new PlotOptionsColumn();
     private PlotOptionsColumnrange columnrange = new PlotOptionsColumnrange();
     private PlotOptionsErrorbar errorbar = new PlotOptionsErrorbar();
+    private PlotOptionsFlags flags = new PlotOptionsFlags();
     private PlotOptionsFunnel funnel = new PlotOptionsFunnel();
     private PlotOptionsGauge gauge = new PlotOptionsGauge();
     private PlotOptionsHeatmap heatmap = new PlotOptionsHeatmap();
     private PlotOptionsLine line = new PlotOptionsLine();
+    private PlotOptionsOhlc ohlc = new PlotOptionsOhlc();
+    private PlotOptionsOrganization organization = new PlotOptionsOrganization();
     private PlotOptionsPie pie = new PlotOptionsPie();
     private PlotOptionsPolygon polygon = new PlotOptionsPolygon();
     private PlotOptionsPyramid pyramid = new PlotOptionsPyramid();
@@ -71,12 +80,10 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
     private PlotOptionsSeries series = new PlotOptionsSeries();
     private PlotOptionsSolidgauge solidgauge = new PlotOptionsSolidgauge();
     private PlotOptionsSpline spline = new PlotOptionsSpline();
+    private PlotOptionsTimeline timeline = new PlotOptionsTimeline();
     private PlotOptionsTreemap treemap = new PlotOptionsTreemap();
     private PlotOptionsWaterfall waterfall = new PlotOptionsWaterfall();
-
-    private PlotOptionsCandlestick candlestick = new PlotOptionsCandlestick();
-    private PlotOptionsFlags flags = new PlotOptionsFlags();
-    private PlotOptionsOhlc ohlc = new PlotOptionsOhlc();
+    private PlotOptionsXrange xrange = new PlotOptionsXrange();
 
     /**
      * @see #setBar(PlotOptionsBar)
@@ -479,4 +486,69 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
     public void setOhlc(PlotOptionsOhlc ohlc) {
         this.ohlc = ohlc;
     }
+
+    /**
+     * @see #setBullet(PlotOptionsBullet)
+     */
+    public PlotOptionsBullet getBullet() {
+        return bullet;
+    }
+
+    /**
+     * Sets the style options for {@link ChartType#BULLET} charts
+     *
+     * @param bullet
+     */
+    public void setBullet(PlotOptionsBullet bullet) {
+        this.bullet = bullet;
+    }
+
+    /**
+     * @see #setOrganization(PlotOptionsOrganization)
+     */
+    public PlotOptionsOrganization getOrganization() {
+        return organization;
+    }
+
+    /**
+     * Sets the style options for {@link ChartType#ORGANIZATION} charts
+     *
+     * @param organization
+     */
+    public void setOrganization(PlotOptionsOrganization organization) {
+        this.organization = organization;
+    }
+
+    /**
+     * @see #setTimeline(PlotOptionsTimeline)
+     */
+    public PlotOptionsTimeline getTimeline() {
+        return timeline;
+    }
+
+    /**
+     * Sets the style options for {@link ChartType#TIMELINE} charts
+     *
+     * @param timeline
+     */
+    public void setTimeline(PlotOptionsTimeline timeline) {
+        this.timeline = timeline;
+    }
+
+    /**
+     * @see #setXrange(PlotOptionsXrange)
+     */
+    public PlotOptionsXrange getXrange() {
+        return xrange;
+    }
+
+    /**
+     * Sets the style options for {@link ChartType#XRANGE} charts
+     *
+     * @param xrange
+     */
+    public void setXrange(PlotOptionsXrange xrange) {
+        this.xrange = xrange;
+    }
+
 }

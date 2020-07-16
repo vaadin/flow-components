@@ -33,10 +33,13 @@ public class PlotOptionsArea extends AreaOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
+	private Boolean clip;
 	private Color color;
 	private Number colorIndex;
+	private String colorKey;
 	private Boolean connectEnds;
 	private Boolean connectNulls;
+	private Boolean crisp;
 	private Number cropThreshold;
 	private Cursor cursor;
 	private DashStyle dashStyle;
@@ -56,6 +59,7 @@ public class PlotOptionsArea extends AreaOptions {
 	private Marker marker;
 	private Color negativeColor;
 	private Color negativeFillColor;
+	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -163,6 +167,23 @@ public class PlotOptionsArea extends AreaOptions {
 	}
 
 	/**
+	 * @see #setClip(Boolean)
+	 */
+	public Boolean getClip() {
+		return clip;
+	}
+
+	/**
+	 * Disable this option to allow series rendering in the whole plotting area.
+	 * Note that clipping should be always enabled when chart.zoomType is set
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setClip(Boolean clip) {
+		this.clip = clip;
+	}
+
+	/**
 	 * @see #setColor(Color)
 	 */
 	public Color getColor() {
@@ -212,6 +233,24 @@ public class PlotOptionsArea extends AreaOptions {
 	}
 
 	/**
+	 * @see #setColorKey(String)
+	 */
+	public String getColorKey() {
+		return colorKey;
+	}
+
+	/**
+	 * Determines what data value should be used to calculate point color if <code>colorAxis</code> is used.
+	 * Requires to set min and max if some custom point property is used
+	 * or if approximation for data grouping is set to <code>'sum'</code>.
+	 * <p>
+	 * Defaults to <code>y</code>.
+	 */
+	public void setColorKey(String colorKey) {
+		this.colorKey = colorKey;
+	}
+
+	/**
 	 * @see #setConnectEnds(Boolean)
 	 */
 	public Boolean getConnectEnds() {
@@ -242,6 +281,22 @@ public class PlotOptionsArea extends AreaOptions {
 	 */
 	public void setConnectNulls(Boolean connectNulls) {
 		this.connectNulls = connectNulls;
+	}
+
+	public Boolean getCrisp() {
+		return crisp;
+	}
+
+	/**
+	 * When true, each point or column edge is rounded to its nearest pixel in order to render sharp on screen.
+	 * In some cases, when there are a lot of densely packed columns, this leads to visible difference in column widths
+	 * or distance between columns.
+	 * In these cases, setting crisp to false may look better, even though each column is rendered blurry.
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setCrisp(Boolean crisp) {
+		this.crisp = crisp;
 	}
 
 	/**
@@ -659,6 +714,22 @@ public class PlotOptionsArea extends AreaOptions {
 	 */
 	public void setNegativeFillColor(Color negativeFillColor) {
 		this.negativeFillColor = negativeFillColor;
+	}
+
+	/**
+	 * @see #setOpacity(Number)
+	 */
+	public Number getOpacity() {
+		return opacity;
+	}
+
+	/**
+	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+	 * <p>
+	 * Defaults to <code>1</code>.
+	 */
+	public void setOpacity(Number opacity) {
+		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {

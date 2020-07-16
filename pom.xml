@@ -24,13 +24,19 @@
         <jetty.version>9.4.15.v20190215</jetty.version>
         <jetty.http.port>9998</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-        <driver.binary.downloader.maven.plugin.version>1.0.14
+        <driver.binary.downloader.maven.plugin.version>1.0.18
         </driver.binary.downloader.maven.plugin.version>
         <flow.version>4.0-SNAPSHOT</flow.version>
         <testbench.version>6.2.2</testbench.version>
+
+        <testbench.testsInParalel>2</testbench.testsInParalel>
+        <testbench.runLocaly>CHROME</testbench.runLocaly>
+        <failsafe.forkCount>2</failsafe.forkCount>
+
+        <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
 
         <powermock.version>1.7.1</powermock.version>
         <jackson.version>2.9.10.4</jackson.version>
@@ -87,6 +93,20 @@
         <module>vaadin-login-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
     </modules>
+
+    <profiles>
+       <profile>
+           <id>default</id>
+           <activation>
+               <property>
+                   <name>run-it</name>
+               </property>
+           </activation>
+           <modules>
+               <module>integration-tests</module>
+           </modules>
+       </profile>
+   </profiles>
 
     <repositories>
         <repository>
@@ -227,10 +247,6 @@
                         <stopPort>${jetty.stop.port}</stopPort>
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
-                        <webAppConfig>
-                            <containerIncludeJarPattern>^$</containerIncludeJarPattern>
-                            <webInfIncludeJarPattern>^((?!flow-server-production-mode).)*$</webInfIncludeJarPattern>
-                        </webAppConfig>
                         <systemProperties>
                             <!-- Needed when running IT from parent folder -->
                             <systemProperty>
@@ -282,8 +298,11 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <forkCount>${failsafe.forkCount}</forkCount>
+                        <reuseForks>true</reuseForks>
                         <systemPropertyVariables>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+                            <com.vaadin.testbench.Parameters.testsInParallel>${testbench.testsInParalel}</com.vaadin.testbench.Parameters.testsInParallel>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
@@ -400,7 +419,7 @@
                     <artifactId>flow-maven-plugin</artifactId>
                     <version>${flow.version}</version>
                     <configuration>
-                        <pnpmEnable>false</pnpmEnable>
+                        <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
                     </configuration>
                     <executions>
                         <execution>
@@ -414,24 +433,6 @@
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>3.1.0</version>
-                    <configuration>
-                        <filesets>
-                            <fileset>
-                                <directory>${project.basedir}</directory>
-                                <includes>
-                                    <include>package*.json</include>
-                                    <include>webpack.*</include>
-                                    <include>node_modules/*</include>
-                                    <include>types.d.ts</include>
-                                    <include>tsconfig.json</include>
-                                    <include>pnpm*</include>
-                                </includes>
-                            </fileset>
-                            <fileset>
-                                <directory>${project.basedir}/node_modules</directory>
-                            </fileset>
-                        </filesets>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-war-plugin</artifactId>
