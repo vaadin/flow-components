@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.charts.model;
 
+import com.vaadin.flow.component.charts.model.style.Color;
+
 /*-
  * #%L
  * Vaadin Charts for Flow
@@ -27,9 +29,80 @@ package com.vaadin.flow.component.charts.model;
  * the Pane-configuration object.</b>
  */
 public class Background extends AbstractConfigurationObject {
+    private Color backgroundColor;
+    private Color borderColor;
+    private Number borderWidth;
+    private String className;
     private String outerRadius;
     private String innerRadius;
     private BackgroundShape shape;
+
+    /**
+     * @see #setBackgroundColor(Color)
+     */
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    /**
+     * Sets the background color
+     * 
+     * @param backgroundColor
+     */
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    /**
+     * @see #setBorderColor(Color)
+     */
+    public Color getBorderColor() {
+        return borderColor;
+    }
+
+    /**
+     * Sets the border color
+     * 
+     * @param borderColor
+     */
+    public void setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+    }
+
+    /**
+     * @see #setBorderWidth(Number)
+     */
+    public Number getBorderWidth() {
+        return borderWidth;
+    }
+
+    /**
+     * Sets the width of the border
+     * 
+     * @param borderWidth
+     */
+    public void setBorderWidth(Number borderWidth) {
+        this.borderWidth = borderWidth;
+    }
+
+    /**
+     * Returns the class name of the background
+     *
+     * @see #setClassName(String)
+     * @return The class name of the background
+     */
+    public String getClassName() {
+        return className;
+    }
+
+    /**
+     * The class name for this background. Defaults to highcharts-pane.
+     *
+     * @param className new class name of the background
+     */
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
     /**
      * Sets the outer radius of the circular shaped background using a string
