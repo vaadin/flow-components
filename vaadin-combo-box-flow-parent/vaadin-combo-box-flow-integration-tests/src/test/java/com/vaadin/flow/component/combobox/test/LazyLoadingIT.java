@@ -40,6 +40,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement callbackBox;
     private ComboBoxElement templateBox;
     private ComboBoxElement emptyCallbackBox;
+    private ComboBoxElement lazyCustomPageSize;
 
     @Before
     public void init() {
@@ -54,6 +55,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         templateBox = $("combo-box-in-a-template").id("template")
                 .$(ComboBoxElement.class).first();
         emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
+        lazyCustomPageSize = $(ComboBoxElement.class)
+                .id("lazy-custom-page-size");
     }
 
     @Test
@@ -517,6 +520,13 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "return arguments[0].focusElement.value", beanBox);
         Assert.assertEquals("The ComboBox filter text got modified",
                 "Person 111", filterText);
+    }
+
+    @Test
+    public void customPageSize_pageSizePopulatedToDataCommunicator() {
+        lazyCustomPageSize.openPopup();
+        scrollToItem(lazyCustomPageSize, 100);
+        assertMessage("42");
     }
 
     private void assertMessage(String expectedMessage) {

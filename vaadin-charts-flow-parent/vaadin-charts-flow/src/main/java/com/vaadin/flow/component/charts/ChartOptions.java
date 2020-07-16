@@ -77,7 +77,7 @@ public class ChartOptions extends AbstractConfigurationObject {
      * @return the ChartOptions instance connected to the given UI
      */
     public static ChartOptions get(UI ui) {
-        Objects.requireNonNull(ui, "Given root items may not be null");
+        Objects.requireNonNull(ui, "Given UI may not be null");
 
         ChartOptions options = ComponentUtil.getData(ui, ChartOptions.class);
 

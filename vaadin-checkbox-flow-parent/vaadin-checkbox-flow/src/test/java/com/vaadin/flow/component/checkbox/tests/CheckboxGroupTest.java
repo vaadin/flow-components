@@ -16,12 +16,14 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
@@ -35,7 +37,9 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
@@ -337,12 +341,33 @@ public class CheckboxGroupTest {
         ui.remove(parent);
     }
 
+    @Test
+    public void dataViewForFaultyDataProvider_throwsException() {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage(
+                "CheckboxGroupListDataView only supports 'ListDataProvider' " +
+                        "or it's subclasses, but was given a " +
+                        "'AbstractBackEndDataProvider'");
+
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        final CheckboxGroupListDataView<String> listDataView = checkboxGroup
+                .setItems(Arrays.asList("one", "two"));
+
+        DataProvider<String, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> Stream.of("one"),
+                        query -> 1);
+
+        checkboxGroup.setDataProvider(dataProvider);
+
+        checkboxGroup.getListDataView();
+    }
+
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(
             List<Wrapper> items) {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
         ListDataProvider<Wrapper> dataProvider = new ListDataProvider<>(items);
-        checkboxGroup.setDataProvider(dataProvider);
+        checkboxGroup.setItems(dataProvider);
         return checkboxGroup;
     }
 
@@ -351,7 +376,7 @@ public class CheckboxGroupTest {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
         ListDataProvider<Wrapper> dataProvider = new CustomDataProvider(items);
-        checkboxGroup.setDataProvider(dataProvider);
+        checkboxGroup.setItems(dataProvider);
         return checkboxGroup;
     }
 

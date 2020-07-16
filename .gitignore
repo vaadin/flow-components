@@ -1,5 +1,5 @@
-/bin/
-/target/
+bin
+target
 
 # Eclipse
 .project
@@ -16,3 +16,6 @@ types.d.ts
 tsconfig.json
 webpack.*
 node_modules
+.driver
+package*json
+pnpm*json

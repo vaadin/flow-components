@@ -19,6 +19,7 @@ The supported chart types are:
 |   <<charts.charttypes.columnbar, `bar`>>
 |   <<charts.charttypes.boxplot, `boxplot`>>
 |   <<charts.charttypes.bubble, `bubble`>>
+|   <<charts.charttypes.bullet, `bullet`>>
 |   <<charts.charttypes.ohlc, `candlestick`>>
 |   <<charts.charttypes.columnbar, `column`>>
 |   <<charts.charttypes.rangecharts, `columnrange`>>
@@ -29,6 +30,7 @@ The supported chart types are:
 |   <<charts.charttypes.heatmap, `heatmap`>>
 |   <<charts.charttypes.line, `line`>>
 |   <<charts.charttypes.ohlc, `ohlc`>>
+|   <<charts.charttypes.organization, `organization`>>
 |   <<charts.charttypes.pie, `pie`>>
 |   <<charts.charttypes.polygon, `polygon`>>
 |   <<charts.charttypes.funnel, `pyramid`>>
@@ -36,7 +38,11 @@ The supported chart types are:
 |   <<charts.charttypes.solidgauge, `solidgauge`>>
 |   <<charts.charttypes.line, `spline`>>
 |   <<charts.charttypes.treemap, `treemap`>>
+|   <<charts.charttypes.timeline, `timeline`>>
 |   <<charts.charttypes.waterfall, `waterfall`>>
+|   <<charts.charttypes.xrange, `xrange`>>
+|
+|
 |
 |===
 
@@ -416,6 +422,180 @@ conf.addyAxis(yaxis);
 ----
 endif::web[]
 
+
+[[charts.charttypes.bullet]]
+== Bullet Charts
+
+Bullet charts display a value and a target value. They require the use of
+[classname]#DataSeriesItemBullet#.
+
+A ready bullet chart is shown in <<figure.charts.charttypes.bullet>>.
+
+[[figure.charts.charttypes.bullet]]
+.Bullet Chart
+image::img/charts-bullet.png[width="60%"]
+
+The chart type of a bullet chart is [parameter]#ChartType.BULLET#. Its options
+can be configured in a [classname]#PlotOptionsBullet# object.
+
+ifdef::web[]
+[source, java]
+----
+// Create a bullet chart
+Chart chart = new Chart(ChartType.BULLET);
+chart.setHeight("115px");
+
+// Modify the default configuration 
+Configuration conf = chart.getConfiguration();
+conf.setTitle("2020 YTD");
+conf.getChart().setInverted(true);
+conf.getLegend().setEnabled(false);
+conf.getTooltip().setPointFormat(
+        "<b>{point.y}</b> (with target at {point.target})");
+
+// Add data
+PlotOptionsBullet options = new PlotOptionsBullet();
+options.setPointPadding(0.25);
+options.setBorderWidth(0);
+options.setColor(SolidColor.BLACK);
+options.getTargetOptions().setWidth("200%");
+DataSeries series = new DataSeries();
+series.add(new DataSeriesItemBullet(275, 250));
+series.setPlotOptions(options);
+conf.addSeries(series);
+
+// Configure the axes
+YAxis yAxis = conf.getyAxis();
+yAxis.setGridLineWidth(0);
+yAxis.setTitle("");
+yAxis.addPlotBand(new PlotBand(0, 150, new SolidColor("#666666")));
+yAxis.addPlotBand(new PlotBand(150, 225, new SolidColor("#999999")));
+yAxis.addPlotBand(new PlotBand(225, 9e9, new SolidColor("#bbbbbb")));
+conf.getxAxis().addCategory(
+        "<span style=\"font-size: 13px; font-weight: bold;\">Revenue</span><br/>U.S. $ (1,000s)");
+
+----
+endif::web[]
+
+
+[[charts.charttypes.organization]]
+== Organization Charts
+
+Organization charts are used for visualizing parent/child relationships between nodes. They require the use of
+[classname]#NodeSeries# to add nodes and the hierarchical links between them.
+
+
+The organization chart is enabled with [parameter]#ChartType.ORGANIZATION# and you
+can make type-specific settings in the [classname]#PlotOptionsOrganization# object as
+described later.
+
+[source, java]
+----
+Chart chart = new Chart(ChartType.ORGANIZATION);
+Configuration conf = chart.getConfiguration();
+conf.getChart().setInverted(true);
+conf.getChart().setHeight("500px");
+conf.getTooltip().setOutside(true);
+conf.setTitle("Acme organization chart");
+...
+----
+
+A ready Organization chart is shown in <<figure.charts.charttypes.organization>>.
+
+[[figure.charts.charttypes.organization]]
+.Organization Chart
+image::img/charts-organization.png[width="60%"]
+
+[[charts.charttypes.organization.plotoptions]]
+=== Plot Options
+
+The chart-specific options of an organization chart are configured with a [classname]#PlotOptionsOrganization#.
+
+[source, java]
+----
+PlotOptionsOrganization plotOptions = new PlotOptionsOrganization();
+plotOptions.setColorByPoint(false);
+plotOptions.setColor(new SolidColor("#007ad0"));
+
+//Special color for first level
+Level level0 = new Level();
+level0.setLevel(0);
+level0.setColor(new SolidColor("#99AED3"));
+plotOptions.addLevel(level0);
+conf.setPlotOptions(plotOptions);
+----
+
+Colors can be defined for all the nodes in the chart, for each level or individually in each node as described later.
+
+[[charts.charttypes.organization.data]]
+=== Data Model
+
+In order to visualize the nodes and the hierarchy between them, a [classname]#NodeSeries# should be created, all the [classname]#Node# instances should be created and finally added as [classname]#NodeSeriesItem#.
+
+[classname]#NodeSeries# provides a method [methodname]#NodeSeries.add(nodeFrom, nodeTo)# that adds the node to the list and adds a link between nodeFrom and nodeTo.
+
+[source, java]
+----
+NodeSeries series = new NodeSeries();
+series.setName("Acme");
+Node acme = new Node("Acme");
+Node headOffice = new Node("Head Office");
+Node labs = new Node("Labs");
+Node coyoteBuilding = new Node("Coyote Building");
+Node roadRunnerBuilding = new Node("Road Runner Building");
+Node sales = new Node("Sales");
+Node marketing = new Node("Marketing");
+Node accounting = new Node("Accounting");
+Node administration = new Node("Administration");
+Node mdsOffice = new Node("MD's Office");
+
+Node josephMiler = new Node("Joseph Miler");
+josephMiler.setTitle("Head of Sales");
+josephMiler.setLayout(NodeLayout.HANGING);
+
+Node erikPerez = new Node("Erik Perez");
+erikPerez.setTitle("Head of Marketing");
+erikPerez.setLayout(NodeLayout.HANGING);
+
+Node emilyFox = new Node("Emily Fox");
+emilyFox.setTitle("Head of Accounting");
+
+Node ewanHerbert = new Node("Ewan Herbert");
+ewanHerbert.setTitle("Head of Admin");
+ewanHerbert.setLayout(NodeLayout.HANGING);
+
+Node kateKirby = new Node("Kate Kirby");
+Node vaughnWhiting = new Node("Vaughn Whiting");
+Node lisaWarner = new Node("Lisa Warner");
+Node mollyDodd = new Node("Molly Dodd");
+Node natashaKelly = new Node("Natasha Kelly");
+
+//Set color for a specific Node
+Node managingDirector = new Node("Sally Brown", "Sally Brown",
+        "Managing Director");
+managingDirector.setColor(new SolidColor("#E4B651"));
+
+series.add(acme, headOffice);
+series.add(acme, labs);
+series.add(headOffice, coyoteBuilding);
+series.add(headOffice, roadRunnerBuilding);
+series.add(coyoteBuilding, sales);
+series.add(coyoteBuilding, marketing);
+series.add(coyoteBuilding, accounting);
+series.add(roadRunnerBuilding, administration);
+series.add(roadRunnerBuilding, mdsOffice);
+series.add(sales, josephMiler);
+series.add(marketing, erikPerez);
+series.add(accounting, emilyFox);
+series.add(administration, ewanHerbert);
+series.add(josephMiler, kateKirby);
+series.add(josephMiler, vaughnWhiting);
+series.add(erikPerez, lisaWarner);
+series.add(ewanHerbert, mollyDodd);
+series.add(ewanHerbert, natashaKelly);
+series.add(mdsOffice, managingDirector);
+conf.addSeries(series);
+----
 
 [[charts.charttypes.pie]]
 == Pie Charts
@@ -1150,6 +1330,171 @@ endif::web[]
 
 endif::web[]
 
+
+[[charts.charttypes.timeline]]
+== Timeline Charts
+
+Timeline charts are used for visualizing events on a time axis. They require the use of
+[classname]#DataSeriesItemTimeline# to set an X value, together with name, label and description for the event.
+
+A ready Timeline chart is shown in <<figure.charts.charttypes.timeline>>.
+
+[[figure.charts.charttypes.timeline]]
+.Timeline Chart
+image::img/charts-timeline.png[width="60%"]
+
+The chart type of a timeline chart is [parameter]#ChartType.TIMELINE#. Its options
+can be configured in a [classname]#PlotOptionsTimeline# object.
+
+ifdef::web[]
+[source, java]
+----
+// Create a timeline chart
+Chart chart = new Chart(ChartType.TIMELINE);
+
+// Modify the default configuration 
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Timeline of Space Exploration");
+conf.setSubTitle(
+        "Info source: <a href=\"https://en.wikipedia.org/wiki/Timeline_of_space_exploration\">www.wikipedia.org</a>");
+conf.getTooltip().setEnabled(true);
+
+// Add data
+DataSeries series = new DataSeries();
+series.add(new DataSeriesItemTimeline(getInstant(1951, 6, 22),
+        "First dogs in space", "First dogs in space",
+        "Dezik and Tsygan were the first dogs to make a sub-orbital flight on 22 July 1951. Both dogs were recovered unharmed after travelling to a maximum altitude of 110 km."));
+series.add(new DataSeriesItemTimeline(getInstant(1957, 10, 4),
+        "First artificial satellite", "First artificial satellite",
+        "Sputnik 1 was the first artificial Earth satellite. The Soviet Union launched it into an elliptical low Earth orbit on 4 October 1957, orbiting for three weeks before its batteries died, then silently for two more months before falling back into the atmosphere."));
+series.add(new DataSeriesItemTimeline(getInstant(1959, 1, 4),
+        "First artificial satellite to reach the Moon",
+        "First artificial satellite to reach the Moon",
+        "Luna 1 was the first artificial satellite to reach the Moon vicinity and first artificial satellite in heliocentric orbit."));
+series.add(new DataSeriesItemTimeline(getInstant(1961, 4, 12),
+        "First human spaceflight", "First human spaceflight",
+        "Yuri Gagarin was a Soviet pilot and cosmonaut. He became the first human to journey into outer space when his Vostok spacecraft completed one orbit of the Earth on 12 April 1961."));
+series.add(new DataSeriesItemTimeline(getInstant(1966, 2, 3),
+        "First soft landing on the Moon",
+        "First soft landing on the Moon",
+        "Yuri Gagarin was a Soviet pilot and cosmonaut. He became the first human to journey into outer space when his Vostok spacecraft completed one orbit of the Earth on 12 April 1961."));
+series.add(new DataSeriesItemTimeline(getInstant(1969, 7, 20),
+        "First human on the Moon", "First human on the Moon",
+        "Apollo 11 was the spaceflight that landed the first two people on the Moon. Commander Neil Armstrong and lunar module pilot Buzz Aldrin, both American, landed the Apollo Lunar Module Eagle on July 20, 1969, at 20:17 UTC."));
+series.add(new DataSeriesItemTimeline(getInstant(1971, 4, 19),
+        "First space station", "First space station",
+        "Salyute 1 was the first space station of any kind, launched into low Earth orbit by the Soviet Union on April 19, 1971. The Salyut program followed this with five more successful launches out of seven more stations."));
+series.add(new DataSeriesItemTimeline(getInstant(1971, 12, 2),
+        "First soft Mars landing", "First soft Mars landing",
+        "Mars 3 was an unmanned space probe of the Soviet Mars program which spanned the years between 1960 and 1973. Mars 3 was launched May 28, 1971, nine days after its twin spacecraft Mars 2. The probes were identical robotic spacecraft launched by Proton-K rockets with a Blok D upper stage, each consisting of an orbiter and an attached lander."));
+series.add(new DataSeriesItemTimeline(getInstant(1976, 4, 17),
+        "Closest flyby of the Sun", "Closest flyby of the Sun",
+        "Helios-A and Helios-B (also known as Helios 1 and Helios 2) are a pair of probes launched into heliocentric orbit for the purpose of studying solar processes. A joint venture of West Germany's space agency DFVLR (70 percent share) and NASA (30 percent), the probes were launched from Cape Canaveral Air Force Station, Florida."));
+series.add(new DataSeriesItemTimeline(getInstant(1978, 12, 4),
+        "First orbital exploration of Venus",
+        "First orbital exploration of Venus",
+        "The Pioneer Venus Orbiter entered orbit around Venus on December 4, 1978, and performed observations to characterize the atmosphere and surface of Venus. It continued to transmit data until October 1992."));
+series.add(new DataSeriesItemTimeline(getInstant(1986, 2, 19),
+        "First inhabited space station",
+        "First inhabited space station",
+        "was a space station that operated in low Earth orbit from 1986 to 2001, operated by the Soviet Union and later by Russia. Mir was the first modular space station and was assembled in orbit from 1986 to 1996. It had a greater mass than any previous spacecraft."));
+series.add(new DataSeriesItemTimeline(getInstant(1989, 8, 8),
+        "First astrometric satellite", "First astrometric satellite",
+        "Hipparcos was a scientific satellite of the European Space Agency (ESA), launched in 1989 and operated until 1993. It was the first space experiment devoted to precision astrometry, the accurate measurement of the positions of celestial objects on the sky."));
+series.add(new DataSeriesItemTimeline(getInstant(1998, 11, 20),
+        "First multinational space station",
+        "First multinational space station",
+        "The International Space Station (ISS) is a space station, or a habitable artificial satellite, in low Earth orbit. Its first component was launched into orbit in 1998, with the first long-term residents arriving in November 2000.[7] It has been inhabited continuously since that date."));
+
+PlotOptionsTimeline options = new PlotOptionsTimeline();
+options.getMarker().setSymbol(MarkerSymbolEnum.CIRCLE);
+DataLabels labels = options.getDataLabels();
+labels.setAllowOverlap(false);
+labels.setFormat(
+        "<span style=\"color:{point.color}\">● </span><span style=\"font-weight: bold;\" > {point.x:%d %b %Y}</span><br/>{point.label}");
+series.setPlotOptions(options);
+conf.addSeries(series);
+
+// Configure the axes
+conf.getxAxis().setVisible(false);
+conf.getxAxis().setType(AxisType.DATETIME);
+conf.getyAxis().setVisible(false);
+
+----
+endif::web[]
+
+ifdef::web[]
+[source, java]
+----
+// Helper method to create an Instant from year, month and day
+private Instant getInstant(int year, int month, int dayOfMonth) {
+    return LocalDate.of(year, month, dayOfMonth).atStartOfDay().toInstant(ZoneOffset.UTC);
+}
+----
+endif::web[]
+
+[[charts.charttypes.xrange]]
+== X-Range Charts
+
+X-Range charts are used for visualizing a range on the X axis. They require the use of
+[classname]#DataSeriesItemXrange# to set an initial X value and a final X2 value. Additionally [propertyname]#partialFillAmount# can be set to indicate the percentage of the point to be filled.
+
+A ready X-Range chart is shown in <<figure.charts.charttypes.xrange>>.
+
+[[figure.charts.charttypes.xrange]]
+.X-Range Chart
+image::img/charts-xrange.png[width="60%"]
+
+The chart type of a xrange chart is [parameter]#ChartType.XRANGE#. Its options
+can be configured in a [classname]#PlotOptionsXrange# object.
+
+ifdef::web[]
+[source, java]
+----
+// Create a xrange chart
+Chart chart = new Chart(ChartType.XRANGE);
+
+// Modify the default configuration 
+Configuration conf = chart.getConfiguration();
+conf.setTitle("X-range");
+
+// Add data
+DataSeries series = new DataSeries();
+series.setName("Project 1");
+series.add(new DataSeriesItemXrange(getInstant(2014, 11, 21),
+        getInstant(2014, 12, 2), 0, 0.25));
+series.add(new DataSeriesItemXrange(getInstant(2014, 12, 2),
+        getInstant(2014, 12, 5), 1));
+series.add(new DataSeriesItemXrange(getInstant(2014, 12, 8),
+        getInstant(2014, 12, 9), 2));
+series.add(new DataSeriesItemXrange(getInstant(2014, 12, 9),
+        getInstant(2014, 12, 19), 1));
+series.add(new DataSeriesItemXrange(getInstant(2014, 12, 10),
+        getInstant(2014, 12, 23), 2));
+PlotOptionsXrange options = new PlotOptionsXrange();
+options.setBorderColor(SolidColor.GRAY);
+options.setPointWidth(20);
+options.getDataLabels().setEnabled(true);
+series.setPlotOptions(options);
+conf.addSeries(series);
+
+// Configure the axes
+conf.getxAxis().setType(AxisType.DATETIME);
+conf.getyAxis().setTitle("");
+conf.getyAxis().setCategories("Prototyping", "Development", "Testing");
+conf.getyAxis().setReversed(true);
+----
+endif::web[]
+
+ifdef::web[]
+[source, java]
+----
+// Helper method to create an Instant from year, month and day
+private Instant getInstant(int year, int month, int dayOfMonth) {
+    return LocalDate.of(year, month, dayOfMonth).atStartOfDay().toInstant(ZoneOffset.UTC);
+}
+----
+endif::web[]
 
 [[charts.charttypes.heatmap]]
 == Heat Maps
