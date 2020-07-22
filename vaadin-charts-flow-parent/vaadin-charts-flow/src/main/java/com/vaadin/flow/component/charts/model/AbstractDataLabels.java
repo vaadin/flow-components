@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.charts.model;
 
+import com.vaadin.flow.component.charts.model.style.Color;
+import com.vaadin.flow.component.charts.model.style.Style;
+
 /*-
  * #%L
  * Vaadin Charts for Flow
@@ -32,6 +35,26 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      */
     public abstract void setClassName(String className);
 
+    /**	
+     * @see #setBackgroundColor(Color)	
+     */	
+    public abstract Color getBackgroundColor();	
+
+    /**	
+     * The background color or gradient for the data label.	
+     */	
+    public abstract void setBackgroundColor(Color backgroundColor);	
+
+    /**	
+     * @see #setBorderColor(Color)	
+     */	
+    public abstract Color getBorderColor();	
+
+    /**	
+     * The border color for the data label.	
+     */	
+    public abstract void setBorderColor(Color borderColor);
+
     /**
      * @see #setBorderRadius(Number)
      */
@@ -42,6 +65,16 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      */
     public abstract void setBorderRadius(Number borderRadius);
 
+    /**	
+     * @see #setColor(Color)	
+     */	
+    public abstract Color getColor();	
+
+    /**	
+     * The text color for the data labels.	
+     */	
+    public abstract void setColor(Color color);
+	
     /**
      * @see #setBorderWidth(Number)
      */
@@ -174,6 +207,16 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * predefined functions on the Renderer object.
      */
     public abstract void setShape(Shape shape);
+
+    /**	
+     * @see #setStyle(Style)	
+     */	
+    public abstract Style getStyle();	
+
+    /**	
+     * Styles for the label.	
+     */	
+    public abstract void setStyle(Style style);
 
     /**
      * @see #setUseHTML(Boolean)
