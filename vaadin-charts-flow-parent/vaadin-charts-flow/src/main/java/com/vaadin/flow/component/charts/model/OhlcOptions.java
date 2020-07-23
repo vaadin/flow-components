@@ -17,10 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.time.Instant;
 import java.util.Date;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class OhlcOptions extends AbstractPlotOptions {
 
@@ -80,6 +80,34 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract void setClassName(String className);
 
     /**
+     * @see #setClip(Boolean)
+     */
+    public abstract Boolean getClip();
+
+    /**
+     * Disable this option to allow series rendering in the whole plotting area.
+     */
+    public abstract void setClip(Boolean clip);
+
+    /**
+     * @see #setColorByPoint(Boolean)
+     */
+    public abstract Boolean getColorByPoint();
+
+    /**
+     * When using automatic point colors pulled from the global colors
+     * or series-specific plotOptions.column.colors collections,
+     * this option determines whether the chart should receive
+     * one color per series or one color per point.
+     * <p>
+     * In styled mode, the <code>colors</code> or <code>series.colors</code>
+     * arrays are not supported,
+     * and instead this option gives the points individual color class names
+     * on the form <code>highcharts-color-{n}</code>.
+     */
+    public abstract void setColorByPoint(Boolean colorByPoint);
+
+    /**
      * @see #setColorIndex(Number)
      */
     public abstract Number getColorIndex();
@@ -90,6 +118,20 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
+
+    /**
+     * @see #setColorKey(String)
+     */
+    public abstract String getColorKey();
+
+    /**
+     * Determines what data value should be used to calculate point color
+     * if <code>colorAxis</code> is used.
+     * Requires to set <code>min</code> and <code>max</code>
+     * if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>.
+     */
+    public abstract void setColorKey(String colorKey);
 
     /**
      * @see #setColors(Color...)
@@ -377,6 +419,16 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * <code>showInNavigator</code> is <code>true</code> for this series.
      */
     public abstract void setNavigatorOptions(PlotOptionsSeries navigatorOptions);
+
+    /**
+     * @see #setOpacity(Number)
+     */
+    public abstract Number getOpacity();
+
+    /**
+     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     */
+    public abstract void setOpacity(Number opacity);
 
     public abstract String getPointDescriptionFormatter();
 

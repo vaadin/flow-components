@@ -13,17 +13,23 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
     private Boolean allowPointSelect;
     private Boolean animation;
     private String className;
+    private Boolean clip;
     private Color color;
+    private Boolean colorByPoint;
     private Number colorIndex;
     private Cursor cursor;
+    private Boolean crisp;
     private DataLabels dataLabels;
     private String description;
     private Boolean enableMouseTracking;
     private Boolean exposeElementToA11y;
+    private Boolean ignoreHiddenPoint;
     private ArrayList<String> keys;
+    private String legendType;
     private String linecap;
     private String linkedTo;
     private Marker marker;
+    private Number opacity;
     private String _fn_pointDescriptionFormatter;
     private Boolean selected;
     private Boolean shadow;
@@ -98,6 +104,23 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
     }
 
     /**
+     * @see #setClip(Boolean)
+     */
+    public Boolean getClip() {
+        return clip;
+    }
+
+    /**
+     * Disable this option to allow series rendering in the whole plotting area.
+     * Note: Clipping should be always enabled when chart.zoomType is set
+     * <p>
+     * Defaults to <code>true</code>.
+     */
+    public void setClip(Boolean clip) {
+        this.clip = clip;
+    }
+
+    /**
      * @see #setColor(Color)
      */
     public Color getColor() {
@@ -127,6 +150,20 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
     public void setColor(Color color) {
         this.color = color;
     }
+
+    /**
+     * @see #setColorByPoint(Boolean)
+     */
+    public Boolean getColorByPoint() {
+        return colorByPoint;
+    }
+    /**
+     * Defaults to <code>true</code>
+     */
+    public void setColorByPoint(Boolean colorByPoint) {
+        this.colorByPoint = colorByPoint;
+    }
+
 
     /**
      * @see #setColorIndex(Number)
@@ -160,6 +197,27 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      */
     public void setCursor(Cursor cursor) {
         this.cursor = cursor;
+    }
+
+    /**
+     * @see #setCrisp(Boolean)
+     */
+    public Boolean getCrisp() {
+        return crisp;
+    }
+
+    /**
+     * When true, each point or column edge is rounded to its nearest pixel
+     * in order to render sharp on screen.
+     * In some cases, when there are a lot of densely packed columns,
+     * this leads to visible difference in column widths or distance between columns.
+     * In these cases, setting crisp to false may look better,
+     * even though each column is rendered blurry.
+     *<p>
+     * Defaults to <code>true</code>.
+     */
+    public void setCrisp(Boolean crisp) {
+        this.crisp = crisp;
     }
 
     /**
@@ -257,6 +315,20 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
     }
 
     /**
+     * @see #setIgnoreHiddenPoint(Boolean)
+     */
+    public Boolean getIgnoreHiddenPoint() {
+        return ignoreHiddenPoint;
+    }
+
+    /**
+     * Defaults to <code>true</code>
+     */
+    public void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint) {
+        this.ignoreHiddenPoint = ignoreHiddenPoint;
+    }
+
+    /**
      * @see #setKeys(String...)
      */
     public String[] getKeys() {
@@ -300,6 +372,20 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      */
     public void removeKey(String key) {
         this.keys.remove(key);
+    }
+
+    /**
+     * @see #setLegendType(String)
+     */
+    public String getLegendType() {
+        return legendType;
+    }
+
+    /**
+     * Defaults to <code>point</>.
+     */
+    public void setLegendType(String legendType) {
+        this.legendType = legendType;
     }
 
     /**
@@ -364,6 +450,22 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      */
     public void setMarker(Marker marker) {
         this.marker = marker;
+    }
+
+    /**
+     * @see #setOpacity(Number)
+     */
+    public Number getOpacity() {
+        return opacity;
+    }
+
+    /**
+     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * <p>
+     * Defaults to <code>1</code>.
+     */
+    public void setOpacity(Number opacity) {
+        this.opacity = opacity;
     }
 
     public String getPointDescriptionFormatter() {

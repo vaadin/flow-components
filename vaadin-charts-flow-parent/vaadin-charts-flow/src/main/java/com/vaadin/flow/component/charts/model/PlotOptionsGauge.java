@@ -17,11 +17,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * General plotting options for the gauge series type. Requires
@@ -33,8 +33,10 @@ public class PlotOptionsGauge extends GaugeOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
+	private Boolean clip;
 	private Color color;
 	private Number colorIndex;
+	private Boolean crisp;
 	private Cursor cursor;
 	private DataLabels dataLabels;
 	private String description;
@@ -46,6 +48,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 	private ArrayList<String> keys;
 	private String linkedTo;
 	private Color negativeColor;
+	private Number opacity;
 	private Number overshoot;
 	private Pivot pivot;
 	private String _fn_pointDescriptionFormatter;
@@ -117,6 +120,23 @@ public class PlotOptionsGauge extends GaugeOptions {
 	}
 
 	/**
+	 * @see #setClip(Boolean)
+	 */
+	public Boolean getClip() {
+		return clip;
+	}
+
+	/**
+	 * Disable this option to allow series rendering in the whole plotting area.
+	 * Note that clipping should be always enabled when chart.zoomType is set
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setClip(Boolean clip) {
+		this.clip = clip;
+	}
+
+	/**
 	 * @see #setColor(Color)
 	 */
 	public Color getColor() {
@@ -163,6 +183,27 @@ public class PlotOptionsGauge extends GaugeOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
+	}
+
+	/**
+	 * @see #setCrisp(Boolean)
+	 */
+	public Boolean getCrisp() {
+		return crisp;
+	}
+
+	/**
+	 * When true, each point or column edge is rounded to its nearest pixel
+	 * in order to render sharp on screen. In some cases, when there are a lot of
+	 * densely packed columns, this leads to visible difference in column widths
+	 * or distance between columns. In these cases, setting <code>crisp</code>
+	 * to <code>false</code> may look better, even though each column is
+	 * rendered blurry.
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 */
+	public void setCrisp(Boolean crisp) {
+		this.crisp = crisp;
 	}
 
 	/**
@@ -376,6 +417,22 @@ public class PlotOptionsGauge extends GaugeOptions {
 	 */
 	public void removeKey(String key) {
 		this.keys.remove(key);
+	}
+
+	/**
+	 * @see #setOpacity(Number)
+	 */
+	public Number getOpacity() {
+		return opacity;
+	}
+
+	/**
+	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+	 * <p>
+	 * Defaults to <code>1</code>.
+	 */
+	public void setOpacity(Number opacity) {
+		this.opacity = opacity;
 	}
 
 	/**
