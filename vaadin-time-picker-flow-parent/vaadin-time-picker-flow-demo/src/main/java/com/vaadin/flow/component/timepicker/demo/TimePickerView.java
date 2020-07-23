@@ -147,9 +147,14 @@ public class TimePickerView extends DemoView {
 
         timePicker.addValueChangeListener(event -> {
             LocalTime value = event.getValue();
-            localTimeValue.setText(String.format(localTimeValueFormat,
-                    value.getHour(), value.getMinute(), value.getSecond(),
-                    value.get(ChronoField.MILLI_OF_SECOND)));
+            if (event.getValue() == null) {
+                localTimeValue.setText("");
+            } else {
+                localTimeValue.setText(
+                      String.format(localTimeValueFormat, value.getHour(),
+                            value.getMinute(), value.getSecond(),
+                            value.get(ChronoField.MILLI_OF_SECOND)));
+            }
         });
         timePicker.setId("step-setting-picker");
         label.setFor(timePicker);
