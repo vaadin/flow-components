@@ -18,6 +18,8 @@ package com.vaadin.flow.component.dialog.demo;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -75,10 +77,9 @@ public class DialogView extends DemoView {
         // begin-source-example
         // source-example-heading: Confirmation dialog
         Dialog dialog = new Dialog();
-
+        dialog.add(new Text("You have unsaved changes that will be discarded if you navigate away."));
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
-
         Span message = new Span();
 
         Button confirmButton = new Button("Confirm", event -> {
@@ -89,10 +90,16 @@ public class DialogView extends DemoView {
             message.setText("Cancelled...");
             dialog.close();
         });
-        dialog.add(confirmButton, cancelButton);
+        // Cancel action on ESC press
+        Shortcuts.addShortcutListener(dialog, () -> {
+            message.setText("Cancelled...");
+            dialog.close();
+        }, Key.ESCAPE);
+
+        dialog.add(new Div( confirmButton, cancelButton));
         // end-source-example
         button.addClickListener(event -> dialog.open());
-
+        confirmButton.getStyle().set("margin-right", "15px");
         message.setId("confirmation-dialog-span");
         button.setId("confirmation-dialog-button");
         addCard("Confirmation dialog", button, message);
