@@ -27,8 +27,6 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HtmlComponent;
@@ -48,6 +46,7 @@ import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.internal.MessageDigestUtil;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import org.apache.commons.io.IOUtils;
 
 /**
  * View for {@link Upload} demo.
@@ -82,7 +81,17 @@ public class UploadView extends DemoView {
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(), buffer.getInputStream());
+            output.removeAll();
             showOutput(event.getFileName(), component, output);
+        });
+
+        upload.addFileRejectedListener(event -> {
+            Paragraph component = new Paragraph();
+            output.removeAll();
+            showOutput(event.getErrorMessage(), component, output);
+        });
+        upload.getElement().addEventListener("file-remove", event -> {
+            output.removeAll();
         });
 
         add(upload, output);
@@ -112,6 +121,9 @@ public class UploadView extends DemoView {
             Paragraph component = new Paragraph();
             showOutput(event.getErrorMessage(), component, output);
         });
+        upload.getElement().addEventListener("file-remove", event -> {
+            output.removeAll();
+        });
 
         add(upload, output);
         // end-source-example
@@ -137,6 +149,10 @@ public class UploadView extends DemoView {
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
         });
+        upload.addFileRejectedListener(event -> {
+            Paragraph component = new Paragraph();
+            showOutput(event.getErrorMessage(), component, output);
+        });
 
         add(upload, output);
         // end-source-example
@@ -161,6 +177,10 @@ public class UploadView extends DemoView {
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
         });
+        upload.addFileRejectedListener(event -> {
+            Paragraph component = new Paragraph();
+            showOutput(event.getErrorMessage(), component, output);
+        });
 
         add(upload, output);
         // end-source-example
@@ -182,6 +202,9 @@ public class UploadView extends DemoView {
                     event.getFileName(),
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
+        });
+        upload.getElement().addEventListener("file-remove", event -> {
+            output.removeAll();
         });
 
         add(upload, output);
@@ -306,7 +329,7 @@ public class UploadView extends DemoView {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            image.setSizeFull();
             return image;
         }
         Div content = new Div();
