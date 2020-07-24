@@ -646,6 +646,9 @@ public class GridDemo extends DemoView {
 
         addCard("Using Components", "Using Components in Grid",
                 new Label("These objects are used in the examples above"));
+
+        addCard("Filtering", "Person filter object", new Span(
+              "Filter Object used in the `Using text fields for filtering items` example"));
     }
 
     // Grid Basics begin
@@ -1038,11 +1041,15 @@ public class GridDemo extends DemoView {
                 .setHeader("Postal Code");
 
         HeaderRow filterRow = grid.appendHeaderRow();
+
+        PersonFilter filterObject = new PersonFilter();
+        dataProvider.setFilter(person -> filterObject.test(person));
         // First filter
         TextField firstNameField = new TextField();
-        firstNameField.addValueChangeListener(event -> dataProvider.addFilter(
-                person -> StringUtils.containsIgnoreCase(person.getFirstName(),
-                        firstNameField.getValue())));
+        firstNameField.addValueChangeListener(event -> {
+            filterObject.setName(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         firstNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -1052,9 +1059,10 @@ public class GridDemo extends DemoView {
 
         // Second filter
         TextField ageField = new TextField();
-        ageField.addValueChangeListener(event -> dataProvider
-                .addFilter(person -> StringUtils.containsIgnoreCase(
-                        String.valueOf(person.getAge()), ageField.getValue())));
+        ageField.addValueChangeListener(event -> {
+            filterObject.setAge(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         ageField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -1064,9 +1072,10 @@ public class GridDemo extends DemoView {
 
         // Third filter
         TextField cityField = new TextField();
-        cityField.addValueChangeListener(event -> dataProvider
-                .addFilter(person -> StringUtils.containsIgnoreCase(
-                        person.getAddress().getCity(), cityField.getValue())));
+        cityField.addValueChangeListener(event -> {
+            filterObject.setCity(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         cityField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -1076,10 +1085,10 @@ public class GridDemo extends DemoView {
 
         // Fourth filter
         TextField postalCodeField = new TextField();
-        postalCodeField.addValueChangeListener(
-                event -> dataProvider.addFilter(person -> StringUtils
-                        .containsIgnoreCase(person.getAddress().getPostalCode(),
-                                postalCodeField.getValue())));
+        postalCodeField.addValueChangeListener(event -> {
+            filterObject.setPostalCode(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         postalCodeField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -2841,6 +2850,68 @@ public class GridDemo extends DemoView {
         public static BigDecimal getRandomBigDecimal() {
             return new BigDecimal(
                     100 + Math.random() * 100 + Math.random() * 10000);
+        }
+    }
+    // end-source-example
+
+    // begin-source-example
+    // source-example-heading: Person filter object
+
+    public class PersonFilter {
+        String name = "";
+        String city = "";
+        String age = "";
+        String postalCode = "";
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public String getAge() {
+            return age;
+        }
+
+        public void setAge(String age) {
+            this.age = age;
+        }
+
+        public void setPostalCode(String postalCode) {
+            this.postalCode = postalCode;
+        }
+
+        public boolean test(Person person) {
+            if (name.length() > 0 && !StringUtils
+                  .containsIgnoreCase(String.valueOf(person.getFirstName()),
+                        name)) {
+                return false;
+            }
+            if (city.length() > 0 && !StringUtils.containsIgnoreCase(
+                  String.valueOf(person.getAddress().getCity()), city)) {
+                return false;
+            }
+            if (age.length() > 0 && !StringUtils
+                  .containsIgnoreCase(String.valueOf(person.getAge()), age)) {
+                return false;
+            }
+
+            if (postalCode.length() > 0 && !StringUtils.containsIgnoreCase(
+                  String.valueOf(person.getAddress().getPostalCode()),
+                  postalCode)) {
+                return false;
+            }
+            return true;
         }
     }
     // end-source-example
