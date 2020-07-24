@@ -36,6 +36,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.GridSortOrderBuilder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
@@ -606,7 +607,8 @@ public class GridDemo extends DemoView {
         createSingleSelect();
         createMultiSelect();
         createProgrammaticSelect();
-        createGridWithSortableColumns();// Sorting
+        createGridWithDescSortedColumn();// Sorting
+        createGridWithSortableColumns();
         createGridWithTextFieldFilters();// Filtering
         createGridWithFilters();
         createGridWithDataTypeSpecificFilters();
@@ -1017,6 +1019,36 @@ public class GridDemo extends DemoView {
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
                 messageDiv, invertAllSortings, resetAllSortings);
+    }
+
+    private void createGridWithDescSortedColumn() {
+        // begin-source-example
+        // source-example-heading: Grid with a desc sorted column
+        List<Person> personList = getItems();
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(personList);
+
+        Column<Person> nameColumn = grid
+              .addColumn(Person::getFirstName, "First Name")
+              .setHeader("First Name");
+        Column<Person> surnameColumn = grid
+              .addColumn(Person::getLastName, "Last Name")
+              .setHeader("Last Name");
+        grid.addColumn(Person::getAge, "age").setHeader("Age");
+
+        List<GridSortOrder<Person>> sortByName = new GridSortOrderBuilder<Person>()
+              .thenDesc(nameColumn).build();
+        grid.sort(sortByName);
+
+        Button sortByLastName = new Button("Sort desc by last name", e -> {
+            List<GridSortOrder<Person>> sortOrders = new GridSortOrderBuilder<Person>()
+                  .thenDesc(surnameColumn).build();
+            grid.sort(sortOrders);
+        });
+        add(grid, sortByLastName);
+
+        // end-source-example
+        addCard("Sorting", "Grid with a desc sorted column", grid, sortByLastName);
     }
 
     // Filtering
