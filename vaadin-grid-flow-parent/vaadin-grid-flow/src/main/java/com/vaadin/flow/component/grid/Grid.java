@@ -3880,11 +3880,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Scrolls to the end of the last data row.
+     * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getElement().executeJs("$0.scrollToIndex($0._effectiveSize)",
-                this.getElement());
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> getElement().executeJs("this.scrollToIndex(this._effectiveSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
