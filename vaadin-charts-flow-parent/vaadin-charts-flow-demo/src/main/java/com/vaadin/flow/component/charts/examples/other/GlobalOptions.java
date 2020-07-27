@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.charts.examples.other;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.ChartOptions;
@@ -14,6 +17,8 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
+import com.vaadin.flow.component.charts.themes.LumoLightTheme;
 import com.vaadin.flow.component.html.NativeButton;
 
 @SkipFromDemo
@@ -21,6 +26,7 @@ public class GlobalOptions extends AbstractChartExample {
 
     @Override
     public void initDemo() {
+        List<Chart> charts = new ArrayList();
         NativeButton changeTitleButton = new NativeButton();
         changeTitleButton.setId("add_chart");
         changeTitleButton.setText("Add chart");
@@ -51,6 +57,7 @@ public class GlobalOptions extends AbstractChartExample {
             y.setMin(0);
             y.setTitle("Rainfall (mm)");
             configuration.addyAxis(y);
+            charts.add(chart);
             add(chart);
         });
         add(changeTitleButton);
@@ -73,6 +80,28 @@ public class GlobalOptions extends AbstractChartExample {
             ChartOptions.get().setLang(lang);
         });
         add(changeLangButton);
+
+        NativeButton changeThemeLightButton = new NativeButton();
+        changeThemeLightButton.setId("change_theme_light");
+        changeThemeLightButton.setText("Change theme light");
+        changeThemeLightButton.addClickListener(e -> {
+            ChartOptions.get().setTheme(new LumoLightTheme());
+            for (Chart chart : charts) {
+                chart.drawChart(true);
+            }
+        });
+        add(changeThemeLightButton);
+
+        NativeButton changeThemeDarkButton = new NativeButton();
+        changeThemeDarkButton.setId("change_theme_dark");
+        changeThemeDarkButton.setText("Change theme Dark");
+        changeThemeDarkButton.addClickListener(e -> {
+            ChartOptions.get().setTheme(new LumoDarkTheme());
+            for (Chart chart : charts) {
+                chart.drawChart(true);
+            }
+        });
+        add(changeThemeDarkButton);
     }
 
 }

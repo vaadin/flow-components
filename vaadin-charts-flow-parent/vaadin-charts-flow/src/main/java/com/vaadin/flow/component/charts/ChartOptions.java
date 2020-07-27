@@ -2,10 +2,14 @@ package com.vaadin.flow.component.charts;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Lang;
+import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 import elemental.json.JsonObject;
@@ -20,6 +24,8 @@ import elemental.json.impl.JreJsonFactory;
  */
 public class ChartOptions extends AbstractConfigurationObject {
 
+    @JsonUnwrapped
+    private Theme theme;
     private Lang lang;
     private transient JreJsonFactory jsonFactory;
 
@@ -65,6 +71,29 @@ public class ChartOptions extends AbstractConfigurationObject {
      */
     public Lang getLang() {
         return lang;
+    }
+
+    /**
+     * Returns the {@link Theme} in use or {@code null} if no theme has been
+     * set.
+     *
+     * @return the {@link Theme} in use or {@code null}.
+     */
+    public Theme getTheme() {
+        return theme;
+    }
+
+    /**
+     * Sets the theme to use.
+     * <p/>
+     * Note that if the view is already drawn, all existing {@link Chart}s will
+     * be redrawn.
+     *
+     * @param theme
+     */
+    public void setTheme(Theme theme) {
+        this.theme = theme;
+        updateOptions();
     }
 
     /**

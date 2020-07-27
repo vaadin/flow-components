@@ -1,5 +1,6 @@
 bin
 target
+integration-tests
 
 # Eclipse
 .project
@@ -18,4 +19,5 @@ webpack.*
 node_modules
 .driver
 package*json
-pnpm*json
+pnpm*
+error-screenshots

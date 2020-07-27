@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.ironlist.paging.PagelessDataCommunicator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
@@ -133,7 +134,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private Registration dataGeneratorRegistration;
     private transient T placeholderItem;
 
-    private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
+    private final DataCommunicator<T> dataCommunicator = new PagelessDataCommunicator<>(
             dataGenerator, arrayUpdater,
             data -> getElement().callJsFunction("$connector.updateData", data),
             getElement().getNode());
@@ -156,8 +157,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached IronList"))
-                .getPage().executeJs(
-                        "window.Vaadin.Flow.ironListConnector.initLazy($0)",
+                .getPage()
+                .executeJs("window.Vaadin.Flow.ironListConnector.initLazy($0)",
                         getElement());
     }
 
@@ -368,7 +369,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
 
         /*
          * Rendered component's enabled state needs to be updated via
-         * rerendering
+         * rendering
          */
         setRenderer(renderer);
     }

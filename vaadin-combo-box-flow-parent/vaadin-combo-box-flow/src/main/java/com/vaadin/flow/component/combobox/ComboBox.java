@@ -715,6 +715,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     "Page size should be greater than zero.");
         }
         super.setPageSize(pageSize);
+        if (dataCommunicator != null) {
+            dataCommunicator.setPageSize(pageSize);
+        }
         reset();
     }
 
