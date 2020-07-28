@@ -178,7 +178,7 @@ const rootRoutes = {};
 // compute the new value for a @Route
 function computeRoute(wcname, clname, prefix, route, suffix) {
   if (!route) {
-    rootRoutes[wcname] = rootRoutes[wcname] || `${clname.toLowerCase()}/`
+    rootRoutes[wcname] = rootRoutes[wcname] || '';
   }
   route = new RegExp(wcname).test(route) || /^\/?iron-list$/.test(route)? route
     : `${wcname}/${route ? route : rootRoutes[wcname]}`;
@@ -200,7 +200,11 @@ function replaceRoutes(wcname, clname, content) {
 
 // Create an index.html. Useful for monkey patching
 async function createFrontendIndex() {
-  copyFileSync(`${templateDir}/index.html`, `${itFolder}/frontend/index.html`);
+  const targetFolder = `${itFolder}/frontend`;
+  if (!fs.existsSync(targetFolder)) {
+    fs.mkdirSync(targetFolder);
+  }
+  copyFileSync(`${templateDir}/index.html`, `${targetFolder}/index.html`);
 }
 
 // Copy components sources from master to the merged integration-tests module
@@ -250,6 +254,10 @@ async function copySources() {
         // to adjust the route used in tests
         content = content.replace(/(return\ +"?)8080("?)/, (...args) => {
           return `${args[1]}9998${args[2]}`;
+        });
+        // App layout: IT tests search for links based on href
+        content = content.replace(/\.attribute\("href", *"([^"]*)"\)/g, (...args) => {
+          return `.attribute("href", "${wc}/${args[1]}")`;
         });
         // pro components: temporary disable tests in FF and Edge in pro components
         content = content.replace(/\( *BrowserUtil.(safari|firefox|edge)\(\) *,/g, "(");
