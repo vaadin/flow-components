@@ -259,6 +259,13 @@ async function copySources() {
         content = content.replace(/\.attribute\("href", *"([^"]*)"\)/g, (...args) => {
           return `.attribute("href", "${wc}/${args[1]}")`;
         });
+        // Combo box - PreSelectedValueIT.selectedValueIsNotResetAfterClientResponse
+        // The test fails because when running in the project there is an iron-icon-set-svg element
+        // which contains an element with id "info", which conflicts with the element
+        // the test is trying to find.
+        if (/PreSelectedValueIT\.java$/.test(source)) {
+          content = content.replace(/findElement\(By.id\("info"\)\)/, '$("div").id("info")')
+        }
         // pro components: temporary disable tests in FF and Edge in pro components
         content = content.replace(/\( *BrowserUtil.(safari|firefox|edge)\(\) *,/g, "(");
         content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge)\(\)/g, "");
@@ -276,7 +283,7 @@ async function copySources() {
 
         // vaadin-chart
         content = content.replace('.replace("com.vaadin.flow.component.charts.examples.", "")',
-         '.replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/mainview/")');
+         '.replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/")');
       }
       return [target, content];
     });
