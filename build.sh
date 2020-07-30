@@ -69,8 +69,3 @@ tcLog 'Running merged ITs'
 cmd="mvn clean verify -Drun-it -Drelease -Dtestbench.testsInParalel=1 $args -pl integration-tests"
 echo $cmd
 $cmd
-
-### We do not want to make build fail for now
-exit 0
-
-
