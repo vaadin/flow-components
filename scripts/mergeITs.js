@@ -190,12 +190,15 @@ function replaceRoutes(wcname, clname, content) {
     return `@Route(value = "${/^Main(View)?$/.test(clname) ? '': clname.replace(/View$/, '').toLowerCase()}")\n`
   });
   const routeRegex = /(\@Route *?)(?:(\( *)(?:(")(.*?)(")|(.*?value *= *")(.*?)(".*?))( *\))) *\n/;
-  return content.replace(routeRegex, (...args) => {
+  content = content.replace(routeRegex, (...args) => {
     let [prefix, route, suffix] = !args[2] && !args[6] ? [`${args[1]}("`, '', '")\n'] :
       args[6] ? [`${args[1]}${args[2]}${args[6]}`, args[7], `${args[8]}${args[9]}\n`] :
       [`${args[1]}${args[2]}${args[3]}`, args[4], `${args[5]}${args[9]}\n`];
     return computeRoute(wcname, clname, prefix, route, suffix);
   });
+  // Replace @Route values which are constants.
+  content = content.replace(/(\@Route\()(\w+\.\w+\))/, `$1"${wcname}/" + $2`);
+  return content;
 }
 
 // Create an index.html. Useful for monkey patching
@@ -247,9 +250,18 @@ async function copySources() {
         });
 
         // pro components do not use TestPath but the following pattern
-        content = content.replace(/(getDriver\(\).get\(getBaseURL\(\) *)(\+ *".+"|)/g, (...args) => {
-          return `${args[1]} + "/${wc}" ${args[2] ? args[2] : '+ "/' + rootRoutes[wc] + '"'}`;
+        content = content.replace(/(\s+)(getDriver\(\).get\(getBaseURL\(\) *)(\+ *".+"|)/g, (...args) => {
+          let lastPart = " ";
+          if(args[3]) lastPart += args[3];
+          else if(rootRoutes[wc]) lastPart += '+ "/' + rootRoutes[wc] + '"';
+          const line1 = `${args[1]}String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/${wc}")${lastPart};`
+          return `${line1}${args[1]}getDriver().get(url`;
         });
+        // Login: Special case for the previous pattern.
+        if (/OverlayIT\.java$/.test(source)) {
+          content = content.replace(/\/overlayselfattached/,`/${wc}$&`)
+        }
+
         // pro components use 8080 and do not use TestPath, this is a hack
         // to adjust the route used in tests
         content = content.replace(/(return\ +"?)8080("?)/, (...args) => {
@@ -263,12 +275,22 @@ async function copySources() {
         // The test fails because when running in the project there is an iron-icon-set-svg element
         // which contains an element with id "info", which conflicts with the element
         // the test is trying to find.
-        if (/PreSelectedValueIT\.java$/.test(source)) {
-          content = content.replace(/findElement\(By.id\("info"\)\)/, '$("div").id("info")')
+        if (/IT\.java$/.test(source)) {
+          content = content.replace(/findElement\(By.id\("info"\)\)/g, '$("div").id("info")')
+          content = content.replace(/findElement\(By.id\("close"\)\)/g, '$("button").id("close")')
+          content = content.replace(/findElement\(By.id\("filter"\)\)/g, '$("vaadin-text-field").id("filter")')
+          content = content.replace(/findElement\(By.id\("refresh"\)\)/g, '$("button").id("refresh")')
+          content = content.replace(/findElement\(By.id\("select"\)\)/g, '$("button").id("select")')
+          content = content.replace(/findElement\(By.id\("collapse"\)\)/g, '$("button").id("collapse")')
+          content = content.replace(/findElement\(By.id\("expand"\)\)/g, '$("button").id("expand")')
         }
         // Grid. Same as above for an element with id "grid"
         if (/DetailsGridIT\.java$/.test(source)) {
           content = content.replace(/findElements\(By.id\("grid"\)\).size/, '$("vaadin-grid").all().size')
+        }
+        // Combobox. Same as above for a vaadin-combo-box with id "list"
+        if (/StringItemsWithTextRendererIT\.java$/.test(source)) {
+          content = content.replace(/findElement\(By.id\("list"\)\)/g, '$("vaadin-combo-box").id("list")')
         }
         // Dialog: Workaround for https://github.com/vaadin/vaadin-confirm-dialog-flow/issues/136
         // Since this project contains a dependency to vaadin-confirm-dialog, the height is different
@@ -284,6 +306,7 @@ async function copySources() {
           });
         }
         
+
         // pro components: temporary disable tests in FF and Edge in pro components
         content = content.replace(/\( *BrowserUtil.(safari|firefox|edge)\(\) *,/g, "(");
         content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge)\(\)/g, "");
