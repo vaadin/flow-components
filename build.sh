@@ -18,7 +18,7 @@ then
 fi
 
 ## TODO: in local 3 is ok, but in TC something fails
-processors=1
+processors=3
 
 # open a block in the TC tree output
 tcLog() {
@@ -53,7 +53,7 @@ $cmd
 args="-B -Dvaadin.pnpm.enable=true"
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.skipAfterFailureCount=1"
+args="$args -Dfailsafe.forkCount=$processors"
 
 ### Run IT's in original modules
 # if [ -n "$modules" ]
