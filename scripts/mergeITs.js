@@ -307,7 +307,9 @@ async function copySources() {
             return `${args[1]}@org.junit.Ignore${args[1]}${args[2]}`
           });
         }
-        
+        if (/TreeGridHugeTreeIT\.java$/.test(source)) {
+          content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);
+        }
 
         // pro components: temporary disable tests in FF and Edge in pro components
         content = content.replace(/\( *BrowserUtil.(safari|firefox|edge)\(\) *,/g, "(");
