@@ -18,7 +18,7 @@ then
 fi
 
 ## TODO: in local 3 is ok, but in TC something fails
-processors=3
+processors=1
 
 # open a block in the TC tree output
 tcLog() {
