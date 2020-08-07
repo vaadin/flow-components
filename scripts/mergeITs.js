@@ -248,6 +248,8 @@ async function copySources() {
         content = content.replace(/(getTestPath\s*\(\)[\S\s]*return *\(? *"\/+?)(.*?)(")/, (...args) => {
           return computeRoute(wc, clname, args[1], args[2], args[3]);
         });
+        // In some cases, @TestPath contains a constant
+        content = content.replace(/(\@TestPath\()(\w+\.\w+\))/, `$1"${wc}/" + $2`);
 
         // pro components do not use TestPath but the following pattern
         content = content.replace(/(\s+)(getDriver\(\).get\(getBaseURL\(\) *)(\+ *".+"|)/g, (...args) => {
@@ -339,4 +341,3 @@ async function main() {
 }
 
 main();
-
