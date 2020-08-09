@@ -267,12 +267,6 @@
                             <configuration>
                                 <daemon>true</daemon>
                                 <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <systemProperties>
-                                    <systemProperty>
-                                        <name>vaadin.devmode.liveReload.enabled</name>
-                                        <value>false</value>
-                                    </systemProperty>
-                                </systemProperties>
                             </configuration>
                         </execution>
                         <execution>
