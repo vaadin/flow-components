@@ -66,6 +66,6 @@ args="$args -Dfailsafe.forkCount=$processors"
 
 ### Run IT's in merged module
 tcLog 'Running merged ITs'
-cmd="mvn clean verify -Drun-it -Drelease -Dtestbench.testsInParalel=1 $args -pl integration-tests"
+cmd="mvn clean verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
 echo $cmd
 $cmd
