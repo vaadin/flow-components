@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -x
 
 if [ -n "$1" ]
 then
@@ -51,6 +51,7 @@ echo $cmd
 $cmd
 
 args="-B -Dvaadin.pnpm.enable=true"
+[ -n "$TBHUB" ] && TBHUB=localhost
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 args="$args -Dfailsafe.forkCount=$processors"
@@ -65,6 +66,11 @@ args="$args -Dfailsafe.forkCount=$processors"
 # fi
 
 ### Run IT's in merged module
+if [ "$TBHUB" = "localhost" ]
+then
+    trap "echo Terminating docker; docker stop standalone-chrome" EXIT
+    docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
+fi
 tcLog 'Running merged ITs'
 cmd="mvn clean verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
 echo $cmd
