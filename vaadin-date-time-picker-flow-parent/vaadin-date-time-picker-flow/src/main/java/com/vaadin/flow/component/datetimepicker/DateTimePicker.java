@@ -247,7 +247,8 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         // is fixed: https://github.com/vaadin/vaadin-time-picker-flow/issues/77
         getElement().executeJs("return this.value;")
                 .then(jsonValue -> super.setValue(
-                        LocalDateTime.parse(jsonValue.asString())));
+                        jsonValue.asString().isEmpty() ? null :
+                                LocalDateTime.parse(jsonValue.asString())));
     }
 
     @Override
