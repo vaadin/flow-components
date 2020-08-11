@@ -18,18 +18,18 @@ then
 fi
 
 ## TODO: in local 3 is ok, but in TC something fails
-processors=1
+processors=3
 
 # open a block in the TC tree output
 tcLog() {
-  [ -n "$inblock" ] && echo "##teamcity[blockClosed name='$inblock']"
+  [ -n "$inblock" ] && echo "#""#teamcity[blockClosed name='$inblock']"
   inblock=$1
-  echo "##teamcity[blockOpened name='$inblock']"
+  echo "#""#teamcity[blockOpened name='$inblock']"
 }
 # log in TC
 tcStatus() {
   [ "$1" = "0" ] && status=SUCCESS || status=FAILURE
-  echo "##teamcity[buildStatus status='$status' text='$1']"
+  echo "#""#teamcity[buildStatus status='$status' text='$1']"
 }
 
 tcLog 'Show info'
