@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 
 if [ -n "$1" ]
 then
@@ -64,11 +64,13 @@ args="$args -Dfailsafe.forkCount=$processors"
 #   echo $cmd
 #   $cmd
 # fi
-
+set -x
 ### Run IT's in merged module
 if [ "$TBHUB" = "localhost" ]
 then
     trap "echo Terminating docker; docker stop standalone-chrome" EXIT
+    docker pull selenium/standalone-chrome
+    docker image prune -f
     docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
 fi
 tcLog 'Running merged ITs'
