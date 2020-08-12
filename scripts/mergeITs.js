@@ -311,6 +311,7 @@ async function copySources() {
         content = ignore_test_method(/GridDetailsRowIT\.java$/.test(source), content, 'gridUpdateItemUpdateDetails');
         content = ignore_test_method(/BasicIT\.java$/.test(source), content, 'customComboBox_circularReferencesInData_isEdited');
         content = ignore_test_method(/BasicIT\.java$/.test(source), content, 'customComboBoxIsUsedForEditColumn');
+        content = ignore_test_method(/BasicIT\.java$/.test(source), content, 'checkboxEditorIsUsedForCheckboxColumn');
         content = ignore_test_method(/DialogTestPageIT\.java$/.test(source),content,  'verifyDialogFullSize');
 
         if (/TreeGridHugeTreeIT\.java$/.test(source)) {
