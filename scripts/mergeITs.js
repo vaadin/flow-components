@@ -294,19 +294,25 @@ async function copySources() {
         if (/StringItemsWithTextRendererIT\.java$/.test(source)) {
           content = content.replace(/findElement\(By.id\("list"\)\)/g, '$("vaadin-combo-box").id("list")')
         }
+        function ignore_test_method(shouldApplyChange, content, methodName) {
+          if(shouldApplyChange) {
+            const regex = new RegExp(`(\\s+)(public void ${methodName})`,'g');
+            content = content.replace(regex,`$1@org.junit.Ignore$1$2`);
+          }
+          return content;
+        }
+
         // Dialog: Workaround for https://github.com/vaadin/vaadin-confirm-dialog-flow/issues/136
         // Since this project contains a dependency to vaadin-confirm-dialog, the height is different
         // and the tests fail.
-        if (/DialogIT\.java$/.test(source)) {
-          content = content.replace(/(\s+)(public void openAndCloseBasicDialog_labelRendered)/, (...args) => {
-            return `${args[1]}@org.junit.Ignore${args[1]}${args[2]}`
-          });
-        }
-        if (/DialogTestPageIT\.java$/.test(source)) {
-          content = content.replace(/(\s+)(public void verifyDialogFullSize)/, (...args) => {
-            return `${args[1]}@org.junit.Ignore${args[1]}${args[2]}`
-          });
-        }
+        content = ignore_test_method(/DialogIT\.java$/.test(source), content, 'openAndCloseBasicDialog_labelRendered');
+        content = ignore_test_method(/ServerSideEventsIT\.java$/.test(source), content, 'chartClick_occured_eventIsFired');
+        content = ignore_test_method(/ValueChangeModeIT\.java$/.test(source), content, 'testValueChangeModesForEmailField');
+        content = ignore_test_method(/GridDetailsRowIT\.java$/.test(source), content, 'gridUpdateItemUpdateDetails');
+        content = ignore_test_method(/BasicIT\.java$/.test(source), content, 'customComboBox_circularReferencesInData_isEdited');
+        content = ignore_test_method(/BasicIT\.java$/.test(source), content, 'customComboBoxIsUsedForEditColumn');
+        content = ignore_test_method(/DialogTestPageIT\.java$/.test(source),content,  'verifyDialogFullSize');
+
         if (/TreeGridHugeTreeIT\.java$/.test(source)) {
           content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);
         }
