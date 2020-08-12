@@ -77,6 +77,11 @@ public class AvatarGroupTest {
     }
 
     @Test
+    public void getEmptyItems_doesNotThrow() {
+        avatarGroup.getItems();
+    }
+
+    @Test
     public void createWithItems_getCreatedItems() {
         items.add(avatarGroupItem);
         items.add(avatarGroupItem2);

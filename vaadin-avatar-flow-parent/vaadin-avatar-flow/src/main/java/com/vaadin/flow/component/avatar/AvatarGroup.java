@@ -185,7 +185,7 @@ public class AvatarGroup extends Component
         }
     }
 
-    private List<AvatarGroupItem> items;
+    private List<AvatarGroupItem> items = Collections.emptyList();
 
     /**
      * Creates an empty avatar group component.
