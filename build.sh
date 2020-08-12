@@ -18,19 +18,21 @@ then
 fi
 
 ## TODO: in local 3 is ok, but in TC something fails
-processors=3
+processors=8
 
 # open a block in the TC tree output
-tcLog() {
-  [ -n "$inblock" ] && echo "#""#teamcity[blockClosed name='$inblock']"
+tcLog() (
+  { set +x; } 2> /dev/null
+  [ -n "$inblock" ] && echo "##teamcity[blockClosed name='$inblock']"
   inblock=$1
-  echo "#""#teamcity[blockOpened name='$inblock']"
-}
+  echo "##teamcity[blockOpened name='$inblock']"
+)
 # log in TC
-tcStatus() {
+tcStatus() (
+  { set +x; } 2> /dev/null
   [ "$1" = "0" ] && status=SUCCESS || status=FAILURE
-  echo "#""#teamcity[buildStatus status='$status' text='$1']"
-}
+  echo "##teamcity[buildStatus status='$status' text='$1']"
+)
 
 tcLog 'Show info'
 java -version
