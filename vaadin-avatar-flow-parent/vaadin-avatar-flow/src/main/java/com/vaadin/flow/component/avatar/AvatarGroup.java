@@ -23,16 +23,26 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.NodeOwner;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,6 +67,13 @@ public class AvatarGroup extends Component
         private String abbr;
         private String img;
         private Integer colorIndex;
+
+        private Component host;
+        private StreamRegistration resourceRegistration;
+        private Registration pendingRegistration;
+        private Command pendingHandle;
+
+        private AbstractStreamResource imageResource;
 
         /**
          * Creates a new empty avatar group item.
@@ -149,16 +166,142 @@ public class AvatarGroup extends Component
         }
 
         /**
+         * Gets the image that was set for the avatar.
+         *
+         * @return the image resource value or {@code null} if the resource has
+         * not been set
+         */
+        public AbstractStreamResource getImageResource() {
+            return imageResource;
+        }
+
+        /**
          * Sets the image url for the avatar.
          * <p>
          * The image will be displayed in the avatar even if abbreviation or
          * name is set.
+         * <p>
+         * Setting the image with this method resets the image resource provided
+         * with {@link AvatarGroupItem#setImageResource(AbstractStreamResource)}
          *
+         * @see AvatarGroupItem#setImageResource(AbstractStreamResource)
          * @param url
          *            the image url
          */
         public void setImage(String url) {
+            unsetResource();
+
             this.img = url;
+        }
+
+        /**
+         * Sets the image for the avatar.
+         * <p>
+         * Setting the image as a resource with this method resets the image URL
+         * that was set with {@link AvatarGroupItem#setImage(String)}
+         *
+         * @see AvatarGroupItem#setImage(String)
+         * @param resource
+         *            the resource value or {@code null} to remove the resource
+         */
+        public void setImageResource(AbstractStreamResource resource) {
+            imageResource = resource;
+
+            if (resource == null) {
+                unsetResource();
+                return;
+            }
+
+            // The following is the copy of functionality from the ElementAttributeMap
+            doSetResource(resource);
+            if (getHost() != null && getHost().getElement().getNode().isAttached()) {
+                registerResource(resource);
+            } else {
+                deferRegistration(resource);
+            }
+        }
+
+        private void doSetResource(AbstractStreamResource resource) {
+            final URI targetUri;
+            if (VaadinSession.getCurrent() != null) {
+                final StreamResourceRegistry resourceRegistry = VaadinSession
+                        .getCurrent().getResourceRegistry();
+                targetUri = resourceRegistry.getTargetURI(resource);
+            } else {
+                targetUri = StreamResourceRegistry.getURI(resource);
+            }
+            this.img = targetUri.toASCIIString();
+        }
+
+        private void unregisterResource() {
+            StreamRegistration registration = resourceRegistration;
+            Registration handle = pendingRegistration;
+            if (handle != null) {
+                handle.remove();
+            }
+            if (registration != null) {
+                registration.unregister();
+            }
+            this.img = null;
+        }
+
+        private void deferRegistration(AbstractStreamResource resource) {
+            if (pendingRegistration != null) {
+                return;
+            }
+
+            pendingHandle = () -> {
+                doSetResource(resource);
+                registerResource(resource);
+            };
+
+            if (getHost() != null) {
+                attachPendingRegistration(pendingHandle);
+                pendingHandle = null;
+            }
+        }
+
+        private void attachPendingRegistration(Command pendingHandle) {
+            Registration handle = getHost().getElement().getNode()
+                    // Do not convert to lambda
+                    .addAttachListener(pendingHandle);
+            pendingRegistration = handle;
+        }
+
+        private void registerResource(AbstractStreamResource resource) {
+            assert resourceRegistration == null;
+            StreamRegistration registration = getSession().getResourceRegistry()
+                    .registerResource(resource);
+            resourceRegistration = registration;
+            Registration handle = pendingRegistration;
+            if (handle != null) {
+                handle.remove();
+            }
+            pendingRegistration = getHost().getElement().getNode().addDetachListener(
+                    // Do not convert to lambda
+                    new Command() {
+                        @Override
+                        public void execute() {
+                            AvatarGroupItem.this.unsetResource();
+                        }
+                    });
+        }
+
+        private void unsetResource() {
+            imageResource = null;
+            StreamRegistration registration = resourceRegistration;
+            Optional<AbstractStreamResource> resource = Optional.empty();
+            if (registration != null) {
+                resource = Optional.ofNullable(registration.getResource());
+            }
+            unregisterResource();
+            resource.ifPresent(this::deferRegistration);
+        }
+
+        private VaadinSession getSession() {
+            NodeOwner owner = getHost().getElement().getNode().getOwner();
+            assert owner instanceof StateTree;
+            return ((StateTree) owner).getUI().getSession();
         }
 
         /**
@@ -182,6 +325,18 @@ public class AvatarGroup extends Component
          */
         public void setColorIndex(Integer colorIndex) {
             this.colorIndex = colorIndex;
+        }
+
+        private Component getHost() {
+            return host;
+        }
+
+        private void setHost(Component host) {
+            this.host = host;
+            if (pendingHandle != null) {
+                attachPendingRegistration(pendingHandle);
+                pendingHandle = null;
+            }
         }
     }
 
@@ -216,7 +371,10 @@ public class AvatarGroup extends Component
      *            the items to set
      */
     public void setItems(Collection<AvatarGroupItem> items) {
+        this.items.forEach(item -> item.setHost(null));
+
         this.items = new ArrayList<>(items);
+        items.stream().forEach(item -> item.setHost(this));
 
         getElement().setPropertyJson("items", createItemsJsonArray(items));
     }

@@ -20,9 +20,13 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
+
 
 /**
  * View for {@link AvatarGroup} demo.
@@ -50,6 +54,12 @@ public class AvatarGroupView extends DemoView {
         AvatarGroupItem avatarWithAbbr = new AvatarGroupItem();
         avatarWithAbbr.setAbbreviation("SK");
         items.add(avatarWithAbbr);
+
+        AvatarGroupItem avatarWithImageResource = new AvatarGroupItem();
+        StreamResource avatarResource = new StreamResource("user+.png",
+            () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+        avatarWithImageResource.setImageResource(avatarResource);
+        items.add(avatarWithImageResource);
 
         items.add(new AvatarGroupItem("Jens Jansson"));
         items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG"));

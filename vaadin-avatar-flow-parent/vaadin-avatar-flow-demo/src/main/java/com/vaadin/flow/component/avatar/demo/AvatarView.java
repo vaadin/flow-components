@@ -16,14 +16,19 @@
 
 package com.vaadin.flow.component.avatar.demo;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 
-import com.vaadin.flow.component.checkbox.CheckboxGroup;
-
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 
 /**
@@ -38,6 +43,9 @@ public class AvatarView extends DemoView {
     public void initView() {
         createBasicAvatar();
         createAvatarWithCombinedProperties();
+
+        addCard("Resource helper method",
+                new Text("This method is used in the examples above"));
     }
 
     private void createBasicAvatar() {
@@ -51,12 +59,17 @@ public class AvatarView extends DemoView {
         Avatar avatarWithName = new Avatar();
         avatarWithName.setName("Yuriy Yevstihnyeyev");
 
-        Avatar avatarWithImg = new Avatar();
-        avatarWithImg.setImage("https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG");
+        Avatar avatarWithImgUrl = new Avatar();
+        avatarWithImgUrl.setImage("https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG");
 
-        add(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImg);
+        Avatar avatarWithImageResource = new Avatar();
+        StreamResource avatarResource = new StreamResource("user+.png",
+                () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+        avatarWithImageResource.setImageResource(avatarResource);
+
+        add(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);
         // end-source-example
-        Div container = new Div(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImg);
+        Div container = new Div(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);
 
         addCard("Basic usage", container);
     }
@@ -100,4 +113,17 @@ public class AvatarView extends DemoView {
 
         addCard("Combined properties", avatar, checkboxGroup);
     }
+
+    // begin-source-example
+    // source-example-heading: Resource helper method
+
+    public static InputStream getFileStream(String filePath) {
+        try {
+            return new FileInputStream(filePath);
+        } catch (IOException error) {
+            throw new UncheckedIOException(error);
+        }
+    }
+
+    // end-source-example
 }

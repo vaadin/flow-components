@@ -19,6 +19,9 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
+
+import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
 
 @Route("avatar-test")
 public class AvatarPage extends Div {
@@ -53,6 +56,17 @@ public class AvatarPage extends Div {
         });
         toggleName.setId("toggle-name");
 
+        NativeButton toggleImgResource = new NativeButton("Toggle image resource", e -> {
+            if (avatar.getImageResource() == null) {
+                StreamResource avatarResource = new StreamResource("user+.png",
+                    () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                avatar.setImageResource(avatarResource);
+            } else {
+                avatar.setImageResource(null);
+            }
+        });
+        toggleImgResource.setId("toggle-res");
+
         Div dataImg = new Div();
         dataImg.setId("data-block-img");
 
@@ -62,13 +76,17 @@ public class AvatarPage extends Div {
         Div dataName = new Div();
         dataName.setId("data-block-name");
 
+        Div dataResource = new Div();
+        dataResource.setId("data-block-resource");
+
         NativeButton getPropertyValues = new NativeButton("Get properties", e -> {
-            dataImg.setText(avatar.getElement().getProperty("img"));
+            dataImg.setText(avatar.getElement().getAttribute("img"));
             dataAbbr.setText(avatar.getElement().getProperty("abbr"));
             dataName.setText(avatar.getElement().getProperty("name"));
+            dataResource.setText(avatar.getElement().getAttribute("img"));
         });
         getPropertyValues.setId("get-props");
 
-        add(avatar, toggleImage, toggleAbbr, toggleName, dataImg, dataAbbr, dataName, getPropertyValues);
+        add(avatar, toggleImage, toggleAbbr, toggleName, toggleImgResource, dataImg, dataAbbr, dataName, dataResource, getPropertyValues);
     }
 }

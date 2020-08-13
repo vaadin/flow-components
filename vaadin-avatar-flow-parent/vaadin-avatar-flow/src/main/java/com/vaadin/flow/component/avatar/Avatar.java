@@ -16,13 +16,14 @@
 
 package com.vaadin.flow.component.avatar;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.server.AbstractStreamResource;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,6 +38,8 @@ import java.util.stream.Stream;
 @NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha5")
 public class Avatar extends Component
     implements HasStyle, HasSize, HasTheme {
+
+    private AbstractStreamResource imageResource;
 
     /**
      * Creates a new empty avatar.
@@ -97,7 +100,6 @@ public class Avatar extends Component
         getElement().setProperty("name", name);
     }
 
-
     /**
      * Gets the abbreviation that was set for the avatar.
      *
@@ -126,7 +128,17 @@ public class Avatar extends Component
      * @return the image url
      */
     public String getImage() {
-        return getElement().getProperty("img");
+        return getElement().getAttribute("img");
+    }
+
+    /**
+     * Gets the image that was set for the avatar.
+     *
+     * @return the image resource value or {@code null} if the resource has not
+     * been set
+     */
+    public AbstractStreamResource getImageResource() {
+        return imageResource;
     }
 
     /**
@@ -134,12 +146,42 @@ public class Avatar extends Component
      * <p>
      * The image will be displayed in the avatar even if abbreviation or
      * name is set.
+     * <p>
+     * Setting the image with this method resets the image resource provided
+     * with {@link Avatar#setImageResource(AbstractStreamResource)}
      *
+     * @see Avatar#setImageResource(AbstractStreamResource)
      * @param url
      *            the image url
      */
     public void setImage(String url) {
-        getElement().setProperty("img", url);
+        imageResource = null;
+
+        if (url == null) {
+            getElement().removeAttribute("img");
+        } else {
+            getElement().setAttribute("img", url);
+        }
+    }
+
+    /**
+     * Sets the image for the avatar.
+     * <p>
+     * Setting the image as a resource with this method resets the image URL
+     * that was set with {@link Avatar#setImage(String)}
+     *
+     * @see Avatar#setImage(String)
+     * @param resource
+     *            the resource value or {@code null} to remove the resource
+     */
+    public void setImageResource(AbstractStreamResource resource) {
+        imageResource = resource;
+        if (resource == null) {
+            getElement().removeAttribute("img");
+            return;
+        }
+
+        getElement().setAttribute("img", resource);
     }
 
     /**
