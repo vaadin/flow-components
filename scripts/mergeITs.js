@@ -220,6 +220,11 @@ async function copySources() {
   ['target', 'node_modules', 'src', 'frontend']
     .forEach(f => deleteFolderRecursive(`${itFolder}/${f}`));
 
+  // Copy java files in templateDir
+  const testsTarget = `${itFolder}/src/test/java/com/vaadin`;
+  fs.mkdirSync(testsTarget, {recursive: true});
+  copyFolderRecursiveSync(`${templateDir}/tests`, testsTarget);
+
   modules.forEach(parent => {
     const id = parent.replace('-parent', '');
     const wc = parent.replace('-flow-parent', '');
@@ -336,6 +341,11 @@ async function copySources() {
         // vaadin-chart
         content = content.replace('.replace("com.vaadin.flow.component.charts.examples.", "")',
          '.replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/")');
+
+       content = content.replace('import com.vaadin.flow.demo.ComponentDemoTest','import com.vaadin.tests.ComponentDemoTest'); 
+       content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest'); 
+       content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest'); 
+       content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT'); 
       }
       return [target, content];
     });
