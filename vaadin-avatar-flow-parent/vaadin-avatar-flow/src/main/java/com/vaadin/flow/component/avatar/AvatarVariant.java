@@ -20,7 +20,7 @@ package com.vaadin.flow.component.avatar;
  */
 public enum AvatarVariant {
     LUMO_XLARGE("xlarge"), LUMO_LARGE("large"), LUMO_SMALL("small"),
-    LUMO_XSMALL("xsmall"), LUMO_SQUARE("square");
+    LUMO_XSMALL("xsmall");
 
     private final String variant;
 
