@@ -24,7 +24,7 @@ public class SharedBrowser {
     SessionId sessionId;
     private volatile TestBenchDriverProxy driver;
 
-    private SharedBrowser() {
+    SharedBrowser() {
 
     }
 
@@ -42,6 +42,17 @@ public class SharedBrowser {
         return createDriverFromSession(sessionId, url);
     }
 
+    void clear() {
+        if(driver == null) {
+            return;
+        }
+        System.out.println(String.format("Clearing driver for session %s\turl %s", sessionId, url));
+        driver.quit();
+        driver = null;
+        sessionId = null;
+        url = null;
+    }
+
     private TestBenchDriverProxy createDriverFromSession(
         final SessionId sessionId, URL command_executor) {
         CommandExecutor executor = new HttpCommandExecutor(command_executor) {
@@ -50,6 +61,8 @@ public class SharedBrowser {
             public Response execute(Command command) throws IOException {
                 Response response = null;
                 if (command.getName() == "newSession") {
+                    driver.manage().deleteAllCookies();
+                    driver.get("about:blank");
                     response = new Response();
                     response.setSessionId(sessionId.toString());
                     response.setStatus(0);
@@ -76,6 +89,7 @@ public class SharedBrowser {
                 return response;
             }
         };
+        System.out.println(String.format("Reusing driver for session %s\turl %s", sessionId, url));
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
             new DesiredCapabilities());
@@ -89,6 +103,7 @@ public class SharedBrowser {
             .getCommandExecutor();
         url = executor.getAddressOfRemoteServer();
         sessionId = webDriver.getSessionId();
+        System.out.println(String.format("Creating driver for session %s\turl %s", sessionId, url));
     }
 
     @FunctionalInterface
