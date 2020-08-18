@@ -29,4 +29,8 @@ public class AvatarElement extends TestBenchElement {
         return !getPropertyBoolean("disabled");
     }
 
+    public String getTitle() {
+        return getAttribute("title");
+    }
+
 }

@@ -40,6 +40,7 @@ public class AvatarGroupView extends DemoView {
     public void initView() {
         createBasicAvatarGroup();
         createMaxAvatarGroup();
+        createLocalizedAvatarGroup();
     }
 
     private void createBasicAvatarGroup() {
@@ -97,5 +98,28 @@ public class AvatarGroupView extends DemoView {
         // end-source-example
 
         addCard("Setting Max", avatarGroup);
+    }
+
+    private void createLocalizedAvatarGroup() {
+        // begin-source-example
+        // source-example-heading: Localized Avatar Group
+        AvatarGroup avatarGroup = new AvatarGroup();
+
+        List<AvatarGroupItem> items = new ArrayList<>();
+
+        items.add(new AvatarGroupItem());
+        items.add(new AvatarGroupItem("Jens Jansson"));
+        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG"));
+        avatarGroup.setItems(items);
+        add(avatarGroup);
+
+        avatarGroup.setI18n(
+                new AvatarGroup.AvatarGroupI18n().setAnonymous("anonyymi")
+                        .setOneActiveUser("Yksi käyttäjä aktiivinen")
+                        .setManyActiveUsers("{count} aktiivista käyttäjää"));
+
+        // end-source-example
+
+        addCard("Localized Avatar Group", avatarGroup);
     }
 }

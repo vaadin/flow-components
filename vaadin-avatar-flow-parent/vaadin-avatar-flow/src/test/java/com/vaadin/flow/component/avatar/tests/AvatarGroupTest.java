@@ -157,4 +157,15 @@ public class AvatarGroupTest {
                 .contains(AvatarGroupVariant.LUMO_LARGE.getVariantName()));
     }
 
+    @Test
+    public void setI18n() {
+        AvatarGroup.AvatarGroupI18n i18n = new AvatarGroup.AvatarGroupI18n()
+                .setAnonymous("anonyymi")
+                .setOneActiveUser("Yksi käyttäjä aktiivinen")
+                .setManyActiveUsers("{count} aktiivista käyttäjää");
+
+        avatarGroup.setI18n(i18n);
+        Assert.assertEquals(i18n, avatarGroup.getI18n());
+    }
+
 }

@@ -43,6 +43,7 @@ public class AvatarView extends DemoView {
     public void initView() {
         createBasicAvatar();
         createAvatarWithCombinedProperties();
+        createLocalizedAvatar();
 
         addCard("Resource helper method",
                 new Text("This method is used in the examples above"));
@@ -112,6 +113,20 @@ public class AvatarView extends DemoView {
         });
 
         addCard("Combined properties", avatar, checkboxGroup);
+    }
+
+    private void createLocalizedAvatar() {
+        // begin-source-example
+        // source-example-heading: Localized Avatar
+        Avatar anonymousAvatar = new Avatar();
+
+        anonymousAvatar.setI18n(new Avatar.AvatarI18n().setAnonymous("anonyymi"));
+
+        add(anonymousAvatar);
+        // end-source-example
+        Div container = new Div(anonymousAvatar);
+
+        addCard("Localized Avatar", container);
     }
 
     // begin-source-example

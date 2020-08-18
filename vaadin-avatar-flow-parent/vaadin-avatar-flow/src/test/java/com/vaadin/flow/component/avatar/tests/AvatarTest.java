@@ -16,11 +16,10 @@
 
 package com.vaadin.flow.component.avatar.tests;
 
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.vaadin.flow.component.avatar.Avatar;
 
 import java.util.Set;
 
@@ -91,6 +90,15 @@ public class AvatarTest {
         Set<String> themeNames = avatar.getThemeNames();
         Assert.assertFalse(themeNames
                 .contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+    }
+
+    @Test
+    public void setI18n() {
+        Avatar.AvatarI18n i18n = new Avatar.AvatarI18n()
+                .setAnonymous("anonyymi");
+
+        avatar.setI18n(i18n);
+        Assert.assertEquals(i18n, avatar.getI18n());
     }
 
 }

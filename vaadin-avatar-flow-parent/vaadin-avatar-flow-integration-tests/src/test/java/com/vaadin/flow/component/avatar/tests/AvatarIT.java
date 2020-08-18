@@ -16,7 +16,6 @@
 
 package com.vaadin.flow.component.avatar.tests;
 
-import com.vaadin.flow.component.avatar.demo.AvatarView;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
@@ -26,7 +25,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
- * Integration tests for the {@link AvatarView}.
+ * Integration tests for the {@link AvatarPage}.
  *
  * @author Vaadin Ltd.
  */
