@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.grid.demo;
 
+import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -19,9 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.ComponentEventListener;
@@ -44,6 +45,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
+import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.demo.data.CountryData;
 import com.vaadin.flow.component.grid.demo.data.CustomerData;
@@ -86,8 +88,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
-import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES;
 
 @Route("vaadin-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")
@@ -328,6 +328,11 @@ public class GridDemo extends DemoView {
                 end = size;
             }
             return personData.getPersons().subList(offset, end);
+        }
+
+        public Stream<Person> fetchPage(int page, int pageSize) {
+            return personData.getPersons().stream().skip(page * pageSize)
+                    .limit(pageSize);
         }
 
         public int count() {
@@ -613,6 +618,7 @@ public class GridDemo extends DemoView {
         createGridWithLazyLoading(); // Lazy Loading
         createGridWithCustomItemCountEstimate();
         createGridWithExactItemCount();
+        createGridWithPagedRepository();
         createSingleSelect(); // Selection
         createMultiSelect();
         createProgrammaticSelect();
@@ -706,9 +712,8 @@ public class GridDemo extends DemoView {
 
         // end-source-example
 
-        addVariantsDemo(() -> {
-                    return grid;
-                }, Grid::addThemeVariants, Grid::removeThemeVariants,
+        addVariantsDemo(() -> grid,
+                Grid::addThemeVariants, Grid::removeThemeVariants,
                 GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
     }
@@ -757,9 +762,9 @@ public class GridDemo extends DemoView {
          * and as the user scrolls down it automatically increases the size by
          * 200 until the backend runs out of items.
          *
-         * Both the estimated item count and its increase can be customized
-         * to allow the user to scroll down faster when the backend will
-         * have a lot of items.
+         * Both the estimated item count and its increase can be customized to
+         * allow the user to scroll down faster when the backend will have a lot
+         * of items.
          */
         lazyDataView.setItemCountEstimate(1000);
         lazyDataView.setItemCountEstimateIncrease(1000);
@@ -768,13 +773,13 @@ public class GridDemo extends DemoView {
         Div countText = new Div();
         lazyDataView.addItemCountChangeListener(event -> {
             if (event.isItemCountEstimated()) {
-                countText
-                        .setText("Item Count Estimate: " + event.getItemCount());
+                countText.setText(
+                        "Item Count Estimate: " + event.getItemCount());
             } else {
                 countText.setText("Exact Item Count: " + event.getItemCount());
             }
         });
-        
+
         VerticalLayout layout = new VerticalLayout(grid, countText);
 
         grid.addColumn(Item::getName).setHeader("Name").setWidth("20px");
@@ -802,9 +807,9 @@ public class GridDemo extends DemoView {
         PersonService personService = new PersonService();
 
         /*
-         * In case it is desired to show to the user the exact number of
-         * items in the backend, that can be done providing another callback
-         * that fetches the item count from the backend.
+         * In case it is desired to show to the user the exact number of items
+         * in the backend, that can be done providing another callback that
+         * fetches the item count from the backend.
          */
         GridLazyDataView<Person> lazyDataView = grid.setItems(
                 query -> personService
@@ -823,6 +828,35 @@ public class GridDemo extends DemoView {
         grid.setId("count-callback");
 
         addCard("Lazy Loading", "Exact item count", grid);
+    }
+
+    private void createGridWithPagedRepository() {
+        //@formatter:off
+        // begin-source-example
+        // source-example-heading: Loading from a paged repository
+
+        Grid<Person> grid = new Grid<>();
+        PersonService service = new PersonService();
+        /*
+         * For backends which provide data in pages, like Spring Data
+         * repositories, it is possible to get the page number and size from the
+         * Query API.
+         * For more instructions on how to work with Spring Data,
+         * see the documentation in https://vaadin.com/docs and the tutorials in
+         * https://vaadin.com/learn/tutorials/.
+         */
+        grid.setItems(query -> service.fetchPage(query.getPage(),
+                query.getPageSize())
+        );
+
+        grid.addColumn(Person::getFirstName).setHeader("First Name");
+        grid.addColumn(Person::getLastName).setHeader("Last Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        // end-source-example
+        //@formatter:on
+        grid.setId("paged-grid");
+        addCard("Lazy Loading", "Loading from a paged repository", grid);
     }
 
     // Assigning Data Begin
@@ -891,8 +925,7 @@ public class GridDemo extends DemoView {
         // discouraged to avoid performance issues.
         grid.setHeightByRows(true);
 
-        final GridListDataView<Person> dataView = grid
-                .setItems(personList);
+        final GridListDataView<Person> dataView = grid.setItems(personList);
 
         Grid.Column<Person> firstNameColumn = grid
                 .addColumn(Person::getFirstName).setHeader("First Name");
@@ -901,13 +934,13 @@ public class GridDemo extends DemoView {
         Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge)
                 .setHeader("Age");
 
-        Button addButton = new Button("Add Item", event ->
-                dataView.addItem(new Person(106, "X", "Y", 16,
-                new Address("95632", "New York"), "187-338-588")));
+        Button addButton = new Button("Add Item",
+                event -> dataView.addItem(new Person(106, "X", "Y", 16,
+                        new Address("95632", "New York"), "187-338-588")));
 
-        Button removeButton = new Button("Remove last", event ->
-                dataView.removeItem(dataView.getItem(
-                        dataView.getItemCount() - 1)));
+        Button removeButton = new Button("Remove last",
+                event -> dataView.removeItem(
+                        dataView.getItem(dataView.getItemCount() - 1)));
 
         FooterRow footerRow = grid.appendFooterRow();
         footerRow.getCell(firstNameColumn).setComponent(addButton);
@@ -1088,8 +1121,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Using text fields for filtering items
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        final GridListDataView<Person> dataView = grid
-                .setItems(personList);
+        final GridListDataView<Person> dataView = grid.setItems(personList);
 
         Grid.Column<Person> firstNameColumn = grid
                 .addColumn(Person::getFirstName).setHeader("Name");
@@ -1168,8 +1200,7 @@ public class GridDemo extends DemoView {
         List<Person> personList = personService.fetchAll();
 
         Grid<Person> grid = new Grid<>();
-        final GridListDataView<Person> dataView = grid
-                .setItems(personList);
+        final GridListDataView<Person> dataView = grid.setItems(personList);
 
         final Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader("Name");
@@ -1434,8 +1465,7 @@ public class GridDemo extends DemoView {
 
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        final GridListDataView<Person> dataView = grid
-                .setItems(personList);
+        final GridListDataView<Person> dataView = grid.setItems(personList);
 
         grid.addColumn(Person::getFirstName).setHeader("First Name")
                 .setFooter("Total: " + dataView.getItemCount() + " people");
@@ -1502,8 +1532,7 @@ public class GridDemo extends DemoView {
         // begin-source-example
         // source-example-heading: Using components
         Grid<Person> grid = new Grid<>();
-        final GridListDataView<Person> dataView = grid
-                .setItems(getItems());
+        final GridListDataView<Person> dataView = grid.setItems(getItems());
 
         Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader(new Label("Name")).setComparator((p1, p2) -> p1
@@ -1648,8 +1677,7 @@ public class GridDemo extends DemoView {
         // source-example-heading: Using Components
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        final GridListDataView<Person> dataView = grid
-                .setItems(personList);
+        final GridListDataView<Person> dataView = grid.setItems(personList);
 
         // Use the component constructor that accepts an item ->
         // new PersonComponent(Person person)
@@ -1704,8 +1732,8 @@ public class GridDemo extends DemoView {
                 .withProperty("lastname", Person::getLastName)
                 .withProperty("address", Person::getAddress)
                 .withProperty("image", Person::getImage)
-                .withEventHandler("handleClick", person ->
-                        grid.getListDataView().refreshItem(person)));
+                .withEventHandler("handleClick",
+                        person -> grid.getListDataView().refreshItem(person)));
 
         // end-source-example
         grid.setId("item-details");
@@ -1737,8 +1765,8 @@ public class GridDemo extends DemoView {
                         + "</div>")
                 .withProperty("firstName", Person::getFirstName)
                 // This is now how we open the details
-                .withEventHandler("handleClick", person ->
-                        grid.getListDataView().refreshItem(person)));
+                .withEventHandler("handleClick",
+                        person -> grid.getListDataView().refreshItem(person)));
 
         // Disable the default way of opening item details:
         grid.setDetailsVisibleOnClick(false);
@@ -1847,8 +1875,8 @@ public class GridDemo extends DemoView {
                                 LocalDate.parse("02/01/2019", formatter)),
                         item)));
 
-        contextMenu.addItem("Remove", event ->
-                event.getItem().ifPresent(dataView::removeItem));
+        contextMenu.addItem("Remove",
+                event -> event.getItem().ifPresent(dataView::removeItem));
 
         contextMenu.addGridContextMenuOpenedListener(event -> message.setValue(
                 String.format("Menu opened on\n Row: '%s'\n Column: '%s'",

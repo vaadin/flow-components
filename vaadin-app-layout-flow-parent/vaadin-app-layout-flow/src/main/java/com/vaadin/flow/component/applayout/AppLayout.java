@@ -37,7 +37,7 @@ import java.util.Objects;
  * Provides a quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.2.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.2.0-beta1")
 @JsModule("@vaadin/vaadin-app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
