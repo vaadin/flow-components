@@ -1,24 +1,22 @@
 #!/bin/bash 
 
+processors=5
+
 if [ -n "$1" ]
 then
-  for i in `echo $*`
+  for i in $*
   do
-    modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
-    elements="$elements $i"
+    case $i in
+      [0-9]|[0-9][0-9])
+        processors=$i
+        ;;
+      *)
+        modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
+        elements="$elements $i"
+       ;;
+     esac
   done
-# else
-#   modules="
-#   text-field button checkbox combo-box context-menu date-picker date-time-picker
-#   dialog form-layout icons radio-button split-layout list-box menu-bar notification
-#   ordered-layout progress-bar tabs select time-picker upload iron-list grid
-#   "
-#   # charts accordion app-layout board confirm-dialog cookie-consent crud
-#   # custom-field details grid-pro login rich-text-editor
 fi
-
-## TODO: in local 3 is ok, but in TC something fails
-processors=3
 
 tcMsg() (
   { set +x; } 2> /dev/null
