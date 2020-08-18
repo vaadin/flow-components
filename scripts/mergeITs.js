@@ -238,6 +238,8 @@ async function copySources() {
       }
       return [target, content];
     });
+    const textFieldVersionSource = 'vaadin-text-field-flow-parent/vaadin-text-field-flow/src/main/java/com/vaadin/flow/component/textfield/GeneratedVaadinTextField.java';
+    const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\r?\n/).filter(l => l.startsWith('@NpmPackage'))[0];
     // copy java sources
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`, (source, target, content) => {
       if (/\.java$/.test(source)) {
@@ -269,6 +271,10 @@ async function copySources() {
           content = content.replace(/\/overlayselfattached/,`/${wc}$&`)
         }
 
+        // Accordion: Match textfield version
+        if (/AccordionInTemplate\.java$/.test(source)) {
+          content = content.replace(/@NpmPackage.*/,textFieldVersion);
+        }
         // pro components use 8080 and do not use TestPath, this is a hack
         // to adjust the route used in tests
         content = content.replace(/(return\ +"?)8080("?)/, (...args) => {
