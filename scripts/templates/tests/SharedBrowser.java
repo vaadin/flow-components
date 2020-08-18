@@ -3,6 +3,7 @@ package com.vaadin.tests;
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchDriverProxy;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -62,6 +63,10 @@ public class SharedBrowser {
                 Response response = null;
                 if (command.getName() == "newSession") {
                     driver.manage().deleteAllCookies();
+                    if (driver instanceof WebStorage) {
+                        ((WebStorage)driver).getSessionStorage().clear();
+                        ((WebStorage)driver).getLocalStorage().clear();
+                    }
                     driver.get("about:blank");
                     response = new Response();
                     response.setSessionId(sessionId.toString());
