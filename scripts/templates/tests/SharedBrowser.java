@@ -1,9 +1,13 @@
 package com.vaadin.tests;
 
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchDriverProxy;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.html5.WebStorage;
+import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -14,10 +18,8 @@ import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.remote.http.W3CHttpCommandCodec;
 import org.openqa.selenium.remote.http.W3CHttpResponseCodec;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Collections;
+import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.TestBenchDriverProxy;
 
 public class SharedBrowser {
     static final SharedBrowser instance = new SharedBrowser();
@@ -62,11 +64,13 @@ public class SharedBrowser {
             public Response execute(Command command) throws IOException {
                 Response response = null;
                 if (command.getName() == "newSession") {
+
                     driver.manage().deleteAllCookies();
                     if (driver instanceof WebStorage) {
                         ((WebStorage)driver).getSessionStorage().clear();
                         ((WebStorage)driver).getLocalStorage().clear();
                     }
+                    driver.manage().logs().get(LogType.BROWSER).getAll();
                     driver.get("about:blank");
                     response = new Response();
                     response.setSessionId(sessionId.toString());
