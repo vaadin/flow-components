@@ -102,7 +102,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
         "WebComponent: Vaadin.TabsElement#2.1.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tabs")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.2.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.2.0-beta1")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
         extends Component implements HasStyle, HasTheme {
 
