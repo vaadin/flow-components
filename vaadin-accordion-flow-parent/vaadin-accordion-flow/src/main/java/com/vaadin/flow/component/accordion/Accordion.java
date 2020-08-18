@@ -38,7 +38,7 @@ import com.vaadin.flow.shared.Registration;
  * can be opened at a time.
  */
 @Tag("vaadin-accordion")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "1.2.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "1.2.0-beta1")
 @JsModule("@vaadin/vaadin-accordion/src/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize {
 

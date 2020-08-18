@@ -91,7 +91,7 @@ Your work has been saved
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
         "WebComponent: Vaadin.NotificationElement#1.3.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "1.6.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "1.6.0-beta1")
 @JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {
