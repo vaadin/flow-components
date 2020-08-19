@@ -1,35 +1,39 @@
-#!/bin/sh
+#!/bin/bash 
+
+processors=5
 
 if [ -n "$1" ]
 then
-  for i in `echo $*`
+  for i in $*
   do
-    modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
-    elements="$elements $i"
+    case $i in
+      [0-9]|[0-9][0-9])
+        processors=$i
+        ;;
+      *)
+        modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
+        elements="$elements $i"
+       ;;
+     esac
   done
-# else
-#   modules="
-#   text-field button checkbox combo-box context-menu date-picker date-time-picker
-#   dialog form-layout icons radio-button split-layout list-box menu-bar notification
-#   ordered-layout progress-bar tabs select time-picker upload iron-list grid
-#   "
-#   # charts accordion app-layout board confirm-dialog cookie-consent crud
-#   # custom-field details grid-pro login rich-text-editor
 fi
 
-## TODO: in local 3 is ok, but in TC something fails
-processors=1
+tcMsg() (
+  { set +x; } 2> /dev/null
+  echo "##teamcity[$1]"
+)
 
 # open a block in the TC tree output
 tcLog() {
-  [ -n "$inblock" ] && echo "##teamcity[blockClosed name='$inblock']"
+  [ -n "$inblock" ] && tcMsg "blockClosed name='$inblock'"
   inblock=$1
-  echo "##teamcity[blockOpened name='$inblock']"
+  tcMsg "blockOpened name='$inblock'"
 }
 # log in TC
 tcStatus() {
+  { set +x; } 2> /dev/null
   [ "$1" = "0" ] && status=SUCCESS || status=FAILURE
-  echo "##teamcity[buildStatus status='$status' text='$1']"
+  tcMsg "buildStatus status='$status' text='$1'"
 }
 
 tcLog 'Show info'
@@ -51,9 +55,10 @@ echo $cmd
 $cmd
 
 args="-B -Dvaadin.pnpm.enable=true"
+[ -n "$TBHUB" ] && TBHUB=localhost
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.skipAfterFailureCount=1"
+args="$args -Dfailsafe.forkCount=$processors"
 
 ### Run IT's in original modules
 # if [ -n "$modules" ]
@@ -63,14 +68,18 @@ args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.skipAfterFailureCount=1"
 #   echo $cmd
 #   $cmd
 # fi
-
 ### Run IT's in merged module
-tcLog 'Running merged ITs'
-cmd="mvn clean verify -Drun-it -Drelease -Dtestbench.testsInParalel=1 $args -pl integration-tests"
+if [ "$TBHUB" = "localhost" ]
+then
+    tcLog 'Installing docker image with standalone-chrome'
+    trap "echo Terminating docker; docker stop standalone-chrome" EXIT
+    set -x
+    docker pull selenium/standalone-chrome
+    docker image prune -f
+    docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
+    set +x
+fi
+tcLog "Running merged ITs (processors=$processors)"
+cmd="mvn clean verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
 echo $cmd
 $cmd
-
-### We do not want to make build fail for now
-exit 0
-
-
