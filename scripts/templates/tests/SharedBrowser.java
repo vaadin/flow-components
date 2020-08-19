@@ -1,10 +1,7 @@
 package com.vaadin.tests;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Collections;
-
+import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.TestBenchDriverProxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.logging.LogType;
@@ -18,16 +15,24 @@ import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.remote.http.W3CHttpCommandCodec;
 import org.openqa.selenium.remote.http.W3CHttpResponseCodec;
 
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchDriverProxy;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
 
 public class SharedBrowser {
     static final SharedBrowser instance = new SharedBrowser();
+
+    static {
+        Runtime.getRuntime()
+            .addShutdownHook(new Thread(() -> instance.clear()));
+    }
+
     URL url;
     SessionId sessionId;
     private volatile TestBenchDriverProxy driver;
 
-    SharedBrowser() {
+    private SharedBrowser() {
 
     }
 
@@ -45,11 +50,12 @@ public class SharedBrowser {
         return createDriverFromSession(sessionId, url);
     }
 
-    void clear() {
-        if(driver == null) {
+    private void clear() {
+        if (driver == null) {
             return;
         }
-        System.out.println(String.format("Clearing driver for session %s\turl %s", sessionId, url));
+        System.out.println(String
+            .format("Clearing driver for session %s\turl %s", sessionId, url));
         driver.quit();
         driver = null;
         sessionId = null;
@@ -67,8 +73,8 @@ public class SharedBrowser {
 
                     driver.manage().deleteAllCookies();
                     if (driver instanceof WebStorage) {
-                        ((WebStorage)driver).getSessionStorage().clear();
-                        ((WebStorage)driver).getLocalStorage().clear();
+                        ((WebStorage) driver).getSessionStorage().clear();
+                        ((WebStorage) driver).getLocalStorage().clear();
                     }
                     driver.manage().logs().get(LogType.BROWSER).getAll();
                     driver.get("about:blank");
@@ -98,7 +104,8 @@ public class SharedBrowser {
                 return response;
             }
         };
-        System.out.println(String.format("Reusing driver for session %s\turl %s", sessionId, url));
+        System.out.println(String
+            .format("Reusing driver for session %s\turl %s", sessionId, url));
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
             new DesiredCapabilities());
@@ -112,7 +119,8 @@ public class SharedBrowser {
             .getCommandExecutor();
         url = executor.getAddressOfRemoteServer();
         sessionId = webDriver.getSessionId();
-        System.out.println(String.format("Creating driver for session %s\turl %s", sessionId, url));
+        System.out.println(String
+            .format("Creating driver for session %s\turl %s", sessionId, url));
     }
 
     @FunctionalInterface

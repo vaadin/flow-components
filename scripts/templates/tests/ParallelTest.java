@@ -1,15 +1,15 @@
 package com.vaadin.tests;
 
 import com.vaadin.testbench.Parameters;
-import org.junit.AfterClass;
 
-public abstract class ParallelTest extends com.vaadin.testbench.parallel.ParallelTest {
+public abstract class ParallelTest
+    extends com.vaadin.testbench.parallel.ParallelTest {
 
-    private static SharedBrowser browser = new SharedBrowser();
+    private static SharedBrowser browser = SharedBrowser.instance;
 
     @Override
     public void setup() throws Exception {
-        if(Parameters.getTestsInParallel() != 1)  {
+        if (Parameters.getTestsInParallel() != 1) {
             super.setup();
             return;
         }
@@ -20,8 +20,4 @@ public abstract class ParallelTest extends com.vaadin.testbench.parallel.Paralle
         screenshotOnFailure.setQuitDriverOnFinish(false);
     }
 
-    @AfterClass
-    public static void runAfterTest() {
-        browser.clear();
-    }
 }

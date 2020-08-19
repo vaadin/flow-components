@@ -1,15 +1,15 @@
 package com.vaadin.tests;
 
 import com.vaadin.testbench.Parameters;
-import org.junit.AfterClass;
 
-public abstract class ComponentDemoTest extends com.vaadin.flow.demo.ComponentDemoTest {
+public abstract class ComponentDemoTest
+    extends com.vaadin.flow.demo.ComponentDemoTest {
 
-    private static SharedBrowser browser = new SharedBrowser();
+    private static SharedBrowser browser = SharedBrowser.instance;
 
     @Override
     public void setup() throws Exception {
-        if(Parameters.getTestsInParallel() != 1)  {
+        if (Parameters.getTestsInParallel() != 1) {
             super.setup();
             return;
         }
@@ -20,8 +20,4 @@ public abstract class ComponentDemoTest extends com.vaadin.flow.demo.ComponentDe
         screenshotOnFailure.setQuitDriverOnFinish(false);
     }
 
-    @AfterClass
-    public static void runAfterTest() {
-        browser.clear();
-    }
 }
