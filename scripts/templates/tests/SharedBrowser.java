@@ -2,6 +2,7 @@ package com.vaadin.tests;
 
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchDriverProxy;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.logging.LogType;
@@ -109,6 +110,7 @@ public class SharedBrowser {
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
             new DesiredCapabilities());
+        driver.manage().window().setSize(new Dimension(1024,768));
         return TestBench.createDriver(driver);
     }
 
