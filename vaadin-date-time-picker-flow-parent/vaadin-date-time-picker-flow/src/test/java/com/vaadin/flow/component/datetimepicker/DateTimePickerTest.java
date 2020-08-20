@@ -27,6 +27,8 @@ import org.junit.Test;
 import com.vaadin.flow.component.UI;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @NotThreadSafe
 public class DateTimePickerTest {
@@ -102,4 +104,16 @@ public class DateTimePickerTest {
         assertEquals(i18n, picker.getDatePickerI18n());
     }
 
+    @Test
+    public void setAutoOpen() {
+        final DateTimePicker picker = new DateTimePicker();
+        assertTrue("Auto-open should be enabled by default",
+            picker.isAutoOpen());
+        picker.setAutoOpen(false);
+        assertFalse("Should be possible to disable auto-open",
+            picker.isAutoOpen());
+        picker.setAutoOpen(true);
+        assertTrue("Should be possible to enable auto-open",
+            picker.isAutoOpen());
+    }
 }

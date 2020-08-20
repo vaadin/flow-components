@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import javax.annotation.Generated;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Generated;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEvent;
@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -123,8 +124,9 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.CheckboxGroupElement#2.2.2",
         "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.4.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.3.0")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox-group.js")
+@HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox-group.html")
 public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinCheckboxGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, HasTheme {

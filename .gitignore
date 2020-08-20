@@ -1,5 +1,7 @@
-/bin/
-/target/
+bin
+target
+integration-tests
+*.xml.bak
 
 # Eclipse
 .project
@@ -10,3 +12,13 @@
 # Idea files
 .idea/
 *.iml
+
+.vscode
+types.d.ts
+tsconfig.json
+webpack.*
+node_modules
+.driver
+package*json
+pnpm*
+error-screenshots

@@ -1,0 +1,9 @@
+html {
+    height: 100%;
+}
+body {
+    margin: 0;
+    font-family: 'Roboto', 'Noto', sans-serif;
+    line-height: 1.5;
+    height: 100%;
+}

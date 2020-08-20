@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
@@ -69,11 +70,14 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        final DesiredCapabilities safari = BrowserUtil.safari();
-        safari.setVersion("13");
+        final DesiredCapabilities ie11Windows8_1 = BrowserUtil.ie11();
+        ie11Windows8_1.setPlatform(Platform.WIN8_1);
 
-        return Arrays.asList(BrowserUtil.firefox(), BrowserUtil.chrome(),
-                BrowserUtil.edge(), safari);
+        final DesiredCapabilities safari = BrowserUtil.safari();
+        safari.setVersion("11");
+
+        return Arrays.asList(ie11Windows8_1, BrowserUtil.firefox(),
+                BrowserUtil.chrome(), BrowserUtil.edge(), safari);
     }
 
     protected String getLastEvent() {

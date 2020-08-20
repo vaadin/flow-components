@@ -37,7 +37,7 @@ public class SelectView extends DemoView {
         formFieldDemo();
         separatorDemo();// Presentation
         customOptionsDemo();
-        themeVariantsTextAlign(); //ThemeVariants
+        themeVariantsTextAlign(); // ThemeVariants
         themeVariantsSmallSize();
         styling();// Styling
     }
@@ -59,6 +59,7 @@ public class SelectView extends DemoView {
         valueSelect.setItems("Value", "Option one", "Option two");
         valueSelect.setValue("Value");
 
+        add(labelSelect, placeholderSelect, valueSelect);
         // end-source-example
         labelSelect.getStyle().set("margin-right", "5px");
         placeholderSelect.getStyle().set("margin-right", "5px");
@@ -78,6 +79,8 @@ public class SelectView extends DemoView {
         readOnlySelect.setReadOnly(true);
         readOnlySelect.setValue("Value");
         readOnlySelect.setLabel("Read-only");
+
+        add(disabledSelect, readOnlySelect);
         // end-source-example
         disabledSelect.getStyle().set("margin-right", "5px");
         HorizontalLayout layout = new HorizontalLayout(disabledSelect,
@@ -107,6 +110,8 @@ public class SelectView extends DemoView {
         // Choose which property from Department is the presentation value
         select.setItemLabelGenerator(Department::getName);
         select.setItems(departmentList);
+
+        add(select);
         // end-source-example
         addCard("Entity list", select);
     }
@@ -122,6 +127,8 @@ public class SelectView extends DemoView {
         value.setText("Select a value");
         select.addValueChangeListener(
                 event -> value.setText("Selected: " + event.getValue()));
+
+        add(select, value);
         // end-source-example
         VerticalLayout verticalLayout = new VerticalLayout(select, value);
         verticalLayout.setAlignItems(FlexComponent.Alignment.START);
@@ -143,6 +150,7 @@ public class SelectView extends DemoView {
                 item -> !"Developers Journey and Onboarding"
                         .equals(item.getName()));
 
+        add(select);
         // end-source-example
         addCard("Disabled item", select);
     }
@@ -164,6 +172,8 @@ public class SelectView extends DemoView {
 
         // add a divider after the empty selection item
         requiredSelect.addComponents(null, new Hr());
+
+        add(requiredSelect);
         // end-source-example
         FlexLayout layout = new FlexLayout(requiredSelect);
         layout.getStyle().set("flex-wrap", "wrap");
@@ -200,6 +210,8 @@ public class SelectView extends DemoView {
                         Notification.Position.MIDDLE);
             }
         });
+
+        add(titleSelect, button);
         // end-source-example
         HorizontalLayout layout = new HorizontalLayout(titleSelect, button);
         layout.setAlignItems(FlexComponent.Alignment.BASELINE);
@@ -217,6 +229,8 @@ public class SelectView extends DemoView {
         select.setItems(Weekday.values());
         select.addComponents(null, new Hr());
         select.addComponents(Weekday.FRIDAY, new Hr());
+
+        add(select);
         // end-source-example
         addCard("Presentation", "Separators", select);
     }
@@ -241,6 +255,8 @@ public class SelectView extends DemoView {
             wrapper.add(emotion.getIcon().create(), text);
             return wrapper;
         }));
+
+        add(select);
 
         // Note that if the setItemLabelGenerator(...) is applied, the label
         // string is shown in the input field instead of the components (icon +
@@ -268,6 +284,8 @@ public class SelectView extends DemoView {
         rightSelect.setItems("Left", "Center", "Right");
         rightSelect.setValue("Right");
         rightSelect.getElement().setAttribute("theme", "align-right");
+
+        add(leftSelect, centerSelect, rightSelect);
         // end-source-example
         div.add(leftSelect, centerSelect, rightSelect);
         leftSelect.getStyle().set("margin-right", "5px");
@@ -283,6 +301,8 @@ public class SelectView extends DemoView {
         select.setItems("Option one", "Option two");
         select.setPlaceholder("Placeholder");
         select.getElement().setAttribute("theme", "small");
+
+        add(select);
         // end-source-example
         addCard("Theme Variants", "Small size", select);
     }

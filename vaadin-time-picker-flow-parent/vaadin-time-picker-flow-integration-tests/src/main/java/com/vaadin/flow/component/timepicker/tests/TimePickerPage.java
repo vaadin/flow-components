@@ -21,7 +21,6 @@ import java.util.Arrays;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("time-picker-it")
@@ -29,10 +28,10 @@ public class TimePickerPage extends Div {
 
     public TimePickerPage() {
         createDefaultTimePicker();
+        createAutoOpenDisabledTimePicker();
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
-        createTimePickerFromRenderer();
     }
 
     private void createDefaultTimePicker() {
@@ -40,6 +39,19 @@ public class TimePickerPage extends Div {
         TimePicker timePicker = new TimePicker();
         timePicker.setId("simple-picker");
         timePicker.setLabel("Default TimePicker");
+
+        timePicker.addValueChangeListener(
+                event -> updateMessage(message, timePicker));
+
+        add(timePicker, message);
+    }
+
+    private void createAutoOpenDisabledTimePicker() {
+        Div message = createMessageDiv("autoopendisabled-picker-message");
+        TimePicker timePicker = new TimePicker();
+        timePicker.setId("autoopendisabled-picker");
+        timePicker.setLabel("Auto open disabled TimePicker");
+        timePicker.setAutoOpen(false);
 
         timePicker.addValueChangeListener(
                 event -> updateMessage(message, timePicker));
@@ -95,16 +107,6 @@ public class TimePickerPage extends Div {
 
         timePicker.setId("time-picker-min-max");
         add(timePicker, message);
-    }
-
-    private void createTimePickerFromRenderer() {
-        ComponentRenderer<TimePicker, TimePickerPage> renderer = new ComponentRenderer<>(
-            () -> {
-                TimePicker timePicker = new TimePicker();
-                timePicker.setValue(LocalTime.now());
-                return timePicker;
-            });
-        renderer.render(getElement(), null);
     }
 
     private Div createMessageDiv(String id) {

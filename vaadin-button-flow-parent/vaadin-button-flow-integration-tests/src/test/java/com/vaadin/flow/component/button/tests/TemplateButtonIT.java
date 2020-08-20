@@ -22,7 +22,6 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @TestPath("template-button")
 public class TemplateButtonIT extends AbstractComponentIT {
@@ -31,8 +30,7 @@ public class TemplateButtonIT extends AbstractComponentIT {
     public void setText_overridesAllContent() {
         open();
 
-        WebElement template = waitUntil(ExpectedConditions
-            .presenceOfElementLocated(By.id("button-template")));
+        WebElement template = findElement(By.id("button-template"));
 
         WebElement button = findInShadowRoot(template, By.id("button")).get(0);
 

@@ -1,12 +1,12 @@
-import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
-import { GridElement } from '@vaadin/vaadin-grid/src/vaadin-grid.js';
-import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mixin.js';
-
+// Not using ES6 imports in this file yet because the connector in V14 must
+// still work in Legacy bower projects. See: `gridConnector-es6.js` for
+// the Polymer3 approach.
 (function () {
   const tryCatchWrapper = function (callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid-flow');
   };
+
+  window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
   window.Vaadin.Flow.gridConnector = {
     initLazy: grid => tryCatchWrapper(function(grid) {
@@ -14,6 +14,25 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       if (grid.$connector){
         return;
       }
+
+      // Polymer
+      if (window.Polymer) {
+        // Polymer2 approach.
+        window.Vaadin.Flow.Legacy.Debouncer = Polymer.Debouncer;
+        window.Vaadin.Flow.Legacy.timeOut = Polymer.Async.timeOut;
+        window.Vaadin.Flow.Legacy.animationFrame = Polymer.Async.animationFrame;
+        window.Vaadin.Flow.Legacy.GridElement = Vaadin.GridElement;
+        window.Vaadin.Flow.Legacy.ItemCache = Vaadin.Grid.ItemCache;
+      }  else if (!window.Vaadin.Flow.Legacy.Debouncer) {
+        console.log("Grid is unable to load Polymer helpers.");
+        return;
+      }
+
+      const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
+      const timeOut = window.Vaadin.Flow.Legacy.timeOut;
+      const animationFrame = window.Vaadin.Flow.Legacy.animationFrame;
+      const GridElement = window.Vaadin.Flow.Legacy.GridElement;
+      const ItemCache = window.Vaadin.Flow.Legacy.ItemCache;
 
       ItemCache.prototype.ensureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
         if (!this.itemCaches[scaledIndex]) {

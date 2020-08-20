@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
@@ -117,6 +118,7 @@ import com.vaadin.flow.shared.Registration;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.RadioGroupElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-group")
+@HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-group.html")
 @JsModule("@vaadin/vaadin-radio-button/src/vaadin-radio-group.js")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

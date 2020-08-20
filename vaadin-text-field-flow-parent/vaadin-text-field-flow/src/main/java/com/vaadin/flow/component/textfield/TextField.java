@@ -390,19 +390,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         super.setPreventInvalidInput(preventInvalidInput);
     }
 
-    /**
-     * Sets a regular expression for the value to pass on the client-side. The pattern
-     * must be a valid JavaScript Regular Expression that matches the entire value,
-     * not just some subset.
-     *
-     * @param pattern
-     *            the new String pattern
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
-     *     https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
-     * @see <a href="https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
-     *     https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
-     */
     @Override
     public void setPattern(String pattern) {
         super.setPattern(pattern);

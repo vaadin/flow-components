@@ -69,10 +69,13 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
+        DesiredCapabilities ie11Windows8_1 = BrowserUtil.ie11();
+        ie11Windows8_1.setPlatform(Platform.WIN8_1);
+
         DesiredCapabilities safari = BrowserUtil.safari();
-        safari.setVersion("13");
-        return Arrays.asList(BrowserUtil.firefox(), BrowserUtil.chrome(),
-                             BrowserUtil.edge(), safari);
+        safari.setVersion("11");
+        return Arrays.asList(ie11Windows8_1, BrowserUtil.firefox(),
+                BrowserUtil.chrome(), BrowserUtil.edge(), safari);
     }
 
 }

@@ -32,6 +32,8 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -42,9 +44,11 @@ import com.vaadin.flow.function.SerializableConsumer;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
+@JavaScript("frontend://menubarConnector.js")
 @JsModule("./menubarConnector.js")
+@HtmlImport("frontend://bower_components/vaadin-menu-bar/src/vaadin-menu-bar.html")
 @JsModule("@vaadin/vaadin-menu-bar/src/vaadin-menu-bar.js")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "1.2.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "1.1.0")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme {
 

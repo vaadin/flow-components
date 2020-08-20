@@ -20,6 +20,7 @@ import javax.annotation.Generated;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -140,8 +141,9 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.FormLayoutElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.3.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.2.0")
 @JsModule("@vaadin/vaadin-form-layout/src/vaadin-form-layout.js")
+@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-layout.html")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component implements HasStyle {
 
@@ -249,6 +251,6 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      *            Missing documentation!
      */
     protected void updateStyles(JsonObject _Args) {
-        getElement().callJsFunction("updateStyles", _Args);
+        getElement().callFunction("updateStyles", _Args);
     }
 }

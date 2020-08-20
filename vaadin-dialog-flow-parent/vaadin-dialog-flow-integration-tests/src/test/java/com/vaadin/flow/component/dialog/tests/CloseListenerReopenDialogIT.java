@@ -31,7 +31,6 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
     public void reopenDialog_closeActionListenerIsCalled() {
         open();
 
-        waitForElementPresent(By.id("open"));
         findElement(By.id("open")).click();
 
         // Dialog is opened

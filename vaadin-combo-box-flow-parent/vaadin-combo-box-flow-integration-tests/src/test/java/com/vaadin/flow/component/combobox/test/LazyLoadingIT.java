@@ -34,6 +34,7 @@ import com.vaadin.flow.testutil.TestPath;
 public class LazyLoadingIT extends AbstractComboBoxIT {
 
     private ComboBoxElement stringBox;
+    private ComboBoxElement stringBoxAutoOpenDisabled;
     private ComboBoxElement pagesizeBox;
     private ComboBoxElement beanBox;
     private ComboBoxElement filterBox;
@@ -47,6 +48,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
+        stringBoxAutoOpenDisabled = $(ComboBoxElement.class).id("lazy-strings-autoopendisabled");
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
         filterBox = $(ComboBoxElement.class).id("custom-filter");
@@ -461,6 +463,18 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         assertMessage(item);
         Assert.assertEquals(item, getSelectedItemLabel(stringBox));
+    }
+
+    @Test 
+    public void autoOpenDisabled_setValue_valueChanged() {
+        String item = "Item 151";
+        stringBox.openPopup();
+        stringBox.setFilter(item);
+        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        stringBoxAutoOpenDisabled.selectByText(item);
+        assertMessage(item);
+        Assert.assertEquals(item, getSelectedItemLabel(stringBoxAutoOpenDisabled));
+        Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpen());
     }
 
     @Test

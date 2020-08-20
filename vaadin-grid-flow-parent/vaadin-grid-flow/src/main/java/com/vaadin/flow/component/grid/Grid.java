@@ -48,6 +48,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -124,13 +125,20 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.6.7")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./gridConnector.js")
+@JsModule("./gridConnector-es6.js")
+
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-sorter.html")
+@HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
+@HtmlImport("frontend://flow-component-renderer.html")
+@JavaScript("frontend://gridConnector.js")
 public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
         HasTheme, HasDataGenerators<T> {
@@ -912,7 +920,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             implements DataGenerator<T> {
 
         private Grid<T> grid;
-        private Registration registration;
 
         /**
          * Constructs a new grid extension, extending the given grid.
@@ -943,14 +950,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          */
         protected void extend(Grid<T> grid) {
             this.grid = grid;
-            registration = getGrid().addDataGenerator(this);
+            getGrid().addDataGenerator(this);
         }
 
         /**
          * Remove this extension from its target.
          */
         protected void remove() {
-            registration.remove();
+            getGrid().removeDataGenerator(this);
         }
 
         /**
@@ -2554,14 +2561,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             JsonObject jsonObject = item != null ? generateJsonForSelection(item) : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        final SerializableRunnable jsFunctionCall = () -> getElement()
-            .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> jsFunctionCall.run()));
-        }
+        getElement().callJsFunction("$connector." + function, jsonArray, false);
     }
 
     private JsonObject generateJsonForSelection(T item) {
@@ -3186,6 +3186,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @Override
     public Registration addDataGenerator(DataGenerator<T> dataGenerator) {
         return gridDataGenerator.addDataGenerator(dataGenerator);
+    }
+
+    @Override
+    public void removeDataGenerator(DataGenerator<T> dataGenerator) {
+        gridDataGenerator.removeDataGenerator(dataGenerator);
     }
 
     protected static int compareMaybeComparables(Object a, Object b) {
@@ -3875,11 +3880,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Scrolls to the end of the last data row.
+     * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getElement().executeJs("$0.scrollToIndex($0._effectiveSize)",
-                this.getElement());
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> getElement().executeJs("this.scrollToIndex(this._effectiveSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {

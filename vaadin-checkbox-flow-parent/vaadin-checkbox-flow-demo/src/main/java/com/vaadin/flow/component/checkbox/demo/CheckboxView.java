@@ -65,6 +65,7 @@ public class CheckboxView extends DemoView {
         Checkbox checkbox = new Checkbox();
         checkbox.setLabel("Option");
         checkbox.setValue(true);
+        add(checkbox);
         // end-source-example
 
         addCard("Basic usage", checkbox);
@@ -78,6 +79,7 @@ public class CheckboxView extends DemoView {
         checkboxGroup.setItems("Option one", "Option two", "Option three");
         checkboxGroup.setValue(Collections.singleton("Option one"));
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        add(checkboxGroup);
         // end-source-example
 
         addCard("Basic usage with checkbox group", checkboxGroup);
@@ -99,6 +101,7 @@ public class CheckboxView extends DemoView {
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         checkboxGroup
                 .setItemEnabledProvider(item -> !"Option three".equals(item));
+        add(disabledCheckGroup, checkboxGroup);
         // end-source-example
 
         disabledCheckGroup.getStyle().set("margin-right", "7.5em");
@@ -121,6 +124,7 @@ public class CheckboxView extends DemoView {
         List<Department> departmentList = getDepartments();
         checkboxGroup.setItems(departmentList);
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        add(checkboxGroup);
         // end-source-example
 
         addCard("Entity list", checkboxGroup);
@@ -143,6 +147,7 @@ public class CheckboxView extends DemoView {
                 value.setText("Selected: " + event.getValue());
             }
         });
+        add(checkboxGroup, value);
         // end-source-example
 
         addCard("Value change event", checkboxGroup, value);
@@ -177,6 +182,7 @@ public class CheckboxView extends DemoView {
             }
         });
         checkboxGroup.setValue(Collections.singleton("Option one"));
+        add(checkbox, checkboxGroup);
         // end-source-example
 
         addCard("Indeterminate checkbox", checkbox, checkboxGroup);
@@ -204,6 +210,7 @@ public class CheckboxView extends DemoView {
                         Notification.Position.MIDDLE);
             }
         });
+        add(checkboxGroup, button);
         // end-source-example
 
         checkboxGroup.getStyle().set("margin-right", "5.5em");
@@ -226,6 +233,7 @@ public class CheckboxView extends DemoView {
         vertical.setItems("Option one", "Option two", "Option three");
         vertical.setValue(Collections.singleton("Option one"));
         vertical.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        add(horizontal, vertical);
         // end-source-example
 
         addCard("Theme variants", "Orientation", horizontal, vertical);

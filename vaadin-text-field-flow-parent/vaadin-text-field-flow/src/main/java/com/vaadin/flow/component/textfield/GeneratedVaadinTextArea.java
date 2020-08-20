@@ -26,6 +26,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -147,7 +148,8 @@ import java.util.stream.Stream;
         "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha8",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.0-alpha5")
+@HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-area.html")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.2")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

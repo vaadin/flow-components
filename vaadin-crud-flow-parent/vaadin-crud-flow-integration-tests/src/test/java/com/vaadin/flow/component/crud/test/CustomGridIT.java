@@ -85,15 +85,13 @@ public class CustomGridIT extends AbstractParallelTest {
     @Test
     public void editorShouldHaveRightTitleWhenOpenedInExistingItemMode() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
-        GridElement grid = $(GridElement.class).first();
-
-        customGridClickToEditButton().click();
         
         crud.getNewItemButton().ifPresent(button -> button.click());
         Assert.assertEquals("New item", getEditorHeaderText(crud));
         
         crud.getEditorCancelButton().click();
-        grid.getCell(0, 0).click();
+        editItemButton().click();
+
         String editorHeaderText = getEditorHeaderText(crud);
         Assert.assertEquals("Edit item", editorHeaderText);
     }
@@ -123,12 +121,12 @@ public class CustomGridIT extends AbstractParallelTest {
                 .first().getText();
     }
 
-    private ButtonElement customGridClickToEditButton() {
-        return $(ButtonElement.class).onPage().id("clickToEdit");
-    }
-
     private ButtonElement newItemButton() {
         return $(ButtonElement.class).onPage().id("newItemEditor");
+    }
+
+    private ButtonElement editItemButton() {
+        return $(ButtonElement.class).onPage().id("editItemEditor");
     }
 
     private ButtonElement toggleBordersButton() {

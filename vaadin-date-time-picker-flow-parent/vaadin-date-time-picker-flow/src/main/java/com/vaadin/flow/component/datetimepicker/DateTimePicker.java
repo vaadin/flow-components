@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableFunction;
@@ -62,11 +63,14 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.3.0-alpha3")
+@HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.2.0")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
         Focusable<DateTimePicker> {
+
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
@@ -532,7 +536,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     /**
      * Sets the error message to display when the input is invalid.
      */
-    @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -543,7 +546,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      *
      * @return the current error message
      */
-    @Override
     public String getErrorMessage() {
         return getElement().getProperty("error-message");
     }
@@ -551,7 +553,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     /**
      * Sets the validity indication of the date time picker output.
      */
-    @Override
     public void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -561,7 +562,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      *
      * @return the current validity indication.
      */
-    @Override
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
     }
@@ -677,4 +677,25 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         this.required = requiredIndicatorVisible;
     }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @param autoOpen Value for the auto open property,
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+        datePicker.setAutoOpen(autoOpen);
+        timePicker.setAutoOpen(autoOpen);
+    }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
+    }
+
 }

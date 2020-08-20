@@ -43,15 +43,12 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         assertText($(DatePickerElement.class).id("french-locale-date-picker"),
                 "03/05/2018");
 
-        List<LogEntry> logs = getWarningEntries();
-        if (logs.size() != 0) {
-            Assert.assertEquals(
-                    "Expected only [Deprecation] warning should be in the logs",
-                    1, logs.size());
-            Assert.assertThat(logs.get(0).getMessage(),
+        for (LogEntry logEntry : getWarningEntries()) {
+            Assert.assertThat("Expected only [Deprecation] warnings in the logs",
+                    logEntry.getMessage(),
                     CoreMatchers.containsString("HTML Imports"));
-            Assert.assertThat(logs.get(0).getMessage(),
-                    CoreMatchers.containsString("deprecated"));
+            Assert.assertThat(logEntry.getMessage(),
+                CoreMatchers.containsString("deprecated"));
         }
 
         localePicker = $(DatePickerElement.class)
@@ -59,10 +56,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         localePicker.setDate(LocalDate.of(1985, 1, 10));
         findElement(By.tagName("body")).click();
 
-        logs = getWarningEntries();
-
         Assert.assertTrue("No new warnings should have appeared in the logs",
-                logs.isEmpty());
+                getWarningEntries().isEmpty());
 
         assertText(localePicker, "10.1.1985");
 

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,11 +36,6 @@ public class TimePickerIT extends AbstractComponentIT {
         $(TimePickerElement.class).waitForFirst();
     }
 
-    @After
-    public void after() {
-        checkLogsForErrors();
-    }
-
     @Test
     public void selectTimeOnSimpleTimePicker() {
         TimePickerElement picker = $(TimePickerElement.class)
@@ -53,6 +47,21 @@ public class TimePickerIT extends AbstractComponentIT {
 
         picker.setValue("");
         waitUntil(driver -> "No time is selected".equals(message.getText()));
+    }
+
+    @Test
+    public void selectTimeOnAutoOpenDisabledTimePicker() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("autoopendisabled-picker");
+        TestBenchElement message = $("div")
+                .id("autoopendisabled-picker-message");
+
+        picker.setValue("10:08");
+        waitUntil(driver -> message.getText().contains("Hour: 10\nMinute: 8"));
+
+        picker.setValue("");
+        waitUntil(driver -> "No time is selected".equals(message.getText()));
+        Assert.assertFalse(picker.isAutoOpen());
     }
 
     @Test

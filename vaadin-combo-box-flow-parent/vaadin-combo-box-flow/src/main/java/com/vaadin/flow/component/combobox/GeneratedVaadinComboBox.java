@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -294,7 +295,8 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
         "WebComponent: Vaadin.ComboBoxElement#5.0.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.3.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.2.0")
+@HtmlImport("frontend://bower_components/vaadin-combo-box/src/vaadin-combo-box.html")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -1112,7 +1114,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * </p>
      */
     protected void clearCache() {
-        getElement().callJsFunction("clearCache");
+        getElement().callFunction("clearCache");
     }
 
     /**
@@ -1124,7 +1126,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * </p>
      */
     protected void render() {
-        getElement().callJsFunction("render");
+        getElement().callFunction("render");
     }
 
     /**
@@ -1136,7 +1138,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * </p>
      */
     protected void open() {
-        getElement().callJsFunction("open");
+        getElement().callFunction("open");
     }
 
     /**
@@ -1148,7 +1150,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * </p>
      */
     protected void close() {
-        getElement().callJsFunction("close");
+        getElement().callFunction("close");
     }
 
     /**
@@ -1160,7 +1162,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * </p>
      */
     protected void cancel() {
-        getElement().callJsFunction("cancel");
+        getElement().callFunction("cancel");
     }
 
     /**
@@ -1193,7 +1195,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * </p>
      */
     protected void checkValidity() {
-        getElement().callJsFunction("checkValidity");
+        getElement().callFunction("checkValidity");
     }
 
     @DomEvent("custom-value-set")

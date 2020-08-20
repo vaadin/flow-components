@@ -26,6 +26,7 @@ import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.router.RouterLayout;
@@ -37,13 +38,12 @@ import java.util.Objects;
  * Provides a quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.2.0-alpha1")
+@HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-app-layout.html")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.1.0")
 @JsModule("@vaadin/vaadin-app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
         .propertyWithDefault("primarySection", Section.NAVBAR.toWebcomponentValue());
-    private static final PropertyDescriptor<Boolean, Boolean> drawerOpenedProperty = PropertyDescriptors
-        .propertyWithDefault("drawerOpened", true);
     private static final PropertyDescriptor<Boolean, Boolean> overlayProperty = PropertyDescriptors
         .propertyWithDefault("overlay", false);
 
@@ -86,7 +86,7 @@ public class AppLayout extends Component implements RouterLayout {
      */
     @Synchronize("drawer-opened-changed")
     public boolean isDrawerOpened() {
-        return drawerOpenedProperty.get(this);
+        return getElement().getProperty("drawerOpened", true);
     }
 
     /**
@@ -97,7 +97,7 @@ public class AppLayout extends Component implements RouterLayout {
      * @see DrawerToggle for a component that allows the user to open and close the drawer.
      */
     public void setDrawerOpened(boolean drawerOpened) {
-        drawerOpenedProperty.set(this, drawerOpened);
+        getElement().setProperty("drawerOpened", drawerOpened);
     }
 
     /**

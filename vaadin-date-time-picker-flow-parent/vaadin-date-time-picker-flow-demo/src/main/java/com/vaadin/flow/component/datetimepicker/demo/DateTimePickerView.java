@@ -53,6 +53,7 @@ public class DateTimePickerView extends DemoView {
         timePickerStep();
         createMinAndMaxDateTimePicker();
         valueChangeEvent();
+        autoOpenDisabled();
         configurationForRequired(); // Validation
         customValidator();
         datePickerWithWeekNumbers(); // Presentation
@@ -161,6 +162,18 @@ public class DateTimePickerView extends DemoView {
                 value);
         verticalLayout.setPadding(false);
         addCard("Value change event", verticalLayout);
+    }
+
+    private void autoOpenDisabled() {
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        DateTimePicker dateTimePicker = new DateTimePicker();
+
+        // Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.
+        dateTimePicker.setAutoOpen(false);
+        // end-source-example
+
+        addCard("Auto open disabled", dateTimePicker);
     }
 
     private void configurationForRequired() {
