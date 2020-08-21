@@ -1,3 +1,5 @@
+# This file is used to record the component branch info for Vaadin 14.3
+
 <module>vaadin-button-flow-parent:2.1</module>
 <module>vaadin-checkbox-flow-parent:2.1</module>
 <module>vaadin-combo-box-flow-parent:3.1</module>
