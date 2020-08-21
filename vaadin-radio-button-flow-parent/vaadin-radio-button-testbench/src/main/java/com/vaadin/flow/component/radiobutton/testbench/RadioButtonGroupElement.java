@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -30,7 +31,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-radio-group")
 public class RadioButtonGroupElement extends TestBenchElement
-        implements HasSelectByText {
+        implements HasSelectByText, HasHelper {
 
     /**
      * Gets a list of all available options.
