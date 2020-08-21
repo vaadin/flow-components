@@ -33,6 +33,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -222,8 +223,10 @@ public class CheckboxView extends DemoView {
         entityList();
         valueChangeEvent();
         indeterminateCheckbox();
+        helperText();
         configurationForRequired(); // Validation
         themeVariantsHorizontal();// Theme Variants
+        helperTextVariant();
         styling(); // Styling
         filteringAndAccessingItems(); // DataView usage demo
 
@@ -355,6 +358,35 @@ public class CheckboxView extends DemoView {
         addCard("Indeterminate checkbox", checkbox, checkboxGroup);
     }
 
+    private void helperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and component
+        CheckboxGroup<Department> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Departments");
+        List<Department> departmentList = getDepartments();
+        checkboxGroup.setItems(departmentList);
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroup.setHelperText("Choose your current departments");
+
+        CheckboxGroup<String> checkboxGroupHelperComponent = new CheckboxGroup<>();
+        checkboxGroupHelperComponent.setLabel("Options");
+        checkboxGroupHelperComponent
+              .setItems("Option one", "Option two", "Option three");
+        checkboxGroupHelperComponent
+              .addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroupHelperComponent
+              .setHelperComponent(new Span("Choose any options"));
+
+        add(checkboxGroup, checkboxGroupHelperComponent);
+        // end-source-example
+
+        checkboxGroup.getStyle().set("margin-right", "15px");
+        div.add(checkboxGroup, checkboxGroupHelperComponent);
+
+        addCard("Helper text and component", div);
+    }
+
     private void configurationForRequired() {
         // begin-source-example
         // source-example-heading: Required
@@ -404,6 +436,22 @@ public class CheckboxView extends DemoView {
         addCard("Theme variants", "Orientation", horizontal, vertical);
     }
 
+    private void helperTextVariant() {
+        // begin-source-example
+        // source-example-heading: Helper text above the field
+        CheckboxGroup<Department> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Departments");
+        List<Department> departmentList = getDepartments();
+        checkboxGroup.setItems(departmentList);
+        checkboxGroup.setHelperText("Choose your current departments");
+        checkboxGroup
+              .addThemeVariants(CheckboxGroupVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        add(checkboxGroup);
+        // end-source-example
+
+        addCard("Theme variants", "Helper text above the field", checkboxGroup);
+    }
     private void styling() {
         Paragraph p1 = new Paragraph(
                 "To read about styling you can read the related tutorial ");
