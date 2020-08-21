@@ -1,9 +1,13 @@
 package com.vaadin.flow.component.select;
 
+import java.util.List;
+import java.util.Objects;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -20,9 +24,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
-import java.util.List;
-import java.util.Objects;
-
 @Route("vaadin-select")
 public class SelectView extends DemoView {
 
@@ -33,12 +34,14 @@ public class SelectView extends DemoView {
         entityList();
         valueChanged();
         disabledItem();
+        helperText();
         configurationForReqiredDemo();// Validation
         formFieldDemo();
         separatorDemo();// Presentation
         customOptionsDemo();
         themeVariantsTextAlign(); // ThemeVariants
         themeVariantsSmallSize();
+        helperTextAbove();
         styling();// Styling
     }
 
@@ -88,6 +91,30 @@ public class SelectView extends DemoView {
         layout.getStyle().set("flex-wrap", "wrap");
         addCard("Disabled and read-only", layout);
     }
+
+    private void helperText() {
+        // begin-source-example
+        // source-example-heading: Helper text and component
+        Select<String> degree = new Select<>("Baccalaureate", "Licence",
+              "Master", "Doctorate");
+        degree.setLabel("Academic degree");
+        degree.setHelperText(
+              "Please, select only the highest accomplished degree");
+
+        Select<String> pet = new Select<>("Cat", "Dog", "Rabbit", "Fish",
+              "Bird", "Other");
+        pet.setLabel("Pets");
+        pet.setHelperComponent(new Span("Your favorite pet"));
+
+        add(degree, pet);
+        // end-source-example
+
+        degree.getStyle().set("margin-right", "5px");
+        HorizontalLayout layout = new HorizontalLayout(degree, pet);
+        layout.getStyle().set("flex-wrap", "wrap");
+        addCard("Helper text and component", layout);
+    }
+
 
     private List<Department> getDepartments() {
 
@@ -305,6 +332,32 @@ public class SelectView extends DemoView {
         add(select);
         // end-source-example
         addCard("Theme Variants", "Small size", select);
+    }
+
+    private void helperTextAbove () {
+        // begin-source-example
+        // source-example-heading: Helper text and component above the field
+        Select<String> degree = new Select<>("Baccalaureate", "Licence",
+              "Master", "Doctorate");
+        degree.setLabel("Academic degree");
+        degree.setHelperText(
+              "Please, select only the highest accomplished degree");
+        degree.getElement().getThemeList().set("helper-above-field", true);
+
+        Select<String> pet = new Select<>("Cat", "Dog", "Rabbit", "Fish",
+              "Bird", "Other");
+        pet.setLabel("Pets");
+        pet.setHelperComponent(new Span("Your favorite pet"));
+        pet.getElement().getThemeList().set("helper-above-field", true);
+
+        add(degree, pet);
+        // end-source-example
+
+        degree.getStyle().set("margin-right", "5px");
+        HorizontalLayout layout = new HorizontalLayout(degree, pet);
+        layout.getStyle().set("flex-wrap", "wrap");
+        addCard("Theme Variants", "Helper text and component above the field",
+              layout);
     }
 
     private void styling() {
