@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -88,7 +89,7 @@ import elemental.json.JsonValue;
 @JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
-        HasFilterableDataProvider<T, String> {
+        HasFilterableDataProvider<T, String>, HasHelper {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
