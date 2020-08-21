@@ -31,6 +31,16 @@
         </driver.binary.downloader.maven.plugin.version>
         <flow.version>3.2-SNAPSHOT</flow.version>
         <testbench.version>6.2.2</testbench.version>
+		
+		<testbench.testsInParalel>2</testbench.testsInParalel>
+        <testbench.runLocaly>CHROME</testbench.runLocaly>
+        <failsafe.forkCount>2</failsafe.forkCount>
+
+        <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
+		
+		<powermock.version>1.7.1</powermock.version>
+        <jackson.version>2.9.10.4</jackson.version>
+        <ci-sauce.version>1.138</ci-sauce.version>
 
         <!-- OSGi support -->
         <osgi.bundle.import.package>*</osgi.bundle.import.package>
@@ -83,6 +93,20 @@
         <module>vaadin-login-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
     </modules>
+	
+	<profiles>
+       <profile>
+           <id>default</id>
+           <activation>
+               <property>
+                   <name>run-it</name>
+               </property>
+           </activation>
+           <modules>
+               <module>integration-tests</module>
+           </modules>
+       </profile>
+   </profiles>
 
     <repositories>
         <repository>
@@ -247,12 +271,6 @@
                             <configuration>
                                 <daemon>true</daemon>
                                 <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <systemProperties>
-                                    <systemProperty>
-                                        <name>vaadin.devmode.liveReload.enabled</name>
-                                        <value>false</value>
-                                    </systemProperty>
-                                </systemProperties>
                             </configuration>
                         </execution>
                         <execution>
@@ -278,9 +296,12 @@
                         </execution>
                     </executions>
                     <configuration>
+					    <forkCount>${failsafe.forkCount}</forkCount>
+                        <reuseForks>true</reuseForks>
                         <systemPropertyVariables>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
-                        </systemPropertyVariables>
+                            <com.vaadin.testbench.Parameters.testsInParallel>${testbench.testsInParalel}</com.vaadin.testbench.Parameters.testsInParallel>
+						</systemPropertyVariables>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -396,7 +417,7 @@
                     <artifactId>flow-maven-plugin</artifactId>
                     <version>${flow.version}</version>
                     <configuration>
-                        <pnpmEnable>false</pnpmEnable>
+                        <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
                     </configuration>
                     <executions>
                         <execution>
