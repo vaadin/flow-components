@@ -122,7 +122,7 @@ import com.vaadin.flow.shared.Registration;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.CheckboxElement#2.2.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.3.0")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.5.0-alpha1")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>

@@ -15,6 +15,12 @@
  */
 package com.vaadin.flow.component.checkbox.demo;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -24,6 +30,7 @@ import com.vaadin.flow.component.checkbox.demo.entity.Department;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -31,12 +38,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * View for {@link CheckboxGroup} demo.
@@ -54,8 +55,10 @@ public class CheckboxView extends DemoView {
         entityList();
         valueChangeEvent();
         indeterminateCheckbox();
+        helperText();
         configurationForRequired(); // Validation
         themeVariantsHorizontal();// Theme Variants
+        helperTextVariant();
         styling(); // Styling
     }
 
@@ -188,6 +191,35 @@ public class CheckboxView extends DemoView {
         addCard("Indeterminate checkbox", checkbox, checkboxGroup);
     }
 
+    private void helperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and component
+        CheckboxGroup<Department> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Departments");
+        List<Department> departmentList = getDepartments();
+        checkboxGroup.setItems(departmentList);
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroup.setHelperText("Choose your current departments");
+
+        CheckboxGroup<String> checkboxGroupHelperComponent = new CheckboxGroup<>();
+        checkboxGroupHelperComponent.setLabel("Options");
+        checkboxGroupHelperComponent
+              .setItems("Option one", "Option two", "Option three");
+        checkboxGroupHelperComponent
+              .addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroupHelperComponent
+              .setHelperComponent(new Span("Choose any options"));
+
+        add(checkboxGroup, checkboxGroupHelperComponent);
+        // end-source-example
+
+        checkboxGroup.getStyle().set("margin-right", "15px");
+        div.add(checkboxGroup, checkboxGroupHelperComponent);
+
+        addCard("Helper text and component", div);
+    }
+
     private void configurationForRequired() {
         // begin-source-example
         // source-example-heading: Required
@@ -239,6 +271,22 @@ public class CheckboxView extends DemoView {
         addCard("Theme variants", "Orientation", horizontal, vertical);
     }
 
+    private void helperTextVariant() {
+        // begin-source-example
+        // source-example-heading: Helper text above the field
+        CheckboxGroup<Department> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Departments");
+        List<Department> departmentList = getDepartments();
+        checkboxGroup.setItems(departmentList);
+        checkboxGroup.setHelperText("Choose your current departments");
+        checkboxGroup
+              .addThemeVariants(CheckboxGroupVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        add(checkboxGroup);
+        // end-source-example
+
+        addCard("Theme variants", "Helper text above the field", checkboxGroup);
+    }
     private void styling() {
         Paragraph p1 = new Paragraph(
                 "To read about styling you can read the related tutorial ");
