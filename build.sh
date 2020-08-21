@@ -47,7 +47,7 @@ tcLog 'Install NPM packages'
 npm install --silent --quiet --no-progress
 
 tcLog 'Merge IT modules'
-scripts/mergeITs.js `echo $elements`
+node scripts/mergeITs.js `echo $elements`
 
 tcLog 'Compiling and Installing flow components'
 cmd="mvn clean install -Drelease -DskipTests -T $processors -q"

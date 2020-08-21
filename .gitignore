@@ -19,6 +19,6 @@ tsconfig.json
 webpack.*
 node_modules
 .driver
-package-*json
+package*json
 pnpm*
 error-screenshots
