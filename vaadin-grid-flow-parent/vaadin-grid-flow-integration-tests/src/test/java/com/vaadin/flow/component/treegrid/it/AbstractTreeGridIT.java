@@ -4,12 +4,11 @@ import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 
-public abstract class AbstractTreeGridIT extends AbstractNoW3c {
+public abstract class AbstractTreeGridIT extends AbstractComponentIT {
 
     private TreeGridElement grid;
 

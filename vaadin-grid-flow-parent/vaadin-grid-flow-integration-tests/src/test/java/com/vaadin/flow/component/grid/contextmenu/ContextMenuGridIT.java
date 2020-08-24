@@ -19,19 +19,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import com.vaadin.flow.testutil.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("context-menu-grid")
-public class ContextMenuGridIT extends AbstractNoW3c {
+public class ContextMenuGridIT extends AbstractComponentIT {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
