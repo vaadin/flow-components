@@ -127,6 +127,10 @@ function copyFileSync(source, target, replaceCall) {
   }
   // fs.copyFileSync(source, targetFile);
   let content = fs.readFileSync(source, 'utf8');
+  // remove CR in windows
+  if (/\.(java)$/.test(source)) {
+    content = content.replace('\r', '');
+  }
   [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
   fs.writeFileSync(targetFile, content, 'utf8');
 }
@@ -186,10 +190,10 @@ function computeRoute(wcname, clname, prefix, route, suffix) {
 }
 // Replace @Route values from master to unique routes in the merged module
 function replaceRoutes(wcname, clname, content) {
-  content = content.replace(/\@Route *\n/, (...args) => {
+  content = content.replace(/\@Route *\r?\n/, (...args) => {
     return `@Route(value = "${/^Main(View)?$/.test(clname) ? '': clname.replace(/View$/, '').toLowerCase()}")\n`
   });
-  const routeRegex = /(\@Route *?)(?:(\( *)(?:(")(.*?)(")|(.*?value *= *")(.*?)(".*?))( *\))) *\n/;
+  const routeRegex = /(\@Route *?)(?:(\( *)(?:(")(.*?)(")|(.*?value *= *")(.*?)(".*?))( *\))) *\r?\n/;
   content = content.replace(routeRegex, (...args) => {
     let [prefix, route, suffix] = !args[2] && !args[6] ? [`${args[1]}("`, '', '")\n'] :
       args[6] ? [`${args[1]}${args[2]}${args[6]}`, args[7], `${args[8]}${args[9]}\n`] :
