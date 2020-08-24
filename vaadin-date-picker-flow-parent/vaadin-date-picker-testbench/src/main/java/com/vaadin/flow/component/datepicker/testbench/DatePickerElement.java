@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker.testbench;
 
 import java.time.LocalDate;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -26,7 +27,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-date-picker")
-public class DatePickerElement extends TestBenchElement implements HasLabel {
+public class DatePickerElement extends TestBenchElement implements HasLabel,
+      HasHelper {
 
     /**
      * Clears the value of the date picker.
