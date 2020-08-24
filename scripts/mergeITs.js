@@ -348,20 +348,10 @@ async function copySources() {
         content = content.replace('.replace("com.vaadin.flow.component.charts.examples.", "")',
          '.replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/")');
 
-        content = content.replace('import com.vaadin.flow.demo.ComponentDemoTest','import com.vaadin.tests.ComponentDemoTest'); 
-        content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest'); 
-        content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest'); 
-        content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT'); 
-
-        // Remove W3C workaround from Grid tests.
-        const w3cReplacement = content.includes('com.vaadin.tests.AbstractComponentIT')? '':'import com.vaadin.tests.AbstractComponentIT;';
-        content = content.replace('import com.vaadin.flow.component.AbstractNoW3c;',w3cReplacement);
-        content = content.replace('extends AbstractNoW3c', 'extends AbstractComponentIT');
-
-        if (/GridViewIT\.java$/.test(source)) {
-          content = content.replace(/AbstractNoW3c[^;]+/,'null');
-        }
-
+       content = content.replace('import com.vaadin.flow.demo.ComponentDemoTest','import com.vaadin.tests.ComponentDemoTest'); 
+       content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest'); 
+       content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest'); 
+       content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT'); 
       }
       return [target, content];
     });
