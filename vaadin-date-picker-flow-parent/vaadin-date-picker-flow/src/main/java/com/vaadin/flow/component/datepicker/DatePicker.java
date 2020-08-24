@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -46,7 +47,7 @@ import elemental.json.JsonObject;
  */
 @JsModule("./datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation {
+        implements HasSize, HasValidation, HasHelper {
 
     private DatePickerI18n i18n;
 
