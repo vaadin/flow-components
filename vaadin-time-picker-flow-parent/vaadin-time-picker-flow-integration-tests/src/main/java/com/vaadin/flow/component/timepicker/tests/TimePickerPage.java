@@ -20,6 +20,8 @@ import java.time.LocalTime;
 import java.util.Arrays;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
 
@@ -32,6 +34,8 @@ public class TimePickerPage extends Div {
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
+        createHelperText();
+        createHelperComponent();
     }
 
     private void createDefaultTimePicker() {
@@ -107,6 +111,35 @@ public class TimePickerPage extends Div {
 
         timePicker.setId("time-picker-min-max");
         add(timePicker, message);
+    }
+
+    private void createHelperText() {
+        TimePicker timePickerHelperText = new TimePicker();
+        timePickerHelperText.setId("time-picker-helper-text");
+        timePickerHelperText.setHelperText("Helper text");
+        NativeButton clearHelper = new NativeButton("Clear helper text", e -> {
+            timePickerHelperText.setHelperText(null);
+        });
+        clearHelper.setId("button-clear-helper-text");
+
+        add(timePickerHelperText, clearHelper);
+    }
+
+    private void createHelperComponent() {
+        TimePicker timePickerHelperComponent = new TimePicker();
+        timePickerHelperComponent.setId("time-picker-helper-component");
+
+        Span span = new Span("Helper component");
+        span.setId("helper-component");
+        timePickerHelperComponent.setHelperComponent(span);
+
+        NativeButton clearComponent = new NativeButton("Clear component helper",
+              e -> {
+                  timePickerHelperComponent.setHelperComponent(null);
+              });
+        clearComponent.setId("button-clear-helper-component");
+
+        add(timePickerHelperComponent, clearComponent);
     }
 
     private Div createMessageDiv(String id) {
