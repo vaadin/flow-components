@@ -26,7 +26,7 @@ import com.vaadin.flow.data.provider.IdentifierProvider;
 
 /**
  * Implementation of generic data view for grid.
- * 
+ *
  * @param <T>
  *            the item type
  * @since

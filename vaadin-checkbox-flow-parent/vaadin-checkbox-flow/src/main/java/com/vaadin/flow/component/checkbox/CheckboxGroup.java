@@ -37,9 +37,11 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -69,7 +71,7 @@ public class CheckboxGroup<T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, CheckboxGroupDataView<T>> {
+        HasDataView<T, Void, CheckboxGroupDataView<T>> {
 
     private static final String VALUE = "value";
 
@@ -102,9 +104,29 @@ public class CheckboxGroup<T>
     }
 
     @Override
-    public CheckboxGroupDataView<T> setItems(DataProvider<T, ?> dataProvider) {
+    public CheckboxGroupDataView<T> setItems(DataProvider<T, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getGenericDataView();
+    }
+
+    @Override
+    public CheckboxGroupDataView<T> setItems(
+            InMemoryDataProvider<T> inMemoryDataProvider) {
+        // We don't use DataProvider.withConvertedFilter() here because it's
+        // implementation does not apply the filter converter if Query has a
+        // null filter
+        DataProvider<T, Void> convertedDataProvider =
+                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                        inMemoryDataProvider) {
+                    @Override
+                    protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                        // Just ignore the query filter (Void) and apply the
+                        // predicate only
+                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                                .orElse(item -> true);
+                    }
+                };
+        return setItems(convertedDataProvider);
     }
 
     @Override
