@@ -55,6 +55,7 @@
     </properties>
 
     <modules>
+        <module>vaadin-flow-components-shared</module>
         <module>vaadin-button-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
         <module>vaadin-combo-box-flow-parent</module>
