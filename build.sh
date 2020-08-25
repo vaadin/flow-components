@@ -58,7 +58,7 @@ args="-B -Dvaadin.pnpm.enable=true"
 [ -n "$TBHUB" ] && TBHUB=localhost
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.reuseForks=false"
+args="$args -Dfailsafe.forkCount=$processors -DreuseForks=false"
 
 ### Run IT's in original modules
 # if [ -n "$modules" ]
