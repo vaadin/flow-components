@@ -22,9 +22,11 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
+import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ADD_ITEM;
+import static com.vaadin.flow.component.grid.it.GridListDataViewPage.DELETE_ITEM;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.FIRST_NAME_FILTER;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ITEM_COUNT;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ITEM_DATA;
@@ -32,8 +34,9 @@ import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ROW_SELECT;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.SHOW_ITEM_DATA;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.SHOW_NEXT_DATA;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.SHOW_PREVIOUS_DATA;
+import static com.vaadin.flow.component.grid.it.GridListDataViewPage.UPDATE_ITEM;
 
-@TestPath("gridlistdataviewpage")
+@TestPath("vaadin-grid/grid-list-data-view-page")
 public class GridListDataViewIT extends AbstractComponentIT {
 
     @Test
@@ -90,6 +93,30 @@ public class GridListDataViewIT extends AbstractComponentIT {
         $(ButtonElement.class).id(SHOW_PREVIOUS_DATA).click();
         Assert.assertEquals("Wrong previous item for sorted data.", "Item: Person 95",
                 $("span").id(ITEM_DATA).getText());
+
+        $(ButtonElement.class).id(ADD_ITEM).click();
+        Assert.assertEquals("Item count not expected", "251",
+                $("span").id(ITEM_COUNT).getText());
+        Assert.assertEquals("Wrong first name for added person",
+                "John", grid.getCell(250, 0).getText());
+        Assert.assertEquals("Wrong last name for added person",
+                "Doe", grid.getCell(250, 1).getText());
+        Assert.assertEquals("Wrong age for added person",
+                "33", grid.getCell(250, 2).getText());
+
+        $(IntegerFieldElement.class).id(ROW_SELECT).setValue("250");
+        $(TextFieldElement.class).id(UPDATE_ITEM).setValue("Bob");
+        Assert.assertEquals("Wrong first name for updated person",
+                "Bob", grid.getCell(250, 0).getText());
+        Assert.assertEquals("Wrong last name for updated person",
+                "Doe", grid.getCell(250, 1).getText());
+        Assert.assertEquals("Wrong age for updated person",
+                "33", grid.getCell(250, 2).getText());
+
+        $(IntegerFieldElement.class).id(ROW_SELECT).setValue("250");
+        $(ButtonElement.class).id(DELETE_ITEM).click();
+        Assert.assertEquals("Item count not expected", "250",
+                $("span").id(ITEM_COUNT).getText());
 
         $(TextFieldElement.class).id(FIRST_NAME_FILTER).setValue("9");
 

@@ -28,14 +28,14 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 
-@TestPath("dialog-test")
+@TestPath("vaadin-dialog/dialog-test")
 public class DialogTestPageIT extends AbstractComponentIT {
 
     static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
@@ -218,6 +218,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     @Test
+    @org.junit.Ignore
     public void verifyDialogFullSize() {
         findElement(By.id("button-for-dialog-with-div")).click();
         WebElement overlay = getInShadowRoot(getOverlayContent(),

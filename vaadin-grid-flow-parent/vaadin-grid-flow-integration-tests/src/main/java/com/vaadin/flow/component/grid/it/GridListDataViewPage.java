@@ -33,7 +33,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route
+@Route("vaadin-grid/grid-list-data-view-page")
 @Theme(Lumo.class)
 public class GridListDataViewPage extends Div {
 
@@ -44,6 +44,9 @@ public class GridListDataViewPage extends Div {
     public static final String SHOW_NEXT_DATA = "showNextData";
     public static final String SHOW_PREVIOUS_DATA = "showPreviousData";
     public static final String FIRST_NAME_FILTER = "firstNameFilter";
+    public static final String ADD_ITEM = "addItem";
+    public static final String UPDATE_ITEM = "updateItem";
+    public static final String DELETE_ITEM = "deleteItem";
 
     public GridListDataViewPage() {
         List<Person> personList = generatePersonItems();
@@ -89,6 +92,28 @@ public class GridListDataViewPage extends Div {
                                     .contains(event.getValue().toLowerCase()));
                 });
         filterByFirstName.setId(FIRST_NAME_FILTER);
+        Button addNewPerson = new Button("Add new person",
+                event -> {
+                    Person newPerson = new Person("John", "Doe",
+                            "john@test.com", 33, Gender.MALE, new Address());
+                    dataView.addItem(newPerson);
+                });
+        addNewPerson.setId(ADD_ITEM);
+        TextField updateFirstNameField = new TextField("Update first name",
+                event -> {
+                    Person updatedPerson =
+                            dataView.getItem(rowSelect.getValue());
+                    updatedPerson.setFirstName(event.getValue());
+                    dataView.refreshItem(updatedPerson);
+                });
+        updateFirstNameField.setId(UPDATE_ITEM);
+        Button deletePerson = new Button("Delete person",
+                event -> {
+                    Person deletedPerson =
+                            dataView.getItem(rowSelect.getValue());
+                    dataView.removeItem(deletedPerson);
+                });
+        deletePerson.setId(DELETE_ITEM);
 
         dataView.addItemCountChangeListener(event -> {
             count.setText(Integer.toString(event.getItemCount()));
@@ -112,7 +137,8 @@ public class GridListDataViewPage extends Div {
         });
 
         add(grid, rowSelect, filterByFirstName, selectItemOnRow, showItemData,
-                showNextData, showPreviousData, count, itemData);
+                showNextData, showPreviousData, count, itemData,
+                addNewPerson, updateFirstNameField, deletePerson);
     }
 
     private List<Person> generatePersonItems() {

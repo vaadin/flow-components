@@ -24,10 +24,10 @@ import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("editor-refresh")
+@TestPath("vaadin-grid/editor-refresh")
 public class GridEditorRefreshIT extends AbstractComponentIT {
 
     private GridElement grid;

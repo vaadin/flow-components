@@ -25,7 +25,7 @@ import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("disabled-grid")
+@Route("vaadin-grid/disabled-grid")
 public class DisabledGridPage extends Div {
 
     private Div message;

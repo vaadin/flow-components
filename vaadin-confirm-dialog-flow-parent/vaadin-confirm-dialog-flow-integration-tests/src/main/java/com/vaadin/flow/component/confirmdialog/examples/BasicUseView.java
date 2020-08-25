@@ -5,7 +5,7 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Route
+@Route(value = "vaadin-confirm-dialog/basicuse")
 public class BasicUseView extends Div {
 
     boolean expanded = true;

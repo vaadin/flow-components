@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +28,7 @@ import java.util.Collections;
 /**
  * Integration tests for the {@link BinderValidationPage}.
  */
-@TestPath("binder-validation")
+@TestPath("vaadin-date-time-picker/binder-validation")
 public class DateTimePickerBinderValidationIT extends AbstractComponentIT {
 
     @Before

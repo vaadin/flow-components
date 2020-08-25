@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -22,7 +23,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
@@ -30,8 +30,8 @@ import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("dynamic-editor-keyboard")
-public class DynamicEditorKBNavigationIT extends AbstractNoW3c {
+@TestPath("vaadin-grid/dynamic-editor-keyboard")
+public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
 
     @Test
     public void navigateBetweenEditorsUsingKeybaord() {
@@ -58,8 +58,8 @@ public class DynamicEditorKBNavigationIT extends AbstractNoW3c {
         nameInput.sendKeys(Keys.ENTER);
         nameInput.click();
         nameInput.sendKeys(Keys.TAB);
-
-        new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
+        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
+        checkbox.sendKeys(Keys.TAB);
 
         new Actions(getDriver())
                 .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
@@ -74,7 +74,6 @@ public class DynamicEditorKBNavigationIT extends AbstractNoW3c {
         Assert.assertEquals("foobaz, true, bar@gmail.org", msg.getText());
 
         // Change the subscriber status
-        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
         checkbox.click();
 
         TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
@@ -86,7 +85,7 @@ public class DynamicEditorKBNavigationIT extends AbstractNoW3c {
         nameField = nameCell.$("vaadin-text-field").first();
         nameInput.click();
         nameInput.sendKeys(Keys.TAB);
-        new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
+        checkbox.sendKeys(Keys.TAB);
         new Actions(getDriver()).sendKeys(Keys.BACK_SPACE).build().perform();
 
         emailField = emailCell.$("vaadin-text-field").first();

@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * https://github.com/vaadin/vaadin-context-menu-flow/issues/119
  */
-@TestPath("on-attach-listener")
+@TestPath("vaadin-context-menu/on-attach-listener")
 public class ContextMenuCreatedOnAttachIT extends AbstractContextMenuIT {
     @Before
     public void init() {

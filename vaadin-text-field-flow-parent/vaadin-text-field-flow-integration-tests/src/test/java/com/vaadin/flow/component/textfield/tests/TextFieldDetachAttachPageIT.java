@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,7 +27,7 @@ import org.openqa.selenium.WebElement;
 /**
  * Integration tests for attaching / detaching {@link TextField}.
  */
-@TestPath("text-field-detach-attach")
+@TestPath("vaadin-text-field/text-field-detach-attach")
 public class TextFieldDetachAttachPageIT extends AbstractComponentIT {
 
     @Test

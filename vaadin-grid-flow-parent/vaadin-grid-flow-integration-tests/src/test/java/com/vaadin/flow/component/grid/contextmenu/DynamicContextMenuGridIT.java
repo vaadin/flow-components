@@ -21,10 +21,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("dynamic-context-menu-grid")
+@TestPath("vaadin-grid/dynamic-context-menu-grid")
 public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";

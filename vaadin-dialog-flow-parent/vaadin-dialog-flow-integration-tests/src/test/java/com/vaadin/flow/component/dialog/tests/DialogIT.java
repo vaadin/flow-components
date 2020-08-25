@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-dialog-view")
@@ -32,6 +32,7 @@ public class DialogIT extends AbstractComponentIT {
     private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
 
     @Test
+    @org.junit.Ignore
     public void openAndCloseBasicDialog_labelRendered() {
         open();
 

@@ -28,7 +28,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
 
-@Route("component-renderer")
+@Route("vaadin-combo-box/component-renderer")
 public class ComponentRendererPage extends Div {
     public ComponentRendererPage() {
         itemsBeforeRenderer();

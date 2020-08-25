@@ -18,7 +18,8 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") ;
+        getDriver().get(url);
     }
 
     @After

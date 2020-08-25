@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.splitlayout.demo.SplitLayoutView;
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 
 /**
  * Integration tests for {@link SplitLayoutView}.

@@ -22,7 +22,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("dynamic-context-menu-grid")
+@Route("vaadin-grid/dynamic-context-menu-grid")
 public class DynamicContextMenuGridPage extends Div {
 
     public DynamicContextMenuGridPage() {

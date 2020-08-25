@@ -19,68 +19,28 @@ package com.vaadin.flow.component.grid.dataview;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.DataView;
-import com.vaadin.flow.data.provider.IdentifierProvider;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
-import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
-public class GridDataViewTest {
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 
-    private List<String> items;
-
-    private InMemoryDataProvider<String> dataProvider;
-
-    private GridDataView<String> dataView;
-
-    private Grid<String> component;
-
-    @Before
-    public void init() {
-
-        items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
-
-        dataProvider = new InMemoryProvider(items);
-        component = new Grid<>();
-        dataView = component.setItems(dataProvider);
-    }
-
-    @Test
-    public void getAllItems_noFiltersSet_allItemsObtained() {
-        Stream<String> allItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set", items.toArray(),
-                allItems.toArray());
-    }
-
-    @Test
-    public void addListener_fireEvent_listenerIsCalled() {
-        AtomicInteger fired = new AtomicInteger(0);
-        dataView.addItemCountChangeListener(
-                event -> fired.compareAndSet(0, event.getItemCount()));
-
-        ComponentUtil.fireEvent(component,
-                new ItemCountChangeEvent<>(component, 10, false));
-
-        Assert.assertEquals(10, fired.get());
-    }
+public class GridDataViewTest extends AbstractComponentDataViewTest {
 
     @Test
     public void dataViewWithItems_getItem_returnsCorrectItem() {
@@ -95,31 +55,68 @@ public class GridDataViewTest {
         Item second = new Item(2L, "middle");
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
-
-        DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
         Grid<Item> component = new Grid<>();
+
+        // We create a generic data provider to test the identity
+        // handling behavior in generic data view
+        DataProvider<Item, Void> dataProvider = new DataProvider<Item, Void>() {
+            @Override
+            public boolean isInMemory() {
+                return true;
+            }
+
+            @Override
+            public int size(Query<Item, Void> query) {
+                return 2;
+            }
+
+            @Override
+            public Stream<Item> fetch(Query<Item, Void> query) {
+                return Stream.of(first, second);
+            }
+
+            @Override
+            public void refreshItem(Item item) {
+
+            }
+
+            @Override
+            public void refreshAll() {
+
+            }
+
+            @Override
+            public Registration addDataProviderListener(
+                    DataProviderListener<Item> listener) {
+                return null;
+            }
+        };
 
         // Generic grid data view
         DataView<Item> dataView = component.setItems(dataProvider);
-        DataKeyMapper<Item> keyMapper =
-                component.getDataCommunicator().getKeyMapper();
+        DataKeyMapper<Item> keyMapper = component.getDataCommunicator()
+                .getKeyMapper();
         items.forEach(keyMapper::key);
 
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
-
         dataView.setIdentifierProvider(IdentifierProvider.identity());
+        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
 
         // In-memory grid data view
-        dataView = component.getListDataView();
+        dataView = component.setItems(DataProvider.ofCollection(items));
+        // We need to repopulate the keyMapper after setting a new data provider
+        items.forEach(keyMapper::key);
 
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+        dataView.setIdentifierProvider(IdentifierProvider.identity());
+        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void getItem_itemRequested_dataCommunicatorInvoked() {
         DataCommunicator<String> dataCommunicator = Mockito
@@ -127,120 +124,88 @@ public class GridDataViewTest {
         Mockito.when(dataCommunicator.getDataProvider())
                 .thenReturn((DataProvider) DataProvider.ofItems());
         GridDataView<String> dataView = new GridDataView<>(dataCommunicator,
-                component);
+                new Grid<>());
         dataView.getItem(42);
         Mockito.verify(dataCommunicator).getItem(42);
     }
 
-    private static class InMemoryProvider
-            implements InMemoryDataProvider<String> {
+    @Test
+    public void setInMemoryDataProvider_convertsToGenericDataProvider() {
+        Grid<String> grid = Mockito.spy(new Grid<>());
 
-        private List<String> items;
-        private SerializablePredicate<String> filter = in -> true;
-        private SerializableComparator<String> comparator;
+        InMemoryDataProvider<String> inMemoryDataProvider = new InMemoryDataProvider<String>() {
 
-        public InMemoryProvider(List<String> items) {
-            this.items = items;
-        }
+            private SerializablePredicate<String> filter;
 
-        @Override
-        public SerializablePredicate<String> getFilter() {
-            return filter;
-        }
+            @Override
+            public int size(
+                    Query<String, SerializablePredicate<String>> query) {
+                Assert.assertTrue(query.getFilter().isPresent());
+                return (int) Stream.of("foo").filter(query.getFilter().get())
+                        .count();
+            }
 
-        @Override
-        public void setFilter(SerializablePredicate<String> filter) {
-            this.filter = filter;
-        }
+            @Override
+            public Stream<String> fetch(
+                    Query<String, SerializablePredicate<String>> query) {
+                Assert.assertTrue(query.getFilter().isPresent());
+                return Stream.of("foo").filter(query.getFilter().get());
+            }
 
-        @Override
-        public SerializableComparator<String> getSortComparator() {
-            return comparator;
-        }
+            @Override
+            public void refreshItem(String item) {
 
-        @Override
-        public void setSortComparator(
-                SerializableComparator<String> comparator) {
-            this.comparator = comparator;
-        }
+            }
 
-        @Override
-        public int size(Query<String, SerializablePredicate<String>> query) {
-            return (int) items.stream().skip(query.getOffset())
-                    .limit(query.getLimit()).filter(filter).count();
-        }
+            @Override
+            public void refreshAll() {
 
-        @Override
-        public Stream<String> fetch(
-                Query<String, SerializablePredicate<String>> query) {
-            return items.stream().skip(query.getOffset())
-                    .limit(query.getLimit()).filter(filter);
-        }
+            }
 
-        @Override
-        public void refreshItem(String item) {
+            @Override
+            public Registration addDataProviderListener(
+                    DataProviderListener<String> listener) {
+                return null;
+            }
 
-        }
+            @Override
+            public SerializablePredicate<String> getFilter() {
+                return filter;
+            }
 
-        @Override
-        public void refreshAll() {
+            @Override
+            public void setFilter(SerializablePredicate<String> filter) {
+                this.filter = filter;
+            }
 
-        }
+            @Override
+            public SerializableComparator<String> getSortComparator() {
+                return null;
+            }
 
-        @Override
-        public Registration addDataProviderListener(
-                DataProviderListener<String> listener) {
-            return () -> {
-            };
-        }
+            @Override
+            public void setSortComparator(
+                    SerializableComparator<String> comparator) {
+
+            }
+        };
+
+        GridDataView<String> dataView = grid.setItems(inMemoryDataProvider);
+
+        // We expect that the current implementation of 'setItems' with IMDP
+        // will delegate to 'setItems(DataProvider)'
+        Mockito.verify(grid).setItems(Mockito.any(DataProvider.class));
+
+        // Verify the predicate filter always returns true and passes the item
+        Assert.assertEquals("foo", dataView.getItem(0));
+
+        // Now set the predicate and verify it goes to query parameter
+        inMemoryDataProvider.setFilter(item -> item.equals("bar"));
+        Assert.assertEquals(0, dataView.getItems().count());
     }
 
-    private static class Item {
-        private long id;
-        private String value;
-
-        public Item(long id) {
-            this.id = id;
-        }
-
-        public Item(long id, String value) {
-            this.id = id;
-            this.value = value;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setId(long id) {
-            this.id = id;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Item item = (Item) o;
-            return id == item.id &&
-                    Objects.equals(value, item.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, value);
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
+    @Override
+    protected HasDataView<String, Void, ? extends DataView<String>> getComponent() {
+        return new Grid<>();
     }
 }

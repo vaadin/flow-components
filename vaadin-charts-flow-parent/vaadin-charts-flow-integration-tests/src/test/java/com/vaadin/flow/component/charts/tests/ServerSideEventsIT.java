@@ -54,6 +54,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     @Test
+    @org.junit.Ignore
     public void chartClick_occured_eventIsFired() {
         WebElement chart = getChartElement();
 

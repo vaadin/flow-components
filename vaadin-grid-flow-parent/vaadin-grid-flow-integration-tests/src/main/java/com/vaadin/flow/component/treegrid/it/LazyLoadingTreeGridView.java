@@ -25,7 +25,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("lazy-loading-treegrid")
+@Route("vaadin-grid/lazy-loading-treegrid")
 public class LazyLoadingTreeGridView extends Div {
 
     private static class LazyLoadingProvider

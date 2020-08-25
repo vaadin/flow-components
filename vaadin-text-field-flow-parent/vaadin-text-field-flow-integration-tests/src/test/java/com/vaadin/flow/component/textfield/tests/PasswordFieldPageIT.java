@@ -18,7 +18,7 @@ package com.vaadin.flow.component.textfield.tests;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +32,7 @@ import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
 /**
  * Integration tests for {@link PasswordField}.
  */
-@TestPath("password-field-test")
+@TestPath("vaadin-text-field/password-field-test")
 public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Before

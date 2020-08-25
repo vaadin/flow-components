@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
-@Route
+@Route(value = "vaadin-crud/protectedbackend")
 @Theme(Lumo.class)
 public class ProtectedBackendView extends VerticalLayout {
 

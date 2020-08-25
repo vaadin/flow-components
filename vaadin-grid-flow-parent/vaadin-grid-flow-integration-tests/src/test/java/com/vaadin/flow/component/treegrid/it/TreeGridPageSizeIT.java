@@ -24,7 +24,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-page-size")
+@TestPath("vaadin-grid/treegrid-page-size")
 public class TreeGridPageSizeIT extends AbstractTreeGridIT {
 
     @Before

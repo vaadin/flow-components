@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-initial-expand")
+@TestPath("vaadin-grid/treegrid-initial-expand")
 public class TreeGridInitialExpandIT extends AbstractTreeGridIT {
 
     @Before

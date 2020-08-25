@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-@TestPath("")
+@TestPath("vaadin-select/")
 public class RendererIT extends AbstractSelectIT {
 
     @Test

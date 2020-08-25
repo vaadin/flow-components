@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("dialog-with-combo")
+@Route("vaadin-dialog/dialog-with-combo")
 public class DialogWithComboBoxPage extends Div {
 
     public DialogWithComboBoxPage() {

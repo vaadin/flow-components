@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
@@ -26,7 +26,7 @@ import org.openqa.selenium.Keys;
 /**
  * Integration tests for attaching / detaching date time picker.
  */
-@TestPath("date-time-picker-detach-attach")
+@TestPath("vaadin-date-time-picker/date-time-picker-detach-attach")
 public class DateTimePickerDetachAttachPageIT extends AbstractComponentIT {
 
     @Test

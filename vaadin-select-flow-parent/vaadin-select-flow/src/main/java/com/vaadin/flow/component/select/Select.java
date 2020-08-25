@@ -39,9 +39,11 @@ import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -73,7 +75,7 @@ import com.vaadin.flow.shared.Registration;
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasDataView<T, SelectDataView<T>> {
+        HasDataView<T, Void, SelectDataView<T>> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -465,9 +467,29 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     }
 
     @Override
-    public SelectDataView<T> setItems(DataProvider<T, ?> dataProvider) {
+    public SelectDataView<T> setItems(DataProvider<T, Void> dataProvider) {
         this.setDataProvider(dataProvider);
         return getGenericDataView();
+    }
+
+    @Override
+    public SelectDataView<T> setItems(
+            InMemoryDataProvider<T> inMemoryDataProvider) {
+        // We don't use DataProvider.withConvertedFilter() here because it's
+        // implementation does not apply the filter converter if Query has a
+        // null filter
+        DataProvider<T, Void> convertedDataProvider =
+                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                inMemoryDataProvider) {
+            @Override
+            protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                // Just ignore the query filter (Void) and apply the
+                // predicate only
+                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        .orElse(item -> true);
+            }
+        };
+        return setItems(convertedDataProvider);
     }
 
     @Override

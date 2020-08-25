@@ -22,7 +22,7 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath(TreeGridBasicFeaturesPage.VIEW)
+@TestPath("vaadin-grid/" + TreeGridBasicFeaturesPage.VIEW)
 public class TreeGridClientSortIT extends AbstractTreeGridIT {
 
     @Before

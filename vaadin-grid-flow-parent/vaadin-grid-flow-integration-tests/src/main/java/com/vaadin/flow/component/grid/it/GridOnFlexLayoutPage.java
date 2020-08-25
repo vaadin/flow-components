@@ -22,7 +22,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-on-flex-layout")
+@Route("vaadin-grid/grid-on-flex-layout")
 public class GridOnFlexLayoutPage extends FlexLayout {
 
     public GridOnFlexLayoutPage() {

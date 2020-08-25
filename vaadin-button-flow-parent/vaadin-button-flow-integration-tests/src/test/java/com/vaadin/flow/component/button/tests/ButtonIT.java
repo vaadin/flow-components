@@ -25,7 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 
 /**
  * Integration tests for the ButtonView.

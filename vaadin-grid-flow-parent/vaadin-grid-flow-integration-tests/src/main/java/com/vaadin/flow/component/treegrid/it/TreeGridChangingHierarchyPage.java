@@ -27,7 +27,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-changing-hierarchy")
+@Route("vaadin-grid/treegrid-changing-hierarchy")
 public class TreeGridChangingHierarchyPage extends Div {
 
     private static class TestDataProvider extends TreeDataProvider<String> {
