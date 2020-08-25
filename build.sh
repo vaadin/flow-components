@@ -1,13 +1,13 @@
-#!/bin/bash 
+#!/bin/bash
 
-processors=5
+processors=3
 
 if [ -n "$1" ]
 then
   for i in $*
   do
     case $i in
-      [0-9]|[0-9][0-9])
+      [1-9]|[0-9][0-9])
         processors=$i
         ;;
       *)
@@ -22,11 +22,10 @@ tcMsg() (
   { set +x; } 2> /dev/null
   echo "##teamcity[$1]"
 )
-
 # open a block in the TC tree output
 tcLog() {
   [ -n "$inblock" ] && tcMsg "blockClosed name='$inblock'"
-  inblock=$1
+  inblock="$1"
   tcMsg "blockOpened name='$inblock'"
 }
 # log in TC
@@ -43,43 +42,55 @@ node --version
 npm --version
 uname -a
 
-tcLog 'Install NPM packages'
-npm install --silent --quiet --no-progress
-
-tcLog 'Merge IT modules'
-scripts/mergeITs.js `echo $elements`
-
-tcLog 'Compiling and Installing flow components'
-cmd="mvn clean install -Drelease -DskipTests -T $processors -q"
-echo $cmd
+cmd="npm install --silent --quiet --no-progress"
+tcLog "Install NPM packages - $cmd"
 $cmd
 
-args="-B -Dvaadin.pnpm.enable=true"
+cmd="scripts/mergeITs.js "`echo $elements`
+tcLog "Merge IT modules - $cmd"
+$cmd
+
+# tcLog 'Compiling and Unit-Testing flow components'
+# cmd="mvn test -B -Drun-it -T C$processors -pl integration-tests"
+# echo $cmd
+# $cmd
+
+cmd="mvn install -DskipTests -Drelease -B -T C$processors"
+tcLog "Installing flow components - $cmd"
+$cmd
+
+# args="-B -Dvaadin.pnpm.enable=true"
+# tcLog 'Running npm install in merged ITs'
+# cmd="mvn flow:build-frontend $args -Drun-it -pl integration-tests"
+# echo $cmd
+# $cmd
+
 [ -n "$TBHUB" ] && TBHUB=localhost
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-args="$args -Dfailsafe.forkCount=$processors"
 
-### Run IT's in original modules
-# if [ -n "$modules" ]
-# then
-#   tcLog "Running module ITs for $modules"
-#   cmd="mvn clean verify $args -pl $modules"
-#   echo $cmd
-#   $cmd
-# fi
-### Run IT's in merged module
 if [ "$TBHUB" = "localhost" ]
 then
     tcLog 'Installing docker image with standalone-chrome'
     trap "echo Terminating docker; docker stop standalone-chrome" EXIT
-    set -x
     docker pull selenium/standalone-chrome
     docker image prune -f
     docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
-    set +x
 fi
-tcLog "Running merged ITs (processors=$processors)"
-cmd="mvn clean verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
-echo $cmd
-$cmd
+
+args="$args -Dfailsafe.forkCount=$processors"
+
+if [ -n "$modules" ]
+then
+  ### Run IT's in original modules
+  cmd="mvn clean verify $args -pl $modules"
+  tcLog "Running module ITs - mvn clean verify -pl ..."
+  echo $cmd
+  $cmd
+else
+  ### Run IT's in merged module
+  cmd="mvn verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
+  tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
+  echo $cmd
+  $cmd
+fi
