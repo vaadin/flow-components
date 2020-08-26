@@ -25,13 +25,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPath("treegrid-changing-hierarchy")
+@TestPath("vaadin-grid/treegrid-changing-hierarchy")
 public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
 
     private TreeGridElement grid;

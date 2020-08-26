@@ -19,10 +19,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("beangridpage")
+@TestPath("vaadin-grid/beangridpage")
 public class BeanGridIT extends AbstractComponentIT {
 
     @Test

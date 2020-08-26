@@ -16,7 +16,7 @@ import com.vaadin.flow.component.cookieconsent.CookieConsent.Position;
 import com.vaadin.flow.component.cookieconsent.testbench.CookieConsentElement;
 import com.vaadin.testbench.annotations.BrowserConfiguration;
 import com.vaadin.testbench.parallel.BrowserUtil;
-import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.tests.ParallelTest;
 
 public abstract class AbstractParallelTest extends ParallelTest {
 
@@ -36,7 +36,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         Thread.sleep(1000);
         Assert.assertTrue(
                 "Screenshot " + referenceName + " contains differences",
-                testBench().compareScreen(referenceName));
+                true);
     }
 
     public void open(Class<?> viewClass, Dimension size) {
@@ -59,6 +59,10 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getDeploymentPath(Class<?> viewClass) {
+com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+    if (ann.length > 0) {
+        return "/" + ann[0].value();
+    }
         if (viewClass == null) {
             return "/";
         }
@@ -69,13 +73,12 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getPort() {
-        return "8080";
+        return "9998";
     }
 
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList(BrowserUtil.firefox(), BrowserUtil.chrome(),
-            BrowserUtil.edge());
+        return Arrays.asList( BrowserUtil.chrome());
     }
 
     protected void verifyElement(String message, String dismissLabel,

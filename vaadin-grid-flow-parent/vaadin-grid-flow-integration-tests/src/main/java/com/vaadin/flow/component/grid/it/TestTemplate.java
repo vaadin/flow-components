@@ -27,8 +27,8 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 /**
  * Simple template example.
  */
-@Tag("test-template")
-@JsModule("./src/test-template.js")
+@Tag("vaadin-grid-flow-test-template")
+@JsModule("./src/vaadin-grid-flow-test-template.js")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id("container")

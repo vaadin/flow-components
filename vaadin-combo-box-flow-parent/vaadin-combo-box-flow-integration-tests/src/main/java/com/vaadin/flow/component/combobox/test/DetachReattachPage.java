@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
-@Route("detach-reattach")
+@Route("vaadin-combo-box/detach-reattach")
 public class DetachReattachPage extends Div {
 
     public DetachReattachPage() {

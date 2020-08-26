@@ -23,10 +23,10 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("vaadin-button-inside-grid")
+@TestPath("vaadin-grid/vaadin-button-inside-grid")
 public class ButtonInGridIT extends AbstractComponentIT {
 
     @Test
@@ -45,7 +45,7 @@ public class ButtonInGridIT extends AbstractComponentIT {
         new Actions(getDriver()).sendKeys(Keys.TAB, Keys.TAB, Keys.SPACE)
                 .build().perform();
 
-        WebElement info = findElement(By.id("info"));
+        WebElement info = $("div").id("info");
         Assert.assertEquals("foo", info.getText());
     }
 }

@@ -14,7 +14,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("editor-vertical-scrolling")
+@Route("vaadin-grid/editor-vertical-scrolling")
 public class EditorVerticalScrollingPage extends Div {
 
     private Grid<Person> grid = new Grid<>();

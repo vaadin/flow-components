@@ -22,7 +22,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("column-path")
+@Route("vaadin-grid/column-path")
 public class ColumnPathPage extends Div {
 
     public ColumnPathPage() {

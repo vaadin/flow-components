@@ -26,7 +26,7 @@ import com.vaadin.testbench.TestBenchElement;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("context-menu-test")
+@TestPath("vaadin-context-menu/context-menu-test")
 public class ContextMenuPageIT extends AbstractContextMenuIT {
 
     static final String CONTEXT_MENU_OVERLAY_TAG = "vaadin-context-menu-overlay";

@@ -28,7 +28,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("refresh-data-provider")
+@Route("vaadin-combo-box/refresh-data-provider")
 public class RefreshDataProviderPage extends Div {
 
     private List<String> nameList = new ArrayList<>();

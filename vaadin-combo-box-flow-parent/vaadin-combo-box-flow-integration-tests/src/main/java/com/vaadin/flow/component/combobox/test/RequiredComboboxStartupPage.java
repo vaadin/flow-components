@@ -21,7 +21,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.router.Route;
 
-@Route("required-combobox-startup")
+@Route("vaadin-combo-box/required-combobox-startup")
 public class RequiredComboboxStartupPage extends Div {
 
     public RequiredComboboxStartupPage() {

@@ -22,7 +22,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for attaching / detaching {@link DateTimePicker}.
  */
-@Route("date-time-picker-detach-attach")
+@Route("vaadin-date-time-picker/date-time-picker-detach-attach")
 public class DateTimePickerDetachAttachPage extends Div {
 
     /**

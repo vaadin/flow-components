@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
@@ -101,10 +102,15 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
                 dataView.contains(items[3]));
         Assert.assertFalse("Non existent item found in data",
                 dataView.contains("item6"));
+
+        // Test getItems
+        Stream<String> allItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set", items,
+                allItems.toArray());
     }
 
     @Test
-    public void dataView_withFilter_methodsUseFilteredData() {
+    public void dataView_setFilter_methodsUseFilteredData() {
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems(items);

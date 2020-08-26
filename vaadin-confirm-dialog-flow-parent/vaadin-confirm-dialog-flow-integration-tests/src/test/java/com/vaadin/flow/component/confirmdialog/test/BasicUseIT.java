@@ -10,7 +10,8 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/basicuse");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-confirm-dialog") + "/basicuse";
+        getDriver().get(url);
     }
 
     @Test

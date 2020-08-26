@@ -19,7 +19,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "")
+@Route(value = "vaadin-select/")
 public class TestView extends Div implements HasUrlParameter<String> {
 
     public static final String SELECT_FIRST_ITEM = "Select first item";

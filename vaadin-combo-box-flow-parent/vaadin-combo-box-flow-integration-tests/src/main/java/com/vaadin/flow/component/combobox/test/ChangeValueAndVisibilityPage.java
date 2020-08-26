@@ -22,7 +22,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-@Route("change-value-and-visibility")
+@Route("vaadin-combo-box/change-value-and-visibility")
 public class ChangeValueAndVisibilityPage extends VerticalLayout {
 
     public static final String INITIAL_VALUE = "Item 1";

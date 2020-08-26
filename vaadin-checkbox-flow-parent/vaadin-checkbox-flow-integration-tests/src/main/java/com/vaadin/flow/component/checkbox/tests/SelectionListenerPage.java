@@ -22,7 +22,7 @@ import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Route("selection-listener")
+@Route("vaadin-checkbox/selection-listener")
 public class SelectionListenerPage extends Div {
 
     public SelectionListenerPage() {

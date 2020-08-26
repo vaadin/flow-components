@@ -12,7 +12,7 @@
 
 set -e
 pom='pom.xml'
-mods=`grep '<module>' $pom  | grep -v '>integration-tests<' | cut -d ">" -f2 | cut -d "<" -f1`
+mods=`grep '<module>' $pom  | grep -v '>integration-tests<' | grep -v shared | cut -d ">" -f2 | cut -d "<" -f1`
 
 checkoutProject() {
   mod=$1
@@ -59,9 +59,14 @@ consolidatePoms() {
   node scripts/updateJavaPOMs.js $1
 }
 
+consolidateSources() {
+  node scripts/updateSources.js $1
+}
+
 for i in $mods
 do
   checkoutProject $i
   [ $i = 'vaadin-charts-flow-parent' ] && consolidateCharts $i || consolidateProject $i
   consolidatePoms $i
+  consolidateSources $i
 done

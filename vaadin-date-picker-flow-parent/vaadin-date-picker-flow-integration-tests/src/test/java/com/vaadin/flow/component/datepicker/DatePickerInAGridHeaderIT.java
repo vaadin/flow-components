@@ -18,10 +18,10 @@ package com.vaadin.flow.component.datepicker;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("date-picker-in-a-grid-header")
+@TestPath("vaadin-date-picker/date-picker-in-a-grid-header")
 public class DatePickerInAGridHeaderIT extends AbstractComponentIT {
 
     /**

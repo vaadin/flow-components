@@ -23,14 +23,14 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Integration tests for changing the ValueChangeMode of TextField, TextArea and
  * PasswordField.
  */
-@TestPath("value-change-mode-test")
+@TestPath("vaadin-text-field/value-change-mode-test")
 public class ValueChangeModeIT extends AbstractComponentIT {
 
     private WebElement message;
@@ -75,6 +75,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
+    @org.junit.Ignore
     public void testValueChangeModesForEmailField()
             throws InterruptedException {
         testValueChangeModes(emailField, "emailfield");

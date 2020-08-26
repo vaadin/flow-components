@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 /**
  * Integration tests for {@link DateTimePicker} validation.
  */
-@TestPath("date-time-picker-validation")
+@TestPath("vaadin-date-time-picker/date-time-picker-validation")
 public class DateTimePickerValidationPageIT extends AbstractValidationTest {
 
     @Test

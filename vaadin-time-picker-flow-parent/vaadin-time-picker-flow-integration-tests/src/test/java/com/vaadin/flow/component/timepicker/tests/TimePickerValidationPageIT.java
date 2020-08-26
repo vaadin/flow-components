@@ -26,7 +26,7 @@ import org.openqa.selenium.WebElement;
 /**
  * Integration tests for {@link TimePicker} validation.
  */
-@TestPath("time-picker-validation")
+@TestPath("vaadin-time-picker/time-picker-validation")
 public class TimePickerValidationPageIT extends AbstractValidationTest {
 
     @Test

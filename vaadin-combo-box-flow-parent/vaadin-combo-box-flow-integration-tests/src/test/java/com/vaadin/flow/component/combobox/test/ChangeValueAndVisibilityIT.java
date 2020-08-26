@@ -31,7 +31,7 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("change-value-and-visibility")
+@TestPath("vaadin-combo-box/change-value-and-visibility")
 public class ChangeValueAndVisibilityIT extends AbstractComboBoxIT {
 
     private ComboBoxElement combo;

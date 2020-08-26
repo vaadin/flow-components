@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.router.Route;
 
-@Route("RowTypes")
+@Route("vaadin-board/RowTypes")
 @CssImport("rowtypes.css")
 @CssImport("styles.css")
 public class RowTypes extends Div {

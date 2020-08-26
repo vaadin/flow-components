@@ -123,7 +123,7 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.CheckboxGroupElement#2.2.2",
         "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.4.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.4.0")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox-group.js")
 public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinCheckboxGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
