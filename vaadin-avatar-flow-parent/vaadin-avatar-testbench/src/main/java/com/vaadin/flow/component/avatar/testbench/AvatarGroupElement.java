@@ -39,6 +39,11 @@ public class AvatarGroupElement extends TestBenchElement {
         return $(AvatarElement.class).get(index);
     }
 
+    /**
+     * Gets the aria label that is pronounced by the screen reader.
+     *
+     * @return the aria label
+     */
     public String getAriaLabel() {
         return getAttribute("aria-label");
     }

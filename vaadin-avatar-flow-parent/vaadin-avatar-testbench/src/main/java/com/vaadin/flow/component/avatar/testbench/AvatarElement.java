@@ -29,8 +29,22 @@ public class AvatarElement extends TestBenchElement {
         return !getPropertyBoolean("disabled");
     }
 
+    /**
+     * Gets the title displayed as a tooltip.
+     *
+     * @return the tooltip text
+     */
     public String getTitle() {
         return getAttribute("title");
+    }
+
+    /**
+     * Gets the abbreviation displayed in the avatar.
+     *
+     * @return the abbreviation
+     */
+    public String getAbbr() {
+        return getPropertyString("abbr");
     }
 
 }

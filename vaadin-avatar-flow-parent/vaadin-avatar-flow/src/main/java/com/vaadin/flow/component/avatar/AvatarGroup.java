@@ -71,7 +71,7 @@ public class AvatarGroup extends Component
         private String img;
         private Integer colorIndex;
 
-        private Component host;
+        private AvatarGroup host;
         private StreamRegistration resourceRegistration;
         private Registration pendingRegistration;
         private Command pendingHandle;
@@ -135,6 +135,9 @@ public class AvatarGroup extends Component
          */
         public void setName(String name) {
             this.name = name;
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
         }
 
         /**
@@ -157,6 +160,9 @@ public class AvatarGroup extends Component
          */
         public void setAbbreviation(String abbr) {
             this.abbr = abbr;
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
         }
 
         /**
@@ -195,6 +201,9 @@ public class AvatarGroup extends Component
             unsetResource();
 
             this.img = url;
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
         }
 
         /**
@@ -221,6 +230,9 @@ public class AvatarGroup extends Component
                 registerResource(resource);
             } else {
                 deferRegistration(resource);
+            }
+            if (getHost() != null) {
+                getHost().setClientItems();
             }
         }
 
@@ -328,13 +340,16 @@ public class AvatarGroup extends Component
          */
         public void setColorIndex(Integer colorIndex) {
             this.colorIndex = colorIndex;
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
         }
 
-        private Component getHost() {
+        private AvatarGroup getHost() {
             return host;
         }
 
-        private void setHost(Component host) {
+        private void setHost(AvatarGroup host) {
             this.host = host;
             if (pendingHandle != null) {
                 attachPendingRegistration(pendingHandle);
@@ -432,6 +447,7 @@ public class AvatarGroup extends Component
     }
 
     private List<AvatarGroupItem> items = Collections.emptyList();
+    private boolean pendingUpdate = false;
 
     private AvatarGroupI18n i18n;
 
@@ -468,8 +484,7 @@ public class AvatarGroup extends Component
 
         this.items = new ArrayList<>(items);
         items.stream().forEach(item -> item.setHost(this));
-
-        getElement().setPropertyJson("items", createItemsJsonArray(items));
+        setClientItems();
     }
 
     /**
@@ -480,6 +495,19 @@ public class AvatarGroup extends Component
      */
     public void setItems(AvatarGroupItem... items) {
         setItems(Arrays.asList(items));
+    }
+
+    private void setClientItems() {
+        if (!pendingUpdate) {
+            pendingUpdate = true;
+            getElement().getNode().runWhenAttached(ui ->
+                    ui.beforeClientResponse(this,
+                            ctx -> {
+                                getElement().setPropertyJson("items",
+                                        createItemsJsonArray(items));
+                                pendingUpdate = false;
+                            }));
+        }
     }
 
     private JsonArray createItemsJsonArray(Collection<AvatarGroupItem> items) {
