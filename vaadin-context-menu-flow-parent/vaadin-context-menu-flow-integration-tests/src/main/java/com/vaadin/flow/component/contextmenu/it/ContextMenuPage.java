@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link ContextMenu}.
  */
-@Route("context-menu-test")
+@Route("vaadin-context-menu/context-menu-test")
 public class ContextMenuPage extends Div {
 
     public ContextMenuPage() {

@@ -10,7 +10,7 @@ class TestTemplate extends PolymerElement {
   }
 
   static get is() {
-      return 'test-template'
+      return 'vaadin-grid-flow-test-template'
   }
 }
 customElements.define(TestTemplate.is, TestTemplate);

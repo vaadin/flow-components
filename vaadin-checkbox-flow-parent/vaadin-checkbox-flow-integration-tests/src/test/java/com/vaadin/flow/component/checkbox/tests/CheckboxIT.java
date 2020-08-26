@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;

@@ -22,7 +22,7 @@ import com.vaadin.flow.testutil.TestPath;
 /**
  * Integration tests for {@link PasswordField} validation.
  */
-@TestPath("passwork-field-validation")
+@TestPath("vaadin-text-field/passwork-field-validation")
 public class PasswordFieldValidationPageIT extends AbstractValidationTest {
 
 }

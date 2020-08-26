@@ -23,7 +23,7 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("detach-reattach")
+@TestPath("vaadin-combo-box/detach-reattach")
 public class DetachReattachIT extends AbstractComboBoxIT {
 
     private ComboBoxElement combo;

@@ -11,7 +11,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.router.Route;
 
-@Route("Features")
+@Route("vaadin-confirm-dialog/Features")
 public class Features extends Div {
 
     static final String CONFIRM_DIALOG = "SampleConfirmDialog";

@@ -23,7 +23,7 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("clientside-filter")
+@TestPath("vaadin-combo-box/clientside-filter")
 public class ClientSideFilterIT extends AbstractComboBoxIT {
     @Before
     public void init() {

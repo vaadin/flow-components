@@ -22,13 +22,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Integration tests for the GridPageSizePage view.
  */
-@TestPath("grid-page-size")
+@TestPath("vaadin-grid/grid-page-size")
 public class GridPageSizePageIT extends AbstractComponentIT {
 
     @Before

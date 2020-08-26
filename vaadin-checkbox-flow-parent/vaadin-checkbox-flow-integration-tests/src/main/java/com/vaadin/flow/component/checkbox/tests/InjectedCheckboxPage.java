@@ -25,7 +25,7 @@ import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Route("injected-checkbox")
+@Route("vaadin-checkbox/injected-checkbox")
 @Tag("inject-checkbox")
 @JsModule("./inject-checkbox.js")
 public class InjectedCheckboxPage extends PolymerTemplate<TemplateModel>

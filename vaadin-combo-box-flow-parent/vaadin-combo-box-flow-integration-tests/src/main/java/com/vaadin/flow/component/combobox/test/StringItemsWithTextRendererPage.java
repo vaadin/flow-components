@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("string-items-text-renderer")
+@Route("vaadin-combo-box/string-items-text-renderer")
 public class StringItemsWithTextRendererPage extends Div {
 
     public StringItemsWithTextRendererPage() {

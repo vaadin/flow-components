@@ -24,10 +24,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("detailsGrid")
+@TestPath("vaadin-grid/detailsGrid")
 public class DetailsGridIT extends AbstractComponentIT {
 
     @Test
@@ -66,7 +66,7 @@ public class DetailsGridIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "Expected to find one grid on new page. Encountered something unexpected.",
-                1, findElements(By.id("grid")).size());
+                1, $("vaadin-grid").all().size());
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,

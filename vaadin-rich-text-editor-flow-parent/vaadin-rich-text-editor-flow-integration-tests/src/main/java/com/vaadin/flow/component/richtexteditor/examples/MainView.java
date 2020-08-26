@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Route
+@Route(value = "vaadin-rich-text-editor/")
 public class MainView extends VerticalLayout {
 
     private Div valuePanel,

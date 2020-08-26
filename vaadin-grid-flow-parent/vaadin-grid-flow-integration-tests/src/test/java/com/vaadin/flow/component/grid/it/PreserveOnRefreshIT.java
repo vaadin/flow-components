@@ -21,10 +21,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("preserve-on-refresh")
+@TestPath("vaadin-grid/preserve-on-refresh")
 public class PreserveOnRefreshIT extends AbstractComponentIT {
 
     @Before

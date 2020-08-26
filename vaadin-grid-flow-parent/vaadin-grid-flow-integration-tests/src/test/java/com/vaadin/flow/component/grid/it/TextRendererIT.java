@@ -23,10 +23,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("text-renderer")
+@TestPath("vaadin-grid/text-renderer")
 public class TextRendererIT extends AbstractComponentIT {
 
     @Test
@@ -38,7 +38,7 @@ public class TextRendererIT extends AbstractComponentIT {
                         .map(cell -> cell.getText())
                         .collect(Collectors.toSet());
 
-        findElement(By.id("refresh")).click();
+        $("button").id("refresh").click();
 
         // self check: click is handled with a result on the client side
         String classNames = findElement(By.tagName("vaadin-grid"))

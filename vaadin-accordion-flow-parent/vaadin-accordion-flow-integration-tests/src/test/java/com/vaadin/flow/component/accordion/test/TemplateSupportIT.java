@@ -14,7 +14,8 @@ public class TemplateSupportIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/accordionintemplate");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-accordion") + "/accordionintemplate";
+        getDriver().get(url);
     }
 
     @Test

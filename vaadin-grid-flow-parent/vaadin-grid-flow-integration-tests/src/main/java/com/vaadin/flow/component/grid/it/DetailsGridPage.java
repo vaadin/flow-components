@@ -28,7 +28,7 @@ import com.vaadin.flow.router.RouterLink;
  * itemDetailsDataGenerator is not correctly cleaned then there will be an
  * exception when navigating and all data is cleared.
  */
-@Route("detailsGrid")
+@Route("vaadin-grid/detailsGrid")
 public class DetailsGridPage extends Div {
 
     Span text = new Span("wow");

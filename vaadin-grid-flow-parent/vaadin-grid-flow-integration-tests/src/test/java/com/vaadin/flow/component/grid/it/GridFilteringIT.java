@@ -21,17 +21,17 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-filtering")
+@TestPath("vaadin-grid/grid-filtering")
 public class GridFilteringIT extends AbstractComponentIT {
 
     @Test
     public void gridInNotLoadingState() {
         open();
 
-        WebElement filter = findElement(By.id("filter"));
+        WebElement filter = $("vaadin-text-field").id("filter");
         WebElement input = getInShadowRoot(filter, By.cssSelector("input"));
         input.sendKeys("w");
 

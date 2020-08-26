@@ -31,7 +31,7 @@ import com.vaadin.testbench.TestBenchElement;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("sub-menu-test")
+@TestPath("vaadin-context-menu/sub-menu-test")
 public class SubMenuIT extends AbstractContextMenuIT {
 
     @Before

@@ -77,6 +77,12 @@
       <artifactId>vaadin-text-field-flow-demo</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-flow-components-shared</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

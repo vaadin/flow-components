@@ -28,7 +28,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route("sorting")
+@Route("vaadin-grid/sorting")
 @Theme(Lumo.class)
 public class SortingPage extends Div {
 

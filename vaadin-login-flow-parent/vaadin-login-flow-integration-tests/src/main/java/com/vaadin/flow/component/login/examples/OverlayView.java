@@ -10,7 +10,7 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
-@Route
+@Route(value = "vaadin-login/overlay")
 public class OverlayView extends AbstractView {
 
     private final LoginOverlay login = new LoginOverlay();

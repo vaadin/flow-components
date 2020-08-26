@@ -37,7 +37,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-form")
-@NpmPackage(value="@vaadin/vaadin-login", version = "1.2.0-beta1")
+@NpmPackage(value="@vaadin/vaadin-login", version = "1.2.0")
 @JsModule("@vaadin/vaadin-login/src/vaadin-login-form.js")
 public class LoginForm extends AbstractLogin {
 

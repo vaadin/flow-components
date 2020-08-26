@@ -29,7 +29,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-expand-collapse-recursively")
+@TestPath("vaadin-grid/treegrid-expand-collapse-recursively")
 public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
 
     private static final int itemsPerLevel = 5;
