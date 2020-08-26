@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
@@ -24,7 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-@TestPath("required-field")
+@TestPath("vaadin-text-field/required-field")
 public class RequiredTextFieldIT extends AbstractComponentIT {
 
     @Test

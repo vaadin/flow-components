@@ -9,7 +9,7 @@ class TemplateButton extends PolymerElement {
 `;
   }
     static get is() {
-      return 'test-template'
+      return 'vaadin-dialog-flow-test-template'
   }
 }
 customElements.define(TemplateButton.is, TemplateButton);

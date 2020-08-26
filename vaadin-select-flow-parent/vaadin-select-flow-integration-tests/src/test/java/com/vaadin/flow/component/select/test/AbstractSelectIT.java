@@ -13,7 +13,7 @@ import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.select.examples.TestView;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.testbench.TestBenchElement;
 
 public abstract class AbstractSelectIT extends AbstractComponentIT {

@@ -26,7 +26,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-expand-collapse-recursively")
+@Route("vaadin-grid/treegrid-expand-collapse-recursively")
 public class TreeGridExpandCollapseRecursivelyPage extends Div {
 
     private static class Directory {

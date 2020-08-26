@@ -25,7 +25,7 @@ import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.data.performance.TreeGridMemory;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-huge-tree")
+@TestPath("vaadin-grid/treegrid-huge-tree")
 public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
     @Test
@@ -82,7 +82,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
     @Test
     public void collapsed_subtrees_outside_of_cache_stay_expanded() {
-        getDriver().get(getRootURL() + "/" + TreeGridMemory.PATH
+        getDriver().get(getRootURL() + "/vaadin-grid/" + TreeGridMemory.PATH
                 + "/items=200&initiallyExpanded");
         setupTreeGrid();
 

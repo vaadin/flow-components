@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-@Route("time-picker-localization")
+@Route("vaadin-time-picker/time-picker-localization")
 public class TimePickerLocalizationView extends Div
         implements HasUrlParameter<String> {
 

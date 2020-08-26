@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  *
  */
-@Route("initial-dialog-open")
+@Route("vaadin-dialog/initial-dialog-open")
 public class InitiallyOpenedDialogPage extends Div {
 
     public InitiallyOpenedDialogPage() {

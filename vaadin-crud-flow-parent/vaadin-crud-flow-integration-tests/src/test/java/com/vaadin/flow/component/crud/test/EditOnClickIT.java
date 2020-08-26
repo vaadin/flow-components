@@ -12,7 +12,8 @@ public class EditOnClickIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/editonclick");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/editonclick";
+        getDriver().get(url);
     }
 
     @After

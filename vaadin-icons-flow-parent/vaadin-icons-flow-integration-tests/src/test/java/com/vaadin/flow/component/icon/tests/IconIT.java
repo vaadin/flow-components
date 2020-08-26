@@ -24,7 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.icon.demo.IconView;
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 
 /**
  * Integration tests for the {@link IconView}.

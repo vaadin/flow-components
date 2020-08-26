@@ -4,7 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.router.Route;
 
-@Route
+@Route(value = "vaadin-login/action")
 public class ActionView extends Div {
 
     public ActionView() {

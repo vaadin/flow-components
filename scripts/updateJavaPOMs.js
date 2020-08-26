@@ -68,7 +68,14 @@ async function consolidatePomDemo() {
   consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
 }
 async function consolidatePomIT() {
-  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`)
+  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`, js => {
+    js.project.dependencies[0].dependency.push({
+      groupId: ['com.vaadin'],
+      artifactId: ['vaadin-flow-components-shared'],
+      version: ['${project.version}'],
+      scope: ['test']
+    });
+  });
 }
 
 consolidatePomParent();

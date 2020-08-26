@@ -22,7 +22,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("clear-items")
+@Route("vaadin-combo-box/clear-items")
 public class ClearItemsPage extends Div {
 
     public ClearItemsPage() {

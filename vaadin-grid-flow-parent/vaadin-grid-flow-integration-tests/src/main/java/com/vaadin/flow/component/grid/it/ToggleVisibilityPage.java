@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
  * 
  * @author Vaadin Ltd.
  */
-@Route("toggle-visibility")
+@Route("vaadin-grid/toggle-visibility")
 public class ToggleVisibilityPage extends Div {
 
     public ToggleVisibilityPage() {

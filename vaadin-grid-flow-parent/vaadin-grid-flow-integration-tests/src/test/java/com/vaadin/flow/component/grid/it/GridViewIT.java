@@ -15,14 +15,13 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import com.vaadin.tests.TabbedComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -30,7 +29,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -49,19 +47,6 @@ import java.util.stream.IntStream;
 public class GridViewIT extends TabbedComponentDemoTest {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
-
-    @Override
-    public void setup() throws Exception {
-        final WebDriver webDriver = AbstractNoW3c
-            .createChromeDriverWithoutW3c(getLocalExecution(),
-                getDesiredCapabilities(), getHubURL());
-        if (webDriver != null) {
-            setDesiredCapabilities(getDesiredCapabilities());
-            setDriver(webDriver);
-        } else {
-            super.setup();
-        }
-    }
 
     @Test
     public void dataIsShown() throws InterruptedException {

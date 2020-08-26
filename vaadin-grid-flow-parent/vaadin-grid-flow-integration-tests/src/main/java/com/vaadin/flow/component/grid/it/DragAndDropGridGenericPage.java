@@ -18,7 +18,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("generic-dnd")
+@Route("vaadin-grid/generic-dnd")
 public class DragAndDropGridGenericPage extends Div {
 
     private List<String> items = IntStream.range(0, 10).mapToObj(String::valueOf)

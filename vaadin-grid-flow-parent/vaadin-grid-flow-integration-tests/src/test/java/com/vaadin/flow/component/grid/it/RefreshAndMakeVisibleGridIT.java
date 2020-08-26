@@ -19,17 +19,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("refresh-invisible-grid")
+@TestPath("vaadin-grid/refresh-invisible-grid")
 public class RefreshAndMakeVisibleGridIT extends AbstractComponentIT {
 
     @Test
     public void refreshDataProviderAndMakeGridVisible() {
         open();
 
-        findElement(By.id("refresh")).click();
+        $("button").id("refresh").click();
         checkLogsForErrors();
 
         boolean hasFooCell = $("vaadin-grid-cell-content").all().stream()

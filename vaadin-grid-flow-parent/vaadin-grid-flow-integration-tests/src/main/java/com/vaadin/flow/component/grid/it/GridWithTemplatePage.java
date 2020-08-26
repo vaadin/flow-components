@@ -24,7 +24,7 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-template-test")
+@Route("vaadin-grid/grid-template-test")
 public class GridWithTemplatePage extends Div {
 
     public GridWithTemplatePage() {

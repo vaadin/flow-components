@@ -23,7 +23,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("detach-attach")
+@Route("vaadin-date-picker/detach-attach")
 public class DetachAttachPage extends Div {
 
     public DetachAttachPage() {

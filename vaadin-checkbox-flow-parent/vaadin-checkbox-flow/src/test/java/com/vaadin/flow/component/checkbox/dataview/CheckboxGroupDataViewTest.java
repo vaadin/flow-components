@@ -20,65 +20,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ItemCountChangeEvent;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
+import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
+import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-public class CheckboxGroupDataViewTest {
-
-    private List<String> items;
-
-    private InMemoryDataProvider<String> dataProvider;
-
-    private CheckboxGroupDataView<String> dataView;
-
-    private CheckboxGroup<String> component;
-
-    @Before
-    public void init() {
-
-        items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
-
-        dataProvider = new InMemoryProvider(items);
-        component = new CheckboxGroup<>();
-        dataView = component.setItems(dataProvider);
-    }
-
-    @Test
-    public void getItems_noFiltersSet_itemsObtained() {
-        Stream<String> allItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set", items.toArray(),
-                allItems.toArray());
-    }
-
-    @Test
-    public void addListener_fireEvent_listenerIsCalled() {
-        AtomicInteger fired = new AtomicInteger(0);
-        dataView.addItemCountChangeListener(
-                event -> fired.compareAndSet(0, event.getItemCount()));
-
-        ComponentUtil.fireEvent(component,
-                new ItemCountChangeEvent<>(component, 10, false));
-
-        Assert.assertEquals(10, fired.get());
-    }
+public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest  {
 
     @Test
     public void getItem_dataViewWithItems_returnsCorrectItem() {
@@ -94,7 +56,7 @@ public class CheckboxGroupDataViewTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
+        GenericDataProvider dataProvider = new GenericDataProvider(items);
         CheckboxGroup<Item> component = new CheckboxGroup<>();
 
         CheckboxGroupDataView<Item> dataView = component.setItems(dataProvider);
@@ -117,16 +79,17 @@ public class CheckboxGroupDataViewTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        DataProvider<Item, ?> dataProvider =
+
+        CustomIdentityItemDataProvider customIdentityItemDataProvider =
                 new CustomIdentityItemDataProvider(items);
 
         CheckboxGroup<Item> component = new CheckboxGroup<>();
-        component.setItems(dataProvider);
+        component.setItems(customIdentityItemDataProvider);
 
         first.setValue("changed-1");
         second.setValue("changed-2");
 
-        dataProvider.refreshItem(new Item(1L));
+        customIdentityItemDataProvider.refreshItem(new Item(1L));
 
         Assert.assertTrue(containsLabel(component, "changed-1"));
         Assert.assertFalse(containsLabel(component, "changed-2"));
@@ -139,7 +102,7 @@ public class CheckboxGroupDataViewTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        DataProvider<Item, ?> dataProvider = DataProvider.ofCollection(items);
+        GenericDataProvider dataProvider = new GenericDataProvider(items);
         CheckboxGroup<Item> component = new CheckboxGroup<>();
         component.setItems(dataProvider);
 
@@ -152,69 +115,114 @@ public class CheckboxGroupDataViewTest {
         Assert.assertFalse(containsLabel(component, "changed-2"));
     }
 
+    @Test
+    public void setInMemoryDataProvider_convertsToGenericDataProvider() {
+        CheckboxGroup<String> checkboxGroup = Mockito.spy(new CheckboxGroup<>());
+
+        InMemoryDataProvider<String> inMemoryDataProvider =
+                new InMemoryDataProvider<String>() {
+
+            private SerializablePredicate<String> filter;
+
+            @Override
+            public int size(
+                    Query<String, SerializablePredicate<String>> query) {
+                Assert.assertTrue(query.getFilter().isPresent());
+                return (int) Stream.of("foo").filter(query.getFilter().get())
+                        .count();
+            }
+
+            @Override
+            public Stream<String> fetch(
+                    Query<String, SerializablePredicate<String>> query) {
+                Assert.assertTrue(query.getFilter().isPresent());
+                return Stream.of("foo").filter(query.getFilter().get());
+            }
+
+            @Override
+            public void refreshItem(String item) {
+
+            }
+
+            @Override
+            public void refreshAll() {
+
+            }
+
+            @Override
+            public Registration addDataProviderListener(
+                    DataProviderListener<String> listener) {
+                return null;
+            }
+
+            @Override
+            public SerializablePredicate<String> getFilter() {
+                return filter;
+            }
+
+            @Override
+            public void setFilter(SerializablePredicate<String> filter) {
+                this.filter = filter;
+            }
+
+            @Override
+            public SerializableComparator<String> getSortComparator() {
+                return null;
+            }
+
+            @Override
+            public void setSortComparator(
+                    SerializableComparator<String> comparator) {
+
+            }
+        };
+
+        CheckboxGroupDataView<String> dataView =
+                checkboxGroup.setItems(inMemoryDataProvider);
+
+        // We expect that the current implementation of 'setItems' with IMDP
+        // will delegate to 'setItems(DataProvider)'
+        Mockito.verify(checkboxGroup).setItems(Mockito.any(DataProvider.class));
+
+        // Verify the predicate filter always returns true and passes the item
+        Assert.assertEquals("foo", dataView.getItem(0));
+
+        // Now set the predicate and verify it goes to query parameter
+        inMemoryDataProvider.setFilter(item -> item.equals("bar"));
+        Assert.assertEquals(0, dataView.getItems().count());
+    }
+
+    @Override
+    protected HasDataView<String, Void, ? extends DataView<String>> getComponent() {
+        return new CheckboxGroup<>();
+    }
+
     private boolean containsLabel(CheckboxGroup<Item> component, String label) {
         return component.getChildren()
                 .anyMatch(c -> ((Checkbox) c).getLabel().equals(label));
     }
 
-    private static class InMemoryProvider
-            implements InMemoryDataProvider<String> {
+    private static class GenericDataProvider
+            extends AbstractDataProvider<Item, Void> {
+        private List<Item> items;
 
-        private List<String> items;
-        private SerializablePredicate<String> filter = in -> true;
-        private SerializableComparator<String> comparator;
-
-        public InMemoryProvider(List<String> items) {
+        public GenericDataProvider(List<Item> items) {
             this.items = items;
         }
 
         @Override
-        public SerializablePredicate<String> getFilter() {
-            return filter;
+        public boolean isInMemory() {
+            return true;
         }
 
         @Override
-        public void setFilter(SerializablePredicate<String> filter) {
-            this.filter = filter;
+        public int size(Query<Item, Void> query) {
+            return 2;
         }
 
         @Override
-        public SerializableComparator<String> getSortComparator() {
-            return comparator;
-        }
-
-        @Override
-        public void setSortComparator(
-                SerializableComparator<String> comparator) {
-            this.comparator = comparator;
-        }
-
-        @Override
-        public int size(Query<String, SerializablePredicate<String>> query) {
-            return (int) items.stream().filter(filter::test).count();
-        }
-
-        @Override
-        public Stream<String> fetch(
-                Query<String, SerializablePredicate<String>> query) {
-            return items.stream().filter(filter::test);
-        }
-
-        @Override
-        public void refreshItem(String item) {
-
-        }
-
-        @Override
-        public void refreshAll() {
-
-        }
-
-        @Override
-        public Registration addDataProviderListener(
-                DataProviderListener<String> listener) {
-            return () -> {
-            };
+        public Stream<Item> fetch(Query<Item, Void> query) {
+            return Stream.of(items.toArray(new Item[0]));
         }
     }
 
@@ -228,56 +236,6 @@ public class CheckboxGroupDataViewTest {
         @Override
         public Object getId(Item item) {
             return item.getId();
-        }
-    }
-
-    private static class Item {
-        private long id;
-        private String value;
-
-        public Item(long id) {
-            this.id = id;
-        }
-
-        public Item(long id, String value) {
-            this.id = id;
-            this.value = value;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setId(long id) {
-            this.id = id;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-            Item item = (Item) o;
-            return id == item.id && Objects.equals(value, item.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, value);
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
         }
     }
 }

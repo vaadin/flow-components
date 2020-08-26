@@ -21,7 +21,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
-@Route("radio-button-group-required-binder")
+@Route("vaadin-radio-button/radio-button-group-required-binder")
 public class RequiredValidationPage extends Div {
 
     public RequiredValidationPage() {

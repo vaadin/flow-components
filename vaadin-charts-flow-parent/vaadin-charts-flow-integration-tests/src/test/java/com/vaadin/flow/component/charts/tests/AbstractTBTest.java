@@ -32,7 +32,7 @@ import com.vaadin.testbench.annotations.BrowserConfiguration;
 import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.DefaultBrowserFactory;
-import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.tests.ParallelTest;
 import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
 
 public abstract class AbstractTBTest extends ParallelTest {
@@ -77,10 +77,9 @@ public abstract class AbstractTBTest extends ParallelTest {
         }
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
-        return Arrays.asList(BrowserUtil.chrome(), BrowserUtil.firefox(),
+        return Arrays.asList(BrowserUtil.chrome(),
             DesiredCapabilities.iphone(), DesiredCapabilities.ipad(),
-            browserFactory.create(Browser.SAFARI, "13.0", Platform.SIERRA),
-            BrowserUtil.edge());
+            browserFactory.create(Browser.SAFARI, "13.0", Platform.SIERRA));
     }
 
     protected void openTestURL() {
@@ -109,7 +108,7 @@ public abstract class AbstractTBTest extends ParallelTest {
      * @return The URL path to the UI class to test
      */
     protected String getDeploymentPath() {
-        return "/" + getTestView().getCanonicalName().replace("com.vaadin.flow.component.charts.examples.", "").replace(".", "/");
+        return "/" + getTestView().getCanonicalName().replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/").replace(".", "/");
     }
 
     /**
@@ -126,7 +125,7 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected int getDeploymentPort() {
-        return 8080;
+        return 9998;
     }
 
     protected abstract Class<? extends AbstractChartExample> getTestView();

@@ -22,7 +22,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 
-@Route("treegrid-scrolling")
+@Route("vaadin-grid/treegrid-scrolling")
 public class TreeGridScrollingPage extends Div {
 
     public static final int DEFAULT_NODES = 20;

@@ -28,7 +28,7 @@ import com.vaadin.flow.router.Route;
 import java.util.Arrays;
 import java.util.List;
 
-@Route(TreeGridOrderColumnsPage.VIEW)
+@Route("vaadin-grid/" + TreeGridOrderColumnsPage.VIEW)
 public class TreeGridOrderColumnsPage extends Div {
 
     public static final String VIEW = "treegrid-order-columns";

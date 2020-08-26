@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Route("binder-validation")
+@Route("vaadin-date-time-picker/binder-validation")
 public class BinderValidationPage extends Div {
 
     public static final String BINDER_ERROR_MSG = "binder";

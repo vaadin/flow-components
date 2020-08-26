@@ -82,15 +82,15 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
+import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.LazyDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -135,7 +135,7 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.0")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -145,8 +145,8 @@ import elemental.json.JsonValue;
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
         HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
-        HasDataView<T, GridDataView<T>>,
-        HasLazyDataView<T, GridLazyDataView<T>> {
+        HasDataView<T, Void, GridDataView<T>>,
+        HasLazyDataView<T, Void, GridLazyDataView<T>> {
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
@@ -2359,9 +2359,29 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @Override
-    public GridDataView<T> setItems(DataProvider<T, ?> dataProvider) {
+    public GridDataView<T> setItems(DataProvider<T, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getGenericDataView();
+    }
+
+    @Override
+    public GridDataView<T> setItems(
+            InMemoryDataProvider<T> inMemoryDataProvider) {
+        // We don't use DataProvider.withConvertedFilter() here because it's
+        // implementation does not apply the filter converter if Query has a
+        // null filter
+        DataProvider<T, Void> convertedDataProvider =
+                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                        inMemoryDataProvider) {
+                    @Override
+                    protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                        // Just ignore the query filter (Void) and apply the
+                        // predicate only
+                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                                .orElse(item -> true);
+                    }
+                };
+        return setItems(convertedDataProvider);
     }
 
     /**

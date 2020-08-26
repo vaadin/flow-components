@@ -11,7 +11,7 @@ import com.vaadin.flow.router.Route;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route("grid-details-row")
+@Route("vaadin-grid/grid-details-row")
 public class GridDetailsRowPage extends Div {
 
     private Grid<Person> grid = new Grid<>();

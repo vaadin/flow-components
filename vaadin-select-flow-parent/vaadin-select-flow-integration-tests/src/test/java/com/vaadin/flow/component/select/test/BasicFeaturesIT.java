@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-@TestPath("")
+@TestPath("vaadin-select/")
 public class BasicFeaturesIT extends AbstractSelectIT {
 
     @Test

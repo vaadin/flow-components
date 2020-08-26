@@ -19,11 +19,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("required-combobox")
+@TestPath("vaadin-combo-box/required-combobox")
 public class RequiredComboboxIT extends AbstractComponentIT {
 
     @Test

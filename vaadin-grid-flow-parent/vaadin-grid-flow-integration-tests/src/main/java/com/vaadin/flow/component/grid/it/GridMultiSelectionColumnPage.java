@@ -34,7 +34,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for grid's multi selection column.
  */
-@Route("grid-multi-selection-column")
+@Route("vaadin-grid/grid-multi-selection-column")
 public class GridMultiSelectionColumnPage extends Div {
 
     public static final int ITEM_COUNT = 1000;

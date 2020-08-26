@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route
+@Route(value = "vaadin-crud/customsearch")
 @Theme(Lumo.class)
 public class CustomSearchView extends VerticalLayout {
 

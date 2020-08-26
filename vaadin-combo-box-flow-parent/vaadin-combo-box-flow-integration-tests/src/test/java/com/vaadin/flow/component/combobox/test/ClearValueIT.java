@@ -17,7 +17,7 @@ package com.vaadin.flow.component.combobox.test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-@TestPath("clear-value")
+@TestPath("vaadin-combo-box/clear-value")
 public class ClearValueIT extends AbstractComponentIT {
 
     @Before

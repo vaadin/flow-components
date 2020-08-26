@@ -20,11 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("treegrid-detach-attach")
+@TestPath("vaadin-grid/treegrid-detach-attach")
 public class TreeGridDetachAttachIT extends AbstractComponentIT {
 
     private TreeGridElement grid;

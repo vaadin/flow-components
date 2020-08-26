@@ -15,7 +15,8 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-rich-text-editor") ;
+        getDriver().get(url);
         ButtonElement setValue = getTestButton("setValue");
         setValue.click();
     }

@@ -22,7 +22,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 
-@Route("close-listener-reopen-dialog")
+@Route("vaadin-dialog/close-listener-reopen-dialog")
 public class CloseListenerReopenDialogPage extends Div {
 
     public CloseListenerReopenDialogPage() {

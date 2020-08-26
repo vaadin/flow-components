@@ -24,7 +24,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("refresh-invisible-grid")
+@Route("vaadin-grid/refresh-invisible-grid")
 public class RefreshAndMakeVisibleGridPage extends Div {
 
     private Grid<String> grid;

@@ -28,7 +28,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -37,7 +37,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
 
-@TestPath("iron-list-test")
+@TestPath("vaadin-iron-list/iron-list-test")
 public class IronListIT extends AbstractComponentIT {
 
     @Before

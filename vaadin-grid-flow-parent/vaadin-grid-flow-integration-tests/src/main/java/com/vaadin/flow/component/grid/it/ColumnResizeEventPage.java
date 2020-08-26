@@ -25,7 +25,7 @@ import com.vaadin.flow.data.bean.Gender;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("column-resize-event")
+@Route("vaadin-grid/column-resize-event")
 public class ColumnResizeEventPage extends Div {
 
     public static final String GRID_ID = "column-resize-event-grid";

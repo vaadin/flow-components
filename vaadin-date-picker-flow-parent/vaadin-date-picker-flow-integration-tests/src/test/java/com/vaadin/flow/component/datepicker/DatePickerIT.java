@@ -25,7 +25,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
 
 import static org.junit.Assert.assertTrue;

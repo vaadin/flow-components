@@ -24,7 +24,7 @@ import java.time.LocalDate;
 /**
  * View for testing custom validation with {@link DatePicker}.
  */
-@Route("required-field-custom-validator")
+@Route("vaadin-date-picker/required-field-custom-validator")
 public class DatePickerWithCustomServerSideValidatorPage extends Div {
 
     public static class LocalDateWrapper {

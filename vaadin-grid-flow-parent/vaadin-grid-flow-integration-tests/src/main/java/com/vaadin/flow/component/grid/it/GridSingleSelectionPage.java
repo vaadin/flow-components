@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for variants of grid single selection mode.
  */
-@Route("grid-single-selection")
+@Route("vaadin-grid/grid-single-selection")
 public class GridSingleSelectionPage extends VerticalLayout {
 
     public static final String DESELECT_ALLOWED_GRID_ID = "deselect-allowed-grid";

@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("set-items-later")
+@TestPath("vaadin-combo-box/set-items-later")
 public class SetItemsLaterIT extends AbstractComboBoxIT {
     @Before
     public void init() {
