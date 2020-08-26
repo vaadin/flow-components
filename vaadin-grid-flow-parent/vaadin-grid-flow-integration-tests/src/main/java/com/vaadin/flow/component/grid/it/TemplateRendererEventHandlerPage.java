@@ -22,7 +22,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("template-renderer-event-handler")
+@Route("vaadin-grid/template-renderer-event-handler")
 public class TemplateRendererEventHandlerPage extends Div {
 
     public TemplateRendererEventHandlerPage() {

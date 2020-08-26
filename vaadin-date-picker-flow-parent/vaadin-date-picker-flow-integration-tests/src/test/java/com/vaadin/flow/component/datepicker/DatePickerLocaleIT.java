@@ -14,11 +14,11 @@ import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("date-picker-locale")
+@TestPath("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocaleIT extends AbstractComponentIT {
 
     private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";

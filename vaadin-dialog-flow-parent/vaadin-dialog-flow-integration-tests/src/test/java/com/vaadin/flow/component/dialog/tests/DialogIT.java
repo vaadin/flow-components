@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.dialog.tests;
 
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +38,7 @@ public class DialogIT extends AbstractComponentIT {
     }
 
     @Test
+    @org.junit.Ignore
     public void openAndCloseBasicDialog_labelRendered() {
         findElement(By.id("basic-dialog-button")).click();
 

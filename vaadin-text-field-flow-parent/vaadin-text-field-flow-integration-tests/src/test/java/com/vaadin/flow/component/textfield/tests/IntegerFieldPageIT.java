@@ -26,7 +26,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -36,7 +36,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 /**
  * Integration tests for {@link IntegerField}.
  */
-@TestPath("integer-field-test")
+@TestPath("vaadin-text-field/integer-field-test")
 public class IntegerFieldPageIT extends AbstractComponentIT {
 
     private IntegerFieldElement field;

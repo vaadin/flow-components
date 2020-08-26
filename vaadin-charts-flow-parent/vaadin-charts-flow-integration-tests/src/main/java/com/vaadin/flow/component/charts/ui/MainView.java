@@ -31,7 +31,7 @@ import com.vaadin.flow.router.WildcardParameter;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route("")
+@Route("vaadin-charts/")
 @Theme(value = Lumo.class)
 @StyleSheet("context://styles.css")
 public class MainView extends Div implements HasUrlParameter<String> {

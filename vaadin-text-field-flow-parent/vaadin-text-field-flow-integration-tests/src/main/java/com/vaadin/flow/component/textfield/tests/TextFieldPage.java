@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link TextField}.
  */
-@Route("text-field-test")
+@Route("vaadin-text-field/text-field-test")
 public class TextFieldPage extends Div {
 
     /**

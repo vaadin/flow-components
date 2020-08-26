@@ -10,7 +10,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route
+@Route(value = "vaadin-crud/editonclick")
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
 public class EditOnClickView extends VerticalLayout {

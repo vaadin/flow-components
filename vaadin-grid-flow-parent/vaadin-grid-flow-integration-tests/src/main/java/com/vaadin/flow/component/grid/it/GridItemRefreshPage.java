@@ -27,7 +27,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-item-refresh-page")
+@Route("vaadin-grid/grid-item-refresh-page")
 public class GridItemRefreshPage extends Div {
 
     public static final String UPDATED_FIRST_FIELD = "updated";

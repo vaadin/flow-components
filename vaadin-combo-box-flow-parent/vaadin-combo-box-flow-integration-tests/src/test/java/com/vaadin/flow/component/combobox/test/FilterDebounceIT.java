@@ -26,7 +26,7 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("filter-debounce")
+@TestPath("vaadin-combo-box/filter-debounce")
 public class FilterDebounceIT extends AbstractComboBoxIT {
 
     private ComboBoxElement combo;

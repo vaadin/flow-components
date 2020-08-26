@@ -22,7 +22,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.AbstractNoW3c;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
@@ -30,8 +30,8 @@ import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("dynamic-editor-keyboard")
-public class DynamicEditorKBNavigationIT extends AbstractNoW3c {
+@TestPath("vaadin-grid/dynamic-editor-keyboard")
+public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
 
     @Test
     public void navigateBetweenEditorsUsingKeybaord() {

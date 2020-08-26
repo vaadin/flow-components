@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -27,7 +27,7 @@ import org.junit.Test;
  * Tests for dynamically adding new columns with different renderers after the
  * Grid has already been attached and rendered.
  */
-@TestPath("component-columns")
+@TestPath("vaadin-grid/component-columns")
 public class ComponentColumnsIT extends AbstractComponentIT {
 
     private GridElement gridThenComp;

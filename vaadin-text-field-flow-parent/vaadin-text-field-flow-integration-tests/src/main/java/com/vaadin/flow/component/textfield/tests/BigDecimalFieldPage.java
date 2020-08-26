@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.router.Route;
 
-@Route("big-decimal-field-test")
+@Route("vaadin-text-field/big-decimal-field-test")
 public class BigDecimalFieldPage extends Div {
 
     private Div messageContainer;

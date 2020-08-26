@@ -108,6 +108,10 @@ function copyFileSync(source, target, replaceCall) {
   }
   // fs.copyFileSync(source, targetFile);
   let content = fs.readFileSync(source, 'utf8');
+  // remove CR in windows
+  if (/\.(java)$/.test(source)) {
+    content = content.replace('\r', '');
+  }
   [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
   fs.writeFileSync(targetFile, content, 'utf8');
 }

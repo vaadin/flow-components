@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.router.Route;
 
-@Route("disabled-items")
+@Route("vaadin-radio-button/disabled-items")
 public class DisabledItemsPage extends Div {
 
     public DisabledItemsPage() {

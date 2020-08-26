@@ -9,7 +9,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Dimensions
  */
-@Route("Dimensions")
+@Route("vaadin-confirm-dialog/Dimensions")
 @BodySize
 public class Dimensions extends Div {
 

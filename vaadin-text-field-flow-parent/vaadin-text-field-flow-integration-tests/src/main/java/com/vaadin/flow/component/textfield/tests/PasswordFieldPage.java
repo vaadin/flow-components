@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link PasswordField}.
  */
-@Route("password-field-test")
+@Route("vaadin-text-field/password-field-test")
 public class PasswordFieldPage extends Div {
 
     /**

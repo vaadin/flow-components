@@ -12,7 +12,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
-@Route("Features")
+@Route("vaadin-confirm-dialog/Features")
 @BodySize
 public class Features extends Div {
 

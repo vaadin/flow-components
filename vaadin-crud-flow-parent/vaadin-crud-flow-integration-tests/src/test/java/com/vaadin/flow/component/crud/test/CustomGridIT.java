@@ -16,7 +16,8 @@ public class CustomGridIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/customgrid");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/customgrid";
+        getDriver().get(url);
     }
 
     @Test

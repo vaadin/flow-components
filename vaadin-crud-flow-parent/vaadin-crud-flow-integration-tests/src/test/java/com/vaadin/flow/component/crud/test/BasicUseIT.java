@@ -16,7 +16,8 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") ;
+        getDriver().get(url);
     }
 
     @Test
@@ -40,7 +41,8 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void filterCanBeDisabled() {
-        getDriver().get(getBaseURL() + "/nofilter");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/nofilter";
+        getDriver().get(url);
         Assert.assertTrue($(CrudElement.class).waitForFirst().getFilterFields().isEmpty());
     }
 

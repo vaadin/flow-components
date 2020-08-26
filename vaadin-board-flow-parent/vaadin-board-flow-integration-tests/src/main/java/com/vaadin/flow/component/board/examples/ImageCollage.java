@@ -20,7 +20,7 @@ import com.vaadin.flow.server.VaadinServlet;
  * This example requires image resources. You need to have files with images in
  * the webapp folder: <code>src/main/webapp/image-collage/small</code>
  */
-@Route("ImageCollage")
+@Route("vaadin-board/ImageCollage")
 @BodySize
 public class ImageCollage extends Div {
     private static final String IMAGE_PATH = "image-collage/small/";

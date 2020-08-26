@@ -21,11 +21,11 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.listbox.testbench.ListBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("multi-select")
+@TestPath("vaadin-list-box/multi-select")
 public class MultiSelectListBoxIT extends AbstractComponentIT {
 
     private ListBoxElement listBox;

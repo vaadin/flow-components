@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertFalse;
@@ -32,7 +32,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 /**
  * Integration tests for {@link NumberField}.
  */
-@TestPath("number-field-test")
+@TestPath("vaadin-text-field/number-field-test")
 public class NumberFieldPageIT extends AbstractComponentIT {
 
     @Before

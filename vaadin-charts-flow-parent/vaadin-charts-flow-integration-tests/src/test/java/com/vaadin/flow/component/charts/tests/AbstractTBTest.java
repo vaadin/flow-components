@@ -32,7 +32,7 @@ import com.vaadin.testbench.annotations.BrowserConfiguration;
 import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.DefaultBrowserFactory;
-import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.tests.ParallelTest;
 import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
 
 public abstract class AbstractTBTest extends ParallelTest {
@@ -79,7 +79,6 @@ public abstract class AbstractTBTest extends ParallelTest {
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
         return Arrays.asList(
                 BrowserUtil.chrome(),
-                BrowserUtil.firefox(),
                 DesiredCapabilities.iphone(),
                 DesiredCapabilities.ipad(),
                 browserFactory.create(Browser.SAFARI, "11.0", Platform.SIERRA),
@@ -131,7 +130,7 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected int getDeploymentPort() {
-        return 8080;
+        return 9998;
     }
 
     protected abstract Class<? extends AbstractChartExample> getTestView();

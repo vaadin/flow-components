@@ -31,7 +31,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Route("templated-columns")
+@Route("vaadin-grid/templated-columns")
 @Tag("templated-columns")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column-group.html")
 @HtmlImport("src/templated-columns.html")

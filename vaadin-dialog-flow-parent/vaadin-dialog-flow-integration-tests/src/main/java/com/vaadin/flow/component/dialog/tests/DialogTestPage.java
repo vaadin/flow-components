@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  *
  */
-@Route("dialog-test")
+@Route("vaadin-dialog/dialog-test")
 public class DialogTestPage extends Div {
 
     private static final String CLOSE_CAPTION = "close";

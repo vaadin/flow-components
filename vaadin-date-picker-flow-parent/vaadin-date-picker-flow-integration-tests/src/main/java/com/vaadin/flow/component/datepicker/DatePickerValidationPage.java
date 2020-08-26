@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
 /**
  * View for testing validation with {@link DatePicker}.
  */
-@Route("date-picker-validation")
+@Route("vaadin-date-picker/date-picker-validation")
 public class DatePickerValidationPage extends Div {
 
     final String STATUS = "The Invalid state of the DatePicker is ";

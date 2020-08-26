@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Integration tests for the {@link DateTimePickerAutoOpenPage}.
  */
-@TestPath("datetimepickerautoopenpage")
+@TestPath("vaadin-date-time-picker/datetimepickerautoopenpage")
 public class DateTimePickerAutoOpenIT extends AbstractComponentIT {
 
     @Test

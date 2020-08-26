@@ -23,7 +23,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("combo-box-in-template")
+@Route("vaadin-combo-box/combo-box-in-template")
 public class ComboBoxInTemplatePage extends Div {
 
     private Label message;

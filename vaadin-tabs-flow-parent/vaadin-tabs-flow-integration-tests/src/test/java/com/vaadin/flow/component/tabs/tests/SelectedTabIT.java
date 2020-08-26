@@ -23,11 +23,11 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("selected-tab")
+@TestPath("vaadin-tabs/selected-tab")
 public class SelectedTabIT extends AbstractComponentIT {
 
     @Before

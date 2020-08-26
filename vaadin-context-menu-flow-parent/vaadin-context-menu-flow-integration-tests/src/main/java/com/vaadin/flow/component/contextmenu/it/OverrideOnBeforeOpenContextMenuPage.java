@@ -26,7 +26,7 @@ import elemental.json.JsonObject;
 /**
  * @author Vaadin Ltd
  */
-@Route("override-on-before-open-context-menu")
+@Route("vaadin-context-menu/override-on-before-open-context-menu")
 public class OverrideOnBeforeOpenContextMenuPage extends Div {
 
     public OverrideOnBeforeOpenContextMenuPage() {

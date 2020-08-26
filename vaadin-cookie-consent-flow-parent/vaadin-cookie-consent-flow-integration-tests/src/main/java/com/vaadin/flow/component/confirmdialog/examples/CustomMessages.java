@@ -6,7 +6,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
-@Route("CustomMessages")
+@Route("vaadin-cookie-consent/CustomMessages")
 @BodySize
 public class CustomMessages extends Div {
     public static final String MESSAGE = "We are using cookies to make your visit here awesome!";

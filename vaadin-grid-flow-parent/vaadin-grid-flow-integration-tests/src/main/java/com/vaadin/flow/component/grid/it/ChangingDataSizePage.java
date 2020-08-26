@@ -28,7 +28,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 
-@Route("changing-data-size")
+@Route("vaadin-grid/changing-data-size")
 public class ChangingDataSizePage extends Div {
 
     private List<String> items;

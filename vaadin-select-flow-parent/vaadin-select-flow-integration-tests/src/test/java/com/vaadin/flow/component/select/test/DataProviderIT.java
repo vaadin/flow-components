@@ -7,7 +7,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
-@TestPath("")
+@TestPath("vaadin-select/")
 public class DataProviderIT extends AbstractSelectIT {
     @Override
     protected int getInitialNumberOfItems() {

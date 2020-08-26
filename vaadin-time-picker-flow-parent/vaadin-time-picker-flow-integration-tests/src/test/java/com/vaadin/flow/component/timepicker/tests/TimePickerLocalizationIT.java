@@ -32,10 +32,10 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.demo.TimePickerView;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("time-picker-localization")
+@TestPath("vaadin-time-picker/time-picker-localization")
 public class TimePickerLocalizationIT extends AbstractComponentIT {
 
     // Maximum is `Locale.getAvailableLocales()` about 159 that makes the

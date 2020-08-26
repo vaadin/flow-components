@@ -22,14 +22,14 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Tests for dynamically adding new columns with different renderers after the
  * Grid has already been attached and rendered.
  */
-@TestPath("tree-component-columns")
+@TestPath("vaadin-grid/tree-component-columns")
 public class TreeComponentColumnsIT extends AbstractComponentIT {
 
     private TreeGridElement gridThenComp;

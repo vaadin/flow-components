@@ -10,7 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-loads-items")
+@Route("vaadin-grid/grid-loads-items")
 public class GridLoadsItemsPage extends Div {
     public GridLoadsItemsPage() {
         Grid<String> grid = new Grid<>();

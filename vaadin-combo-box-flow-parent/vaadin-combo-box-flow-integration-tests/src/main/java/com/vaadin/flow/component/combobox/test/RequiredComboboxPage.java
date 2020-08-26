@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
-@Route("required-combobox")
+@Route("vaadin-combo-box/required-combobox")
 public class RequiredComboboxPage extends Div {
 
     public RequiredComboboxPage() {

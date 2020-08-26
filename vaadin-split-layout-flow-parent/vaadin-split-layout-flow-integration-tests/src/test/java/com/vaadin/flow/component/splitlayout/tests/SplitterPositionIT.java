@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.testbench.SpanElement;
 import com.vaadin.flow.component.splitlayout.demo.SplitLayoutView;
 import com.vaadin.flow.component.splitlayout.test.SplitterPositionView;
 import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.interactions.Actions;
@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 /**
  * Integration tests for {@link SplitLayoutView}.
  */
-@TestPath("splitter-position")
+@TestPath("vaadin-split-layout/splitter-position")
 public class SplitterPositionIT extends AbstractComponentIT {
 
     public static final String JAVA_API = "JavaApi";

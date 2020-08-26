@@ -16,7 +16,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Tag("validation-connector")
 @HtmlImport("src/validation-connector.html")
 @JsModule("./src/validation-connector.js")
-@Route("validation-connector")
+@Route("vaadin-combo-box/validation-connector")
 public class ValidationConnectorErrorPage extends PolymerTemplate<TemplateModel>
         implements HasComponents {
 

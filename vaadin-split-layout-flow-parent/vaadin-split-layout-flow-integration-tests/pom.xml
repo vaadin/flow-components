@@ -60,6 +60,12 @@
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.12</version>
     </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-flow-components-shared</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

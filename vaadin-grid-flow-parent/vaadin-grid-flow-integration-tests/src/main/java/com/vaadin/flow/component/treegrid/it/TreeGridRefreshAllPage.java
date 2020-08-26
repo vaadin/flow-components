@@ -21,7 +21,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-refresh-all")
+@Route("vaadin-grid/treegrid-refresh-all")
 public class TreeGridRefreshAllPage extends Div {
 
     public TreeGridRefreshAllPage() {

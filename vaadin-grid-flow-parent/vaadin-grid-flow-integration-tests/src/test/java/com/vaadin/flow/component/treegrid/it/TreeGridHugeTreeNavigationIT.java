@@ -27,7 +27,7 @@ import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertTrue;
 
-@TestPath("treegrid-huge-tree-navigation")
+@TestPath("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
 
     @Before

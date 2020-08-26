@@ -24,7 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.datepicker.demo.DatePickerView;
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 
 import static org.junit.Assert.assertTrue;
 
