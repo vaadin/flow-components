@@ -46,7 +46,7 @@ cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd
 
-cmd="scripts/mergeITs.js "`echo $elements`
+cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd
 
