@@ -36,7 +36,6 @@ async function computeModules() {
   }
 }
 
-
 // Add a dependency to the array, if not already present
 function addDependency(arr, groupId, artifactId, version, scope) {
   if (!arr.find(e => e.groupId[0] === groupId && e.artifactId[0] === artifactId)) {
@@ -52,9 +51,7 @@ function addDependency(arr, groupId, artifactId, version, scope) {
 
 // Creates the pom.xml for the integration-tests module
 async function createPom() {
-  const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/pom-integration-tests.xml`, 'utf8'));
-
-  tplJs.project.dependencies[0].dependency = await modules.reduce(async (prevP, name) => {
+   const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
     // Add component-flow and component-testbench dependencies
@@ -78,6 +75,9 @@ async function createPom() {
       scope: ['compile']
     }
   ]));
+
+  const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/pom-integration-tests.xml`, 'utf8'));
+  tplJs.project.dependencies = [{dependency}];
 
   tplJs.project.artifactId = ['vaadin-flow-components-integration-tests'];
   tplJs.project.parent[0].artifactId = ['vaadin-flow-components'];
