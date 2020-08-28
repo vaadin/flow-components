@@ -9,7 +9,7 @@
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '17.0-SNAPSHOT';
+const version = '18.0-SNAPSHOT';
 const itFolder = 'integration-tests';
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
