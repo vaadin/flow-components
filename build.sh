@@ -50,22 +50,17 @@ cmd="scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd || exit 1
 
-# tcLog 'Compiling and Unit-Testing flow components'
-# cmd="mvn test -B -Drun-it -T C$processors -pl integration-tests"
-# echo $cmd
-# $cmd
-
 cmd="mvn install -DskipTests -Drelease -B -T C$processors"
 tcLog "Installing flow components - $cmd"
 $cmd || exit 1
 
-# args="-B -Dvaadin.pnpm.enable=true"
-# tcLog 'Running npm install in merged ITs'
-# cmd="mvn flow:build-frontend $args -Drun-it -pl integration-tests"
-# echo $cmd
-# $cmd
+if [ -n "$BUILD" ]
+then
+  cmd="mvn test -B -Drun-it -T C$processors"
+  tcLog "Unit-Testing - $cmd"
+  $cmd
+fi
 
-[ -n "$TBHUB" ] && TBHUB=localhost
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 
@@ -89,7 +84,8 @@ then
   tcLog "Running module ITs - mvn clean verify -pl ..."
   echo $cmd
   $cmd
-else
+elif [ -z "$BUILD" ]
+then
   ### Run IT's in merged module
   cmd="mvn verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
