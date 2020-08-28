@@ -9,7 +9,7 @@
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '17.0-SNAPSHOT';
+const version = '18.0-SNAPSHOT';
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
