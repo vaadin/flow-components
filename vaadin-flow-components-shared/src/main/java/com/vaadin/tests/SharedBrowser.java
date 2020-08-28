@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.vaadin.testbench.Parameters;
 import org.openqa.selenium.WebDriver;
@@ -30,6 +32,8 @@ public class SharedBrowser {
     SessionId sessionId;
     private volatile TestBenchDriverProxy driver;
 
+    private static Logger logger = Logger.getLogger(SharedBrowser.class.getName());
+
     SharedBrowser() {
 
     }
@@ -52,7 +56,7 @@ public class SharedBrowser {
         if(driver == null) {
             return;
         }
-        System.out.println(String.format("Clearing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String.format("Clearing driver for session %s\turl %s", sessionId, url));
         driver.quit();
         driver = null;
         sessionId = null;
@@ -101,7 +105,7 @@ public class SharedBrowser {
                 return response;
             }
         };
-        System.out.println(String.format("Reusing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String.format("Reusing driver for session %s\turl %s", sessionId, url));
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
             new DesiredCapabilities());
@@ -115,7 +119,7 @@ public class SharedBrowser {
             .getCommandExecutor();
         url = executor.getAddressOfRemoteServer();
         sessionId = webDriver.getSessionId();
-        System.out.println(String.format("Creating driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String.format("Creating driver for session %s\turl %s", sessionId, url));
     }
 
     public Optional<List<DesiredCapabilities>> getGridBrowsers() {
