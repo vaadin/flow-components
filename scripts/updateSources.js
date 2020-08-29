@@ -153,7 +153,7 @@ async function main() {
     function ignore_test_method(shouldApplyChange, content, methodName) {
       if(shouldApplyChange) {
         const regex = new RegExp(`(\\s+)(public void ${methodName})`,'g');
-        content = content.replace(regex,`$1@org.junit.Ignore$1$2`);
+        content = content.replace(regex,`$1@org.junit.Ignore("Unstable test in mono-repo")$1$2`);
       }
       return content;
     }

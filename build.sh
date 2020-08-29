@@ -69,6 +69,8 @@ $cmd
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 
+echo "$args"
+
 if [ "$TBHUB" = "localhost" ]
 then
     tcLog 'Installing docker image with standalone-chrome'
