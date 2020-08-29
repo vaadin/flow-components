@@ -73,6 +73,8 @@ then
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 
+echo "$args"
+
 if [ "$TBHUB" = "localhost" ]
 then
     tcLog 'Installing docker image with standalone-chrome'
