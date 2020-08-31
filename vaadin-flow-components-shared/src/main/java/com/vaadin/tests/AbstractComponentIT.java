@@ -1,13 +1,10 @@
 package com.vaadin.tests;
 
 import com.vaadin.testbench.Parameters;
-import com.vaadin.testbench.parallel.setup.RemoteDriver;
-import com.vaadin.testbench.parallel.setup.SetupDriver;
 import org.junit.AfterClass;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
-import java.lang.reflect.Field;
+import java.util.List;
 
 public abstract class AbstractComponentIT
     extends com.vaadin.flow.testutil.AbstractComponentIT {
@@ -29,6 +26,11 @@ public abstract class AbstractComponentIT
 
     protected int getDeploymentPort() {
         return 8080;
+    }
+
+    @Override
+    protected List<DesiredCapabilities> getHubBrowsersToTest() {
+        return browser.getGridBrowsers().orElse(super.getHubBrowsersToTest());
     }
 
     @AfterClass
