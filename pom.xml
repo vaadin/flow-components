@@ -22,7 +22,7 @@
         </project.reporting.outputEncoding>
 
         <jetty.version>9.4.15.v20190215</jetty.version>
-        <jetty.http.port>9998</jetty.http.port>
+        <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
