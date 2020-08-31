@@ -58,7 +58,6 @@ $cmd
 cmd="mvn install -DskipTests -Drelease -B -T C$processors"
 tcLog "Installing flow components - $cmd"
 $cmd
-
 # args="-B -Dvaadin.pnpm.enable=true"
 # tcLog 'Running npm install in merged ITs'
 # cmd="mvn flow:build-frontend $args -Drun-it -pl integration-tests"
@@ -68,6 +67,11 @@ $cmd
 [ -n "$TBHUB" ] && TBHUB=localhost
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
+if [ -n "$SAUCE_USER" ]
+then
+   test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
+   args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
+fi
 
 if [ "$TBHUB" = "localhost" ]
 then
