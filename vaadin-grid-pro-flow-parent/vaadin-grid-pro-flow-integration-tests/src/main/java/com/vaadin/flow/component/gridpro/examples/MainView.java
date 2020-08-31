@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -89,6 +90,13 @@ public class MainView extends VerticalLayout {
                     itemDisplayPanel.setText(item.toString());
                     subPropertyDisplayPanel.setText(newValue.toString());
         }).setHeader("City").setWidth("300px");
+
+        Input customField = new Input();
+        grid.addEditColumn(Person::getEmail)
+                .custom(customField, (item, newValue) ->
+                        item.setEmail(newValue))
+                .setHeader("Email")
+                .setWidth("300px");
 
         disableGrid.addClickListener(click -> grid.setEnabled(false));
 
