@@ -20,6 +20,10 @@ public abstract class ParallelTest extends com.vaadin.testbench.parallel.Paralle
         screenshotOnFailure.setQuitDriverOnFinish(false);
     }
 
+    protected int getDeploymentPort() {
+        return 8080;
+    }
+
     @AfterClass
     public static void runAfterTest() {
         browser.clear();

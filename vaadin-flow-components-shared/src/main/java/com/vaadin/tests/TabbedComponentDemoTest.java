@@ -20,6 +20,10 @@ public abstract class TabbedComponentDemoTest extends com.vaadin.flow.demo.Tabbe
         screenshotOnFailure.setQuitDriverOnFinish(false);
     }
 
+    protected int getDeploymentPort() {
+        return 8080;
+    }
+
     @AfterClass
     public static void runAfterTest() {
         browser.clear();
