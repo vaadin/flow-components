@@ -66,7 +66,7 @@ com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.f
     }
 
     protected String getPort() {
-        return "9998";
+        return "8080";
     }
 
     @BrowserConfiguration
