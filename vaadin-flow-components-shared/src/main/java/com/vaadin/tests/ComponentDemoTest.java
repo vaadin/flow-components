@@ -20,6 +20,10 @@ public abstract class ComponentDemoTest extends com.vaadin.flow.demo.ComponentDe
         screenshotOnFailure.setQuitDriverOnFinish(false);
     }
 
+    protected int getDeploymentPort() {
+        return 8080;
+    }
+
     @AfterClass
     public static void runAfterTest() {
         browser.clear();
