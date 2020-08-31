@@ -44,11 +44,11 @@ uname -a
 
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
-$cmd
+$cmd || exit 1
 
 cmd="scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
-$cmd
+$cmd || exit 1
 
 # tcLog 'Compiling and Unit-Testing flow components'
 # cmd="mvn test -B -Drun-it -T C$processors -pl integration-tests"
@@ -57,7 +57,7 @@ $cmd
 
 cmd="mvn install -DskipTests -Drelease -B -T C$processors"
 tcLog "Installing flow components - $cmd"
-$cmd
+$cmd || exit 1
 
 # args="-B -Dvaadin.pnpm.enable=true"
 # tcLog 'Running npm install in merged ITs'
@@ -80,7 +80,7 @@ then
     docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
 fi
 
-args="$args -Dfailsafe.forkCount=$processors"
+args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
 if [ -n "$modules" ]
 then
