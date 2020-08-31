@@ -2,6 +2,9 @@ package com.vaadin.tests;
 
 import com.vaadin.testbench.Parameters;
 import org.junit.AfterClass;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+import java.util.List;
 
 public abstract class ComponentDemoTest extends com.vaadin.flow.demo.ComponentDemoTest {
 
@@ -18,6 +21,11 @@ public abstract class ComponentDemoTest extends com.vaadin.flow.demo.ComponentDe
             return getDriver();
         });
         screenshotOnFailure.setQuitDriverOnFinish(false);
+    }
+
+    @Override
+    protected List<DesiredCapabilities> getHubBrowsersToTest() {
+        return browser.getGridBrowsers().orElse(super.getHubBrowsersToTest());
     }
 
     protected int getDeploymentPort() {
