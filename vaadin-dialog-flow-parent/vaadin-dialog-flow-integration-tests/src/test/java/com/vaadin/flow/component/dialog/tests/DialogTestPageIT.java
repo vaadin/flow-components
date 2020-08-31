@@ -218,7 +218,6 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     @Test
-    @org.junit.Ignore
     public void verifyDialogFullSize() {
         findElement(By.id("button-for-dialog-with-div")).click();
         WebElement overlay = getInShadowRoot(getOverlayContent(),

@@ -34,6 +34,7 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();
 
