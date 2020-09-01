@@ -94,6 +94,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testValueChangeModesForBigDecimalField()
             throws InterruptedException {
         testValueChangeModes(bigDecimalField, "bigdecimalfield");
