@@ -51,6 +51,7 @@ consolidateCharts() {
   tb=`echo $prj | sed -e 's/-flow/-testbench/'`
   renameModule $mod addon $prj
   renameModule $mod examples $prj-demo
+  perl -pi -e "s,>$prj-examples<,>$prj-demo<,g" $mod/*/pom.xml
   renameModule $mod integration-test $prj-integration-tests
   renameModule $mod testbench $tb
 }

@@ -44,27 +44,23 @@ uname -a
 
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
-$cmd
+$cmd || exit 1
 
 cmd="scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
-$cmd
-
-# tcLog 'Compiling and Unit-Testing flow components'
-# cmd="mvn test -B -Drun-it -T C$processors -pl integration-tests"
-# echo $cmd
-# $cmd
+$cmd || exit 1
 
 cmd="mvn install -DskipTests -Drelease -B -T C$processors"
 tcLog "Installing flow components - $cmd"
-$cmd
-# args="-B -Dvaadin.pnpm.enable=true"
-# tcLog 'Running npm install in merged ITs'
-# cmd="mvn flow:build-frontend $args -Drun-it -pl integration-tests"
-# echo $cmd
-# $cmd
+$cmd || exit 1
 
-[ -n "$TBHUB" ] && TBHUB=localhost
+if [ -n "$BUILD" ]
+then
+  cmd="mvn test -B -Drun-it -T C$processors"
+  tcLog "Unit-Testing - $cmd"
+  $cmd
+fi
+
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 if [ -n "$SAUCE_USER" ]
@@ -72,6 +68,7 @@ then
    test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
+echo "$args"
 
 if [ "$TBHUB" = "localhost" ]
 then
@@ -82,7 +79,7 @@ then
     docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
 fi
 
-args="$args -Dfailsafe.forkCount=$processors"
+args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
 if [ -n "$modules" ]
 then
@@ -91,7 +88,8 @@ then
   tcLog "Running module ITs - mvn clean verify -pl ..."
   echo $cmd
   $cmd
-else
+elif [ -z "$BUILD" ]
+then
   ### Run IT's in merged module
   cmd="mvn verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."

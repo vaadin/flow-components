@@ -32,7 +32,7 @@ public class DialogIT extends AbstractComponentIT {
     private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
 
     @Test
-    @org.junit.Ignore
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void openAndCloseBasicDialog_labelRendered() {
         open();
 
