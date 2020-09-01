@@ -61,6 +61,7 @@ then
   $cmd
 fi
 
+[ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 if [ -n "$SAUCE_USER" ]
@@ -91,7 +92,7 @@ then
 elif [ -z "$BUILD" ]
 then
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
+  cmd="mvn verify -Drun-it -Drelease "-Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL" $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
