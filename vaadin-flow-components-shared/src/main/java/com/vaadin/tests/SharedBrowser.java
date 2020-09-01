@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.vaadin.testbench.Parameters;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.logging.LogType;
