@@ -15,7 +15,6 @@ const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
 const name = mod.replace('-flow-parent', '');
 const componentName = name.replace('vaadin-', '');
-const compNameFirUp = componentName.charAt(0).toUpperCase() + componentName.slice(1)
 const desc = name.split('-').map(w => w.replace(/./, m => m.toUpperCase())).join(' ');
 const proComponents = ['accordion',
                        'app-layout' ,
@@ -46,8 +45,17 @@ function renameBase(js) {
 }
 
 function renamePlugin(js){
-  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0].replace(/crud/, componentName);
-  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0].replace(/Crud/, compNameFirUp);
+  // component name in Bundle-SymbolicName uses '.' as separator
+  const symbolicName = componentName.replace('-', '.');
+  // Implementation Title uses uppercase for the first letter in each word
+  nameArray = componentName.split('-');
+  for(let i = 0; nameArray && i < nameArray.length; i++) {
+    nameArray[i] = nameArray[i].charAt(0).toUpperCase() + nameArray[i].slice(1);
+  }
+  impTitle = nameArray.join(' ');
+
+  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0].replace(/proComponent/, symbolicName);
+  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0].replace(/proComponent/, impTitle);
 }
 
 function setDependenciesVersion(dependencies) {
