@@ -204,6 +204,7 @@ async function main() {
     content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest');
     content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest');
     content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT');
+    content = content.replace('import com.vaadin.flow.testutil.AbstractValidationTest','import com.vaadin.tests.AbstractValidationTest');
 
     // Remove W3C workaround from Grid tests.
     const w3cReplacement = content.includes('com.vaadin.tests.AbstractComponentIT')? '':'import com.vaadin.tests.AbstractComponentIT;';
