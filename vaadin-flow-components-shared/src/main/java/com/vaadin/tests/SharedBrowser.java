@@ -1,15 +1,9 @@
 package com.vaadin.tests;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.vaadin.testbench.Parameters;
+import com.vaadin.testbench.ScreenshotOnFailureRule;
+import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.TestBenchDriverProxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.logging.LogType;
@@ -23,8 +17,15 @@ import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.remote.http.W3CHttpCommandCodec;
 import org.openqa.selenium.remote.http.W3CHttpResponseCodec;
 
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchDriverProxy;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SharedBrowser {
     static final SharedBrowser instance = new SharedBrowser();
@@ -61,6 +62,23 @@ public class SharedBrowser {
         driver = null;
         sessionId = null;
         url = null;
+    }
+
+    interface ISetup {
+        void setup() throws Exception;
+    }
+
+    Optional<WebDriver> setup(ISetup realSetup, Supplier<WebDriver> getDriver,
+        ScreenshotOnFailureRule screenshotOnFailure) throws Exception {
+        if (Parameters.getTestsInParallel() != 1) {
+            realSetup.setup();
+            return Optional.empty();
+        }
+        screenshotOnFailure.setQuitDriverOnFinish(false);
+        return Optional.of(getDriver(() -> {
+            realSetup.setup();
+            return getDriver.get();
+        }));
     }
 
     private TestBenchDriverProxy createDriverFromSession(
