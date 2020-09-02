@@ -64,7 +64,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-SymbolicName>${project.groupId}.flow.component.crud</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${project.groupId}.flow.component.proComponent</Bundle-SymbolicName>
                         <Import-Package>*</Import-Package>
                         <Export-Package>com.vaadin.flow.component.*;-noimport:=true</Export-Package>
                         <Private-Package></Private-Package>
@@ -76,7 +76,7 @@
                         <Vaadin-Package-Version>1</Vaadin-Package-Version>
                         <!-- Implementation-Title and Implementation-Version
                             come from the POM by default -->
-                        <Implementation-Title>Vaadin Crud</Implementation-Title>
+                        <Implementation-Title>Vaadin proComponent</Implementation-Title>
                         <_removeheaders>Built-By</_removeheaders>
                     </instructions>
                 </configuration>
