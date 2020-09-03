@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.3-SNAPSHOT</version>
+        <version>2.4-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <artifactId>vaadin-menu-bar-flow-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin MenuBar Flow Parent</name>
 
@@ -22,7 +22,7 @@
     </organization>
 
     <properties>
-        <contextmenu.version>3.2-SNAPSHOT</contextmenu.version>
+        <contextmenu.version>3.3-SNAPSHOT</contextmenu.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
