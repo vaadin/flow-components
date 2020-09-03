@@ -126,16 +126,16 @@ public class AvatarGroupTest {
     }
 
     @Test
-    public void setMax_getMax() {
-        avatarGroup.setMax(3);
+    public void setMaxItemsVisible_getMaxItemsVisible() {
+        avatarGroup.setMaxItemsVisible(3);
 
         Assert.assertEquals(new Integer(3),
-                avatarGroup.getMax());
+                avatarGroup.getMaxItemsVisible());
     }
 
     @Test
-    public void getMax_returnsNull() {
-        Assert.assertNull(avatarGroup.getMax());
+    public void getMaxItemsVisible_returnsNull() {
+        Assert.assertNull(avatarGroup.getMaxItemsVisible());
     }
 
     @Test

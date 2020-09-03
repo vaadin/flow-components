@@ -56,7 +56,7 @@ import java.util.stream.Stream;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.0-alpha9")
 public class AvatarGroup extends Component
     implements HasStyle, HasSize, HasTheme {
 
@@ -614,21 +614,22 @@ public class AvatarGroup extends Component
      * overflowing avatars are grouped into one avatar.
      *
      * @param max
-     *            the max number of avatars, or {@code null} to remove the max
+     *            the maximum number of avatars, or {@code null} to remove the
+     *            limit
      */
-    public void setMax(Integer max) {
-        getElement().setProperty("max", max);
+    public void setMaxItemsVisible(Integer max) {
+        getElement().setProperty("maxItemsVisible", max);
     }
 
     /**
-     * Gets the maximum number of avatars to display, or {@code null} if no max
-     * has been set.
+     * Gets the maximum number of avatars to display, or {@code null} if no
+     * limit has been set.
      *
      * @return the max number of avatars
-     * @see AvatarGroup#setMax(Integer)
+     * @see AvatarGroup#setMaxItemsVisible(Integer)
      */
-    public Integer getMax() {
-        String max = getElement().getProperty("max");
+    public Integer getMaxItemsVisible() {
+        String max = getElement().getProperty("maxItemsVisible");
         if (max != null && !max.isEmpty()) {
             return Integer.parseInt(max);
         }

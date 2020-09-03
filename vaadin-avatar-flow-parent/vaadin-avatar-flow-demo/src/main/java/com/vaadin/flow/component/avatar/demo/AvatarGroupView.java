@@ -78,7 +78,7 @@ public class AvatarGroupView extends DemoView {
         // source-example-heading: Setting Max
         AvatarGroup avatarGroup = new AvatarGroup();
 
-        avatarGroup.setMax(3);
+        avatarGroup.setMaxItemsVisible(3);
 
         List<AvatarGroupItem> items = new ArrayList<>();
 
