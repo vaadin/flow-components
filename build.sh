@@ -64,7 +64,7 @@ fi
 [ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-[ -z "$FORK_COUNT" ] && FORK_COUNT="$processors"
+[ -z "$FORK_COUNT" ] && FORK_COUNT="$processors"
 if [ -n "$SAUCE_USER" ]
 then
    test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
@@ -83,7 +83,7 @@ fi
 
 args="$args -Dfailsafe.forkCount=$FORK_COUNT -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
-if [ -n "$modules" ]
+if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
   cmd="mvn clean verify $args -pl $modules"
