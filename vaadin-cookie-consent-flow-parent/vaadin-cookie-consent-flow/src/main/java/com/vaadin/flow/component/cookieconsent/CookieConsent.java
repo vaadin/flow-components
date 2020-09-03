@@ -32,7 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@NpmPackage(value="@vaadin/vaadin-cookie-consent", version = "1.1.2")
+@NpmPackage(value="@vaadin/vaadin-cookie-consent", version = "1.2.0")
 @JsModule("@vaadin/vaadin-cookie-consent/src/vaadin-cookie-consent.js")
 @HtmlImport("frontend://bower_components/vaadin-cookie-consent/src/vaadin-cookie-consent.html")
 public class CookieConsent extends Component {
