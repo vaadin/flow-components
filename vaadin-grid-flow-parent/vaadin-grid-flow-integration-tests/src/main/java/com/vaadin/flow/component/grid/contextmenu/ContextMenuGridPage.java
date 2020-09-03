@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.it.GridInATemplate;
 import com.vaadin.flow.component.html.Anchor;
@@ -29,6 +30,9 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
 @Route("context-menu-grid")
+// TODO remove after helper text fields are stable
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.4.0")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.1")
 public class ContextMenuGridPage extends Div {
 
     private static final String NO_TARGET_ITEM = "no target item";
