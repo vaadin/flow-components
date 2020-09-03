@@ -44,6 +44,8 @@ public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
         // trigger the loading loop issue (vaadin-grid-flow issue #578)
         scroller.setProperty("scrollTop", 3597800);
 
+        waitUntil(e -> !grid.getPropertyBoolean("loading"));
+
         // Checks that all header and body cells have text content
         List<TestBenchElement> allCellContents = grid
                 .$("vaadin-grid-cell-content").all();

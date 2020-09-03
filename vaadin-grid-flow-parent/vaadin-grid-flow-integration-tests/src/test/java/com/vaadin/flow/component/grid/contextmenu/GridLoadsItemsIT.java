@@ -36,36 +36,56 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
     public void initialRender_twoQueries() {
         open();
 
-        // waits for Grid to fetch the items after it is loaded. This process is
-        // asynchronous - without this wait, the test might fail.
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GridElement grid = $(GridElement.class).id("data-grid");
+        // Even though grid is already as row 0, this makes the grid to wait until it has finished loading.
+        grid.scrollToRow(0);
 
         List<String> messages = getMessages();
 
         Assert.assertEquals(
                 "There should be just one query, that fills up the pageSize of the Grid",
-                Arrays.asList("Fetch 0 - 50"), messages);
+                Arrays.asList("Fetch 0 - 100"), messages);
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode")
     public void scrollToPosition_oneQuery() {
         open();
 
         findElement(By.id("clear-messages")).click();
 
         GridElement grid = $(GridElement.class).id("data-grid");
-        grid.scrollToRow(500);
+
+        grid.scrollToRow(550);
 
         List<String> messages = getMessages();
 
         Assert.assertEquals(
-                "There should be one query fetching two previous pages (400-450 + 450-500), the current page (500-550), and one upcoming page (550-600)",
-                Arrays.asList("Fetch 400 - 600"), messages);
+                "There should be one query (500 - 600), which covers the index the user is currently at",
+                Arrays.asList("Fetch 500 - 600"), messages);
+    }
+
+    @Test
+    public void scrollToPosition_inSteps_oneQuery() {
+        open();
+
+        findElement(By.id("clear-messages")).click();
+
+        GridElement grid = $(GridElement.class).id("data-grid");
+
+        // grid.scrollToRow includes logic that waits until grid has finished loading items
+        // so we need to use the vaadin-grid's scrollToIndex API instead (until last index).
+        grid.callFunction("scrollToIndex", 100);
+        grid.callFunction("scrollToIndex", 200);
+        grid.callFunction("scrollToIndex", 300);
+        grid.callFunction("scrollToIndex", 400);
+        grid.callFunction("scrollToIndex", 500);
+        grid.scrollToRow(550);
+
+        List<String> messages = getMessages();
+
+        Assert.assertEquals(
+                "There should be one query (500 - 600), which covers the index the user is currently at",
+                Arrays.asList("Fetch 500 - 600"), messages);
     }
 
     private List<String> getMessages() {

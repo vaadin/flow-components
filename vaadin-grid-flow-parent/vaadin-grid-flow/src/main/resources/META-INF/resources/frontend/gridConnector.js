@@ -81,13 +81,16 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       *  into one request. Delay in milliseconds. Disable by setting to 0.
       *  parentRequestBatchMaxSize - maximum size of the batch.
       */
-      const parentRequestDelay = 20;
+      const parentRequestDelay = 50;
       const parentRequestBatchMaxSize = 20;
 
       let parentRequestQueue = [];
       let parentRequestDebouncer;
       let ensureSubCacheQueue = [];
       let ensureSubCacheDebouncer;
+
+      const rootRequestDelay = 150;
+      let rootRequestDebouncer;
 
       let lastRequestedRanges = {};
       const root = 'null';
@@ -114,6 +117,10 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         return parentRequestQueue.length > 0;
       })
 
+      grid.$connector.hasRootRequestQueue = tryCatchWrapper(function() {
+        return Object.keys(rootPageCallbacks).length > 0 || (rootRequestDebouncer && rootRequestDebouncer.isActive());
+      })
+
       grid.$connector.beforeEnsureSubCacheForScaledIndex = tryCatchWrapper(function(targetCache, scaledIndex) {
         // add call to queue
         ensureSubCacheQueue.push({
@@ -126,13 +133,14 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         ensureSubCacheQueue.sort(function(a, b) {
           return a.scaledIndex - b.scaledIndex || a.level - b.level;
         });
-        if(!ensureSubCacheDebouncer) {
-          grid.$connector.flushQueue(
-            (debouncer) => ensureSubCacheDebouncer = debouncer,
-            () => grid.$connector.hasEnsureSubCacheQueue(),
-            () => grid.$connector.flushEnsureSubCache(),
-            (action) => Debouncer.debounce(ensureSubCacheDebouncer, animationFrame, action));
-        }
+
+        ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame,
+          () => {
+            while (ensureSubCacheQueue.length) {
+              grid.$connector.flushEnsureSubCache();
+            }
+          }
+        );
       })
 
       grid.$connector.doSelection = tryCatchWrapper(function(items, userOriginated) {
@@ -245,23 +253,9 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           return cacheAndIndex.cache;
         }
         return undefined;
-      })
-
-      grid.$connector.flushQueue = tryCatchWrapper(function(timeoutIdSetter, hasQueue, flush, startTimeout) {
-        if(!hasQueue()) {
-          timeoutIdSetter(undefined);
-          return;
-        }
-        if(flush()) {
-          timeoutIdSetter(startTimeout(() =>
-            grid.$connector.flushQueue(timeoutIdSetter, hasQueue, flush, startTimeout)));
-        } else {
-          grid.$connector.flushQueue(timeoutIdSetter, hasQueue, flush, startTimeout);
-        }
-      })
+      });
 
       grid.$connector.flushEnsureSubCache = tryCatchWrapper(function() {
-        let fetched = false;
         let pendingFetch = ensureSubCacheQueue.splice(0, 1)[0];
         let itemkey =  pendingFetch.itemkey;
 
@@ -306,14 +300,13 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
             parentKey: parentKey
           });
 
-          if(!parentRequestDebouncer) {
-            grid.$connector.flushQueue(
-              (debouncer) => parentRequestDebouncer = debouncer,
-              () => grid.$connector.hasParentRequestQueue(),
-              () => grid.$connector.flushParentRequests(),
-              (action) => Debouncer.debounce(parentRequestDebouncer, timeOut.after(parentRequestDelay), action));
-          }
-
+          parentRequestDebouncer = Debouncer.debounce(parentRequestDebouncer, timeOut.after(parentRequestDelay),
+            () => {
+              while (parentRequestQueue.length) {
+                grid.$connector.flushParentRequests();
+              }
+            }
+          );
         } else {
           grid.$server.setParentRequestedRange(firstIndex, size, parentKey);
         }
@@ -393,7 +386,11 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
             rootPageCallbacks[page] = callback;
           }
 
-          grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+          rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(grid._hasData ? rootRequestDelay : 0),
+            () => {
+              grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+            }
+          );
         }
       })
 
@@ -756,6 +753,9 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         if(parentRequestDebouncer) {
           parentRequestDebouncer.cancel();
         }
+        if (rootRequestDebouncer) {
+          rootRequestDebouncer.cancel();
+        }
         ensureSubCacheDebouncer = undefined;
         parentRequestDebouncer = undefined;
         ensureSubCacheQueue = [];
@@ -763,12 +763,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         updateAllGridRowsInDomBasedOnCache();
       });
 
-      const deleteObjectContents = function(obj) {
-        let props = Object.keys(obj);
-        for (let i = 0; i < props.length; i++) {
-          delete obj[props[i]];
-        }
-      };
+      const deleteObjectContents = obj => Object.keys(obj).forEach(key => delete obj[key]);
 
       grid.$connector.updateSize = function(newSize) {
         grid.size = newSize;
@@ -827,15 +822,24 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           let page = outstandingRequests[i];
 
           let lastRequestedRange = lastRequestedRanges[parentKey] || [0, 0];
+
+          const callback = treePageCallbacks[parentKey][page];
           if((cache[parentKey] && cache[parentKey][page]) || page < lastRequestedRange[0] || page > lastRequestedRange[1]) {
-            let callback = treePageCallbacks[parentKey][page];
             delete treePageCallbacks[parentKey][page];
             let items = cache[parentKey][page] || new Array(levelSize);
             callback(items, levelSize);
+          } else if (callback && levelSize === 0) {
+            // The parent item has 0 child items => resolve the callback with an empty array
+            delete treePageCallbacks[parentKey][page];
+            callback([], levelSize);
           }
         }
         // Let server know we're done
         grid.$server.confirmParentUpdate(id, parentKey);
+
+        if (!grid.loading) {
+          grid._assignModels();
+        }
       });
 
       grid.$connector.confirm = tryCatchWrapper(function(id) {
@@ -845,9 +849,13 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         for(let i = 0; i < outstandingRequests.length; i++) {
           let page = outstandingRequests[i];
           let lastRequestedRange = lastRequestedRanges[root] || [0, 0];
+
+          const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
+          // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
+          const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
           // Resolve if we have data or if we don't expect to get data
-          if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || page > lastRequestedRange[1]) {
-            let callback = rootPageCallbacks[page];
+          const callback = rootPageCallbacks[page];
+          if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
             delete rootPageCallbacks[page];
             callback(cache[root][page] || new Array(grid.pageSize));
             // Makes sure to push all new rows before this stack execution is done so any timeout expiration called after will be applied on a fully updated grid
@@ -856,6 +864,10 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
               grid._debounceIncreasePool.flush();
             }
 
+          } else if (callback && grid.size === 0) {
+            // The grid has 0 items => resolve the callback with an empty array
+            delete rootPageCallbacks[page];
+            callback([]);
           }
         }
 
