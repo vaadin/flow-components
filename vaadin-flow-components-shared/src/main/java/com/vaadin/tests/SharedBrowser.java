@@ -28,12 +28,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SharedBrowser {
-    static final SharedBrowser instance = new SharedBrowser();
+    private static final boolean browserReuseAllowed;
+    private static Logger logger = Logger
+        .getLogger(SharedBrowser.class.getName());
+
+    static {
+        final String envValue = System.getenv("TESTBENCH_REUSE_BROWSER");
+        browserReuseAllowed = envValue == null || envValue.isEmpty() || Boolean
+            .parseBoolean(envValue);
+    }
+
     URL url;
     SessionId sessionId;
     private volatile TestBenchDriverProxy driver;
-
-    private static Logger logger = Logger.getLogger(SharedBrowser.class.getName());
 
     SharedBrowser() {
 
@@ -54,23 +61,20 @@ public class SharedBrowser {
     }
 
     void clear() {
-        if(driver == null) {
+        if (driver == null) {
             return;
         }
-        System.out.println(String.format("Clearing driver for session %s\turl %s", sessionId, url));
+        System.out.println(String
+            .format("Clearing driver for session %s\turl %s", sessionId, url));
         driver.quit();
         driver = null;
         sessionId = null;
         url = null;
     }
 
-    interface ISetup {
-        void setup() throws Exception;
-    }
-
     Optional<WebDriver> setup(ISetup realSetup, Supplier<WebDriver> getDriver,
         ScreenshotOnFailureRule screenshotOnFailure) throws Exception {
-        if (Parameters.getTestsInParallel() != 1) {
+        if (!browserReuseAllowed || Parameters.getTestsInParallel() != 1) {
             realSetup.setup();
             return Optional.empty();
         }
@@ -92,8 +96,8 @@ public class SharedBrowser {
 
                     driver.manage().deleteAllCookies();
                     if (driver instanceof WebStorage) {
-                        ((WebStorage)driver).getSessionStorage().clear();
-                        ((WebStorage)driver).getLocalStorage().clear();
+                        ((WebStorage) driver).getSessionStorage().clear();
+                        ((WebStorage) driver).getLocalStorage().clear();
                     }
                     driver.manage().logs().get(LogType.BROWSER).getAll();
                     driver.get("about:blank");
@@ -123,7 +127,8 @@ public class SharedBrowser {
                 return response;
             }
         };
-        logger.log(Level.FINE, String.format("Reusing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String
+            .format("Reusing driver for session %s\turl %s", sessionId, url));
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
             new DesiredCapabilities());
@@ -137,15 +142,20 @@ public class SharedBrowser {
             .getCommandExecutor();
         url = executor.getAddressOfRemoteServer();
         sessionId = webDriver.getSessionId();
-        logger.log(Level.FINE, String.format("Creating driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String
+            .format("Creating driver for session %s\turl %s", sessionId, url));
     }
 
     public Optional<List<DesiredCapabilities>> getGridBrowsers() {
         List<DesiredCapabilities> result = Parameters.getGridBrowsers();
-        if(result.isEmpty()) {
+        if (result.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(result);
+    }
+
+    interface ISetup {
+        void setup() throws Exception;
     }
 
     @FunctionalInterface
