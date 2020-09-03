@@ -133,32 +133,6 @@
                     <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
-            <!-- install bower tooling -->
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>${frontend.maven.plugin.version}</version>
-
-                <configuration>
-                    <nodeVersion>${node.version}</nodeVersion>
-                    <yarnVersion>${yarn.version}</yarnVersion>
-                    <workingDirectory>${buildtools.directory}</workingDirectory>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <id>install-tools-then-build</id>
-                        <goals>
-                            <goal>install-node-and-yarn</goal>
-                            <goal>yarn</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${buildtools.directory}</workingDirectory>
-                            <arguments>install-bower-and-dependencies</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- compile app for production in bower mode -->
             <plugin>
                 <groupId>com.vaadin</groupId>
