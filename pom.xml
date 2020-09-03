@@ -41,6 +41,7 @@
         <powermock.version>1.7.1</powermock.version>
         <jackson.version>2.9.10.4</jackson.version>
         <ci-sauce.version>1.138</ci-sauce.version>
+        <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
 
         <!-- OSGi support -->
         <osgi.bundle.import.package>*</osgi.bundle.import.package>
