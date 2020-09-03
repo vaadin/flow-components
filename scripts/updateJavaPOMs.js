@@ -14,7 +14,20 @@ const version = '18.0-SNAPSHOT';
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
 const name = mod.replace('-flow-parent', '');
+const componentName = name.replace('vaadin-', '');
 const desc = name.split('-').map(w => w.replace(/./, m => m.toUpperCase())).join(' ');
+const proComponents = ['accordion',
+                       'app-layout' ,
+                       'board',
+                       'charts',
+                       'confirm-dialog',
+                       'cookie-consent',
+                       'crud',
+                       'custom-field',
+                       'details',
+                       'grid-pro',
+                       'login',
+                       'rich-text-editor'];
 
 function renameComponent(array, name) {
   for(let i = 0; array && i < array.length; i++) {
@@ -27,7 +40,22 @@ function renameBase(js) {
   renameComponent(js.project.artifactId, name);
   renameComponent(js.project.name, desc);
   renameComponent(js.project.description, desc);
+
   js.project.parent[0].version = [version];
+}
+
+function renamePlugin(js){
+  // component name in Bundle-SymbolicName uses '.' as separator
+  const symbolicName = componentName.replace('-', '.');
+  // Implementation Title uses uppercase for the first letter in each word
+  nameArray = componentName.split('-');
+  for(let i = 0; nameArray && i < nameArray.length; i++) {
+    nameArray[i] = nameArray[i].charAt(0).toUpperCase() + nameArray[i].slice(1);
+  }
+  impTitle = nameArray.join(' ');
+
+  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0].replace(/proComponent/, symbolicName);
+  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0].replace(/proComponent/, impTitle);
 }
 
 function setDependenciesVersion(dependencies) {
@@ -44,6 +72,10 @@ async function consolidate(template, pom, cb) {
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   renameBase(tplJs);
+  if (template === "pom-flow-pro.xml"){
+    renamePlugin(tplJs);
+  }
+
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
   cb && cb(tplJs);
 
@@ -59,7 +91,11 @@ async function consolidatePomParent() {
   });
 }
 async function consolidatePomFlow() {
-  consolidate('pom-flow.xml', `${mod}/${name}-flow/pom.xml`)
+  if (proComponents.includes(componentName)){
+    consolidate('pom-flow-pro.xml', `${mod}/${name}-flow/pom.xml`);
+  } else {
+    consolidate('pom-flow.xml', `${mod}/${name}-flow/pom.xml`);
+  }
 }
 async function consolidatePomTB() {
   consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
