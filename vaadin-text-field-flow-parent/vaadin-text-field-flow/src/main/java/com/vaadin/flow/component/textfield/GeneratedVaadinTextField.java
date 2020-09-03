@@ -173,7 +173,7 @@ import java.util.stream.Stream;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.2")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

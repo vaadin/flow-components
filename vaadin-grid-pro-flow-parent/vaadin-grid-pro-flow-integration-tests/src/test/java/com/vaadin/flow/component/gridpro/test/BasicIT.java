@@ -3,9 +3,11 @@ package com.vaadin.flow.component.gridpro.test;
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
 import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
 import com.vaadin.testbench.TestBenchElement;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void editColumnsAdded() {
         List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column").all();
-        Assert.assertEquals(columns.size(), 4);
+        Assert.assertEquals(columns.size(), 5);
     }
 
     @Test
@@ -91,7 +93,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore
+    @org.junit.Ignore("Unstable test in mono-repo")
     public void customComboBox_circularReferencesInData_isEdited() {
         GridTHTDElement cell = grid.getCell(0, 4);
         Assert.assertEquals("City 1", cell.$("span").first().getText());
@@ -131,7 +133,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore
+    @org.junit.Ignore("Unstable test in mono-repo")
     public void customComboBoxIsUsedForEditColumn() {
         AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
     }
@@ -146,7 +148,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore
+    @org.junit.Ignore("Unstable test in mono-repo")
     public void checkboxEditorIsUsedForCheckboxColumn() {
         AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-checkbox");
     }
@@ -183,6 +185,35 @@ public class BasicIT extends AbstractParallelTest {
     public void disabledGridShouldNotBeActivatedByDoubleClick() {
         $("vaadin-button").id("disable-grid-id").click();
         AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-grid-pro-edit-text-field", grid, false);
+    }
+
+    @Test
+    public void customEditorValueIsUpdatedByLeavingEditorWithTab() {
+        GridTHTDElement cell = grid.getCell(0, 5);
+        Assert.assertEquals("person1@vaadin.com", cell.getText());
+
+        AssertCellEnterEditModeOnDoubleClick(0, 5, "input");
+        TestBenchElement input = cell.$("input").first();
+        // Clearing the field before sending keys
+        input.setProperty("value", "");
+        input.sendKeys("newperson1@vaadin.com");
+        input.sendKeys(Keys.TAB);
+
+        Assert.assertEquals("newperson1@vaadin.com", cell.getText());
+    }
+
+    @Test
+    public void customEditorValueIsUpdatedByLeavingEditorWithEnter() {
+        GridTHTDElement cell = grid.getCell(0, 5);
+        Assert.assertEquals("person1@vaadin.com", cell.getText());
+
+        AssertCellEnterEditModeOnDoubleClick(0, 5, "input");
+        TestBenchElement input = cell.$("input").first();
+        input.setProperty("value", "");
+        input.sendKeys("newperson1@vaadin.com");
+        input.sendKeys(Keys.ENTER);
+
+        Assert.assertEquals("newperson1@vaadin.com", cell.getText());
     }
 
     private void AssertCellEnterEditModeOnDoubleClick(Integer rowIndex, Integer colIndex, String editorTag) {

@@ -53,7 +53,7 @@
     <dependency>
       <groupId>com.vaadin.webjar</groupId>
       <artifactId>vaadin-grid-pro</artifactId>
-      <version>2.1.1</version>
+      <version>2.1.2</version>
     </dependency>
     <dependency>
       <groupId>org.webjars.bowergithub.vaadin</groupId>
@@ -144,7 +144,7 @@
     </dependency>
   </dependencies>
   <build>
-    <plugins>&#xD;
+    <plugins>
         </plugins>
   </build>
   <profiles>
@@ -178,8 +178,8 @@
             <artifactId>maven-jar-plugin</artifactId>
             <configuration>
               <archive>
-                <manifestFile>&#xD;
-                                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
+                <manifestFile>
+                                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                                 </manifestFile>
                 <manifestEntries>
                   <Built-By/>

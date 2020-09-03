@@ -62,7 +62,7 @@
         <filtering>false</filtering>
       </resource>
     </resources>
-    <plugins>&#xD;
+    <plugins>
         </plugins>
   </build>
   <profiles>
