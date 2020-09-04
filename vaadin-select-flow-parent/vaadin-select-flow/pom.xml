@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-select</artifactId>
-            <version>2.4.0-alpha1</version>
+            <version>2.4.0</version>
         </dependency>
         <!-- Lock transitive webjar dependencies for V13 versions-->
         <dependency>
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-text-field</artifactId>
-            <version>2.8.0-alpha1</version>
+            <version>2.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
