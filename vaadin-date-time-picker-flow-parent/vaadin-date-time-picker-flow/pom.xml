@@ -30,13 +30,13 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-date-time-picker</artifactId>
-            <version>1.4.0-alpha1</version>
+            <version>1.4.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-date-picker</artifactId>
-            <version>4.4.0-alpha1</version>
+            <version>4.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-text-field</artifactId>
-            <version>2.8.0-alpha1</version>
+            <version>2.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
@@ -127,12 +127,12 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-time-picker</artifactId>
-            <version>2.4.0-alpha1</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
-            <version>5.4.0-alpha1</version>
+            <version>5.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
@@ -153,7 +153,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-custom-field</artifactId>
-            <version>1.3.0-alpha1</version>
+            <version>1.3.0</version>
         </dependency>
 
         <dependency>
