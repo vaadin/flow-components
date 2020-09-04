@@ -67,7 +67,9 @@ function replaceRoutes(wcname, clname, content) {
     let [prefix, route, suffix] = !args[2] && !args[6] ? [`${args[1]}("`, '', '")\n'] :
       args[6] ? [`${args[1]}${args[2]}${args[6]}`, args[7], `${args[8]}${args[9]}\n`] :
       [`${args[1]}${args[2]}${args[3]}`, args[4], `${args[5]}${args[9]}\n`];
-    return computeRoute(wcname, clname, prefix, route, suffix);
+    return computeRoute(wcname, clname, prefix, route, suffix)
+      // v14 does not support end slashes in routing when parameters
+      .replace(/\/+"/, '"');
   });
   // Replace @Route values which are constants.
   content = content.replace(/(\@Route\()(\w+\.\w+\))/, `$1"${wcname}/" + $2`);
