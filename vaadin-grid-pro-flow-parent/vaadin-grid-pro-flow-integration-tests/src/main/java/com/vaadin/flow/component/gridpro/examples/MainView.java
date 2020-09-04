@@ -19,7 +19,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "vaadin-grid-pro/")
+@Route(value = "vaadin-grid-pro")
 // TODO remove this line after we can use latest minor (V14.4)
 @NpmPackage(value = "@vaadin/vaadin-select", version = "2.2.0")
 public class MainView extends VerticalLayout {

@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
 
-@Route(value = "vaadin-accordion/")
+@Route(value = "vaadin-accordion")
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
 public class MainView extends HorizontalLayout {
