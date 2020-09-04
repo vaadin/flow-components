@@ -48,23 +48,14 @@ $cmd
 
 cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
-$cmd
+$cmd || exit 1
 
-cmd="mvn install -DskipTests -Drelease -B -T C$processors"
-tcLog "Installing flow components - $cmd"
-$cmd
-
-if [ -n "$BUILD" ]
-then
-  cmd="mvn test -B -Drun-it -T C$processors"
-  tcLog "Unit-Testing - $cmd"
-  $cmd
-fi
+cmd="mvn install -Drelease -B -q -T C$processors"
+tcLog "Unit-Testing and Installing flow components - $cmd"
+$cmd || exit 1
 
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-
-echo "$args"
 
 if [ "$TBHUB" = "localhost" ]
 then
@@ -75,8 +66,6 @@ then
     docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
 fi
 
-args="$args -Dfailsafe.forkCount=$processors"
-
 if [ -n "$modules" ]
 then
   ### Run IT's in original modules
@@ -86,9 +75,22 @@ then
   $cmd
 elif [ -z "$BUILD" ]
 then
+  args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=1"
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
-  tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
+  cmd="mvn verify  -Drun-it -Drelease  $args -pl integration-tests"
+  tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-  $cmd
+  $cmd 2>&1 | egrep -v 'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update'
+
+  ### Second try, Re-run only failed tests
+  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u | tr '\n' ','`
+  if [ -n "$failed" ]
+  then
+      cmd="mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test=$failed"
+      tcLog "Re-Running failed tests - mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test= ..."
+      echo $cmd
+      $cmd
+      exit $?
+  fi
+  exit 0
 fi
