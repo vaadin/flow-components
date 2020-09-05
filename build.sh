@@ -52,7 +52,13 @@ $cmd || exit 1
 
 cmd="mvn install -Drelease -B -q -T C$processors"
 tcLog "Unit-Testing and Installing flow components - $cmd"
-$cmd || exit 1
+$cmd
+if [ $? != 0 ]
+then
+  tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
+  sleep 30
+  $cmd || exit 1
+fi
 
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
