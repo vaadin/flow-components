@@ -80,7 +80,7 @@ public class GridDetailsRowIT extends AbstractComponentIT {
      * and the item updated then the detail should be updated
      */
     @Test
-    @org.junit.Ignore("Unstable test in mono-repo")
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void gridUpdateItemUpdateDetails() {
         open();
         GridElement grid = $(GridElement.class).first();

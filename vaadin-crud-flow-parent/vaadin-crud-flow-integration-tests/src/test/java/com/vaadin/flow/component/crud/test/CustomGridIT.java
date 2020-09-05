@@ -98,6 +98,7 @@ public class CustomGridIT extends AbstractParallelTest {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void editorShouldHaveRightTitleWhenOpenedInNewItemMode() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
 

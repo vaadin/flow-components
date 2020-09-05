@@ -113,7 +113,7 @@ public abstract class AbstractTBTest extends ParallelTest {
      * @return The URL path to the UI class to test
      */
     protected String getDeploymentPath() {
-        return "/" + getTestView().getCanonicalName();
+        return "/" + "vaadin-charts/" + getTestView().getCanonicalName();
     }
 
     /**

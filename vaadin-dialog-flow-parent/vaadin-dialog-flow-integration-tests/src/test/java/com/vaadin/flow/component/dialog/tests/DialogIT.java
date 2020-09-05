@@ -38,7 +38,7 @@ public class DialogIT extends AbstractComponentIT {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test in mono-repo")
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void openAndCloseBasicDialog_labelRendered() {
         findElement(By.id("basic-dialog-button")).click();
 

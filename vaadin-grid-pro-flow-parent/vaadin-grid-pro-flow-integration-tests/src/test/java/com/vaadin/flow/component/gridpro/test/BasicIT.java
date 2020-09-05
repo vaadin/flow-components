@@ -93,7 +93,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test in mono-repo")
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void customComboBox_circularReferencesInData_isEdited() {
         GridTHTDElement cell = grid.getCell(0, 4);
         Assert.assertEquals("City 1", cell.$("span").first().getText());
@@ -133,7 +133,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test in mono-repo")
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void customComboBoxIsUsedForEditColumn() {
         AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
     }
@@ -148,7 +148,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test in mono-repo")
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void checkboxEditorIsUsedForCheckboxColumn() {
         AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-checkbox");
     }
@@ -188,6 +188,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void customEditorValueIsUpdatedByLeavingEditorWithTab() {
         GridTHTDElement cell = grid.getCell(0, 5);
         Assert.assertEquals("person1@vaadin.com", cell.getText());
