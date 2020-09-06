@@ -1,15 +1,17 @@
 #!/bin/bash
 
 processors=3
+parallel=1
 
 if [ -n "$1" ]
 then
   for i in $*
   do
     case $i in
-      [1-9]|[0-9][0-9])
-        processors=$i
-        ;;
+      processors=*)
+        processors=`echo $i | cut -d = -f2`;;
+      parallel=*)
+        parallel=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -17,6 +19,7 @@ then
      esac
   done
 fi
+echo "Using processors=$processors parallel=$parallel"
 
 tcMsg() (
   { set +x; } 2> /dev/null
@@ -81,9 +84,9 @@ then
   $cmd
 elif [ -z "$BUILD" ]
 then
-  args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=1"
+  args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
   ### Run IT's in merged module
-  cmd="mvn verify  -Drun-it -Drelease  $args -pl integration-tests"
+  cmd="mvn verify  -Drun-it -Drelease $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd 2>&1 | egrep -v 'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update'
