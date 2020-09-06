@@ -6,13 +6,9 @@
  * - adjust the sources so as there are no duplicate routes.
  */
 
-const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '14.3-SNAPSHOT';
-const itFolder = 'integration-tests';
 
-const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
 const wc = mod.replace('-flow-parent', '');
 const id = `${wc}-flow`
@@ -20,7 +16,7 @@ const id = `${wc}-flow`
 function visitFilesRecursive (name, replaceCall) {
   let modified = 0, renamed = 0;
   if (fs.existsSync(name)) {
-    fs.readdirSync(name).forEach((file, index) => {
+    fs.readdirSync(name).forEach(file => {
       const source = path.join(name, file);
       if (fs.lstatSync(source).isDirectory()) {
         // recurse
@@ -183,6 +179,10 @@ async function main() {
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
     content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');
     content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForBigDecimalField');
+
+    content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
+    content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
+    content = ignore_test_method(content, source, 'TreeGridHugeTreeNavigationIT.keyboard_navigation');
 
     if (/TreeGridHugeTreeIT\.java$/.test(source)) {
       content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);

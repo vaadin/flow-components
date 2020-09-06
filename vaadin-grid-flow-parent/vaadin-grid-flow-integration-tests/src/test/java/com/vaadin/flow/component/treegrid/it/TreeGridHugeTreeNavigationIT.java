@@ -37,6 +37,7 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void keyboard_navigation() {
         getTreeGrid().getCell(0, 0).focus();
 
