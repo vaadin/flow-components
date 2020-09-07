@@ -6,7 +6,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "vaadin-custom-field/")
+@Route(value = "vaadin-custom-field")
 public class Home extends Div {
 
     public Home() {

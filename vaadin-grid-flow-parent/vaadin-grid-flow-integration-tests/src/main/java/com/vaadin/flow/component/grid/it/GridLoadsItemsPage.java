@@ -15,6 +15,7 @@ public class GridLoadsItemsPage extends Div {
     public GridLoadsItemsPage() {
         Grid<String> grid = new Grid<>();
         grid.setId("data-grid");
+        grid.setPageSize(100);
 
         VerticalLayout messages = new VerticalLayout();
         messages.setId("messages");
