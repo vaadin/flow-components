@@ -19,7 +19,6 @@ then
      esac
   done
 fi
-echo "Using processors=$processors parallel=$parallel"
 
 tcMsg() (
   { set +x; } 2> /dev/null
@@ -38,20 +37,17 @@ tcStatus() {
   tcMsg "buildStatus status='$status' text='$1'"
 }
 
-tcLog 'Show info'
-java -version
-mvn -version
-node --version
-npm --version
+tcLog "Show info (processors=$processors parallel=$parallel)"
+type java && java -version
+type mvn && mvn -version
+type node && node --version
+type npm && npm --version
+type pnpm && pnpm --version
 uname -a
 
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd
-
-cmd="node scripts/mergeITs.js "`echo $elements`
-tcLog "Merge IT modules - $cmd"
-$cmd || exit 1
 
 cmd="mvn install -Drelease -B -q -T C$processors"
 tcLog "Unit-Testing and Installing flow components - $cmd"
@@ -63,9 +59,12 @@ then
   $cmd || exit 1
 fi
 
+cmd="node scripts/mergeITs.js "`echo $elements`
+tcLog "Merge IT modules - $cmd"
+$cmd || exit 1
+
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-
 if [ "$TBHUB" = "localhost" ]
 then
     tcLog 'Installing docker image with standalone-chrome'
@@ -86,15 +85,18 @@ elif [ -z "$BUILD" ]
 then
   args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
   ### Run IT's in merged module
-  cmd="mvn verify  -Drun-it -Drelease $args -pl integration-tests"
+  cmd="mvn verify -B -Drun-it -Drelease $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-  $cmd 2>&1 | egrep -v 'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update'
+  $cmd 2>&1 | egrep --line-buffered -v \
+   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update| at '
 
   ### Second try, Re-run only failed tests
-  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u | tr '\n' ','`
-  if [ -n "$failed" ]
+  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
+  nfailed=`echo $failed | wc -w`
+  if [ "$nfailed" > 0 -a "$nfailed" < 10 ]
   then
+      failed=`echo $failed | tr '\n' ','`
       cmd="mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test=$failed"
       tcLog "Re-Running failed tests - mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test= ..."
       echo $cmd
