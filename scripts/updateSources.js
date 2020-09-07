@@ -190,7 +190,7 @@ async function main() {
     content = content.replace(/(safari|firefox|edge|ie11Windows8_1|ie11Capabilities) *,/g, "");
     content = content.replace(/,[ \n]*(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)/g, "");
 
-    content = content.replace(/browserFactory.create\(Browser.+\),?/g, "");
+    content = content.replace(/browserFactory.create\(Browser.+?\),?/g, "");
     content = content.replace(/BrowserUtil.chrome\(\) *,/g, "BrowserUtil.chrome()");
 
     // pro components: have screen comparisons, disable temporary since paths changed
