@@ -189,10 +189,10 @@ async function main() {
     }
 
     // pro components: temporary disable tests in FF and Edge in pro components
-    content = content.replace(/\( *BrowserUtil.(safari|firefox|edge|ie11Windows8_1)\(\) *,/g, "(");
-    content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge|ie11Windows8_1)\(\)/g, "");
-    content = content.replace(/(safari|firefox|edge|ie11Windows8_1) *,/g, "");
-    content = content.replace(/,[ \r\n]*(safari|firefox|edge|ie11Windows8_1)/g, "");
+    content = content.replace(/\( *BrowserUtil.(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)\(\) *,/g, "(");
+    content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)\(\)/g, "");
+    content = content.replace(/(safari|firefox|edge|ie11Windows8_1|ie11Capabilities) *,/g, "");
+    content = content.replace(/,[ \r\n]*(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)/g, "");
     // pro components: have screen comparisons, disable temporary since paths changed
     content = content.replace(/testBench\(\).compareScreen\(.*?\)/g, 'true');
 
