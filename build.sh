@@ -93,7 +93,7 @@ then
   $cmd
 elif [ -z "$BUILD" ]
 then
-  args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
+  mode="-Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
   ### Run IT's in merged module
   cmd="mvn verify -Drun-it -Drelease "-Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL" $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
@@ -109,10 +109,16 @@ then
   then
       tcLog "There were Failed Tests: $nfailed"
       echo "$failed"
+      for i in $failed
+      do
+        cp integration-tests/target/failsafe-reports/$i.txt integration-tests/target/error-screenshots
+      done
+
       if [ "$nfailed" -le 15 ]
       then
         failed=`echo "$failed" | tr '\n' ','`
-        cmd="$cmd -Dit.test=$failed"
+        mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
+        cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
         tcLog "Re-Running failed $nfailed tests ..."
         echo $cmd
         $cmd
