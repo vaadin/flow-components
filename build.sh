@@ -47,7 +47,7 @@ uname -a
 
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
-$cmd
+$cmd || exit 1
 
 cmd="mvn install -Drelease -B -q -T C$processors"
 tcLog "Unit-Testing and Installing flow components - $cmd"
@@ -94,14 +94,20 @@ then
   ### Second try, Re-run only failed tests
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo $failed | wc -w`
-  if [ "$nfailed" > 0 -a "$nfailed" < 10 ]
+  if [ "$nfailed" -gt 0 ]
   then
-      failed=`echo $failed | tr '\n' ','`
-      cmd="mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test=$failed"
-      tcLog "Re-Running failed tests - mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test= ..."
-      echo $cmd
-      $cmd
-      exit $?
+      tcLog "There were Failed Tests: $nfailed"
+      echo $failed
+      if [ "$nfailed" -le 15 ]
+      then
+        failed=`echo $failed | tr '\n' ','`
+        cmd="mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test=$failed"
+        tcLog "Re-Running failed tests - mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test= ..."
+        echo $cmd
+        $cmd
+        exit $?
+      fi
+      exit 1
   fi
   exit 0
 fi
