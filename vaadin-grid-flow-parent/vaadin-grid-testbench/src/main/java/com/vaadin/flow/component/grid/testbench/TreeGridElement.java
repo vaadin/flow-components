@@ -34,14 +34,15 @@ public class TreeGridElement extends GridElement {
      *            the row to scroll to
      */
     public void scrollToRowAndWait(int row) {
+        waitUntilLoadingFinished();
         if (row > getLastVisibleRowIndex()) {
             int lastIndex = getLastVisibleRowIndex();
             scrollToRow(lastIndex);
             waitUntil(test -> getLastVisibleRowIndex() > lastIndex);
-            waitUntil(test -> !isLoadingExpandedRows());
+            waitUntilLoadingFinished();
             scrollToRow(row);
         } else {
-            callFunction("_scrollToIndex", row);
+            scrollToRow(row);
         }
     }
 
@@ -115,6 +116,7 @@ public class TreeGridElement extends GridElement {
                     "The element at row " + rowIndex + " was expanded already");
         }
         getExpandToggleElement(rowIndex, hierarchyColumnIndex).click();
+        waitUntilLoadingFinished();
     }
 
     /**
@@ -144,6 +146,7 @@ public class TreeGridElement extends GridElement {
                     + " was collapsed already");
         }
         getExpandToggleElement(rowIndex, hierarchyColumnIndex).click();
+        waitUntilLoadingFinished();
     }
 
     /**
@@ -156,6 +159,7 @@ public class TreeGridElement extends GridElement {
      * @return {@code true} if expanded, {@code false} if collapsed
      */
     public boolean isRowExpanded(int rowIndex, int hierarchyColumnIndex) {
+        waitUntilLoadingFinished();
         WebElement expandElement = getExpandToggleElement(rowIndex,
                 hierarchyColumnIndex);
         return expandElement != null
@@ -268,9 +272,9 @@ public class TreeGridElement extends GridElement {
      * @return the number of expanded rows
      */
     public long getNumberOfExpandedRows() {
-        long value = (long) executeScript(
+        waitUntilLoadingFinished();
+        return (long) executeScript(
                 "return arguments[0].expandedItems.length;", this);
-        return value;
     }
 
     /**
@@ -312,7 +316,12 @@ public class TreeGridElement extends GridElement {
      */
     public boolean isLoadingExpandedRows() {
         return (Boolean) executeScript(
-                "return arguments[0].$connector.hasEnsureSubCacheQueue();",
+                "return arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()",
                 this);
+    }
+
+    @Override
+    protected boolean isLoading() {
+        return super.isLoading() || isLoadingExpandedRows();
     }
 }

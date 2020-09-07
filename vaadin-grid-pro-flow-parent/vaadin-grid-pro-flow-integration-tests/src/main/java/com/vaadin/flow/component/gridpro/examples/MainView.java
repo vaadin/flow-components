@@ -18,7 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "vaadin-grid-pro/")
+@Route(value = "vaadin-grid-pro")
 public class MainView extends VerticalLayout {
 
     public MainView() {

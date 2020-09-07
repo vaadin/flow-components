@@ -18,7 +18,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 
-@Route(value = "vaadin-crud/")
+@Route(value = "vaadin-crud")
 @Theme(Lumo.class)
 public class MainView extends VerticalLayout {
 
