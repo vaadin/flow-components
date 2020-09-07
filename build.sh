@@ -1,15 +1,17 @@
 #!/bin/bash
 
 processors=3
+parallel=1
 
 if [ -n "$1" ]
 then
   for i in $*
   do
     case $i in
-      [1-9]|[0-9][0-9])
-        processors=$i
-        ;;
+      processors=*)
+        processors=`echo $i | cut -d = -f2`;;
+      parallel=*)
+        parallel=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -35,37 +37,34 @@ tcStatus() {
   tcMsg "buildStatus status='$status' text='$1'"
 }
 
-tcLog 'Show info'
-java -version
-mvn -version
-node --version
-npm --version
+tcLog "Show info (processors=$processors parallel=$parallel)"
+type java && java -version
+type mvn && mvn -version
+type node && node --version
+type npm && npm --version
+type pnpm && pnpm --version
 uname -a
 
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd || exit 1
 
-cmd="scripts/mergeITs.js "`echo $elements`
+cmd="mvn install -Drelease -B -q -T C$processors"
+tcLog "Unit-Testing and Installing flow components - $cmd"
+$cmd
+if [ $? != 0 ]
+then
+  tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
+  sleep 30
+  $cmd || exit 1
+fi
+
+cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd || exit 1
 
-cmd="mvn install -DskipTests -Drelease -B -T C$processors"
-tcLog "Installing flow components - $cmd"
-$cmd || exit 1
-
-if [ -n "$BUILD" ]
-then
-  cmd="mvn test -B -Drun-it -T C$processors"
-  tcLog "Unit-Testing - $cmd"
-  $cmd
-fi
-
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-
-echo "$args"
-
 if [ "$TBHUB" = "localhost" ]
 then
     tcLog 'Installing docker image with standalone-chrome'
@@ -74,8 +73,6 @@ then
     docker image prune -f
     docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
 fi
-
-args="$args -Dfailsafe.forkCount=$processors -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
 if [ -n "$modules" ]
 then
@@ -86,9 +83,31 @@ then
   $cmd
 elif [ -z "$BUILD" ]
 then
+  args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease -Dcom.vaadin.testbench.Parameters.testsInParallel=1 $args -pl integration-tests"
-  tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
+  cmd="mvn verify -B -Drun-it -Drelease $args -pl integration-tests"
+  tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-  $cmd
+  $cmd 2>&1 | egrep --line-buffered -v \
+   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat '
+
+  ### Second try, Re-run only failed tests
+  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
+  nfailed=`echo "$failed" | wc -w`
+  if [ "$nfailed" -gt 0 ]
+  then
+      tcLog "There were Failed Tests: $nfailed"
+      echo "$failed"
+      if [ "$nfailed" -le 15 ]
+      then
+        failed=`echo "$failed" | tr '\n' ','`
+        cmd="$cmd -Dit.test=$failed"
+        tcLog "Re-Running failed $nfailed tests ..."
+        echo $cmd
+        $cmd
+        exit $?
+      fi
+      exit 1
+  fi
+  exit 0
 fi
