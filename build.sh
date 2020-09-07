@@ -89,20 +89,20 @@ then
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd 2>&1 | egrep --line-buffered -v \
-   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update| at '
+   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat '
 
   ### Second try, Re-run only failed tests
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
-  nfailed=`echo $failed | wc -w`
+  nfailed=`echo "$failed" | wc -w`
   if [ "$nfailed" -gt 0 ]
   then
       tcLog "There were Failed Tests: $nfailed"
-      echo $failed
+      echo "$failed"
       if [ "$nfailed" -le 15 ]
       then
-        failed=`echo $failed | tr '\n' ','`
-        cmd="mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test=$failed"
-        tcLog "Re-Running failed tests - mvn verify -Drun-it -Drelease -pl integration-tests -Dit.test= ..."
+        failed=`echo "$failed" | tr '\n' ','`
+        cmd="$cmd -Dit.test=$failed"
+        tcLog "Re-Running failed $nfailed tests ..."
         echo $cmd
         $cmd
         exit $?

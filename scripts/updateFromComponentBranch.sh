@@ -37,19 +37,19 @@ renameModule() {
 
 consolidateProject() {
   mod=$1
-  prj=`echo $mod | sed -e 's/-parent//'`
+  prj=`sed -e 's/-parent//' <<< $mod`
   oldtb="$prj-testbench"
-  newtb=`echo $oldtb | sed -e 's/-flow//'`
+  newtb=`sed -e 's/-flow//' <<< $oldtb`
   renameModule $mod $oldtb $newtb
   newit="$prj-integration-tests"
-  oldit=`echo $newit | sed -e 's/-flow//'`
+  oldit=`sed -e 's/-flow//' <<< $newit`
   renameModule $mod $oldit $newit
 }
 
 consolidateCharts() {
   mod=$1
-  prj=`echo $mod | sed -e 's/-parent//'`
-  tb=`echo $prj | sed -e 's/-flow/-testbench/'`
+  prj=`sed -e 's/-parent//' <<< $mod`
+  tb=`sed -e 's/-flow/-testbench/' <<< $prj`
   renameModule $mod addon $prj
   renameModule $mod examples $prj-demo
   perl -pi -e "s,>$prj-examples<,>$prj-demo<,g" $mod/*/pom.xml
@@ -67,8 +67,8 @@ consolidateSources() {
 
 for i in $mods
 do
-  module=`cut -d\: -f1 <<<$i`
-  branch=`cut -d\: -f2 <<<$i`
+  module=`cut -d\: -f1 <<< $i`
+  branch=`cut -d\: -f2 <<< $i`
   checkoutProject $module $branch
   [ $module = 'vaadin-charts-flow-parent' ] && consolidateCharts $module || consolidateProject $module
   consolidatePoms $module
