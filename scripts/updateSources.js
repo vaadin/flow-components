@@ -189,19 +189,19 @@ async function main() {
     }
 
     // pro components: temporary disable tests in FF and Edge in pro components
-    content = content.replace(/\( *BrowserUtil.(safari|firefox|edge)\(\) *,/g, "(");
-    content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge)\(\)/g, "");
-    content = content.replace(/(safari|firefox|edge) *,/g, "");
-    content = content.replace(/,[ \r\n]*(safari|firefox|edge)/g, "");
+    content = content.replace(/\( *BrowserUtil.(safari|firefox|edge|ie11Windows8_1)\(\) *,/g, "(");
+    content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge|ie11Windows8_1)\(\)/g, "");
+    content = content.replace(/(safari|firefox|edge|ie11Windows8_1) *,/g, "");
+    content = content.replace(/,[ \r\n]*(safari|firefox|edge|ie11Windows8_1)/g, "");
     // pro components: have screen comparisons, disable temporary since paths changed
     content = content.replace(/testBench\(\).compareScreen\(.*?\)/g, 'true');
 
     // vaadin-board
-    content = content.replace(/(getDeploymentPath\(Class.*?\) *{ *\n)/,
-    `$1com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
-    if (ann.length > 0) {
-        return "/" + ann[0].value();
-    }\n`);
+    content = content.replace(/(getDeploymentPath\(Class.*?\) *{ *\n)/, `$1
+        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        if (ann.length > 0) {
+            return "/" + ann[0].value();
+        }\n`);
 
     // vaadin-chart
     content = content.replace('.replace("com.vaadin.flow.component.charts.examples.", "")',
