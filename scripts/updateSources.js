@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Merge IT modules of all components to the `integration-tests` module
- * - creates the new module pom file
- * - compute dependencies needed for merged modules.
- * - adjust the sources so as there are no duplicate routes.
+ * Adjust the sources of a module so as it can be run among other modules.
+ * Example
+ *   ./scripts/updateSources.js vaadin-button-flow-parent
+ *
  */
 
 const fs = require('fs');
