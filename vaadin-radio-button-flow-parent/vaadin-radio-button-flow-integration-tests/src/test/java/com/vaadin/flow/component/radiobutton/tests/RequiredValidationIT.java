@@ -21,10 +21,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("radio-button-group-required-binder")
+@TestPath("vaadin-radio-button/radio-button-group-required-binder")
 public class RequiredValidationIT extends AbstractComponentIT {
 
     @Test

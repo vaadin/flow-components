@@ -30,6 +30,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -41,6 +42,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@JavaScript("frontend://timepickerConnector.js")
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled {
@@ -56,6 +58,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     private static final long MILLISECONDS_IN_A_DAY = 86400000L;
     private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
     private transient DateTimeFormatter dateTimeFormatter;
@@ -63,6 +66,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private LocalTime max;
     private LocalTime min;
     private boolean required;
+
 
     /**
      * Default constructor.
@@ -187,17 +191,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
+     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
+     * client side validation constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
+        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax  = value != null && max != null && value.isAfter(max);
+        final boolean isSmallerThenMin = value != null && min != null && value.isBefore(min);
         return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
     }
 
@@ -331,7 +331,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private void initConnector() {
         // can't run this with getElement().executeJavaScript(...) since then
         // setLocale might be called before this causing client side error
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
+        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
                 "window.Vaadin.Flow.timepickerConnector.initLazy($0)",
                 getElement()));
     }
@@ -379,7 +379,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         if (!locale.getCountry().isEmpty()) {
             bcp47LanguageTag.append("-").append(locale.getCountry());
         }
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
+        runBeforeClientResponse(ui -> getElement().callFunction(
                 "$connector.setLocale", bcp47LanguageTag.toString()));
     }
 
@@ -539,6 +539,28 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
+     * Enables or disables the dropdown opening automatically. If {@code false}
+     * the dropdown is only opened when clicking the toggle button or pressing
+     * Up or Down arrow keys.
+     * 
+     * @param autoOpen
+     *            {@code false} to prevent the dropdown from opening
+     *            automatically
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+    }
+
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
+    }
+
+    /**
      * Returns a stream of all the available locales that are supported by the
      * time picker component.
      * <p>
@@ -558,10 +580,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     private DateTimeFormatter initializeAndReturnFormatter() {
-        if (dateTimeFormatter == null) {
-            dateTimeFormatter = locale == null
-                    ? DateTimeFormatter.ISO_LOCAL_TIME
-                    : DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
+        if(dateTimeFormatter == null) {
+            dateTimeFormatter = locale == null ?
+                DateTimeFormatter.ISO_LOCAL_TIME :
+                DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
         }
         return dateTimeFormatter;
     }

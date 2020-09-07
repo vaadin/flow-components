@@ -24,7 +24,7 @@ import com.vaadin.flow.testutil.TestPath;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("override-on-before-open-context-menu")
+@TestPath("vaadin-context-menu/override-on-before-open-context-menu")
 public class OverrideOnBeforeOpenContextMenuIT extends AbstractContextMenuIT {
 
     @Before

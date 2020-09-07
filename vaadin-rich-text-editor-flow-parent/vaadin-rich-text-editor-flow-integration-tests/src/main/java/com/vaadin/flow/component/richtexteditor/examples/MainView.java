@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Route
+@Route(value = "vaadin-rich-text-editor")
 public class MainView extends VerticalLayout {
 
     private Div valuePanel,
@@ -211,11 +211,8 @@ public class MainView extends VerticalLayout {
         actions.add(save, reset, getValueButton, setBeanHtmlValue);
         save.getStyle().set("marginRight", "10px");
 
-        SerializablePredicate<String> htmlValuePredicate = value -> {
-            String htmlValue = rte.asHtml()
-                .getValue();
-            return htmlValue != null && !htmlValue.trim().isEmpty();
-        };
+        SerializablePredicate<String> htmlValuePredicate = value -> !rte.asHtml()
+                .getValue().trim().isEmpty();
 
         Binding<HtmlEntry, String> asHtmlValueBinding = binder.forField(rte.asHtml())
                 .withValidator(htmlValuePredicate,

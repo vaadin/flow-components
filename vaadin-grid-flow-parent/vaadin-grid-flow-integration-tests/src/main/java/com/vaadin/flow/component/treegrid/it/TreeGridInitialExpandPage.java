@@ -6,7 +6,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-initial-expand")
+@Route("vaadin-grid/treegrid-initial-expand")
 public class TreeGridInitialExpandPage extends Div {
 
     public TreeGridInitialExpandPage() {

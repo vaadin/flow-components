@@ -56,7 +56,7 @@ public class ButtonView extends DemoView {
 
         message = new Div();
         message.setId("buttonMessage");
-        add(message);
+        getElement().appendChild(message.getElement());
     }
 
     private void createDefaultButton() {
@@ -65,6 +65,7 @@ public class ButtonView extends DemoView {
         Button button = new Button("Vaadin button");
 
         button.addClickListener(this::showButtonClickedMessage);
+        add(button);
         // end-source-example
 
         addCard("Default button", button);
@@ -81,6 +82,7 @@ public class ButtonView extends DemoView {
         rightButton.setIconAfterText(true);
 
         Button thumbsUpButton = new Button(new Icon(VaadinIcon.THUMBS_UP));
+        add(leftButton, rightButton, thumbsUpButton);
         // end-source-example
 
         leftButton.addClickListener(this::showButtonClickedMessage);
@@ -101,6 +103,7 @@ public class ButtonView extends DemoView {
         button.setAutofocus(true);
 
         button.addClickListener(this::showButtonClickedMessage);
+        add(button);
         // end-source-example
 
         addCard("Button with image and autofocus", button);
@@ -114,6 +117,7 @@ public class ButtonView extends DemoView {
         button.getElement().setAttribute("aria-label", "Click me");
 
         button.addClickListener(this::showButtonClickedMessage);
+        add(button);
         // end-source-example
 
         addCard("Button with ARIA label", button);
@@ -134,6 +138,7 @@ public class ButtonView extends DemoView {
         Button button3 = new Button("3");
         button3.setTabIndex(3);
         button3.addClickListener(this::showButtonClickedMessage);
+        add(button3, button2, button1);
         // end-source-example
 
         addCard("Buttons with custom tabindex", button3, button2, button1);
@@ -147,6 +152,7 @@ public class ButtonView extends DemoView {
         // source-example-heading: Disabled button
         Button button = new Button("Disabled");
         button.setEnabled(false);
+        add(button);
         // end-source-example
 
         addCard("Disabled button", button);
@@ -162,9 +168,10 @@ public class ButtonView extends DemoView {
         Button button = new Button();
         button.addThemeVariants(ButtonVariant.LUMO_SMALL,
                 ButtonVariant.LUMO_PRIMARY);
+        add(button);
         // end-source-example
 
-        addVariantsDemo(Button::new, GeneratedVaadinButton::addThemeVariants,
+        addVariantsDemo(() -> button, GeneratedVaadinButton::addThemeVariants,
                 GeneratedVaadinButton::removeThemeVariants,
                 ButtonVariant::getVariantName, ButtonVariant.LUMO_SMALL,
                 ButtonVariant.LUMO_PRIMARY);
@@ -189,10 +196,13 @@ public class ButtonView extends DemoView {
                 clearButton);
         clearButton.addClickShortcut(Key.KEY_L, KeyModifier.ALT)
                 .listenOn(container);
-        // end-source-example
+
         Paragraph paragraph = new Paragraph("Button \"Clean fields\"'s "
-                + "shortcut ALT+L works only within the text fields.");
+              + "shortcut ALT+L works only within the text fields.");
         container.add(paragraph);
+
+        add(button, container);
+        // end-source-example
         addCard("Button shortcuts", button, container);
         button.setId("shortcuts-enter-button");
         clearButton.setId("shortcuts-clear-button");
@@ -242,7 +252,6 @@ public class ButtonView extends DemoView {
                     }
                 });
         temporarilyDisabledButton.setDisableOnClick(true);
-        // end-source-example
 
         final Div disabledMessage = new Div();
         disabledMessage.setId("disabled-message");
@@ -260,6 +269,10 @@ public class ButtonView extends DemoView {
             event.getSource().setText("Disable on click "
                     + disableOnClickButton.isDisableOnClick());
         });
+
+        add(disableOnClickButton, enable, toggle, disabledMessage,
+              temporarilyDisabledButton);
+        // end-source-example
         toggle.setId("toggle-button");
 
         addCard("Button disabled on click", disableOnClickButton, enable,

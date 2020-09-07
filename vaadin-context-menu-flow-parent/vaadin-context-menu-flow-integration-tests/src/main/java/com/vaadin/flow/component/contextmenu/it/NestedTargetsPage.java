@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd
  */
-@Route("nested-targets")
+@Route("vaadin-context-menu/nested-targets")
 public class NestedTargetsPage extends Div {
 
     public NestedTargetsPage() {

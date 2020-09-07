@@ -22,7 +22,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("pre-selected")
+@Route("vaadin-combo-box/pre-selected")
 public class PreSelectedValuePage extends Div {
 
     private static final String PRE_SELECTED_VALUE = "Item 1";

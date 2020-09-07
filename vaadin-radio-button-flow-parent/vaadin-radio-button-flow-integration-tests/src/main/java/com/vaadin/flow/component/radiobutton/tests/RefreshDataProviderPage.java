@@ -25,7 +25,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("refresh-data-provider")
+@Route("vaadin-radio-button/refresh-data-provider")
 public class RefreshDataProviderPage extends Div {
 
     public RefreshDataProviderPage() {

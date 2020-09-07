@@ -33,13 +33,13 @@ import java.nio.charset.StandardCharsets;
 /**
  * Page created for testing purposes. Not suitable for demos.
  *
- * @author Vaadin Ltd
+ * @author Vaadin Ltd.
+ *
  */
 @Route("vaadin-dialog-view")
 public class DialogView extends Div {
 
     private static final String BUTTON_CAPTION = "Open dialog";
-
 
     public DialogView() {
         addBasicDialog();
@@ -47,6 +47,7 @@ public class DialogView extends Div {
         addCloseFromServerSideDialog();
         addDialogWithFocusedElement();
         addStyledDialogContent();
+        addModelessDraggableResizableDialog();
     }
 
     private void addBasicDialog() {
@@ -61,7 +62,7 @@ public class DialogView extends Div {
         button.addClickListener(event -> dialog.open());
 
         button.setId("basic-dialog-button");
-        add(button);
+        add(new Text("Sized dialog"), button);
     }
 
     private void addConfirmationDialog() {
@@ -87,11 +88,12 @@ public class DialogView extends Div {
 
         messageLabel.setId("confirmation-dialog-label");
         button.setId("confirmation-dialog-button");
-        add(button, messageLabel);
+        add(new Text("Confirmation dialog"), button, messageLabel);
     }
 
     private void addCloseFromServerSideDialog() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
+
         Label messageLabel = new Label();
 
         Dialog dialog = new Dialog(new Text("Close me with the esc-key"));
@@ -101,12 +103,11 @@ public class DialogView extends Div {
             messageLabel.setText("Closed from server-side");
             dialog.close();
         });
-
         button.addClickListener(event -> dialog.open());
 
         messageLabel.setId("server-side-close-dialog-label");
         button.setId("server-side-close-dialog-button");
-        add(button, messageLabel);
+        add(new Text("Close from server-side"), button, messageLabel);
     }
 
     private void addDialogWithFocusedElement() {
@@ -123,7 +124,7 @@ public class DialogView extends Div {
         });
 
         button.setId("focus-dialog-button");
-        add( button);
+        add(new Label("Focus internal Element"), button);
     }
 
     private void addStyledDialogContent() {
@@ -160,6 +161,34 @@ public class DialogView extends Div {
         button.addClickListener(event -> dialog.open());
 
         button.setId("styled-content-dialog-button");
-        add(button);
+        add(new Text("Dialog with styled content"), button);
+    }
+
+    private void addModelessDraggableResizableDialog() {
+        NativeButton openDialog = new NativeButton(BUTTON_CAPTION);
+        NativeButton openSecondDialog = new NativeButton("Open another dialog");
+
+        Dialog firstDialog = new Dialog();
+        firstDialog.add(
+            new Text("This is the first dialog"),
+            new Button("Close", e -> firstDialog.close())
+        );
+        firstDialog.setModal(false);
+        firstDialog.setDraggable(true);
+        firstDialog.setResizable(true);
+        
+        Dialog secondDialog = new Dialog();
+        secondDialog.add(
+            new Text("This is the second dialog"),
+            new Button("Close", e -> secondDialog.close())
+        );
+        secondDialog.setModal(false);
+        secondDialog.setDraggable(true);
+        secondDialog.setResizable(true);
+
+        openDialog.addClickListener(e -> firstDialog.open());
+        openSecondDialog.addClickListener(e -> secondDialog.open());
+
+        add(new Text("Modeless Draggable Resizable Dialog"), openDialog, openSecondDialog, firstDialog);
     }
 }

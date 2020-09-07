@@ -21,17 +21,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("close-listener-reopen-dialog")
+@TestPath("vaadin-dialog/close-listener-reopen-dialog")
 public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
     @Test
     public void reopenDialog_closeActionListenerIsCalled() {
         open();
 
-        waitForElementPresent(By.id("open"));
         findElement(By.id("open")).click();
 
         // Dialog is opened
@@ -45,7 +44,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
                 isElementPresent(By.className("main")));
 
         // close dialog via button
-        findElement(By.id("close")).click();
+        $("button").id("close").click();
 
         // reopen
         findElement(By.id("open")).click();
@@ -73,7 +72,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
         closeDialog();
 
         // close dialog via button
-        findElement(By.id("close")).click();
+        $("button").id("close").click();
 
         // remove close listener
         findElement(By.id("remove")).click();

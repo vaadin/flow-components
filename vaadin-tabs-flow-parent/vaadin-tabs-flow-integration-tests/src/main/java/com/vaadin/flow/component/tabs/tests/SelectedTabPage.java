@@ -22,7 +22,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
 
-@Route("selected-tab")
+@Route("vaadin-tabs/selected-tab")
 public class SelectedTabPage extends Div {
 
     public SelectedTabPage() {
@@ -40,11 +40,11 @@ public class SelectedTabPage extends Div {
 
         NativeButton button = new NativeButton("Show tabs selection", event -> {
             Div div = new Div();
-            div.addClassName("tab-first");
+            div.addClassName("first");
             div.setText("The first tab is selected: " + tab1.isSelected());
             add(div);
             div = new Div();
-            div.addClassName("tab-second");
+            div.addClassName("second");
             div.setText("The second tab is selected: " + tab2.isSelected());
             add(div);
         });

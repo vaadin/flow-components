@@ -20,6 +20,9 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -37,6 +40,7 @@ import com.vaadin.flow.component.Tag;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
+
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 

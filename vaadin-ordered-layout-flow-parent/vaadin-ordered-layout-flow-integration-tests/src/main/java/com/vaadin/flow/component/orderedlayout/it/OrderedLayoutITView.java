@@ -8,7 +8,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.demo.AbstractLayout;
 import com.vaadin.flow.router.Route;
 
-@Route("ordered-layout-tests")
+@Route("vaadin-ordered-layout/ordered-layout-tests")
 public class OrderedLayoutITView extends Div {
 
     public OrderedLayoutITView() {

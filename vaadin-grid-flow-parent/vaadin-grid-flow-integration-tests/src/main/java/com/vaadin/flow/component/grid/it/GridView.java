@@ -39,6 +39,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -94,6 +95,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-grid-it-demo")
 @JsModule("grid-demo-styles.js")
+@HtmlImport("grid-demo-styles.html")
 public class GridView extends DemoView {
 
     static final List<Person> items;

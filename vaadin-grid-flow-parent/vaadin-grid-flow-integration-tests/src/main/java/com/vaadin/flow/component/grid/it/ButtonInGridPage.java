@@ -20,7 +20,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-button-inside-grid")
+@Route("vaadin-grid/vaadin-button-inside-grid")
 public class ButtonInGridPage extends Div {
 
     public ButtonInGridPage() {

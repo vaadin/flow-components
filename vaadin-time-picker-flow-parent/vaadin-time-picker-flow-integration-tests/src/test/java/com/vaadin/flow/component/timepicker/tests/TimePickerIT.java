@@ -15,31 +15,25 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for the {@link TimePickerPage}.
  */
-@TestPath("time-picker-it")
+@TestPath("vaadin-time-picker/time-picker-it")
 public class TimePickerIT extends AbstractComponentIT {
 
     @Before
     public void init() {
         open();
         $(TimePickerElement.class).waitForFirst();
-    }
-
-    @After
-    public void after() {
-        checkLogsForErrors();
     }
 
     @Test
@@ -53,6 +47,21 @@ public class TimePickerIT extends AbstractComponentIT {
 
         picker.setValue("");
         waitUntil(driver -> "No time is selected".equals(message.getText()));
+    }
+
+    @Test
+    public void selectTimeOnAutoOpenDisabledTimePicker() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("autoopendisabled-picker");
+        TestBenchElement message = $("div")
+                .id("autoopendisabled-picker-message");
+
+        picker.setValue("10:08");
+        waitUntil(driver -> message.getText().contains("Hour: 10\nMinute: 8"));
+
+        picker.setValue("");
+        waitUntil(driver -> "No time is selected".equals(message.getText()));
+        Assert.assertFalse(picker.isAutoOpen());
     }
 
     @Test

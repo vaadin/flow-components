@@ -35,7 +35,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
-@Route("lazy-loading")
+@Route("vaadin-combo-box/lazy-loading")
 public class LazyLoadingPage extends Div {
 
     private Div message = new Div();
@@ -44,6 +44,8 @@ public class LazyLoadingPage extends Div {
         message.setId("message");
         add(message);
 
+        addSeparator();
+        createListDataProviderWithStringsAutoOpenDisabled();
         addSeparator();
         createListDataProviderWithStrings();
         addSeparator();
@@ -60,6 +62,21 @@ public class LazyLoadingPage extends Div {
         createCallbackDataProviderWhichReturnsZeroItems();
     }
 
+    private void createListDataProviderWithStringsAutoOpenDisabled() {
+        addTitle("ListDataProvider with strings and AutoOpenDisabled");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("lazy-strings-autoopendisabled");
+        comboBox.setAutoOpen(false);
+
+        List<String> items = generateStrings(1000);
+        ListDataProvider<String> dp = DataProvider.ofCollection(items);
+        comboBox.setDataProvider(dp);
+
+        comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
+
+        add(comboBox);
+    }
+    
     private void createListDataProviderWithStrings() {
         addTitle("ListDataProvider with strings");
         ComboBox<String> comboBox = new ComboBox<>();

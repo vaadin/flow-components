@@ -28,7 +28,7 @@ import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertFalse;
 
-@TestPath("combo-box-test")
+@TestPath("vaadin-combo-box/combo-box-test")
 public class ComboBoxPageIT extends AbstractComboBoxIT {
 
     @Before

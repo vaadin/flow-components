@@ -16,7 +16,7 @@ import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ UI.class, VaadinService.class })
+@PrepareForTest({ UI.class, VaadinService.class})
 public abstract class PowerMockTest {
 
     protected RouteRegistry registry;
@@ -43,10 +43,11 @@ public abstract class PowerMockTest {
             Route route = routeClass.getDeclaredAnnotation(Route.class);
             return route.value();
         };
-
+        
         // Let Flow resolve route URLs
-        Mockito.doAnswer(routeResolver).when(registry)
-                .getTargetUrl(Mockito.any(Class.class));
+        Mockito.doAnswer(routeResolver).when(router).getUrl(Mockito.any(Class.class));
+        // Let Flow resolve route URLs
+        Mockito.doAnswer(routeResolver).when(registry).getTargetUrl(Mockito.any(Class.class));
     }
 
 }

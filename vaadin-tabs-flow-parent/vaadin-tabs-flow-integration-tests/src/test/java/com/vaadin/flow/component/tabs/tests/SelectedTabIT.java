@@ -23,11 +23,11 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("selected-tab")
+@TestPath("vaadin-tabs/selected-tab")
 public class SelectedTabIT extends AbstractComponentIT {
 
     @Before
@@ -40,14 +40,14 @@ public class SelectedTabIT extends AbstractComponentIT {
         findElement(By.id("second")).click();
         findElement(By.id("show-selection")).click();
 
-        List<WebElement> firstSelections = findElements(By.className("tab-first"));
+        List<WebElement> firstSelections = findElements(By.className("first"));
         WebElement firstSelection = firstSelections
                 .get(firstSelections.size() - 1);
         Assert.assertEquals("The first tab is selected: false",
                 firstSelection.getText());
 
         List<WebElement> secondSelections = findElements(
-                By.className("tab-second"));
+                By.className("second"));
         WebElement secondSelection = secondSelections
                 .get(secondSelections.size() - 1);
         Assert.assertEquals("The second tab is selected: true",

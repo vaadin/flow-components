@@ -12,7 +12,8 @@ public class EditOnClickIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/editonclick");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/editonclick";
+        getDriver().get(url);
     }
 
     @After
@@ -33,6 +34,7 @@ public class EditOnClickIT extends AbstractParallelTest {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void editButtonsAreHiddenIfEditOnClickIsEnabled() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());

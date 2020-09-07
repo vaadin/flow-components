@@ -20,13 +20,13 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -36,6 +36,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.GridSortOrderBuilder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
@@ -83,11 +84,12 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
+import org.apache.commons.lang3.StringUtils;
 import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES;
 
 @Route("vaadin-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")
+@HtmlImport("./grid-demo-styles.html")
 @SuppressWarnings("squid:S1192")
 public class GridDemo extends DemoView {
 
@@ -605,7 +607,8 @@ public class GridDemo extends DemoView {
         createSingleSelect();
         createMultiSelect();
         createProgrammaticSelect();
-        createGridWithSortableColumns();// Sorting
+        createGridWithDescSortedColumn();// Sorting
+        createGridWithSortableColumns();
         createGridWithTextFieldFilters();// Filtering
         createGridWithFilters();
         createGridWithDataTypeSpecificFilters();
@@ -638,12 +641,16 @@ public class GridDemo extends DemoView {
         createDropLocations();
         createDragData();
         createDragDropFilters();
+        createStyling();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
 
         addCard("Using Components", "Using Components in Grid",
                 new Label("These objects are used in the examples above"));
+
+        addCard("Filtering", "Person filter object", new Span(
+              "Filter Object used in the `Using text fields for filtering items` example"));
     }
 
     // Grid Basics begin
@@ -674,6 +681,7 @@ public class GridDemo extends DemoView {
         // reorder the properties we use the 'setColumns' method.
         grid.setColumns("firstName", "lastName", "age", "address",
                 "phoneNumber");
+        add(grid);
 
         // end-source-example
         grid.setId("basic-usage");
@@ -702,6 +710,7 @@ public class GridDemo extends DemoView {
         grid.addColumn(Person::getFirstName).setHeader("First Name");
         grid.addColumn(Person::getLastName).setHeader("Last Name");
         grid.addColumn(Person::getAge).setHeader("Age");
+        add(grid);
 
         // end-source-example
 
@@ -720,6 +729,7 @@ public class GridDemo extends DemoView {
         grid.addColumn(Person::getAge).setHeader("Age");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        add(grid);
 
         // end-source-example
 
@@ -770,6 +780,7 @@ public class GridDemo extends DemoView {
         FooterRow footerRow = grid.appendFooterRow();
         footerRow.getCell(firstNameColumn).setComponent(addButton);
         footerRow.getCell(lastNameColumn).setComponent(removeButton);
+        add(grid, addButton, removeButton);
 
         // end-source-example
         grid.setId("assigning-array-data");
@@ -832,6 +843,7 @@ public class GridDemo extends DemoView {
         FooterRow footerRow = grid.appendFooterRow();
         footerRow.getCell(firstNameColumn).setComponent(addButton);
         footerRow.getCell(lastNameColumn).setComponent(removeButton);
+        add(grid, addButton, removeButton);
 
         // end-source-example
         grid.setId("dynamic-height");
@@ -843,9 +855,10 @@ public class GridDemo extends DemoView {
 
     // Selection Begin
     private void createSingleSelect() {
-        Div messageDiv = new Div();
         // begin-source-example
         // source-example-heading: Grid Single Selection
+        Div messageDiv = new Div();
+
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         grid.setItems(personList);
@@ -858,6 +871,7 @@ public class GridDemo extends DemoView {
                     event.getOldValue(), event.getValue());
             messageDiv.setText(message);
         });
+        add(grid, messageDiv);
         // end-source-example
         grid.setId("single-selection");
         messageDiv.setId("single-selection-message");
@@ -865,9 +879,10 @@ public class GridDemo extends DemoView {
     }
 
     private void createMultiSelect() {
-        Div messageDiv = new Div();
         // begin-source-example
         // source-example-heading: Grid Multi Selection
+        Div messageDiv = new Div();
+
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
         grid.setItems(personList);
@@ -885,6 +900,7 @@ public class GridDemo extends DemoView {
 
         // You can pre-select items
         grid.asMultiSelect().select(personList.get(0), personList.get(1));
+        add(grid, messageDiv);
         // end-source-example
         grid.setId("multi-selection");
         messageDiv.setId("multi-selection-message");
@@ -937,6 +953,8 @@ public class GridDemo extends DemoView {
         selectAllBtn.addClickListener(
                 event -> ((GridMultiSelectionModel<Person>) secondGrid
                         .getSelectionModel()).selectAll());
+        add(filterField, firstHeader, firstGrid, secondHeader, secondGrid,
+                selectAllBtn, deselectBtn);
         // end-source-example
         filterField.setId("programmatic-select-filter");
         firstHeader.setId("programmatic-select-first-header");
@@ -992,6 +1010,7 @@ public class GridDemo extends DemoView {
 
         NativeButton resetAllSortings = new NativeButton("Reset all sortings",
                 event -> grid.sort(null));
+        add(grid, multiSort, invertAllSortings, resetAllSortings);
         // end-source-example
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
@@ -1000,6 +1019,36 @@ public class GridDemo extends DemoView {
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
                 messageDiv, invertAllSortings, resetAllSortings);
+    }
+
+    private void createGridWithDescSortedColumn() {
+        // begin-source-example
+        // source-example-heading: Grid with a desc sorted column
+        List<Person> personList = getItems();
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(personList);
+
+        Column<Person> nameColumn = grid
+              .addColumn(Person::getFirstName, "First Name")
+              .setHeader("First Name");
+        Column<Person> surnameColumn = grid
+              .addColumn(Person::getLastName, "Last Name")
+              .setHeader("Last Name");
+        grid.addColumn(Person::getAge, "age").setHeader("Age");
+
+        List<GridSortOrder<Person>> sortByName = new GridSortOrderBuilder<Person>()
+              .thenDesc(nameColumn).build();
+        grid.sort(sortByName);
+
+        Button sortByLastName = new Button("Sort desc by last name", e -> {
+            List<GridSortOrder<Person>> sortOrders = new GridSortOrderBuilder<Person>()
+                  .thenDesc(surnameColumn).build();
+            grid.sort(sortOrders);
+        });
+        add(grid, sortByLastName);
+
+        // end-source-example
+        addCard("Sorting", "Grid with a desc sorted column", grid, sortByLastName);
     }
 
     // Filtering
@@ -1024,11 +1073,15 @@ public class GridDemo extends DemoView {
                 .setHeader("Postal Code");
 
         HeaderRow filterRow = grid.appendHeaderRow();
+
+        PersonFilter filterObject = new PersonFilter();
+        dataProvider.setFilter(person -> filterObject.test(person));
         // First filter
         TextField firstNameField = new TextField();
-        firstNameField.addValueChangeListener(event -> dataProvider.addFilter(
-                person -> StringUtils.containsIgnoreCase(person.getFirstName(),
-                        firstNameField.getValue())));
+        firstNameField.addValueChangeListener(event -> {
+            filterObject.setName(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         firstNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -1038,9 +1091,10 @@ public class GridDemo extends DemoView {
 
         // Second filter
         TextField ageField = new TextField();
-        ageField.addValueChangeListener(event -> dataProvider
-                .addFilter(person -> StringUtils.containsIgnoreCase(
-                        String.valueOf(person.getAge()), ageField.getValue())));
+        ageField.addValueChangeListener(event -> {
+            filterObject.setAge(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         ageField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -1050,9 +1104,10 @@ public class GridDemo extends DemoView {
 
         // Third filter
         TextField cityField = new TextField();
-        cityField.addValueChangeListener(event -> dataProvider
-                .addFilter(person -> StringUtils.containsIgnoreCase(
-                        person.getAddress().getCity(), cityField.getValue())));
+        cityField.addValueChangeListener(event -> {
+            filterObject.setCity(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         cityField.setValueChangeMode(ValueChangeMode.EAGER);
 
@@ -1062,16 +1117,17 @@ public class GridDemo extends DemoView {
 
         // Fourth filter
         TextField postalCodeField = new TextField();
-        postalCodeField.addValueChangeListener(
-                event -> dataProvider.addFilter(person -> StringUtils
-                        .containsIgnoreCase(person.getAddress().getPostalCode(),
-                                postalCodeField.getValue())));
+        postalCodeField.addValueChangeListener(event -> {
+            filterObject.setPostalCode(event.getValue());
+            dataProvider.refreshAll();
+        });
 
         postalCodeField.setValueChangeMode(ValueChangeMode.EAGER);
 
         filterRow.getCell(postalCodeColumn).setComponent(postalCodeField);
         postalCodeField.setSizeFull();
         postalCodeField.setPlaceholder("Filter");
+        add(grid);
         // end-source-example
         grid.setId("grid-with-filters");
         addCard("Filtering", "Using text fields for filtering items", grid);
@@ -1155,6 +1211,7 @@ public class GridDemo extends DemoView {
 
         // Columns for sub-properties can be added easily
         grid.addColumn("address.postalCode");
+        add(grid);
 
         // end-source-example
         grid.setId("configuring-columns");
@@ -1191,6 +1248,7 @@ public class GridDemo extends DemoView {
                 "Toggle user reordering of columns");
         userReordering.addValueChangeListener(event -> grid
                 .setColumnReorderingAllowed(!grid.isColumnReorderingAllowed()));
+        add(grid, idColumnVisibility, userReordering);
         // end-source-example
 
         grid.setId("column-api-example");
@@ -1217,6 +1275,7 @@ public class GridDemo extends DemoView {
                 "Recalculate column widths");
         recalculateWidthsButton.addClickListener(
                 buttonClickEvent -> grid.recalculateColumnWidths());
+        add(grid, recalculateWidthsButton);
         // end-source-example
 
         grid.setId("column-auto-width-grid");
@@ -1271,6 +1330,7 @@ public class GridDemo extends DemoView {
                 .setHeader("Marital status").setWidth("200px");
         secondGrid.addColumn(Person::getBirthDate).setHeader("Birth Date")
                 .setWidth("200px");
+        add(firstHeader, firstGrid, secondHeader, secondGrid);
 
         // end-source-example
         firstGrid.setId("frozen-column-first-grid");
@@ -1302,6 +1362,7 @@ public class GridDemo extends DemoView {
         alignments.setValue(ColumnTextAlign.START);
         alignments.addValueChangeListener(event -> grid.getColumnByKey("age")
                 .setTextAlign(event.getValue()));
+        add(grid, alignments);
 
         // end-source-example
         grid.setId("column-alignment-example");
@@ -1331,6 +1392,7 @@ public class GridDemo extends DemoView {
         grid.addColumnReorderListener(event ->
                 columnOrder.setText(event.getColumns().stream()
                         .map(Column::getKey).collect(Collectors.joining(", "))));
+        add(grid, columnOrder);
 
         // end-source-example
         grid.setId("column-reorder-example");
@@ -1355,6 +1417,7 @@ public class GridDemo extends DemoView {
 
         grid.addColumn(Person::getAge).setHeader("Age")
                 .setFooter("Average: " + averageOfAge);
+        add(grid);
         // end-source-example
         grid.setId("header-and-footer");
         addCard("Header and footer", "Header and footer texts", grid);
@@ -1400,6 +1463,7 @@ public class GridDemo extends DemoView {
         half2Header.getStyle().set("text-align", "right");
         half2Header.setSizeFull();
         halfheaderRow.join(quarter3, quarter4).setComponent(half2Header);
+        add(grid);
 
         // Footers can be set with a similar API
 
@@ -1457,6 +1521,7 @@ public class GridDemo extends DemoView {
 
         grid.appendFooterRow().getCell(nameColumn).setComponent(
                 new Label("Total: " + personList.size() + " people"));
+        add(grid);
 
         // end-source-example
         grid.setId("using-components");
@@ -1499,6 +1564,7 @@ public class GridDemo extends DemoView {
         grid.addColumn(new LocalDateRenderer<>(Item::getEstimatedDeliveryDate,
                 DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Estimated Delivery Date");
+        add(grid);
 
         // end-source-example
 
@@ -1549,6 +1615,7 @@ public class GridDemo extends DemoView {
                         order -> formatter.format(order.getPurchaseDate()))
                 .withProperty("address", order -> order.getAddress()))
                 .setHeader("Delivery").setFlexGrow(6);
+        add(grid);
 
         // end-source-example
         grid.setId("template-renderer");
@@ -1624,6 +1691,7 @@ public class GridDemo extends DemoView {
                 .withEventHandler("handleClick", person -> {
                     grid.getDataProvider().refreshItem(person);
                 }));
+        add(grid);
 
         // end-source-example
         grid.setId("item-details");
@@ -1664,6 +1732,7 @@ public class GridDemo extends DemoView {
 
         grid.addColumn(new NativeButtonRenderer<>("Details", item -> grid
                 .setDetailsVisible(item, !grid.isDetailsVisible(item))));
+        add(grid);
 
         // end-source-example
         grid.setId("open-details-programmatically");
@@ -1728,6 +1797,7 @@ public class GridDemo extends DemoView {
                         event.getItem().map(Task::toString)
                                 .orElse("-no item-"),
                         event.getColumnId().orElse("-no column-"))));
+        add(grid, contextMenu);
 
         // end-source-example
         grid.setId("context-menu-grid");
@@ -1773,6 +1843,7 @@ public class GridDemo extends DemoView {
             items.add(items.indexOf(item.get()) + 1, createItems(1).get(0));
             dataProvider.refreshAll();
         });
+        add(grid, contextMenu);
         // end-source-example
         grid.setId("context-sub-menu-grid");
         addCard("Context Menu", "Using Context Sub Menu With Grid", grid,
@@ -1803,6 +1874,7 @@ public class GridDemo extends DemoView {
             contextMenu.addItem("Due date: " + task.getDueDate());
             return true; // show the context menu
         });
+        add(grid, contextMenu);
         // end-source-example
         grid.setId("dynamic-context-menu-grid");
         addCard("Context Menu", "Dynamic Context Menu", grid, contextMenu);
@@ -1836,6 +1908,7 @@ public class GridDemo extends DemoView {
                     age.setText(String.valueOf(event.getItem().getAge()));
                     column.setText(event.getColumn().getKey());
                 });
+        add(grid);
 
         // end-source-example
         grid.setId("item-click-listener");
@@ -1865,6 +1938,7 @@ public class GridDemo extends DemoView {
             name.setText(event.getItem().getFirstName());
             age.setText(String.valueOf(event.getItem().getAge()));
         });
+        add(grid);
 
         // end-source-example
         grid.setId("item-doubleclick-listener");
@@ -1947,6 +2021,7 @@ public class GridDemo extends DemoView {
         editor.addSaveListener(
                 event -> message.setText(event.getItem().getFirstName() + ", "
                         + event.getItem().getAge()));
+        add(validationStatus, grid);
 
         // end-source-example
         grid.setId("buffered-editor");
@@ -2006,6 +2081,7 @@ public class GridDemo extends DemoView {
                         + binder.getBean().getAge());
             }
         });
+        add(grid);
 
         // end-source-example
         grid.setId("not-buffered-editor");
@@ -2143,6 +2219,7 @@ public class GridDemo extends DemoView {
                 event -> message.setText(event.getItem().getFirstName() + ", "
                         + event.getItem().getCountry() + ", "
                         + event.getItem().getState()));
+        add(grid);
         // end-source-example
         grid.setId("buffered-dynamic-editor");
         addCard("Grid Editor", "Dynamic Editor in Buffered Mode", message,
@@ -2237,6 +2314,7 @@ public class GridDemo extends DemoView {
                         + binder.getBean().getState());
             }
         });
+        add(grid);
 
         // end-source-example
         grid.setId("not-buffered-dynamic-editor");
@@ -2283,6 +2361,7 @@ public class GridDemo extends DemoView {
                 grid.getDataProvider().refreshAll();
             }
         });
+        add(grid);
 
         // end-source-example
 
@@ -2358,6 +2437,7 @@ public class GridDemo extends DemoView {
         grid2.addDragEndListener(dragEndListener);
         grid2.setRowsDraggable(true);
         grid2.setColumns("firstName", "lastName");
+        add(grid, grid2);
 
         // end-source-example
 
@@ -2424,6 +2504,7 @@ public class GridDemo extends DemoView {
             }
             treeGrid.getDataProvider().refreshAll();
         });
+        add(grid, treeGrid);
 
         // end-source-example
 
@@ -2507,8 +2588,11 @@ public class GridDemo extends DemoView {
                         ? Collections.max(persons.stream().collect(Collectors
                                 .mapping(Person::getId, Collectors.toList())))
                         : 0;
-                persons.add(index, new Person(maxId + 1, dataArray[0],
-                        dataArray[1], -1, null, dataArray[2]));
+                if (dataArray.length == 3) {
+                    persons.add(index,
+                          new Person(maxId + 1, dataArray[0], dataArray[1], -1,
+                                null, dataArray[2]));
+                }
             });
             grid.getDataProvider().refreshAll();
         });
@@ -2522,6 +2606,7 @@ public class GridDemo extends DemoView {
             persons.removeAll(draggedItems);
             grid.getDataProvider().refreshAll();
         });
+        add(grid);
 
         // end-source-example
 
@@ -2602,11 +2687,61 @@ public class GridDemo extends DemoView {
                 grid.getDataProvider().refreshAll();
             });
         });
+        add(grid);
 
         // end-source-example
         VerticalLayout vl = new VerticalLayout(new Label("Supervisors"), grid);
 
         addCard("Drag and Drop", "Drag and Drop Filters", vl);
+    }
+
+    private void createStyling() {
+        //@formatter:off
+        /*
+        // begin-source-example
+        // source-example-heading: Styling Grid Cells
+        // source-example-type: CSS
+         [part~="cell"].subscriber {
+            background: rgb(245, 245, 255);
+         }
+         [part~="cell"].minor {
+           color: red;
+           font-weight: bold;
+         }
+        // end-source-example
+        */
+        //@formatter:on
+        String instructions = "<p>In order to inject styles into Grid cells, "
+                + "create a style like in the snippet below, "
+                + "put it into an css-file in your frontent/styles folder, "
+                + "and import it with <code>@CssImport(value = \"./styles/fileName.css\", themeFor = \"vaadin-grid\")</code>. "
+                + "After this you can apply the CSS classes "
+                + "(<code>subscriber</code> and <code>minor</code> in this case) "
+                + "into grid rows and cells as shown in the next example.</p>";
+        addCard("Styling", "Styling Grid Cells", new Html(instructions));
+
+        // begin-source-example
+        // source-example-heading: Generating CSS Class Names for Cells
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(createItems(150));
+        grid.setSelectionMode(SelectionMode.NONE);
+
+        grid.addColumn(Person::getFirstName).setHeader("Name");
+        Column<Person> ageColumn = grid.addColumn(Person::getAge)
+                .setHeader("Age");
+        grid.addColumn(person -> person.isSubscriber() ? "Yes" : "")
+                .setHeader("Subscriber");
+
+        grid.setClassNameGenerator(
+                person -> person.isSubscriber() ? "subscriber" : "");
+
+        ageColumn.setClassNameGenerator(
+                person -> person.getAge() < 18 ? "minor" : "");
+        add(grid);
+
+        // end-source-example
+        grid.setId("class-name-generator");
+        addCard("Styling", "Generating CSS Class Names for Cells", grid);
     }
 
     private List<Person> getItems() {
@@ -2747,6 +2882,68 @@ public class GridDemo extends DemoView {
         public static BigDecimal getRandomBigDecimal() {
             return new BigDecimal(
                     100 + Math.random() * 100 + Math.random() * 10000);
+        }
+    }
+    // end-source-example
+
+    // begin-source-example
+    // source-example-heading: Person filter object
+
+    public class PersonFilter {
+        String name = "";
+        String city = "";
+        String age = "";
+        String postalCode = "";
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public String getAge() {
+            return age;
+        }
+
+        public void setAge(String age) {
+            this.age = age;
+        }
+
+        public void setPostalCode(String postalCode) {
+            this.postalCode = postalCode;
+        }
+
+        public boolean test(Person person) {
+            if (name.length() > 0 && !StringUtils
+                  .containsIgnoreCase(String.valueOf(person.getFirstName()),
+                        name)) {
+                return false;
+            }
+            if (city.length() > 0 && !StringUtils.containsIgnoreCase(
+                  String.valueOf(person.getAddress().getCity()), city)) {
+                return false;
+            }
+            if (age.length() > 0 && !StringUtils
+                  .containsIgnoreCase(String.valueOf(person.getAge()), age)) {
+                return false;
+            }
+
+            if (postalCode.length() > 0 && !StringUtils.containsIgnoreCase(
+                  String.valueOf(person.getAddress().getPostalCode()),
+                  postalCode)) {
+                return false;
+            }
+            return true;
         }
     }
     // end-source-example

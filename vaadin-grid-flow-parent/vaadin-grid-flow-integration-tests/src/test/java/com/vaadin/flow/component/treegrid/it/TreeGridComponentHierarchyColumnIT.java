@@ -9,7 +9,7 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-component-hierarchy-column")
+@TestPath("vaadin-grid/treegrid-component-hierarchy-column")
 public class TreeGridComponentHierarchyColumnIT extends AbstractTreeGridIT {
 
     @Before

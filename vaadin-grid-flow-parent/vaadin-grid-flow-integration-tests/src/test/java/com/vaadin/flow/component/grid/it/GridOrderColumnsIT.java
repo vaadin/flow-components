@@ -21,13 +21,13 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Tests reorder of columns
  */
-@TestPath("grid-order-columns")
+@TestPath("vaadin-grid/grid-order-columns")
 public class GridOrderColumnsIT extends AbstractComponentIT {
 
     private GridElement grid;

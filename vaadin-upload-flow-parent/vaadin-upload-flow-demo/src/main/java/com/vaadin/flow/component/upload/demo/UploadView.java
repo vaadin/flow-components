@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.upload.demo;
 
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
-import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -25,11 +22,10 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -38,7 +34,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
@@ -48,6 +46,7 @@ import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.internal.MessageDigestUtil;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import org.apache.commons.io.IOUtils;
 
 /**
  * View for {@link Upload} demo.
@@ -66,22 +65,36 @@ public class UploadView extends DemoView {
         changeDefaultComponents();
         i18nSampleUpload();
         createUploadWithFileConstraints();
+
+        addCard("Helper methods",
+                new Label("These methods are used in the examples above"));
     }
 
     private void createSimpleUpload() {
-        Div output = new Div();
-
         //@formatter:off
         // begin-source-example
         // source-example-heading: Simple in memory receiver for single file upload
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
+        Div output = new Div();
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(), buffer.getInputStream());
+            output.removeAll();
             showOutput(event.getFileName(), component, output);
         });
+
+        upload.addFileRejectedListener(event -> {
+            Paragraph component = new Paragraph();
+            output.removeAll();
+            showOutput(event.getErrorMessage(), component, output);
+        });
+        upload.getElement().addEventListener("file-remove", event -> {
+            output.removeAll();
+        });
+
+        add(upload, output);
         // end-source-example
         //@formatter:on
         upload.setMaxFileSize(500 * 1024);
@@ -93,8 +106,6 @@ public class UploadView extends DemoView {
     }
 
     private void createUploadWithFileConstraints() {
-        Div output = new Div();
-
         //@formatter:off
         // begin-source-example
         // source-example-heading: Simple single file upload showing messages when file rejected
@@ -104,27 +115,33 @@ public class UploadView extends DemoView {
         upload.setDropLabel(new Label("Upload a 300 bytes file in .csv format"));
         upload.setAcceptedFileTypes("text/csv");
         upload.setMaxFileSize(300);
+        Div output = new Div();
 
         upload.addFileRejectedListener(event -> {
             Paragraph component = new Paragraph();
             showOutput(event.getErrorMessage(), component, output);
         });
+        upload.getElement().addEventListener("file-remove", event -> {
+            output.removeAll();
+        });
+
+        add(upload, output);
         // end-source-example
         //@formatter:on
         upload.setId("test-upload");
         output.setId("test-output");
 
-        addCard("Simple single file upload showing messages when file rejected", upload, output);
+        addCard("Simple single file upload showing messages when file rejected",
+                upload, output);
     }
 
     private void createSimpleMultiFileUpload() {
-        Div output = new Div();
-
         //@formatter:off
         // begin-source-example
         // source-example-heading: Simple in memory receiver for multi file upload
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
+        Div output = new Div();
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
@@ -132,6 +149,12 @@ public class UploadView extends DemoView {
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
         });
+        upload.addFileRejectedListener(event -> {
+            Paragraph component = new Paragraph();
+            showOutput(event.getErrorMessage(), component, output);
+        });
+
+        add(upload, output);
         // end-source-example
         //@formatter:on
         upload.setMaxFileSize(200 * 1024);
@@ -141,13 +164,12 @@ public class UploadView extends DemoView {
     }
 
     private void createFilteredMultiFileUpload() {
-        Div output = new Div();
-
         // begin-source-example
         // source-example-heading: Filtered multi file upload for images
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
         upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
+        Div output = new Div();
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
@@ -155,6 +177,12 @@ public class UploadView extends DemoView {
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
         });
+        upload.addFileRejectedListener(event -> {
+            Paragraph component = new Paragraph();
+            showOutput(event.getErrorMessage(), component, output);
+        });
+
+        add(upload, output);
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
@@ -162,13 +190,12 @@ public class UploadView extends DemoView {
     }
 
     private void createNonImmediateUpload() {
-        Div output = new Div();
-
         // begin-source-example
         // source-example-heading: Non immediate upload
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
         upload.setAutoUpload(false);
+        Div output = new Div();
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
@@ -176,6 +203,11 @@ public class UploadView extends DemoView {
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
         });
+        upload.getElement().addEventListener("file-remove", event -> {
+            output.removeAll();
+        });
+
+        add(upload, output);
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
@@ -183,8 +215,6 @@ public class UploadView extends DemoView {
     }
 
     private void changeDefaultComponents() {
-        Div output = new Div();
-
         // begin-source-example
         // source-example-heading: Custom components upload demo
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
@@ -198,6 +228,7 @@ public class UploadView extends DemoView {
 
         Span dropIcon = new Span("¸¸.•*¨*•♫♪");
         upload.setDropLabelIcon(dropIcon);
+        Div output = new Div();
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
@@ -205,6 +236,8 @@ public class UploadView extends DemoView {
                     buffer.getInputStream(event.getFileName()));
             showOutput(event.getFileName(), component, output);
         });
+
+        add(upload, output);
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
@@ -212,13 +245,12 @@ public class UploadView extends DemoView {
     }
 
     private void i18nSampleUpload() {
-        Div output = new Div();
-
         // begin-source-example
         // source-example-heading: i18n translations example
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
         upload.setId("i18n-upload");
+        Div output = new Div();
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
@@ -258,16 +290,20 @@ public class UploadView extends DemoView {
                         .collect(Collectors.toList()));
 
         upload.setI18n(i18n);
+
+        add(upload, output);
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
         addCard("i18n translations example", upload, output);
     }
 
+    // begin-source-example
+    // source-example-heading: Helper methods
     private Component createComponent(String mimeType, String fileName,
             InputStream stream) {
         if (mimeType.startsWith("text")) {
-          return createTextComponent(stream);
+            return createTextComponent(stream);
         } else if (mimeType.startsWith("image")) {
             Image image = new Image();
             try {
@@ -293,7 +329,7 @@ public class UploadView extends DemoView {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            image.setSizeFull();
             return image;
         }
         Div content = new Div();
@@ -304,21 +340,22 @@ public class UploadView extends DemoView {
 
     }
 
-  private Component createTextComponent(InputStream stream) {
-    String text;
-    try {
-        text = IOUtils.toString(stream, StandardCharsets.UTF_8);
-    } catch (IOException e) {
-        text = "exception reading stream";
+    private Component createTextComponent(InputStream stream) {
+        String text;
+        try {
+            text = IOUtils.toString(stream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            text = "exception reading stream";
+        }
+        return new Text(text);
     }
-    return new Text(text);
-  }
 
-  private void showOutput(String text, Component content,
+    private void showOutput(String text, Component content,
             HasComponents outputContainer) {
         HtmlComponent p = new HtmlComponent(Tag.P);
         p.getElement().setText(text);
         outputContainer.add(p);
         outputContainer.add(content);
     }
+    // end-source-example
 }

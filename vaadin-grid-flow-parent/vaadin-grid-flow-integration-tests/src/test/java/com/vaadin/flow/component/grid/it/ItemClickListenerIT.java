@@ -22,15 +22,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.component.AbstractNoW3c;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.WebElement;
 
-@TestPath("item-click-listener")
-public class ItemClickListenerIT extends AbstractNoW3c {
+@TestPath("vaadin-grid/item-click-listener")
+public class ItemClickListenerIT extends AbstractComponentIT {
 
     private GridElement grid;
 

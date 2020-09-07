@@ -24,10 +24,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("notification-test")
+@TestPath("vaadin-notification/notification-test")
 public class NotificationTestPageIT extends AbstractComponentIT {
 
     private static final String NOTIFICATION_CARD_TAG = "vaadin-notification-card";
@@ -220,7 +220,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         waitForElementPresent(By.id("notification-add-component-at-index"));
         assertButtonNumberInNotification(initialNumber);
         findElement(By.id("close-notification-add-component-at-index")).click();
-        waitForElementNotPresent(By.id(NOTIFICATION_CARD_TAG));
+        waitForElementNotPresent(By.tagName(NOTIFICATION_CARD_TAG));
     }
 
     private void assertButtonNumberInNotification(int expectedButtonNumber) {

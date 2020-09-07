@@ -29,9 +29,9 @@ public class AccordionView extends DemoView {
     @Override
     protected void initView() {
         basicUsage();
-        filledPannels();
-        smallPannels();
-        reversePannels();
+        filledPanels();
+        smallPanels();
+        reversePanels();
         complexForm();
     }
 
@@ -58,22 +58,22 @@ public class AccordionView extends DemoView {
         );
         accordion.add("Billing Address", billingAddressLayout);
 
-        VerticalLayout paymenLayout = new VerticalLayout();
-        paymenLayout.add(
+        VerticalLayout paymentLayout = new VerticalLayout();
+        paymentLayout.add(
             new Span("Not yet implemented")
         );
-        AccordionPanel billingAddressPanel = accordion.add("Payment", paymenLayout);
+        AccordionPanel billingAddressPanel = accordion.add("Payment", paymentLayout);
         billingAddressPanel.setEnabled(false);
-
+        add(accordion);
         // end-source-example
 
         addCard("Basics", accordion);
     }
 
-    private void filledPannels() {
+    private void filledPanels() {
 
         // begin-source-example
-        // source-example-heading: Theme variants - Filled Pannels
+        // source-example-heading: Theme variants - Filled Panels
         Accordion accordion = new Accordion();
 
         accordion.add("Panel 1", new Span("Panel content"))
@@ -82,19 +82,19 @@ public class AccordionView extends DemoView {
         accordion.add("Panel 2", new Span("Panel content"))
             .addThemeVariants(DetailsVariant.FILLED);
 
-        AccordionPanel disabledPannel = accordion.add("Panel 3", new Span("Panel content"));
-        disabledPannel.addThemeVariants(DetailsVariant.FILLED);
-        disabledPannel.setEnabled(false);
-
+        AccordionPanel disabledPanel = accordion.add("Panel 3", new Span("Panel content"));
+        disabledPanel.addThemeVariants(DetailsVariant.FILLED);
+        disabledPanel.setEnabled(false);
+        add(accordion);
         // end-source-example
 
-        addCard("Theme variants - Filled Pannels", accordion);
+        addCard("Theme variants - Filled Panels", accordion);
     }
 
-    private void smallPannels() {
+    private void smallPanels() {
 
         // begin-source-example
-        // source-example-heading: Theme variants - Small Pannels
+        // source-example-heading: Theme variants - Small Panels
         Accordion accordion = new Accordion();
 
         accordion.add("Panel 1", new Span("Panel content"))
@@ -105,16 +105,16 @@ public class AccordionView extends DemoView {
 
         accordion.add("Panel 3", new Span("Panel content"))
             .addThemeVariants(DetailsVariant.SMALL);
-
+        add(accordion);
         // end-source-example
 
-        addCard("Theme variants - Small Pannels", accordion);
+        addCard("Theme variants - Small Panels", accordion);
     }
 
-    private void reversePannels() {
+    private void reversePanels() {
 
         // begin-source-example
-        // source-example-heading: Theme variants - Reverse Pannels
+        // source-example-heading: Theme variants - Reverse Panels
         Accordion accordion = new Accordion();
 
         accordion.add("Panel 1", new Span("Panel content"))
@@ -125,10 +125,10 @@ public class AccordionView extends DemoView {
 
         accordion.add("Panel 3", new Span("Panel content"))
             .addThemeVariants(DetailsVariant.REVERSE);
-
+        add(accordion);
         // end-source-example
 
-        addCard("Theme variants - Reverse Pannels", accordion);
+        addCard("Theme variants - Reverse Panels", accordion);
     }
 
     private void complexForm() {
@@ -181,7 +181,7 @@ public class AccordionView extends DemoView {
         submit.setEnabled(false);
         submit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         submit.addClickListener(e -> Notification.show("Complete! \uD83D\uDC4D",
-                4000, Position.BOTTOM_END));
+                4000, Notification.Position.BOTTOM_END));
         Checkbox consent = new Checkbox("I agree");
         consent.addValueChangeListener(e -> submit.setEnabled(e.getValue()));
 
@@ -191,6 +191,7 @@ public class AccordionView extends DemoView {
         VerticalLayout terms = new VerticalLayout(paragraph, bottomPanel);
 
         accordion.add("Terms and conditions", terms);
+        add(accordion);
         // end-source-example
 
         addCard("Complex form", accordion);

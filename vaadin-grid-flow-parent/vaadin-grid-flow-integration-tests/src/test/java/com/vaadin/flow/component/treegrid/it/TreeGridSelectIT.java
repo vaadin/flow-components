@@ -25,7 +25,7 @@ import com.vaadin.flow.testutil.TestPath;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPath(TreeGridBasicFeaturesPage.VIEW)
+@TestPath("vaadin-grid/" + TreeGridBasicFeaturesPage.VIEW)
 public class TreeGridSelectIT extends AbstractTreeGridIT {
 
     @Before

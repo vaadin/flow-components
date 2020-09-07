@@ -4,10 +4,10 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("reattach-test")
+@TestPath("vaadin-select/reattach-test")
 public class DetachIT extends AbstractComponentIT {
 
     /**
@@ -19,7 +19,7 @@ public class DetachIT extends AbstractComponentIT {
      */
     @Test
     public void testReattach_setRenderer() {
-        open();
+        open(getTestURL());
         getCommandExecutor().waitForVaadin();
         $("button").first().click();
         getCommandExecutor().waitForVaadin();

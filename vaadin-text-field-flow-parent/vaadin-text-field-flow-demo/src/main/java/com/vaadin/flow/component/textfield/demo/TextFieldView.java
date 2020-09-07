@@ -60,7 +60,6 @@ public class TextFieldView extends DemoView {
         textFieldAutoselect();
         textFieldClearButton();
         textFieldFocusShortcut();
-        textFieldSetPattern();
         passwordFieldBasic(); // PasswordField
         passwordFieldHideRevealButton();
         emailFieldBasic(); // EmailField
@@ -96,6 +95,8 @@ public class TextFieldView extends DemoView {
 
         TextField valueField = new TextField();
         valueField.setValue("Value");
+
+        add(labelField, placeholderField, valueField);
         // end-source-example
 
         labelField.setId("text-field-label-id");
@@ -121,7 +122,9 @@ public class TextFieldView extends DemoView {
         readonlyField.setLabel("Read-only");
         readonlyField.setReadOnly(true);
 
+        add(disabledField, readonlyField);
         // end-source-example
+
         div.add(disabledField, new Text(" "), readonlyField);
         disabledField.setId("text-field-disabled-id");
         readonlyField.setId("text-field-readonly-id");
@@ -136,6 +139,7 @@ public class TextFieldView extends DemoView {
         textField.setValue("Text selected on focus");
         textField.setAutoselect(true);
 
+        add(textField);
         // end-source-example
         textField.setId("autoselect-id");
         addCard("Text field", "Autoselect", textField);
@@ -147,6 +151,8 @@ public class TextFieldView extends DemoView {
         TextField textField = new TextField();
         textField.setValue("Value");
         textField.setClearButtonVisible(true);
+
+        add(textField);
         // end-source-example
 
         textField.setId("text-field-clear-button-id");
@@ -159,37 +165,12 @@ public class TextFieldView extends DemoView {
         TextField textField = new TextField();
         textField.setLabel("Press ALT + 1 to focus");
         textField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+
+        add(textField);
         // end-source-example
 
         textField.setId("shortcut-field");
         this.addCard("Text field", "Focus shortcut usage", textField);
-    }
-
-    private void textFieldSetPattern(){
-        // begin-source-example
-        // source-example-heading: Pattern usage
-        TextField zipCode = new TextField("ZIP code");
-        zipCode.setPlaceholder("Only 3 letters codes are valid");
-        zipCode.setPattern("[A-Za-z]{3}");
-        zipCode.setPreventInvalidInput(true);
-
-        Paragraph status = new Paragraph();
-        TextField username = new TextField("Username");
-        username.setPattern("^[a-zA-Z0-9._-]{3,}");
-        username.addValueChangeListener(e -> {
-                if (username.isInvalid())
-                        status.setText(
-                                "Username should be, at least, 3 character long "
-                                        + "and contain only letters, digits, dashes or dots.");
-                else
-                        status.setText("Your username seems valid!");
-        });
-        // end-source-example
-
-        zipCode.setId("text-field-zip-pattern");
-        username.setId("text-field-username-pattern");
-        addCard("Text field", "Pattern usage", zipCode, username,
-                status);
     }
 
     private void passwordFieldBasic() {
@@ -199,6 +180,8 @@ public class TextFieldView extends DemoView {
         passwordField.setLabel("Password");
         passwordField.setPlaceholder("Enter password");
         passwordField.setValue("secret1");
+
+        add(passwordField);
         // end-source-example
 
         passwordField.setId("password-field-id");
@@ -212,6 +195,8 @@ public class TextFieldView extends DemoView {
         passwordField.setLabel("Password");
         passwordField.setValue("secret1");
         passwordField.setRevealButtonVisible(false);
+
+        add(passwordField);
         // end-source-example
 
         passwordField.setId("hidden-reveal-button-id");
@@ -224,6 +209,8 @@ public class TextFieldView extends DemoView {
         EmailField emailField = new EmailField("Email");
         emailField.setClearButtonVisible(true);
         emailField.setErrorMessage("Please enter a valid email address");
+
+        add(emailField);
         // end-source-example
 
         emailField.setId("email-field");
@@ -234,6 +221,8 @@ public class TextFieldView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic number field
         NumberField numberField = new NumberField("Years of expertise");
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-id");
@@ -244,6 +233,8 @@ public class TextFieldView extends DemoView {
         // begin-source-example
         // source-example-heading: Integer field
         IntegerField integerField = new IntegerField("Age");
+
+        add(integerField);
         // end-source-example
 
         integerField.setId("integer-field");
@@ -255,6 +246,8 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Number field with controls
         NumberField numberField = new NumberField();
         numberField.setHasControls(true);
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-has-control-id");
@@ -269,6 +262,8 @@ public class TextFieldView extends DemoView {
         numberField.setHasControls(true);
         numberField.setMin(1);
         numberField.setMax(10);
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-limit-id");
@@ -283,6 +278,8 @@ public class TextFieldView extends DemoView {
         numberField.setStep(0.2d);
         numberField.setMin(0);
         numberField.setMax(10);
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-step-id");
@@ -310,6 +307,8 @@ public class TextFieldView extends DemoView {
         });
 
         bigDecimalField.setValue(new BigDecimal(15).setScale(2));
+
+        add(bigDecimalField, tax);
         // end-source-example
         addCard("Number field", "Big decimal field", bigDecimalField, tax);
     }
@@ -319,6 +318,8 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Basic text area
         TextArea textArea = new TextArea("Description");
         textArea.setPlaceholder("Write here ...");
+
+        add(textArea);
         // end-source-example
 
         textArea.setId("text-area-basic-id");
@@ -331,6 +332,8 @@ public class TextFieldView extends DemoView {
         TextArea textArea = new TextArea("Description");
         textArea.getStyle().set("maxHeight", "150px");
         textArea.setPlaceholder("Write here ...");
+
+        add(textArea);
         // end-source-example
 
         textArea.getStyle().set("padding", "0");
@@ -344,6 +347,8 @@ public class TextFieldView extends DemoView {
         TextArea textArea = new TextArea("Description");
         textArea.getStyle().set("minHeight", "150px");
         textArea.setPlaceholder("Write here ...");
+
+        add(textArea);
         // end-source-example
 
         textArea.getStyle().set("padding", "0");
@@ -360,6 +365,8 @@ public class TextFieldView extends DemoView {
 
         NumberField euroField = new NumberField("Euros");
         euroField.setSuffixComponent(new Span("€"));
+
+        add(dollarField, euroField);
         // end-source-example
 
         dollarField.setId("dollar-field");
@@ -375,6 +382,8 @@ public class TextFieldView extends DemoView {
         textField.setPlaceholder("Search");
         Icon icon = VaadinIcon.SEARCH.create();
         textField.setPrefixComponent(icon);
+
+        add(textField);
         // end-source-example
 
         textField.setId("text-field-search-id");
@@ -400,6 +409,8 @@ public class TextFieldView extends DemoView {
                 .withValidator(max -> max.length() <= 4, "Maximum 4 characters")
                 .bind(Person::getName, Person::setName);
         binder.setBean(person);
+
+        add(minField, maxField);
         // end-source-example
 
         minField.setId("min-id");
@@ -420,6 +431,8 @@ public class TextFieldView extends DemoView {
                         "[A-Z]{2}\\d{3,4}"))
                 .bind(Person::getFlightNumber, Person::setFlightNumber);
         binder.setBean(person);
+
+        add(textField, div);
         // end-source-example
 
         div.setText("Valid flight number: 2 uppercase letters followed by "
@@ -464,6 +477,8 @@ public class TextFieldView extends DemoView {
                     return ValidationResult.ok();
                 }).bind(Person::getId, Person::setId);
         binder.setBean(person);
+
+        add(textField, div);
         // end-source-example
         div.setText(
                 "Valid ID: Use a 10 digit number. The sum of digits must be divisible by 10. For example 1111111111.");
@@ -485,6 +500,8 @@ public class TextFieldView extends DemoView {
         TextField rightTextField = new TextField();
         rightTextField.setValue("right");
         rightTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+
+        add(leftTextField, centerTextField, rightTextField);
         // end-source-example
 
         leftTextField.setId("text-field-left-id");
@@ -501,6 +518,8 @@ public class TextFieldView extends DemoView {
         TextField textField = new TextField("Label");
         textField.setPlaceholder("Text field");
         textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        add(textField);
         // end-source-example
         addCard("Theme Variants", "Small size", textField);
     }

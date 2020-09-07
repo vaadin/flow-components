@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.AbstractNoW3c;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import com.vaadin.tests.TabbedComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -52,9 +52,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     @Override
     public void setup() throws Exception {
-        final WebDriver webDriver = AbstractNoW3c
-            .createChromeDriverWithoutW3c(getLocalExecution(),
-                getDesiredCapabilities(), getHubURL());
+        final WebDriver webDriver = null;
         if (webDriver != null) {
             setDesiredCapabilities(getDesiredCapabilities());
             setDriver(webDriver);

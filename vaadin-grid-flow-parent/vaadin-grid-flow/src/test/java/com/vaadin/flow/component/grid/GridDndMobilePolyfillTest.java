@@ -38,8 +38,20 @@ public class GridDndMobilePolyfillTest {
 
     @Before
     public void setup() {
+        DefaultDeploymentConfiguration configuration = new DefaultDeploymentConfiguration(
+                VaadinServlet.class, new Properties()) {
+            @Override
+            public boolean isCompatibilityMode() {
+                return false;
+            }
+        };
+
         VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(service.resolveResource(Mockito.anyString(),
+                Mockito.any(WebBrowser.class))).thenReturn("");
+
         VaadinSession session = Mockito.mock(VaadinSession.class);
+        Mockito.when(session.getConfiguration()).thenReturn(configuration);
         Mockito.when(session.getService()).thenReturn(service);
         Mockito.when(session.hasLock()).thenReturn(true);
         ui = new UI() {

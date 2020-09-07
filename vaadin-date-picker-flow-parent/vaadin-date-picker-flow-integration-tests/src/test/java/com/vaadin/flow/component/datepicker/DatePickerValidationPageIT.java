@@ -28,7 +28,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertTrue;
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Integration tests for {@link DatePicker} validation.
  */
-@TestPath("date-picker-validation")
+@TestPath("vaadin-date-picker/date-picker-validation")
 public class DatePickerValidationPageIT extends AbstractComponentIT {
 
     private WebElement field;

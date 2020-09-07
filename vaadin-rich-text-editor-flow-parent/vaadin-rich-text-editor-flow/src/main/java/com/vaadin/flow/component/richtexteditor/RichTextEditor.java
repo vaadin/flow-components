@@ -18,6 +18,7 @@ package com.vaadin.flow.component.richtexteditor;
  */
 
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -46,6 +47,7 @@ import java.util.Objects;
  *
  */
 @Tag("vaadin-rich-text-editor")
+@HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
         implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier, CompositionNotifier {
 
@@ -82,8 +84,8 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
                 JsonObject i18nObject = (JsonObject) JsonSerializer
                         .toJson(this.i18n);
                 for (String key : i18nObject.keys()) {
-                    getElement().executeJs(
-                            "this.set('i18n." + key + "', $0)",
+                    ui.getPage().executeJavaScript(
+                            "$0.set('i18n." + key + "', $1)", getElement(),
                             i18nObject.get(key));
                 }
             }

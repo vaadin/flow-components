@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  *
  */
-@Route("notification-test")
+@Route("vaadin-notification/notification-test")
 public class NotificationTestPage extends Div {
 
     private static final String BUTTON_CAPTION = "Open notification";

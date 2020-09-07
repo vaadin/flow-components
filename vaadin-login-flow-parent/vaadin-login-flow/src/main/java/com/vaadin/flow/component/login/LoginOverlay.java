@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -40,8 +41,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value="@vaadin/vaadin-login", version = "1.2.0-alpha2")
+@NpmPackage(value="@vaadin/vaadin-login", version = "1.1.0")
 @JsModule("@vaadin/vaadin-login/src/vaadin-login-overlay.js")
+@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login-overlay.html")
 public class LoginOverlay extends AbstractLogin {
 
     private Component title;

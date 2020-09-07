@@ -23,6 +23,7 @@ public class CookieConsentView extends DemoView {
 	// begin-source-example
 	// source-example-heading: Basic usage
 	CookieConsent dialog = new CookieConsent();
+	add(dialog);
 	// end-source-example
 	// @formatter:on
 
@@ -37,6 +38,7 @@ public class CookieConsentView extends DemoView {
                 "We are using cookies to make your visit here awesome!",
                 "Cool!", "Why?", "https://vaadin.com/terms-of-service",
                 Position.BOTTOM_LEFT);
+	add(dialog);
 	// end-source-example
 	// @formatter:on
 

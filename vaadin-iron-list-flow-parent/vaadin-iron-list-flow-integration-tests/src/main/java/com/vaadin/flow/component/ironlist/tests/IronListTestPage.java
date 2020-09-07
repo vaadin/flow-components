@@ -46,7 +46,7 @@ import com.vaadin.flow.router.Route;
  *
  * @author Vaadin Ltd.
  */
-@Route("iron-list-test")
+@Route("vaadin-iron-list/iron-list-test")
 public class IronListTestPage extends Div {
 
     private static final List<String> ITEMS;

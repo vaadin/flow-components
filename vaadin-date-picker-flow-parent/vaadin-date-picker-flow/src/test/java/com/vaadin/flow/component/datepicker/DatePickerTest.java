@@ -129,4 +129,16 @@ public class DatePickerTest {
                 picker.getElement().getProperty("clearButtonVisible", value));
     }
 
+    @Test
+    public void setAutoOpenEnabled() {
+        DatePicker picker = new DatePicker();
+        assertTrue("Auto-open should be enabled by default",
+            picker.isAutoOpen());
+        picker.setAutoOpen(false);
+        assertFalse("Should be possible to disable auto-open",
+            picker.isAutoOpen());
+        picker.setAutoOpen(true);
+        assertTrue("Should be possible to enable auto-open",
+            picker.isAutoOpen());
+    }
 }

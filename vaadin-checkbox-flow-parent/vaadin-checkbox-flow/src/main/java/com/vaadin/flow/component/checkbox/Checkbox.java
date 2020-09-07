@@ -17,7 +17,6 @@ package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
  * Server-side component for the {@code vaadin-checkbox} element.
@@ -33,19 +32,15 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         implements HasSize {
 
-    private static final PropertyChangeListener NO_OP = event -> {
-    };
-
     /**
      * Default constructor.
      */
     public Checkbox() {
         // initial value, default value, accept null value
         super(false, false, false);
-        getElement().addPropertyChangeListener("indeterminate",
-                "indeterminate-changed", NO_OP);
-        getElement().addPropertyChangeListener("checked", "checked-changed",
-                NO_OP);
+        getElement().synchronizeProperty("indeterminate",
+                "indeterminate-changed");
+        getElement().synchronizeProperty("checked", "checked-changed");
         // https://github.com/vaadin/vaadin-checkbox/issues/25
         setIndeterminate(false);
     }
@@ -126,12 +121,12 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     }
 
     /**
-     * Set the current label text of this checkbox with HTML formatting.
+     * Set the current label text of this checkbox with HTML
+     * formatting.
      *
-     * <p>
-     * XSS vulnerability warning: the given HTML is rendered in the browser as
-     * is and the developer is responsible for ensuring no harmful HTML is used.
-     * </p>
+     * <p>XSS vulnerability warning: the given HTML is rendered
+     * in the browser as is and the developer is responsible
+     * for ensuring no harmful HTML is used.</p>
      *
      * @param htmlContent
      *            the label html to set

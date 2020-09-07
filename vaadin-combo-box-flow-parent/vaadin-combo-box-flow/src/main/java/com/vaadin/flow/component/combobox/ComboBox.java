@@ -29,6 +29,8 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -80,8 +82,10 @@ import elemental.json.JsonValue;
  *            the type of the items to be inserted in the combo box
  * @author Vaadin Ltd
  */
+@HtmlImport("frontend://flow-component-renderer.html")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./comboBoxConnector.js")
+@JavaScript("frontend://comboBoxConnector.js")
+@JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasFilterableDataProvider<T, String> {
@@ -89,6 +93,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -824,6 +829,28 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public boolean isAllowCustomValue() {
         return isAllowCustomValueBoolean();
+    }
+
+    /**
+     * Enables or disables the dropdown opening automatically. If {@code false}
+     * the dropdown is only opened when clicking the toggle button or pressing
+     * Up or Down arrow keys.
+     * 
+     * @param autoOpen
+     *            {@code false} to prevent the dropdown from opening
+     *            automatically
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+    }
+
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

@@ -24,7 +24,7 @@ import com.vaadin.flow.testutil.TestPath;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("preserve-on-refresh")
+@TestPath("vaadin-context-menu/preserve-on-refresh")
 public class PreserveOnRefreshIT extends AbstractContextMenuIT {
 
     @Test

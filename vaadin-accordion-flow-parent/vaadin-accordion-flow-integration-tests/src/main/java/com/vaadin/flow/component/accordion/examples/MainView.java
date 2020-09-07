@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
@@ -21,8 +22,9 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
 
-@Route
+@Route(value = "vaadin-accordion")
 @Theme(Lumo.class)
+@BodySize(height = "100vh", width = "100vw")
 public class MainView extends HorizontalLayout {
 
     public static final String ACCORDION_EVENTS = "accordion-events";

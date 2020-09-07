@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view that adds header rows with components to a Grid.
  */
-@Route("grid-header-row-with-components")
+@Route("vaadin-grid/grid-header-row-with-components")
 public class GridHeaderRowWithComponentsPage extends Div {
 
     public GridHeaderRowWithComponentsPage() {

@@ -19,15 +19,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Integration tests for the GridPageSizePage view.
  */
-@TestPath("grid-scroll-to")
+@TestPath("vaadin-grid/grid-scroll-to")
 public class GridScrollToIT extends AbstractComponentIT {
 
     private GridElement grid;
@@ -66,6 +67,21 @@ public class GridScrollToIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "First visible index did not equal 0 after scroll to start.",
                 0L, grid.getProperty("firstVisibleIndex"));
+    }
+
+    @Test
+    public void grid_addItems_scrollToEnd() {
+        WebElement button = $("button").id("add-row-and-scroll-to-end");
+        button.click();
+
+        GridElement grid = $(GridElement.class).id("scroll-to-end-grid");
+
+        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals(1, grid.getLastVisibleRowIndex());
+
+        button.click();
+        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals(3, grid.getLastVisibleRowIndex());
     }
 
 }

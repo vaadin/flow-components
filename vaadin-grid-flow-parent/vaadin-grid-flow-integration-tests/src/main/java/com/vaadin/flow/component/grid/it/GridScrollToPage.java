@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -7,7 +9,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-scroll-to")
+@Route("vaadin-grid/grid-scroll-to")
 public class GridScrollToPage extends Div {
     public GridScrollToPage() {
         Grid<String> grid = new Grid<>();
@@ -29,6 +31,22 @@ public class GridScrollToPage extends Div {
                 e -> grid.scrollToIndex(500));
         scrollToRow500.setId("scroll-to-row-500");
 
-        add(grid, scrollToStart, scrollToEnd, scrollToRow500);
+        Grid<String> grid2 = new Grid<>();
+        grid2.setId("scroll-to-end-grid");
+
+        List<String> items = new ArrayList<>();
+        grid2.setItems(items);
+        grid2.addColumn(item -> item);
+
+        NativeButton addRowsAndScrollToEnd = new NativeButton("Add row and scroll to end",
+                e -> {
+                        items.add(String.valueOf(items.size()));
+                        items.add(String.valueOf(items.size()));
+                        grid2.getDataProvider().refreshAll();
+                        grid2.scrollToEnd();
+                });
+        addRowsAndScrollToEnd.setId("add-row-and-scroll-to-end");
+
+        add(grid, scrollToStart, scrollToEnd, scrollToRow500, grid2, addRowsAndScrollToEnd);
     }
 }

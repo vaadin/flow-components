@@ -5,12 +5,14 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route
+@Route(value = "vaadin-crud/editonclick")
 @Theme(Lumo.class)
+@BodySize(height = "100vh", width = "100vw")
 public class EditOnClickView extends VerticalLayout {
     public static String CLICKTOEDIT_BUTTON_ID =  "setClickToEdit";
 

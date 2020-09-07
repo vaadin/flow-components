@@ -6,12 +6,14 @@ import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route
+@Route(value = "vaadin-crud/editorposition")
 @Theme(Lumo.class)
+@BodySize(height = "100vh", width = "100vw")
 public class EditorPositionView extends VerticalLayout {
 
     public EditorPositionView() {

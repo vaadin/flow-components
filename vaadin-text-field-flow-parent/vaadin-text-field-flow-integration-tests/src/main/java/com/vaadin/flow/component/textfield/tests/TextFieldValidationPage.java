@@ -23,7 +23,7 @@ import com.vaadin.flow.testutil.ValidationTestView;
 /**
  * View for testing validation with {@link TextField}.
  */
-@Route("text-field-validation")
+@Route("vaadin-text-field/text-field-validation")
 public class TextFieldValidationPage extends ValidationTestView {
 
     @Override

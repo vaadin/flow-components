@@ -26,8 +26,11 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
@@ -73,11 +76,17 @@ import elemental.json.JsonValue;
  *      webcomponent documentation</a>
  */
 @Tag("iron-list")
+// NPM MODE
 @NpmPackage(value = "@polymer/iron-list", version = "3.1.0")
 @JsModule("@polymer/iron-list/iron-list.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./ironListConnector.js")
+@JsModule("./ironListConnector-es6.js")
 @JsModule("./ironListStyles.js")
+// BOWER MODE
+@HtmlImport("frontend://bower_components/iron-list/iron-list.html")
+@HtmlImport("frontend://flow-component-renderer.html")
+@JavaScript("frontend://ironListConnector.js")
+@StyleSheet("frontend://ironListStyles.css")
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
 

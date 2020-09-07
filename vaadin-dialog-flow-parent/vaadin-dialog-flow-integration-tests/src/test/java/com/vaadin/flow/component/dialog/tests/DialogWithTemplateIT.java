@@ -28,11 +28,11 @@ import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.html.testbench.LabelElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.html.testbench.SpanElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("dialog-template-test")
+@TestPath("vaadin-dialog/dialog-template-test")
 public class DialogWithTemplateIT extends AbstractComponentIT {
 
     @Before
@@ -47,7 +47,7 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
         DialogElement dialog = $(DialogElement.class).first();
 
-        TestBenchElement template = dialog.$("test-template").first();
+        TestBenchElement template = dialog.$("vaadin-dialog-flow-test-template").first();
         NativeButtonElement btn = template.$(NativeButtonElement.class).first();
         DivElement container = template.$(DivElement.class).first();
         List<SpanElement> spans = container.$(SpanElement.class).all();
