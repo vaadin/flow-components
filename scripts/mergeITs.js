@@ -143,15 +143,18 @@ function copyFolderRecursiveSync(source, target, replaceCall) {
 
 // Create an index.html. Useful for monkey patching
 async function createFrontendIndex() {
-  const frontendFolder = `${itFolder}/frontend`;
-  const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
-  const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
-  fs.mkdirSync(frontendFolder, { recursive: true });
-  fs.mkdirSync(servicesFolder, { recursive: true });
-  fs.mkdirSync(javaFolder, { recursive: true });
-  copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
-  copyFileSync(`${templateDir}/com.vaadin.flow.server.VaadinServiceInitListener`, `${servicesFolder}`);
-  copyFileSync(`${templateDir}/AppVaadinServiceInitListener.java`, `${javaFolder}`);
+  if (/^14/.test(version)) {
+    const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
+    const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
+    fs.mkdirSync(servicesFolder, { recursive: true });
+    fs.mkdirSync(javaFolder, { recursive: true });
+    copyFileSync(`${templateDir}/com.vaadin.flow.server.VaadinServiceInitListener`, `${servicesFolder}`);
+    copyFileSync(`${templateDir}/AppVaadinServiceInitListener.java`, `${javaFolder}`);
+  } else {
+    const frontendFolder = `${itFolder}/frontend`;
+    fs.mkdirSync(frontendFolder, { recursive: true });
+    copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
+  }
 }
 
 // Create an index.html. Useful for monkey patching
