@@ -90,6 +90,7 @@ then
   echo $cmd
   $cmd 2>&1 | egrep --line-buffered -v \
    'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat '
+  [ ! -d integration-tests/target/failsafe-reports ] && exit 1
 
   ### Second try, Re-run only failed tests
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`

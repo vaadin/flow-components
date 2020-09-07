@@ -78,7 +78,7 @@ public abstract class AbstractTBTest extends ParallelTest {
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
         return Arrays.asList(BrowserUtil.chrome()
-            ;
+            );
     }
 
     protected void openTestURL() {
