@@ -108,6 +108,10 @@ function copyFileSync(source, target, replaceCall) {
   }
   // fs.copyFileSync(source, targetFile);
   let content = fs.readFileSync(source, 'utf8');
+  // remove CR in windows
+  if (/\.(java)$/.test(source)) {
+    content = content.replace('\r', '');
+  }
   [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
   fs.writeFileSync(targetFile, content, 'utf8');
 }
@@ -137,25 +141,24 @@ function copyFolderRecursiveSync(source, target, replaceCall) {
   }
 }
 
-// delete recursively a folder without failing
-function deleteFolderRecursive (name) {
-  if (fs.existsSync(name)) {
-    fs.readdirSync(name).forEach((file, index) => {
-      const curPath = path.join(name, file);
-      if (fs.lstatSync(curPath).isDirectory()) {
-        // recurse
-        deleteFolderRecursive(curPath);
-      } else {
-        // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(name);
-  }
-};
-
 // Create an index.html. Useful for monkey patching
 async function createFrontendIndex() {
+  if (/^14/.test(version)) {
+    const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
+    const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
+    fs.mkdirSync(servicesFolder, { recursive: true });
+    fs.mkdirSync(javaFolder, { recursive: true });
+    copyFileSync(`${templateDir}/com.vaadin.flow.server.VaadinServiceInitListener`, `${servicesFolder}`);
+    copyFileSync(`${templateDir}/AppVaadinServiceInitListener.java`, `${javaFolder}`);
+  } else {
+    const frontendFolder = `${itFolder}/frontend`;
+    fs.mkdirSync(frontendFolder, { recursive: true });
+    copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
+  }
+}
+
+// Create an index.html. Useful for monkey patching
+async function createInitListener() {
   const targetFolder = `${itFolder}/frontend`;
   if (!fs.existsSync(targetFolder)) {
     fs.mkdirSync(targetFolder);
@@ -172,8 +175,11 @@ async function copySources() {
   // clean old stuff
   ['target', 'node_modules', 'src', 'frontend']
     .forEach(f => {
-      console.log(`removing ${itFolder}/${f}`);
-      deleteFolderRecursive(`${itFolder}/${f}`);
+      const dir = `${itFolder}/${f}`;
+      if (fs.existsSync(dir)) {
+        console.log(`removing ${dir}`);
+        fs.rmdirSync(`${dir}`, { recursive: true } );
+      }
     });
 
   modules.forEach(parent => {

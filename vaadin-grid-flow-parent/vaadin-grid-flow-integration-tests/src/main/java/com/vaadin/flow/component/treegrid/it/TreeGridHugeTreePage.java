@@ -33,12 +33,11 @@ import com.vaadin.flow.router.Route;
 public class TreeGridHugeTreePage extends Div {
 
     private TreeGrid<String> treeGrid;
-    private TreeDataProvider<String> inMemoryDataProvider;
 
     public TreeGridHugeTreePage() {
-        initializeDataProvider();
+
         treeGrid = new TreeGrid<>();
-        treeGrid.setDataProvider(inMemoryDataProvider);
+        treeGrid.setDataProvider(initializeDataProvider(3));
         treeGrid.setWidth("100%");
         treeGrid.addHierarchyColumn(String::toString).setHeader("String")
                 .setId("string");
@@ -49,21 +48,26 @@ public class TreeGridHugeTreePage extends Div {
         expand.addClickListener(event -> treeGrid.expand("Granddad 1"));
         NativeButton collapse = new NativeButton("Collapse Granddad 1");
         collapse.addClickListener(event -> treeGrid.collapse("Granddad 1"));
+        NativeButton initLargeDataSet = new NativeButton("Init larger data set");
+        initLargeDataSet.addClickListener(event -> treeGrid.setDataProvider(initializeDataProvider(300)));
+        NativeButton expandRecursively = new NativeButton("Expand Recursively");
+        expandRecursively.addClickListener(event -> treeGrid.expandRecursively(
+                ((TreeDataProvider<String>) treeGrid.getDataProvider()).getTreeData().getRootItems(), 2));
 
-        add(treeGrid, expand, collapse);
+        add(treeGrid, expand, collapse, initLargeDataSet, expandRecursively);
     }
 
-    private void initializeDataProvider() {
+    private TreeDataProvider<String> initializeDataProvider(int dadCount) {
         TreeData<String> data = new TreeData<>();
 
         final Map<String, String> parentPathMap = new HashMap<>();
 
         addRootItems("Granddad", 3, data, parentPathMap).forEach(
-                granddad -> addItems("Dad", 3, granddad, data, parentPathMap)
+                granddad -> addItems("Dad", dadCount, granddad, data, parentPathMap)
                         .forEach(dad -> addItems("Son", 300, dad, data,
                                 parentPathMap)));
 
-        inMemoryDataProvider = new TreeDataProvider<>(data);
+        return new TreeDataProvider<>(data);
     }
 
     static List<String> addRootItems(String name, int numberOfItems,

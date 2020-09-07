@@ -77,9 +77,8 @@ public abstract class AbstractTBTest extends ParallelTest {
         }
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
-        return Arrays.asList(BrowserUtil.chrome(),
-            DesiredCapabilities.iphone(), DesiredCapabilities.ipad(),
-            browserFactory.create(Browser.SAFARI, "13.0", Platform.SIERRA));
+        return Arrays.asList(BrowserUtil.chrome()
+            );
     }
 
     protected void openTestURL() {

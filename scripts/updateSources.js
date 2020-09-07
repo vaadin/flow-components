@@ -6,13 +6,9 @@
  * - adjust the sources so as there are no duplicate routes.
  */
 
-const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '18.0-SNAPSHOT';
-const itFolder = 'integration-tests';
 
-const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
 const wc = mod.replace('-flow-parent', '');
 const id = `${wc}-flow`
@@ -20,14 +16,14 @@ const id = `${wc}-flow`
 function visitFilesRecursive (name, replaceCall) {
   let modified = 0, renamed = 0;
   if (fs.existsSync(name)) {
-    fs.readdirSync(name).forEach((file, index) => {
+    fs.readdirSync(name).forEach(file => {
       const source = path.join(name, file);
       if (fs.lstatSync(source).isDirectory()) {
         // recurse
         visitFilesRecursive(source, replaceCall);
       } else {
         if (replaceCall) {
-          const content = fs.readFileSync(source, 'utf8');
+          const content = fs.readFileSync(source, 'utf8').replace('\r', '');
           const [targetFile, modifiedContent] = replaceCall ? replaceCall(source, source, content) : [source, content];
           if (modifiedContent !== content) {
             modified ++;
@@ -67,7 +63,9 @@ function replaceRoutes(wcname, clname, content) {
     let [prefix, route, suffix] = !args[2] && !args[6] ? [`${args[1]}("`, '', '")\n'] :
       args[6] ? [`${args[1]}${args[2]}${args[6]}`, args[7], `${args[8]}${args[9]}\n`] :
       [`${args[1]}${args[2]}${args[3]}`, args[4], `${args[5]}${args[9]}\n`];
-    return computeRoute(wcname, clname, prefix, route, suffix);
+    return computeRoute(wcname, clname, prefix, route, suffix)
+      // v14 does not support end slashes in routing when parameters
+      .replace(/\/+"/, '"');
   });
   // Replace @Route values which are constants.
   content = content.replace(/(\@Route\()(\w+\.\w+\))/, `$1"${wcname}/" + $2`);
@@ -77,7 +75,7 @@ function replaceRoutes(wcname, clname, content) {
 async function main() {
 
   const textFieldVersionSource = 'vaadin-text-field-flow-parent/vaadin-text-field-flow/src/main/java/com/vaadin/flow/component/textfield/GeneratedVaadinTextField.java';
-  const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\r?\n/).filter(l => l.startsWith('@NpmPackage'))[0];
+  const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\n/).filter(l => l.startsWith('@NpmPackage'))[0];
 
   await visitFilesRecursive(`${mod}/${id}-integration-tests/frontend`, (source, target, content) => {
     if (/test-template.js$/.test(target)) {
@@ -182,28 +180,39 @@ async function main() {
     content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');
     content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForBigDecimalField');
 
+    content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
+    content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
+    content = ignore_test_method(content, source, 'TreeGridHugeTreeNavigationIT.keyboard_navigation');
+
     if (/TreeGridHugeTreeIT\.java$/.test(source)) {
       content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);
     }
 
     // pro components: temporary disable tests in FF and Edge in pro components
-    content = content.replace(/\( *BrowserUtil.(safari|firefox|edge)\(\) *,/g, "(");
-    content = content.replace(/,[ \r\n]*BrowserUtil.(safari|firefox|edge)\(\)/g, "");
-    content = content.replace(/(safari|firefox|edge) *,/g, "");
-    content = content.replace(/,[ \r\n]*(safari|firefox|edge)/g, "");
+    content = content.replace(/\( *(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\) *,/g, "(");
+    content = content.replace(/,[ \n]*(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\)/g, "");
+    content = content.replace(/ *(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\) *,/g, "");
+    content = content.replace(/(safari|firefox|edge|ie11Windows8_1|ie11Capabilities) *,/g, "");
+    content = content.replace(/,[ \n]*(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)/g, "");
+
+    content = content.replace(/browserFactory.create\(Browser.+?\),?/g, "");
+    content = content.replace(/BrowserUtil.chrome\(\) *,/g, "BrowserUtil.chrome()");
+
     // pro components: have screen comparisons, disable temporary since paths changed
     content = content.replace(/testBench\(\).compareScreen\(.*?\)/g, 'true');
 
     // vaadin-board
-    content = content.replace(/(getDeploymentPath\(Class.*?\) *{ *\n)/,
-    `$1com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
-    if (ann.length > 0) {
-        return "/" + ann[0].value();
-    }\n`);
+    content = content.replace(/(getDeploymentPath\(Class.*?\) *{ *\n)/, `$1
+        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        if (ann.length > 0) {
+            return "/" + ann[0].value();
+        }\n`);
 
     // vaadin-chart
     content = content.replace('.replace("com.vaadin.flow.component.charts.examples.", "")',
       '.replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/")');
+    // charts v14
+    content = content.replace('getTestView().getCanonicalName();', '"vaadin-charts/" + getTestView().getCanonicalName();');
 
     content = content.replace('import com.vaadin.flow.demo.ComponentDemoTest','import com.vaadin.tests.ComponentDemoTest');
     content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest');
