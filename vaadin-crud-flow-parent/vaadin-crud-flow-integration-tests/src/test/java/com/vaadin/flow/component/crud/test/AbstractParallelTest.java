@@ -53,10 +53,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getDeploymentPath(Class<?> viewClass) {
-com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
-    if (ann.length > 0) {
-        return "/" + ann[0].value();
-    }
+
+        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        if (ann.length > 0) {
+            return "/" + ann[0].value();
+        }
         if (viewClass == null) {
             return "/";
         }
@@ -80,7 +81,7 @@ com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.f
 
         return Arrays.asList(
                 
-                ie11Windows8_1,
+                
                 BrowserUtil.chrome()
         );
     }
