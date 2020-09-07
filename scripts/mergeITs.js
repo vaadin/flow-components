@@ -3,7 +3,6 @@
  * Merge IT modules of all components to the `integration-tests` module
  * - creates the new module pom file
  * - compute dependencies needed for merged modules.
- * - adjust the sources so as there are no duplicate routes.
  */
 
 const xml2js = require('xml2js');
