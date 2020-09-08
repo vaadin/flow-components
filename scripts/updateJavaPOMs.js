@@ -15,17 +15,12 @@ const mod = process.argv[2] || process.exit(1);
 const name = mod.replace('-flow-parent', '');
 const componentName = name.replace('vaadin-', '');
 const desc = name.split('-').map(w => w.replace(/./, m => m.toUpperCase())).join(' ');
-const proComponents = ['accordion',
-                       'app-layout' ,
-                       'board',
+const proComponents = ['board',
                        'charts',
                        'confirm-dialog',
                        'cookie-consent',
                        'crud',
-                       'custom-field',
-                       'details',
                        'grid-pro',
-                       'login',
                        'rich-text-editor'];
 
 function renameComponent(array, name) {
