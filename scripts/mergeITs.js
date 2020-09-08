@@ -8,8 +8,8 @@
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '18.0-SNAPSHOT';
 const itFolder = 'integration-tests';
+let version;
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 
@@ -48,8 +48,14 @@ function addDependency(arr, groupId, artifactId, version, scope) {
   }
 }
 
+async function computeVersion() {
+  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
+  version = parentJs.project.version[0];
+}
+
 // Creates the pom.xml for the integration-tests module
 async function createPom() {
+
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
@@ -192,6 +198,7 @@ async function copySources() {
 }
 
 async function main() {
+  await computeVersion();
   await computeModules();
   await copySources();
   await createFrontendIndex();
