@@ -3,14 +3,13 @@
  * Merge IT modules of all components to the `integration-tests` module
  * - creates the new module pom file
  * - compute dependencies needed for merged modules.
- * - adjust the sources so as there are no duplicate routes.
  */
 
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '14.3-SNAPSHOT';
 const itFolder = 'integration-tests';
+let version;
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 
@@ -49,8 +48,14 @@ function addDependency(arr, groupId, artifactId, version, scope) {
   }
 }
 
+async function computeVersion() {
+  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
+  version = parentJs.project.version[0];
+}
+
 // Creates the pom.xml for the integration-tests module
 async function createPom() {
+
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
@@ -143,15 +148,18 @@ function copyFolderRecursiveSync(source, target, replaceCall) {
 
 // Create an index.html. Useful for monkey patching
 async function createFrontendIndex() {
-  const frontendFolder = `${itFolder}/frontend`;
-  const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
-  const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
-  fs.mkdirSync(frontendFolder, { recursive: true });
-  fs.mkdirSync(servicesFolder, { recursive: true });
-  fs.mkdirSync(javaFolder, { recursive: true });
-  copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
-  copyFileSync(`${templateDir}/com.vaadin.flow.server.VaadinServiceInitListener`, `${servicesFolder}`);
-  copyFileSync(`${templateDir}/AppVaadinServiceInitListener.java`, `${javaFolder}`);
+  if (/^14/.test(version)) {
+    const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
+    const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
+    fs.mkdirSync(servicesFolder, { recursive: true });
+    fs.mkdirSync(javaFolder, { recursive: true });
+    copyFileSync(`${templateDir}/com.vaadin.flow.server.VaadinServiceInitListener`, `${servicesFolder}`);
+    copyFileSync(`${templateDir}/AppVaadinServiceInitListener.java`, `${javaFolder}`);
+  } else {
+    const frontendFolder = `${itFolder}/frontend`;
+    fs.mkdirSync(frontendFolder, { recursive: true });
+    copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
+  }
 }
 
 // Create an index.html. Useful for monkey patching
@@ -190,6 +198,7 @@ async function copySources() {
 }
 
 async function main() {
+  await computeVersion();
   await computeModules();
   await copySources();
   await createFrontendIndex();

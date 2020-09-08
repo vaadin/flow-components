@@ -2,22 +2,24 @@
 #!/usr/bin/env bash
 
 # Remove all component modules, checkout them from their
-# origin master branch in github, consolidate folders so as
+# origin branch in github, consolidate folders so as
 # all of them follow the same pattern, and update their
-# POMs to be aligned
+# POMs to be aligned.
 #
 # Usage:
 #   ./scripts/updateFromMaster.sh
 #
 
 set -e
-pom='./scripts/branch.xml'
+pom='pom.xml'
 mods=`grep '<module>' $pom  | grep -v '>integration-tests<' | grep -v shared | cut -d ">" -f2 | cut -d "<" -f1`
 
 checkoutProject() {
   mod=$1
   branch=$2
   prj=`echo $mod | sed -e 's/-parent//'`
+  # check that the branch exist otherwise branch=master
+  curl --output /dev/null --silent --head --fail "https://github.com/vaadin/$prj/tree/$branch" || branch=master
   echo cloning $prj branch=$branch into $mod
   rm -rf $mod
   git clone -q git@github.com:vaadin/$prj.git --branch $branch $mod
@@ -37,19 +39,19 @@ renameModule() {
 
 consolidateProject() {
   mod=$1
-  prj=`sed -e 's/-parent//' <<< $mod`
+  prj=`echo $mod | sed -e 's/-parent//'`
   oldtb="$prj-testbench"
-  newtb=`sed -e 's/-flow//' <<< $oldtb`
+  newtb=`echo $oldtb | sed -e 's/-flow//'`
   renameModule $mod $oldtb $newtb
   newit="$prj-integration-tests"
-  oldit=`sed -e 's/-flow//' <<< $newit`
+  oldit=`echo $newit | sed -e 's/-flow//'`
   renameModule $mod $oldit $newit
 }
 
 consolidateCharts() {
   mod=$1
-  prj=`sed -e 's/-parent//' <<< $mod`
-  tb=`sed -e 's/-flow/-testbench/' <<< $prj`
+  prj=`echo $mod | sed -e 's/-parent//'`
+  tb=`echo $prj | sed -e 's/-flow/-testbench/'`
   renameModule $mod addon $prj
   renameModule $mod examples $prj-demo
   perl -pi -e "s,>$prj-examples<,>$prj-demo<,g" $mod/*/pom.xml
@@ -65,12 +67,13 @@ consolidateSources() {
   node scripts/updateSources.js $1
 }
 
+versions=`node scripts/getVersions.js`
+
 for i in $mods
 do
-  module=`cut -d\: -f1 <<< $i`
-  branch=`cut -d\: -f2 <<< $i`
-  checkoutProject $module $branch
-  [ $module = 'vaadin-charts-flow-parent' ] && consolidateCharts $module || consolidateProject $module
-  consolidatePoms $module
-  consolidateSources $module
+  branch=`echo "$versions" | grep $i | cut -d ":" -f2`
+  checkoutProject $i $branch
+  [ $i = 'vaadin-charts-flow-parent' ] && consolidateCharts $i || consolidateProject $i
+  consolidatePoms $i
+  consolidateSources $i
 done
