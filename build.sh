@@ -21,7 +21,6 @@ then
 fi
 
 tcMsg() (
-  { set +x; } 2> /dev/null
   echo "##teamcity[$1]"
 )
 # open a block in the TC tree output
@@ -32,15 +31,17 @@ tcLog() {
 }
 # log in TC
 tcStatus() {
-  { set +x; } 2> /dev/null
   [ "$1" = "0" ] && status=SUCCESS || status=FAILURE
-  tcMsg "buildStatus status='$status' text='$1'"
+  [ "$1" = "0" ] && text="$3" || status="$2"
+  tcMsg "buildStatus status='$status' text='$text'"
+  exit $1
 }
 
 saveFailed() {
   try=$1
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
-  if [ -n "$failed" ]
+  nfailed=`echo "$failed" | wc -w`
+  if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$try
     mv integration-tests/error-screenshots/*.png integration-tests/error-screenshots/$try
@@ -60,6 +61,9 @@ type npm && npm --version
 type pnpm && pnpm --version
 uname -a
 
+tcLog "Running report watcher for JUnits "
+tcMsg "importData type='surefire' path='**/surefire-reports/TEST*xml'";
+
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd || exit 1
@@ -71,12 +75,12 @@ if [ $? != 0 ]
 then
   tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
   sleep 30
-  $cmd || exit 1
+  $cmd || tcStatus 1 "Unit-Testing failed"
 fi
 
 cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
-$cmd || exit 1
+$cmd || tcStatus 1 "Merging ITs failed"
 
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
@@ -104,7 +108,8 @@ then
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
 
-  echo "##teamcity[importData type='surefire' path='integration-tests/target/failsafe-reports/TEST*xml']"
+  tcLog "Running report watcher for ITs "
+  tcMsg "importData type='surefire' path='integration-tests/target/failsafe-reports/TEST*xml'";
 
   ## exit on error if any command in the pipe fails
   $cmd
@@ -113,7 +118,6 @@ then
   [ ! -d integration-tests/target/failsafe-reports ] && exit 1
   saveFailed run-1
 
-  nfailed=`echo "$failed" | wc -w`
   if [ "$nfailed" -gt 0 ]
   then
       tcLog "There were $nfailed Failed Tests: "
@@ -129,7 +133,7 @@ then
         $cmd
         error=$?
         saveFailed run-2
-        exit $error
+        tcStatus $error "Test failed: $nfailed" "Success"
       fi
   fi
   exit $error
