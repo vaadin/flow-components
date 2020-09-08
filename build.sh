@@ -88,7 +88,7 @@ then
 fi
 echo "$args"
 
-if [ -n "$TBHUB" = "localhost" ]
+if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
     [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
