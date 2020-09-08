@@ -92,7 +92,7 @@ if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
     [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
-    tcLog "Installing docker image with "
+    tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
     docker pull "$SELENIUM_DOCKER_IMAGE"
     docker image prune -f
