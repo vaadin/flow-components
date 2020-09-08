@@ -40,7 +40,7 @@ tcStatus() {
 saveFailed() {
   try=$1
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
-  if [ -n $failed ]
+  if [ -n "$failed" ]
   then
     mkdir -p integration-tests/error-screenshots/$try
     mv integration-tests/error-screenshots/*.png integration-tests/error-screenshots/$try
@@ -100,14 +100,14 @@ elif [ -z "$BUILD" ]
 then
   mode="-Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
   ### Run IT's in merged module
-  cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests"
+  cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-  # set -o pipefail
 
-  $cmd 2>&1 | (egrep --line-buffered -v \
-   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat ' \
-   || true)
+  echo "##teamcity[importData type='surefire' path='integration-tests/target/failsafe-reports/TEST*xml']"
+
+  ## exit on error if any command in the pipe fails
+  $cmd
   error=$?
 
   [ ! -d integration-tests/target/failsafe-reports ] && exit 1
@@ -116,15 +116,15 @@ then
   nfailed=`echo "$failed" | wc -w`
   if [ "$nfailed" -gt 0 ]
   then
-      tcLog "There were Failed Tests: $nfailed"
+      tcLog "There were $nfailed Failed Tests: "
       echo "$failed"
 
       if [ "$nfailed" -le 15 ]
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
-        tcLog "Re-Running failed $nfailed tests ..."
+        cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
+        tcLog "Re-Running $nfailed failed tests ..."
         echo $cmd
         $cmd
         error=$?
