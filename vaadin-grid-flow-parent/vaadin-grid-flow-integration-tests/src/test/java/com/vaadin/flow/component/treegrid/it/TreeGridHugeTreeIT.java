@@ -17,6 +17,8 @@ package com.vaadin.flow.component.treegrid.it;
 
 import java.util.List;
 
+import org.hamcrest.core.StringContains;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -110,6 +112,41 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         waitUntil(test -> !grid.isLoadingExpandedRows(),25);
 
         assertCellTexts(0, 0, cellTexts);
+    }
+
+    @Test
+    public void expanded_nodes_populate_after_scroll() {
+        open();
+        setupTreeGrid();
+
+        TreeGridElement grid = getTreeGrid();
+
+        List<WebElement> buttons = findElements(By.tagName("button"));
+        // Init larger data set -button
+        buttons.get(2).click();
+        // Expand recursively -button
+        buttons.get(3).click();
+
+        // Scroll as far as possible
+        grid.scrollToRowAndWait(1000000);
+        assertExpandedNodesPopulated(grid);
+
+        // Repeat
+        grid.scrollToRowAndWait(1000000);
+        assertExpandedNodesPopulated(grid);
+    }
+
+    private void assertExpandedNodesPopulated(TreeGridElement grid) {
+        int firstVisibleIndex = grid.getFirstVisibleRowIndex();
+        int lastVisibleIndex = grid.getLastVisibleRowIndex();
+        for (int i = lastVisibleIndex; i >= firstVisibleIndex; i--) {
+                String cellText = grid.getCell(i, 0).getText();
+                if (cellText.contains("Dad")) {
+                        String sonText = grid.getCell(i + 1, 0).getText();
+                        Assert.assertThat(sonText + " is not a Son item", sonText, StringContains.containsString("Son"));
+
+                }
+        }
     }
 
 }

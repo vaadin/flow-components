@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
 
-@Route(value = "vaadin-accordion/")
+@Route(value = "vaadin-accordion")
 @Theme(Lumo.class)
 public class MainView extends HorizontalLayout {
 
