@@ -88,27 +88,29 @@ then
 fi
 echo "$args"
 
-if [ "$TBHUB" = "localhost" ]
+if [ -n "$TBHUB" = "localhost" ]
 then
-    tcLog 'Installing docker image with standalone-chrome'
-    trap "echo Terminating docker; docker stop standalone-chrome" EXIT
-    docker pull selenium/standalone-chrome
+    DOCKER_CONTAINER_NAME="selenium-container"
+    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
+    tcLog "Installing docker image with "
+    trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
+    docker pull "$SELENIUM_DOCKER_IMAGE"
     docker image prune -f
-    docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
+    docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE"
 fi
 
-args="$args -Dfailsafe.forkCount=$FORK_COUNT -Dfailsafe.rerunFailingTestsCount=2 -B -q"
+args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify $args -pl $modules"
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules"
   tcLog "Running module ITs - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 elif [ -z "$BUILD" ]
 then
-  mode="-Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
+  mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
   cmd="mvn verify -Drun-it -Drelease "-Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL" $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
@@ -136,7 +138,7 @@ then
         cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
         tcLog "Re-Running failed $nfailed tests ..."
         echo $cmd
-        $cmd
+        TESTBENCH_REUSE_BROWSER=false $cmd
         error=$?
         saveFailed run-2
         exit $error
