@@ -83,13 +83,14 @@ then
   $cmd
 elif [ -z "$BUILD" ]
 then
-  args="$args -Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
+  mode="-Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
   ### Run IT's in merged module
-  cmd="mvn verify -B -Drun-it -Drelease $args -pl integration-tests"
+  cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd 2>&1 | egrep --line-buffered -v \
    'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat '
+  [ ! -d integration-tests/target/failsafe-reports ] && exit 1
 
   ### Second try, Re-run only failed tests
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
@@ -98,10 +99,16 @@ then
   then
       tcLog "There were Failed Tests: $nfailed"
       echo "$failed"
+      for i in $failed
+      do
+        cp integration-tests/target/failsafe-reports/$i.txt integration-tests/error-screenshots/
+      done
+
       if [ "$nfailed" -le 15 ]
       then
         failed=`echo "$failed" | tr '\n' ','`
-        cmd="$cmd -Dit.test=$failed"
+        mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
+        cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
         tcLog "Re-Running failed $nfailed tests ..."
         echo $cmd
         $cmd
