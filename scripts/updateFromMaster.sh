@@ -18,6 +18,8 @@ checkoutProject() {
   mod=$1
   branch=$2
   prj=`echo $mod | sed -e 's/-parent//'`
+  # check that the branch exist otherwise branch=master
+  curl --output /dev/null --silent --head --fail "https://github.com/vaadin/$prj/tree/$branch" || branch=master
   echo cloning $prj branch=$branch into $mod
   rm -rf $mod
   git clone -q git@github.com:vaadin/$prj.git --branch $branch $mod
