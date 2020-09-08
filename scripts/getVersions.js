@@ -5,22 +5,25 @@
  *   ./scripts/getVersions.js
  */
 
-// Increase this if platform major changes
-const master = '18.0'
-
 const https = require("https");
 const xml2js = require('xml2js');
 const fs = require('fs');
 
-async function main() {
-  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
-  const version = parentJs.project.version[0];  
-  const branch = version.replace(/^(\d+\.\d+).*$/, '$1');
-
-  const url = `https://raw.githubusercontent.com/vaadin/platform/${branch === master ? 'master' : branch}/versions.json`;
-
+async function checkBranch(branch) {
   return new Promise(resolve => {
-    https.get(url, res => {
+    https.request({
+      method: 'HEAD',
+      hostname: 'raw.githubusercontent.com',
+      path: `vaadin/platform/${branch}/versions.json`
+    }, r => {
+      resolve(r.statusCode === 200);
+    }).end();
+  });
+}
+
+async function getVersions(branch) {
+  return new Promise(resolve => {
+    https.get(`https://raw.githubusercontent.com/vaadin/platform/${branch}/versions.json`, res => {
       res.setEncoding("utf8");
       let body = "";
       res.on("data", data => {
@@ -32,7 +35,16 @@ async function main() {
     });
   }).then(body => {
     return JSON.parse(body);
-  }).then(json => {
+  });
+}
+
+async function main() {
+  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
+  const version = parentJs.project.version[0];
+  const branch = version.replace(/^(\d+\.\d+).*$/, '$1');
+  const isMaster = !await checkBranch(branch);
+
+  return getVersions(isMaster ? 'master' : branch).then(json => {
     return ['core', 'vaadin'].reduce((prev, k) => {
       return prev.concat(Object.keys(json[k]).filter(pkg => /\-/.test(pkg) && json[k][pkg].javaVersion).map(pkg => {
         const branch = json[k][pkg].javaVersion.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
