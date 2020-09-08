@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Merge IT modules of all components to the `integration-tests` module
- * - creates the new module pom file
- * - compute dependencies needed for merged modules.
- * - adjust the sources so as there are no duplicate routes.
+ * Adjust the sources of a module so as it can be run among other modules.
+ * Example
+ *   ./scripts/updateSources.js vaadin-button-flow-parent
+ *
  */
 
 const fs = require('fs');
@@ -23,7 +23,7 @@ function visitFilesRecursive (name, replaceCall) {
         visitFilesRecursive(source, replaceCall);
       } else {
         if (replaceCall) {
-          const content = fs.readFileSync(source, 'utf8');
+          const content = fs.readFileSync(source, 'utf8').replace('\r', '');
           const [targetFile, modifiedContent] = replaceCall ? replaceCall(source, source, content) : [source, content];
           if (modifiedContent !== content) {
             modified ++;
@@ -55,10 +55,10 @@ function computeRoute(wcname, clname, prefix, route, suffix) {
 }
 // Replace @Route values from master to unique routes in the merged module
 function replaceRoutes(wcname, clname, content) {
-  content = content.replace(/\@Route *\r?\n/, (...args) => {
+  content = content.replace(/\@Route *\n/, (...args) => {
     return `@Route(value = "${/^Main(View)?$/.test(clname) ? '': clname.replace(/View$/, '').toLowerCase()}")\n`
   });
-  const routeRegex = /(\@Route *?)(?:(\( *)(?:(")(.*?)(")|(.*?value *= *")(.*?)(".*?))( *\))) *\r?\n/;
+  const routeRegex = /(\@Route *?)(?:(\( *)(?:(")(.*?)(")|(.*?value *= *")(.*?)(".*?))( *\))) *\n/;
   content = content.replace(routeRegex, (...args) => {
     let [prefix, route, suffix] = !args[2] && !args[6] ? [`${args[1]}("`, '', '")\n'] :
       args[6] ? [`${args[1]}${args[2]}${args[6]}`, args[7], `${args[8]}${args[9]}\n`] :
@@ -75,7 +75,7 @@ function replaceRoutes(wcname, clname, content) {
 async function main() {
 
   const textFieldVersionSource = 'vaadin-text-field-flow-parent/vaadin-text-field-flow/src/main/java/com/vaadin/flow/component/textfield/GeneratedVaadinTextField.java';
-  const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\r?\n/).filter(l => l.startsWith('@NpmPackage'))[0];
+  const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\n/).filter(l => l.startsWith('@NpmPackage'))[0];
 
   await visitFilesRecursive(`${mod}/${id}-integration-tests/frontend`, (source, target, content) => {
     if (/test-template.js$/.test(target)) {
@@ -190,12 +190,12 @@ async function main() {
 
     // pro components: temporary disable tests in FF and Edge in pro components
     content = content.replace(/\( *(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\) *,/g, "(");
-    content = content.replace(/,[ \r\n]*(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\)/g, "");
+    content = content.replace(/,[ \n]*(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\)/g, "");
     content = content.replace(/ *(DesiredCapabilities|BrowserUtil)\.(safari|firefox|edge|ie11|iphone|ipad)\(\) *,/g, "");
     content = content.replace(/(safari|firefox|edge|ie11Windows8_1|ie11Capabilities) *,/g, "");
-    content = content.replace(/,[ \r\n]*(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)/g, "");
+    content = content.replace(/,[ \n]*(safari|firefox|edge|ie11Windows8_1|ie11Capabilities)/g, "");
 
-    content = content.replace(/browserFactory.create\(Browser.+\),?/g, "");
+    content = content.replace(/browserFactory.create\(Browser.+?\),?/g, "");
     content = content.replace(/BrowserUtil.chrome\(\) *,/g, "BrowserUtil.chrome()");
 
     // pro components: have screen comparisons, disable temporary since paths changed
