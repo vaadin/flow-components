@@ -179,6 +179,7 @@ async function main() {
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
     content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');
     content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForBigDecimalField');
+    content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForNumberField');
 
     content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
     content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
