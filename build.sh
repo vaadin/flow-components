@@ -101,7 +101,7 @@ then
       echo "$failed"
       for i in $failed
       do
-        cp integration-tests/target/failsafe-reports/$i.txt integration-tests/target/error-screenshots
+        cp integration-tests/target/failsafe-reports/$i.txt integration-tests/error-screenshots/
       done
 
       if [ "$nfailed" -le 15 ]
