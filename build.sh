@@ -37,7 +37,22 @@ tcStatus() {
   tcMsg "buildStatus status='$status' text='$1'"
 }
 
+saveFailed() {
+  try=$1
+  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
+  if [ -n $failed ]
+  then
+    mkdir -p integration-tests/error-screenshots/$try
+    mv integration-tests/error-screenshots/*.png integration-tests/error-screenshots/$try
+    for i in $failed
+    do
+      cp integration-tests/target/failsafe-reports/$i.txt integration-tests/error-screenshots/$try
+    done
+  fi
+}
+
 tcLog "Show info (processors=$processors parallel=$parallel)"
+echo $SHELL
 type java && java -version
 type mvn && mvn -version
 type node && node --version
@@ -88,21 +103,21 @@ then
   cmd="mvn verify -B -Drun-it -Drelease $mode $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-  $cmd 2>&1 | egrep --line-buffered -v \
-   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat '
-  [ ! -d integration-tests/target/failsafe-reports ] && exit 1
+  # set -o pipefail
 
-  ### Second try, Re-run only failed tests
-  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
+  $cmd 2>&1 | (egrep --line-buffered -v \
+   'ProtocolHandshake|Detected dialect|multiple locations|setDesiredCapabilities|empty sauce.options|org.atmosphere|JettyWebAppContext@|Starting ChromeDrive|Only local|ChromeDriver was started|ChromeDriver safe|Ignoring update|Property update|\tat ' \
+   || true)
+  error=$?
+
+  [ ! -d integration-tests/target/failsafe-reports ] && exit 1
+  saveFailed run-1
+
   nfailed=`echo "$failed" | wc -w`
   if [ "$nfailed" -gt 0 ]
   then
       tcLog "There were Failed Tests: $nfailed"
       echo "$failed"
-      for i in $failed
-      do
-        cp integration-tests/target/failsafe-reports/$i.txt integration-tests/target/error-screenshots
-      done
 
       if [ "$nfailed" -le 15 ]
       then
@@ -112,9 +127,10 @@ then
         tcLog "Re-Running failed $nfailed tests ..."
         echo $cmd
         $cmd
-        exit $?
+        error=$?
+        saveFailed run-2
+        exit $error
       fi
-      exit 1
   fi
-  exit 0
+  exit $error
 fi

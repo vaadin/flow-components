@@ -2,9 +2,9 @@
 #!/usr/bin/env bash
 
 # Remove all component modules, checkout them from their
-# origin master branch in github, consolidate folders so as
+# origin branch in github, consolidate folders so as
 # all of them follow the same pattern, and update their
-# POMs to be aligned
+# POMs to be aligned.
 #
 # Usage:
 #   ./scripts/updateFromMaster.sh
@@ -16,10 +16,13 @@ mods=`grep '<module>' $pom  | grep -v '>integration-tests<' | grep -v shared | c
 
 checkoutProject() {
   mod=$1
+  branch=$2
   prj=`echo $mod | sed -e 's/-parent//'`
-  echo cloning $prj into $mod
+  # check that the branch exist otherwise branch=master
+  curl --output /dev/null --silent --head --fail "https://github.com/vaadin/$prj/tree/$branch" || branch=master
+  echo cloning $prj branch=$branch into $mod
   rm -rf $mod
-  git clone -q git@github.com:vaadin/$prj.git $mod
+  git clone -q git@github.com:vaadin/$prj.git --branch $branch $mod
   rm -rf $mod/.??*
 }
 
@@ -64,9 +67,12 @@ consolidateSources() {
   node scripts/updateSources.js $1
 }
 
+versions=`node scripts/getVersions.js`
+
 for i in $mods
 do
-  checkoutProject $i
+  branch=`echo "$versions" | grep $i | cut -d ":" -f2`
+  checkoutProject $i $branch
   [ $i = 'vaadin-charts-flow-parent' ] && consolidateCharts $i || consolidateProject $i
   consolidatePoms $i
   consolidateSources $i

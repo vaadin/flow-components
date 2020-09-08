@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Merge IT modules of all components to the `integration-tests` module
- * - creates the new module pom file
- * - compute dependencies needed for merged modules.
- * - adjust the sources so as there are no duplicate routes.
+ * Adjust the sources of a module so as it can be run among other modules.
+ * Example
+ *   ./scripts/updateSources.js vaadin-button-flow-parent
+ *
  */
 
 const fs = require('fs');
@@ -179,6 +179,7 @@ async function main() {
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
     content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');
     content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForBigDecimalField');
+    content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForNumberField');
 
     content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
     content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
