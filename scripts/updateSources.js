@@ -162,7 +162,6 @@ async function main() {
     // and the tests fail.
     content = ignore_test_method(content, source, 'DialogIT.openAndCloseBasicDialog_labelRendered');
     content = ignore_test_method(content, source, 'ServerSideEventsIT.chartClick_occured_eventIsFired');
-    content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForEmailField');
     content = ignore_test_method(content, source, 'GridDetailsRowIT.gridUpdateItemUpdateDetails');
     content = ignore_test_method(content, source, 'BasicIT.customComboBox_circularReferencesInData_isEdited');
     content = ignore_test_method(content, source, 'BasicIT.customComboBoxIsUsedForEditColumn');
@@ -178,8 +177,7 @@ async function main() {
     content = ignore_test_method(content, source, 'BasicChartIT.Chart_TitleCanBeChanged');
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
     content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');
-    content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForBigDecimalField');
-    content = ignore_test_method(content, source, 'ValueChangeModeIT.testValueChangeModesForNumberField');
+    content = ignore_test_method(content, source, 'ValueChangeModeIT.test\\w+');
 
     content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
     content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
