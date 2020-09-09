@@ -124,7 +124,7 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected int getDeploymentPort() {
-        return 9998;
+        return 8080;
     }
 
     protected abstract Class<? extends AbstractChartExample> getTestView();
