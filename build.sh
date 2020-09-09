@@ -61,12 +61,12 @@ type npm && npm --version
 type pnpm && pnpm --version
 uname -a
 
-tcLog "Running report watcher for JUnits "
-tcMsg "importData type='surefire' path='**/surefire-reports/TEST*xml'";
-
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd || exit 1
+
+tcLog "Running report watcher for Tests "
+tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
 cmd="mvn install -Drelease -B -q -T C$processors"
 tcLog "Unit-Testing and Installing flow components - $cmd"
@@ -107,9 +107,6 @@ then
   cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-
-  tcLog "Running report watcher for ITs "
-  tcMsg "importData type='surefire' path='integration-tests/target/failsafe-reports/TEST*xml'";
 
   ## exit on error if any command in the pipe fails
   $cmd
