@@ -184,7 +184,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <systemPropertyVariables>
-                <com.vaadin.testbench.Parameters.runLocally>${testbench.runLocaly}</com.vaadin.testbench.Parameters.runLocally>
+
               </systemPropertyVariables>
             </configuration>
           </plugin>
