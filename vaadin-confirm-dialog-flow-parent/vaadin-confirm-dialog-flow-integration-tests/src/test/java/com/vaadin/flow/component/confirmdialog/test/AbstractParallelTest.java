@@ -75,7 +75,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         return Arrays.asList( BrowserUtil.chrome());
     }
