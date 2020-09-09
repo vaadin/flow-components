@@ -56,18 +56,23 @@
 
     <modules>
         <module>vaadin-flow-components-shared</module>
+        <module>vaadin-accordion-flow-parent</module>
+        <module>vaadin-app-layout-flow-parent</module>
         <module>vaadin-button-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
         <module>vaadin-combo-box-flow-parent</module>
         <module>vaadin-context-menu-flow-parent</module>
+        <module>vaadin-custom-field-flow-parent</module>
         <module>vaadin-date-picker-flow-parent</module>
         <module>vaadin-date-time-picker-flow-parent</module>
+        <module>vaadin-details-flow-parent</module>
         <module>vaadin-dialog-flow-parent</module>
         <module>vaadin-form-layout-flow-parent</module>
         <module>vaadin-grid-flow-parent</module>
         <module>vaadin-icons-flow-parent</module>
         <module>vaadin-iron-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
+        <module>vaadin-login-flow-parent</module>
         <module>vaadin-menu-bar-flow-parent</module>
         <module>vaadin-notification-flow-parent</module>
         <module>vaadin-ordered-layout-flow-parent</module>
@@ -81,17 +86,12 @@
         <module>vaadin-upload-flow-parent</module>
 
         <!-- pro components-->
-        <module>vaadin-accordion-flow-parent</module>
-        <module>vaadin-app-layout-flow-parent</module>
         <module>vaadin-board-flow-parent</module>
         <module>vaadin-charts-flow-parent</module>
         <module>vaadin-confirm-dialog-flow-parent</module>
         <module>vaadin-cookie-consent-flow-parent</module>
         <module>vaadin-crud-flow-parent</module>
-        <module>vaadin-custom-field-flow-parent</module>
-        <module>vaadin-details-flow-parent</module>
         <module>vaadin-grid-pro-flow-parent</module>
-        <module>vaadin-login-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
     </modules>
 

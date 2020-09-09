@@ -55,37 +55,7 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <instructions>
-            <Bundle-Name>${project.artifactId}</Bundle-Name>
-            <Bundle-SymbolicName>${project.groupId}.flow.component.details</Bundle-SymbolicName>
-            <Import-Package>*</Import-Package>
-            <Export-Package>com.vaadin.flow.component.*;-noimport:=true</Export-Package>
-            <Private-Package/>
-            <Bundle-Activator/>
-            <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
-            <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
-            <Bundle-Description/>
-            <Vaadin-Package-Version>1</Vaadin-Package-Version>
-            <Implementation-Title>Vaadin Details</Implementation-Title>
-            <_removeheaders>Built-By</_removeheaders>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
+        </plugins>
   </build>
   <profiles>
     <profile>
