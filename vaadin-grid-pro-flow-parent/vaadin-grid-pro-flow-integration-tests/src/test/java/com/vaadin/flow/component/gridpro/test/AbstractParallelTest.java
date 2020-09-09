@@ -74,7 +74,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         DesiredCapabilities safari = BrowserUtil.safari();
         safari.setVersion("13");
