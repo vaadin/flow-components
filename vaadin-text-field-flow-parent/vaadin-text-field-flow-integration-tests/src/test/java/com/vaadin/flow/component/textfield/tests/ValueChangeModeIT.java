@@ -59,16 +59,19 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testValueChangeModesForTextField() throws InterruptedException {
         testValueChangeModes(textField, "textfield");
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testValueChangeModesForTextArea() throws InterruptedException {
         testValueChangeModes(textArea, "textarea");
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testValueChangeModesForPasswordField()
             throws InterruptedException {
         testValueChangeModes(passwordField, "passwordfield");
@@ -82,12 +85,14 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testValueChangeModesForNumberField()
             throws InterruptedException {
         testValueChangeModes(numberField, "numberfield");
     }
 
     @Test
+    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testValueChangeModesForIntegerField()
             throws InterruptedException {
         testValueChangeModes(integerField, "integerfield");

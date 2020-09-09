@@ -3,30 +3,24 @@
  * Update POMs for all modules of a component.
  * Example
  *   git clone git@github.com:vaadin/vaadin-button-flow.git
- *   ./scripts/updateJavaPOMs.js vaadin-button-flow
+ *   ./scripts/updateJavaPOMs.js vaadin-button-flow-parent
  */
 
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
-const version = '18.0-SNAPSHOT';
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
 const name = mod.replace('-flow-parent', '');
 const componentName = name.replace('vaadin-', '');
 const desc = name.split('-').map(w => w.replace(/./, m => m.toUpperCase())).join(' ');
-const proComponents = ['accordion',
-                       'app-layout' ,
-                       'board',
+const proComponents = ['board',
                        'charts',
                        'confirm-dialog',
                        'cookie-consent',
                        'crud',
-                       'custom-field',
-                       'details',
                        'grid-pro',
-                       'login',
                        'rich-text-editor'];
 
 function renameComponent(array, name) {
@@ -35,13 +29,14 @@ function renameComponent(array, name) {
   }
 }
 
-function renameBase(js) {
+async function renameBase(js) {
   renameComponent(js.project.parent[0].artifactId, name);
   renameComponent(js.project.artifactId, name);
   renameComponent(js.project.name, desc);
   renameComponent(js.project.description, desc);
 
-  js.project.parent[0].version = [version];
+  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
+  js.project.parent[0].version = [parentJs.project.version[0]];
 }
 
 function renamePlugin(js){
@@ -71,7 +66,7 @@ async function consolidate(template, pom, cb) {
   const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/${template}`, 'utf8'));
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
-  renameBase(tplJs);
+  await renameBase(tplJs);
   if (template === "pom-flow-pro.xml"){
     renamePlugin(tplJs);
   }
