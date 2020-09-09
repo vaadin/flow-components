@@ -93,10 +93,12 @@ then
     DOCKER_CONTAINER_NAME="selenium-container"
     [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
     tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
+    set -x
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
-    docker pull "$SELENIUM_DOCKER_IMAGE"
-    docker image prune -f
-    docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE"
+    docker pull "$SELENIUM_DOCKER_IMAGE" || exit 1
+    docker image prune -f || exit 1
+    docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE" || exit 1
+    set +x
 fi
 
 args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
