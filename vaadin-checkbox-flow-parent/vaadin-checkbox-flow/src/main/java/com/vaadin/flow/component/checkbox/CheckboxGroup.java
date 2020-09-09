@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -54,7 +55,7 @@ import elemental.json.JsonArray;
 public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
         implements HasItemsAndComponents<T>, HasSize, HasValidation,
-        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T> {
+        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T>, HasHelper {
 
     private static final String VALUE = "value";
 

@@ -40,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.2.1")
+@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.3.0")
 @JsModule("@vaadin/vaadin-confirm-dialog/src/vaadin-confirm-dialog.js")
 @HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component

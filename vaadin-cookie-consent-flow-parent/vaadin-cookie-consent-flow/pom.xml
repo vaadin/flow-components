@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
-    <version>14.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-cookie-consent-flow</artifactId>
   <packaging>jar</packaging>
@@ -23,7 +23,7 @@
     <dependency>
       <groupId>com.vaadin.webjar</groupId>
       <artifactId>vaadin-cookie-consent</artifactId>
-      <version>1.1.2</version>
+      <version>1.2.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.webjars.bowergithub.osano</groupId>
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.webjars.bowergithub.vaadin</groupId>
       <artifactId>vaadin-themable-mixin</artifactId>
-      <version>1.5.2</version>
+      <version>1.6.1</version>
     </dependency>
     <dependency>
       <groupId>org.webjars.bowergithub.polymerelements</groupId>
