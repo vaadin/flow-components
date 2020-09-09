@@ -40,7 +40,7 @@ tcStatus() {
 saveFailed() {
   try=$1
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
-  if [ -n $failed ]
+  if [ -n "$failed" ]
   then
     mkdir -p integration-tests/error-screenshots/$try
     mv integration-tests/error-screenshots/*.png integration-tests/error-screenshots/$try
