@@ -1,7 +1,5 @@
 #!/bin/bash
 
-processors=3
-parallel=1
 
 if [ -n "$1" ]
 then
@@ -9,9 +7,9 @@ then
   do
     case $i in
       processors=*)
-        processors=`echo $i | cut -d = -f2`;;
+        FORK_COUNT=`echo $i | cut -d = -f2`;;
       parallel=*)
-        parallel=`echo $i | cut -d = -f2`;;
+        TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -52,7 +50,10 @@ saveFailed() {
   fi
 }
 
-tcLog "Show info (processors=$processors parallel=$parallel)"
+[ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
+[ -z "$FORK_COUNT" ] && FORK_COUNT="5"
+
+tcLog "Show info (forks=$FORK_COUNT parallel=$TESTS_IN_PARALLEL)"
 echo $SHELL
 type java && java -version
 type mvn && mvn -version
@@ -68,7 +69,7 @@ $cmd || exit 1
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
-cmd="mvn install -Drelease -B -q -T C$processors"
+cmd="mvn install -Drelease -B -q -T C$FORK_COUNT"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
@@ -81,10 +82,8 @@ fi
 cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd || tcStatus 1 "Merging ITs failed"
-[ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
-[ -z "$FORK_COUNT" ] && FORK_COUNT="$processors"
 if [ -n "$SAUCE_USER" ]
 then
    test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
@@ -121,16 +120,12 @@ then
   cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-  # set -o pipefail
-
-  ## exit on error if any command in the pipe fails
   $cmd
   error=$?
 
   [ ! -d integration-tests/target/failsafe-reports ] && exit 1
   saveFailed run-1
 
-  nfailed=`echo "$failed" | wc -w`
   if [ "$nfailed" -gt 0 ]
   then
       tcLog "There were $nfailed Failed Tests: "
