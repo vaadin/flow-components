@@ -128,14 +128,20 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <profiles>
     <profile>
-      <id>ITs</id>
+      <id>build-frontend</id>
       <activation>
         <property>
-          <name>!skipTests</name>
+          <name>!skipFrontend</name>
         </property>
       </activation>
       <build>
@@ -144,6 +150,18 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-maven-plugin</artifactId>
           </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>run-jetty</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
           <plugin>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-maven-plugin</artifactId>
