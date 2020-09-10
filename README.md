@@ -28,7 +28,7 @@ Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
 
 ## Running ITs of all components
 
-NOTE: this takes a long while and consumes a lot of resources in your computer
+NOTE: this takes a long while and consumes a lot of resources in your computer, it's better to run tests in the merged repo as it is indicated in the following sections
 
 - `mvn clean verify -T C2`
 
@@ -43,6 +43,14 @@ By default it merges all modules, but it's also possible to merge certain module
 
 - `scripts/mergeITs.js button text-field crud`
 
+## Running ITs of all components in the merged module
+
+It should take around 15-20 minutes depending on the computer capabilities.
+
+- `mvn verify -Drun-it -Dfailsafe.forkCount=5 -Dcom.vaadin.testbench.Parameters.testsInParallel=1 -pl integration-tests`
+
+NOTE: that we need to activate the module with the `-Drun-it` property, and to speed up tests we enable parallel execution of classes by setting `-Dfailsafe.forkCount=5`, in addition `-Dcom.vaadin.testbench.Parameters.testsInParallel=1` makes TB to reuse browser instances.
+
 ## Updating modules from original master branches
 
 By running `./scripts/updateFromMaster.sh` all components are replaced with their origin master branches.
@@ -54,6 +62,10 @@ The `./build.sh` script is though to be run in CI, it compiles all modules, merg
 It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid combo-box`
 
+## Update package version for `@NpmPackage` in all files
+There are scripts available for updating the `@NpmPackage` annotation to its latest patch version: 
+- `npm install && cd scripts`
+- `sh updateNpmVer.sh` 
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
