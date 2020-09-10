@@ -28,14 +28,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SharedBrowser {
+    private static final String reuseBrowserProperty =
+        SharedBrowser.class.getName() + ".reuseBrowser";
     private static final boolean browserReuseAllowed;
     private static Logger logger = Logger
         .getLogger(SharedBrowser.class.getName());
 
     static {
-        final String envValue = System.getenv("TESTBENCH_REUSE_BROWSER");
-        browserReuseAllowed = envValue == null || envValue.isEmpty() || Boolean
-            .parseBoolean(envValue);
+        final String propertyValue = System.getProperty(reuseBrowserProperty);
+        browserReuseAllowed =
+            propertyValue == null || propertyValue.isEmpty() || Boolean
+                .parseBoolean(propertyValue);
     }
 
     URL url;
@@ -64,7 +67,7 @@ public class SharedBrowser {
         if (driver == null) {
             return;
         }
-        System.out.println(String
+        logger.log(Level.FINE, String
             .format("Clearing driver for session %s\turl %s", sessionId, url));
         driver.quit();
         driver = null;
