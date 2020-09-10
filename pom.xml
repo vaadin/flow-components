@@ -22,7 +22,7 @@
         </project.reporting.outputEncoding>
 
         <jetty.version>9.4.15.v20190215</jetty.version>
-        <jetty.http.port>9998</jetty.http.port>
+        <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
@@ -41,6 +41,7 @@
         <powermock.version>1.7.1</powermock.version>
         <jackson.version>2.9.10.4</jackson.version>
         <ci-sauce.version>1.138</ci-sauce.version>
+        <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
 
         <!-- OSGi support -->
         <osgi.bundle.import.package>*</osgi.bundle.import.package>

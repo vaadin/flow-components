@@ -1,6 +1,5 @@
 package com.vaadin.tests;
 
-import com.vaadin.testbench.Parameters;
 import org.junit.AfterClass;
 
 public abstract class ParallelTest extends com.vaadin.testbench.parallel.ParallelTest {
@@ -9,19 +8,17 @@ public abstract class ParallelTest extends com.vaadin.testbench.parallel.Paralle
 
     @Override
     public void setup() throws Exception {
-        if(Parameters.getTestsInParallel() != 1)  {
-            super.setup();
-            return;
-        }
-        driver = browser.getDriver(() -> {
-            super.setup();
-            return getDriver();
-        });
-        screenshotOnFailure.setQuitDriverOnFinish(false);
+        browser.setup(super::setup, this::getDriver, screenshotOnFailure)
+            .ifPresent(this::setDriver);
+    }
+
+    protected int getDeploymentPort() {
+        return 8080;
     }
 
     @AfterClass
     public static void runAfterTest() {
         browser.clear();
     }
+
 }

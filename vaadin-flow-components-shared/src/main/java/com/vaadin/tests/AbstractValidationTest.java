@@ -5,7 +5,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.util.List;
 
-public abstract class TabbedComponentDemoTest extends com.vaadin.flow.demo.TabbedComponentDemoTest {
+public abstract class AbstractValidationTest extends
+    com.vaadin.flow.testutil.AbstractValidationTest {
 
     private static SharedBrowser browser = new SharedBrowser();
 

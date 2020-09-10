@@ -1,12 +1,9 @@
 package com.vaadin.tests;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.vaadin.testbench.Parameters;
+import com.vaadin.testbench.ScreenshotOnFailureRule;
+import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.TestBenchDriverProxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.logging.LogType;
@@ -20,16 +17,33 @@ import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.remote.http.W3CHttpCommandCodec;
 import org.openqa.selenium.remote.http.W3CHttpResponseCodec;
 
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchDriverProxy;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SharedBrowser {
-    static final SharedBrowser instance = new SharedBrowser();
+    private static final String reuseBrowserProperty =
+        SharedBrowser.class.getName() + ".reuseBrowser";
+    private static final boolean browserReuseAllowed;
+    private static Logger logger = Logger
+        .getLogger(SharedBrowser.class.getName());
+
+    static {
+        final String propertyValue = System.getProperty(reuseBrowserProperty);
+        browserReuseAllowed =
+            propertyValue == null || propertyValue.isEmpty() || Boolean
+                .parseBoolean(propertyValue);
+    }
+
     URL url;
     SessionId sessionId;
     private volatile TestBenchDriverProxy driver;
-
-    private static Logger logger = Logger.getLogger(SharedBrowser.class.getName());
 
     SharedBrowser() {
 
@@ -50,14 +64,28 @@ public class SharedBrowser {
     }
 
     void clear() {
-        if(driver == null) {
+        if (driver == null) {
             return;
         }
-        logger.log(Level.FINE, String.format("Clearing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String
+            .format("Clearing driver for session %s\turl %s", sessionId, url));
         driver.quit();
         driver = null;
         sessionId = null;
         url = null;
+    }
+
+    Optional<WebDriver> setup(ISetup realSetup, Supplier<WebDriver> getDriver,
+        ScreenshotOnFailureRule screenshotOnFailure) throws Exception {
+        if (!browserReuseAllowed || Parameters.getTestsInParallel() != 1) {
+            realSetup.setup();
+            return Optional.empty();
+        }
+        screenshotOnFailure.setQuitDriverOnFinish(false);
+        return Optional.of(getDriver(() -> {
+            realSetup.setup();
+            return getDriver.get();
+        }));
     }
 
     private TestBenchDriverProxy createDriverFromSession(
@@ -71,8 +99,8 @@ public class SharedBrowser {
 
                     driver.manage().deleteAllCookies();
                     if (driver instanceof WebStorage) {
-                        ((WebStorage)driver).getSessionStorage().clear();
-                        ((WebStorage)driver).getLocalStorage().clear();
+                        ((WebStorage) driver).getSessionStorage().clear();
+                        ((WebStorage) driver).getLocalStorage().clear();
                     }
                     driver.manage().logs().get(LogType.BROWSER).getAll();
                     driver.get("about:blank");
@@ -102,7 +130,8 @@ public class SharedBrowser {
                 return response;
             }
         };
-        logger.log(Level.FINE, String.format("Reusing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String
+            .format("Reusing driver for session %s\turl %s", sessionId, url));
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
             new DesiredCapabilities());
@@ -116,7 +145,20 @@ public class SharedBrowser {
             .getCommandExecutor();
         url = executor.getAddressOfRemoteServer();
         sessionId = webDriver.getSessionId();
-        logger.log(Level.FINE, String.format("Creating driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String
+            .format("Creating driver for session %s\turl %s", sessionId, url));
+    }
+
+    public Optional<List<DesiredCapabilities>> getGridBrowsers() {
+        List<DesiredCapabilities> result = Parameters.getGridBrowsers();
+        if (result.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(result);
+    }
+
+    interface ISetup {
+        void setup() throws Exception;
     }
 
     @FunctionalInterface

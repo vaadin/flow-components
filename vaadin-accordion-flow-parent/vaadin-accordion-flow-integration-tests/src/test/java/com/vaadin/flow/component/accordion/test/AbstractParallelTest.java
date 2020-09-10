@@ -69,10 +69,10 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getPort() {
-        return "9998";
+        return "8080";
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         final DesiredCapabilities safari = BrowserUtil.safari();
         safari.setVersion("13");

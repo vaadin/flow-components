@@ -70,7 +70,7 @@ public abstract class AbstractTBTest extends ParallelTest {
                 "Could not find required element in the shadowRoot");
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         if (System.getProperty(PROPERTY_TEST_ALL_BROWSERS) == null) {
             return Arrays.asList(BrowserUtil.chrome());
@@ -124,7 +124,7 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected int getDeploymentPort() {
-        return 9998;
+        return 8080;
     }
 
     protected abstract Class<? extends AbstractChartExample> getTestView();
