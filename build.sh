@@ -69,7 +69,7 @@ $cmd || exit 1
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
-cmd="mvn install -Drelease -B -q -T C$FORK_COUNT"
+cmd="mvn install -Drelease -B -q -T $FORK_COUNT"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
@@ -98,7 +98,7 @@ then
     tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
     set -x
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
-    docker pull "$SELENIUM_DOCKER_IMAGE" || exit 1
+    docker pull "$SELENIUM_DOCKER_IMAGE" || exit 1
     docker image prune -f || exit 1
     docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE" || exit 1
     set +x
@@ -106,10 +106,14 @@ fi
 
 args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
+reuse_browser() {
+    [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
+}
+
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules"
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
   tcLog "Running module ITs - mvn clean verify -pl ..."
   echo $cmd
   $cmd
@@ -117,14 +121,9 @@ elif [ -z "$BUILD" ]
 then
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease "-Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL" $args -pl integration-tests"
-  tcLog "Running merged ITs - mvn verify -Drun-it -Drelease -pl integration-tests ..."
+  cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-<<<<<<< HEAD
-
-  ## exit on error if any command in the pipe fails
-=======
->>>>>>> f9992ef7... simplify a little bit the way to set forks and treads
   $cmd
   error=$?
 
@@ -140,10 +139,10 @@ then
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
+        cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed $(reuse_browser false)"
         tcLog "Re-Running $nfailed failed tests ..."
         echo $cmd
-        TESTBENCH_REUSE_BROWSER=false $cmd
+        $cmd
         error=$?
         saveFailed run-2
         tcStatus $error "Test failed: $nfailed" "Success"
