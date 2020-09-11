@@ -11,7 +11,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 

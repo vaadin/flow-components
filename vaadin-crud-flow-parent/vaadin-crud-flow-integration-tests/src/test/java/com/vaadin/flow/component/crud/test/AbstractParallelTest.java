@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 import org.junit.Assert;
