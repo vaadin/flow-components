@@ -6,9 +6,7 @@
 
 const xml2js = require('xml2js');
 const fs = require('fs');
-const path = require('path');
 const https = require("https");
-const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 let modules = [];
 
@@ -16,7 +14,7 @@ let modules = [];
  * Collect all modules from root pom
  */
 async function computeModules() {
-    const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`../pom.xml`, 'utf8'));
+    const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`./pom.xml`, 'utf8'));
     modules = parentJs.project.modules[0].module.filter(m => !/shared/.test(m));
 }
 
@@ -29,7 +27,7 @@ async function updateWebjars(moduleName){
     updateFile = false;
 
     subModule = moduleName.replace('-parent','');
-    pom = '../' + moduleName + '/' + subModule + '/pom.xml';
+    pom = './' + moduleName + '/' + subModule + '/pom.xml';
     pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
     //collect vaadin webjars
     webjars = pomJs.project.dependencies[0].dependency.filter(dep => dep.groupId == vaadinWebjarGroupId);

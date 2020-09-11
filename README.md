@@ -37,11 +37,11 @@ NOTE: this takes a long while and consumes a lot of resources in your computer
 There is a able to visit all IT modules and merge then into one unique module.
 It does substitutions in sources so as routes do no conflict, and also adjust ports etc.
 
-- `scripts/mergeITs.js`
+- `./scripts/mergeITs.js`
 
 By default it merges all modules, but it's also possible to merge certain modules by passing arguments
 
-- `scripts/mergeITs.js button text-field crud`
+- `./scripts/mergeITs.js button text-field crud`
 
 ## Updating modules from original master branches
 
@@ -56,8 +56,7 @@ Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid co
 
 ## Update Webjars
 There is script available for updating the webjars version used in the projects. This can be triggered by running:
-- `cd scripts`
-- `node updateWebjars.js`
+- `./scripts/updateWebjars.js`
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
