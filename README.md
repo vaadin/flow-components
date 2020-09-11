@@ -54,6 +54,10 @@ The `./build.sh` script is though to be run in CI, it compiles all modules, merg
 It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid combo-box`
 
+## Update Webjars
+There is script available for updating the webjars version used in the projects. This can be triggered by running:
+- `cd scripts`
+- `node updateWebjars.js`
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
