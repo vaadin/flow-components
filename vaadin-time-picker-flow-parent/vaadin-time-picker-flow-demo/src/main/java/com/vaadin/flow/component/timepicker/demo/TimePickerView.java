@@ -54,6 +54,8 @@ public class TimePickerView extends DemoView {
         autoOpenDisabled();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
+        createHelperTextAndComponent();
+        createHelperTextAbove();
     }
 
     private void createLocalizedTimePicker() {
@@ -221,6 +223,43 @@ public class TimePickerView extends DemoView {
         timePicker.setId("time-picker-min-max");
         addCard("Time Picker With Min And Max Setting", timePicker, message);
     }
+
+    public void createHelperTextAndComponent() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        TimePicker timePicker = new TimePicker();
+        timePicker.setLabel("Start time");
+        timePicker
+              .setHelperText("Select the best suited time for a meeting");
+
+        TimePicker timePickerHelperComponent = new TimePicker();
+        timePickerHelperComponent.setLabel("Arrival time");
+        timePickerHelperComponent.setHelperComponent(
+              new Span("Choose the best suited parcel arrive time"));
+
+        add(timePicker, timePickerHelperComponent);
+        // end-source-example
+
+        timePicker.getStyle().set("margin-right", "15px");
+        div.add(timePicker, timePickerHelperComponent);
+        addCard("Helper text and helper component", div);
+    }
+
+    public void createHelperTextAbove() {
+        // begin-source-example
+        // source-example-heading: Helper above the field
+        TimePicker timePicker = new TimePicker();
+        timePicker.setLabel("Start time");
+        timePicker
+              .setHelperText("Select the best suited time for a meeting");
+        timePicker.getElement().getThemeList().set("helper-above-field", true);
+        add(timePicker);
+
+        // end-source-example
+        addCard("Helper above the field", timePicker);
+    }
+
 
     private Div createMessageDiv(String id) {
         Div message = new Div();

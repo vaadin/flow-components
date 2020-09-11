@@ -256,11 +256,11 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#2.0-SNAPSHOT",
-        "WebComponent: Vaadin.DatePickerElement#4.0.0-alpha1",
+        "WebComponent: Vaadin.DatePickerElement#4.0.0",
         "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
-@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.2.0")
+@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.4.0")
 @JsModule("@vaadin/vaadin-date-picker/src/vaadin-date-picker.js")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

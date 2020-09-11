@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-radio-button-flow-parent</artifactId>
-    <version>14.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-radio-button-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -31,6 +31,11 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-radio-button-flow-demo</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-radio-button-testbench</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

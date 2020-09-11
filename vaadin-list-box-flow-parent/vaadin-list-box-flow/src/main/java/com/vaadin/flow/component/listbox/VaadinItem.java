@@ -34,7 +34,7 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
  */
 @Tag("vaadin-item")
 @HtmlImport("frontend://bower_components/vaadin-item/vaadin-item.html")
-@NpmPackage(value = "@vaadin/vaadin-item", version = "2.2.0")
+@NpmPackage(value = "@vaadin/vaadin-item", version = "2.3.0")
 @JsModule("@vaadin/vaadin-item/src/vaadin-item.js")
 class VaadinItem<T> extends Component
         implements ItemComponent<T>, HasComponents {

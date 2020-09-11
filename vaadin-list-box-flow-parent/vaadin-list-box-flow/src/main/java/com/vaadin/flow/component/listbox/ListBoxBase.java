@@ -42,7 +42,7 @@ import com.vaadin.flow.function.SerializablePredicate;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.3.0")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.4.0")
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>

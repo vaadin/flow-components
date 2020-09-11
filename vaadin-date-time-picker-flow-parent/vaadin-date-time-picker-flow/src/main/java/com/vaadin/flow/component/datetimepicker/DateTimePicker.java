@@ -26,6 +26,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
@@ -64,11 +65,11 @@ class DateTimePickerTimePicker
  */
 @Tag("vaadin-date-time-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.2.0")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.4.0")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker> {
+        Focusable<DateTimePicker>, HasHelper {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
