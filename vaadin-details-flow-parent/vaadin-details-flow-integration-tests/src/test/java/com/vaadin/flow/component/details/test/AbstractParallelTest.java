@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 
