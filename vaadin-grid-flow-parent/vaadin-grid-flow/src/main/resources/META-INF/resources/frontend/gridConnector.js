@@ -34,7 +34,15 @@
       const GridElement = window.Vaadin.Flow.Legacy.GridElement;
       const ItemCache = window.Vaadin.Flow.Legacy.ItemCache;
 
+      // Storing original implementation of the method to be used for client
+      // side only grids
+      ItemCache.prototype.ensureSubCacheForScaledIndexOriginal = ItemCache.prototype.ensureSubCacheForScaledIndex;
       ItemCache.prototype.ensureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
+        if (!this.grid.$connector) {
+          this.ensureSubCacheForScaledIndexOriginal(scaledIndex);
+          return;
+        }
+
         if (!this.itemCaches[scaledIndex]) {
 
           if(ensureSubCacheDelay) {

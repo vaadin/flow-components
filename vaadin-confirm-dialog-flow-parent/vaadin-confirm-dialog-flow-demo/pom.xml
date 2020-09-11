@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
-    <version>14.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-confirm-dialog-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>

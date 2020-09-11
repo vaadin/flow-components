@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -45,7 +46,7 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://timepickerConnector.js")
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled {
+        implements HasSize, HasValidation, HasEnabled, HasHelper {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null

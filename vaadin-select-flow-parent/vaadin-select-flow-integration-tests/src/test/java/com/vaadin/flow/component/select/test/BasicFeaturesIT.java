@@ -92,6 +92,16 @@ public class BasicFeaturesIT extends AbstractSelectIT {
         verify.selectedItem("Item-0");
     }
 
+    @Test
+    public void testHelper_text() {
+        page.toggleHelperText(true);
+        verify.helperTextVisible();
+
+        page.toggleHelperText(false);
+        verify.noHelperText();
+
+    }
+
     @Override
     protected int getInitialNumberOfItems() {
         return 5;

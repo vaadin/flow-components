@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>vaadin-flow-components</artifactId>
-    <version>14.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Components flow</name>
 
@@ -29,8 +29,8 @@
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <driver.binary.downloader.maven.plugin.version>1.0.14
         </driver.binary.downloader.maven.plugin.version>
-        <flow.version>2.3-SNAPSHOT</flow.version>
-        <testbench.version>6.2.2</testbench.version>
+        <flow.version>2.4.0.alpha1</flow.version>
+        <testbench.version>6.4.0.alpha2</testbench.version>
 		
 		<testbench.testsInParalel>2</testbench.testsInParalel>
         <testbench.runLocaly>CHROME</testbench.runLocaly>

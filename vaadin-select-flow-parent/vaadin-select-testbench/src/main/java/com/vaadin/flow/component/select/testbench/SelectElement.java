@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasSelectByText;
@@ -33,7 +34,8 @@ import org.openqa.selenium.WebElement;
  * Testbench Element API for vaadin-select.
  */
 @Element("vaadin-select")
-public class SelectElement extends TestBenchElement implements HasSelectByText, HasLabel, HasPlaceholder {
+public class SelectElement extends TestBenchElement
+      implements HasSelectByText, HasLabel, HasPlaceholder, HasHelper {
 
     @Element("vaadin-item")
     public static class ItemElement extends TestBenchElement {

@@ -35,6 +35,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.component.textfield.demo.entity.Person;
@@ -60,6 +61,7 @@ public class TextFieldView extends DemoView {
         textFieldAutoselect();
         textFieldClearButton();
         textFieldFocusShortcut();
+        textFieldHelperText();
         passwordFieldBasic(); // PasswordField
         passwordFieldHideRevealButton();
         emailFieldBasic(); // EmailField
@@ -69,9 +71,11 @@ public class TextFieldView extends DemoView {
         numberFieldWithValueLimits();
         numberFieldWithStep();
         bigDecimalField();
+        numberFieldWithHelperText();
         textAreaBasic(); // TextArea
         textAreaMaxHeight();
         textAreaMinHeight();
+        textAreaHelperText();
         prefixAndSuffix(); // Prefix and suffix
         prefixAndSuffixSearch();
         validationMinMaxLength(); // Validation
@@ -79,6 +83,7 @@ public class TextFieldView extends DemoView {
         customValidation();
         themeVariantsTextAlign(); // Theme Variants
         themeVariantsSmallSize();
+        helperTextVariants();
         styling(); // Styling
     }
 
@@ -171,6 +176,23 @@ public class TextFieldView extends DemoView {
 
         textField.setId("shortcut-field");
         this.addCard("Text field", "Focus shortcut usage", textField);
+    }
+
+    private void textFieldHelperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper Text and Component
+        TextField helperFieldText = new TextField("First name");
+        helperFieldText.setHelperText("Enter all your first names");
+
+        TextField helperFieldComponent = new TextField("Last Name");
+        helperFieldComponent.setHelperComponent(new Span("Family name"));
+
+        add(helperFieldText, helperFieldComponent);
+        // end-source-example
+
+        div.add(helperFieldText, new Text("  "), helperFieldComponent);
+        addCard("Text field", "Helper Text and Component", div);
     }
 
     private void passwordFieldBasic() {
@@ -301,7 +323,7 @@ public class TextFieldView extends DemoView {
                 taxValue = BigDecimal.ZERO;
             } else {
                 taxValue = e.getValue().multiply(new BigDecimal("0.24"))
-                        .setScale(2, RoundingMode.HALF_EVEN);
+                      .setScale(2, RoundingMode.HALF_EVEN);
             }
             tax.setText("VAT 24%: $" + taxValue);
         });
@@ -311,6 +333,27 @@ public class TextFieldView extends DemoView {
         add(bigDecimalField, tax);
         // end-source-example
         addCard("Number field", "Big decimal field", bigDecimalField, tax);
+    }
+
+    private void numberFieldWithHelperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Number fields with helper text
+        NumberField numberField = new NumberField("Total Salary");
+        numberField
+              .setHelperText("Any valid number can be put in a NumberField");
+
+        IntegerField integerField = new IntegerField("Your age");
+        integerField
+              .setHelperText("Only integers can be put in an IntegerField");
+
+        add(numberField, integerField);
+        // end-source-example
+
+        numberField.setId("number-field-helper-id");
+        integerField.setId("integer-field-helper-id");
+        div.add(numberField, new Text(" "), integerField);
+        addCard("Number field", "Number fields with helper text", div);
     }
 
     private void textAreaBasic() {
@@ -354,6 +397,30 @@ public class TextFieldView extends DemoView {
         textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-min-height");
         addCard("Text Area", "Minimum height", textArea);
+    }
+
+    private void textAreaHelperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        TextArea textAreaHelperText = new TextArea("Overview");
+        textAreaHelperText.setPlaceholder("Write here ...");
+        textAreaHelperText
+              .setHelperText("Short description of your current role");
+
+        TextArea textAreaHelperComponent = new TextArea("Feedback");
+        textAreaHelperComponent.setPlaceholder("Write here ...");
+        textAreaHelperComponent.setHelperComponent(new Span(
+              "Here you can share what you've liked and "
+                    + "what can be improved in the next lesson"));
+
+        add(textAreaHelperText, textAreaHelperComponent);
+        // end-source-example
+
+        textAreaHelperText.setId("text-area-with-helper-text");
+        textAreaHelperText.getStyle().set("margin-right", "20px");
+        div.add(textAreaHelperText, textAreaHelperComponent);
+        addCard("Text Area", "Helper text and helper component", div);
     }
 
     private void prefixAndSuffix() {
@@ -522,6 +589,30 @@ public class TextFieldView extends DemoView {
         add(textField);
         // end-source-example
         addCard("Theme Variants", "Small size", textField);
+    }
+
+    private void helperTextVariants() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper Variant
+
+        TextField helperFieldAbove = new TextField();
+        helperFieldAbove.setHelperText("Helper Text displayed above the field");
+        helperFieldAbove
+              .addThemeVariants(TextFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        TextArea textAreaAbove = new TextArea();
+        textAreaAbove.setPlaceholder("Write here ...");
+        textAreaAbove.setHelperText("Helper Text is above the field");
+        textAreaAbove.addThemeVariants(TextAreaVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        add(helperFieldAbove, textAreaAbove);
+        // end-source-example
+
+        div.getStyle().set("display", "flex");
+        helperFieldAbove.getStyle().set("margin-right", "20px");
+        div.add(helperFieldAbove, textAreaAbove);
+        addCard("Theme Variants", "Helper Variant", div);
     }
 
     private void styling() {

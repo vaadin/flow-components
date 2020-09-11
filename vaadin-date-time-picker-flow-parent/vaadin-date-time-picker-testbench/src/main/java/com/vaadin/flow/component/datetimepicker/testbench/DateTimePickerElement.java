@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -29,7 +30,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-time-picker")
 public class DateTimePickerElement extends TestBenchElement
-        implements HasLabel {
+        implements HasLabel, HasHelper {
 
     private static final String VALUE_PROPERTY = "value";
 
