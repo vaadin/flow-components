@@ -10,34 +10,27 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const replace = require('replace-in-file');
 
-let infos = fs.readFileSync("info.json").toString('utf-8');
-let results = infos.split("\n").filter(info => info.startsWith('../vaadin-'));
-let modules = [];
 
-function computeModules(){
-  for (i = 0; i < results.length; i++){
-    //(results[i]);
-    path = results[i].slice(0, results[i].indexOf(':'));
-    pathArray = path.split("/");
-    annotation = results[i].slice(results[i].lastIndexOf(':')+1);
-    array = annotation.split('"');
-    verArray = array[3].split('.')
-
-    modules.push({
-      'name': pathArray[1],
-      'path': path,
-      'annotation':annotation,
-      'package':array[1],
-      'major': verArray[0],
-      'minor': [verArray[0],verArray[1]].join('.'),
-      'version':array[3],
-      'updatedVersion':""
-    });
-  }
+async function computeModules(){
+  const cmd = 'grep -r @NpmPackage ./vaadin*parent/vaadin*flow/src/*/java';
+  const output = await run(cmd);
+  const lines = output.split('\n').filter(Boolean);
+  return lines.map(line => {
+    const r = /(.*(vaadin-.*)-parent.*):(.*value *= *"([^"]+).*version *= *"((\d+)\.(\d+)[^"]*).*)/.exec(line);
+    return {
+      path: r[1],
+      name: r[2],
+      annotation: r[3],
+      package: r[4],
+      version: r[5],
+      major: r[6],
+      minor: r[7],
+      updatedVersion: ''
+    };
+  });
 }
 
 async function updateFiles(moduleData){
-
   if(moduleData.annotation.length>0){
     if (moduleData.version != moduleData.updatedVersion){
       updatedNpm = moduleData.annotation.replace(moduleData.version, moduleData.updatedVersion)
@@ -50,7 +43,6 @@ async function updateFiles(moduleData){
         const results = await replace(options)
         console.log('\x1b[33m', "Updated "+ moduleData.package + " from version " + 
                     moduleData.version + " to " + moduleData.updatedVersion);
-        //console.log('Replacement results:', results);
       }
       catch (error) {
         console.error('Error occurred:', error);
@@ -67,25 +59,19 @@ async function run(cmd) {
   return stdout;
 }
 
-async function calculateVersions(moduleData) {
-  cmd = "npm view " + moduleData.package + " versions --json";
-  let versions = await run(cmd);
-  if ( versions.includes(moduleData.version) ){
-    avaiVersion = versions.split('"').filter(version => version.startsWith(moduleData.minor));
-    moduleData['updatedVersion'] = avaiVersion[avaiVersion.length-1];
-  } 
-
-  //console.log(moduleData);
-  return moduleData;
+async function calculateVersions(data) {
+  cmd = "npm view " + data.package + " versions --json";
+  const versions = JSON.parse(await run(cmd)).filter(version => version.startsWith(`${data.major}.${data.minor}`));
+  data['updatedVersion'] = versions.pop();
+  return data;
 }
 
 async function main() {
   console.log("Updating the NpmPackage annotation.")
-  
-  await computeModules();
+  const modules = await computeModules();
   
   for (i = 0; i < modules.length; i++){
-    modules[i] = await calculateVersions(modules[i]);
+    modules[i] = await calculateVersions(modules[i]); 
     await updateFiles(modules[i]);
   }
 }
