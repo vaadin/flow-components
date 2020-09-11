@@ -51,6 +51,19 @@ It should take around 15-20 minutes depending on the computer capabilities.
 
 NOTE: that we need to activate the module with the `-Drun-it` property, and to speed up tests we enable parallel execution of classes by setting `-Dfailsafe.forkCount=5`, in addition `-Dcom.vaadin.testbench.Parameters.testsInParallel=1` makes TB to reuse browser instances.
 
+
+## Running in Sauce Labs
+
+The time it takes depends on the number of browsers and the modules tested.
+
+To select which browsers to test, set the `TESTBENCH_GRID_BROWSERS` environment variable with a list of browsers.
+```
+TESTBENCH_GRID_BROWSERS=edge,safari-13,firefox
+```
+Then run the following command, replacing the `***` with your Sauce Labs credentials.
+- `mvn verify -P saucelabs -Dtest.use.hub=true -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Dcom.vaadin.tests.SharedBrowser.reuseBrowser=false -Drun-it -Dfailsafe.forkCount=5 -Dcom.vaadin.testbench.Parameters.testsInParallel=1 -pl integration-tests`
+
+
 ## Updating modules from original master branches
 
 By running `./scripts/updateFromMaster.sh` all components are replaced with their origin master branches.
