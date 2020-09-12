@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Update the NpmPackage annotation for all moudles
- * This script should be triggered from `updateNpmVer.sh`
- * by using `sh updateNpmVer.sh`
+ * Update the NpmPackage annotation for all modules in the project
+ * by checking versions published in npm repository.
+ * Example
+ *   ./scripts/updateNpmVer.js vaadin-button-flow-parent
  */
 
 const fs = require('fs');
@@ -41,14 +42,14 @@ async function updateFiles(moduleData){
       };
       try {
         const results = await replace(options)
-        console.log('\x1b[33m', "Updated "+ moduleData.package + " from version " + 
+        console.log('\x1b[33m', "Updated "+ moduleData.package + " from version " +
                     moduleData.version + " to " + moduleData.updatedVersion);
       }
       catch (error) {
         console.error('Error occurred:', error);
-      }	
+      }
     } else {
-      console.log('\x1b[32m', "No need to update annotation for package " + moduleData.package + 
+      console.log('\x1b[32m', "No need to update annotation for package " + moduleData.package +
                   ", as version " + moduleData.version + " is the latest");
     }
   }
@@ -69,9 +70,9 @@ async function calculateVersions(data) {
 async function main() {
   console.log("Updating the NpmPackage annotation.")
   const modules = await computeModules();
-  
+
   for (i = 0; i < modules.length; i++){
-    modules[i] = await calculateVersions(modules[i]); 
+    modules[i] = await calculateVersions(modules[i]);
     await updateFiles(modules[i]);
   }
 }
