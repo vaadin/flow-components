@@ -76,9 +76,8 @@ It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid combo-box`
 
 ## Update package version for `@NpmPackage` in all files
-There are scripts available for updating the `@NpmPackage` annotation to its latest patch version: 
-- `npm install && cd scripts`
-- `sh updateNpmVer.sh` 
+There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
+- `./scripts/updateNpmVer.js`
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
