@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-text-field-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.text.field.version}</version>
   </parent>
   <artifactId>vaadin-text-field-testbench</artifactId>
   <packaging>jar</packaging>

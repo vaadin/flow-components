@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-dialog-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.dialog.version}</version>
   </parent>
   <artifactId>vaadin-dialog-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.dialog.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -43,7 +43,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
   </dependencies>
   <build>

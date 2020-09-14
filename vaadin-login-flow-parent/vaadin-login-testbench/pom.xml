@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-login-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.login.version}</version>
   </parent>
   <artifactId>vaadin-login-testbench</artifactId>
   <packaging>jar</packaging>
@@ -19,12 +19,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
   </dependencies>
   <build>

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-select-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.select.version}</version>
   </parent>
   <artifactId>vaadin-select-testbench</artifactId>
   <packaging>jar</packaging>

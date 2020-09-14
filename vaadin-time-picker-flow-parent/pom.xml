@@ -28,4 +28,5 @@
     </profile>
   </profiles>
   <dependencies/>
+  <version>${vaadin.time.picker.version}</version>
 </project>

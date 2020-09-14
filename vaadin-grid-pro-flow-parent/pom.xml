@@ -28,4 +28,5 @@
     </profile>
   </profiles>
   <dependencies/>
+  <version>${vaadin.grid.pro.version}</version>
 </project>

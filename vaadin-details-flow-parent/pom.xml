@@ -28,4 +28,5 @@
     </profile>
   </profiles>
   <dependencies/>
+  <version>${vaadin.details.version}</version>
 </project>

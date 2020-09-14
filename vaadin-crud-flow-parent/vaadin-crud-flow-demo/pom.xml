@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-crud-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.crud.version}</version>
   </parent>
   <artifactId>vaadin-crud-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -29,22 +29,22 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-crud-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.crud.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-form-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.form.layout.version}</version>
     </dependency>
   </dependencies>
   <build>

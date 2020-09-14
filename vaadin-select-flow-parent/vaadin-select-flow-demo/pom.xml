@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-select-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.select.version}</version>
   </parent>
   <artifactId>vaadin-select-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -33,27 +33,27 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-select-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.select.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-notification-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.notification.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

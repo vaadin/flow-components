@@ -4,13 +4,15 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-context-menu-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.context.menu.version}</version>
   </parent>
   <artifactId>vaadin-context-menu-integration-tests</artifactId>
   <packaging>war</packaging>
   <name>Vaadin Context Menu Integration Tests</name>
   <properties>
     <failOnMissingWebXml>false</failOnMissingWebXml>
+    <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
+    <ci-sauce.version>1.138</ci-sauce.version>
   </properties>
   <dependencies>
     <dependency>
@@ -32,7 +34,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.context.menu.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -55,7 +57,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.context.menu.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -125,14 +127,20 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <profiles>
     <profile>
-      <id>ITs</id>
+      <id>build-frontend</id>
       <activation>
         <property>
-          <name>!skipTests</name>
+          <name>!skipFrontend</name>
         </property>
       </activation>
       <build>
@@ -141,9 +149,93 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-maven-plugin</artifactId>
           </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>run-jetty</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
           <plugin>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>saucelabs</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.saucelabs</groupId>
+          <artifactId>ci-sauce</artifactId>
+          <version>${ci-sauce.version}</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>2.20</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <systemPropertyVariables>
+                <sauce.user>${sauce.user}</sauce.user>
+                <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
+                <sauce.options>${sauce.options}</sauce.options>
+              </systemPropertyVariables>
+              <trimStackTrace>false</trimStackTrace>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>com.saucelabs.maven.plugin</groupId>
+            <artifactId>sauce-connect-plugin</artifactId>
+            <version>2.1.25</version>
+            <configuration>
+              <sauceUsername>${sauce.user}</sauceUsername>
+              <sauceAccessKey>${sauce.sauceAccessKey}</sauceAccessKey>
+              <options>${sauce.options}</options>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>com.saucelabs</groupId>
+                <artifactId>ci-sauce</artifactId>
+                <version>${ci-sauce.version}</version>
+              </dependency>
+            </dependencies>
+            <executions>
+              <execution>
+                <id>start-sauceconnect</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>start-sauceconnect</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>stop-sauceconnect</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>stop-sauceconnect</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -168,11 +260,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <configuration>
-              <systemPropertyVariables>
-                <com.vaadin.testbench.Parameters.runLocally>${testbench.runLocaly}</com.vaadin.testbench.Parameters.runLocally>
-              </systemPropertyVariables>
-            </configuration>
           </plugin>
         </plugins>
       </build>

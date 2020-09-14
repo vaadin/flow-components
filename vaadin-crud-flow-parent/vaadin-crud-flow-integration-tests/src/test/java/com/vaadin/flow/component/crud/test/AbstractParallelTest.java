@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 import org.junit.Assert;
@@ -68,10 +68,10 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getPort() {
-        return "9998";
+        return "8080";
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         DesiredCapabilities safari = BrowserUtil.safari();
         safari.setVersion("11");

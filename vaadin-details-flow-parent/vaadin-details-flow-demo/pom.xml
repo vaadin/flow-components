@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-details-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.details.version}</version>
   </parent>
   <artifactId>vaadin-details-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -33,12 +33,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-details-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.details.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-notification-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.notification.version}</version>
     </dependency>
   </dependencies>
   <build>

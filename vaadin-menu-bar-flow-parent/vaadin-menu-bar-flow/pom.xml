@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-menu-bar-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.menu.bar.version}</version>
   </parent>
   <artifactId>vaadin-menu-bar-flow</artifactId>
   <packaging>jar</packaging>
@@ -98,7 +98,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.context.menu.version}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>

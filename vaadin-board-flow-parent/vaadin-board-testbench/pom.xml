@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-board-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.board.version}</version>
   </parent>
   <artifactId>vaadin-board-testbench</artifactId>
   <packaging>jar</packaging>

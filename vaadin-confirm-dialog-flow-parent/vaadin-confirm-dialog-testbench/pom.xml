@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.confirm.dialog.version}</version>
   </parent>
   <artifactId>vaadin-confirm-dialog-testbench</artifactId>
   <packaging>jar</packaging>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
   </dependencies>
   <build>

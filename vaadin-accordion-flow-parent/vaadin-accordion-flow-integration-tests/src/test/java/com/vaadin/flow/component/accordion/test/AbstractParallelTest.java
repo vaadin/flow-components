@@ -10,7 +10,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 
@@ -70,10 +70,10 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getPort() {
-        return "9998";
+        return "8080";
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         final DesiredCapabilities ie11Windows8_1 = BrowserUtil.ie11();
         ie11Windows8_1.setPlatform(Platform.WIN8_1);

@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-grid-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.grid.version}</version>
   </parent>
   <artifactId>vaadin-grid-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.grid.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -35,37 +35,37 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-radio-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.radio.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-picker-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.date.picker.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.combo.box.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -80,12 +80,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-form-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.form.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-select-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.select.version}</version>
     </dependency>
   </dependencies>
   <build>

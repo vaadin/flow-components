@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-notification-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.notification.version}</version>
   </parent>
   <artifactId>vaadin-notification-testbench</artifactId>
   <packaging>jar</packaging>

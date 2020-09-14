@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-time-picker-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.time.picker.version}</version>
   </parent>
   <artifactId>vaadin-time-picker-flow</artifactId>
   <packaging>jar</packaging>

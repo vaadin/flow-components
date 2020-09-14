@@ -28,4 +28,5 @@
     </profile>
   </profiles>
   <dependencies/>
+  <version>${vaadin.form.layout.version}</version>
 </project>

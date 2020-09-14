@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-combo-box-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.combo.box.version}</version>
   </parent>
   <artifactId>vaadin-combo-box-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.combo.box.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

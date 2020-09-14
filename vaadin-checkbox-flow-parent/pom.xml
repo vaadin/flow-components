@@ -28,4 +28,5 @@
     </profile>
   </profiles>
   <dependencies/>
+  <version>${vaadin.checkbox.version}</version>
 </project>

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-date-picker-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.date.picker.version}</version>
   </parent>
   <artifactId>vaadin-date-picker-testbench</artifactId>
   <packaging>jar</packaging>

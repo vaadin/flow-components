@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-radio-button-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.radio.button.version}</version>
   </parent>
   <artifactId>vaadin-radio-button-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-radio-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.radio.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -39,17 +39,17 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-notification-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.notification.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
   </dependencies>
   <build>

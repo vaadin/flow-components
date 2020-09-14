@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-upload-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>${vaadin.upload.version}</version>
   </parent>
   <artifactId>vaadin-upload-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -33,12 +33,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-upload-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.upload.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
