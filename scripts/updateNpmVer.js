@@ -13,7 +13,7 @@ const replace = require('replace-in-file');
 
 
 async function computeModules(){
-  const cmd = 'grep -r @NpmPackage ./vaadin*parent/vaadin*flow/src/*/java';
+  const cmd = 'grep -r @NpmPackage ./vaadin*parent/*/src/*/java';
   const output = await run(cmd);
   const lines = output.split('\n').filter(Boolean);
   return lines.map(line => {
