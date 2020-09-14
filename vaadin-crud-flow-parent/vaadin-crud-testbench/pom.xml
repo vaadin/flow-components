@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-crud-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>${vaadin.crud.version}</version>
+    <version>2.3-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-crud-testbench</artifactId>
   <packaging>jar</packaging>

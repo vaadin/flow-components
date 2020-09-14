@@ -6,6 +6,7 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
+  <version>1.2-SNAPSHOT</version>
   <artifactId>vaadin-menu-bar-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Menu Bar Parent</name>
@@ -28,5 +29,4 @@
     </profile>
   </profiles>
   <dependencies/>
-  <version>${vaadin.menu.bar.version}</version>
 </project>

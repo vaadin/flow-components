@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-custom-field-flow-parent</artifactId>
-    <version>${vaadin.custom.field.version}</version>
+    <version>3.2-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-custom-field-flow</artifactId>
   <packaging>jar</packaging>

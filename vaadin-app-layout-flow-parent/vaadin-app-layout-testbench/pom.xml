@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-app-layout-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>${vaadin.app.layout.version}</version>
+    <version>2.2-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-app-layout-testbench</artifactId>
   <packaging>jar</packaging>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-text-field-flow-parent</artifactId>
-    <version>${vaadin.text.field.version}</version>
+    <version>2.3-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-text-field-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -77,12 +77,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

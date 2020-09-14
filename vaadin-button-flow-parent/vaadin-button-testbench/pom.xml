@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-button-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>${vaadin.button.version}</version>
+    <version>2.2-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-button-testbench</artifactId>
   <packaging>jar</packaging>

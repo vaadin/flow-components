@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>${vaadin.rich.text.editor.version}</version>
+    <version>2.3-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-rich-text-editor-testbench</artifactId>
   <packaging>jar</packaging>

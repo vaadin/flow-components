@@ -78,6 +78,7 @@
     <vaadin.crud.version>2.3-SNAPSHOT</vaadin.crud.version>
     <vaadin.grid.pro.version>2.2-SNAPSHOT</vaadin.grid.pro.version>
     <vaadin.rich.text.editor.version>2.3-SNAPSHOT</vaadin.rich.text.editor.version>
+    <vaadin.flow.components.shared.version>14.4-SNAPSHOT</vaadin.flow.components.shared.version>
   </properties>
   <modules>
     <module>vaadin-flow-components-shared</module>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
-    <version>${vaadin.date.time.picker.version}</version>
+    <version>1.2-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-date-time-picker-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-time-picker-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.date.time.picker.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -79,7 +79,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

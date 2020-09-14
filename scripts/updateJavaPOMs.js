@@ -56,7 +56,7 @@ async function renameBase(js) {
   renameComponent(js.project.artifactId, name);
   renameComponent(js.project.name, desc);
   renameComponent(js.project.description, desc);
-  js.project.parent[0].version = [componentVersion];
+  js.project.parent[0].version = [originalVersion];
 }
 
 function renamePlugin(js){
@@ -75,8 +75,8 @@ function renamePlugin(js){
 
 function setDependenciesVersion(dependencies) {
   dependencies && dependencies[0] && dependencies[0].dependency.forEach(dep => {
-    if (dep.groupId[0] === 'com.vaadin' && /^vaadin-.*(flow|testbench)$/.test(dep.artifactId[0])) {
-      version = oldVersionSchema ? artifactId2versionName(dep.artifactId[0].replace(/-(flow|testbench)$/, '')) : 'project.version';
+    if (dep.groupId[0] === 'com.vaadin' && /^vaadin-.*(flow.*|testbench)$/.test(dep.artifactId[0])) {
+      version = oldVersionSchema ? artifactId2versionName(dep.artifactId[0].replace(/-(flow.*|testbench)$/, '')) : 'project.version';
       dep.version = [`\$\{${version}\}`];
     }
   });
@@ -106,7 +106,11 @@ async function consolidatePomParent() {
     renameComponent(js.project.modules[0].module, name);
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
     js.project.parent[0].version = [rootVersion];
-    js.project.version = [componentVersion];
+    if (oldVersionSchema) {
+       js.project.version = [originalVersion];
+    } else {
+      delete js.project.version;
+    }
   });
 }
 async function consolidatePomFlow() {
@@ -127,7 +131,7 @@ async function consolidatePomIT() {
     js.project.dependencies[0].dependency.push({
       groupId: ['com.vaadin'],
       artifactId: ['vaadin-flow-components-shared'],
-      version: ['${project.version}'],
+      version: [oldVersionSchema ? '${vaadin.flow.components.shared.version}' : '${project.version}'],
       scope: ['test']
     });
   });
@@ -137,6 +141,7 @@ async function saveRootPom() {
   if (oldVersionSchema) {
     const propertyName = artifactId2versionName(name);
     console.log(`updating ${propertyName} = ${originalVersion} in root pom.xml`);
+    rootJs.project.properties[0]['vaadin.flow.components.shared.version'] = [rootVersion];
     rootJs.project.properties[0][propertyName] = [originalVersion];
     const xml = new xml2js.Builder().buildObject(rootJs);
     fs.writeFileSync('pom.xml', xml + '\n', 'utf8');

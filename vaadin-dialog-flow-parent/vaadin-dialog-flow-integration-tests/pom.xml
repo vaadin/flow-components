@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-dialog-flow-parent</artifactId>
-    <version>${vaadin.dialog.version}</version>
+    <version>2.3-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-dialog-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -82,7 +82,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

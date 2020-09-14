@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-parent</artifactId>
-    <version>${vaadin.charts.version}</version>
+    <version>7.1-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-charts-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-charts-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.charts.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

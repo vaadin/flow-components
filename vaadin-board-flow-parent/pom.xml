@@ -6,6 +6,7 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
+  <version>3.2-SNAPSHOT</version>
   <artifactId>vaadin-board-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Board Parent</name>
@@ -28,5 +29,4 @@
     </profile>
   </profiles>
   <dependencies/>
-  <version>${vaadin.board.version}</version>
 </project>

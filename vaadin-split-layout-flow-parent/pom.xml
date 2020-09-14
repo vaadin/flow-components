@@ -6,6 +6,7 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
+  <version>2.2-SNAPSHOT</version>
   <artifactId>vaadin-split-layout-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Split Layout Parent</name>
@@ -28,5 +29,4 @@
     </profile>
   </profiles>
   <dependencies/>
-  <version>${vaadin.split.layout.version}</version>
 </project>

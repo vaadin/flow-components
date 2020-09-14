@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-grid-flow-parent</artifactId>
-    <version>${vaadin.grid.version}</version>
+    <version>4.3-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-grid-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.grid.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -107,7 +107,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vaadin-combo-box-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>${vaadin.combo.box.version}</version>
+    <version>3.2-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-combo-box-testbench</artifactId>
   <packaging>jar</packaging>

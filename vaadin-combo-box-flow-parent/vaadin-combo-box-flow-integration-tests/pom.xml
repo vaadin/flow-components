@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-combo-box-flow-parent</artifactId>
-    <version>${vaadin.combo.box.version}</version>
+    <version>3.2-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-combo-box-integration-tests</artifactId>
   <packaging>war</packaging>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.combo.box.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -6,6 +6,7 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
+  <version>2.3-SNAPSHOT</version>
   <artifactId>vaadin-text-field-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Text Field Parent</name>
@@ -28,5 +29,4 @@
     </profile>
   </profiles>
   <dependencies/>
-  <version>${vaadin.text.field.version}</version>
 </project>
