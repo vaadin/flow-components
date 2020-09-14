@@ -58,6 +58,10 @@ Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid co
 There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
 - `./scripts/updateNpmVer.js`
 
+## Update Webjars
+There is script available for updating the webjars version used in the projects. This can be triggered by running:
+- `./scripts/updateWebjars.js`
+
 ## Using the component in a Flow application
 To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
