@@ -118,11 +118,6 @@ async function main() {
     if (/AccordionInTemplate\.java$/.test(source)) {
       content = content.replace(/@NpmPackage.*/,textFieldVersion);
     }
-    // pro components use 8080 and do not use TestPath, this is a hack
-    // to adjust the route used in tests
-    content = content.replace(/(return\ +"?)8080("?)/, (...args) => {
-      return `${args[1]}9998${args[2]}`;
-    });
     // App layout: IT tests search for links based on href
     content = content.replace(/\.attribute\("href", *"([^"]*)"\)/g, (...args) => {
       return `.attribute("href", "${wc}/${args[1]}")`;
@@ -217,6 +212,9 @@ async function main() {
     content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest');
     content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest');
     content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT');
+    content = content.replace('import com.vaadin.flow.testutil.AbstractValidationTest','import com.vaadin.tests.AbstractValidationTest');
+    content = content.replace('import com.vaadin.testbench.annotations.BrowserConfiguration;','');
+    content = content.replace(/.*@BrowserConfiguration.*/,'');
 
     // Remove W3C workaround from Grid tests.
     const w3cReplacement = content.includes('com.vaadin.tests.AbstractComponentIT')? '':'import com.vaadin.tests.AbstractComponentIT;';
