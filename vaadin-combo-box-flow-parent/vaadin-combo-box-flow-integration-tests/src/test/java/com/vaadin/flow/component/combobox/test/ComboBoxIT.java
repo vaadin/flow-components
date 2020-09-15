@@ -232,7 +232,7 @@ public class ComboBoxIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void callBackLazcallBackLazyComboBox_itemsLoadedLazilyyComboBox_itemsLoadedLazily() {
+    public void callBackLazycallBackLazyComboBox_itemsLoadedLazilyComboBox_itemsLoadedLazily() {
         testLazyComboBox("callback-box");
     }
 

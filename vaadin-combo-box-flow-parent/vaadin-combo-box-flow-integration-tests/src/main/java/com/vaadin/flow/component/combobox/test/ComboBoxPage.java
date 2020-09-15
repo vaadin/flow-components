@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -24,8 +27,13 @@ import com.vaadin.flow.component.combobox.bean.SimpleBean;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -50,6 +58,7 @@ public class ComboBoxPage extends Div {
     public ComboBoxPage() {
         createExternalSetValue();
         createExternalDisableTest();
+        createWithRequestsSpyDataProvider();
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithUpdatableValue();
@@ -117,6 +126,27 @@ public class ComboBoxPage extends Div {
         setValue.setId("update-value");
 
         add(comboBox, setProvider, setItemCaptionGenerator, setValue);
+    }
+
+    private void createWithRequestsSpyDataProvider() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("combobox-list-size-request-count");
+
+        AtomicInteger sizeRequestCounter = new AtomicInteger(0);
+        Span sizeRequestCountSpan = new Span("0");
+        sizeRequestCountSpan.setId("list-size-request-count-span");
+
+        ListDataProvider<String> dataProvider =
+                new SpyListDataProvider<>(Arrays.asList("foo", "bar", "baz"),
+                        ignore -> sizeRequestCountSpan.setText(
+                                String.valueOf(sizeRequestCounter.incrementAndGet())));
+        comboBox.setDataProvider(dataProvider);
+
+        NativeButton resetDataProvider = new NativeButton("Set data provider",
+                event -> comboBox.setItems("new item"));
+        resetDataProvider.setId("size-request-count-update-provider");
+
+        add(comboBox, resetDataProvider, sizeRequestCountSpan);
     }
 
     private void createWithValueChangeListener() {
@@ -192,5 +222,22 @@ public class ComboBoxPage extends Div {
         div.getStyle().set("padding", "10px").set("borderBottom",
                 "1px solid lightgray");
         super.add(div);
+    }
+
+    private static class SpyListDataProvider<T> extends ListDataProvider<T> {
+
+        private SerializableConsumer<Void> sizeRequestListener;
+
+        public SpyListDataProvider(Collection<T> items,
+                                   SerializableConsumer<Void> sizeRequestListener) {
+            super(items);
+            this.sizeRequestListener = sizeRequestListener;
+        }
+
+        @Override
+        public int size(Query<T, SerializablePredicate<T>> query) {
+            sizeRequestListener.accept(null);
+            return super.size(query);
+        }
     }
 }

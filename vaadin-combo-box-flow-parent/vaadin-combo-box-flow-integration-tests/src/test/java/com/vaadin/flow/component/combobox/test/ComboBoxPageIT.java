@@ -61,6 +61,28 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void sizeRequestCount_setListDataProvider_sizeRequestedImmediately() {
+        ComboBoxElement combo =
+                $(ComboBoxElement.class).id("combobox-list-size-request-count");
+        WebElement span = findElement(By.id("list-size-request-count-span"));
+
+        // check the data provider has been invoked immediately
+        // First size request - check whether to set client side filter
+        // Second size request - get real size of the data
+        Assert.assertEquals("2", span.getText());
+
+        combo.openPopup();
+        // Third size request - fetch data
+        Assert.assertEquals("3", span.getText());
+
+        // update data provider
+        findElement(By.id("size-request-count-update-provider")).click();
+
+        // check that the data provider has been changed
+        waitUntil(driver -> "new item".equals(getItemLabel(getItems(combo), 0)));
+    }
+
+    @Test
     public void createExternalDisableTest() {
         WebElement combo = findElement(By.id("client-test"));
         WebElement message = findElement(By.id("get-value"));
