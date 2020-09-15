@@ -6,7 +6,6 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
-  <version>2.2-SNAPSHOT</version>
   <artifactId>vaadin-checkbox-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Checkbox Parent</name>

@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-app-layout-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-app-layout-integration-tests</artifactId>
+  <version>${vaadin.app.layout.version}</version>
   <packaging>war</packaging>
   <name>Vaadin App Layout Integration Tests</name>
   <properties>

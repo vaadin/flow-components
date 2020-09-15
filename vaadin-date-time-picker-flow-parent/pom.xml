@@ -6,7 +6,6 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
-  <version>1.2-SNAPSHOT</version>
   <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Date Time Picker Parent</name>

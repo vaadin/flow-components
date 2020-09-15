@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-login-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-login-flow</artifactId>
+  <version>${vaadin.login.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Login</name>
   <dependencies>

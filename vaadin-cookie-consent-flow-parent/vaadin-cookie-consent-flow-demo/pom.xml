@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-cookie-consent-flow-demo</artifactId>
+  <version>${vaadin.cookie.consent.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Cookie Consent Flow Demo</name>
   <dependencies>

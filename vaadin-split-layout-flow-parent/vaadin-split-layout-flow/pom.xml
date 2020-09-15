@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-split-layout-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-split-layout-flow</artifactId>
+  <version>${vaadin.split.layout.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Split Layout</name>
   <dependencies>

@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-parent</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-charts-integration-tests</artifactId>
+  <version>${vaadin.charts.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Charts Integration Tests</name>
   <properties>

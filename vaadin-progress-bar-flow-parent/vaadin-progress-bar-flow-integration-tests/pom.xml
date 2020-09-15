@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-progress-bar-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-progress-bar-integration-tests</artifactId>
+  <version>${vaadin.progress.bar.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Progress Bar Integration Tests</name>
   <properties>

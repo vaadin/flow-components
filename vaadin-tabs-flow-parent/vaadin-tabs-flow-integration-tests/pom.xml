@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-tabs-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-tabs-integration-tests</artifactId>
+  <version>${vaadin.tabs.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Tabs Integration Tests</name>
   <properties>

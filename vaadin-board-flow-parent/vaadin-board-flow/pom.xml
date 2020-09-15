@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-board-flow-parent</artifactId>
-    <version>3.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-board-flow</artifactId>
+  <version>${vaadin.board.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Board</name>
   <dependencies>

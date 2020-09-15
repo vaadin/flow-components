@@ -4,9 +4,10 @@
   <parent>
     <artifactId>vaadin-iron-list-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>2.1-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-iron-list-testbench</artifactId>
+  <version>${vaadin.iron.list.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Iron List Testbench API</name>
   <dependencies>

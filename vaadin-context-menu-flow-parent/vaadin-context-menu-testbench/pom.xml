@@ -4,9 +4,10 @@
   <parent>
     <artifactId>vaadin-context-menu-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>3.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-context-menu-testbench</artifactId>
+  <version>${vaadin.context.menu.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Context Menu Testbench API</name>
   <dependencies>

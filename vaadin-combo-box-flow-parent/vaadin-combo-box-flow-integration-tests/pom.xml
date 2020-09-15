@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-combo-box-flow-parent</artifactId>
-    <version>3.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-combo-box-integration-tests</artifactId>
+  <version>${vaadin.combo.box.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Combo Box Integration Tests</name>
   <properties>

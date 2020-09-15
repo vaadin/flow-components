@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-menu-bar-flow-parent</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-menu-bar-integration-tests</artifactId>
+  <version>${vaadin.menu.bar.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Menu Bar Integration Tests</name>
   <properties>

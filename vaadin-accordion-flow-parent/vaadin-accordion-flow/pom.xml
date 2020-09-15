@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-accordion-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-accordion-flow</artifactId>
+  <version>${vaadin.accordion.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Accordion</name>
   <dependencies>

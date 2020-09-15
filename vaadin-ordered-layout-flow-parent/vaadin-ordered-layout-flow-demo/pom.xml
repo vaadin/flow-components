@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-ordered-layout-flow-parent</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-ordered-layout-flow-demo</artifactId>
+  <version>${vaadin.ordered.layout.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Ordered Layout Flow Demo</name>
   <dependencies>

@@ -6,7 +6,6 @@
     <artifactId>vaadin-flow-components</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
-  <version>7.1-SNAPSHOT</version>
   <artifactId>vaadin-charts-flow-parent</artifactId>
   <packaging>pom</packaging>
   <name>Vaadin Charts Parent</name>

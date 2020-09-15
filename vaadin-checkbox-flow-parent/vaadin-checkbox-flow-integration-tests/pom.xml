@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-checkbox-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-checkbox-integration-tests</artifactId>
+  <version>${vaadin.checkbox.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Checkbox Integration Tests</name>
   <properties>

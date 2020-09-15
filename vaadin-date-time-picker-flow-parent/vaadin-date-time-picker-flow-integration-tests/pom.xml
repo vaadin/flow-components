@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-date-time-picker-integration-tests</artifactId>
+  <version>${vaadin.date.time.picker.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Date Time Picker Integration Tests</name>
   <properties>

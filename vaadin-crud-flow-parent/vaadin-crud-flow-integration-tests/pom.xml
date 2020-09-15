@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-crud-flow-parent</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-crud-integration-tests</artifactId>
+  <version>${vaadin.crud.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Crud Integration Tests</name>
   <properties>

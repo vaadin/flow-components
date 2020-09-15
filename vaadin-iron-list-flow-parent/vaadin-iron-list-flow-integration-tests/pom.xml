@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-iron-list-flow-parent</artifactId>
-    <version>2.1-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-iron-list-integration-tests</artifactId>
+  <version>${vaadin.iron.list.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Iron List Integration Tests</name>
   <properties>

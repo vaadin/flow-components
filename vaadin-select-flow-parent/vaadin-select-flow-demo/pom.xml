@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-select-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-select-flow-demo</artifactId>
+  <version>${vaadin.select.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Select Flow Demo</name>
   <dependencies>

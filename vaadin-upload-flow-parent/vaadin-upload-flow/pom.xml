@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-upload-flow-parent</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-upload-flow</artifactId>
+  <version>${vaadin.upload.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Upload</name>
   <dependencies>

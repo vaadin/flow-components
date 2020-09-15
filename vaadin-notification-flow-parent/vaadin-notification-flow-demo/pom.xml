@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-notification-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-notification-flow-demo</artifactId>
+  <version>${vaadin.notification.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Notification Flow Demo</name>
   <dependencies>

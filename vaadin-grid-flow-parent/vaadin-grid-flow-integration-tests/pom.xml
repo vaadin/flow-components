@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-grid-flow-parent</artifactId>
-    <version>4.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-grid-integration-tests</artifactId>
+  <version>${vaadin.grid.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Grid Integration Tests</name>
   <properties>

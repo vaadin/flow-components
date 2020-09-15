@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-form-layout-flow-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-form-layout-integration-tests</artifactId>
+  <version>${vaadin.form.layout.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Form Layout Integration Tests</name>
   <properties>

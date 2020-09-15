@@ -4,9 +4,10 @@
   <parent>
     <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>2.2-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-confirm-dialog-testbench</artifactId>
+  <version>${vaadin.confirm.dialog.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Confirm Dialog Testbench API</name>
   <dependencies>

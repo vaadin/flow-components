@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-list-box-flow-parent</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-list-box-integration-tests</artifactId>
+  <version>${vaadin.list.box.version}</version>
   <packaging>war</packaging>
   <name>Vaadin List Box Integration Tests</name>
   <properties>

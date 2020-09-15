@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-rich-text-editor-flow-demo</artifactId>
+  <version>${vaadin.rich.text.editor.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Rich Text Editor Flow Demo</name>
   <dependencies>
