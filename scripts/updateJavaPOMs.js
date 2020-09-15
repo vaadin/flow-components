@@ -41,7 +41,7 @@ async function readRootPoms() {
   if (oldVersionSchema) {
     componentVersion = `\$\{${artifactId2versionName(name)}\}`;
   } else {
-    componentVersion = rootVersion;
+    componentVersion = '${project.version}';
   }
 }
 
@@ -94,6 +94,12 @@ async function consolidate(template, pom, cb) {
   }
 
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
+  tplJs.project.parent[0].version = [rootVersion];
+  if (oldVersionSchema) {
+    tplJs.project.version = [componentVersion];
+  } else {
+    delete js.project.version;
+  }
   cb && cb(tplJs);
 
   const xml = new xml2js.Builder().buildObject(tplJs);
@@ -106,11 +112,6 @@ async function consolidatePomParent() {
     renameComponent(js.project.modules[0].module, name);
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
     js.project.parent[0].version = [rootVersion];
-    if (oldVersionSchema) {
-       js.project.version = [originalVersion];
-    } else {
-      delete js.project.version;
-    }
   });
 }
 async function consolidatePomFlow() {
