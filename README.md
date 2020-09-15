@@ -28,7 +28,7 @@ Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
 
 ## Running ITs of all components
 
-NOTE: this takes a long while and consumes a lot of resources in your computer
+NOTE: this takes a long while and consumes a lot of resources in your computer, it's better to run tests in the merged repo as it is indicated in the following sections
 
 - `mvn clean verify -T C2`
 
@@ -42,6 +42,27 @@ It does substitutions in sources so as routes do no conflict, and also adjust po
 By default it merges all modules, but it's also possible to merge certain modules by passing arguments
 
 - `./scripts/mergeITs.js button text-field crud`
+
+## Running ITs of all components in the merged module
+
+It should take around 15-20 minutes depending on the computer capabilities.
+
+- `mvn verify -Drun-it -Dfailsafe.forkCount=5 -Dcom.vaadin.testbench.Parameters.testsInParallel=1 -pl integration-tests`
+
+NOTE: that we need to activate the module with the `-Drun-it` property, and to speed up tests we enable parallel execution of classes by setting `-Dfailsafe.forkCount=5`, in addition `-Dcom.vaadin.testbench.Parameters.testsInParallel=1` makes TB to reuse browser instances.
+
+
+## Running in Sauce Labs
+
+The time it takes depends on the number of browsers and the modules tested.
+
+To select which browsers to test, set the `TESTBENCH_GRID_BROWSERS` environment variable with a list of browsers.
+```
+TESTBENCH_GRID_BROWSERS=edge,safari-13,firefox
+```
+Then run the following command, replacing the `***` with your Sauce Labs credentials.
+- `mvn verify -P saucelabs -Dtest.use.hub=true -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Dcom.vaadin.tests.SharedBrowser.reuseBrowser=false -Drun-it -Dfailsafe.forkCount=5 -Dcom.vaadin.testbench.Parameters.testsInParallel=1 -pl integration-tests`
+
 
 ## Updating modules from original master branches
 
