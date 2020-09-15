@@ -1,7 +1,5 @@
 #!/bin/bash
 
-processors=3
-parallel=1
 
 if [ -n "$1" ]
 then
@@ -9,9 +7,9 @@ then
   do
     case $i in
       processors=*)
-        processors=`echo $i | cut -d = -f2`;;
+        FORK_COUNT=`echo $i | cut -d = -f2`;;
       parallel=*)
-        parallel=`echo $i | cut -d = -f2`;;
+        TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -52,7 +50,10 @@ saveFailed() {
   fi
 }
 
-tcLog "Show info (processors=$processors parallel=$parallel)"
+[ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
+[ -z "$FORK_COUNT" ] && FORK_COUNT="5"
+
+tcLog "Show info (forks=$FORK_COUNT parallel=$TESTS_IN_PARALLEL)"
 echo $SHELL
 type java && java -version
 type mvn && mvn -version
@@ -68,7 +69,7 @@ $cmd || exit 1
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
-cmd="mvn install -Drelease -B -q -T C$processors"
+cmd="mvn install -Drelease -B -q -T $FORK_COUNT"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
@@ -81,34 +82,48 @@ fi
 cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd || tcStatus 1 "Merging ITs failed"
-
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
+if [ -n "$SAUCE_USER" ]
+then
+   test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
+   args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
+fi
+echo "$args"
+
 if [ "$TBHUB" = "localhost" ]
 then
-    tcLog 'Installing docker image with standalone-chrome'
-    trap "echo Terminating docker; docker stop standalone-chrome" EXIT
-    docker pull selenium/standalone-chrome
-    docker image prune -f
-    docker run --name standalone-chrome --net=host --rm -d -v /dev/shm:/dev/shm  selenium/standalone-chrome
+    DOCKER_CONTAINER_NAME="selenium-container"
+    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
+    tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
+    set -x
+    trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
+    docker pull "$SELENIUM_DOCKER_IMAGE" || exit 1
+    docker image prune -f || exit 1
+    docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE" || exit 1
+    set +x
 fi
 
-if [ -n "$modules" ]
+args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
+
+reuse_browser() {
+    [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
+}
+
+if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify $args -pl $modules"
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
   tcLog "Running module ITs - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 elif [ -z "$BUILD" ]
 then
-  mode="-Dfailsafe.forkCount=$processors -Dcom.vaadin.testbench.Parameters.testsInParallel=$parallel"
+  mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests"
+  cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
-
-  ## exit on error if any command in the pipe fails
   $cmd
   error=$?
 
@@ -124,7 +139,7 @@ then
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -q -Drun-it -Drelease $mode $args -pl integration-tests -Dit.test=$failed"
+        cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dit.test=$failed $(reuse_browser false)"
         tcLog "Re-Running $nfailed failed tests ..."
         echo $cmd
         $cmd

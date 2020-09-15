@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-crud-flow</artifactId>
+  <version>${vaadin.crud.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Crud</name>
   <dependencies>
@@ -33,12 +34,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.grid.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin.webjar</groupId>
@@ -58,7 +59,7 @@
     <dependency>
       <groupId>org.webjars.bowergithub.vaadin</groupId>
       <artifactId>vaadin-checkbox</artifactId>
-      <version>2.5.0</version>
+      <version>2.5.0-alpha1</version>
     </dependency>
     <dependency>
       <groupId>org.webjars.bowergithub.polymerelements</groupId>

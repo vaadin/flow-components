@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-button-testbench</artifactId>
+  <version>${vaadin.button.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Button Testbench API</name>
   <dependencies>

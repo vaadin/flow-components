@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-accordion-testbench</artifactId>
+  <version>${vaadin.accordion.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Accordion Testbench API</name>
   <dependencies>
@@ -18,7 +19,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-details-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.details.version}</version>
     </dependency>
   </dependencies>
   <build>

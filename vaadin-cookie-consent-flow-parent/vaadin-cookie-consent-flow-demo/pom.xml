@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-cookie-consent-flow-demo</artifactId>
+  <version>${vaadin.cookie.consent.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Cookie Consent Flow Demo</name>
   <dependencies>
@@ -26,12 +27,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-cookie-consent-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.cookie.consent.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>

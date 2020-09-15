@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-menu-bar-testbench</artifactId>
+  <version>${vaadin.menu.bar.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Menu Bar Testbench API</name>
   <dependencies>

@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-form-layout-flow-demo</artifactId>
+  <version>${vaadin.form.layout.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Form Layout Flow Demo</name>
   <dependencies>
@@ -25,7 +26,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-form-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.form.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -34,22 +35,22 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-picker-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.date.picker.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

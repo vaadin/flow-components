@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-form-layout-testbench</artifactId>
+  <version>${vaadin.form.layout.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Form Layout Testbench API</name>
   <dependencies>

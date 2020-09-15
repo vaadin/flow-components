@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-cookie-consent-testbench</artifactId>
+  <version>${vaadin.cookie.consent.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Cookie Consent Testbench API</name>
   <dependencies>
@@ -18,7 +19,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-cookie-consent-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.cookie.consent.version}</version>
     </dependency>
   </dependencies>
   <build>

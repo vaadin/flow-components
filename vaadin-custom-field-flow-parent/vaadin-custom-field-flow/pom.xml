@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-custom-field-flow</artifactId>
+  <version>${vaadin.custom.field.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Custom Field</name>
   <dependencies>

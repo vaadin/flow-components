@@ -1,12 +1,9 @@
 package com.vaadin.tests;
 
-import com.vaadin.testbench.Parameters;
-import com.vaadin.testbench.parallel.setup.RemoteDriver;
-import com.vaadin.testbench.parallel.setup.SetupDriver;
 import org.junit.AfterClass;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
-import java.lang.reflect.Field;
+import java.util.List;
 
 public abstract class AbstractComponentIT
     extends com.vaadin.flow.testutil.AbstractComponentIT {
@@ -15,15 +12,17 @@ public abstract class AbstractComponentIT
 
     @Override
     public void setup() throws Exception {
-        if(Parameters.getTestsInParallel() != 1)  {
-            super.setup();
-            return;
-        }
-        driver = browser.getDriver(() -> {
-            super.setup();
-            return getDriver();
-        });
-        screenshotOnFailure.setQuitDriverOnFinish(false);
+        browser.setup(super::setup, this::getDriver, screenshotOnFailure)
+            .ifPresent(this::setDriver);
+    }
+
+    protected int getDeploymentPort() {
+        return 8080;
+    }
+
+    @Override
+    protected List<DesiredCapabilities> getHubBrowsersToTest() {
+        return browser.getGridBrowsers().orElse(super.getHubBrowsersToTest());
     }
 
     @AfterClass

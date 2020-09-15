@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-select-testbench</artifactId>
+  <version>${vaadin.select.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Select Testbench API</name>
   <dependencies>

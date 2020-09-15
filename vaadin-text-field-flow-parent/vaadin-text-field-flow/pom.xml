@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-text-field-flow</artifactId>
+  <version>${vaadin.text.field.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Text Field</name>
   <dependencies>

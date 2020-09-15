@@ -7,13 +7,14 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-charts-flow-demo</artifactId>
+  <version>${vaadin.charts.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Charts Flow Demo</name>
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-charts-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.charts.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -30,22 +31,22 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-radio-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.radio.button.version}</version>
     </dependency>
   </dependencies>
   <build>

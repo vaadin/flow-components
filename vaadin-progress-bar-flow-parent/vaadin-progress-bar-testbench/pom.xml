@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-progress-bar-testbench</artifactId>
+  <version>${vaadin.progress.bar.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Progress Bar Testbench API</name>
   <dependencies>

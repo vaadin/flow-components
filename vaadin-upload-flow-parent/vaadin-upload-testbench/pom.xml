@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-upload-testbench</artifactId>
+  <version>${vaadin.upload.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Upload Testbench API</name>
   <dependencies>

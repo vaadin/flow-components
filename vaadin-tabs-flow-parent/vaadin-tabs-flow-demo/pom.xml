@@ -7,13 +7,14 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-tabs-flow-demo</artifactId>
+  <version>${vaadin.tabs.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Tabs Flow Demo</name>
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-tabs-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.tabs.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -33,7 +34,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.webjars.bowergithub.polymerelements</groupId>
@@ -44,12 +45,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

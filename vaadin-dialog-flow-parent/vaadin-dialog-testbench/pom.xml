@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-dialog-testbench</artifactId>
+  <version>${vaadin.dialog.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Dialog Testbench API</name>
   <dependencies>

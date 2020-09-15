@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-upload-flow-demo</artifactId>
+  <version>${vaadin.upload.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Upload Flow Demo</name>
   <dependencies>
@@ -33,12 +34,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-upload-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.upload.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-context-menu-flow-demo</artifactId>
+  <version>${vaadin.context.menu.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Context Menu Flow Demo</name>
   <dependencies>
@@ -25,7 +26,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.context.menu.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -34,7 +35,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-confirm-dialog-testbench</artifactId>
+  <version>${vaadin.confirm.dialog.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Confirm Dialog Testbench API</name>
   <dependencies>
@@ -19,7 +20,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
   </dependencies>
   <build>

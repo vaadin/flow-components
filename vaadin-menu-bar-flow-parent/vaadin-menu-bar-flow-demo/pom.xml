@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-menu-bar-flow-demo</artifactId>
+  <version>${vaadin.menu.bar.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Menu Bar Flow Demo</name>
   <dependencies>
@@ -33,17 +34,17 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-menu-bar-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.menu.bar.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.checkbox.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

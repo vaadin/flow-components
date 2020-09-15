@@ -60,8 +60,9 @@ async function createPom() {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
     // Add component-flow and component-testbench dependencies
-    addDependency(prev, 'com.vaadin', `${id}-flow`, '${project.version}');
-    addDependency(prev, 'com.vaadin', `${id}-testbench`, '${project.version}', 'test');
+    const componentVersion = /^14\.[3-4]/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
+    addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
+    addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
     // Read original IT dependencies in master and add them
     const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'))
     js.project.dependencies[0].dependency.forEach(dep => {

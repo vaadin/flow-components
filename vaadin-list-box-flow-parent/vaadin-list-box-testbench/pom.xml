@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-list-box-testbench</artifactId>
+  <version>${vaadin.list.box.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin List Box Testbench API</name>
   <dependencies>

@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-app-layout-flow-demo</artifactId>
+  <version>${vaadin.app.layout.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin App Layout Flow Demo</name>
   <dependencies>
@@ -32,22 +33,22 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-app-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.app.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-tabs-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.tabs.version}</version>
     </dependency>
   </dependencies>
   <build>
