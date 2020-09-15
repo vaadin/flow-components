@@ -29,6 +29,7 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
@@ -41,6 +42,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement templateBox;
     private ComboBoxElement emptyCallbackBox;
     private ComboBoxElement lazyCustomPageSize;
+
+    private WebElement lazySizeRequestCountSpan;
 
     @Before
     public void init() {
@@ -57,6 +60,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
         lazyCustomPageSize = $(ComboBoxElement.class)
                 .id("lazy-custom-page-size");
+        lazySizeRequestCountSpan =
+                findElement(By.id("callback-dataprovider-size-request-count"));
     }
 
     @Test
@@ -415,11 +420,17 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
     @Test
     public void callbackDataprovider_pagesLoadedLazily() {
+        // Check that no backend calls before open popup
+        Assert.assertEquals("0", lazySizeRequestCountSpan.getText());
+
         callbackBox.openPopup();
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
         assertRendered("Item 10");
+
+        // Now backend request should take place to init the data communicator
+        Assert.assertEquals("1", lazySizeRequestCountSpan.getText());
 
         callbackBox.openPopup();
         scrollToItem(callbackBox, 60);
