@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -29,11 +30,13 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
+
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/lazy-loading")
@@ -59,6 +62,7 @@ public class LazyLoadingPage extends Div {
         createComboBoxInATemplate();
         addSeparator();
         createCallbackDataProviderWhichReturnsZeroItems();
+        addSeparator();
         createComboBoxWithCustomPageSizeAndLazyLoading();
     }
 
@@ -68,8 +72,7 @@ public class LazyLoadingPage extends Div {
         comboBox.setId("lazy-strings");
 
         List<String> items = generateStrings(1000);
-        ListDataProvider<String> dp = DataProvider.ofCollection(items);
-        comboBox.setDataProvider(dp);
+        comboBox.setDataProvider(DataProvider.ofCollection(items));
 
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
@@ -188,16 +191,24 @@ public class LazyLoadingPage extends Div {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("callback-dataprovider");
 
+        AtomicInteger sizeRequestCount = new AtomicInteger(0);
+        Span sizeRequestCountSpan = new Span("0");
+        sizeRequestCountSpan.setId("callback-dataprovider-size-request-count");
+
         CallbackDataProvider<String, String> dataProvider = new CallbackDataProvider<String, String>(
                 query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
                         .mapToObj(i -> "Item " + i),
-                query -> 210);
+                query -> {
+                    sizeRequestCountSpan.setText(
+                            String.valueOf(sizeRequestCount.incrementAndGet()));
+                    return 210;
+                });
 
         comboBox.setDataProvider(dataProvider);
 
-        add(comboBox);
+        add(comboBox, sizeRequestCountSpan);
     }
 
     private void createComboBoxInATemplate() {
