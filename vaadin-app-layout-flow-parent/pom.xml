@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-app-layout-flow-parent</artifactId>
+  <version>${vaadin.app.layout.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin App Layout Parent</name>
   <modules>
