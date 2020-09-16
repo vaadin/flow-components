@@ -46,6 +46,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -116,7 +117,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
          *            the fetched item count
          * @return stream of items
          */
-        public Stream<T> fetchItems(String filter, int offset, int limit);
+        Stream<T> fetchItems(String filter, int offset, int limit);
     }
 
     private class CustomValueRegistration implements Registration {
@@ -193,7 +194,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @FunctionalInterface
     public interface ItemFilter<T> extends SerializableBiPredicate<T, String> {
         @Override
-        public boolean test(T item, String filterText);
+        boolean test(T item, String filterText);
     }
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
@@ -207,6 +208,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private String lastFilter;
 
     private DataCommunicator<T> dataCommunicator;
+    private DataCommunicatorInitializer dataCommunicatorInitializer;
+    private Registration lazyOpenRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
 
@@ -248,13 +251,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setPageSize(pageSize);
 
         addAttachListener(e -> initConnector());
-
-        runBeforeClientResponse(ui -> {
-            // If user didn't provide any data, initialize with empty data set.
-            if (dataCommunicator == null) {
-                setItems();
-            }
-        });
     }
 
     /**
@@ -374,9 +370,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
      *
-     * Note that filtering of the ComboBox is not affected by the renderer that
-     * is set here. Filtering is done on the original values and can be affected
-     * by {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
@@ -518,12 +515,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
-                            .callJsFunction("$connector.updateData", data),
+                    .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
             dataCommunicator.setPageSize(getPageSize());
         }
 
-        scheduleRender();
         setValue(null);
 
         SerializableFunction<String, C> convertOrNull = filterText -> {
@@ -534,21 +530,58 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return filterConverter.apply(filterText);
         };
 
-        SerializableConsumer<C> providerFilterSlot = dataCommunicator
-                .setDataProvider(dataProvider,
-                        convertOrNull.apply(getFilterString()));
-
-        filterSlot = filter -> {
-            if (!Objects.equals(filter, lastFilter)) {
-                providerFilterSlot.accept(convertOrNull.apply(filter));
-                lastFilter = filter;
+        // Postpone data communicator provider initialization in order to
+        // trigger item count request and data fetch upon clicking on combobox
+        dataCommunicatorInitializer = () -> {
+            dataCommunicatorInitializer = null;
+            if(lazyOpenRegistration != null) {
+                lazyOpenRegistration.remove();
+                lazyOpenRegistration = null;
             }
+            scheduleRender();
+            SerializableConsumer<C> providerFilterSlot = dataCommunicator
+                    .setDataProvider(dataProvider,
+                            convertOrNull.apply(getFilterString()));
+
+            filterSlot = filter -> {
+                if (!Objects.equals(filter, lastFilter)) {
+                    providerFilterSlot.accept(convertOrNull.apply(filter));
+                    lastFilter = filter;
+                }
+            };
+
+            shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
+            setupDataProviderListener(dataProvider);
+
+            refreshAllData(shouldForceServerSideFiltering);
+
+            userProvidedFilter = UserProvidedFilter.UNDECIDED;
         };
 
-        shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
-        setupDataProviderListener(dataProvider);
+        // Register an opened listener to initialize the dataprovider
+        // when the dropdown opens.
+        lazyOpenRegistration = getElement()
+                .addPropertyChangeListener("opened", this::executeRegistration);
+    }
 
-        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+    /**
+     * Initialize {@link DataCommunicator} with the lazy {@link DataProvider}
+     * when the open property changes for a lazy combobox. Clean registration
+     * on initialization.
+     *
+     * @param event property change event for "open"
+     */
+    private void executeRegistration(PropertyChangeEvent event) {
+        if (event.getValue().equals(Boolean.TRUE)) {
+            if (lazyOpenRegistration != null) {
+                lazyOpenRegistration.remove();
+                lazyOpenRegistration = null;
+            }
+            if (dataCommunicatorInitializer != null) {
+                getDataCommunicator();
+                reset();
+            }
+        }
     }
 
     private <C> void setupDataProviderListener(DataProvider<T, C> dataProvider) {
@@ -562,7 +595,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 refreshAllData(shouldForceServerSideFiltering);
             }
         });
-        refreshAllData(shouldForceServerSideFiltering);
     }
 
     @Override
@@ -628,7 +660,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * size callback.
      * <p>
      * This method is a shorthand for making a {@link CallbackDataProvider} that
-     * handles a partial {@link com.vaadin.data.provider.Query Query} object.
+     * handles a partial {@link com.vaadin.flow.data.provider.Query Query} object.
      * <p>
      * Changing the combo box's data provider resets its current value to
      * {@code null}.
@@ -675,6 +707,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         setDataProvider(listDataProvider,
                 filterText -> item -> itemFilter.test(item, filterText));
+
+        // Force the data communicator initialization eagerly because in-memory
+        // data is used (ListDataProvider)
+        initDataCommunicator();
     }
 
     /**
@@ -836,7 +872,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
-     * 
+     *
      * @param allowCustomValue
      *            {@code true} to enable custom value set events, {@code false}
      *            to disable them
@@ -1012,7 +1048,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The clear button is an icon, which can be clicked to set the combo box
      * value to {@code null}.
-     * 
+     *
      * @param clearButtonVisible
      *            {@code true} to display the clear button, {@code false} to
      *            hide it
@@ -1025,7 +1061,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Gets whether this combo box displays a clear button when a value is
      * selected.
-     * 
+     *
      * @return {@code true} if this combo box displays a clear button,
      *         {@code false} otherwise
      * @see #setClearButtonVisible(boolean)
@@ -1074,12 +1110,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void confirmUpdate(int id) {
-        dataCommunicator.confirmUpdate(id);
+        getDataCommunicator().confirmUpdate(id);
     }
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
-        dataCommunicator.setRequestedRange(start, length);
+        getDataCommunicator().setRequestedRange(start, length);
         filterSlot.accept(filter);
         // Send (possibly updated) key for the selected value
         getElement().executeJs("this._selectedKey=$0",
@@ -1088,7 +1124,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void resetDataCommunicator() {
-        dataCommunicator.reset();
+        getDataCommunicator().reset();
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -1121,4 +1157,35 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
+    private DataCommunicator<T> getDataCommunicator() {
+        initDataCommunicator();
+        return dataCommunicator;
+    }
+
+    private void initDataCommunicator() {
+        if (dataCommunicatorInitializer != null) {
+            /*
+             * Init the Data Communicator: 1. Lazily, when the data lazy
+             * loading is used. Initialization occurs when the user clicks
+             * on the dropdown to view the list of items. 2. Eagerly, when
+             * the items are set explicitly or in-memory Data Provider is
+             * used.
+             */
+            dataCommunicatorInitializer.init();
+        } else if (dataCommunicator == null) {
+            /*
+             * If the user hasn't provided any data, initialize with empty
+             * data set.
+             */
+            setItems();
+        }
+    }
+
+    /**
+     * Callback for Data Communicator lazy initialization
+     */
+    @FunctionalInterface
+    private interface DataCommunicatorInitializer extends Serializable {
+        void init();
+    }
 }
