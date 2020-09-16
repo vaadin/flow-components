@@ -57,6 +57,8 @@ consolidateCharts() {
   perl -pi -e "s,>$prj-examples<,>$prj-demo<,g" $mod/*/pom.xml
   renameModule $mod integration-test $prj-integration-tests
   renameModule $mod testbench $tb
+  # remove the demo folder from vaadin-charts-flow
+  rm -rf $mod/demo
 }
 
 consolidatePoms() {
