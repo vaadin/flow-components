@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-grid-pro-flow-parent</artifactId>
+  <version>${vaadin.grid.pro.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Grid Pro Parent</name>
   <modules>

@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-ordered-layout-flow-parent</artifactId>
+  <version>${vaadin.ordered.layout.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Ordered Layout Parent</name>
   <modules>
