@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
+  <version>${vaadin.rich.text.editor.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Rich Text Editor Parent</name>
   <modules>

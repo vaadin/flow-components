@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-notification-flow-parent</artifactId>
+  <version>${vaadin.notification.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Notification Parent</name>
   <modules>
