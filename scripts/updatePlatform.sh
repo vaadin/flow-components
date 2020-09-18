@@ -6,7 +6,7 @@
 set -euo pipefail
 
 log() {
-    [ -z  ${DEBUG+x} ] ||  echo "$@"
+    [ -z  ${DEBUG+x} ] ||  echo "$@"
 }
 
 die() { 
@@ -65,10 +65,22 @@ log "---"
 
 log "Comparing versions in $VERSIONS_FILE"
 declare -A packagesForUpdate
-for item in $(jq -r '.core + .vaadin | map(select(.npmName != null)) | map(.npmName + ":" + .jsVersion) | join("\n")' "$VERSIONS_FILE" )
+
+jq_select_version() {
+    jq -r '.core + .vaadin
+        | map(select(.npmName != null))
+        | map(.npmName
+            + ":"
+            + if has("npmVersion") then .npmVersion else .jsVersion end
+            + ":" + (has("npmVersion")|tostring) )
+        | join("\n")' "$1"
+}
+
+for item in $(jq_select_version "$VERSIONS_FILE" )
 do
     NAME="$(echo $item | cut -d: -f1)"
     VERSION_IN_PLATFORM="$(echo $item | cut -d: -f2)"
+    HAS_NPM_VERSION="$(echo $item | cut -d: -f3)"
     if [ ${packages[$NAME]+_} ]
     then
         VERSION_IN_LOCAL_REPO="${packages[$NAME]}"
@@ -82,7 +94,7 @@ do
         else
             # Mark for update 
             echo "$NAME needs update from $VERSION_IN_PLATFORM to $VERSION_IN_LOCAL_REPO" 
-            packagesForUpdate[$NAME]=$VERSION_IN_LOCAL_REPO
+            packagesForUpdate[$NAME]="$VERSION_IN_LOCAL_REPO:$HAS_NPM_VERSION"
         fi
     else
        log "Ignoring $NAME"
@@ -100,10 +112,17 @@ for K in "${!packagesForUpdate[@]}"; do
     # Example value: vaadin-list-mixin
     ELEMENT="$(echo $FULL_ELEMENT | cut -d. -f2)"
     # Example value: 1.2.3-beta2
-    VERSION="${packagesForUpdate[$K]}"
+    VERSION="$(echo ${packagesForUpdate[$K]} | cut -d: -f1)"
+    # "true" or "false"
+    HAS_NPM_VERSION="$(echo ${packagesForUpdate[$K]} | cut -d: -f2)"
     # jq does not update in place, so each time a new temp file is created
     NEW_TEMP_FILE="$(mktemp)"
-    jq --indent 4 ".$ROOT_PATH[\"$ELEMENT\"].jsVersion |= \"$VERSION\"" "$TEMP_FILE" > "$NEW_TEMP_FILE"
+    JQ_UPDATE_VERSION=".$ROOT_PATH[\"$ELEMENT\"].jsVersion |= \"$VERSION\""
+    if [ "$HAS_NPM_VERSION" == "true" ]
+    then
+        JQ_UPDATE_VERSION=".$ROOT_PATH[\"$ELEMENT\"].npmVersion |= \"$VERSION\""
+    fi
+    jq --indent 4 "$JQ_UPDATE_VERSION" "$TEMP_FILE" > "$NEW_TEMP_FILE"
     rm "$TEMP_FILE"
     TEMP_FILE="$NEW_TEMP_FILE"
 done
@@ -118,14 +137,12 @@ fi
 ## TODO: Check if there is already an open pull-request
 ## curl "https://api.github.com/repos/vaadin/platform/pulls?state=open&base=$TARGET_BRANCH" | jq -r  'map_values(.head.ref) | join("\n")'
 
-git checkout --quiet "$TARGET_BRANCH" || quit "Could not checkout branch $TARGET_BRANCH"
-
 PR_BRANCH="update-versions-in-$TARGET_BRANCH-$(date +%s)"
-git checkout -b "$PR_BRANCH"
+git checkout --quiet -b "$PR_BRANCH"
 
 git add versions.json
 git commit --quiet -m "Updated versions.json"
-git push --quiet -u origin HEAD
+git push --quiet -u origin HEAD 2> >(grep -v "^remote:" 1>&2)
 
 [ -z ${GITHUB_TOKEN+x} ] && quit "GITHUB_TOKEN not set. Pull request will not be created. Branch is $PR_BRANCH"
 
