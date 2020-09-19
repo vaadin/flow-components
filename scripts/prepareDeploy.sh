@@ -4,41 +4,48 @@
 getBaseVersion() {
    echo $1 | tr - . | cut -d . -f1,2;
 }
-# get latest released version of an artifact by checking releases or prereleases repos
+# get latest released version of an artifact by checking maven repos
 getLatest() {
    base=`getBaseVersion $2`
-   releases=`curl -s "https://maven.vaadin.com/vaadin-prereleases/com/vaadin/$1/maven-metadata.xml"`
-   prereleases=`curl -s "https://repo.maven.apache.org/maven2/com/vaadin/$1/maven-metadata.xml"`
+   releases=`curl -s "https://repo.maven.apache.org/maven2/com/vaadin/$1/maven-metadata.xml"`
+   prereleases=`curl -s "https://maven.vaadin.com/vaadin-prereleases/com/vaadin/$1/maven-metadata.xml"`
 
    stable=`echo "$releases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | tail -1`
    [ -n "$stable" ] && echo $stable && return
    pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | grep 'alpha|beta|rc'`
-   [ -n "$pre" ] && echo $pre || echo $1
+   [ -n "$pre" ] && echo $pre || echo "$2"
 }
 
-### Check that version comes as a parameter and has a valid format
+### Check that version is given as a parameter and has a valid format
 version=$1
 ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+([\.-](alpha|beta|rc)[0-9]+)?$ ]] && echo Invalid version format: $version && exit 1
 [[ $version =~ (alpha|beta|rc) ]] && profile=prerelease || profile=maven-central
+pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
 
-### Compute platform branch based on version
-branch=`getBaseVersion $version`
-[[ $branch =~ ^(18|0) ]] && branch=master
+### Extrat major.minor part from version
+versionBase=`getBaseVersion $version`
+pomBase=`getBaseVersion $pomVersion`
 
-### Load versions file for this platform release
+### Compute platform branch based on version to release
+[[ $versionBase =~ ^(18|0) ]] && branch=master || branch=$versionBase
+
+### Check that current branch is valid for the version to release
+[ $branch != master -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
+
+### Load versions file for the platform release matching version to release
 versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
-## Compute flow version
+## Compute flow version for the platform version
 flow=`echo "$versions" | jq -r .core.flow.javaVersion`
 flow=`getLatest flow $flow`
 
 ## Modify poms with the versions to release
 echo "Setting version=$version to vaadin-flow-components"
-mvn -B -q versions:set -DnewVersion=$version
+mvn -B -q versions:set -DnewVersion=$version || exit 1
 echo "Setting flow.version=$flow in vaadin-flow-components"
-mvn -B -q -N versions:set-property -Dproperty=flow.version -DnewVersion=$flow
+mvn -B -q -N versions:set-property -Dproperty=flow.version -DnewVersion=$flow || exit 1
 
-## Compure modules to build and deploy
+## Compute modules to build and deploy
 modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 |cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
 build=vaadin-flow-components-shared
 for i in $modules
