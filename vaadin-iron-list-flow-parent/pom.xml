@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-iron-list-flow-parent</artifactId>
+  <version>${vaadin.iron.list.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Iron List Parent</name>
   <modules>
