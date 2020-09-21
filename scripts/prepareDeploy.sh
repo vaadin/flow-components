@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 
 # return the major.minor numbers of a version
 getBaseVersion() {
@@ -26,24 +27,26 @@ pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '
 versionBase=`getBaseVersion $version`
 pomBase=`getBaseVersion $pomVersion`
 
-### Compute platform branch based on version to release
-[[ $versionBase =~ ^(18|0) ]] && branch=master || branch=$versionBase
+### Load versions file for this platform release and compute flow version
+branch=$versionBase
+flow=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json" | jq -r .core.flow.javaVersion 2>/dev/null`
+if [ $? != 0 ]
+then
+  ## when branch does not exist try master
+  branch=master
+  flow=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json" | jq -r .core.flow.javaVersion`
+fi
 
 ### Check that current branch is valid for the version to release
 [ $branch != master -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
 
-### Load versions file for the platform release matching version to release
-versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
-
-## Compute flow version for the platform version
-flow=`echo "$versions" | jq -r .core.flow.javaVersion`
 flow=`getLatest flow $flow`
 
 ## Modify poms with the versions to release
 echo "Setting version=$version to vaadin-flow-components"
 mvn -B -q versions:set -DnewVersion=$version || exit 1
 echo "Setting flow.version=$flow in vaadin-flow-components"
-mvn -B -q -N versions:set-property -Dproperty=flow.version -DnewVersion=$flow || exit 1
+mvn -B -q -N versions:set-property -Dproperty=flow.version -DnewVersion=$flow || exit 1
 
 ## Compute modules to build and deploy
 modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 |cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
