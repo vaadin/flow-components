@@ -270,7 +270,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         Long overLayWidthBeforeResize = getSizeFromElement(overlay,
                 ElementConstants.STYLE_WIDTH);
 
-        resizeDialog(overlayContent);
+        resizeDialog(overlayContent, 50, 50);
 
         Long overLayHeightAfterResize = getSizeFromElement(overlay,
                 ElementConstants.STYLE_HEIGHT);
@@ -298,6 +298,38 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void verifyResizeLimitsAreRespected() {
+        findElement(By.id("dialog-resizing-restrictions-button")).click();
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
+
+        Long maxValue = 225l;
+        Long minValue = 175l;
+
+        WebElement overlayContent = getOverlayContent();
+        WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
+
+        resizeDialog(overlayContent, 50, 50);
+
+        Long overLayHeightAfterResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_HEIGHT);
+        Long overLayWidthAfterResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_WIDTH);
+        
+        Assert.assertEquals(overLayHeightAfterResize, maxValue);
+        Assert.assertEquals(overLayWidthAfterResize, maxValue);
+
+        resizeDialog(overlayContent, -75, -75);
+
+        overLayHeightAfterResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_HEIGHT);
+        overLayWidthAfterResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_WIDTH);
+        
+        Assert.assertEquals(overLayHeightAfterResize, minValue);
+        Assert.assertEquals(overLayWidthAfterResize, minValue);
+    }
+
+    @Test
     public void resizableDialogListenerIsCalled() {
         findElement(By.id("dialog-resizable-draggable-open-button")).click();
         WebElement message = findElement(By.id("dialog-resizable-draggable-message"));
@@ -308,19 +340,19 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         WebElement overlayContent = getOverlayContent();
 
-        resizeDialog(overlayContent);
+        resizeDialog(overlayContent, 50, 50);
 
         Assert.assertEquals(
                 "Rezise listener called with width (250px) and height (250px)",
                 message.getText());
     }
 
-    private void resizeDialog(WebElement overlayContent) {
+    private void resizeDialog(WebElement overlayContent, int xOffset, int yOffset) {
         WebElement resizerSE = getInShadowRoot(overlayContent, 
                 By.cssSelector(".resizer.se"));
 
         Actions resizeAction = new Actions(getDriver());
-        resizeAction.dragAndDropBy(resizerSE, 50, 50);
+        resizeAction.dragAndDropBy(resizerSE, xOffset, yOffset);
         resizeAction.perform();
     }
 
@@ -390,7 +422,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
 
         // resizing only to force component to set top/left values
-        resizeDialog(overlayContent);
+        resizeDialog(overlayContent, 50, 50);
         String overlayLeft = overlay.getCssValue("left");
         String overlayTop = overlay.getCssValue("top");
 
