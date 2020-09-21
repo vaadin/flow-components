@@ -50,7 +50,11 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
     private String width;
+    private String minWidth;
+    private String maxWidth;
     private String height;
+    private String minHeight;
+    private String maxHeight;
 
     /**
      * Creates an empty dialog.
@@ -61,6 +65,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
         container = new Element("div");
         container.getClassList().add("draggable");
+        container.getClassList().add("draggable-leaf-only");
         container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
         container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
         container.getStyle().set("display", "inline-block");
@@ -144,9 +149,33 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     @Override
+    public void setMinWidth(String value) {
+        minWidth = value;
+        setDimension(ElementConstants.STYLE_MIN_WIDTH, value);
+    }
+
+    @Override
+    public void setMaxWidth(String value) {
+        maxWidth = value;
+        setDimension(ElementConstants.STYLE_MAX_WIDTH, value);
+    }
+
+    @Override
     public void setHeight(String value) {
         height = value;
         setDimension(ElementConstants.STYLE_HEIGHT, value);
+    }
+
+    @Override
+    public void setMinHeight(String value) {
+        minHeight = value;
+        setDimension(ElementConstants.STYLE_MIN_HEIGHT, value);
+    }
+
+    @Override
+    public void setMaxHeight(String value) {
+        maxHeight = value;
+        setDimension(ElementConstants.STYLE_MAX_HEIGHT, value);
     }
 
     @Override
@@ -155,8 +184,28 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     @Override
+    public String getMinWidth() {
+        return minWidth;
+    }
+
+    @Override
+    public String getMaxWidth() {
+        return maxWidth;
+    }
+
+    @Override
     public String getHeight() {
         return height;
+    }
+
+    @Override
+    public String getMinHeight() {
+        return minHeight;
+    }
+
+    @Override
+    public String getMaxHeight() {
+        return maxHeight;
     }
 
     /**
@@ -587,7 +636,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         template.setProperty("innerHTML", renderer);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
+        setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
+        setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
         setDimension(ElementConstants.STYLE_HEIGHT, height);
-
+        setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
+        setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
 }
