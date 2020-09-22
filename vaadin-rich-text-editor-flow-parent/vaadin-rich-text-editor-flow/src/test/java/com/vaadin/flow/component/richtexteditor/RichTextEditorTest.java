@@ -2,12 +2,20 @@ package com.vaadin.flow.component.richtexteditor;
 
 import static org.junit.Assert.assertEquals;
 
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Tests for the {@link RichTextEditor}.
@@ -20,8 +28,7 @@ public class RichTextEditorTest {
     @Test
     public void setValueNull() {
         RichTextEditor rte = new RichTextEditor();
-        assertEquals("Value should be an empty string", "",
-                rte.getValue());
+        assertEquals("Value should be an empty string", "", rte.getValue());
 
         thrown.expect(NullPointerException.class);
         thrown.expectMessage("Null value is not supported");
@@ -48,7 +55,8 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeStrongTag_StrongTagPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<strong>Foo</strong>", rte.sanitize("<strong>Foo</strong>"));
+        Assert.assertEquals("<strong>Foo</strong>",
+                rte.sanitize("<strong>Foo</strong>"));
     }
 
     @Test
@@ -72,7 +80,8 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeCombinedDecorationTags_AllTagsPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<strong><em><s><u>123123</u></s></em></strong>", rte.sanitize("<strong><em><s><u>123123</u></s></em></strong>"));
+        Assert.assertEquals("<strong><em><s><u>123123</u></s></em></strong>",
+                rte.sanitize("<strong><em><s><u>123123</u></s></em></strong>"));
     }
 
     // Headers group sanitization
@@ -134,7 +143,8 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeStyleTextAlign_StyleTextAlignPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<p style=\"text-align: center\">Foo</p>", rte.sanitize("<p style=\"text-align: center\">Foo</p>"));
+        Assert.assertEquals("<p style=\"text-align: center\">Foo</p>",
+                rte.sanitize("<p style=\"text-align: center\">Foo</p>"));
     }
 
     // Script sanitization
@@ -150,20 +160,24 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeImgTagWithHttpSource_srcAttributeRemoved() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<img>", rte.sanitize("<img src='http://vaadin.com'>"));
+        Assert.assertEquals("<img>",
+                rte.sanitize("<img src='http://vaadin.com'>"));
     }
 
     @Test
     public void sanitizeImgTagWithHttpsSource_srcAttributeRemoved() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<img>", rte.sanitize("<img src='https://vaadin.com'>"));
+        Assert.assertEquals("<img>",
+                rte.sanitize("<img src='https://vaadin.com'>"));
     }
 
     @Test
     public void sanitizeImgTagWithDataSource_srcAttributePersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">",
-                rte.sanitize("<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">"));
+        Assert.assertEquals(
+                "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">",
+                rte.sanitize(
+                        "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">"));
     }
 
     // Blockquote sanitization
@@ -171,7 +185,8 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeBlockquoteTag_blockquoteTagPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<blockquote>\n Foo\n</blockquote>", rte.sanitize("<blockquote>Foo</blockquote>"));
+        Assert.assertEquals("<blockquote>\n Foo\n</blockquote>",
+                rte.sanitize("<blockquote>Foo</blockquote>"));
     }
 
     // Code block sanitization
@@ -186,7 +201,8 @@ public class RichTextEditorTest {
 
     @Test
     public void asHtml_setValue_getValue() {
-        HasValue<ValueChangeEvent<String>, String> rteAsHtml = new RichTextEditor().asHtml();
+        HasValue<ValueChangeEvent<String>, String> rteAsHtml = new RichTextEditor()
+                .asHtml();
         String htmlValue = "<strong>Foo</strong>";
         rteAsHtml.setValue(htmlValue);
         Assert.assertEquals("Should get the same value as it was set",
@@ -207,7 +223,31 @@ public class RichTextEditorTest {
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> rteAsHtml = rte.asHtml();
         rteAsHtml.setRequiredIndicatorVisible(true);
-        Assert.assertTrue("Should be possible to set required indicator to be visible on asHtml",
+        Assert.assertTrue(
+                "Should be possible to set required indicator to be visible on asHtml",
                 rte.isRequiredIndicatorVisible());
+    }
+
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-rich-text-editor");
+
+        element.setProperty("value", "foo");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(RichTextEditor.class))
+                .thenAnswer(invocation -> new RichTextEditor());
+
+        RichTextEditor field = Component.from(element, RichTextEditor.class);
+        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 }

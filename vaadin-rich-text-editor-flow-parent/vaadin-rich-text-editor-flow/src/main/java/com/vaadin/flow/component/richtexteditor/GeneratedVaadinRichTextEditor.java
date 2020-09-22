@@ -67,8 +67,8 @@ import elemental.json.JsonArray;
  * </p>
  * <p>
  * Vaadin Rich Text Editor focuses on the structure, not the styling of content.
- * Therefore, the semantic HTML5 tags and CSS usage is limited to most common cases,
- * like horizontal text alignment.
+ * Therefore, the semantic HTML5 tags and CSS usage is limited to most common
+ * cases, like horizontal text alignment.
  * </p>
  * <h3>Styling</h3>
  * <p>
@@ -92,8 +92,7 @@ import elemental.json.JsonArray;
  * <td>Set to a readonly text editor</td>
  * <td>:host</td>
  * </tr>
- * </tbody>
- * <caption>Styling</caption>
+ * </tbody> <caption>Styling</caption>
  * </table>
  * <p>
  * The following shadow DOM parts are available for styling:
@@ -197,13 +196,12 @@ import elemental.json.JsonArray;
  * <td>{@code clean-button}</td>
  * <td>The &quot;clean formatting&quot; button</td>
  * </tr>
- * </tbody>
- * <caption>Shadow parts</caption>
+ * </tbody> <caption>Shadow parts</caption>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
@@ -402,14 +400,16 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
 
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
-     * arguments.
+     * arguments. If {@code isInitialValueOptional} is {@code true} then the
+     * initial value is used only if element has no {@code "value"} property
+     * value, otherwise element {@code "value"} property is ignored and the
+     * initial value is set.
      * 
      * @param initialValue
      *            the initial value to set to the value
@@ -417,12 +417,17 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
      */
     public GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
+            boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -453,7 +458,6 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
