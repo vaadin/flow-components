@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-select-flow-parent</artifactId>
+  <version>${vaadin.select.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Select Parent</name>
   <modules>

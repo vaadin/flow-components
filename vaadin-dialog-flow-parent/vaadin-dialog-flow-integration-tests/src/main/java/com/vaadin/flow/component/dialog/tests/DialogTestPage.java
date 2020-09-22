@@ -202,7 +202,15 @@ public class DialogTestPage extends Div {
                 e -> dialog.open());
         openDialog.setId("dialog-resizable-draggable-open-button");
 
-        add(openDialog, message);
+        NativeButton sizeRestrictions = new NativeButton("set resizing restrictions", e -> {
+            dialog.setMinWidth("175px");
+            dialog.setMaxWidth("225px");
+            dialog.setMinHeight("175px");
+            dialog.setMaxHeight("225px");
+        });
+        sizeRestrictions.setId("dialog-resizing-restrictions-button");
+
+        add(openDialog, message, sizeRestrictions);
     }
 
     private void changeDialogDimensions() {
