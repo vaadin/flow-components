@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-time-picker-flow-parent</artifactId>
+  <version>${vaadin.time.picker.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Time Picker Parent</name>
   <modules>

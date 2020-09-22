@@ -7,6 +7,7 @@
     <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
+  <version>${vaadin.cookie.consent.version}</version>
   <packaging>pom</packaging>
   <name>Vaadin Cookie Consent Parent</name>
   <modules>
