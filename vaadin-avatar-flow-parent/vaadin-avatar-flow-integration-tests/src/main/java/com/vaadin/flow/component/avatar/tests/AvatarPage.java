@@ -59,7 +59,7 @@ public class AvatarPage extends Div {
         NativeButton toggleImgResource = new NativeButton("Toggle image resource", e -> {
             if (avatar.getImageResource() == null) {
                 StreamResource avatarResource = new StreamResource("user+.png",
-                    () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                    () -> getFileStream("vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
                 avatar.setImageResource(avatarResource);
             } else {
                 avatar.setImageResource(null);
