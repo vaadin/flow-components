@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -95,6 +97,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+    private Registration dataProviderListener = null;
+    private boolean shouldForceServerSideFiltering = false;
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -546,9 +550,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         };
 
-        boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
+        shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
+        setupDataProviderListener(dataProvider);
 
-        dataProvider.addDataProviderListener(e -> {
+        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+    }
+
+    private <C> void setupDataProviderListener(DataProvider<T, C> dataProvider) {
+        if (dataProviderListener != null) {
+            dataProviderListener.remove();
+        }
+        dataProviderListener = dataProvider.addDataProviderListener(e -> {
             if (e instanceof DataRefreshEvent) {
                 dataCommunicator.refresh(((DataRefreshEvent<T>) e).getItem());
             } else {
@@ -556,8 +568,24 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         });
         refreshAllData(shouldForceServerSideFiltering);
+    }
 
-        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider != null && dataProviderListener == null) {
+            setupDataProviderListener(dataProvider);
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataProviderListener != null) {
+            dataProviderListener.remove();
+            dataProviderListener = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     private void refreshAllData(boolean forceServerSideFiltering) {
@@ -660,7 +688,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @return the data provider used by this ComboBox
      */
     public DataProvider<T, ?> getDataProvider() { // NOSONAR
-        return dataCommunicator.getDataProvider();
+        if (dataCommunicator != null) {
+            return dataCommunicator.getDataProvider();
+        }
+        return null;
     }
 
     /**
