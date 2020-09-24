@@ -59,6 +59,7 @@
         <module>vaadin-flow-components-shared</module>
         <module>vaadin-accordion-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
+		<module>vaadin-avatar-flow-parent</module>
         <module>vaadin-button-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
         <module>vaadin-combo-box-flow-parent</module>
