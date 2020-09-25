@@ -43,6 +43,42 @@
     <osgi.bundle.package.private/>
     <osgi.bundle.bundle.activator/>
     <osgi.bundle.description/>
+    <vaadin.flow.components.shared.version>14.4-SNAPSHOT</vaadin.flow.components.shared.version>
+    <vaadin.accordion.version>2.2-SNAPSHOT</vaadin.accordion.version>
+    <vaadin.app.layout.version>2.2-SNAPSHOT</vaadin.app.layout.version>
+    <vaadin.button.version>2.2-SNAPSHOT</vaadin.button.version>
+    <vaadin.checkbox.version>2.2-SNAPSHOT</vaadin.checkbox.version>
+    <vaadin.combo.box.version>3.2-SNAPSHOT</vaadin.combo.box.version>
+    <vaadin.context.menu.version>3.3-SNAPSHOT</vaadin.context.menu.version>
+    <vaadin.custom.field.version>3.2-SNAPSHOT</vaadin.custom.field.version>
+    <vaadin.date.picker.version>2.2-SNAPSHOT</vaadin.date.picker.version>
+    <vaadin.date.time.picker.version>1.2-SNAPSHOT</vaadin.date.time.picker.version>
+    <vaadin.details.version>2.2-SNAPSHOT</vaadin.details.version>
+    <vaadin.dialog.version>2.3-SNAPSHOT</vaadin.dialog.version>
+    <vaadin.form.layout.version>2.2-SNAPSHOT</vaadin.form.layout.version>
+    <vaadin.grid.version>4.3-SNAPSHOT</vaadin.grid.version>
+    <vaadin.icons.version>2.1-SNAPSHOT</vaadin.icons.version>
+    <vaadin.iron.list.version>2.1-SNAPSHOT</vaadin.iron.list.version>
+    <vaadin.list.box.version>2.3-SNAPSHOT</vaadin.list.box.version>
+    <vaadin.login.version>2.2-SNAPSHOT</vaadin.login.version>
+    <vaadin.menu.bar.version>1.2-SNAPSHOT</vaadin.menu.bar.version>
+    <vaadin.notification.version>2.2-SNAPSHOT</vaadin.notification.version>
+    <vaadin.ordered.layout.version>2.3-SNAPSHOT</vaadin.ordered.layout.version>
+    <vaadin.progress.bar.version>2.2-SNAPSHOT</vaadin.progress.bar.version>
+    <vaadin.radio.button.version>2.2-SNAPSHOT</vaadin.radio.button.version>
+    <vaadin.select.version>2.2-SNAPSHOT</vaadin.select.version>
+    <vaadin.split.layout.version>2.2-SNAPSHOT</vaadin.split.layout.version>
+    <vaadin.tabs.version>2.2-SNAPSHOT</vaadin.tabs.version>
+    <vaadin.text.field.version>2.3-SNAPSHOT</vaadin.text.field.version>
+    <vaadin.time.picker.version>2.3-SNAPSHOT</vaadin.time.picker.version>
+    <vaadin.upload.version>2.3-SNAPSHOT</vaadin.upload.version>
+    <vaadin.board.version>3.2-SNAPSHOT</vaadin.board.version>
+    <vaadin.charts.version>7.1-SNAPSHOT</vaadin.charts.version>
+    <vaadin.confirm.dialog.version>2.2-SNAPSHOT</vaadin.confirm.dialog.version>
+    <vaadin.cookie.consent.version>2.2-SNAPSHOT</vaadin.cookie.consent.version>
+    <vaadin.crud.version>2.3-SNAPSHOT</vaadin.crud.version>
+    <vaadin.grid.pro.version>2.2-SNAPSHOT</vaadin.grid.pro.version>
+    <vaadin.rich.text.editor.version>2.3-SNAPSHOT</vaadin.rich.text.editor.version>
   </properties>
   <modules>
     <module>vaadin-flow-components-shared</module>
