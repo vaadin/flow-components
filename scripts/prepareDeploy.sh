@@ -17,6 +17,24 @@ getLatest() {
    [ -n "$pre" ] && echo $pre || echo "$2"
 }
 
+getPlatformVersion() {
+  [ "$1" = vaadin-iron-list ] && name="iron-list" || name=$1
+  echo "$versions" | jq -r ".core, .vaadin | .[\"$name\"]| .javaVersion" | grep -v null
+}
+
+getNextVersion() {
+  prefix=`echo $1 | perl -pe 's/[0-1]+$//'`
+  number=`echo $1 | perl -pe 's/.*([0-1]+)$/$1/'`
+  number=`expr $number + 1`
+  echo $prefix$number
+}
+
+setPomVersion() {
+  key=`echo $1 | tr - .`".version"
+  echo "Setting $key=$2 in pom.xml"
+  mvn -B -q -N versions:set-property -Dproperty=$key -DnewVersion=$2 || exit 1
+}
+
 ### Check that version is given as a parameter and has a valid format
 version=$1
 ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+([\.-](alpha|beta|rc)[0-9]+)?$ ]] && echo Invalid version format: $version && exit 1
@@ -27,29 +45,48 @@ pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '
 versionBase=`getBaseVersion $version`
 pomBase=`getBaseVersion $pomVersion`
 
-### Load versions file for this platform release and compute flow version
+### Load versions file for this platform release
 branch=$versionBase
-flow=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json" | jq -r .core.flow.javaVersion 2>/dev/null`
-if [ $? != 0 ]
-then
-  ## when branch does not exist try master
-  branch=master
-  flow=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json" | jq -r .core.flow.javaVersion`
-fi
+versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
+[ $? != 0 ] && branch=master && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
 ### Check that current branch is valid for the version to release
 [ $branch != master -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
 
+### Compute flow version
+flow=`getPlatformVersion flow`
 flow=`getLatest flow $flow`
 
 ## Modify poms with the versions to release
 echo "Setting version=$version to vaadin-flow-components"
 mvn -B -q versions:set -DnewVersion=$version || exit 1
-echo "Setting flow.version=$flow in vaadin-flow-components"
-mvn -B -q -N versions:set-property -Dproperty=flow.version -DnewVersion=$flow || exit 1
+setPomVersion flow $flow
 
 ## Compute modules to build and deploy
-modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 |cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
+modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 | cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
+
+for i in $modules
+do
+  modVersion=`getPlatformVersion $i`
+  setPomVersion $i $modVersion
+done
+
+[ "$versionBase" = 14.4 ] && lastTag=`git tag | grep "^$versionBase" | tail -1`
+if [ -n "$lastTag" ]
+then
+  modified=`git diff --name-only $lastTag  HEAD | grep '.java$' | cut -d "/" -f1 | grep parent | sort -u | perl -pe 's,-flow-parent,,g'`
+  [ -n "$modified" ] && modules="$modified"
+  echo "Increasing version of the modified modules from last release"
+  for i in $modules
+  do
+    modVersion=`getPlatformVersion $i`
+    nextVersion=`getNextVersion $modVersion`
+    setPomVersion $i $nextVersion
+  done
+fi
+
+echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile=$profile"
+
 build=vaadin-flow-components-shared
 for i in $modules
 do
@@ -61,8 +98,3 @@ echo "##teamcity[setParameter name='components.branch' value='$branch']"
 echo "##teamcity[setParameter name='maven.profile' value='$profile']"
 echo "##teamcity[setParameter name='flow.version' value='$flow']"
 echo "##teamcity[setParameter name='build.modules' value='$build']"
-
-
-
-
-
