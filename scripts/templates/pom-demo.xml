@@ -9,8 +9,8 @@
         <artifactId>component-flow-parent</artifactId>
         <version>component</version>
     </parent>
-
     <artifactId>component-flow-demo</artifactId>
+    <version>component</version>
     <packaging>${packaging.type}</packaging>
     <name>component Flow Demo</name>
 
