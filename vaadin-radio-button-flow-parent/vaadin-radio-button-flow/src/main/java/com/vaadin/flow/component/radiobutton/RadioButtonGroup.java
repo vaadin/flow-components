@@ -20,7 +20,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -103,10 +105,13 @@ public class RadioButtonGroup<T>
         this.dataProvider = dataProvider;
         reset();
 
+        setupDataProviderListener(dataProvider);
+    }
+
+    private void setupDataProviderListener(DataProvider<T, ?> dataProvider) {
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-
         dataProviderListenerRegistration = dataProvider
                 .addDataProviderListener(event -> {
                     if (event instanceof DataChangeEvent.DataRefreshEvent) {
@@ -116,6 +121,23 @@ public class RadioButtonGroup<T>
                         reset();
                     }
                 });
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (getDataProvider() != null && dataProviderListenerRegistration == null) {
+            setupDataProviderListener(getDataProvider());
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataProviderListenerRegistration != null) {
+        	dataProviderListenerRegistration.remove();
+        	dataProviderListenerRegistration = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     /**
