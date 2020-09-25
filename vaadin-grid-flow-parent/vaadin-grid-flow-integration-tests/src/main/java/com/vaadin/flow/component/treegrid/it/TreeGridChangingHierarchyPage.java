@@ -104,6 +104,9 @@ public class TreeGridChangingHierarchyPage extends Div {
         NativeButton btn7 = new NativeButton("remove children of a/a/a");
         btn7.addClickListener(event -> {
             data.removeItem("a/a/a/a");
+            // All the children of an item are removed so it should be collapsed
+            // (otherwise TreeGrid will get stuck in loading state)
+            grid.collapse("a/a/a");
             // Inform item removal to DataProvider
             grid.getDataProvider().refreshAll();
         });

@@ -1602,9 +1602,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 oldSelection, newSelection, isFromClient);
     }
 
-    private void scroll(WebElement grid, int index) {
-        getCommandExecutor().executeScript(
-                "arguments[0].scrollToIndex(" + index + ")", grid);
+    private void scroll(GridElement grid, int index) {
+        grid.scrollToRow(index);
     }
 
     private void waitUntilCellHasText(WebElement grid, String text) {
