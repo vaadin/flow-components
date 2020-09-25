@@ -41,6 +41,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
@@ -3149,6 +3150,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        if (getDataProvider() != null && dataProviderChangeRegistration == null) {
+            handleDataProviderChange(getDataProvider());
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataProviderChangeRegistration != null) {
+            dataProviderChangeRegistration.remove();
+            dataProviderChangeRegistration = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     private void setSortOrder(List<GridSortOrder<T>> order,
