@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+
+
 if [ -n "$1" ]
 then
   for i in $*
