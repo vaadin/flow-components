@@ -77,8 +77,12 @@ public abstract class AbstractTBTest extends ParallelTest {
         }
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
-        return Arrays.asList(BrowserUtil.chrome()
-            );
+        return Arrays.asList(
+                BrowserUtil.chrome()
+                
+                
+                
+                );
     }
 
     protected void openTestURL() {
@@ -107,7 +111,7 @@ public abstract class AbstractTBTest extends ParallelTest {
      * @return The URL path to the UI class to test
      */
     protected String getDeploymentPath() {
-        return "/" + getTestView().getCanonicalName().replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/").replace(".", "/");
+        return "/" + "vaadin-charts/" + getTestView().getCanonicalName();
     }
 
     /**

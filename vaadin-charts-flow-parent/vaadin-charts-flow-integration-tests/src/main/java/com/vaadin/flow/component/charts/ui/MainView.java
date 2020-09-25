@@ -21,6 +21,7 @@ import java.util.Optional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.area.AreaChart;
+import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEvent;
@@ -38,6 +39,8 @@ public class MainView extends Div implements HasUrlParameter<String> {
 
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+        // workaround for https://github.com/vaadin/flow/issues/5509
+        new ServerSideEvents();
         removeAll();
         Optional<Component> content = getContentFromParameter(parameter);
         if (content.isPresent()) {

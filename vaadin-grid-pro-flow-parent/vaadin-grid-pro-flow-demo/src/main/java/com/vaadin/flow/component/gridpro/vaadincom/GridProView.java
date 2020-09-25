@@ -48,6 +48,7 @@ public class GridProView extends DemoView {
                 .text((item, newValue) ->
                         item.setEmail(newValue))
                 .setHeader("Email (editable)");
+        add(grid);
         // end-source-example
 
         addCard("Basic Grid Pro", grid);
@@ -68,6 +69,7 @@ public class GridProView extends DemoView {
                 .checkbox((item, newValue) ->
                         item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
+        add(grid);
         // end-source-example
 
         addCard("Sorting", grid);
@@ -101,6 +103,7 @@ public class GridProView extends DemoView {
                 .select((item, newValue) ->
                         item.setEmail(newValue), optionsList)
                 .setHeader("Email (editable)");
+        add(grid);
         // end-source-example
 
         addCard("Editor Types", grid);
@@ -124,6 +127,7 @@ public class GridProView extends DemoView {
                 .checkbox((item, newValue) ->
                         item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
+        add(grid);
         // end-source-example
 
         addCard("Custom Representation", grid);
@@ -143,6 +147,7 @@ public class GridProView extends DemoView {
                         item.setEmail(newValue))
                 .setHeader("Email")
                 .setWidth("300px");
+        add(grid);
         // end-source-example
 
         addCard("Custom Editor Type", grid);
@@ -173,6 +178,7 @@ public class GridProView extends DemoView {
                 .checkbox((item, newValue) ->
                         item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
+        add(grid);
         // end-source-example
 
         addCard("Enter Next Row", grid);
@@ -203,6 +209,7 @@ public class GridProView extends DemoView {
                 .checkbox((item, newValue) ->
                         item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
+        add(grid);
         // end-source-example
 
         addCard("Single Cell Edit", grid);

@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- *
+ * 
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- *
+ * 
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -50,10 +50,6 @@ public class ChartType implements ChartEnum {
      * @see PlotOptionsAreaspline
      */
     public static final ChartType AREASPLINE = new ChartType("areaspline");
-    /**
-     * @see PlotOptionsBullet
-     */
-    public static final ChartType BULLET = new ChartType("bullet");
     /**
      * @see PlotOptionsColumn
      */
@@ -139,24 +135,9 @@ public class ChartType implements ChartEnum {
     public static final ChartType FLAGS = new ChartType("flags");
 
     /**
-     * @see PlotOptionsTimeline
-     */
-    public static final ChartType TIMELINE = new ChartType("timeline");
-
-    /**
      * @see PlotOptionsOhlc
      */
     public static final ChartType OHLC = new ChartType("ohlc");
-
-    /**
-     * @see PlotOptionsOrganization
-     */
-    public static final ChartType ORGANIZATION = new ChartType("organization");
-
-    /**
-     * @see PlotOptionsXrange
-     */
-    public static final ChartType XRANGE = new ChartType("xrange");
 
     public static ChartType getDefault() {
         return ChartType.LINE;
@@ -166,7 +147,7 @@ public class ChartType implements ChartEnum {
 
     /**
      * Constructs a new Chart type.
-     *
+     * 
      * @param type
      *            the actual type string passed for client side
      */

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -32,7 +33,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextField extends GeneratedVaadinTextField<TextField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -390,19 +391,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         super.setPreventInvalidInput(preventInvalidInput);
     }
 
-    /**
-     * Sets a regular expression for the value to pass on the client-side. The pattern
-     * must be a valid JavaScript Regular Expression that matches the entire value,
-     * not just some subset.
-     *
-     * @param pattern
-     *            the new String pattern
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
-     *     https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
-     * @see <a href="https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
-     *     https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
-     */
     @Override
     public void setPattern(String pattern) {
         super.setPattern(pattern);

@@ -17,13 +17,12 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import javax.annotation.Generated;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-
-import com.vaadin.flow.component.charts.model.style.Color;
+import java.time.Instant;
 import com.vaadin.flow.component.charts.util.Util;
 
 /**
@@ -35,23 +34,15 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private Boolean allowPointSelect;
 	private Boolean animation;
 	private Number animationLimit;
-	private Color borderColor;
 	private Number borderRadius;
-	private Number borderWidth;
 	private String className;
-	private Boolean clip;
-	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
-	private String colorKey;
-	private ArrayList<Color> colors;
 	private Boolean crisp;
 	private Cursor cursor;
-	private DashStyle dashStyle;
 	private DataLabels dataLabels;
 	private Number depth;
 	private String description;
-	private Color edgeColor;
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
@@ -61,12 +52,9 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private Number groupZPadding;
 	private Boolean grouping;
 	private ArrayList<String> keys;
-	private Color lineColor;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Number minPointLength;
-	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -85,7 +73,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private Boolean stickyTracking;
 	private Number threshold;
 	private SeriesTooltip tooltip;
-	private Color upColor;
 	private Boolean visible;
 	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
@@ -151,31 +138,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the border of each waterfall column.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke can be set with the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #333333
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
 	 * @see #setBorderRadius(Number)
 	 */
 	public Number getBorderRadius() {
@@ -192,48 +154,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the border surrounding each column or bar.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width can be set with the
-	 * <code>.highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
-	}
-
-	/**
-	 * @see #setClip(Boolean)
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
 	 * @see #setClassName(String)
 	 */
 	public String getClassName() {
@@ -245,37 +165,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * <p>
-	 * The main color or the series. In line type series it applies to the line
-	 * and the point markers unless otherwise specified. In bar type series it
-	 * applies to the bars unless a color is specified per point. The default
-	 * value is pulled from the <code>options.colors</code> array.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the color can be defined by the <a
-	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
-	 * series color can be set with the <code>.highcharts-series</code>,
-	 * <code>.highcharts-color-{n}</code>,
-	 * <code>.highcharts-{type}-series</code> or
-	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
-	 * the <code>className</code> option.
-	 * </p>
-	 */
-	public void setColor(Color color) {
-		this.color = color;
 	}
 
 	/**
@@ -297,25 +186,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setColorKey(String)
-	 */
-	public String getColorKey() {
-		return colorKey;
-	}
-
-	/**
-	 * Determines what data value should be used to calculate point color if <code>colorAxis</code> is used.
-	 * Requires to set <code>min</code> and <code>amx</code> if some custom point property is used
-	 * or if approximation for data grouping is set to <code>'sum'</code>.
-	 * <p>
-	 * Defaults to <code>y</code>.
-	 */
-	public void setColorKey(String colorKey) {
-		this.colorKey = colorKey;
-
-	}
-
-	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -331,52 +201,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**
@@ -414,45 +238,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void setCursor(Cursor cursor) {
 		this.cursor = cursor;
-	}
-
-	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * <p>
-	 * A name for the dash style to use for the line connecting the columns of
-	 * the waterfall series. Possible values:
-	 * <ul>
-	 * <li>Solid</li>
-	 * <li>ShortDash</li>
-	 * <li>ShortDot</li>
-	 * <li>ShortDashDot</li>
-	 * <li>ShortDashDotDot</li>
-	 * <li>Dot</li>
-	 * <li>Dash</li>
-	 * <li>LongDash</li>
-	 * <li>DashDot</li>
-	 * <li>LongDashDot</li>
-	 * <li>LongDashDotDot</li>
-	 * </ul>
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke dash-array can be set with the
-	 * <code>.highcharts-graph</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: Dot
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
 	}
 
 	/**
@@ -521,22 +306,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	/**
-	 * @see #setEdgeColor(Color)
-	 */
-	public Color getEdgeColor() {
-		return edgeColor;
-	}
-
-	/**
-	 * 3D columns only. The color of the edges. Similar to
-	 * <code>borderColor</code>, except it defaults to the same color as the
-	 * column.
-	 */
-	public void setEdgeColor(Color edgeColor) {
-		this.edgeColor = edgeColor;
 	}
 
 	/**
@@ -738,47 +507,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line that connects columns in a waterfall series.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke can be set with the
-	 * <code>.highcharts-graph</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #333333
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line connecting waterfall columns.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -793,22 +521,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void setLinkedTo(String linkedTo) {
 		this.linkedTo = linkedTo;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * <p>
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	/**
@@ -1198,31 +910,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void setTooltip(SeriesTooltip tooltip) {
 		this.tooltip = tooltip;
-	}
-
-	/**
-	 * @see #setUpColor(Color)
-	 */
-	public Color getUpColor() {
-		return upColor;
-	}
-
-	/**
-	 * <p>
-	 * The color used specifically for positive point columns. When not
-	 * specified, the general series color is used.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the waterfall colors can be set with the
-	 * <code>.highcharts-point-negative</code>, <code>.highcharts-sum</code> and
-	 * <code>.highcharts-intermediate-sum</code> classes.
-	 * </p>
-	 */
-	public void setUpColor(Color upColor) {
-		this.upColor = upColor;
 	}
 
 	/**

@@ -34,7 +34,7 @@ import java.util.Arrays;
  */
 @Tag(Tag.DIV)
 public class FlexLayout extends Component
-        implements FlexComponent, ClickNotifier<FlexLayout> {
+        implements FlexComponent<FlexLayout>, ClickNotifier<FlexLayout> {
 
     /**
      * Enum with the possible values for the component alignment inside the
@@ -311,8 +311,11 @@ public class FlexLayout extends Component
     }
 
     /**
-     * Similar to {@link #setAlignItems(Alignment)}, but instead of aligning
-     * components, it aligns flex lines.
+     * Sets how the lines within the layout are aligned when there is extra space,
+     * similar to how {@link #setJustifyContentMode(JustifyContentMode)}
+     * aligns individual items.
+     * Has no effect if {@link #getWrapMode()} is {@link WrapMode#NOWRAP},
+     * since, in that case, there is only one line.
      * <p>
      * It effectively sets the {@code "alignContent"} style value.
      * <p>

@@ -25,6 +25,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.board.internal.FunctionCaller;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -55,8 +56,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-board-row")
 @NpmPackage(value = "@vaadin/vaadin-board", version = "2.2.0")
 @JsModule("@vaadin/vaadin-board/vaadin-board-row.js")
+@HtmlImport("frontend://bower_components/vaadin-board/vaadin-board-row.html")
 public class Row extends Component
-        implements HasStyle, HasSize, HasOrderedComponents {
+        implements HasStyle, HasSize, HasOrderedComponents<Row> {
 
     static final String COLSPAN_ATTRIBUTE = "board-cols";
     private boolean redrawTriggered;

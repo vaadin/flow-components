@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker.testbench;
 
 import java.time.LocalDate;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -26,7 +27,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-date-picker")
-public class DatePickerElement extends TestBenchElement implements HasLabel {
+public class DatePickerElement extends TestBenchElement implements HasLabel,
+      HasHelper {
 
     /**
      * Clears the value of the date picker.
@@ -88,23 +90,11 @@ public class DatePickerElement extends TestBenchElement implements HasLabel {
     }
 
     /**
-     * Opens the overlay, sets the value to the inner input element as a string
-     * and closes the overlay. This simulates the user typing into the input and
-     * triggering an update of the value property.
-     */
-    public void setInputValue(String value) {
-        executeScript("arguments[0].open();", this);
-        setProperty("_inputValue", value);
-        executeScript("arguments[0].close();", this);
-    }
-
-    /**
-     * Gets the visible presentation value from the inner input element as a
-     * string. This value depends on the used Locale.
+     * When auto open is enabled, the dropdown will open when the field is clicked.
      *
-     * @return
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
      */
-    public String getInputValue() {
-        return getPropertyString("_inputValue");
+    public boolean isAutoOpen() {
+        return !getPropertyBoolean("autoOpenDisabled");
     }
 }

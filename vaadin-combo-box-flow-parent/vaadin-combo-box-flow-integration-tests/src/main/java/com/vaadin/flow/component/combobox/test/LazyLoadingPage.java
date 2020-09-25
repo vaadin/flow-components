@@ -18,10 +18,8 @@ package com.vaadin.flow.component.combobox.test;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.test.template.ComboBoxInATemplate;
@@ -30,13 +28,11 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
-
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/lazy-loading")
@@ -48,6 +44,8 @@ public class LazyLoadingPage extends Div {
         message.setId("message");
         add(message);
 
+        addSeparator();
+        createListDataProviderWithStringsAutoOpenDisabled();
         addSeparator();
         createListDataProviderWithStrings();
         addSeparator();
@@ -62,17 +60,31 @@ public class LazyLoadingPage extends Div {
         createComboBoxInATemplate();
         addSeparator();
         createCallbackDataProviderWhichReturnsZeroItems();
-        addSeparator();
-        createComboBoxWithCustomPageSizeAndLazyLoading();
     }
 
+    private void createListDataProviderWithStringsAutoOpenDisabled() {
+        addTitle("ListDataProvider with strings and AutoOpenDisabled");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("lazy-strings-autoopendisabled");
+        comboBox.setAutoOpen(false);
+
+        List<String> items = generateStrings(1000);
+        ListDataProvider<String> dp = DataProvider.ofCollection(items);
+        comboBox.setDataProvider(dp);
+
+        comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
+
+        add(comboBox);
+    }
+    
     private void createListDataProviderWithStrings() {
         addTitle("ListDataProvider with strings");
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("lazy-strings");
 
         List<String> items = generateStrings(1000);
-        comboBox.setDataProvider(DataProvider.ofCollection(items));
+        ListDataProvider<String> dp = DataProvider.ofCollection(items);
+        comboBox.setDataProvider(dp);
 
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
@@ -191,24 +203,16 @@ public class LazyLoadingPage extends Div {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("callback-dataprovider");
 
-        AtomicInteger sizeRequestCount = new AtomicInteger(0);
-        Span sizeRequestCountSpan = new Span("0");
-        sizeRequestCountSpan.setId("callback-dataprovider-size-request-count");
-
         CallbackDataProvider<String, String> dataProvider = new CallbackDataProvider<String, String>(
                 query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
                         .mapToObj(i -> "Item " + i),
-                query -> {
-                    sizeRequestCountSpan.setText(
-                            String.valueOf(sizeRequestCount.incrementAndGet()));
-                    return 210;
-                });
+                query -> 210);
 
         comboBox.setDataProvider(dataProvider);
 
-        add(comboBox, sizeRequestCountSpan);
+        add(comboBox);
     }
 
     private void createComboBoxInATemplate() {
@@ -237,27 +241,6 @@ public class LazyLoadingPage extends Div {
                 DataProvider.fromFilteringCallbacks(fetch, count));
 
         add(comboBox);
-    }
-
-    private void createComboBoxWithCustomPageSizeAndLazyLoading() {
-        addTitle("Callback data provider with custom page size 42");
-        ComboBox<String> comboBox = new ComboBox<>(42);
-        comboBox.setId("lazy-custom-page-size");
-
-        comboBox.setDataProvider(
-                DataProvider.fromFilteringCallbacks(query -> {
-                    Stream<String> stream = IntStream.range(0, 500)
-                            .mapToObj(String::valueOf);
-                    message.setText(String.valueOf(query.getPageSize()));
-                    return stream.skip(query.getOffset())
-                            .limit(query.getLimit());
-                }, query -> 500));
-
-        NativeButton changePageSizeButton = new NativeButton(
-                "Change page size", event -> comboBox.setPageSize(41));
-        changePageSizeButton.setId("change-page-size-button");
-
-        add(comboBox, changePageSizeButton);
     }
 
     public static List<String> generateStrings(int count) {

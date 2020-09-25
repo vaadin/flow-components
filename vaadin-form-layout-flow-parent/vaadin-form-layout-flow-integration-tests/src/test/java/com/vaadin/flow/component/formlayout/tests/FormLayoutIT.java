@@ -93,25 +93,20 @@ public class FormLayoutIT extends ComponentDemoTest {
         forceClick(save);
 
         waitUntil(
-                driver -> "There are errors: Both phone and email cannot be empty, Please add the first name, Please add the last name"
+                driver -> "There are errors: Please specify your email, Please specify your phone, Please add the address"
                         .equals(info.getText()));
 
         // Fill form: there shouldn't be an error
-        setValue("binder-first-name", "foo");
-        setValue("binder-last-name", "bar");
         setValue("binder-phone", "123-456-789");
         setValue("binder-email", "example@foo.bar");
-        setValue("binder-birth-date", "2003-01-02");
-        setChecked("binder-do-not-call", true);
+        setValue("binder-address", "foo bar");
         forceClick(save);
 
         // waitUntil(driver -> info.getText().startsWith("Saved bean values"));
-
-        Assert.assertTrue(info.getText().contains("foo bar"));
         Assert.assertTrue(info.getText()
-                .contains(", phone 123-456-789 (don't call me!)"));
+                .contains("phone 123-456-789"));
         Assert.assertTrue(info.getText().contains(", e-mail example@foo.bar"));
-        Assert.assertTrue(info.getText().contains(", born on 2003-01-02"));
+        Assert.assertTrue(info.getText().contains(", address foo bar"));
 
         // Make email address incorrect
         setValue("binder-email", "abc");
@@ -131,12 +126,9 @@ public class FormLayoutIT extends ComponentDemoTest {
         // Wait for everything to update.
         waitUntil(driver -> info.getText().isEmpty());
 
-        Assert.assertEquals("", getValue("binder-first-name"));
-        Assert.assertEquals("", getValue("binder-last-name"));
+        Assert.assertEquals("", getValue("binder-address"));
         Assert.assertEquals("", getValue("binder-phone"));
         Assert.assertEquals("", getValue("binder-email"));
-        Assert.assertEquals("", getValue("binder-birth-date"));
-        Assert.assertEquals(false, isChecked("binder-do-not-call"));
     }
 
     private void setChecked(String id, boolean checked) {

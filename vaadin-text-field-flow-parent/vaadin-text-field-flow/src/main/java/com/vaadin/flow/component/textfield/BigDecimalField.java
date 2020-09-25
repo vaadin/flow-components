@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -48,12 +49,13 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
+@JavaScript("frontend://vaadin-big-decimal-field.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
         extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

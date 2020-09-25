@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -29,6 +30,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -47,6 +49,17 @@ import java.util.stream.IntStream;
 public class GridViewIT extends TabbedComponentDemoTest {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+
+    @Override
+    public void setup() throws Exception {
+        final WebDriver webDriver = null;
+        if (webDriver != null) {
+            setDesiredCapabilities(getDesiredCapabilities());
+            setDriver(webDriver);
+        } else {
+            super.setup();
+        }
+    }
 
     @Test
     public void dataIsShown() throws InterruptedException {

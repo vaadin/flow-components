@@ -17,11 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * A pyramid chart consists of a single pyramid with item heights corresponding
@@ -33,15 +32,9 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
 	private Boolean allowPointSelect;
 	private Number animationLimit;
-	private Color borderColor;
-	private Number borderWidth;
 	private String[] center;
 	private String className;
-	private Boolean clip;
 	private Number colorIndex;
-	private String colorKey;
-	private ArrayList<Color> colors;
-	private Boolean crisp;
 	private Cursor cursor;
 	private DataLabelsFunnel dataLabels;
 	private Number depth;
@@ -51,11 +44,9 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private String height;
-	private Boolean ignoreHiddenPoint;
 	private ArrayList<String> keys;
 	private String linkedTo;
 	private Number minSize;
-	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Boolean reversed;
 	private Boolean selected;
@@ -115,66 +106,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	}
 
 	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the border surrounding each slice. When <code>null</code>,
-	 * the border takes the same color as the slice fill. This can be used
-	 * together with a <code>borderWidth</code> to fill drawing gaps created by
-	 * antialiazing artefacts in borderless pies.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke is given in the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the border surrounding each slice.
-	 * </p>
-	 * 
-	 * <p>
-	 * When setting the border width to 0, there may be small gaps between the
-	 * slices due to SVG antialiasing artefacts. To work around this, keep the
-	 * border width at 0.5 or 1, but set the <code>borderColor</code> to
-	 * <code>null</code> instead.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke width is given in the
-	 * <code>.highcharts-point</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
-	}
-
-	/**
 	 * The center of the series. By default, it is centered in the middle of the
 	 * plot area, so it fills the plot area height.
 	 * <p>
@@ -199,23 +130,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	}
 
 	/**
-	 * @see #setClip(Boolean)
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set.
-	 * <p>
-	 * Defaults to <code>false</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -231,91 +145,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColorKey(String)
-	 */
-	public String getColorKey() {
-		return colorKey;
-	}
-
-	/**
-	 * Determines what data value should be used to calculate point color
-	 * if <code>colorAxis</code> is used. Requires to set <code>min</code> and
-	 * <code>max</code> if some custom point property is used or if approximation
-	 * for data grouping is set to <code>'sum'</code>.
-	 * <p>
-	 * Defaults to <code>y</code>.
-	 */
-	public void setColorKey(String colorKey) {
-		this.colorKey = colorKey;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to use instead of the
-	 * global <a href="#colors">colors</a>.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
-	}
-
-	/**
-	 * @see #setCrisp(Boolean)
-	 */
-	public Boolean getCrisp() {
-		return crisp;
-	}
-
-	/**
-	 * When true, each point or column edge is rounded to its nearest pixel
-	 * in order to render sharp on screen. In some cases, when there are a lot of
-	 * densely packed columns, this leads to visible difference in column widths
-	 * or distance between columns. In these cases, setting <code>crisp</code>
-	 * to <code>false</code> may look better, even though each column
-	 * is rendered blurry.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setCrisp(Boolean crisp) {
-		this.crisp = crisp;
 	}
 
 	/**
@@ -488,23 +317,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	}
 
 	/**
-	 * @see #setIgnoreHiddenPoint(Boolean)
-	 */
-	public Boolean getIgnoreHiddenPoint() {
-		return ignoreHiddenPoint;
-	}
-
-	/**
-	 * This option tells whether the series shall be redrawn as if
-	 * the hidden point were null.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint) {
-		this.ignoreHiddenPoint = ignoreHiddenPoint;
-	}
-
-	/**
 	 * @see #setKeys(String...)
 	 */
 	public String[] getKeys() {
@@ -583,22 +395,6 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	 */
 	public void setMinSize(Number minSize) {
 		this.minSize = minSize;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * <p>
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {

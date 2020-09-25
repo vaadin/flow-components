@@ -58,6 +58,8 @@ public class ListBoxView extends DemoView {
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems("Option one", "Option two", "Option three");
         listBox.setValue("Option one");
+
+        add(listBox);
         // end-source-example
 
         addCard("Basic usage", listBox);
@@ -70,6 +72,8 @@ public class ListBoxView extends DemoView {
         listBox.setItems("Option one", "Option two", "Option three");
         listBox.setValue("Option one");
         listBox.setItemEnabledProvider(item -> !"Option three".equals(item));
+
+        add(listBox);
         // end-source-example
 
         addCard("Disabled item", listBox);
@@ -81,6 +85,8 @@ public class ListBoxView extends DemoView {
         MultiSelectListBox<String> listBox = new MultiSelectListBox<>();
         listBox.setItems("Option one", "Option two", "Option three",
                 "Option four");
+
+        add(listBox);
         // end-source-example
 
         addCard("Multi select list box", listBox);
@@ -93,6 +99,8 @@ public class ListBoxView extends DemoView {
         listBox.setItems(DayOfWeek.values());
         listBox.setValue(DayOfWeek.MONDAY);
         listBox.addComponents(DayOfWeek.FRIDAY, new Hr());
+
+        add(listBox);
         // end-source-example
 
         addCard("Presentation", "Separators", listBox);
@@ -128,6 +136,8 @@ public class ListBoxView extends DemoView {
             wrapper.add(image, text);
             return wrapper;
         }));
+
+        add(listBox);
         // end-source-example
 
         addCard("Presentation", "Customizing the label", listBox);
@@ -157,6 +167,8 @@ public class ListBoxView extends DemoView {
             Div div = new Div(name, description);
             return div;
         }));
+
+        add(listBox);
         // end-source-example
 
         addCard("Presentation", "Multi-line label", listBox);

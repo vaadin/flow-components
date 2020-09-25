@@ -41,6 +41,7 @@ public class Demos extends DemoView {
         Div child4 = createComponent("This could be chart 4");
 
         board.addRow(child1, child2, child3, child4);
+        add(board);
         // end-source-example
 
         setBreakpoints(board);
@@ -77,6 +78,7 @@ public class Demos extends DemoView {
         board.addRow(child5, child6, child7);
         board.addRow(child8, child9);
         board.addRow(child10);
+        add(board);
         // end-source-example
         // @formatter:on
 
@@ -100,6 +102,7 @@ public class Demos extends DemoView {
         row1.setComponentSpan(child1, 2);
         Row row2 = board.addRow(child3, child4);
         row2.setComponentSpan(child4, 2);
+        add(board);
         // end-source-example
         // @formatter:on
 
@@ -122,6 +125,7 @@ public class Demos extends DemoView {
 
         Row nested = new Row(child4a, child4b);
         board.addRow(child1, child2,child3,nested);
+        add(board);
         // end-source-example
         // @formatter:on
 
@@ -166,6 +170,7 @@ public class Demos extends DemoView {
         Div child4 = createComponent("This could be chart 4");
 
         board.addRow(child1, child2, child3, child4);
+        add(board);
         // end-source-example
 
         setBreakpoints(board);
@@ -207,7 +212,7 @@ public class Demos extends DemoView {
 
         board.addRow(child1, child2, child3, child4);
         layout.add(board);
-
+        add(layout);
         // end-source-example
 
         setStyles(child1, child2, child3, child4);

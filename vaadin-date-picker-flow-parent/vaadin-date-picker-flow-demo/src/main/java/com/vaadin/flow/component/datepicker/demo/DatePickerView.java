@@ -15,23 +15,23 @@
  */
 package com.vaadin.flow.component.datepicker.demo;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Locale;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.datepicker.demo.entity.Appointment;
 import com.vaadin.flow.component.datepicker.demo.entity.Person;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * View for {@link DatePicker} demo.
@@ -47,6 +47,8 @@ public class DatePickerView extends DemoView {
         disabledAndReadonly();
         clearButton();
         valueChangeEvent();
+        autoOpenDisabled();
+        helperText();
         configurationForRequired(); // Validation
         minAndMaXDateValidation();
         customValidator();
@@ -56,6 +58,7 @@ public class DatePickerView extends DemoView {
         customDateParser();
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
+        helperTextVariants();
         styling(); // Styling
     }
 
@@ -72,6 +75,7 @@ public class DatePickerView extends DemoView {
         DatePicker valueDatePicker = new DatePicker();
         LocalDate now = LocalDate.now();
         valueDatePicker.setValue(now);
+        add(labelDatePicker, placeholderDatePicker, valueDatePicker);
         // end-source-example
 
         labelDatePicker.getStyle().set("margin-right", "5px");
@@ -93,6 +97,8 @@ public class DatePickerView extends DemoView {
         readonlyDatePicker.setLabel("Read-only");
         readonlyDatePicker.setValue(LocalDate.now());
         readonlyDatePicker.setReadOnly(true);
+
+        add(disabledDatePicker, readonlyDatePicker);
         // end-source-example
 
         disabledDatePicker.getStyle().set("margin-right", "5px");
@@ -108,6 +114,7 @@ public class DatePickerView extends DemoView {
 
         // Display an icon which can be clicked to clear the value:
         datePicker.setClearButtonVisible(true);
+        add(datePicker);
         // end-source-example
 
         addCard("Clear button", datePicker);
@@ -128,12 +135,45 @@ public class DatePickerView extends DemoView {
                 value.setText("Selected date: " + event.getValue());
             }
         });
+        add(datePicker, value);
         // end-source-example
 
         VerticalLayout verticalLayout = new VerticalLayout(datePicker, value);
         verticalLayout.setPadding(false);
         addCard("Value change event", verticalLayout);
     }
+
+    private void autoOpenDisabled() {
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        DatePicker datePicker = new DatePicker();
+
+        // Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.
+        datePicker.setAutoOpen(false);
+        // end-source-example
+
+        addCard("Auto open disabled", datePicker);
+    }
+
+    private void helperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and Helper component
+        DatePicker datePickerHelperText = new DatePicker("Delivery");
+        datePickerHelperText.setHelperText("Select a delivery date");
+
+        DatePicker datePickerHelperComponent = new DatePicker("Order");
+        datePickerHelperComponent
+              .setHelperComponent(new Span("Select an order date"));
+        // end-source-example
+
+        datePickerHelperText.getStyle().set("margin-right", "15px");
+
+        div.add(datePickerHelperText, datePickerHelperComponent);
+        addCard("Helper text and Helper component", div);
+    }
+
+
 
     private void configurationForRequired() {
         // begin-source-example
@@ -147,6 +187,7 @@ public class DatePickerView extends DemoView {
         Button button = new Button("Submit", event ->
             binder.validate()
         );
+        add(datePicker, button);
         // end-source-example
 
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -163,6 +204,7 @@ public class DatePickerView extends DemoView {
         datePicker.setValue(LocalDate.of(2019, 11, 11));
         datePicker.setMin(LocalDate.of(2019, 11, 10));
         datePicker.setMax(LocalDate.of(2019, 11, 16));
+        add(datePicker);
         // end-source-example
 
         addCard("Validation", "Min and max date validation", datePicker);
@@ -179,17 +221,18 @@ public class DatePickerView extends DemoView {
                         && !DayOfWeek.SUNDAY.equals(value.getDayOfWeek()),
                 "The selected date must be between Monday to Friday")
                 .bind(Appointment::getDate, Appointment::setDate);
+        add(datePicker);
         // end-source-example
 
         addCard("Validation", "Custom validator", datePicker);
     }
 
     private void startAndEndDatePickers() {
+        // begin-source-example
+        // source-example-heading: Date range
         Div message = new Div();
         message.setText("Selected range: ");
 
-        // begin-source-example
-        // source-example-heading: Date range
         DatePicker fromDatePicker = new DatePicker();
         fromDatePicker.setLabel("From date");
         DatePicker toDatePicker = new DatePicker();
@@ -235,6 +278,7 @@ public class DatePickerView extends DemoView {
                 }
             }
         });
+        add(fromDatePicker, toDatePicker, message);
         // end-source-example
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -248,7 +292,7 @@ public class DatePickerView extends DemoView {
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Label");
         datePicker.setWeekNumbersVisible(true);
-        datePicker.setI18n(new DatePickerI18n().setWeek("Week")
+        datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("Week")
                 .setCalendar("Calendar").setClear("Clear").setToday("Today")
                 .setCancel("cancel").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("January", "February", "March",
@@ -258,21 +302,22 @@ public class DatePickerView extends DemoView {
                         "Wednesday", "Thursday", "Friday", "Saturday"))
                 .setWeekdaysShort(Arrays.asList("Sun", "Mon", "Tue", "Wed",
                         "Thu", "Fri", "Sat")));
+        add(datePicker);
         // end-source-example
 
         addCard("Presentation", "Date picker with week numbers", datePicker);
     }
 
     private void finnishDatePicker() {
-        Div message = new Div();
         // begin-source-example
         // source-example-heading: Localizing
+        Div message = new Div();
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Finnish date picker");
         datePicker.setPlaceholder("Syntymäpäivä");
         datePicker.setLocale(new Locale("fi"));
 
-        datePicker.setI18n(new DatePickerI18n().setWeek("viikko")
+        datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("viikko")
                 .setCalendar("kalenteri").setClear("tyhjennä")
                 .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
@@ -300,6 +345,7 @@ public class DatePickerView extends DemoView {
                 message.setText("No date is selected");
             }
         });
+        add(datePicker, message);
         // end-source-example
 
         datePicker.setId("finnish-picker");
@@ -311,7 +357,7 @@ public class DatePickerView extends DemoView {
         // source-example-heading: Simple date picker
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Label");
-        datePicker.setI18n(new DatePickerI18n().setWeek("Week")
+        datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("Week")
                 .setCalendar("Calendar").setClear("clear").setToday("today")
                 .setCancel("cancel").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("January", "February", "March",
@@ -322,7 +368,6 @@ public class DatePickerView extends DemoView {
                 .setWeekdaysShort(Arrays.asList("Sun", "Mon", "Tue", "Wed",
                         "Thu", "Fri", "Sat")));
         // end-source-example
-
     }
 
     private void themeVariantsTextAlign() {
@@ -341,6 +386,7 @@ public class DatePickerView extends DemoView {
         rightDatePicker.setValue(LocalDate.now());
         rightDatePicker.getElement().setAttribute("theme", "align-right");
 
+        add(leftDatePicker, centerDatePicker, rightDatePicker);
         // end-source-example
 
         div.add(leftDatePicker, centerDatePicker, rightDatePicker);
@@ -355,9 +401,33 @@ public class DatePickerView extends DemoView {
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Label");
         datePicker.getElement().setAttribute("theme", "small");
+
+        add(datePicker);
         // end-source-example
 
         addCard("Theme Variants", "Small text field", datePicker);
+    }
+
+    private void helperTextVariants(){
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and component above the field
+        DatePicker datePickerHelperTextAbove = new DatePicker("Label");
+        datePickerHelperTextAbove.setHelperText("Helper text above the field");
+        datePickerHelperTextAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+
+        DatePicker datePickerHelperComponentAbove = new DatePicker("Label");
+        datePickerHelperComponentAbove
+              .setHelperComponent(new Span("Helper component above the field"));
+        datePickerHelperComponentAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+        add(datePickerHelperTextAbove, datePickerHelperComponentAbove);
+        // end-source-example
+
+        datePickerHelperTextAbove.getStyle().set("margin-right", "15px");
+        div.add(datePickerHelperTextAbove, datePickerHelperComponentAbove);
+        addCard("Theme Variants", "Helper text and component above the field", div);
     }
 
     private void styling() {

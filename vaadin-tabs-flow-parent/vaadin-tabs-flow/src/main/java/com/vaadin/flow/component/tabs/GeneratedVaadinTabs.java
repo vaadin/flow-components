@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -101,6 +102,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.TabsElement#2.1.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tabs")
+@HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tabs.html")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tabs.js")
 @NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.2.0")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
@@ -129,6 +131,6 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
     }
 
     protected void focus() {
-        getElement().callJsFunction("focus");
+        getElement().callFunction("focus");
     }
 }

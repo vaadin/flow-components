@@ -19,9 +19,9 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.Date;
 import java.time.Instant;
 import com.vaadin.flow.component.charts.util.Util;
@@ -37,17 +37,12 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	private Boolean allowPointSelect;
 	private Number animationLimit;
 	private String className;
-	private Boolean clip;
-	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
-	private String colorKey;
-	private ArrayList<Color> colors;
 	private Boolean crisp;
 	private Cursor cursor;
 	private Number depth;
 	private String description;
-	private Color edgeColor;
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
@@ -55,11 +50,9 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	private Boolean getExtremesFromAll;
 	private Number groupZPadding;
 	private ArrayList<String> keys;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
-	private Color negativeColor;
-	private Number opacity;
+	private boolean negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -72,8 +65,6 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	private Boolean skipKeyboardNavigation;
 	private States states;
 	private Color stemColor;
-	private DashStyle stemDashStyle;
-	private Number stemWidth;
 	private Boolean stickyTracking;
 	private SeriesTooltip tooltip;
 	private Number turboThreshold;
@@ -142,42 +133,6 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setClip(Boolean)
-	 * @return
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * The main color of the bars. This can be overridden by <a
-	 * href="#plotOptions.errorbar.stemColor">stemColor</a> and <a
-	 * href="#plotOptions.errorbar.whiskerColor">whiskerColor</a> individually.
-	 * <p>
-	 * Defaults to: #000000
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
 	 * @see #setColorByPoint(Boolean)
 	 */
 	public Boolean getColorByPoint() {
@@ -211,72 +166,6 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColorKey(String)
-	 */
-	public String getColorKey() {
-		return colorKey;
-	}
-
-	/**
-	 * Determines what data value should be used to calculate point color
-	 * if <code>colorAxis</code> is used.
-	 * Requires to set <code>min</code> and <code>max</code>
-	 * if some custom point property is used or if approximation for data grouping
-	 * is set to <code>`sum'</code>.
-	 * <p>
-	 * Defaults to <code>high</code>.
-	 */
-	public void setColorKey(String colorKey) {
-		this.colorKey = colorKey;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**
@@ -353,22 +242,6 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	/**
-	 * @see #setEdgeColor(Color)
-	 */
-	public Color getEdgeColor() {
-		return edgeColor;
-	}
-
-	/**
-	 * 3D columns only. The color of the edges. Similar to
-	 * <code>borderColor</code>, except it defaults to the same color as the
-	 * column.
-	 */
-	public void setEdgeColor(Color edgeColor) {
-		this.edgeColor = edgeColor;
 	}
 
 	/**
@@ -536,26 +409,6 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line surrounding the box. If any of <a
-	 * href="#plotOptions.boxplot.stemWidth">stemWidth</a>, <a
-	 * href="#plotOptions.boxplot.medianWidth">medianWidth</a> or <a
-	 * href="#plotOptions.boxplot.whiskerWidth">whiskerWidth</a> are
-	 * <code>null</code>, the lineWidth also applies to these lines.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -591,35 +444,20 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(Color)
+	 * @see #setNegativeColor(boolean)
 	 */
-	public Color getNegativeColor() {
+	public boolean isNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
 	 */
-	public void setNegativeColor(Color negativeColor) {
+	public void setNegativeColor(boolean negativeColor) {
 		this.negativeColor = negativeColor;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {
@@ -846,41 +684,6 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	 */
 	public void setStemColor(Color stemColor) {
 		this.stemColor = stemColor;
-	}
-
-	/**
-	 * @see #setStemDashStyle(DashStyle)
-	 */
-	public DashStyle getStemDashStyle() {
-		return stemDashStyle;
-	}
-
-	/**
-	 * The dash style of the stem, the vertical line extending from the box to
-	 * the whiskers.
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setStemDashStyle(DashStyle stemDashStyle) {
-		this.stemDashStyle = stemDashStyle;
-	}
-
-	/**
-	 * @see #setStemWidth(Number)
-	 */
-	public Number getStemWidth() {
-		return stemWidth;
-	}
-
-	/**
-	 * The width of the stem, the vertical line extending from the box to the
-	 * whiskers. If <code>null</code>, the width is inherited from the <a
-	 * href="#plotOptions.boxplot.lineWidth">lineWidth</a> option.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setStemWidth(Number stemWidth) {
-		this.stemWidth = stemWidth;
 	}
 
 	/**

@@ -17,11 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * General plotting options for the gauge series type. Requires
@@ -33,10 +32,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
-	private Boolean clip;
-	private Color color;
 	private Number colorIndex;
-	private Boolean crisp;
 	private Cursor cursor;
 	private DataLabels dataLabels;
 	private String description;
@@ -47,8 +43,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private String linkedTo;
-	private Color negativeColor;
-	private Number opacity;
+	private boolean negativeColor;
 	private Number overshoot;
 	private Pivot pivot;
 	private String _fn_pointDescriptionFormatter;
@@ -120,54 +115,6 @@ public class PlotOptionsGauge extends GaugeOptions {
 	}
 
 	/**
-	 * @see #setClip(Boolean)
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * <p>
-	 * The main color or the series. In line type series it applies to the line
-	 * and the point markers unless otherwise specified. In bar type series it
-	 * applies to the bars unless a color is specified per point. The default
-	 * value is pulled from the <code>options.colors</code> array.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the color can be defined by the <a
-	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
-	 * series color can be set with the <code>.highcharts-series</code>,
-	 * <code>.highcharts-color-{n}</code>,
-	 * <code>.highcharts-{type}-series</code> or
-	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
-	 * the <code>className</code> option.
-	 * </p>
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -183,27 +130,6 @@ public class PlotOptionsGauge extends GaugeOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setCrisp(Boolean)
-	 */
-	public Boolean getCrisp() {
-		return crisp;
-	}
-
-	/**
-	 * When true, each point or column edge is rounded to its nearest pixel
-	 * in order to render sharp on screen. In some cases, when there are a lot of
-	 * densely packed columns, this leads to visible difference in column widths
-	 * or distance between columns. In these cases, setting <code>crisp</code>
-	 * to <code>false</code> may look better, even though each column is
-	 * rendered blurry.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setCrisp(Boolean crisp) {
-		this.crisp = crisp;
 	}
 
 	/**
@@ -420,22 +346,6 @@ public class PlotOptionsGauge extends GaugeOptions {
 	}
 
 	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * <p>
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -453,19 +363,19 @@ public class PlotOptionsGauge extends GaugeOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(Color)
+	 * @see #setNegativeColor(boolean)
 	 */
-	public Color getNegativeColor() {
+	public boolean isNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
 	 */
-	public void setNegativeColor(Color negativeColor) {
+	public void setNegativeColor(boolean negativeColor) {
 		this.negativeColor = negativeColor;
 	}
 

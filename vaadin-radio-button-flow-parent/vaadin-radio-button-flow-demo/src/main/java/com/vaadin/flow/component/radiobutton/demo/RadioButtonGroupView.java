@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -43,6 +44,7 @@ public class RadioButtonGroupView extends DemoView {
     @Override
     protected void initView() {
         basicDemo(); // Basic Usage
+        helperDemo();
         entityList();
         disabledAndDisabledItem();
         valueChangeEvent();
@@ -50,6 +52,7 @@ public class RadioButtonGroupView extends DemoView {
         customOptions(); // Presentation
         usingTemplateRenderer();
         themeVariantsHorizontal();// Theme Variants
+        themeVariantsHelperText();
         styling(); // Styling
     }
 
@@ -61,10 +64,33 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setItems("Option one", "Option two", "Option three");
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroup.setValue("Option one");
+
+        add(radioGroup);
         // end-source-example
 
         addCard("Basic usage", radioGroup);
     }
+
+    private void helperDemo() {
+        // begin-source-example
+        // source-example-heading: Helper text
+        RadioButtonGroup<String> radioGroupHelperText = new RadioButtonGroup<>();
+        radioGroupHelperText.setLabel("Label");
+        radioGroupHelperText.setItems("Option one", "Option two", "Option three");
+        radioGroupHelperText.setHelperText("Helper text");
+
+        RadioButtonGroup<String> radioGroupHelperComponent = new RadioButtonGroup<>();
+        radioGroupHelperComponent.setLabel("Label");
+        radioGroupHelperComponent.setItems("Option one", "Option two", "Option three");
+        radioGroupHelperComponent.setHelperComponent(new Span("Helper text"));;
+
+        add(radioGroupHelperText, radioGroupHelperComponent);
+        // end-source-example
+
+        addCard("Helper text", radioGroupHelperText, radioGroupHelperComponent);
+    }
+
+    
 
     private void entityList() {
         // begin-source-example
@@ -75,6 +101,8 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setItems(departmentList);
         radioGroup.setRenderer(new TextRenderer<>(Department::getName));
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        add(radioGroup);
         // end-source-example
 
         addCard("Entity list", radioGroup);
@@ -95,6 +123,8 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setItems("Option one", "Option two", "Option three");
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroup.setItemEnabledProvider(item -> !"Option three".equals(item));
+
+        add(disabledRadioGroup, radioGroup);
         // end-source-example
 
         disabledRadioGroup.getStyle().set("margin-right", "7.5em");
@@ -126,6 +156,8 @@ public class RadioButtonGroupView extends DemoView {
                 value.setText("Selected: " + event.getValue());
             }
         });
+
+        add(radioGroup, value);
         // end-source-example
 
         addCard("Value change event", radioGroup, value);
@@ -153,6 +185,8 @@ public class RadioButtonGroupView extends DemoView {
                         Notification.Position.MIDDLE);
             }
         });
+
+        add(radioGroup, button);
         // end-source-example
 
         radioGroup.getStyle().set("margin-right", "5.5em");
@@ -192,6 +226,8 @@ public class RadioButtonGroupView extends DemoView {
             wrapper.add(image, title);
             return wrapper;
         }));
+
+        add(radioButton);
         // end-source-example
 
         addCard("Presentation", "Customizing radio button label", radioButton);
@@ -216,6 +252,8 @@ public class RadioButtonGroupView extends DemoView {
             Div div = new Div(name, description);
             return div;
         }));
+
+        add(radioGroup);
         // end-source-example
 
         addCard("Presentation", "Multi-line label", radioGroup);
@@ -234,9 +272,33 @@ public class RadioButtonGroupView extends DemoView {
         vertical.setItems("Option one", "Option two", "Option three");
         vertical.setValue("Option one");
         vertical.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        add(horizontal, vertical);
         // end-source-example
 
         addCard("Theme variants", "Direction", horizontal, vertical);
+    }
+
+    private void themeVariantsHelperText() {
+        // begin-source-example
+        // source-example-heading: Helper text position
+        RadioButtonGroup<String> below = new RadioButtonGroup<>();
+        below.setLabel("Label");
+        below.setItems("Option one", "Option two", "Option three");
+        below.setValue("Option one");
+        below.setHelperText("Helper text below");
+        
+        RadioButtonGroup<String> above = new RadioButtonGroup<>();
+        above.setLabel("Label");
+        above.setItems("Option one", "Option two", "Option three");
+        above.setValue("Option one");
+        above.setHelperText("Helper text above");
+        above.addThemeVariants(RadioGroupVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        add(below, above);
+        // end-source-example
+
+        addCard("Theme variants", "Helper text position", below, above);
     }
 
     private void styling() {

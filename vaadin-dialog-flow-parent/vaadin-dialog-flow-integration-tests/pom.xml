@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-dialog-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-dialog-integration-tests</artifactId>
+  <version>${vaadin.dialog.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Dialog Integration Tests</name>
   <properties>
@@ -34,12 +35,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-flow</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-dialog-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.dialog.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -48,7 +44,20 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.combo.box.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-html-components</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-button-flow</artifactId>
+      <version>${vaadin.button.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -57,7 +66,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.dialog.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -74,7 +83,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

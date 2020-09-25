@@ -8,19 +8,16 @@ package com.vaadin.flow.component.charts;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- *
+ * 
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- *
+ * 
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -29,7 +26,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.events.ChartAddSeriesEvent;
 import com.vaadin.flow.component.charts.events.ChartAfterPrintEvent;
 import com.vaadin.flow.component.charts.events.ChartBeforePrintEvent;
@@ -59,32 +55,27 @@ import com.vaadin.flow.component.charts.events.SeriesShowEvent;
 import com.vaadin.flow.component.charts.events.XAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.events.YAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
-import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
-import com.vaadin.flow.component.charts.model.DrilldownCallback;
-import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
-import com.vaadin.flow.component.charts.model.DrilldownCallback.DrilldownDetails;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
-@NpmPackage(value="@vaadin/vaadin-charts", version = "7.0.0")
-@JsModule("@vaadin/vaadin-charts/src/vaadin-chart.js")
+@NpmPackage(value="@vaadin/vaadin-charts", version = "6.3.1")
+@JsModule("@vaadin/vaadin-charts/vaadin-chart.js")
+@HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
 public class Chart extends Component implements HasStyle, HasSize {
 
     private Configuration configuration;
-
-    private Registration configurationUpdateRegistration;
 
     private transient JreJsonFactory jsonFactory = new JreJsonFactory();
 
@@ -93,11 +84,7 @@ public class Chart extends Component implements HasStyle, HasSize {
 
     private final static List<ChartType> TIMELINE_NOT_SUPPORTED = Arrays.asList(
             ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE, ChartType.PYRAMID,
-            ChartType.FUNNEL, ChartType.ORGANIZATION);
-
-    private DrillCallbackHandler drillCallbackHandler;
-
-    private DrilldownCallback drilldownCallback;
+            ChartType.FUNNEL);
 
     /**
      * Creates a new chart with default configuration
@@ -117,35 +104,18 @@ public class Chart extends Component implements HasStyle, HasSize {
         getConfiguration().getChart().setType(type);
     }
 
-    static String wrapJSExpressionInTryCatchWrapper(String expression) {
-        return String.format(
-            "const f = function(){return %s;}.bind(this);"
-                + "return Vaadin.Flow.tryCatchWrapper(f, 'Vaadin Charts', 'vaadin-charts-flow')();",
-            expression);
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        beforeClientResponse(attachEvent.getUI(), false);
-    }
-
-    private void beforeClientResponse(UI ui, boolean resetConfiguration) {
-        if (configurationUpdateRegistration != null) {
-            configurationUpdateRegistration.remove();
-        }
-        configurationUpdateRegistration = ui
-            .beforeClientResponse(this, context -> {
-                drawChart(resetConfiguration);
-
-                if (configuration != null) {
-                    // Start listening to data series events once the chart has been
-                    // drawn.
-                    configuration.addChangeListener(changeListener);
-                }
-                configurationUpdateRegistration = null;
-            });
+        attachEvent.getUI().beforeClientResponse(this, context -> {
+            drawChart();
+            if (configuration != null) {
+                // Start listening to data series events once the chart has been
+                // drawn.
+                configuration.addChangeListener(changeListener);
+            }
+        });
     }
 
     JreJsonFactory getJsonFactory() {
@@ -191,29 +161,24 @@ public class Chart extends Component implements HasStyle, HasSize {
         final JsonObject configurationNode = getJsonFactory()
                 .parse(ChartSerialization.toJSON(configuration));
 
-        getElement().callJsFunction("update", configurationNode,
+        getElement().callFunction("update", configurationNode,
                 resetConfiguration);
     }
 
     /**
-     * Determines if the chart is in timeline mode or in normal mode. The
-     * following chart types do not support timeline mode:
+     * Determines if the chart is a timeline chart or a normal chart.
+     * The following chart types do not support timeline:
      * <ul>
      * <li>ChartType.PIE</li>
      * <li>ChartType.GAUGE</li>
      * <li>ChartType.SOLIDGAUGE</li>
      * <li>ChartType.PYRAMID</li>
      * <li>ChartType.FUNNEL</li>
-     * <li>ChartType.ORGANIZATION</li>
      * </ul>
-     * Enabling timeline mode in these unsupported chart types results in an
-     * <code>IllegalArgumentException</code>
-     * <p>
-     * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
-     * {@link PlotOptionsTimeline}.
-     * 
-     * @param timeline
-     *            true for timeline chart
+     * Enabling timeline in these unsupported chart types
+     * results in an <code>IllegalArgumentException</code>
+     *
+     * @param timeline true for timeline chart
      */
     public void setTimeline(Boolean timeline) {
         getElement().setProperty("timeline", timeline);
@@ -246,41 +211,6 @@ public class Chart extends Component implements HasStyle, HasSize {
      */
     public Configuration getConfiguration() {
         return configuration;
-    }
-
-    /**
-     * @param configuration new configuration for this chart.
-     */
-    public void setConfiguration(Configuration configuration) {
-        if (this.configuration != null) {
-            // unbound old configuration
-            this.configuration.removeChangeListener(changeListener);
-        }
-        this.configuration = configuration;
-        if(getElement().getNode().isAttached()) {
-            getUI().ifPresent(ui -> beforeClientResponse(ui, true));
-        }
-    }
-
-    public DrilldownCallback getDrilldownCallback() {
-        return drilldownCallback;
-    }
-
-    public void setDrilldownCallback(DrilldownCallback drilldownCallback) {
-        this.drilldownCallback = drilldownCallback;
-        updateDrillHandler();
-    }
-
-    private void updateDrillHandler() {
-        final boolean hasCallback = this.getDrilldownCallback() != null;
-        if (hasCallback && this.drillCallbackHandler == null) {
-            this.drillCallbackHandler = new DrillCallbackHandler();
-            this.drillCallbackHandler.register();
-        } else if (!hasCallback && this.drillCallbackHandler != null
-            && this.drillCallbackHandler.canBeUnregistered()) {
-            this.drillCallbackHandler.unregister();
-            this.drillCallbackHandler = null;
-        }
     }
 
     /**
@@ -606,82 +536,6 @@ public class Chart extends Component implements HasStyle, HasSize {
     public Registration addYAxesExtremesSetListener(
             ComponentEventListener<YAxesExtremesSetEvent> listener) {
         return addListener(YAxesExtremesSetEvent.class, listener);
-    }
-
-    /*
-     * Handles Drilldown and Drillup events when using a callback.
-     */
-    private class DrillCallbackHandler implements Serializable {
-        private final Deque<Series> stack = new LinkedList<>();
-        private Registration drilldownRegistration;
-        private Registration drillupRegistration;
-
-        private void register() {
-            drilldownRegistration = addDrilldownListener(this::onDrilldown);
-            drillupRegistration = addChartDrillupListener(this::onDrillup);
-        }
-
-        private void unregister() {
-            stack.clear();
-            drilldownRegistration.remove();
-            drillupRegistration.remove();
-
-            drilldownRegistration = null;
-            drillupRegistration = null;
-        }
-
-        private void onDrilldown(DrilldownEvent details) {
-            if (getDrilldownCallback() == null) {
-                return;
-            }
-            final int seriesIndex = details.getSeriesItemIndex();
-            final int pointIndex = details.getItemIndex();
-            final Series series = resolveSeriesFor(seriesIndex);
-            DataSeriesItem item = null;
-            if (series instanceof DataSeries) {
-                DataSeries dataSeries = (DataSeries) series;
-                item = dataSeries.get(pointIndex);
-            }
-            final DrilldownDetails chartDrilldownEvent = new DrilldownDetails(
-                series, item, pointIndex);
-
-            final Series drilldownSeries = getDrilldownCallback()
-                .handleDrilldown(chartDrilldownEvent);
-            if (drilldownSeries != null) {
-                stack.push(drilldownSeries);
-                callClientSideAddSeriesAsDrilldown(seriesIndex, pointIndex,
-                    drilldownSeries);
-            }
-        }
-
-        private void onDrillup(ChartDrillupEvent e) {
-            stack.pop();
-            updateDrillHandler();
-        }
-
-        private boolean canBeUnregistered() {
-            return stack.isEmpty();
-        }
-
-        private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
-            int pointIndex, Series drilldownSeries) {
-            final String JS = "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)";
-            getElement().executeJs(wrapJSExpressionInTryCatchWrapper(JS),
-                "addSeriesAsDrilldown", seriesIndex, pointIndex,
-                toJsonValue((AbstractConfigurationObject) drilldownSeries));
-        }
-
-        private JsonValue toJsonValue(AbstractConfigurationObject series) {
-            return getJsonFactory().parse(ChartSerialization.toJSON(series));
-        }
-
-        private Series resolveSeriesFor(int seriesIndex) {
-            if (stack.isEmpty()) {
-                return getConfiguration().getSeries().get(seriesIndex);
-            } else {
-                return stack.peek();
-            }
-        }
     }
 
 }

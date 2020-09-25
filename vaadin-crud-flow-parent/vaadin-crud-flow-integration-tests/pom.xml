@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-crud-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-crud-integration-tests</artifactId>
+  <version>${vaadin.crud.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Crud Integration Tests</name>
   <properties>
@@ -23,31 +24,31 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-crud-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.crud.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-confirm-dialog-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.confirm.dialog.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.dialog.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-crud-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.crud.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -63,42 +64,46 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>flow-server-production-mode</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-lumo-theme</artifactId>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.combo.box.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.dialog.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-form-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.form.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -108,7 +113,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -29,21 +29,18 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
 
     private ComboBoxElement stringBox;
+    private ComboBoxElement stringBoxAutoOpenDisabled;
     private ComboBoxElement pagesizeBox;
     private ComboBoxElement beanBox;
     private ComboBoxElement filterBox;
     private ComboBoxElement callbackBox;
     private ComboBoxElement templateBox;
     private ComboBoxElement emptyCallbackBox;
-    private ComboBoxElement lazyCustomPageSize;
-
-    private WebElement lazySizeRequestCountSpan;
 
     @Before
     public void init() {
@@ -51,6 +48,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
+        stringBoxAutoOpenDisabled = $(ComboBoxElement.class).id("lazy-strings-autoopendisabled");
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
         filterBox = $(ComboBoxElement.class).id("custom-filter");
@@ -58,10 +56,6 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         templateBox = $("combo-box-in-a-template").id("template")
                 .$(ComboBoxElement.class).first();
         emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
-        lazyCustomPageSize = $(ComboBoxElement.class)
-                .id("lazy-custom-page-size");
-        lazySizeRequestCountSpan =
-                findElement(By.id("callback-dataprovider-size-request-count"));
     }
 
     @Test
@@ -420,17 +414,11 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
     @Test
     public void callbackDataprovider_pagesLoadedLazily() {
-        // Check that no backend calls before open popup
-        Assert.assertEquals("0", lazySizeRequestCountSpan.getText());
-
         callbackBox.openPopup();
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
         assertRendered("Item 10");
-
-        // Now backend request should take place to init the data communicator
-        Assert.assertEquals("1", lazySizeRequestCountSpan.getText());
 
         callbackBox.openPopup();
         scrollToItem(callbackBox, 60);
@@ -475,6 +463,18 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         assertMessage(item);
         Assert.assertEquals(item, getSelectedItemLabel(stringBox));
+    }
+
+    @Test 
+    public void autoOpenDisabled_setValue_valueChanged() {
+        String item = "Item 151";
+        stringBox.openPopup();
+        stringBox.setFilter(item);
+        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        stringBoxAutoOpenDisabled.selectByText(item);
+        assertMessage(item);
+        Assert.assertEquals(item, getSelectedItemLabel(stringBoxAutoOpenDisabled));
+        Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpen());
     }
 
     @Test
@@ -531,23 +531,6 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "return arguments[0].focusElement.value", beanBox);
         Assert.assertEquals("The ComboBox filter text got modified",
                 "Person 111", filterText);
-    }
-
-    @Test
-    public void customPageSize_pageSizePopulatedToDataCommunicator() {
-        lazyCustomPageSize.openPopup();
-        scrollToItem(lazyCustomPageSize, 100);
-        waitUntilTextInContent("100");
-        // page size should be 42
-        assertMessage("42");
-
-        clickButton("change-page-size-button");
-        lazyCustomPageSize.closePopup();
-        lazyCustomPageSize.openPopup();
-        scrollToItem(lazyCustomPageSize, 300);
-        waitUntilTextInContent("300");
-        // page size should be 41
-        assertMessage("41");
     }
 
     private void assertMessage(String expectedMessage) {

@@ -7,19 +7,7 @@ layout: page
 [[css.styling]]
 = CSS Styling
 
-Starting from Vaadin 17, Chart appearance is primarily controlled by using Java API.
-
-NOTE: CSS styling is not the default, but can be enabled by setting [propertyname]#styledMode# to [literal]#++true++#.
-
-[source, java]
-----
-Chart chart = new Chart();
-Configuration conf = chart.getConfiguration();
-conf.getChart().setStyledMode(true);
-----
-
-After enabling [propertyname]#styledMode# and creating a theme module including [literal]#++vaadin-chart-default-theme++#, as described later, the chart appearance is primarily controlled by CSS style rules.
-
+Chart appearance is primarily controlled by CSS style rules.
 A comprehensive list of the supported style classes can be found https://www.highcharts.com/docs/chart-design-and-style/style-by-css[here].
 
 [[css.styling.steps]]
@@ -30,7 +18,7 @@ Starting from Vaadin 14, applications running on the default mode can use `@CssI
 1. Create a CSS file (by convention this should be at `frontend/styles/`).
 2. Specify the desired CSS rules in the theme file.
 3. If multiple charts are present, each one can be specifically targeted by the host selector e.g `:host(.first-chart-class)`.
-4. Add the annotations to import the default theme module (`@JsModule("@vaadin/vaadin-charts/theme/vaadin-chart-default-theme")` and the style file (`@CssImport(value = "./styles/my-charts-styles.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")`).
+4. Add the annotation to import the style (`@CssImport(value = "./styles/my-charts-styles.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")`).
 
 +
 NOTE: If there are multiple theme modules *only one* of them should declare the `include` in step 4 above.
@@ -55,7 +43,6 @@ CssStyleExample.java
 
 [source, java]
 ----
-@JsModule("@vaadin/vaadin-charts/theme/vaadin-chart-default-theme")
 @CssImport(value = "./styles/custom-chart-styles.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class CssStyleExample extends Div {
 
@@ -106,7 +93,6 @@ CssStyleExample.java
 
 [source, java]
 ----
-@JsModule("@vaadin/vaadin-charts/theme/vaadin-chart-default-theme")
 @CssImport(value = "./styles/huge-axis.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class CssStyleExample extends Div {
 

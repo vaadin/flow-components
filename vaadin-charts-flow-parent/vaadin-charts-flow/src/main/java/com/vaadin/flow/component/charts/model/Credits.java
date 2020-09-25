@@ -19,7 +19,6 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * Highchart by default puts a credits label in the lower right corner of the
@@ -31,7 +30,6 @@ public class Credits extends AbstractConfigurationObject {
 	private Boolean enabled;
 	private String href;
 	private Position position;
-	private Style style;
 	private String text;
 
 	public Credits() {
@@ -88,26 +86,6 @@ public class Credits extends AbstractConfigurationObject {
 	 */
 	public void setPosition(Position position) {
 		this.position = position;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * CSS styles for the credits label.
-	 * <p>
-	 * Defaults to: { "cursor": "pointer", "color": "#999999", "fontSize":
-	 * "10px" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	public Credits(String text) {

@@ -29,7 +29,6 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
@@ -53,17 +52,13 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     private static final String PROP_DISABLED = "disabled";
     private static final String PROP_ERROR = "error";
     private static final String PROP_NO_FORGOT_PASSWORD = "noForgotPassword";
-    
-    private static final PropertyChangeListener NO_OP = event -> {
-    };
 
     /**
      * Initializes a new AbstractLogin with a default localization.
      */
     public AbstractLogin() {
         this(LoginI18n.createDefault());
-        getElement().addPropertyChangeListener(PROP_DISABLED, LOGIN_EVENT,
-                NO_OP);
+        getElement().synchronizeProperty(PROP_DISABLED, LOGIN_EVENT);
         getElement().setProperty("_preventAutoEnable", true);
         addLoginListener(e -> {
             setEnabled(false);

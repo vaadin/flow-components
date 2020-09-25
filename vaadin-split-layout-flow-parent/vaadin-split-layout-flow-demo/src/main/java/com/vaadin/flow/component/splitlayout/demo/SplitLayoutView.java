@@ -52,6 +52,8 @@ public class SplitLayoutView extends DemoView {
                 new Label("First content component"),
                 new Label("Second content component"));
         layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
+
+        add(layout);
         // end-source-example
 
         addVariantsDemo(() -> {
@@ -69,6 +71,8 @@ public class SplitLayoutView extends DemoView {
         SplitLayout layout = new SplitLayout(
                 new Label("First content component"),
                 new Label("Second content component"));
+
+        add(layout);
         // end-source-example
 
         setMinHeightForLayout(layout);
@@ -82,6 +86,8 @@ public class SplitLayoutView extends DemoView {
         layout.setOrientation(Orientation.VERTICAL);
         layout.addToPrimary(new Label("Top content component"));
         layout.addToSecondary(new Label("Bottom content component"));
+
+        add(layout);
         // end-source-example
 
         setMinHeightForLayout(layout);
@@ -103,6 +109,8 @@ public class SplitLayoutView extends DemoView {
         SplitLayout layout = new SplitLayout();
         layout.addToPrimary(firstLabel);
         layout.addToSecondary(innerLayout);
+
+        add(layout);
         // end-source-example
 
         layout.getPrimaryComponent().setId("first-component");
@@ -124,6 +132,8 @@ public class SplitLayoutView extends DemoView {
         AtomicInteger resizeCounter = new AtomicInteger();
         layout.addSplitterDragendListener(event -> message.setText(
                 "SplitLayout Resized " + resizeCounter.incrementAndGet() + " times."));
+
+        add(layout, message);
         // end-source-example
 
         message.setId("resize-message");
@@ -139,6 +149,8 @@ public class SplitLayoutView extends DemoView {
 
         SplitLayout layout = new SplitLayout(firstLabel, secondLabel);
         layout.setSplitterPosition(80);
+
+        add(layout);
         // end-source-example
 
         layout.getPrimaryComponent().setId("initial-sp-first-component");
@@ -157,6 +169,8 @@ public class SplitLayoutView extends DemoView {
         layout.setPrimaryStyle("minWidth", "100px");
         layout.setPrimaryStyle("maxWidth", "150px");
         layout.setPrimaryStyle("background", "salmon");
+
+        add(layout);
         // end-source-example
 
         layout.getPrimaryComponent().setId("min-max-first-component");

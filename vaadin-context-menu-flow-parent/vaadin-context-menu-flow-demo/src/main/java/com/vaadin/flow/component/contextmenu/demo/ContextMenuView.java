@@ -67,6 +67,7 @@ public class ContextMenuView extends DemoView {
         MenuItem item = contextMenu.addItem("Disabled menu item",
                 e -> message.setText("This cannot happen"));
         item.setEnabled(false);
+        add(target, message);
 
         // end-source-example
 
@@ -97,7 +98,7 @@ public class ContextMenuView extends DemoView {
         subMenu = subMenu.addItem("Parent item").getSubMenu();
         subMenu.addItem("Third menu item",
                 event -> message.setText("Clicked on the third item"));
-
+        add(target, message);
         // end-source-example
 
         addCard("Hierarchical Menu", target, message);
@@ -133,7 +134,7 @@ public class ContextMenuView extends DemoView {
         });
         item2.setCheckable(true);
         item2.setChecked(true);
-
+        add(target, message);
         // end-source-example
 
         addCard("Checkable Menu Items", target, message);
@@ -161,7 +162,7 @@ public class ContextMenuView extends DemoView {
         // without creating menu items with add()
         Component separator = new Hr();
         contextMenu.add(separator, new Label("This is not a menu item"));
-
+        add(target, message);
         // end-source-example
 
         addCard("ContextMenu With Components", target, message);
@@ -195,7 +196,7 @@ public class ContextMenuView extends DemoView {
         // without creating menu items with add()
         subMenu.addComponentAtIndex(1, new Hr());
         subMenu.add(new Label("This is not a menu item"));
-
+        add(target, message);
         // end-source-example
 
         addCard("ContextMenu With Components in Sub Menu", target, message);

@@ -20,7 +20,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.binder.HasItemsAndComponents;
 
 /**
  * Internal representation of {@code <vaadin-item>}. vaadin-select.html imports
@@ -30,7 +30,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  */
 @Tag("vaadin-item")
 class VaadinItem<T> extends Component
-        implements HasItemComponents.ItemComponent<T>, HasComponents,
+        implements HasItemsAndComponents.ItemComponent<T>, HasComponents,
         HasStyle, HasText {
 
     private T item;

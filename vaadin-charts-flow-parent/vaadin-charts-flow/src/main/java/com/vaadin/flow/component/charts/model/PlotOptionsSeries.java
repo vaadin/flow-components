@@ -17,13 +17,12 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import javax.annotation.Generated;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-
-import com.vaadin.flow.component.charts.model.style.Color;
+import java.time.Instant;
 import com.vaadin.flow.component.charts.util.Util;
 
 /**
@@ -38,16 +37,11 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
-	private Boolean clip;
-	private Color color;
 	private Number colorIndex;
-	private String colorKey;
 	private Boolean connectEnds;
 	private Boolean connectNulls;
-	private Boolean crisp;
 	private Number cropThreshold;
 	private Cursor cursor;
-	private DashStyle dashStyle;
 	private DataLabels dataLabels;
 	private String description;
 	private Boolean enableMouseTracking;
@@ -55,12 +49,10 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
-	private Number lineWidth;
 	private String linecap;
 	private String linkedTo;
 	private Marker marker;
-	private Color negativeColor;
-	private Number opacity;
+	private boolean negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -162,54 +154,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setClip(Boolean)
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * <p>
-	 * The main color or the series. In line type series it applies to the line
-	 * and the point markers unless otherwise specified. In bar type series it
-	 * applies to the bars unless a color is specified per point. The default
-	 * value is pulled from the <code>options.colors</code> array.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the color can be defined by the <a
-	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
-	 * series color can be set with the <code>.highcharts-series</code>,
-	 * <code>.highcharts-color-{n}</code>,
-	 * <code>.highcharts-{type}-series</code> or
-	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
-	 * the <code>className</code> option.
-	 * </p>
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -225,27 +169,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColorKey(String)
-	 */
-	public String getColorKey() {
-		return colorKey;
-	}
-
-	/**
-	 * Determines what data value should be used to calculate point
-	 * color if <code>colorAxis</code> is used.
-	 * Requires to set min and max if some custom point property is used or if approximation
-	 * for data grouping is set to <code>'sum'</code>.
-	 * <p>
-	 * Defaults to <code>y</code>.
-	 *
-	 * @param colorKey
-	 */
-	public void setColorKey(String colorKey) {
-		this.colorKey = colorKey;
 	}
 
 	/**
@@ -279,27 +202,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 */
 	public void setConnectNulls(Boolean connectNulls) {
 		this.connectNulls = connectNulls;
-	}
-
-	/**
-	 * @see #setCrisp(Boolean)
-	 */
-	public Boolean getCrisp() {
-		return crisp;
-	}
-
-	/**
-	 * When true, each point or column edge is rounded to its nearest pixel
-	 * in order to render sharp on screen. In some cases, when there are a lot of
-	 * densely packed columns, this leads to visible difference in column widths
-	 * or distance between columns. In these cases, setting <code>crisp</code>
-	 * to <code>false</code> may look better, even though each column
-	 * is rendered blurry.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setCrisp(Boolean crisp) {
-		this.crisp = crisp;
 	}
 
 	/**
@@ -339,38 +241,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 */
 	public void setCursor(Cursor cursor) {
 		this.cursor = cursor;
-	}
-
-	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * A name for the dash style to use for the graph. Applies only to series
-	 * type having a graph, like <code>line</code>, <code>spline</code>,
-	 * <code>area</code> and <code>scatter</code> in case it has a
-	 * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-	 * <ul>
-	 * <li>Solid</li>
-	 * <li>ShortDash</li>
-	 * <li>ShortDot</li>
-	 * <li>ShortDashDot</li>
-	 * <li>ShortDashDotDot</li>
-	 * <li>Dot</li>
-	 * <li>Dash</li>
-	 * <li>LongDash</li>
-	 * <li>DashDot</li>
-	 * <li>LongDashDot</li>
-	 * <li>LongDashDotDot</li>
-	 * </ul>
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
 	}
 
 	/**
@@ -556,22 +426,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * Pixel with of the graph line.
-	 * <p>
-	 * Defaults to: 2
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinecap(String)
 	 */
 	public String getLinecap() {
@@ -636,36 +490,20 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(Color)
+	 * @see #setNegativeColor(boolean)
 	 */
-	public Color getNegativeColor() {
+	public boolean isNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
 	 */
-	public void setNegativeColor(Color negativeColor) {
+	public void setNegativeColor(boolean negativeColor) {
 		this.negativeColor = negativeColor;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * <p>
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {

@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.time.Instant;
 import java.util.Date;
@@ -82,17 +81,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setClassName(String className);
 
     /**
-     * @see #setClip(Boolean)
-     */
-    public abstract Boolean getClip();
-
-    /**
-     * Disable this option to allow series rendering
-     * in the whole plotting area.
-     */
-    public abstract void setClip(Boolean clip);
-
-    /**
      * @see #setColorIndex(Number)
      */
     public abstract Number getColorIndex();
@@ -105,18 +93,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setColorIndex(Number colorIndex);
 
     /**
-     * @see #setColorKey(String)
-     */
-    public abstract String getColorKey();
-
-    /**
-     * Determines what data value should be used to calculate point color if <code>colorAxis</code> is used.
-     * Requires to set <code>min</code> and <code>max</code> if some custom point property is used
-     * or if approximation for data grouping is set to <code>'sum'</code>.
-     */
-    public abstract void setColorKey(String colorKey);
-
-    /**
      * @see #setConnectNulls(Boolean)
      */
     public abstract Boolean getConnectNulls();
@@ -125,19 +101,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * Whether to connect a graph line across null points.
      */
     public abstract void setConnectNulls(Boolean connectNulls);
-
-    /**
-     * @see #setCrisp(Boolean)
-     */
-    public abstract Boolean getCrisp();
-
-    /**
-     * When true, each point or column edge is rounded to its nearest pixel
-     * in order to render sharp on screen. In some cases, when there are a lot of densely packed columns,
-     * this leads to visible difference in column widths or distance between columns.
-     * In these cases, setting crisp to false may look better, even though each column is rendered blurry.
-     */
-    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCropThreshold(Number)
@@ -180,32 +143,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setDescription(String description);
 
     /**
-     * @see #setDashStyle(DashStyle)
-     */
-    public abstract DashStyle getDashStyle();
-
-    /**
-     * A name for the dash style to use for the graph. Applies only to series
-     * type having a graph, like <code>line</code>, <code>spline</code>,
-     * <code>area</code> and <code>scatter</code> in case it has a
-     * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-     * <ul>
-     * <li>Solid</li>
-     * <li>ShortDash</li>
-     * <li>ShortDot</li>
-     * <li>ShortDashDot</li>
-     * <li>ShortDashDotDot</li>
-     * <li>Dot</li>
-     * <li>Dash</li>
-     * <li>LongDash</li>
-     * <li>DashDot</li>
-     * <li>LongDashDot</li>
-     * <li>LongDashDotDot</li>
-     * </ul>
-     */
-    public abstract void setDashStyle(DashStyle dashStyle);
-
-    /**
      * @see #setEnableMouseTracking(Boolean)
      */
     public abstract Boolean getEnableMouseTracking();
@@ -230,30 +167,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * series.
      */
     public abstract void setExposeElementToA11y(Boolean exposeElementToA11y);
-
-    /**
-     * @see #setFillColor(Color)
-     */
-    public abstract Color getFillColor();
-
-    /**
-     * Fill color or gradient for the area. When <code>null</code>, the series'
-     * <code>color</code> is used with the series' <code>fillOpacity</code>.
-     */
-    public abstract void setFillColor(Color fillColor);
-
-    /**
-     * @see #setFillOpacity(Number)
-     */
-    public abstract Number getFillOpacity();
-
-    /**
-     * Fill opacity for the area. Note that when you set an explicit
-     * <code>fillColor</code>, the <code>fillOpacity</code> is not applied.
-     * Instead, you should define the opacity in the <code>fillColor</code> with
-     * an rgba color definition.
-     */
-    public abstract void setFillOpacity(Number fillOpacity);
 
     /**
      * @see #setFindNearestPointBy(Dimension)
@@ -317,29 +230,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void removeKey(String key);
 
     /**
-     * @see #setLineColor(Color)
-     */
-    public abstract Color getLineColor();
-
-    /**
-     * A separate color for the graph line. By default the line takes the
-     * <code>color</code> of the series, but the lineColor setting allows
-     * setting a separate color for the line without altering the
-     * <code>fillColor</code>.
-     */
-    public abstract void setLineColor(Color lineColor);
-
-    /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * Pixel with of the graph line.
-     */
-    public abstract void setLineWidth(Number lineWidth);
-
-    /**
      * @see #setLinecap(String)
      */
     public abstract String getLinecap();
@@ -363,36 +253,17 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setLinkedTo(String linkedTo);
 
     /**
-     * @see #setNegativeColor(Color)
+     * @see #setNegativeColor(boolean)
      */
-    public abstract Color getNegativeColor();
+    public abstract boolean isNegativeColor();
 
     /**
-     * The color for the parts of the graph or points that are below the
-     * threshold.
+     * Enable or disable the color for parts of the graph that are bellow
+     * <code>threshold</code>. A negative color is applied by setting this
+     * option to <code>true</code> combined with the
+     * <code>.highcharts-negative</code> class name.
      */
-    public abstract void setNegativeColor(Color negativeColor);
-
-    /**
-     * @see #setNegativeFillColor(Color)
-     */
-    public abstract Color getNegativeFillColor();
-
-    /**
-     * A separate color for the negative part of the area.
-     */
-    public abstract void setNegativeFillColor(Color negativeFillColor);
-
-    /**
-     * @see #setOpacity(Number)
-     */
-    public abstract Number getOpacity();
-
-    /**
-     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-     */
-    public abstract void setOpacity(Number opacity);
-
+    public abstract void setNegativeColor(boolean negativeColor);
 
     public abstract String getPointDescriptionFormatter();
 

@@ -20,8 +20,9 @@ import java.time.LocalTime;
 import java.util.Arrays;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-time-picker/time-picker-it")
@@ -29,10 +30,12 @@ public class TimePickerPage extends Div {
 
     public TimePickerPage() {
         createDefaultTimePicker();
+        createAutoOpenDisabledTimePicker();
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
-        createTimePickerFromRenderer();
+        createHelperText();
+        createHelperComponent();
     }
 
     private void createDefaultTimePicker() {
@@ -40,6 +43,19 @@ public class TimePickerPage extends Div {
         TimePicker timePicker = new TimePicker();
         timePicker.setId("simple-picker");
         timePicker.setLabel("Default TimePicker");
+
+        timePicker.addValueChangeListener(
+                event -> updateMessage(message, timePicker));
+
+        add(timePicker, message);
+    }
+
+    private void createAutoOpenDisabledTimePicker() {
+        Div message = createMessageDiv("autoopendisabled-picker-message");
+        TimePicker timePicker = new TimePicker();
+        timePicker.setId("autoopendisabled-picker");
+        timePicker.setLabel("Auto open disabled TimePicker");
+        timePicker.setAutoOpen(false);
 
         timePicker.addValueChangeListener(
                 event -> updateMessage(message, timePicker));
@@ -97,14 +113,33 @@ public class TimePickerPage extends Div {
         add(timePicker, message);
     }
 
-    private void createTimePickerFromRenderer() {
-        ComponentRenderer<TimePicker, TimePickerPage> renderer = new ComponentRenderer<>(
-            () -> {
-                TimePicker timePicker = new TimePicker();
-                timePicker.setValue(LocalTime.now());
-                return timePicker;
-            });
-        renderer.render(getElement(), null);
+    private void createHelperText() {
+        TimePicker timePickerHelperText = new TimePicker();
+        timePickerHelperText.setId("time-picker-helper-text");
+        timePickerHelperText.setHelperText("Helper text");
+        NativeButton clearHelper = new NativeButton("Clear helper text", e -> {
+            timePickerHelperText.setHelperText(null);
+        });
+        clearHelper.setId("button-clear-helper-text");
+
+        add(timePickerHelperText, clearHelper);
+    }
+
+    private void createHelperComponent() {
+        TimePicker timePickerHelperComponent = new TimePicker();
+        timePickerHelperComponent.setId("time-picker-helper-component");
+
+        Span span = new Span("Helper component");
+        span.setId("helper-component");
+        timePickerHelperComponent.setHelperComponent(span);
+
+        NativeButton clearComponent = new NativeButton("Clear component helper",
+              e -> {
+                  timePickerHelperComponent.setHelperComponent(null);
+              });
+        clearComponent.setId("button-clear-helper-component");
+
+        add(timePickerHelperComponent, clearComponent);
     }
 
     private Div createMessageDiv(String id) {

@@ -17,11 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * <p>
@@ -40,16 +39,10 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	private Boolean allowPointSelect;
 	private Boolean animation;
 	private Number animationLimit;
-	private Color borderColor;
 	private Number borderRadius;
-	private Number borderWidth;
 	private String className;
-	private Boolean clip;
-	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
-	private String colorKey;
-	private ArrayList<Color> colors;
 	private Number colsize;
 	private Boolean crisp;
 	private Number cropThreshold;
@@ -63,7 +56,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	private ArrayList<String> keys;
 	private String linkedTo;
 	private Number maxPointWidth;
-	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private Number rowsize;
 	private Boolean selected;
@@ -140,31 +132,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the border surrounding each column or bar.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the border stroke can be set with the
-	 * <code>.highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
 	 * @see #setBorderRadius(Number)
 	 */
 	public Number getBorderRadius() {
@@ -181,31 +148,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the border surrounding each column or bar.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width can be set with the
-	 * <code>.highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
-	}
-
-	/**
 	 * @see #setClassName(String)
 	 */
 	public String getClassName() {
@@ -217,42 +159,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
-	}
-
-	/**
-	 * @see #setClip(Boolean)
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * The main color of the series. In heat maps this color is rarely used, as
-	 * we mostly use the color to denote the value of each point. Unless options
-	 * are set in the <a href="#colorAxis">colorAxis</a>, the default value is
-	 * pulled from the <a href="#colors">options.colors</a> array.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setColor(Color color) {
-		this.color = color;
 	}
 
 	/**
@@ -289,71 +195,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColorKey(String)
-	 */
-	public String getColorKey() {
-		return colorKey;
-	}
-
-	/**
-	 * Determines what data value should be used to calculate point color
-	 * if <code>colorAxis</code> is used. Requires to set <code>min</code> and
-	 * <code>max</code> if some custom point property is used or if approximation
-	 * for data grouping is set to <code>'sum'</code>.
-	 * <p>
-	 * Defaults to <code>value</code>.
-	 */
-	public void setColorKey(String colorKey) {
-		this.colorKey = colorKey;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**
@@ -648,22 +489,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	 */
 	public void setMaxPointWidth(Number maxPointWidth) {
 		this.maxPointWidth = maxPointWidth;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * <p>
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {

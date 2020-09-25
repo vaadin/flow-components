@@ -7,8 +7,6 @@ import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * DimensionsIT
@@ -19,9 +17,6 @@ public class DimensionsIT extends AbstractParallelTest {
     public void init() {
         String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-confirm-dialog") + "/Dimensions";
         getDriver().get(url);
-
-        waitUntil(ExpectedConditions
-            .presenceOfElementLocated(By.id(Dimensions.VIEW_ID)));
     }
 
     @Test

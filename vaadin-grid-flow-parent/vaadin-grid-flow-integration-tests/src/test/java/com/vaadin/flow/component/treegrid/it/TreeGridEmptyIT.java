@@ -17,8 +17,8 @@ package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -43,7 +43,7 @@ public class TreeGridEmptyIT extends AbstractComponentIT {
 
         TreeGridElement grid = $(TreeGridElement.class).id("treegrid");
 
-        $(ButtonElement.class).id("add-expanded-button").click();
+        findElement(By.id("add-expanded-button")).click();
 
         Assert.assertEquals("Expected only the parent row to be rendered", 1, grid.getRowCount());
     }

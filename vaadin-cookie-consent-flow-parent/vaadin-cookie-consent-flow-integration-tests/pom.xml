@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-cookie-consent-integration-tests</artifactId>
+  <version>${vaadin.cookie.consent.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Cookie Consent Integration Tests</name>
   <properties>
@@ -39,12 +40,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-cookie-consent-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.cookie.consent.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-cookie-consent-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.cookie.consent.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -54,7 +55,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

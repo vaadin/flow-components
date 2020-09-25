@@ -17,12 +17,10 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * 
@@ -33,13 +31,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Boolean allowPointSelect;
 	private Number animationLimit;
 	private String className;
-	private Boolean clip;
-	private Color color;
 	private Number colorIndex;
-	private String colorKey;
-	private ArrayList<Color> colors;
 	private Number compareBase;
-	private Boolean crisp;
 	private Number cropThreshold;
 	private Cursor cursor;
 	private String description;
@@ -50,15 +43,12 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private Number legendIndex;
-	private Color lineColor;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private PlotOptionsSeries navigatorOptions;
-	private Color negativeColor;
+	private boolean negativeColor;
 	private String onKey;
 	private String onSeries;
-	private Number opacity;
 	private String _fn_pointDescriptionFormatter;
 	private IntervalUnit pointIntervalUnit;
 	private Boolean selected;
@@ -72,7 +62,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Number stackDistance;
 	private States states;
 	private Boolean stickyTracking;
-	private Style style;
 	private String textAlign;
 	private Number threshold;
 	private SeriesTooltip tooltip;
@@ -140,54 +129,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setClip(Boolean)
-	 */
-	public Boolean getClip() {
-		return clip;
-	}
-
-	/**
-	 * Disable this option to allow series rendering in the whole plotting area.
-	 * Note that clipping should be always enabled when chart.zoomType is set
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setClip(Boolean clip) {
-		this.clip = clip;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * <p>
-	 * The main color of the series. In line type series it applies to the line
-	 * and the point markers unless otherwise specified. In bar type series it
-	 * applies to the bars unless a color is specified per point. The default
-	 * value is pulled from the <code>options.colors</code> array.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the color can be defined by the <a
-	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
-	 * series color can be set with the <code>.highcharts-series</code>,
-	 * <code>.highcharts-color-{n}</code>,
-	 * <code>.highcharts-{type}-series</code> or
-	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
-	 * the <code>className</code> option.
-	 * </p>
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -206,71 +147,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setColorKey(String)
-	 */
-	public String getColorKey() {
-		return colorKey;
-	}
-
-	/**
-	 * Determines what data value should be used to calculate point color
-	 * if <code>colorAxis</code> is used. Requires to set <code>min</code>
-	 * and <code>max</code> if some custom point property is used
-	 * or if approximation for data grouping is set to <code>'sum'</code>.
-	 * <p>
-	 * Defaults to <code>y</code>.
-	 */
-	public void setColorKey(String colorKey) {
-		this.colorKey = colorKey;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
-	}
-
-	/**
 	 * @see #setCompareBase(Number)
 	 */
 	public Number getCompareBase() {
@@ -286,27 +162,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setCompareBase(Number compareBase) {
 		this.compareBase = compareBase;
-	}
-
-	/**
-	 * @see #setCrisp(Boolean)
-	 */
-	public Boolean getCrisp() {
-		return crisp;
-	}
-
-	/**
-	 * When true, each point or column edge is rounded to its nearest pixel
-	 * in order to render sharp on screen. In some cases, when there are a lot of
-	 * densely packed columns, this leads to visible difference in column widths
-	 * or distance between columns. In these cases, setting <code>crisp</code>
-	 * to <code>false</code> may look better, even though each column
-	 * is rendered blurry.
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 */
-	public void setCrisp(Boolean crisp) {
-		this.crisp = crisp;
 	}
 
 	/**
@@ -536,48 +391,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line/border of the flag.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke is set in the
-	 * <code>.highcharts-flag-series .highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: #000000
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The pixel width of the candlestick line/border. Defaults to
-	 * <code>1</code>.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -641,19 +454,19 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setNegativeColor(Color)
+	 * @see #setNegativeColor(boolean)
 	 */
-	public Color getNegativeColor() {
+	public boolean isNegativeColor() {
 		return negativeColor;
 	}
 
 	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
 	 */
-	public void setNegativeColor(Color negativeColor) {
+	public void setNegativeColor(boolean negativeColor) {
 		this.negativeColor = negativeColor;
 	}
 
@@ -692,22 +505,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setOnSeries(String onSeries) {
 		this.onSeries = onSeries;
-	}
-
-	/**
-	 * @see #setOpacity(Number)
-	 */
-	public Number getOpacity() {
-		return opacity;
-	}
-
-	/**
-	 * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-	 * <p>
-	 * Defaults to <code>1</code>.
-	 */
-	public void setOpacity(Number opacity) {
-		this.opacity = opacity;
 	}
 
 	public String getPointDescriptionFormatter() {
@@ -944,34 +741,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setStickyTracking(Boolean stickyTracking) {
 		this.stickyTracking = stickyTracking;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * The text styles of the flag.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the styles are set in the
-	 * <code>.highcharts-flag-series .highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: { "fontSize": "11px", "fontWeight": "bold" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

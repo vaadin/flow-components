@@ -2,14 +2,14 @@ package com.vaadin.flow.component.board.examples;
 
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-board/SalesDashboard")
-@CssImport("styles.css")
+@BodySize
 public class SalesDashboard extends Div {
 
         private final String YELLOW = "#F9DD51";
@@ -48,7 +48,7 @@ public class SalesDashboard extends Div {
 
                 // Third row
                 board.addRow(
-                        createColoredBox("Sales & Marketing pipeline", PURPLE, HEIGHT_400),
+                        createColoredBox("Sales & Marketing pipeline", PURPLE, HEIGHT_400), 
                         createColoredBox("Working Today", YELLOW, HEIGHT_400));
 
                 add(board);

@@ -46,7 +46,6 @@ public class StopSerializer extends JsonSerializer<Stop> {
             throws IOException, JsonProcessingException {
         gen.writeStartArray();
         gen.writeNumber(value.getPosition());
-        gen.writeString(value.getColor().toString());
         gen.writeEndArray();
     }
 }

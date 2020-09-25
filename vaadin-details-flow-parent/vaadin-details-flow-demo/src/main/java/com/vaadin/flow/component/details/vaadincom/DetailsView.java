@@ -27,6 +27,7 @@ public class DetailsView extends DemoView {
                 new Text("Toggle using mouse, Enter and Space keys."));
         component.addOpenedChangeListener(e ->
                 Notification.show(e.isOpened() ? "Opened" : "Closed"));
+        add(component);
         // end-source-example
 
         addCard("Details", component);
@@ -39,6 +40,7 @@ public class DetailsView extends DemoView {
                 new Span("Always visible content."));
         component.setEnabled(false);
         component.setOpened(true);
+        add(component);
         // end-source-example
 
         addCard("Disabled Details", component);
@@ -51,6 +53,7 @@ public class DetailsView extends DemoView {
         component.setSummaryText("Small");
         component.addContent(new H3("Panel content heading"), new Text("Panel content text"));
         component.addThemeVariants(DetailsVariant.SMALL);
+        add(component);
         // end-source-example
 
         addCard("Small Size Details", component);
@@ -61,6 +64,7 @@ public class DetailsView extends DemoView {
         // source-example-heading: Reverse Filled Details
         Details component = new Details("Reverse Filled", new Text("Panel content"));
         component.addThemeVariants(DetailsVariant.REVERSE, DetailsVariant.FILLED);
+        add(component);
         // end-source-example
 
         addCard("Reverse Filled Details", component);

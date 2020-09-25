@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 
@@ -72,9 +73,13 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
 
     public List<DesiredCapabilities> getBrowserConfiguration() {
+        DesiredCapabilities ie11Windows8_1 = BrowserUtil.ie11();
+        ie11Windows8_1.setPlatform(Platform.WIN8_1);
+
         DesiredCapabilities safari = BrowserUtil.safari();
-        safari.setVersion("13");
-        return Arrays.asList( BrowserUtil.chrome());
+        safari.setVersion("11");
+        return Arrays.asList(
+                BrowserUtil.chrome());
     }
 
 }

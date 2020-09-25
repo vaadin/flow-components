@@ -18,13 +18,14 @@ package com.vaadin.flow.component.dialog.demo;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.demo.DemoView;
@@ -76,10 +77,9 @@ public class DialogView extends DemoView {
         // begin-source-example
         // source-example-heading: Confirmation dialog
         Dialog dialog = new Dialog();
-
+        dialog.add(new Text("You have unsaved changes that will be discarded if you navigate away."));
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
-
         Span message = new Span();
 
         Button confirmButton = new Button("Confirm", event -> {
@@ -90,10 +90,16 @@ public class DialogView extends DemoView {
             message.setText("Cancelled...");
             dialog.close();
         });
-        dialog.add(confirmButton, cancelButton);
+        // Cancel action on ESC press
+        Shortcuts.addShortcutListener(dialog, () -> {
+            message.setText("Cancelled...");
+            dialog.close();
+        }, Key.ESCAPE);
+
+        dialog.add(new Div( confirmButton, cancelButton));
         // end-source-example
         button.addClickListener(event -> dialog.open());
-
+        confirmButton.getStyle().set("margin-right", "15px");
         message.setId("confirmation-dialog-span");
         button.setId("confirmation-dialog-button");
         addCard("Confirmation dialog", button, message);
@@ -191,15 +197,19 @@ public class DialogView extends DemoView {
         // begin-source-example
         // source-example-heading: Modeless Draggable Resizable Dialog
         Dialog firstDialog = new Dialog();
-        firstDialog.add(new Label("This is the first dialog"),
-                new Button("Close", e -> firstDialog.close()));
+        firstDialog.add(
+            new Text("This is the first dialog"),
+            new Button("Close", e -> firstDialog.close())
+        );
         firstDialog.setModal(false);
         firstDialog.setDraggable(true);
         firstDialog.setResizable(true);
-
+        
         Dialog secondDialog = new Dialog();
-        secondDialog.add(new Label("This is the second dialog"),
-                new Button("Close", e -> secondDialog.close()));
+        secondDialog.add(
+            new Text("This is the second dialog"),
+            new Button("Close", e -> secondDialog.close())
+        );
         secondDialog.setModal(false);
         secondDialog.setDraggable(true);
         secondDialog.setResizable(true);
@@ -208,7 +218,6 @@ public class DialogView extends DemoView {
         openSecondDialog.addClickListener(e -> secondDialog.open());
         // end-source-example
 
-        addCard("Modeless Draggable Resizable Dialog", openDialog,
-                openSecondDialog, firstDialog);
+        addCard("Modeless Draggable Resizable Dialog", openDialog, openSecondDialog, firstDialog);
     }
 }

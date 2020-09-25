@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
@@ -49,15 +49,14 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.dataview.GridDataView;
-import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
@@ -67,6 +66,7 @@ import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.binder.Setter;
@@ -74,23 +74,14 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
-import com.vaadin.flow.data.provider.BackEndDataProvider;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
-import com.vaadin.flow.data.provider.DataProviderWrapper;
-import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.provider.HasDataGenerators;
-import com.vaadin.flow.data.provider.HasDataView;
-import com.vaadin.flow.data.provider.HasLazyDataView;
-import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -135,18 +126,23 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.4")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./gridConnector.js")
-public class Grid<T> extends Component implements HasStyle, HasSize,
-        Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
-        HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
-        HasDataView<T, Void, GridDataView<T>>,
-        HasLazyDataView<T, Void, GridLazyDataView<T>> {
+@JsModule("./gridConnector-es6.js")
+
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-sorter.html")
+@HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
+@HtmlImport("frontend://flow-component-renderer.html")
+@JavaScript("frontend://gridConnector.js")
+public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
+        HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
+        HasTheme, HasDataGenerators<T> {
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
@@ -555,8 +551,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
          * <p>
-         * <strong>Note:</strong> Comparator is not serializable. If you need to
-         * write serializable implementation, use inlined class of
+         * <strong>Note:</strong> Comparator is not serializable. If you need
+         * to write serializable implementation, use inlined class of
          * {@link SerializableComparator} instead of Lambda expression.
          *
          * @param comparator
@@ -925,7 +921,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             implements DataGenerator<T> {
 
         private Grid<T> grid;
-        private Registration registration;
 
         /**
          * Constructs a new grid extension, extending the given grid.
@@ -956,14 +951,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         protected void extend(Grid<T> grid) {
             this.grid = grid;
-            registration = getGrid().addDataGenerator(this);
+            getGrid().addDataGenerator(this);
         }
 
         /**
          * Remove this extension from its target.
          */
         protected void remove() {
-            registration.remove();
+            getGrid().removeDataGenerator(this);
         }
 
         /**
@@ -1045,8 +1040,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         /**
          * Remove the displayed details and remove details item from the list
          *
-         * @param item
-         *            item to removed
+         * @param item item to removed
          */
         @Override
         public void destroyData(T item) {
@@ -2306,14 +2300,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return -1;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link GridListDataView} or
-     *             {@link GridLazyDataView}
-     */
-    @Deprecated
+    @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
@@ -2334,119 +2321,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} or
-     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
-     *             instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
-    /**
      * Returns the data provider of this grid.
-     * <p>
-     * To get information and control over the items in the grid, use either
-     * {@link #getListDataView()} or {@link #getLazyDataView()} instead.
      *
      * @return the data provider of this grid, not {@code null}
      */
     public DataProvider<T, ?> getDataProvider() {
         return getDataCommunicator().getDataProvider();
-    }
-
-    @Override
-    public GridDataView<T> setItems(DataProvider<T, Void> dataProvider) {
-        setDataProvider(dataProvider);
-        return getGenericDataView();
-    }
-
-    @Override
-    public GridDataView<T> setItems(
-            InMemoryDataProvider<T> inMemoryDataProvider) {
-        // We don't use DataProvider.withConvertedFilter() here because it's
-        // implementation does not apply the filter converter if Query has a
-        // null filter
-        DataProvider<T, Void> convertedDataProvider =
-                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
-                        inMemoryDataProvider) {
-                    @Override
-                    protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
-                        // Just ignore the query filter (Void) and apply the
-                        // predicate only
-                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                                .orElse(item -> true);
-                    }
-                };
-        return setItems(convertedDataProvider);
-    }
-
-    /**
-     * Gets the generic data view for the grid. This data view should only be
-     * used when {@link #getListDataView()} or {@link #getLazyDataView()} is not
-     * applicable for the underlying data provider.
-     *
-     * @return the generic {@link DataView} implementation for grid
-     * @see #getListDataView()
-     * @see #getLazyDataView()
-     */
-    @Override
-    public GridDataView<T> getGenericDataView() {
-        return new GridDataView<>(getDataCommunicator(), this);
-    }
-
-    @Override
-    public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
-        setDataProvider(dataProvider);
-        return getListDataView();
-    }
-
-    /**
-     * Gets the list data view for the grid. This data view should only be used
-     * when the items are in-memory set with:
-     * <ul>
-     * <li>{@link #setItems(Collection)}</li>
-     * <li>{@link #setItems(Object[])}</li>
-     * <li>{@link #setItems(ListDataProvider)}</li>
-     * </ul>
-     * If the items are not in-memory an exception is thrown. When the items are
-     * fetched lazily, use {@link #getLazyDataView()} instead.
-     *
-     * @return the list data view that provides access to the items in the grid
-     */
-    @Override
-    public GridListDataView<T> getListDataView() {
-        return new GridListDataView<>(getDataCommunicator(), this);
-    }
-
-    // Overridden for now to delegate to setDataProvider for setup
-    @Override
-    public GridLazyDataView<T> setItems(
-            BackEndDataProvider<T, Void> dataProvider) {
-        setDataProvider(dataProvider);
-        return getLazyDataView();
-    }
-
-    /**
-     * Gets the lazy data view for the grid. This data view should only be used
-     * when the items are provided lazily from the backend with:
-     * <ul>
-     * <li>{@link #setItems(CallbackDataProvider.FetchCallback)}</li>
-     * <li>{@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}</li>
-     * <li>{@link #setItems(BackEndDataProvider)}</li>
-     * </ul>
-     * If the items are not fetched lazily an exception is thrown. When the
-     * items are in-memory, use {@link #getListDataView()} instead.
-     * 
-     * @return the lazy data view that provides access to the data bound to the
-     *         grid
-     */
-    @Override
-    public GridLazyDataView<T> getLazyDataView() {
-        return new GridLazyDataView<>(getDataCommunicator(), this);
     }
 
     /**
@@ -2470,19 +2350,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets the page size, which is the number of items fetched at a time from
-     * the data provider. With the default value of {@code 50}, the grid might
-     * fetch items for example as: {@code 0-49, 50-149, 150-200...}.
+     * the dataprovider.
      * <p>
-     * <em>Note:</em> the number of items in the server-side memory can be
-     * considerably higher than the page size, since the component can show more
-     * than one page at a time.
+     * Note: the number of items in the server-side memory can be considerably
+     * higher than the page size, since the component can show more than one
+     * page at a time.
      * <p>
      * Setting the pageSize after the Grid has been rendered effectively resets
      * the component, and the current page(s) and sent over again.
-     * <p>
-     * With automatically extending grid, controlling the item count and how
-     * much it is increased when scrolling is possible via
-     * {@link #getLazyDataView()}.
      *
      * @param pageSize
      *            the maximum number of items sent per request. Should be
@@ -2496,7 +2371,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         getElement().setProperty("pageSize", pageSize);
         getElement().callJsFunction("$connector.reset");
-        getDataCommunicator().setPageSize(pageSize);
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
     }
@@ -2685,20 +2559,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         JsonArray jsonArray = Json.createArray();
         for (T item : items) {
-            JsonObject jsonObject = item != null
-                    ? generateJsonForSelection(item)
-                    : null;
+            JsonObject jsonObject = item != null ? generateJsonForSelection(item) : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        final SerializableRunnable jsFunctionCall = () -> getElement()
-                .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> jsFunctionCall.run()));
-        }
+        getElement().callJsFunction("$connector." + function, jsonArray, false);
     }
 
     private JsonObject generateJsonForSelection(T item) {
@@ -2836,11 +2700,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
-     * 
      * @param internalId
      *            the internal identifier of the column to get
-     * @return the column corresponding to the given column identifier, or
-     *         {@code null} if no column has such an identifier
+     * @return the column corresponding to the given column identifier, or {@code null}
+     *         if no column has such an identifier
      */
     Column<T> getColumnByInternalId(String internalId) {
         return idToColumnMap.get(internalId);
@@ -3149,6 +3012,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        if (getDataProvider() != null && dataProviderChangeRegistration == null) {
+            handleDataProviderChange(getDataProvider());
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataProviderChangeRegistration != null) {
+            dataProviderChangeRegistration.remove();
+            dataProviderChangeRegistration = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     private void setSortOrder(List<GridSortOrder<T>> order,
@@ -3239,27 +3114,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected SerializableComparator<T> createSortingComparator() {
         BinaryOperator<SerializableComparator<T>> operator = (comparator1,
                 comparator2) -> {
-                    /*
-                     * thenComparing is defined to return a serializable
-                     * comparator as long as both original comparators are also
-                     * serializable
-                     */
-                    return comparator1.thenComparing(comparator2)::compare;
-                };
+            /*
+             * thenComparing is defined to return a serializable comparator as
+             * long as both original comparators are also serializable
+             */
+            return comparator1.thenComparing(comparator2)::compare;
+        };
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
     }
 
     /**
-     * If <code>true</code>, the grid's height is defined by its rows. All items
-     * are fetched from the {@link DataProvider}, and the Grid shows no vertical
-     * scroll bar.
+     * If <code>true</code>, the grid's height is defined by its
+     * rows. All items are fetched from the {@link DataProvider}, and the Grid
+     * shows no vertical scroll bar.
      * <p>
      * Note: <code>setHeightByRows</code> disables the grid's virtual scrolling
-     * so that all the rows are rendered in the DOM at once. If the grid has a
-     * large number of items, using the feature is discouraged to avoid
-     * performance issues.
+     * so that all the rows are rendered in the DOM at once.
+     * If the grid has a large number of items, using the feature is discouraged
+     * to avoid performance issues.
      *
      * @param heightByRows
      *            <code>true</code> to make Grid compute its height by the
@@ -3325,6 +3199,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     @Override
     public Registration addDataGenerator(DataGenerator<T> dataGenerator) {
         return gridDataGenerator.addDataGenerator(dataGenerator);
+    }
+
+    @Override
+    public void removeDataGenerator(DataGenerator<T> dataGenerator) {
+        gridDataGenerator.removeDataGenerator(dataGenerator);
     }
 
     protected static int compareMaybeComparables(Object a, Object b) {
@@ -3928,29 +3807,29 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets a new column order for the grid.
      * <p>
-     * The function doesn't support column removal: all columns must be present
-     * in the list, otherwise {@link IllegalArgumentException} is thrown.
+     * The function doesn't support column
+     * removal: all columns must be present in the list, otherwise
+     * {@link IllegalArgumentException} is thrown.
      * <p>
      * The {@link #getColumns()} function will reflect the new column ordering.
      * <p>
-     * Fires the {@link ColumnReorderEvent} with
-     * {@link ColumnReorderEvent#isFromClient()} returning {@code false}.
+     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
+     * returning {@code false}.
      * <p>
-     * The method is atomic: if the requested reordering is not achievable, the
-     * function fails cleanly with {@link IllegalArgumentException} without
+     * The method is atomic: if the requested reordering is not achievable,
+     * the function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
      * @see #setColumnOrder(List)
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
-     *             if the {@code columns} parameter is {@code null}.
-     * @throws IllegalArgumentException
-     *             if a column is present two times in the list, or if the
-     *             column is not owned by this Grid, or if the list doesn't
-     *             contain all columns currently present in the Grid, or if the
-     *             column rearranging would require to split a joined
-     *             header/footer cell group.
+     *            if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException if a column is present two times in the
+     *            list, or if the column is not owned by this Grid, or if the
+     *            list doesn't contain all columns currently present in the Grid,
+     *            or if the column rearranging would require to split a joined
+     *            header/footer cell group.
      */
     public void setColumnOrder(Column<T>... columns) {
         setColumnOrder(Arrays.asList(columns));
@@ -3959,29 +3838,29 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets a new column order for the grid.
      * <p>
-     * The function doesn't support column removal: all columns must be present
-     * in the list, otherwise {@link IllegalArgumentException} is thrown.
+     * The function doesn't support column
+     * removal: all columns must be present in the list, otherwise
+     * {@link IllegalArgumentException} is thrown.
      * <p>
      * The {@link #getColumns()} function will reflect the new column ordering.
      * <p>
-     * Fires the {@link ColumnReorderEvent} with
-     * {@link ColumnReorderEvent#isFromClient()} returning {@code false}.
+     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
+     * returning {@code false}.
      * <p>
-     * The method is atomic: if the requested reordering is not achievable, the
-     * function fails cleanly with {@link IllegalArgumentException} without
+     * The method is atomic: if the requested reordering is not achievable,
+     * the function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
      * @see #setColumnOrder(Column[])
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
-     *             if the {@code columns} parameter is {@code null}.
-     * @throws IllegalArgumentException
-     *             if a column is present two times in the list, or if the
-     *             column is not owned by this Grid, or if the list doesn't
-     *             contain all columns currently present in the Grid, or if the
-     *             column rearranging would require to split a joined
-     *             header/footer cell group.
+     *            if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException if a column is present two times in the
+     *            list, or if the column is not owned by this Grid, or if the
+     *            list doesn't contain all columns currently present in the Grid,
+     *            or if the column rearranging would require to split a joined
+     *            header/footer cell group.
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
@@ -4021,16 +3900,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
-        ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY,
-                event.getDraggedItems());
-        getUI().ifPresent(
-                ui -> ui.getInternals().setActiveDragSourceComponent(this));
+        ComponentUtil.setData(this,
+                DRAG_SOURCE_DATA_KEY, event.getDraggedItems());
+        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(this));
     }
 
     private void onDragEnd(GridDragEndEvent<T> event) {
-        ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY, null);
-        getUI().ifPresent(
-                ui -> ui.getInternals().setActiveDragSourceComponent(null));
+        ComponentUtil.setData(this,
+                DRAG_SOURCE_DATA_KEY, null);
+        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
 }

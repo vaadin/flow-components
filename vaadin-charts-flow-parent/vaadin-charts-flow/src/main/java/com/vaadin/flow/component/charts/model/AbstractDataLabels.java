@@ -1,8 +1,5 @@
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
-
 /*-
  * #%L
  * Vaadin Charts for Flow
@@ -20,6 +17,7 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * #L%
  */
 
+
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     public static final String OVERFLOW_JUSTIFY = "justify";
@@ -34,56 +32,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * A class name for the data label.
      */
     public abstract void setClassName(String className);
-
-    /**	
-     * @see #setBackgroundColor(Color)	
-     */	
-    public abstract Color getBackgroundColor();	
-
-    /**	
-     * The background color or gradient for the data label.	
-     */	
-    public abstract void setBackgroundColor(Color backgroundColor);	
-
-    /**	
-     * @see #setBorderColor(Color)	
-     */	
-    public abstract Color getBorderColor();	
-
-    /**	
-     * The border color for the data label.	
-     */	
-    public abstract void setBorderColor(Color borderColor);
-
-    /**
-     * @see #setBorderRadius(Number)
-     */
-    public abstract Number getBorderRadius();
-
-    /**
-     * The border radius in pixels for the data label.
-     */
-    public abstract void setBorderRadius(Number borderRadius);
-
-    /**	
-     * @see #setColor(Color)	
-     */	
-    public abstract Color getColor();	
-
-    /**	
-     * The text color for the data labels.	
-     */	
-    public abstract void setColor(Color color);
-	
-    /**
-     * @see #setBorderWidth(Number)
-     */
-    public abstract Number getBorderWidth();
-
-    /**
-     * The border width in pixels for the data label.
-     */
-    public abstract void setBorderWidth(Number borderWidth);
 
     /**
      * @see #setCrop(Boolean)
@@ -208,16 +156,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      */
     public abstract void setShape(Shape shape);
 
-    /**	
-     * @see #setStyle(Style)	
-     */	
-    public abstract Style getStyle();	
-
-    /**	
-     * Styles for the label.	
-     */	
-    public abstract void setStyle(Style style);
-
     /**
      * @see #setUseHTML(Boolean)
      */
@@ -237,7 +175,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * The vertical alignment of a data label.
      */
     public abstract void setVerticalAlign(VerticalAlign verticalAlign);
-
 
     /**
      * @see #setZIndex(Number)

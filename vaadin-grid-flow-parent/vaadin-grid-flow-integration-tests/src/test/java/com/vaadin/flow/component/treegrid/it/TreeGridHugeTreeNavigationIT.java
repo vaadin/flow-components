@@ -62,9 +62,10 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         assertCellTexts(103, 0, "Son 1/1/99");
 
         // Should navigate to "Dad 1/1" back
-        getTreeGrid()
+        new Actions(getDriver())
                 .sendKeys(Keys.chord(Keys.CONTROL, Keys.HOME), Keys.DOWN,
-                        Keys.DOWN, Keys.DOWN);
+                        Keys.DOWN, Keys.DOWN)
+                .perform();
         assertCellTexts(3, 0, "Dad 1/1");
 
         // Should collapse "Dad 1/1"

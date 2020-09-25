@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.time.Duration;
 import java.time.LocalTime;
 
@@ -22,10 +26,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.TimePicker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 public class TimePickerTest {
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     @Test
     public void timePicker_basicCases() {
@@ -43,9 +45,9 @@ public class TimePickerTest {
 
     @Test
     public void timePicker_nullValue() {
-    	TimePicker timePicker = new TimePicker();
-    	timePicker.setValue(null);
-    	assertEquals(null, timePicker.getValue());
+        TimePicker timePicker = new TimePicker();
+        timePicker.setValue(null);
+        assertEquals(null, timePicker.getValue());
     }
 
     @Test
@@ -223,4 +225,13 @@ public class TimePickerTest {
                 timePicker.getElement().getProperty("clearButtonVisible", value));
     }
 
+    @Test
+    public void setAutoOpenDisabled() {
+        TimePicker timePicker = new TimePicker();
+        assertTrue(timePicker.isAutoOpen());
+        timePicker.setAutoOpen(false);
+        assertTrue(timePicker.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,
+                false));
+        assertFalse(timePicker.isAutoOpen());
+    }
 }

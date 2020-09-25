@@ -35,6 +35,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.component.textfield.demo.entity.Person;
@@ -60,7 +61,7 @@ public class TextFieldView extends DemoView {
         textFieldAutoselect();
         textFieldClearButton();
         textFieldFocusShortcut();
-        textFieldSetPattern();
+        textFieldHelperText();
         passwordFieldBasic(); // PasswordField
         passwordFieldHideRevealButton();
         emailFieldBasic(); // EmailField
@@ -70,9 +71,11 @@ public class TextFieldView extends DemoView {
         numberFieldWithValueLimits();
         numberFieldWithStep();
         bigDecimalField();
+        numberFieldWithHelperText();
         textAreaBasic(); // TextArea
         textAreaMaxHeight();
         textAreaMinHeight();
+        textAreaHelperText();
         prefixAndSuffix(); // Prefix and suffix
         prefixAndSuffixSearch();
         validationMinMaxLength(); // Validation
@@ -80,6 +83,7 @@ public class TextFieldView extends DemoView {
         customValidation();
         themeVariantsTextAlign(); // Theme Variants
         themeVariantsSmallSize();
+        helperTextVariants();
         styling(); // Styling
     }
 
@@ -96,6 +100,8 @@ public class TextFieldView extends DemoView {
 
         TextField valueField = new TextField();
         valueField.setValue("Value");
+
+        add(labelField, placeholderField, valueField);
         // end-source-example
 
         labelField.setId("text-field-label-id");
@@ -121,7 +127,9 @@ public class TextFieldView extends DemoView {
         readonlyField.setLabel("Read-only");
         readonlyField.setReadOnly(true);
 
+        add(disabledField, readonlyField);
         // end-source-example
+
         div.add(disabledField, new Text(" "), readonlyField);
         disabledField.setId("text-field-disabled-id");
         readonlyField.setId("text-field-readonly-id");
@@ -136,6 +144,7 @@ public class TextFieldView extends DemoView {
         textField.setValue("Text selected on focus");
         textField.setAutoselect(true);
 
+        add(textField);
         // end-source-example
         textField.setId("autoselect-id");
         addCard("Text field", "Autoselect", textField);
@@ -147,6 +156,8 @@ public class TextFieldView extends DemoView {
         TextField textField = new TextField();
         textField.setValue("Value");
         textField.setClearButtonVisible(true);
+
+        add(textField);
         // end-source-example
 
         textField.setId("text-field-clear-button-id");
@@ -159,37 +170,29 @@ public class TextFieldView extends DemoView {
         TextField textField = new TextField();
         textField.setLabel("Press ALT + 1 to focus");
         textField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+
+        add(textField);
         // end-source-example
 
         textField.setId("shortcut-field");
         this.addCard("Text field", "Focus shortcut usage", textField);
     }
 
-    private void textFieldSetPattern(){
+    private void textFieldHelperText() {
+        Div div = new Div();
         // begin-source-example
-        // source-example-heading: Pattern usage
-        TextField zipCode = new TextField("ZIP code");
-        zipCode.setPlaceholder("Only 3 letters codes are valid");
-        zipCode.setPattern("[A-Za-z]{3}");
-        zipCode.setPreventInvalidInput(true);
+        // source-example-heading: Helper Text and Component
+        TextField helperFieldText = new TextField("First name");
+        helperFieldText.setHelperText("Enter all your first names");
 
-        Paragraph status = new Paragraph();
-        TextField username = new TextField("Username");
-        username.setPattern("^[a-zA-Z0-9._-]{3,}");
-        username.addValueChangeListener(e -> {
-                if (username.isInvalid())
-                        status.setText(
-                                "Username should be, at least, 3 character long "
-                                        + "and contain only letters, digits, dashes or dots.");
-                else
-                        status.setText("Your username seems valid!");
-        });
+        TextField helperFieldComponent = new TextField("Last Name");
+        helperFieldComponent.setHelperComponent(new Span("Family name"));
+
+        add(helperFieldText, helperFieldComponent);
         // end-source-example
 
-        zipCode.setId("text-field-zip-pattern");
-        username.setId("text-field-username-pattern");
-        addCard("Text field", "Pattern usage", zipCode, username,
-                status);
+        div.add(helperFieldText, new Text("  "), helperFieldComponent);
+        addCard("Text field", "Helper Text and Component", div);
     }
 
     private void passwordFieldBasic() {
@@ -199,6 +202,8 @@ public class TextFieldView extends DemoView {
         passwordField.setLabel("Password");
         passwordField.setPlaceholder("Enter password");
         passwordField.setValue("secret1");
+
+        add(passwordField);
         // end-source-example
 
         passwordField.setId("password-field-id");
@@ -212,6 +217,8 @@ public class TextFieldView extends DemoView {
         passwordField.setLabel("Password");
         passwordField.setValue("secret1");
         passwordField.setRevealButtonVisible(false);
+
+        add(passwordField);
         // end-source-example
 
         passwordField.setId("hidden-reveal-button-id");
@@ -224,6 +231,8 @@ public class TextFieldView extends DemoView {
         EmailField emailField = new EmailField("Email");
         emailField.setClearButtonVisible(true);
         emailField.setErrorMessage("Please enter a valid email address");
+
+        add(emailField);
         // end-source-example
 
         emailField.setId("email-field");
@@ -234,6 +243,8 @@ public class TextFieldView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic number field
         NumberField numberField = new NumberField("Years of expertise");
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-id");
@@ -244,6 +255,8 @@ public class TextFieldView extends DemoView {
         // begin-source-example
         // source-example-heading: Integer field
         IntegerField integerField = new IntegerField("Age");
+
+        add(integerField);
         // end-source-example
 
         integerField.setId("integer-field");
@@ -255,6 +268,8 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Number field with controls
         NumberField numberField = new NumberField();
         numberField.setHasControls(true);
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-has-control-id");
@@ -269,6 +284,8 @@ public class TextFieldView extends DemoView {
         numberField.setHasControls(true);
         numberField.setMin(1);
         numberField.setMax(10);
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-limit-id");
@@ -283,6 +300,8 @@ public class TextFieldView extends DemoView {
         numberField.setStep(0.2d);
         numberField.setMin(0);
         numberField.setMax(10);
+
+        add(numberField);
         // end-source-example
 
         numberField.setId("number-field-step-id");
@@ -304,14 +323,37 @@ public class TextFieldView extends DemoView {
                 taxValue = BigDecimal.ZERO;
             } else {
                 taxValue = e.getValue().multiply(new BigDecimal("0.24"))
-                        .setScale(2, RoundingMode.HALF_EVEN);
+                      .setScale(2, RoundingMode.HALF_EVEN);
             }
             tax.setText("VAT 24%: $" + taxValue);
         });
 
         bigDecimalField.setValue(new BigDecimal(15).setScale(2));
+
+        add(bigDecimalField, tax);
         // end-source-example
         addCard("Number field", "Big decimal field", bigDecimalField, tax);
+    }
+
+    private void numberFieldWithHelperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Number fields with helper text
+        NumberField numberField = new NumberField("Total Salary");
+        numberField
+              .setHelperText("Any valid number can be put in a NumberField");
+
+        IntegerField integerField = new IntegerField("Your age");
+        integerField
+              .setHelperText("Only integers can be put in an IntegerField");
+
+        add(numberField, integerField);
+        // end-source-example
+
+        numberField.setId("number-field-helper-id");
+        integerField.setId("integer-field-helper-id");
+        div.add(numberField, new Text(" "), integerField);
+        addCard("Number field", "Number fields with helper text", div);
     }
 
     private void textAreaBasic() {
@@ -319,6 +361,8 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Basic text area
         TextArea textArea = new TextArea("Description");
         textArea.setPlaceholder("Write here ...");
+
+        add(textArea);
         // end-source-example
 
         textArea.setId("text-area-basic-id");
@@ -331,6 +375,8 @@ public class TextFieldView extends DemoView {
         TextArea textArea = new TextArea("Description");
         textArea.getStyle().set("maxHeight", "150px");
         textArea.setPlaceholder("Write here ...");
+
+        add(textArea);
         // end-source-example
 
         textArea.getStyle().set("padding", "0");
@@ -344,11 +390,37 @@ public class TextFieldView extends DemoView {
         TextArea textArea = new TextArea("Description");
         textArea.getStyle().set("minHeight", "150px");
         textArea.setPlaceholder("Write here ...");
+
+        add(textArea);
         // end-source-example
 
         textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-min-height");
         addCard("Text Area", "Minimum height", textArea);
+    }
+
+    private void textAreaHelperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        TextArea textAreaHelperText = new TextArea("Overview");
+        textAreaHelperText.setPlaceholder("Write here ...");
+        textAreaHelperText
+              .setHelperText("Short description of your current role");
+
+        TextArea textAreaHelperComponent = new TextArea("Feedback");
+        textAreaHelperComponent.setPlaceholder("Write here ...");
+        textAreaHelperComponent.setHelperComponent(new Span(
+              "Here you can share what you've liked and "
+                    + "what can be improved in the next lesson"));
+
+        add(textAreaHelperText, textAreaHelperComponent);
+        // end-source-example
+
+        textAreaHelperText.setId("text-area-with-helper-text");
+        textAreaHelperText.getStyle().set("margin-right", "20px");
+        div.add(textAreaHelperText, textAreaHelperComponent);
+        addCard("Text Area", "Helper text and helper component", div);
     }
 
     private void prefixAndSuffix() {
@@ -360,6 +432,8 @@ public class TextFieldView extends DemoView {
 
         NumberField euroField = new NumberField("Euros");
         euroField.setSuffixComponent(new Span("€"));
+
+        add(dollarField, euroField);
         // end-source-example
 
         dollarField.setId("dollar-field");
@@ -375,6 +449,8 @@ public class TextFieldView extends DemoView {
         textField.setPlaceholder("Search");
         Icon icon = VaadinIcon.SEARCH.create();
         textField.setPrefixComponent(icon);
+
+        add(textField);
         // end-source-example
 
         textField.setId("text-field-search-id");
@@ -400,6 +476,8 @@ public class TextFieldView extends DemoView {
                 .withValidator(max -> max.length() <= 4, "Maximum 4 characters")
                 .bind(Person::getName, Person::setName);
         binder.setBean(person);
+
+        add(minField, maxField);
         // end-source-example
 
         minField.setId("min-id");
@@ -420,6 +498,8 @@ public class TextFieldView extends DemoView {
                         "[A-Z]{2}\\d{3,4}"))
                 .bind(Person::getFlightNumber, Person::setFlightNumber);
         binder.setBean(person);
+
+        add(textField, div);
         // end-source-example
 
         div.setText("Valid flight number: 2 uppercase letters followed by "
@@ -464,6 +544,8 @@ public class TextFieldView extends DemoView {
                     return ValidationResult.ok();
                 }).bind(Person::getId, Person::setId);
         binder.setBean(person);
+
+        add(textField, div);
         // end-source-example
         div.setText(
                 "Valid ID: Use a 10 digit number. The sum of digits must be divisible by 10. For example 1111111111.");
@@ -485,6 +567,8 @@ public class TextFieldView extends DemoView {
         TextField rightTextField = new TextField();
         rightTextField.setValue("right");
         rightTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+
+        add(leftTextField, centerTextField, rightTextField);
         // end-source-example
 
         leftTextField.setId("text-field-left-id");
@@ -501,8 +585,34 @@ public class TextFieldView extends DemoView {
         TextField textField = new TextField("Label");
         textField.setPlaceholder("Text field");
         textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        add(textField);
         // end-source-example
         addCard("Theme Variants", "Small size", textField);
+    }
+
+    private void helperTextVariants() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper Variant
+
+        TextField helperFieldAbove = new TextField();
+        helperFieldAbove.setHelperText("Helper Text displayed above the field");
+        helperFieldAbove
+              .addThemeVariants(TextFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        TextArea textAreaAbove = new TextArea();
+        textAreaAbove.setPlaceholder("Write here ...");
+        textAreaAbove.setHelperText("Helper Text is above the field");
+        textAreaAbove.addThemeVariants(TextAreaVariant.LUMO_HELPER_ABOVE_FIELD);
+
+        add(helperFieldAbove, textAreaAbove);
+        // end-source-example
+
+        div.getStyle().set("display", "flex");
+        helperFieldAbove.getStyle().set("margin-right", "20px");
+        div.add(helperFieldAbove, textAreaAbove);
+        addCard("Theme Variants", "Helper Variant", div);
     }
 
     private void styling() {

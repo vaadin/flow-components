@@ -17,6 +17,8 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.List;
 
+import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.testbench.TestBenchElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,9 +26,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import com.vaadin.tests.ComponentDemoTest;
-import com.vaadin.testbench.TestBenchElement;
 
 public class CheckboxGroupIT extends ComponentDemoTest {
 
@@ -179,6 +178,33 @@ public class CheckboxGroupIT extends ComponentDemoTest {
 
         executeScript("arguments[0].value=['2'];", group);
         verifyGroupValid(group, errorMessage);
+    }
+
+    @Test
+    public void assertHelperText(){
+        TestBenchElement group = $(TestBenchElement.class)
+              .id("checkbox-helper-text");
+
+        TestBenchElement helperText = group.$("slot")
+              .attributeContains("name", "helper").first();
+        Assert.assertEquals("Helper text", helperText.getText());
+
+        $("button").id("button-clear-helper").click();
+        Assert.assertEquals("", helperText.getText());
+    }
+
+    @Test
+    public void assertHelperComponent(){
+        TestBenchElement group = $(TestBenchElement.class)
+              .id("checkbox-helper-component");
+
+        TestBenchElement helperComponent = group.$("span")
+              .attributeContains("slot", "helper").first();
+        Assert.assertEquals("Helper text", helperComponent.getText());
+
+        $("button").id("button-clear-component").click();
+
+        Assert.assertFalse(group.$("span").exists());
     }
 
     private void verifyGroupInvalid(TestBenchElement group,

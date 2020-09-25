@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.util.Date;
 
@@ -52,16 +51,6 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract void setAnimation(Boolean animation);
 
     /**
-     * @see #setBorderColor(Color)
-     */
-    public abstract Color getBorderColor();
-
-    /**
-     * The color of the border of each waterfall column.
-     */
-    public abstract void setBorderColor(Color borderColor);
-
-    /**
      * @see #setBorderRadius(Number)
      */
     public abstract Number getBorderRadius();
@@ -70,26 +59,6 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * The corner radius of the border surrounding each column or bar.
      */
     public abstract void setBorderRadius(Number borderRadius);
-
-    /**
-     * @see #setBorderWidth(Number)
-     */
-    public abstract Number getBorderWidth();
-
-    /**
-     * The width of the border surrounding each column or bar.
-     */
-    public abstract void setBorderWidth(Number borderWidth);
-
-    /**
-     * @see #setClip(Boolean)
-     */
-    public abstract Boolean getClip();
-
-    /**
-     * Disable this option to allow series rendering in the whole plotting area.
-     */
-    public abstract void setClip(Boolean clip);
 
     /**
      * @see #setColorByPoint(Boolean)
@@ -102,61 +71,6 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * the chart should receive one color per series or one color per point.
      */
     public abstract void setColorByPoint(Boolean colorByPoint);
-
-    /**
-     * @see #setColorKey(String)
-     */
-    public abstract String getColorKey();
-
-    /**
-     * Determines what data value should be used to calculate point color if colorAxis is used.
-     * Requires to set <code>min</code> and <code>max</code> if some custom point property is used
-     * or if approximation for data grouping is set to <code>'sum'</code>'.
-     */
-    public abstract void setColorKey(String colorKey);
-
-    /**
-     * @see #setColors(Color...)
-     */
-    public abstract Color[] getColors();
-
-    /**
-     * A series specific or series type specific color set to apply instead of
-     * the theme colors when {@link #setColorByPoint(Boolean)} is true.
-     */
-    public abstract void setColors(Color... colors);
-
-    /**
-     * Adds color to the colors array
-     * 
-     * @param color
-     *            to add
-     * @see #setColors(Color...)
-     */
-    public abstract void addColor(Color color);
-
-    /**
-     * Removes first occurrence of color in colors array
-     * 
-     * @param color
-     *            to remove
-     * @see #setColors(Color...)
-     */
-    public abstract void removeColor(Color color);
-
-    /**
-     * @see #setCrisp(Boolean)
-     */
-    public abstract Boolean getCrisp();
-
-    /**
-     * When true, each point or column edge is rounded to its nearest pixel in order to render sharp on screen.
-     * In some cases, when there are a lot of densely packed columns, this leads to visible difference
-     * in column widths or distance between columns.
-     * In these cases, setting crisp to false may look better,
-     * even though each column is rendered blurry.
-     */
-    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCursor(Cursor)
@@ -179,16 +93,6 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * Depth of the columns in a 3D column chart.
      */
     public abstract void setDepth(Number depth);
-
-    /**
-     * @see #setEdgeColor(Color)
-     */
-    public abstract Color getEdgeColor();
-
-    /**
-     * 3D columns only. The color of the edges.
-     */
-    public abstract void setEdgeColor(Color edgeColor);
 
     /**
      * @see #setEdgeWidth(Number)
@@ -298,16 +202,6 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * also toggles the linked series.
      */
     public abstract void setLinkedTo(String linkedTo);
-
-    /**
-     * @see #setOpacity(Number)
-     */
-    public abstract Number getOpacity();
-
-    /**
-     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-     */
-    public abstract void setOpacity(Number opacity);
 
     /**
      * @see #setMaxPointWidth(Number)
@@ -533,7 +427,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract void setVisible(Boolean visible);
 
     /**
-     * @see #setZoneAxis(ZoneAxis)
+     * @see #setZoneAxis(String)
      */
     public abstract ZoneAxis getZoneAxis();
 

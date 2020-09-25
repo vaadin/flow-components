@@ -71,6 +71,7 @@ public class CrudView extends DemoView {
 
         crud.getGrid().removeColumnByKey("id");
         crud.addThemeVariants(CrudVariant.NO_BORDER);
+        add(crud);
         // end-source-example
 
         addCard("Basic CRUD", crud);
@@ -107,6 +108,7 @@ public class CrudView extends DemoView {
 
         crud.getGrid().removeColumnByKey("id");
         crud.addThemeVariants(CrudVariant.NO_BORDER);
+        add(crud);
         // end-source-example
 
         addCard("Editor Position", crud);
@@ -128,6 +130,7 @@ public class CrudView extends DemoView {
 
         crud.getGrid().removeColumnByKey("id");
         crud.addThemeVariants(CrudVariant.NO_BORDER);
+        add(crud);
         // end-source-example
 
         addCard("Edit on double-click", crud);
@@ -146,6 +149,7 @@ public class CrudView extends DemoView {
         crud.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+        add(crud);
         // end-source-example
 
         addCard("No filtering and sorting", crud);
@@ -161,6 +165,8 @@ public class CrudView extends DemoView {
 
         Button updateI18nButton = new Button("Switch to Yorùbá",
                 event -> crud.setI18n(createYorubaI18n()));
+
+        add(crud, updateI18nButton);
         // end-source-example
 
         addCard("Internationalization", crud, updateI18nButton);
@@ -213,6 +219,7 @@ public class CrudView extends DemoView {
         crud.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+        add(crud);
         // end-source-example
 
         addCard("Custom toolbar", crud);
@@ -237,6 +244,7 @@ public class CrudView extends DemoView {
                 .setFlexGrow(0);
         grid.addColumn(Person::getFirstName).setHeader("First name");
         grid.addColumn(Person::getLastName).setHeader("Last name");
+        add(crud);
         // end-source-example
 
         addCard("Custom Grid", crud);
@@ -292,6 +300,7 @@ public class CrudView extends DemoView {
 
         crud.setToolbar(searchBar);
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
+        add(crud);
         // end-source-example
 
         addCard("Custom search", crud);

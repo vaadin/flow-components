@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class PyramidOptions extends AbstractPlotOptions {
 
@@ -66,17 +65,6 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract void setClassName(String className);
 
     /**
-     * @see #setClip(Boolean)
-     */
-    public abstract Boolean getClip();
-
-    /**
-     * Disable this option to allow series rendering in the whole plotting area.
-     * Note that clipping should be always enabled when chart.zoomType is set
-     */
-    public abstract void setClip(Boolean clip);
-
-    /**
      * @see #setColorIndex(Number)
      */
     public abstract Number getColorIndex();
@@ -87,63 +75,6 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
-
-    /**
-     * @see #setColorKey(String)
-     */
-    public abstract String getColorKey();
-
-    /**
-     * Determines what data value should be used to calculate point color if
-     * <code>colorAxis</code> is used. Requires to set <code>min</code>
-     * and <code>max</code> if some custom point property is used
-     * or if approximation for data grouping is set to <code>'sum'</code>.
-     */
-    public abstract void setColorKey(String colorKey);
-
-    /**
-     * @see #setColors(Color...)
-     */
-    public abstract Color[] getColors();
-
-    /**
-     * A series specific or series type specific color set to use instead of the
-     * theme colors.
-     */
-    public abstract void setColors(Color... colors);
-
-    /**
-     * Adds color to the colors array
-     *
-     * @param color
-     *            to add
-     * @see #setColors(Color...)
-     */
-    public abstract void addColor(Color color);
-
-    /**
-     * Removes first occurrence of color in colors array
-     *
-     * @param color
-     *            to remove
-     * @see #setColors(Color...)
-     */
-    public abstract void removeColor(Color color);
-
-    /**
-     * @see #setCrisp(Boolean)
-     */
-    public abstract Boolean getCrisp();
-
-    /**
-     * When true, each point or column edge is rounded to its nearest pixel
-     * in order to render sharp on screen. In some cases, when there are
-     * a lot of densely packed columns, this leads to visible difference
-     * in column widths or distance between columns.
-     * In these cases, setting crisp to <code>falase</code> may look better,
-     * even though each column is rendered blurry.
-     */
-    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCursor(Cursor)
@@ -265,17 +196,6 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract void setHeight(String height);
 
     /**
-     * @see #setIgnoreHiddenPoint(Boolean)
-     */
-    public abstract Boolean getIgnoreHiddenPoint();
-
-    /**
-     * This option tells whether the series shall be redrawn
-     * as if the hidden point were null.
-     */
-    public abstract void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint);
-
-    /**
      * @see #setKeys(String...)
      */
     public abstract String[] getKeys();
@@ -329,16 +249,6 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * this size.
      */
     public abstract void setMinSize(Number minSize);
-
-    /**
-     * @see #setOpacity(Number)
-     */
-    public abstract Number getOpacity();
-
-    /**
-     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-     */
-    public abstract void setOpacity(Number opacity);
 
     public abstract String getPointDescriptionFormatter();
 

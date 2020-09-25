@@ -19,7 +19,7 @@ public class DetachIT extends AbstractComponentIT {
      */
     @Test
     public void testReattach_setRenderer() {
-        open();
+        open(getTestURL());
         getCommandExecutor().waitForVaadin();
         $("button").first().click();
         getCommandExecutor().waitForVaadin();

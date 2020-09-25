@@ -79,7 +79,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Edit Profile"));
         account.getSubMenu().addItem("Privacy Settings",
                 e -> selected.setText("Privacy Settings"));
-
+        add(menuBar, message);
         // end-source-example
 
         addCard("Menu Bar", menuBar, message);
@@ -116,7 +116,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Edit Profile"));
         account.getSubMenu().addItem("Privacy Settings",
                 e -> selected.setText("Privacy Settings"));
-
+        add(menuBar, message);
         // end-source-example
 
         addCard("Open on Hover", menuBar, message);
@@ -129,6 +129,7 @@ public class MenuBarView extends DemoView {
         Stream.of("Home", "Dashboard", "Content", "Structure", "Appearance",
                 "Modules", "Users", "Configuration", "Reports", "Help")
                 .forEach(menuBar::addItem);
+        add(menuBar);
         // end-source-example
 
         addCard("Overflowing Buttons", menuBar);
@@ -159,7 +160,7 @@ public class MenuBarView extends DemoView {
             permissions.setEnabled(e.getValue());
             delete.setEnabled(e.getValue());
         });
-
+        add(menuBar, message, adminCheckbox);
         // end-source-example
 
         addCard("Items", "Disabled Items", menuBar, message, adminCheckbox);
@@ -192,7 +193,7 @@ public class MenuBarView extends DemoView {
                 .addItem(option, e -> selected.setText(option
                         + (e.getSource().isChecked() ? " (On)" : " (Off)")))
                 .setCheckable(true));
-
+        add(menuBar, message);
         // end-source-example
 
         addCard("Items", "Checkable Items", menuBar, message);
@@ -227,6 +228,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Notifications"));
         item.getSubMenu().addItem("Mark as Read",
                 e -> selected.setText("Mark as Read"));
+        add(menuBar, message);
         // end-source-example
 
         addCard("Items", "Item Components", menuBar, message);
@@ -263,7 +265,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Edit Profile"));
         account.getSubMenu().addItem("Privacy Settings",
                 e -> selected.setText("Privacy Settings"));
-
+        add(menuBar, message);
         // end-source-example
         addCard("Theme Variants", "Primary Buttons", menuBar, message);
     }
@@ -299,7 +301,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Edit Profile"));
         account.getSubMenu().addItem("Privacy Settings",
                 e -> selected.setText("Privacy Settings"));
-
+        add(menuBar, message);
         // end-source-example
         addCard("Theme Variants", "Tertiary Buttons", menuBar, message);
     }
@@ -340,7 +342,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Notifications"));
         notifications.getSubMenu().addItem("Mark as Read",
                 e -> selected.setText("Mark as Read"));
-
+        add(menuBar, message);
         // end-source-example
         addCard("Theme Variants", "Tertiary Inline Buttons", menuBar, message);
     }
@@ -378,6 +380,7 @@ public class MenuBarView extends DemoView {
                 e -> selected.setText("Edit Profile"));
         account.getSubMenu().addItem("Privacy Settings",
                 e -> selected.setText("Privacy Settings"));
+        add(menuBar, message);
 
         // end-source-example
         addCard("Theme Variants", "Small Buttons", menuBar, message);

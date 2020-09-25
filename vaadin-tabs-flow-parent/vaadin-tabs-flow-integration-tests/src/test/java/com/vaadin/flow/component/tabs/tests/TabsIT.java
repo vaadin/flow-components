@@ -44,7 +44,7 @@ public class TabsIT extends ComponentDemoTest {
 
         scrollIntoViewAndClick(tab3);
 
-        assertFalse(isElementPresent(By.id("page1")));
+        waitUntil(driver -> "true".equals(page1.getAttribute("hidden")));
         WebElement page3 = layout.findElement(By.id("page3"));
         assertThat(page3.getCssValue("display"), is("block"));
     }

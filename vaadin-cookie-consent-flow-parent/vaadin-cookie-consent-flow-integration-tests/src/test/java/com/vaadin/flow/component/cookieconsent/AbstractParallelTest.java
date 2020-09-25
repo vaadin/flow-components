@@ -79,7 +79,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
 
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList( BrowserUtil.chrome());
+        return Arrays.asList(
+                BrowserUtil.chrome());
     }
 
     protected void verifyElement(String message, String dismissLabel,

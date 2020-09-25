@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -40,6 +41,7 @@ import com.vaadin.flow.router.Route;
  * View for {@link TimePicker} demo.
  */
 @Route("vaadin-time-picker")
+@HtmlImport("frontend://hide-clear-button-theme.html")
 @JsModule("@vaadin/flow-frontend/hide-clear-button-theme.js")
 public class TimePickerView extends DemoView {
 
@@ -49,8 +51,11 @@ public class TimePickerView extends DemoView {
         createLocalizedTimePicker();
         createDisabledTimePicker();
         createWithClearButton();
+        autoOpenDisabled();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
+        createHelperTextAndComponent();
+        createHelperTextAbove();
     }
 
     private void createLocalizedTimePicker() {
@@ -144,9 +149,14 @@ public class TimePickerView extends DemoView {
 
         timePicker.addValueChangeListener(event -> {
             LocalTime value = event.getValue();
-            localTimeValue.setText(String.format(localTimeValueFormat,
-                    value.getHour(), value.getMinute(), value.getSecond(),
-                    value.get(ChronoField.MILLI_OF_SECOND)));
+            if (event.getValue() == null) {
+                localTimeValue.setText("");
+            } else {
+                localTimeValue.setText(
+                      String.format(localTimeValueFormat, value.getHour(),
+                            value.getMinute(), value.getSecond(),
+                            value.get(ChronoField.MILLI_OF_SECOND)));
+            }
         });
         timePicker.setId("step-setting-picker");
         label.setFor(timePicker);
@@ -183,6 +193,19 @@ public class TimePickerView extends DemoView {
         addCard("Clear button", timePicker);
     }
 
+    private void autoOpenDisabled() {
+        Span note = new Span(
+                "Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        TimePicker timePicker = new TimePicker();
+        timePicker.setValue(LocalTime.now());
+        timePicker.setAutoOpen(false);
+        // end-source-example
+
+        addCard("Auto open disabled", note, timePicker);
+    }
+
     private void createTimePickerWithMinAndMaxSetting() {
         Div message = createMessageDiv("time-picker-min-max-message");
         // begin-source-example
@@ -200,6 +223,43 @@ public class TimePickerView extends DemoView {
         timePicker.setId("time-picker-min-max");
         addCard("Time Picker With Min And Max Setting", timePicker, message);
     }
+
+    public void createHelperTextAndComponent() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        TimePicker timePicker = new TimePicker();
+        timePicker.setLabel("Start time");
+        timePicker
+              .setHelperText("Select the best suited time for a meeting");
+
+        TimePicker timePickerHelperComponent = new TimePicker();
+        timePickerHelperComponent.setLabel("Arrival time");
+        timePickerHelperComponent.setHelperComponent(
+              new Span("Choose the best suited parcel arrive time"));
+
+        add(timePicker, timePickerHelperComponent);
+        // end-source-example
+
+        timePicker.getStyle().set("margin-right", "15px");
+        div.add(timePicker, timePickerHelperComponent);
+        addCard("Helper text and helper component", div);
+    }
+
+    public void createHelperTextAbove() {
+        // begin-source-example
+        // source-example-heading: Helper above the field
+        TimePicker timePicker = new TimePicker();
+        timePicker.setLabel("Start time");
+        timePicker
+              .setHelperText("Select the best suited time for a meeting");
+        timePicker.getElement().getThemeList().set("helper-above-field", true);
+        add(timePicker);
+
+        // end-source-example
+        addCard("Helper above the field", timePicker);
+    }
+
 
     private Div createMessageDiv(String id) {
         Div message = new Div();
@@ -262,10 +322,11 @@ public class TimePickerView extends DemoView {
             if (step.getSeconds() < 1) {
                 expression += "+' " + MILLISECONDS_SPLIT + "'+ $1;";
                 int milliSeconds = localTime.get(ChronoField.MILLI_OF_SECOND);
-                getElement().executeJs(expression, getElement(), milliSeconds);
+                getElement().executeJavaScript(expression, getElement(),
+                        milliSeconds);
             } else {
                 expression += ";";
-                getElement().executeJs(expression, getElement());
+                getElement().executeJavaScript(expression, getElement());
             }
         }
     }

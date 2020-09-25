@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.data.DepartmentData;
-import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.data.TeamData;
 import com.vaadin.flow.component.select.entity.Department;
 import com.vaadin.flow.component.select.entity.Team;
@@ -35,14 +34,15 @@ public class SelectView extends DemoView {
         entityList();
         valueChanged();
         disabledItem();
-        configurationForRequiredDemo();// Validation
+        helperText();
+        configurationForReqiredDemo();// Validation
         formFieldDemo();
         separatorDemo();// Presentation
         customOptionsDemo();
         themeVariantsTextAlign(); // ThemeVariants
         themeVariantsSmallSize();
+        helperTextAbove();
         styling();// Styling
-        externalDataNavigation(); // External Navigation
     }
 
     private void basicDemo() {
@@ -62,6 +62,7 @@ public class SelectView extends DemoView {
         valueSelect.setItems("Value", "Option one", "Option two");
         valueSelect.setValue("Value");
 
+        add(labelSelect, placeholderSelect, valueSelect);
         // end-source-example
         labelSelect.getStyle().set("margin-right", "5px");
         placeholderSelect.getStyle().set("margin-right", "5px");
@@ -81,6 +82,8 @@ public class SelectView extends DemoView {
         readOnlySelect.setReadOnly(true);
         readOnlySelect.setValue("Value");
         readOnlySelect.setLabel("Read-only");
+
+        add(disabledSelect, readOnlySelect);
         // end-source-example
         disabledSelect.getStyle().set("margin-right", "5px");
         HorizontalLayout layout = new HorizontalLayout(disabledSelect,
@@ -88,6 +91,30 @@ public class SelectView extends DemoView {
         layout.getStyle().set("flex-wrap", "wrap");
         addCard("Disabled and read-only", layout);
     }
+
+    private void helperText() {
+        // begin-source-example
+        // source-example-heading: Helper text and component
+        Select<String> degree = new Select<>("Baccalaureate", "Licence",
+              "Master", "Doctorate");
+        degree.setLabel("Academic degree");
+        degree.setHelperText(
+              "Please, select only the highest accomplished degree");
+
+        Select<String> pet = new Select<>("Cat", "Dog", "Rabbit", "Fish",
+              "Bird", "Other");
+        pet.setLabel("Pets");
+        pet.setHelperComponent(new Span("Your favorite pet"));
+
+        add(degree, pet);
+        // end-source-example
+
+        degree.getStyle().set("margin-right", "5px");
+        HorizontalLayout layout = new HorizontalLayout(degree, pet);
+        layout.getStyle().set("flex-wrap", "wrap");
+        addCard("Helper text and component", layout);
+    }
+
 
     private List<Department> getDepartments() {
 
@@ -110,6 +137,8 @@ public class SelectView extends DemoView {
         // Choose which property from Department is the presentation value
         select.setItemLabelGenerator(Department::getName);
         select.setItems(departmentList);
+
+        add(select);
         // end-source-example
         addCard("Entity list", select);
     }
@@ -125,6 +154,8 @@ public class SelectView extends DemoView {
         value.setText("Select a value");
         select.addValueChangeListener(
                 event -> value.setText("Selected: " + event.getValue()));
+
+        add(select, value);
         // end-source-example
         VerticalLayout verticalLayout = new VerticalLayout(select, value);
         verticalLayout.setAlignItems(FlexComponent.Alignment.START);
@@ -146,11 +177,12 @@ public class SelectView extends DemoView {
                 item -> !"Developers Journey and Onboarding"
                         .equals(item.getName()));
 
+        add(select);
         // end-source-example
         addCard("Disabled item", select);
     }
 
-    private void configurationForRequiredDemo() {
+    private void configurationForReqiredDemo() {
         // begin-source-example
         // source-example-heading: Required
         Select<String> requiredSelect = new Select<>();
@@ -167,6 +199,8 @@ public class SelectView extends DemoView {
 
         // add a divider after the empty selection item
         requiredSelect.addComponents(null, new Hr());
+
+        add(requiredSelect);
         // end-source-example
         FlexLayout layout = new FlexLayout(requiredSelect);
         layout.getStyle().set("flex-wrap", "wrap");
@@ -203,6 +237,8 @@ public class SelectView extends DemoView {
                         Notification.Position.MIDDLE);
             }
         });
+
+        add(titleSelect, button);
         // end-source-example
         HorizontalLayout layout = new HorizontalLayout(titleSelect, button);
         layout.setAlignItems(FlexComponent.Alignment.BASELINE);
@@ -220,6 +256,8 @@ public class SelectView extends DemoView {
         select.setItems(Weekday.values());
         select.addComponents(null, new Hr());
         select.addComponents(Weekday.FRIDAY, new Hr());
+
+        add(select);
         // end-source-example
         addCard("Presentation", "Separators", select);
     }
@@ -244,6 +282,8 @@ public class SelectView extends DemoView {
             wrapper.add(emotion.getIcon().create(), text);
             return wrapper;
         }));
+
+        add(select);
 
         // Note that if the setItemLabelGenerator(...) is applied, the label
         // string is shown in the input field instead of the components (icon +
@@ -271,6 +311,8 @@ public class SelectView extends DemoView {
         rightSelect.setItems("Left", "Center", "Right");
         rightSelect.setValue("Right");
         rightSelect.getElement().setAttribute("theme", "align-right");
+
+        add(leftSelect, centerSelect, rightSelect);
         // end-source-example
         div.add(leftSelect, centerSelect, rightSelect);
         leftSelect.getStyle().set("margin-right", "5px");
@@ -286,8 +328,36 @@ public class SelectView extends DemoView {
         select.setItems("Option one", "Option two");
         select.setPlaceholder("Placeholder");
         select.getElement().setAttribute("theme", "small");
+
+        add(select);
         // end-source-example
         addCard("Theme Variants", "Small size", select);
+    }
+
+    private void helperTextAbove () {
+        // begin-source-example
+        // source-example-heading: Helper text and component above the field
+        Select<String> degree = new Select<>("Baccalaureate", "Licence",
+              "Master", "Doctorate");
+        degree.setLabel("Academic degree");
+        degree.setHelperText(
+              "Please, select only the highest accomplished degree");
+        degree.getElement().getThemeList().set("helper-above-field", true);
+
+        Select<String> pet = new Select<>("Cat", "Dog", "Rabbit", "Fish",
+              "Bird", "Other");
+        pet.setLabel("Pets");
+        pet.setHelperComponent(new Span("Your favorite pet"));
+        pet.getElement().getThemeList().set("helper-above-field", true);
+
+        add(degree, pet);
+        // end-source-example
+
+        degree.getStyle().set("margin-right", "5px");
+        HorizontalLayout layout = new HorizontalLayout(degree, pet);
+        layout.getStyle().set("flex-wrap", "wrap");
+        addCard("Theme Variants", "Helper text and component above the field",
+              layout);
     }
 
     private void styling() {
@@ -315,46 +385,6 @@ public class SelectView extends DemoView {
         // end-source-example
         addCard("Styling", "Styling references", firstHorizontalLayout,
                 secondHorizontalLayout);
-    }
-
-    // begin-source-example
-    // source-example-heading: Navigating Select items externally
-    private Select<String> select;
-    private Button next;
-    private Button previous;
-    private Span selectedOption;
-    private String currentOption;
-    private SelectListDataView<String> dataView;
-    private HorizontalLayout layout;
-
-    private void createExternalDataNavigation() {
-        select = new Select<>();
-        dataView = select.setItems("Option one", "Option two", "Option three");
-        selectedOption = new Span();
-        next = new Button("Next", event -> selectOption(
-                dataView.getNextItem(currentOption).get()));
-        previous = new Button("Previous", event -> selectOption(
-                dataView.getPreviousItem(currentOption).get()));
-        select.addValueChangeListener(event -> selectOption(event.getValue()));
-        select.setValue(dataView.getItem(0));
-        layout = new HorizontalLayout(select, previous, selectedOption, next);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-    }
-
-    private void selectOption(String currentOption) {
-        this.currentOption = currentOption;
-        selectedOption.setText(currentOption);
-        select.setValue(currentOption);
-        next.setEnabled(dataView.getNextItem(currentOption).isPresent());
-        previous.setEnabled(
-                dataView.getPreviousItem(currentOption).isPresent());
-    }
-    // end-source-example
-
-    private void externalDataNavigation() {
-        createExternalDataNavigation();
-        addCard("External Navigation", "Navigating Select items externally",
-                layout);
     }
 
     private static class Employee {

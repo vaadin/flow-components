@@ -8,11 +8,12 @@ import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.checkbox.GeneratedVaadinCheckboxGroup;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 /**
- * View for {@link CheckboxGroup} integration tests.
+ * View for {@link CheckboxGroup} demo.
  *
  * @author Vaadin Ltd
  */
@@ -42,14 +43,6 @@ public class CheckboxGroupDemoPage extends DemoView {
             return id;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(name);
-        }
     }
 
     @Override
@@ -61,13 +54,12 @@ public class CheckboxGroupDemoPage extends DemoView {
         addDisabledItems();
         addReadOnlyGroup();
         addComponentWithThemeVariant();
+        addHelperCheckboxGroup();
     }
 
     @Override
     public void populateSources() {
-        // The body of this method is kept empty because no source population
-        // is needed for integration tests. CheckboxGroupDemoPage is only used for testing.
-        // Old demos have been moved to integration tests and separated from demos.
+
     }
 
     private void addBasicFeatures() {
@@ -188,12 +180,47 @@ public class CheckboxGroupDemoPage extends DemoView {
         group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
-        addVariantsDemo(() -> group,
-                GeneratedVaadinCheckboxGroup::addThemeVariants,
+        addVariantsDemo(() -> {
+                    return group;
+                }, GeneratedVaadinCheckboxGroup::addThemeVariants,
                 GeneratedVaadinCheckboxGroup::removeThemeVariants,
                 CheckboxGroupVariant::getVariantName,
                 CheckboxGroupVariant.LUMO_VERTICAL);
     }
+
+    private void addHelperCheckboxGroup(){
+        // begin-source-example
+        // source-example-heading: CheckboxGroup with helper text and helper component
+        CheckboxGroup<String> groupHelperText = new CheckboxGroup<>();
+        groupHelperText.setItems("foo", "bar", "baz");
+        groupHelperText.setHelperText("Helper text");
+
+        NativeButton clearHelper = new NativeButton("Clear helper text", e -> {
+            groupHelperText.setHelperText(null);
+        });
+
+        CheckboxGroup<String> groupHelperComponent = new CheckboxGroup<>();
+        groupHelperComponent.setItems("foo", "bar", "baz");
+        Span span = new Span("Helper text");
+        groupHelperComponent.setHelperComponent(span);
+
+        NativeButton clearHelperComponent = new NativeButton(
+              "Clear helper text", e -> {
+            groupHelperComponent.setHelperComponent(null);
+        });
+
+        // end-source-example
+        groupHelperText.setId("checkbox-helper-text");
+        groupHelperComponent.setId("checkbox-helper-component");
+        span.setId("component-helper");
+        clearHelper.setId("button-clear-helper");
+        clearHelperComponent.setId("button-clear-component");
+
+        addCard("CheckboxGroup with helper text and helper component",
+              groupHelperText, clearHelper, groupHelperComponent,
+              clearHelperComponent);
+    }
+
 
     private String toString(Set<String> value) {
         return value.stream().sorted().collect(Collectors.toList()).toString();

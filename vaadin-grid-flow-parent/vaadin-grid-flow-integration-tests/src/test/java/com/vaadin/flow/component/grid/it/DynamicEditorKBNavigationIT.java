@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -23,6 +22,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
@@ -59,8 +59,8 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         nameInput.sendKeys(Keys.ENTER);
         nameInput.click();
         nameInput.sendKeys(Keys.TAB);
-        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
-        checkbox.sendKeys(Keys.TAB);
+
+        new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
 
         new Actions(getDriver())
                 .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
@@ -75,6 +75,7 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         Assert.assertEquals("foobaz, true, bar@gmail.org", msg.getText());
 
         // Change the subscriber status
+        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
         checkbox.click();
 
         TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
@@ -86,7 +87,7 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         nameField = nameCell.$("vaadin-text-field").first();
         nameInput.click();
         nameInput.sendKeys(Keys.TAB);
-        checkbox.sendKeys(Keys.TAB);
+        new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
         new Actions(getDriver()).sendKeys(Keys.BACK_SPACE).build().perform();
 
         emailField = emailCell.$("vaadin-text-field").first();

@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.treegrid.demo;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.HtmlImport;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.demo.GridDemo.Person;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 
 @Route("vaadin-tree-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")
+@HtmlImport("grid-demo-styles.html")
 public class TreeGridDemo extends DemoView {
 
     /**
@@ -72,6 +74,7 @@ public class TreeGridDemo extends DemoView {
         grid.addCollapseListener(event -> message.setValue(
                 String.format("Collapsed %s item(s)", event.getItems().size())
                         + "\n" + message.getValue()));
+        add(grid);
 
         // end-source-example
         grid.setId("treegridbasic");
@@ -144,6 +147,7 @@ public class TreeGridDemo extends DemoView {
         };
 
         grid.setDataProvider(dataProvider);
+        add(grid);
 
         // end-source-example
         grid.setId("treegridlazy");
@@ -169,6 +173,7 @@ public class TreeGridDemo extends DemoView {
                     departmentLine.setSpacing(false);
                     return departmentLine;
                 }).setHeader("Departments");
+        add(grid);
 
         // end-source-example
         grid.setId("treegridcomponent");

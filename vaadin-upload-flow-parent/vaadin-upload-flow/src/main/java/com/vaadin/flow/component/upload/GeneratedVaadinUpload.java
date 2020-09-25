@@ -25,6 +25,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -120,6 +121,7 @@ import elemental.json.JsonObject;
 @Tag("vaadin-upload")
 @NpmPackage(value = "@vaadin/vaadin-upload", version = "4.4.0")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
+@HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {
 
@@ -796,7 +798,7 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *            Missing documentation!
      */
     protected void uploadFiles(JsonObject files) {
-        getElement().callJsFunction("uploadFiles", files);
+        getElement().callFunction("uploadFiles", files);
     }
 
     @DomEvent("file-reject")

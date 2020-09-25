@@ -1,0 +1,153 @@
+<!--
+  ~ Copyright 2000-2017 Vaadin Ltd.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  ~ use this file except in compliance with the License. You may obtain a copy of
+  ~ the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~ License for the specific language governing permissions and limitations under
+  ~ the License.
+  -->
+
+<link rel="import" href="../../../frontend/bower_components/polymer/polymer.html">
+<link rel="import" href="../../../frontend/bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../../frontend/bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../../frontend/bower_components/vaadin-icons/vaadin-icons.html">
+<link rel="import" href="../../../frontend/bower_components/vaadin-icons/iconset.html">
+
+<dom-module id="all-icons">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      dom-repeat {
+        display: block;
+        width: 100%;
+      }
+
+      .iconset-container {
+        margin-top: 1em;
+        background-Color: #fff;
+      }
+
+      .icon-container {
+        margin: 18px 0;
+        padding: 0 5px;
+        text-align: center;
+        width: 19.3%;
+        display: inline-block;
+        cursor: default;
+        vertical-align: top;
+        box-sizing: border-box;
+      }
+
+      .wrapper-icon-label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      .icon {
+        width: 50px !important;
+        height: 50px !important;
+        margin-bottom: 3px;
+        fill: #00b4f0 !important
+      }
+
+      .text-icon {
+        margin: 5px;
+        width: 140px;
+        font-size: 12px;
+      }
+
+      @media (max-width: 1024px) {
+        .icon-container {
+          width: 24%;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .icon-container {
+          width: 32%;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .icon-container {
+          width: 49%;
+        }
+      }
+
+      .icon-container span {
+        font-family: sans-serif;
+        font-size: 12px;
+        display: block;
+        margin-top: .5em;
+        color: #616161;
+        transition: all 600ms;
+      }
+
+      .icon-container:hover span {
+        color: #00b4f0;
+      }
+
+      .icon-container iron-icon {
+        display: inline-block;
+        fill: #616161;
+        transition: all 200ms;
+        width: 30px;
+        height: 30px;
+      }
+
+      .icon-container:hover iron-icon {
+        fill: #00b4f0;
+      }
+    </style>
+    <div class="iconset-container">
+     <dom-repeat items="[[icons]]">
+        <template>
+          <div class="icon-container">
+            <div class="wrapper-icon-label">
+                <iron-icon icon="[[item]]" class="icon"></iron-icon>
+                <span class="text-icon">[[getNameIcons(item)]]</span>
+            </div>
+          </div>
+        </template>
+      </dom-repeat>
+    </div>
+  </template>
+
+  <!-- Polymer boilerplate to register the all-icons element -->
+  <script>
+    class AllIconsView extends Polymer.Element {
+      static get is() {
+        return 'all-icons';
+      }
+
+      static get properties() {
+        return {
+          icons : Array
+        }
+      }
+
+      ready() {
+        super.ready();
+        const iconset = new Polymer.IronMeta({type: 'iconset'}).list.filter(i => i.name == 'vaadin')[0];
+        this.icons = iconset.getIconNames();
+      }
+
+      getNameIcons(iconset) {
+          const labelIcon = iconset.substring(iconset.indexOf(":") + 1);
+          return labelIcon.toUpperCase().replace(/-/g, '_');
+      }
+    }
+    customElements.define(AllIconsView.is, AllIconsView);
+  </script>
+</dom-module>

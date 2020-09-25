@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Chart's configuration root object containing all the child objects that are
@@ -46,7 +45,7 @@ public class Configuration extends AbstractConfigurationObject
         implements ChartConfiguration {
 
     private Accessibility accessibility;
-    private ChartModel chart = new ChartModel();
+    private ChartModel chart;
     private Title title;
     private Subtitle subtitle;
     private AxisList<XAxis> xAxis;
@@ -70,7 +69,6 @@ public class Configuration extends AbstractConfigurationObject
     private Navigation navigation;
     private NoData noData;
     private Navigator navigator;
-    private Time time;
 
     @JsonIgnore
     private final List<ConfigurationChangeListener> changeListeners = new ArrayList<>();
@@ -109,10 +107,8 @@ public class Configuration extends AbstractConfigurationObject
      * options.
      * 
      * @param chart
-     *            ChartModel to set, not <code>null</code>
      */
     public void setChart(ChartModel chart) {
-        Objects.requireNonNull(chart, "Given ChartModel may not be null");
         this.chart = chart;
     }
 
@@ -824,22 +820,6 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void setNavigator(Navigator navigator) {
         this.navigator = navigator;
-    }
-
-    /**
-     * @see #setTime(Time)
-     */
-    public Time getTime() {
-        return time;
-    }
-
-    /**
-     * Set configuration for time options
-     * 
-     * @param time
-     */
-    public void setTime(Time time) {
-        this.time = time;
     }
 
     /**

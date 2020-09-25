@@ -46,6 +46,8 @@ public class ProgressBarView extends DemoView {
         ProgressBar progressBar = new ProgressBar();
         progressBar.setValue(0.345);
         progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
+
+        add(progressBar);
         // end-source-example
 
         addVariantsDemo(() -> {
@@ -61,6 +63,8 @@ public class ProgressBarView extends DemoView {
         // source-example-heading: Progress bar
         ProgressBar progressBar = new ProgressBar();
         progressBar.setValue(0.345);
+
+        add(progressBar);
         // end-source-example
 
         progressBar.setId("default-progress-bar");
@@ -78,6 +82,8 @@ public class ProgressBarView extends DemoView {
             }
             progressBar.setValue(value);
         });
+
+        add(progressBar, progressButton);
         // end-source-example
 
         progressBar.setId("custom-progress-bar");
@@ -90,6 +96,8 @@ public class ProgressBarView extends DemoView {
         // source-example-heading: Indeterminate progress bar
         ProgressBar progressBar = new ProgressBar();
         progressBar.setIndeterminate(true);
+
+        add(progressBar);
         // end-source-example
 
         progressBar.setId("indeterminate-progress-bar");

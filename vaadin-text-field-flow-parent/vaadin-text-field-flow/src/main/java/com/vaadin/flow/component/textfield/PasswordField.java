@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -34,7 +35,7 @@ public class PasswordField
         extends GeneratedVaadinPasswordField<PasswordField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

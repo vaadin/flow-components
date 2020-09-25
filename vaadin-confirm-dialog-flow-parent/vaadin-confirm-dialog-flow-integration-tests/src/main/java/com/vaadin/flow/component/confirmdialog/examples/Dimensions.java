@@ -3,15 +3,16 @@ package com.vaadin.flow.component.confirmdialog.examples;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
 /**
  * Dimensions
  */
 @Route("vaadin-confirm-dialog/Dimensions")
+@BodySize
 public class Dimensions extends Div {
 
-    public static String VIEW_ID = "dimensions";
     public static String CONFIRM_DIALOG_ID = "confirm-dialog-dimensions";
     public static String OPEN_DIALOG_ID = "open-confirm-dialog-id";
     public static String ATTACH_DIALOG_ID = "attach-confirm-dialog";
@@ -25,7 +26,6 @@ public class Dimensions extends Div {
     public static String DIMENSION_SMALLER = "300px";
 
     public Dimensions() {
-        setId(VIEW_ID);
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setId(CONFIRM_DIALOG_ID);
         confirmDialog.setHeader("Confirm dialog header");

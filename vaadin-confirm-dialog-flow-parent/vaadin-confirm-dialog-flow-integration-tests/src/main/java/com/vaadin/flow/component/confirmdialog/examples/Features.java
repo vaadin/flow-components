@@ -9,9 +9,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-confirm-dialog/Features")
+@BodySize
 public class Features extends Div {
 
     static final String CONFIRM_DIALOG = "SampleConfirmDialog";

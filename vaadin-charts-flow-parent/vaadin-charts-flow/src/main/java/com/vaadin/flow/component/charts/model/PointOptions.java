@@ -17,10 +17,9 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import java.time.Instant;
 import java.util.Date;
-
-import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class PointOptions extends AbstractPlotOptions {
 
@@ -55,19 +54,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      */
     public abstract void setAnimation(Boolean animation);
 
-    /** 
-     * @see #setColor(Color)
-     */ 
-    public abstract Color getColor();
-
-    /** 
-     * The main color or the series. In line type series it applies to the line 
-     * and the point markers unless otherwise specified. In bar type series it
-     * applies to the bars unless a color is specified per point. The default
-     * value is pulled from the <code>options.colors</code> array.
-     */ 
-    public abstract void setColor(Color color);
-
     /**
      * @see #setAnimationLimit(Number)
      */
@@ -93,17 +79,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setClassName(String className);
 
     /**
-     * @see #setClip(Boolean)
-     */
-    public abstract Boolean getClip();
-
-    /**
-     * Disable this option to allow series rendering in the whole plotting area.
-     * Note that clipping should be always enabled when chart.zoomType is set
-     */
-    public abstract void setClip(Boolean clip);
-
-    /**
      * @see #setColorIndex(Number)
      */
     public abstract Number getColorIndex();
@@ -114,32 +89,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
-
-    public abstract String getColorKey();
-
-    /**
-     * Determines what data value should be used to calculate point color
-     * if <code>colorAxis</code> is used. Requires to set <code>min</code>
-     * and <code>max</code> if some custom point property is used
-     * or if approximation for data grouping is set to <code>'sum'</code>.
-     */
-    public abstract void setColorKey(String colorKey);
-
-    /**
-     * @see #setCrisp(Boolean)
-     */
-    public abstract Boolean getCrisp();
-
-    /**
-     * When true, each point or column edge is rounded to its nearest pixel
-     * in order to render sharp on screen.
-     * In some cases, when there are a lot of densely packed columns,
-     * this leads to visible difference in column widths
-     * or distance between columns. In these cases, setting <code>crisp</code>
-     * to <code>false</code> may look better,
-     * even though each column is rendered blurry.
-     */
-    public abstract void setCrisp(Boolean crisp);
 
     /**
      * @see #setCropThreshold(Number)
@@ -169,42 +118,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * clicked.
      */
     public abstract void setCursor(Cursor cursor);
-    /**
-     * @see #setDescription(String)
-     */
-    public abstract String getDescription();
-
-    /**
-     * A description of the series to add to the screen reader information about
-     * the series.
-     */
-    public abstract void setDescription(String description);
-
-    /**
-     * @see #setDashStyle(DashStyle)
-     */
-    public abstract DashStyle getDashStyle();
-
-    /**
-     * A name for the dash style to use for the graph. Applies only to series
-     * type having a graph, like <code>line</code>, <code>spline</code>,
-     * <code>area</code> and <code>scatter</code> in case it has a
-     * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-     * <ul>
-     * <li>Solid</li>
-     * <li>ShortDash</li>
-     * <li>ShortDot</li>
-     * <li>ShortDashDot</li>
-     * <li>ShortDashDotDot</li>
-     * <li>Dot</li>
-     * <li>Dash</li>
-     * <li>LongDash</li>
-     * <li>DashDot</li>
-     * <li>LongDashDot</li>
-     * <li>LongDashDotDot</li>
-     * </ul>
-     */
-    public abstract void setDashStyle(DashStyle dashStyle);
 
     /**
      * @see #setDataLabels(DataLabels)
@@ -217,6 +130,17 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * @param dataLabels
      */
     public abstract void setDataLabels(DataLabels dataLabels);
+
+    /**
+     * @see #setDescription(String)
+     */
+    public abstract String getDescription();
+
+    /**
+     * A description of the series to add to the screen reader information about
+     * the series.
+     */
+    public abstract void setDescription(String description);
 
     /**
      * @see #setEnableMouseTracking(Boolean)
@@ -307,16 +231,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void removeKey(String key);
 
     /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * The width of the line connecting the data points.
-     */
-    public abstract void setLineWidth(Number lineWidth);
-
-    /**
      * @see #setLinkedTo(String)
      */
     public abstract String getLinkedTo();
@@ -338,27 +252,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * Options for the point markers of line-like series.
      */
     public abstract void setMarker(Marker marker);
-
-    /**
-     * @see #setNegativeColor(Color)
-     */
-    public abstract Color getNegativeColor();
-
-    /**
-     * The color for the parts of the graph or points that are below the
-     * threshold.
-     */
-    public abstract void setNegativeColor(Color negativeColor);
-
-    /**
-     * @see #setOpacity(Number)
-     */
-    public abstract Number getOpacity();
-
-    /**
-     * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
-     */
-    public abstract void setOpacity(Number opacity);
 
     public abstract String getPointDescriptionFormatter();
 

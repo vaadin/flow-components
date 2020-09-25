@@ -4,9 +4,10 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>14.4-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-confirm-dialog-integration-tests</artifactId>
+  <version>${vaadin.confirm.dialog.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Confirm Dialog Integration Tests</name>
   <properties>
@@ -49,22 +50,22 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.dialog.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-confirm-dialog-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.confirm.dialog.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.icons.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -75,13 +76,13 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-confirm-dialog-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.confirm.dialog.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

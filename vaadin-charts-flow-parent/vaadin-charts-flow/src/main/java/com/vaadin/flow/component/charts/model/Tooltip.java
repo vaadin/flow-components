@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- *
+ * 
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- *
+ * 
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -19,8 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
+
 /**
  * Options for the tooltip that appears when the user hovers over a series or
  * point.
@@ -29,8 +28,6 @@ import com.vaadin.flow.component.charts.model.style.Style;
 public class Tooltip extends AbstractConfigurationObject {
 
 	private Boolean animation;
-	private Color backgroundColor;
-	private Color borderColor;
 	private Number borderRadius;
 	private Number borderWidth;
 	private DateTimeLabelFormats dateTimeLabelFormats;
@@ -50,14 +47,12 @@ public class Tooltip extends AbstractConfigurationObject {
 	private Boolean shared;
 	private Number snap;
 	private Boolean split;
-	private Style style;
 	private Boolean useHTML;
 	private Number valueDecimals;
 	private String valuePrefix;
 	private String valueSuffix;
 	private String xDateFormat;
 	private Number changeDecimals;
-	private Boolean outside;
 
 	public Tooltip() {
 	}
@@ -77,48 +72,6 @@ public class Tooltip extends AbstractConfigurationObject {
 	 */
 	public void setAnimation(Boolean animation) {
 		this.animation = animation;
-	}
-
-	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * <p>
-	 * The background color or gradient for the tooltip.
-	 * </p>
-	 *
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is set in the
-	 * <code>.highcharts-tooltip-box</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: rgba(247,247,247,0.85)
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The color of the tooltip border. When <code>null</code>, the border takes
-	 * the color of the corresponding series or point.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
 	}
 
 	/**
@@ -148,7 +101,7 @@ public class Tooltip extends AbstractConfigurationObject {
 	 * <p>
 	 * The pixel width of the tooltip border.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -180,10 +133,10 @@ public class Tooltip extends AbstractConfigurationObject {
 	 * overview of the replacement codes, see <a
 	 * href="#Highcharts.dateFormat">dateFormat</a>.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Defaults to:
-	 *
+	 * 
 	 * <pre>
 	 * {
 	 * 	    millisecond:"%A, %b %e, %H:%M:%S.%L",
@@ -196,7 +149,7 @@ public class Tooltip extends AbstractConfigurationObject {
 	 * 	    year:"%Y"
 	 * 	}
 	 * </pre>
-	 *
+	 * 
 	 * </p>
 	 */
 	public void setDateTimeLabelFormats(
@@ -311,7 +264,7 @@ public class Tooltip extends AbstractConfigurationObject {
 	 * datetime string depending on the type of axis. For datetime axes, the
 	 * <code>point.key</code> date format can be set using tooltip.xDateFormat.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Defaults to
 	 * <code>&lt;span style="font-size: 10px"&gt;{point.key}&lt;/span&gt;&lt;br/&gt;</code>
@@ -448,7 +401,7 @@ public class Tooltip extends AbstractConfigurationObject {
 	 * is recommended for single series charts and for tablet/mobile optimized
 	 * charts.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * See also <a href="#tooltip.split">tooltip.split</a>, that is better
 	 * suited for charts with many series, especially line-type series.
@@ -472,7 +425,7 @@ public class Tooltip extends AbstractConfigurationObject {
 	 * Proximity snap for graphs or single points. It defaults to 10 for
 	 * mouse-powered devices and 25 for touch devices.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Note that in most cases the whole plot area captures the mouse movement,
 	 * and in these cases <code>tooltip.snap</code> doesn't make sense. This
@@ -503,27 +456,6 @@ public class Tooltip extends AbstractConfigurationObject {
 	 */
 	public void setSplit(Boolean split) {
 		this.split = split;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * CSS styles for the tooltip. The tooltip can also be styled through the
-	 * CSS class <code>.highcharts-tooltip</code>.
-	 * <p>
-	 * Defaults to: { "color": "#333333", "cursor": "default", "fontSize":
-	 * "12px", "pointerEvents": "none", "whiteSpace": "nowrap" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**
@@ -622,25 +554,5 @@ public class Tooltip extends AbstractConfigurationObject {
 	 */
 	public void setChangeDecimals(Number changeDecimals) {
 		this.changeDecimals = changeDecimals;
-	}
-
-	/**
-	 * @see #setOutside(Boolean)
-	 */
-	public Boolean getOutside() {
-		return outside;
-	}
-
-	/**
-	 *
-	 * Whether to allow the tooltip to render outside the chart's SVG element
-	 * box. By default (false), the tooltip is rendered within the chart's
-	 * SVG element, which results in the tooltip being aligned inside the chart
-	 * area. For small charts, this may result in clipping or overlapping. When
-	 * true, a separate SVG element is created and overlaid on the page,
-	 * allowing the tooltip to be aligned inside the page itself.
-	 */
-	public void setOutside(Boolean outside) {
-		this.outside = outside;
 	}
 }
