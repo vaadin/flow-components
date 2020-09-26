@@ -35,7 +35,7 @@ tcStatus() {
   exit $1
 }
 
-saveFailed() {
+saveFailedTests() {
   try=$1
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
@@ -50,6 +50,15 @@ saveFailed() {
   fi
 }
 
+computeFastBuild() {
+  [ -z "$PR" ] && return
+  ghUrl="https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR"
+  prTitle=`curl -s $ghUrl | jq -r .title`
+  echo "$prTitle" | grep '\[skip ci\]' >/dev/null && FAST_BUILD=true && return
+  prMessages=`curl -s $ghUrl/commits | jq -r '.[] | .commit.message'`
+  echo "$prMessages" | grep -v '\[skip ci\]' >/dev/null || FAST_BUILD=true
+}
+
 [ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -z "$FORK_COUNT" ] && FORK_COUNT="5"
 
@@ -61,10 +70,6 @@ type node && node --version
 type npm && npm --version
 type pnpm && pnpm --version
 uname -a
-
-cmd="npm install --silent --quiet --no-progress"
-tcLog "Install NPM packages - $cmd"
-$cmd || exit 1
 
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
@@ -78,6 +83,19 @@ then
   sleep 30
   $cmd || tcStatus 1 "Unit-Testing failed"
 fi
+
+tcLog "Checking for skip-ci labels"
+computeFastBuild
+if [ -n "$FAST_BUILD" ]
+then
+  echo "$prTitle"
+  echo "$prMessages"
+  tcStatus 0 "" "Success - skip-ci"
+fi
+
+cmd="npm install --silent --quiet --no-progress"
+tcLog "Install NPM packages - $cmd"
+$cmd || exit 1
 
 cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
@@ -117,8 +135,7 @@ then
   tcLog "Running module ITs - mvn clean verify -pl ..."
   echo $cmd
   $cmd
-elif [ -z "$BUILD" ]
-then
+else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
   cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
@@ -128,7 +145,7 @@ then
   error=$?
 
   [ ! -d integration-tests/target/failsafe-reports ] && exit 1
-  saveFailed run-1
+  saveFailedTests run-1
 
   if [ "$nfailed" -gt 0 ]
   then
@@ -144,7 +161,7 @@ then
         echo $cmd
         $cmd
         error=$?
-        saveFailed run-2
+        saveFailedTests run-2
         tcStatus $error "Test failed: $nfailed" "Success"
       fi
   fi
