@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import javax.annotation.Generated;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Generated;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEvent;
@@ -109,9 +110,9 @@ import com.vaadin.flow.shared.Registration;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
@@ -433,7 +434,6 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -453,7 +453,47 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
+            setPresentationValue(initialValue);
+        }
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinRadioGroup component with the given
+     * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that accepts this component and a property value
+     *            and returns a model value
+     * @param modelToPresentation
+     *            a function that accepts this component and a model value and
+     *            returns a property value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> GeneratedVaadinRadioGroup(T initialValue, T defaultValue,
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation,
+            boolean isInitialValueOptional) {
+        super("value", defaultValue, elementPropertyType, presentationToModel,
+                modelToPresentation);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -481,12 +521,8 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
             SerializableBiFunction<R, T, P> modelToPresentation) {
-        super("value", defaultValue, elementPropertyType, presentationToModel,
-                modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
-            setPresentationValue(initialValue);
-        }
+        this(initialValue, defaultValue, elementPropertyType,
+                presentationToModel, modelToPresentation, false);
     }
 
     /**
