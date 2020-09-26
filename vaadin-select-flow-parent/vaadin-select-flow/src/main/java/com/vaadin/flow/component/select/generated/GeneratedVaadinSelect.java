@@ -169,9 +169,9 @@ import com.vaadin.flow.shared.Registration;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  * <p>
  * In addition to {@code <vaadin-select>} itself, the following internal
@@ -622,11 +622,11 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * 
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
@@ -685,13 +685,12 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *            the property type
      */
     public <P> GeneratedVaadinSelect(T initialValue, T defaultValue,
-                                     Class<P> elementPropertyType,
-                                     SerializableFunction<P, T> presentationToModel,
-                                     SerializableFunction<T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -708,10 +707,9 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinSelect(T initialValue, T defaultValue,
-                                 boolean acceptNullValues) {
+            boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -736,13 +734,50 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *            the property type
      */
     public <P> GeneratedVaadinSelect(T initialValue, T defaultValue,
-                                     Class<P> elementPropertyType,
-                                     SerializableBiFunction<R, P, T> presentationToModel,
-                                     SerializableBiFunction<R, T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation) {
+        this(initialValue, defaultValue, elementPropertyType,
+                presentationToModel, modelToPresentation, false);
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinSelect component with the given
+     * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     * 
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that accepts this component and a property value
+     *            and returns a model value
+     * @param modelToPresentation
+     *            a function that accepts this component and a model value and
+     *            returns a property value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> GeneratedVaadinSelect(T initialValue, T defaultValue,
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation,
+            boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
