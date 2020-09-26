@@ -20,7 +20,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -87,7 +89,7 @@ public class RadioButtonGroup<T>
 
     public RadioButtonGroup() {
         super(null, null, String.class, RadioButtonGroup::presentationToModel,
-                RadioButtonGroup::modelToPresentation);
+                RadioButtonGroup::modelToPresentation, true);
 
         registerValidation();
     }
@@ -103,19 +105,40 @@ public class RadioButtonGroup<T>
         this.dataProvider = dataProvider;
         reset();
 
+        setupDataProviderListener(dataProvider);
+    }
+
+    private void setupDataProviderListener(DataProvider<T, ?> dataProvider) {
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-
         dataProviderListenerRegistration = dataProvider
                 .addDataProviderListener(event -> {
                     if (event instanceof DataChangeEvent.DataRefreshEvent) {
                         resetRadioButton(
-                            ((DataChangeEvent.DataRefreshEvent<T>) event).getItem());
+                                ((DataChangeEvent.DataRefreshEvent<T>) event)
+                                        .getItem());
                     } else {
                         reset();
                     }
                 });
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (getDataProvider() != null && dataProviderListenerRegistration == null) {
+            setupDataProviderListener(getDataProvider());
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataProviderListenerRegistration != null) {
+        	dataProviderListenerRegistration.remove();
+        	dataProviderListenerRegistration = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     /**
@@ -274,10 +297,11 @@ public class RadioButtonGroup<T>
     }
 
     private void resetRadioButton(T item) {
-        getRadioButtons().filter(radioButton ->
-            getDataProvider().getId(radioButton.getItem()).equals(getDataProvider().getId(item)))
-        .findFirst()
-        .ifPresent(this::updateButton);
+        getRadioButtons()
+                .filter(radioButton -> getDataProvider()
+                        .getId(radioButton.getItem())
+                        .equals(getDataProvider().getId(item)))
+                .findFirst().ifPresent(this::updateButton);
     }
 
     private Component createRadioButton(T item) {

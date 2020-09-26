@@ -68,7 +68,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * Default constructor.
      */
     public TimePicker() {
-        this((LocalTime) null);
+        this((LocalTime) null, true);
     }
 
     /**
@@ -78,7 +78,23 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *            the pre-selected time in the picker
      */
     public TimePicker(LocalTime time) {
-        super(time, null, String.class, PARSER, FORMATTER);
+        this(time, false);
+    }
+
+    /**
+     * Convenience constructor to create a time picker with a pre-selected time.
+     *
+     * @param time
+     *            the pre-selected time in the picker
+     * @param isInitialValueOptional
+     *            If {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     */
+    private TimePicker(LocalTime time, boolean isInitialValueOptional) {
+        super(time, null, String.class, PARSER, FORMATTER,
+                isInitialValueOptional);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
