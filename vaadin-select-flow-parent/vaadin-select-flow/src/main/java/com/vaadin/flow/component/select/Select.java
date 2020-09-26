@@ -83,8 +83,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private final InternalListBox listBox = new InternalListBox();
 
-    private final AtomicReference<DataProvider<T, ?>> dataProvider =
-            new AtomicReference<>(DataProvider.ofItems());
+    private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
+            DataProvider.ofItems());
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -92,8 +92,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = null;
 
-    private final PropertyChangeListener validationListener =
-            this::validateSelectionEnabledState;
+    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
     private boolean resetPending = true;
@@ -117,7 +116,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     public Select() {
         super(null, null, String.class, Select::presentationToModel,
-                Select::modelToPresentation);
+                Select::modelToPresentation, true);
 
         getElement().setProperty("invalid", false);
         getElement().setProperty("opened", false);
@@ -141,14 +140,15 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
-        if (!select.keyMapper.containsKey(presentation)) {
+        if (select.keyMapper == null
+                || !select.keyMapper.containsKey(presentation)) {
             return null;
         }
         return select.keyMapper.get(presentation);
     }
 
     private static <T> String modelToPresentation(Select<T> select, T model) {
-        if (model == null) {
+        if (model == null || select.keyMapper == null) {
             return "";
         }
         if (!select.keyMapper.has(model)) {
@@ -478,8 +478,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         // We don't use DataProvider.withConvertedFilter() here because it's
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<T, Void> convertedDataProvider =
-                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+        DataProvider<T, Void> convertedDataProvider = new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
                 inMemoryDataProvider) {
             @Override
             protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
@@ -944,9 +943,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     @SuppressWarnings("unchecked")
     private IdentifierProvider<T> getIdentifierProvider() {
-        IdentifierProvider<T> identifierProviderObject =
-                (IdentifierProvider<T>) ComponentUtil.getData(this,
-                        IdentifierProvider.class);
+        IdentifierProvider<T> identifierProviderObject = ComponentUtil
+                .getData(this, IdentifierProvider.class);
         if (identifierProviderObject == null) {
             DataProvider<T, ?> dataProvider = getDataProvider();
             if (dataProvider != null) {
