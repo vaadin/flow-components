@@ -20,15 +20,30 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import org.junit.Assert;
-import org.junit.Test;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class RadioButtonGroupTest {
 
     private static final String OUTER_HTML = "<vaadin-radio-button>\n <span>%s</span>\n</vaadin-radio-button>";
+
+    private class RadioButtunWithInitialValue extends
+            GeneratedVaadinRadioGroup<RadioButtunWithInitialValue, String> {
+        RadioButtunWithInitialValue() {
+            super("", null, String.class, (group, value) -> value,
+                    (group, value) -> value, true);
+        }
+    }
 
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnlyAndDisabled() {
@@ -133,10 +148,11 @@ public class RadioButtonGroupTest {
     @Test
     public void changeItems_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
-        radioButtonGroup.setItems("Foo","Bar");
+        radioButtonGroup.setItems("Foo", "Bar");
 
         AtomicReference<String> capture = new AtomicReference<>();
-        radioButtonGroup.addValueChangeListener(event -> capture.set(event.getValue()));
+        radioButtonGroup
+                .addValueChangeListener(event -> capture.set(event.getValue()));
 
         radioButtonGroup.setValue("Foo");
 
@@ -163,12 +179,17 @@ public class RadioButtonGroupTest {
         item2.setName("bar");
         group.getDataProvider().refreshAll();
 
-        List<Component> components = group.getChildren().collect(Collectors.toList());
-        RadioButton<ItemHelper> radioZoo = (RadioButton<ItemHelper>) components.get(0);
-        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components.get(1);
+        List<Component> components = group.getChildren()
+                .collect(Collectors.toList());
+        RadioButton<ItemHelper> radioZoo = (RadioButton<ItemHelper>) components
+                .get(0);
+        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
+                .get(1);
 
-        Assert.assertEquals(String.format(OUTER_HTML, "zoo"), radioZoo.getElement().getOuterHTML());
-        Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "zoo"),
+                radioZoo.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "bar"),
+                radioBar.getElement().getOuterHTML());
     }
 
     @Test
@@ -184,11 +205,39 @@ public class RadioButtonGroupTest {
         item2.setName("bar");
         group.getDataProvider().refreshItem(item2);
 
-        List<Component> components = group.getChildren().collect(Collectors.toList());
-        RadioButton<ItemHelper> radioFoo = (RadioButton<ItemHelper>) components.get(0);
-        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components.get(1);
+        List<Component> components = group.getChildren()
+                .collect(Collectors.toList());
+        RadioButton<ItemHelper> radioFoo = (RadioButton<ItemHelper>) components
+                .get(0);
+        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
+                .get(1);
 
-        Assert.assertEquals(String.format(OUTER_HTML, "foo"), radioFoo.getElement().getOuterHTML());
-        Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "foo"),
+                radioFoo.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "bar"),
+                radioBar.getElement().getOuterHTML());
+    }
+
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-radio-group");
+        element.setProperty("value", "foo");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(
+                instantiator.createComponent(RadioButtunWithInitialValue.class))
+                .thenAnswer(invocation -> new RadioButtunWithInitialValue());
+        RadioButtunWithInitialValue field = Component.from(element,
+                RadioButtunWithInitialValue.class);
+        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 }

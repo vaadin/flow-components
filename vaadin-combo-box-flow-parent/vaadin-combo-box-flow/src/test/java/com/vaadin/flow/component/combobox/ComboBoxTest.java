@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,15 +26,21 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
-import static org.junit.Assert.assertEquals;
 
 public class ComboBoxTest {
 
@@ -64,6 +72,14 @@ public class ComboBoxTest {
 
         public void setCategory(Category category) {
             this.category = category;
+        }
+    }
+
+    private class ComboBoxWithInitialValue
+            extends GeneratedVaadinComboBox<ComboBoxWithInitialValue, String> {
+        ComboBoxWithInitialValue() {
+            super("", null, String.class, (combo, value) -> value,
+                    (combo, value) -> value, true);
         }
     }
 
@@ -288,6 +304,29 @@ public class ComboBoxTest {
         combo.setClearButtonVisible(true);
         Assert.assertTrue("Getter should reflect the set value.",
                 combo.isClearButtonVisible());
+    }
+
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-combo-box");
+        element.setProperty("value", "foo");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(
+                instantiator.createComponent(ComboBoxWithInitialValue.class))
+                .thenAnswer(invocation -> new ComboBoxWithInitialValue());
+        ComboBoxWithInitialValue field = Component.from(element,
+                ComboBoxWithInitialValue.class);
+        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
