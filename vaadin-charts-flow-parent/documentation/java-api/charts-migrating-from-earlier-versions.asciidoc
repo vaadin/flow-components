@@ -1,0 +1,102 @@
+---
+title: Migrating from earlier versions
+order: 8
+layout: page
+---
+
+[[charts.migratingfromearlierversions]]
+= Migrating from earlier versions
+
+Vaadin Charts 9 comes with new chart types and brings back the API to style from
+Java.
+
+== Summary
+
+* Upgraded to HighCharts 8.1
+* Styling can be done either with CSS or Java API (default)
+* New chart types:
+** <<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes.bullet,"Bullet Chart">>
+** <<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes.organization,"Organization Chart">>
+** <<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes.timeline,"Timeline Chart">>
+** <<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes.xrange,"X-Range Chart">>
+* Java API for lazy drilldown
+
+== Migration guide
+
+If you are migrating your project to platform V17, there might be different
+approaches related with which styling option you will pick.
+
+NOTE: While no error is thrown if different styling options are used on a same
+project, *only one option should be used across all charts*, since having both
+could lead to unexpected results.
+
+=== From a V8 or older project
+
+==== Using Java API styling
+
+Since V17 uses Java API for styling by default, there's no needed to do any
+extra step.
+
+NOTE: There might be small changes for APIs that no longer work between the
+Highcharts versions used for V8 and V17.
+
+==== Using CSS styling
+
+If you want to convert your project to use CSS styling, there are a few steps
+needed to make it work:
+
+. Enable CSS style by setting `styledMode` to `true`:
++
+[source, java]
+----
+Chart chart = new Chart();
+Configuration conf = chart.getConfiguration();
+conf.getChart().setStyledMode(true);
+----
+. Import the charts default theme module to your view with:
++
+[source, java]
+----
+@JsModule("@vaadin/vaadin-charts/theme/vaadin-chart-default-theme")
+----
+
+For more detailed instructions, please check the
+<<dummy/../../../charts/java-api/css-styling,"CSS Styling guide">>
+
+
+=== From a V10+ project
+
+==== Using Java API styling
+
+If your project does not have any Charts custom theme, then there's no extra step
+needed to do.
+
+In the other hand, if it has custom themes, then they should be
+removed, along aside their `@CssImport` annotations. You can, then, use the Java
+API for styling the charts.
+
+
+==== Using CSS styling
+
+To keep using CSS styling, make sure your project is importing the Charts
+default theme module and enable the `styledMode` as described on this same topic
+at the previous section.
+
+=== Running Charts 9 in V14
+
+While Charts 9 is released for V17, a project running V14 in *npm mode* could
+use the new Charts by overriding the version at the project's POM file:
+
+[source, xml]
+----
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-charts-flow</artifactId>
+    <version>9.0.0</version>
+</dependency>
+----
+
+NOTE: Check the latest version on the https://github.com/vaadin/vaadin-charts-flow/releases[Charts release page].
+
+Then, to start using it, check the <<From a V10+ project>> instructions presented
+on this page.

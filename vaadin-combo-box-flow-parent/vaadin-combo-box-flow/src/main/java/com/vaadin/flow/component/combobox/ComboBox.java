@@ -242,7 +242,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public ComboBox(int pageSize) {
         super(null, null, String.class, ComboBox::presentationToModel,
-                ComboBox::modelToPresentation);
+                ComboBox::modelToPresentation, true);
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
                 .put("label", generateLabel(item)));
 
@@ -515,7 +515,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
-                    .callJsFunction("$connector.updateData", data),
+                            .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
             dataCommunicator.setPageSize(getPageSize());
         }
@@ -534,7 +534,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // trigger item count request and data fetch upon clicking on combobox
         dataCommunicatorInitializer = () -> {
             dataCommunicatorInitializer = null;
-            if(lazyOpenRegistration != null) {
+            if (lazyOpenRegistration != null) {
                 lazyOpenRegistration.remove();
                 lazyOpenRegistration = null;
             }
@@ -560,16 +560,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         // Register an opened listener to initialize the dataprovider
         // when the dropdown opens.
-        lazyOpenRegistration = getElement()
-                .addPropertyChangeListener("opened", this::executeRegistration);
+        lazyOpenRegistration = getElement().addPropertyChangeListener("opened",
+                this::executeRegistration);
     }
 
     /**
      * Initialize {@link DataCommunicator} with the lazy {@link DataProvider}
-     * when the open property changes for a lazy combobox. Clean registration
-     * on initialization.
+     * when the open property changes for a lazy combobox. Clean registration on
+     * initialization.
      *
-     * @param event property change event for "open"
+     * @param event
+     *            property change event for "open"
      */
     private void executeRegistration(PropertyChangeEvent event) {
         if (event.getValue().equals(Boolean.TRUE)) {
@@ -584,7 +585,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
     }
 
-    private <C> void setupDataProviderListener(DataProvider<T, C> dataProvider) {
+    private <C> void setupDataProviderListener(
+            DataProvider<T, C> dataProvider) {
         if (dataProviderListener != null) {
             dataProviderListener.remove();
         }
@@ -660,7 +662,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * size callback.
      * <p>
      * This method is a shorthand for making a {@link CallbackDataProvider} that
-     * handles a partial {@link com.vaadin.flow.data.provider.Query Query} object.
+     * handles a partial {@link com.vaadin.flow.data.provider.Query Query}
+     * object.
      * <p>
      * Changing the combo box's data provider resets its current value to
      * {@code null}.
@@ -1165,17 +1168,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void initDataCommunicator() {
         if (dataCommunicatorInitializer != null) {
             /*
-             * Init the Data Communicator: 1. Lazily, when the data lazy
-             * loading is used. Initialization occurs when the user clicks
-             * on the dropdown to view the list of items. 2. Eagerly, when
-             * the items are set explicitly or in-memory Data Provider is
-             * used.
+             * Init the Data Communicator: 1. Lazily, when the data lazy loading
+             * is used. Initialization occurs when the user clicks on the
+             * dropdown to view the list of items. 2. Eagerly, when the items
+             * are set explicitly or in-memory Data Provider is used.
              */
             dataCommunicatorInitializer.init();
         } else if (dataCommunicator == null) {
             /*
-             * If the user hasn't provided any data, initialize with empty
-             * data set.
+             * If the user hasn't provided any data, initialize with empty data
+             * set.
              */
             setItems();
         }
