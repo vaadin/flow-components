@@ -54,9 +54,10 @@ computeFastBuild() {
   [ -z "$PR" ] && return
   ghUrl="https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR"
   prTitle=`curl -s $ghUrl | jq -r .title`
-  echo "$prTitle" | grep '\[skip ci\]' >/dev/null && FAST_BUILD=true && return
+  echo "$prTitle" | grep '\[skip ci\]' >/dev/null && return 0
   prMessages=`curl -s $ghUrl/commits | jq -r '.[] | .commit.message'`
-  echo "$prMessages" | grep -v '\[skip ci\]' >/dev/null || FAST_BUILD=true
+  echo "$prMessages" | grep -v '\[skip ci\]' >/dev/null || return 0
+  return 1
 }
 
 [ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
@@ -85,8 +86,7 @@ then
 fi
 
 tcLog "Checking for skip-ci labels"
-computeFastBuild
-if [ -n "$FAST_BUILD" ]
+if computeFastBuild
 then
   echo "$prTitle"
   echo "$prMessages"
