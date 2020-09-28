@@ -112,11 +112,14 @@ async function consolidatePomParent() {
   });
 }
 async function consolidatePomFlow() {
-  if (proComponents.includes(componentName)){
-    await consolidate('pom-flow-pro.xml', `${mod}/${name}-flow/pom.xml`);
-  } else {
-    await consolidate('pom-flow.xml', `${mod}/${name}-flow/pom.xml`);
-  }
+  const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
+  await consolidate(template, `${mod}/${name}-flow/pom.xml`, js => {
+    js.project.dependencies[0].dependency.push({
+      groupId: ['org.slf4j'],
+      artifactId: ['slf4j-simple'],
+      scope: ['test']
+    })
+  });
 }
 async function consolidatePomTB() {
   await consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
