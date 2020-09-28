@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.richtexteditor;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /*
  * #%L
  * Vaadin Rich Text Editor for Vaadin 10
@@ -16,8 +19,14 @@ package com.vaadin.flow.component.richtexteditor;
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
  */
-
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.InputNotifier;
+import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -25,10 +34,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
 
-import java.io.Serializable;
-import java.util.Objects;
+import elemental.json.JsonObject;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
@@ -46,8 +53,10 @@ import java.util.Objects;
  *
  */
 @Tag("vaadin-rich-text-editor")
-public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
-        implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier, CompositionNotifier {
+public class RichTextEditor
+        extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
+        implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
+        CompositionNotifier {
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
@@ -82,8 +91,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
                 JsonObject i18nObject = (JsonObject) JsonSerializer
                         .toJson(this.i18n);
                 for (String key : i18nObject.keys()) {
-                    getElement().executeJs(
-                            "this.set('i18n." + key + "', $0)",
+                    getElement().executeJs("this.set('i18n." + key + "', $0)",
                             i18nObject.get(key));
                 }
             }
@@ -99,7 +107,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * Constructs an empty {@code RichTextEditor}.
      */
     public RichTextEditor() {
-        super("", "", false);
+        super("", "", false, true);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
@@ -131,8 +139,8 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Constructs an empty {@code RichTextEditor} with a value change
-     * listener and an initial value.
+     * Constructs an empty {@code RichTextEditor} with a value change listener
+     * and an initial value.
      *
      * @param initialValue
      *            the initial value
@@ -143,7 +151,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public RichTextEditor(String initialValue,
-                          ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
         this();
         setValue(initialValue);
         addValueChangeListener(listener);
@@ -167,10 +175,10 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Sets the value of this editor. Should be in <a href="https://github.com/quilljs/delta">Delta</a> format.
-     * If the new value is not equal to
-     * {@code getValue()}, fires a value change event. Throws
-     * {@code NullPointerException}, if the value is null.
+     * Sets the value of this editor. Should be in
+     * <a href="https://github.com/quilljs/delta">Delta</a> format. If the new
+     * value is not equal to {@code getValue()}, fires a value change event.
+     * Throws {@code NullPointerException}, if the value is null.
      * <p>
      * Note: {@link Binder} will take care of the {@code null} conversion when
      * integrates with the editor, as long as no new converter is defined.
@@ -186,21 +194,24 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Sets content represented by sanitized HTML string into the editor.
-     * The HTML string is interpreted by
-     * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's Clipboard matchers</a>
-     * on the client side, which may not produce the exactly input HTML.
+     * Sets content represented by sanitized HTML string into the editor. The
+     * HTML string is interpreted by
+     * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
+     * Clipboard matchers</a> on the client side, which may not produce the
+     * exactly input HTML.
      * <p>
      * Note: The value will be set asynchronously with client-server roundtrip.
      *
      * @param htmlValueString
      *            the HTML string
      */
-    private PendingJavaScriptResult setHtmlValueAsynchronously(String htmlValueString) {
+    private PendingJavaScriptResult setHtmlValueAsynchronously(
+            String htmlValueString) {
         if (htmlValueString != null) {
             htmlValueString = sanitize(htmlValueString);
         }
-        return getElement().callJsFunction("dangerouslySetHtmlValue", htmlValueString);
+        return getElement().callJsFunction("dangerouslySetHtmlValue",
+                htmlValueString);
     }
 
     @ClientCallable
@@ -209,8 +220,9 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Returns the current value of the text editor in <a href="https://github.com/quilljs/delta">Delta</a> format. By default, the empty
-     * editor will return an empty string.
+     * Returns the current value of the text editor in
+     * <a href="https://github.com/quilljs/delta">Delta</a> format. By default,
+     * the empty editor will return an empty string.
      *
      * @see #getHtmlValue()
      * @see #asHtml()
@@ -221,7 +233,6 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     public String getValue() {
         return super.getValue();
     }
-
 
     /**
      * The value of the editor presented as an HTML string.
@@ -236,7 +247,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * @see #asHtml()
      * @see AsHtml#getValue()
      * @return the sanitized {@code htmlValue} property from the web component
-     * or {@code null} if it is not available.
+     *         or {@code null} if it is not available.
      */
     public String getHtmlValue() {
         String htmlValueString = getHtmlValueString();
@@ -252,7 +263,8 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         return org.jsoup.Jsoup.clean(html,
                 org.jsoup.safety.Whitelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
-                        .addAttributes("img", "align", "alt", "height", "src", "title", "width")
+                        .addAttributes("img", "align", "alt", "height", "src",
+                                "title", "width")
                         .addAttributes(":all", "style")
                         .addProtocols("img", "src", "data"));
     }
@@ -731,34 +743,19 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
          */
         @Override
         public String toString() {
-            return  "[" +
-                    undo + ", " +
-                    redo + ", " +
-                    bold + ", " +
-                    italic + ", " +
-                    underline + ", " +
-                    strike + ", " +
-                    h1 + ", " +
-                    h2 + ", " +
-                    h3 + ", " +
-                    subscript + ", " +
-                    superscript + ", " +
-                    listOrdered + ", " +
-                    listBullet + ", " +
-                    alignLeft + ", " +
-                    alignCenter + ", " +
-                    alignRight + ", " +
-                    image + ", " +
-                    link + ", " +
-                    blockquote + ", " +
-                    codeBlock + ", " +
-                    clean + "]";
+            return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
+                    + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
+                    + h3 + ", " + subscript + ", " + superscript + ", "
+                    + listOrdered + ", " + listBullet + ", " + alignLeft + ", "
+                    + alignCenter + ", " + alignRight + ", " + image + ", "
+                    + link + ", " + blockquote + ", " + codeBlock + ", " + clean
+                    + "]";
         }
     }
 
     /**
-     * Gets an instance of {@code HasValue} for binding the
-     * html value of the editor with {@code Binder}.
+     * Gets an instance of {@code HasValue} for binding the html value of the
+     * editor with {@code Binder}.
      *
      * @return an instance of {@code HasValue}
      */
@@ -783,7 +780,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
             this.value = getHtmlValue();
             rte.addValueChangeListener(event -> {
                 if (event.isFromClient()) {
-                   setValue(getHtmlValue(), false);
+                    setValue(getHtmlValue(), false);
                 }
             });
         }
@@ -823,8 +820,8 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
             }
         }
 
-        private ComponentValueChangeEvent<RichTextEditor, String> createValueChange(String oldValue,
-                                                                  boolean fromClient) {
+        private ComponentValueChangeEvent<RichTextEditor, String> createValueChange(
+                String oldValue, boolean fromClient) {
             return new ComponentValueChangeEvent<>(rte, this, oldValue,
                     fromClient);
         }
@@ -852,48 +849,49 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         }
 
         /**
-         * Adds a value change listener. The listener is called when the value of
-         * this {@code HasValue} is changed either by the user or programmatically.
+         * Adds a value change listener. The listener is called when the value
+         * of this {@code HasValue} is changed either by the user or
+         * programmatically.
          *
          * @param listener
          *            the value change listener, not null
          * @return a registration for the listener
          */
         @Override
-        public Registration addValueChangeListener(ValueChangeListener listener) {
-            return
-                    rte.addValueChangeListener(originalEvent -> {
-                        ValueChangeEvent event = new ValueChangeEvent<String>() {
-                            @Override
-                            public HasValue<ValueChangeEvent<String>, String> getHasValue() {
-                                return AsHtml.this;
-                            }
+        public Registration addValueChangeListener(
+                ValueChangeListener listener) {
+            return rte.addValueChangeListener(originalEvent -> {
+                ValueChangeEvent event = new ValueChangeEvent<String>() {
+                    @Override
+                    public HasValue<ValueChangeEvent<String>, String> getHasValue() {
+                        return AsHtml.this;
+                    }
 
-                            @Override
-                            public boolean isFromClient() {
-                                return originalEvent.isFromClient();
-                            }
+                    @Override
+                    public boolean isFromClient() {
+                        return originalEvent.isFromClient();
+                    }
 
-                            @Override
-                            public String getOldValue() {
-                                return oldValue;
-                            }
+                    @Override
+                    public String getOldValue() {
+                        return oldValue;
+                    }
 
-                            @Override
-                            public String getValue() {
-                                return AsHtml.this.getValue();
-                            }
-                        };
-                        listener.valueChanged(event);
-                    });
+                    @Override
+                    public String getValue() {
+                        return AsHtml.this.getValue();
+                    }
+                };
+                listener.valueChanged(event);
+            });
         }
 
         /**
          * Sets the editor to be read only.
          *
          * @param readOnly
-         *            {@code true} to make the editor read only,
-         *            {@code false} to make the editor not read only
+         *            {@code true} to make the editor read only, {@code false}
+         *            to make the editor not read only
          */
         @Override
         public void setReadOnly(boolean readOnly) {
@@ -903,8 +901,8 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         /**
          * Gets whether the editor is read only.
          *
-         * @return {@code true} if the editor is read only,
-         *         {@code false} if it is not read only
+         * @return {@code true} if the editor is read only, {@code false} if it
+         *         is not read only
          */
         @Override
         public boolean isReadOnly() {
@@ -915,11 +913,12 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
          * Sets the editor's required indicator visibility.
          *
          * @param requiredIndicatorVisible
-         *            {@code true} to make the indicator visible,
-         *            {@code false} to hide the indicator
+         *            {@code true} to make the indicator visible, {@code false}
+         *            to hide the indicator
          */
         @Override
-        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        public void setRequiredIndicatorVisible(
+                boolean requiredIndicatorVisible) {
             rte.setRequiredIndicatorVisible(requiredIndicatorVisible);
         }
 
