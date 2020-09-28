@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.math.BigDecimal;
 
 import org.junit.Assert;
@@ -22,9 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class BigDecimalFieldTest extends TextFieldTest {
 
@@ -78,6 +78,14 @@ public class BigDecimalFieldTest extends TextFieldTest {
         assertValueFormatting(
                 new BigDecimal("1.01").setScale(1, BigDecimal.ROUND_FLOOR),
                 "1.0");
+    }
+
+    @Override
+    @Test
+    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+        ComponentFromTest
+                .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
+                        BigDecimal.TEN.toString(), BigDecimalField.class);
     }
 
     private void assertValueFormatting(BigDecimal bigDecimal,

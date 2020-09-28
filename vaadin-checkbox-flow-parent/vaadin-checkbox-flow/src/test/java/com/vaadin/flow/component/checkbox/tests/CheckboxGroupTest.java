@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -42,6 +43,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -341,6 +346,33 @@ public class CheckboxGroupTest {
         ui.remove(parent);
     }
 
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-checkbox-group");
+        JsonArray array = Json.createArray();
+        array.set(0, "foo");
+        element.setPropertyJson("value", array);
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(CheckboxGroup.class))
+                .thenAnswer(invocation -> new CheckboxGroup());
+        CheckboxGroup field = Component.from(element, CheckboxGroup.class);
+        JsonArray propertyValue = (JsonArray) field.getElement()
+                .getPropertyRaw("value");
+        Assert.assertEquals(1, propertyValue.length());
+        Assert.assertEquals("foo", propertyValue.getString(0));
+    }
+  
     @Test
     public void dataViewForFaultyDataProvider_throwsException() {
         thrown.expect(IllegalStateException.class);
