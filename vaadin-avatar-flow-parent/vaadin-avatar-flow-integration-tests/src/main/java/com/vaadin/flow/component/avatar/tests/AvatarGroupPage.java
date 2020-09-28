@@ -15,17 +15,15 @@
  */
 package com.vaadin.flow.component.avatar.tests;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
 
 @Route("avatar-group-test")
 public class AvatarGroupPage extends Div {
@@ -52,7 +50,8 @@ public class AvatarGroupPage extends Div {
 
         NativeButton setItemsWithResource = new NativeButton("Set new item with StreamResource image", e -> {
             StreamResource resource = new StreamResource("avatar-group-img",
-                    () -> getFileStream("vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                    () -> getClass().getResourceAsStream(
+                            "/META-INF/resources/frontend/images/user.png"));
             AvatarGroupItem newItem = new AvatarGroupItem();
             newItem.setImageResource(resource);
 

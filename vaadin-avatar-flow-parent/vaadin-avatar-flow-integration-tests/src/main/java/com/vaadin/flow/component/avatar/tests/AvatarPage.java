@@ -21,8 +21,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 
-import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
-
 @Route("avatar-test")
 public class AvatarPage extends Div {
 
@@ -59,7 +57,8 @@ public class AvatarPage extends Div {
         NativeButton toggleImgResource = new NativeButton("Toggle image resource", e -> {
             if (avatar.getImageResource() == null) {
                 StreamResource avatarResource = new StreamResource("user+.png",
-                    () -> getFileStream("vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                        () -> getClass().getResourceAsStream(
+                                "/META-INF/resources/frontend/images/user.png"));
                 avatar.setImageResource(avatarResource);
             } else {
                 avatar.setImageResource(null);
