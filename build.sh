@@ -54,7 +54,7 @@ computeFastBuild() {
   [ -z "$PR" ] && return
   ghUrl="https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR"
   prTitle=`curl -s $ghUrl | jq -r .title`
-  echo "$prTitle" | grep '\[skip ci\]' >/dev/null && return 0
+  echo "$prTitle" | grep -v '\[skip ci\]' >/dev/null || return 0
   prMessages=`curl -s $ghUrl/commits | jq -r '.[] | .commit.message'`
   echo "$prMessages" | grep -v '\[skip ci\]' >/dev/null || return 0
   return 1
