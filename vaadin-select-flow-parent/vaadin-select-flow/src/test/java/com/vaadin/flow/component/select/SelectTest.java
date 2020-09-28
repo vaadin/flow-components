@@ -9,18 +9,26 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableFunction;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class SelectTest {
 
@@ -33,6 +41,15 @@ public class SelectTest {
     @Before
     public void setUp() {
         select = new Select<>();
+    }
+
+    private static class TestSelect
+            extends GeneratedVaadinSelect<TestSelect, String> {
+
+        TestSelect() {
+            super("", null, String.class, (select, value) -> value,
+                    (select, value) -> value, true);
+        }
     }
 
     @Test
@@ -649,6 +666,27 @@ public class SelectTest {
         select.setDataProvider(dataProvider);
 
         select.getListDataView();
+    }
+
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-select");
+        element.setProperty("value", "foo");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(TestSelect.class))
+                .thenAnswer(invocation -> new TestSelect());
+        TestSelect field = Component.from(element, TestSelect.class);
+        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
     private void validateItem(int index, String textContent, String label,
