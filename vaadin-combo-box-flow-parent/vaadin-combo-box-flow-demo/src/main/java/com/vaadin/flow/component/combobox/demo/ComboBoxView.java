@@ -15,8 +15,16 @@
  */
 package com.vaadin.flow.component.combobox.demo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
+
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
 import com.vaadin.flow.component.combobox.demo.data.ElementData;
 import com.vaadin.flow.component.combobox.demo.data.ProjectData;
@@ -32,18 +40,16 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * View for {@link ComboBox} demo.
@@ -65,10 +71,13 @@ public class ComboBoxView extends DemoView {
         valueChangeEvent();
         customValues();
         storingCustomValues();
-        lazyLoading();
+        lazyLoading(); // Lazy loading
+        lazyLoadingWithExactItemCount();
+        lazyLoadingWithCustomItemCountEstimate();
         pagedRepository();
         configurationForRequired(); // Validation
         customFiltering(); // Filtering
+        filteringAndSortingWithDataView();
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
         themeVariantsTextAlign(); // Theme variants
@@ -226,10 +235,7 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Storing custom values
         ComboBox<Project> comboBox = new ComboBox<>("Project");
-        DataProvider<Project, String> dataProvider = DataProvider
-                .fromFilteringCallbacks(this::fetchProjects,
-                        this::countProjects);
-        comboBox.setDataProvider(dataProvider);
+        comboBox.setItems(this::fetchProjects, this::countProjects);
         comboBox.setItemLabelGenerator(Project::getName);
 
         comboBox.addValueChangeListener(valueChangeEvent -> {
@@ -254,29 +260,107 @@ public class ComboBoxView extends DemoView {
     private void lazyLoading() {
         //@formatter:off
         // begin-source-example
-        // source-example-heading: Lazy loading with callbacks
+        // source-example-heading: Lazy Loading with Callback
+        // PersonService can be found:
+        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
+
+        ComboBox<Person> comboBox = new ComboBox<>();
+        PersonService service = new PersonService(500);
+        /*
+         * When provided a callback, the combo box doesn't load all items from
+         * backend to server memory right away. It will request only the data
+         * that is shown in its current view "window". The data is provided
+         * based on string filter, offset and limit.
+         *
+         * When the user scrolls to the end, combo box will automatically 
+         * extend and fetch more items until the backend runs out of items.
+         */
+        comboBox.setItems(
+                query -> service.fetch(query.getFilter().orElse(null),
+                        query.getOffset(), query.getLimit()));
+        // end-source-example
+        //@formatter:on
+        comboBox.setId("fetch-callback");
+        addCard("Lazy Loading", "Lazy Loading with Callback", comboBox);
+    }
+
+    private void lazyLoadingWithExactItemCount() {
+        //@formatter:off
+        // begin-source-example
+        // source-example-heading: Lazy Loading with Exact Items Count
         // PersonService can be found:
         // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
 
         ComboBox<Person> comboBox = new ComboBox<>();
         PersonService service = new PersonService();
         /*
-         * This data provider doesn't load all the items to the server memory
-         * right away. The component calls the first provided callback to fetch
-         * items from the given range with the given filter. The second callback
-         * should provide the number of items that match the query.
+         * By using these callbacks the ComboBox doesn't load all the items to
+         * the server memory right away. The ComboBox calls the first provided
+         * callback to fetch items from the given range with the given filter.
+         * The second callback should provide the number of items that match
+         * the query.
          */
-        comboBox.setDataProvider(service::fetch, service::count);
+        comboBox.setItems(
+                query -> service.fetch(query.getFilter().orElse(null),
+                        query.getOffset(), query.getLimit()),
+                query -> service.count(query.getFilter().orElse(null)));
         // end-source-example
         //@formatter:on
-        comboBox.setId("callback-box");
-        addCard("Lazy loading with callbacks", comboBox);
+        comboBox.setId("with-exact-items-count");
+        addCard("Lazy Loading", "Lazy Loading with Exact Items Count",
+                comboBox);
+    }
+
+    private void lazyLoadingWithCustomItemCountEstimate() {
+        // @formatter:off
+        // begin-source-example
+        // source-example-heading: Fast Scroll with Custom Item Count Estimate
+        // PersonService can be found:
+        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
+        // The backend will have 12345 items
+        PersonService service = new PersonService(12345);
+        ComboBox<Person> comboBox = new ComboBox<>();
+
+        ComboBoxLazyDataView<Person> lazyDataView = comboBox.setItems(
+                query -> service.fetch(query.getFilter().orElse(null),
+                        query.getOffset(), query.getLimit()));
+
+        /*
+         * By default, the combo box will initially adjust the scrollbar to 200
+         * items and as the user scrolls down it automatically increases the
+         * size by 200 until the backend runs out of items.
+         *
+         * Both the estimated item count and its increase can be customized to
+         * allow the user to scroll down faster when the backend will have a lot
+         * of items.
+         */
+        lazyDataView.setItemCountEstimate(1000);
+        lazyDataView.setItemCountEstimateIncrease(1000);
+
+        // Showing the item count for demo purposes
+        Div countText = new Div();
+        lazyDataView.addItemCountChangeListener(event -> {
+            if (event.isItemCountEstimated()) {
+                countText.setText(
+                        "Person Count Estimate: " + event.getItemCount());
+            } else {
+                countText.setText("Exact Person Count: " + event.getItemCount());
+            }
+        });
+
+        HorizontalLayout layout = new HorizontalLayout(comboBox, countText);
+        // end-source-example
+        //@formatter:on
+
+        comboBox.setId("custom-item-count-estimate");
+        addCard("Lazy Loading", "Fast Scroll with Custom Item Count Estimate",
+                layout);
     }
 
     private void pagedRepository() {
         //@formatter:off
         // begin-source-example
-        // source-example-heading: Lazy loading from paged repository
+        // source-example-heading: Lazy Loading from Paged Repository
         // PersonService can be found:
         // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
 
@@ -286,14 +370,15 @@ public class ComboBoxView extends DemoView {
          * For those backend repositories which use paged data fetching, it
          * is possible to get the page number and page size from Query API.
          */
-        comboBox.setDataProvider(DataProvider.fromFilteringCallbacks(
-                query -> service.fetchPage(query.getFilter().orElse(""),
+        comboBox.setItems(
+                query -> service.fetchPage(query.getFilter().orElse(null),
                         query.getPage(), query.getPageSize()),
-                query -> service.count(query.getFilter().orElse(""))));
+                query -> service.count(query.getFilter().orElse(null)));
+
         // end-source-example
         //@formatter:on
         comboBox.setId("paged-box");
-        addCard("Lazy loading from paged repository", comboBox);
+        addCard("Lazy Loading", "Lazy Loading from Paged Repository", comboBox);
     }
 
     private void configurationForRequired() {
@@ -333,6 +418,41 @@ public class ComboBoxView extends DemoView {
         // end-source-example
         addCard("Filtering", "Custom filtering", div, filteringComboBox);
 
+    }
+
+    private void filteringAndSortingWithDataView() {
+        // begin-source-example
+        // source-example-heading: Filtering and Sorting with Data View
+        ComboBox<Person> comboBox = new ComboBox<>("Persons");
+        PersonService personService = new PersonService();
+
+        // We fetch the items to the memory and bind the obtained collection
+        // to the combo box
+        Collection<Person> persons = personService.fetchAll();
+
+        ComboBoxListDataView<Person> dataView = comboBox.setItems(persons);
+
+        /*
+         * Providing a predicate item filter allows filtering by any field of
+         * the business entity and apply a combo box's text filter independently
+         */
+        IntegerField personAgeFilter = new IntegerField(
+                event -> dataView.setFilter(person -> event.getValue() == null
+                        || person.getAge() > event.getValue()));
+
+        /*
+         * Providing a value provider or comparator allows sorting combo
+         * box's items by custom field, or combination of fields
+         */
+        Button sortPersons = new Button("Sort Persons by Name",
+                event -> dataView.setSortOrder(Person::toString,
+                        SortDirection.ASCENDING));
+
+        // end-source-example
+        personAgeFilter.setLabel("Filter Persons with age more than:");
+        personAgeFilter.setWidth(WIDTH_STRING);
+        addCard("Filtering", "Filtering and Sorting with Data View", comboBox,
+                personAgeFilter, sortPersons);
     }
 
     private void customOptionsDemo() {
