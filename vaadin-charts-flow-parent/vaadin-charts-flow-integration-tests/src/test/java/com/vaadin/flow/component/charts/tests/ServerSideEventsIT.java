@@ -244,11 +244,11 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findLastDataPointOfTheFirstSeries() {
-        return getElementFromShadowRoot(getChartElement(), By.cssSelector(".highcharts-markers > path"));
+        return getElementFromShadowRoot(getChartElement(), ".highcharts-markers > path");
     }
 
     private WebElement findLegendItem() {
-        return getElementFromShadowRoot(getChartElement(), By.className("highcharts-legend-item"));
+        return getElementFromShadowRoot(getChartElement(), ".highcharts-legend-item");
     }
 
     private WebElement findCheckBox() {
@@ -260,7 +260,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findCheckBox(int index) {
-        return getElementFromShadowRoot(getChartElement(), By.cssSelector("input[type=\"checkbox\"]"), index);
+        return getElementFromShadowRoot(getChartElement(), "input[type=\"checkbox\"]", index);
     }
 
     private WebElement findDisableVisibityToggle() {

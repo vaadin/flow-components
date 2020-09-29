@@ -16,24 +16,20 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertNotNull;
+import com.vaadin.flow.component.charts.AbstractChartExample;
+import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.testbench.parallel.BrowserUtil;
+import com.vaadin.testbench.parallel.DefaultBrowserFactory;
+import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
+import com.vaadin.tests.ParallelTest;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
-
-import com.vaadin.flow.component.charts.AbstractChartExample;
-import com.vaadin.flow.component.charts.testbench.ChartElement;
-
-import com.vaadin.testbench.parallel.Browser;
-import com.vaadin.testbench.parallel.BrowserUtil;
-import com.vaadin.testbench.parallel.DefaultBrowserFactory;
-import com.vaadin.tests.ParallelTest;
-import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
+import static org.junit.Assert.assertNotNull;
 
 public abstract class AbstractTBTest extends ParallelTest {
 
@@ -49,25 +45,24 @@ public abstract class AbstractTBTest extends ParallelTest {
         return $(ChartElement.class).waitForFirst();
     }
 
-    protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-                                                  By by) {
-        return getElementFromShadowRoot(shadowRootOwner, by, 0);
+    protected WebElement getElementFromShadowRootByClassName(WebElement owner,
+        String tagName) {
+        return (WebElement) executeScript(
+            "return arguments[0].shadowRoot.querySelector('.'+arguments[1])",
+            owner, tagName);
     }
 
     protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-            By by, int index) {
-        WebElement shadowRoot = (WebElement) executeScript(
-                "return arguments[0].shadowRoot", shadowRootOwner);
-        assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
+                                                  String selector) {
+        return getElementFromShadowRoot(shadowRootOwner, selector, 0);
+    }
 
-
-        List<WebElement> elements = shadowRoot.findElements(by);
-        if (elements.size() > index) {
-            return elements.get(index);
-        }
-
-        throw new AssertionError(
-                "Could not find required element in the shadowRoot");
+    protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
+            String selector, int index) {
+        return (WebElement) executeScript(
+                "return arguments[0].shadowRoot.querySelectorAll("
+                    + " arguments[1])[arguments[2]]", shadowRootOwner,
+                    selector,index);
     }
 
 
@@ -83,6 +78,7 @@ public abstract class AbstractTBTest extends ParallelTest {
 
     protected void openTestURL() {
         String url = getTestUrl();
+        System.out.println(url);
         driver.get(url);
     }
 

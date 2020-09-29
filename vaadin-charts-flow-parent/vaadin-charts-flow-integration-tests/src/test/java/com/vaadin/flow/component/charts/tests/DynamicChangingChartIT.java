@@ -27,7 +27,7 @@ public class DynamicChangingChartIT extends AbstractTBTest {
 
     private void assertTitle(ChartElement chart, String expectedTitle) {
         Assert.assertEquals(expectedTitle,
-            getElementFromShadowRoot(chart, By.className("highcharts-title"))
+            getElementFromShadowRoot(chart, ".highcharts-title")
                 .getText());
     }
 }
