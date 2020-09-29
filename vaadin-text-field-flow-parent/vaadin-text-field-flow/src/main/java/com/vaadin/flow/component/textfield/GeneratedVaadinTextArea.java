@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Generated;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -24,7 +29,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -32,10 +36,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-
-import javax.annotation.Generated;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -955,7 +955,6 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -973,9 +972,30 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      */
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
             boolean acceptNullValues) {
+        this(initialValue, defaultValue, acceptNullValues, false);
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinTextArea component with the given
+     * arguments.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param acceptNullValues
+     *            whether <code>null</code> is accepted as a model value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     */
+    public GeneratedVaadinTextArea(T initialValue, T defaultValue,
+            boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -1006,7 +1026,6 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }

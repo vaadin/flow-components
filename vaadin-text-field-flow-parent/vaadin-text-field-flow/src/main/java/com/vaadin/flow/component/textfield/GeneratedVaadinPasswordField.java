@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import javax.annotation.Generated;
+
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
-
-import javax.annotation.Generated;
 
 /**
  * <p>
@@ -168,6 +168,10 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
     /**
      * Constructs a new GeneratedVaadinPasswordField component with the given
      * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
      *
      * @param initialValue
      *            the initial value to set to the value
@@ -175,10 +179,16 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
      */
     public GeneratedVaadinPasswordField(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
-        super(initialValue, defaultValue, acceptNullValues);
+            boolean acceptNullValues, boolean isInitialValueOptional) {
+        super(initialValue, defaultValue, acceptNullValues,
+                isInitialValueOptional);
     }
 
     /**

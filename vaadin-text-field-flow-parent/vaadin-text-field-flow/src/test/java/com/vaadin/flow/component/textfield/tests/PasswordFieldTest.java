@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.textfield.PasswordField;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.component.textfield.PasswordField;
 
 /**
  * Tests for the {@link PasswordField}.
@@ -57,11 +58,12 @@ public class PasswordFieldTest {
         assertClearButtonPropertyValueEquals(passwordField, false);
     }
 
-    public void assertClearButtonPropertyValueEquals(PasswordField passwordField, Boolean value) {
+    public void assertClearButtonPropertyValueEquals(
+            PasswordField passwordField, Boolean value) {
         passwordField.setClearButtonVisible(value);
         assertEquals(value, passwordField.isClearButtonVisible());
-        assertEquals(passwordField.isClearButtonVisible(),
-                passwordField.getElement().getProperty("clearButtonVisible", value));
+        assertEquals(passwordField.isClearButtonVisible(), passwordField
+                .getElement().getProperty("clearButtonVisible", value));
     }
 
     @Test
@@ -72,7 +74,15 @@ public class PasswordFieldTest {
         assertAutoselectPropertyValueEquals(passwordField, false);
     }
 
-    public void assertAutoselectPropertyValueEquals(PasswordField passwordField, Boolean value) {
+    @Test
+    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+        ComponentFromTest
+                .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
+                        "foo", PasswordField.class);
+    }
+
+    public void assertAutoselectPropertyValueEquals(PasswordField passwordField,
+            Boolean value) {
         passwordField.setAutoselect(value);
         assertEquals(value, passwordField.isAutoselect());
         assertEquals(passwordField.isAutoselect(),
