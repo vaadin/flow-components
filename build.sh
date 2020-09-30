@@ -108,7 +108,7 @@ $cmd || tcStatus 1 "Merging ITs failed"
 if [ -n "$SAUCE_USER" ]
 then
    test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
-   args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
+   args="$args -Dvaadin.productionMode -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 echo "$args"
 
