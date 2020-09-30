@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 
 import org.junit.Assert;
@@ -22,9 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.textfield.NumberField;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * Tests for the {@link NumberField}.
@@ -147,6 +147,14 @@ public class NumberFieldTest extends TextFieldTest {
 
         assertValidValues(-5.0, -0.5, 4.0);
         assertInvalidValues(-4.5, 0.0, 1.0, 4.5);
+    }
+
+    @Override
+    @Test
+    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+        ComponentFromTest
+                .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
+                        1.1d, NumberField.class);
     }
 
     private void assertValidValues(Double... values) {

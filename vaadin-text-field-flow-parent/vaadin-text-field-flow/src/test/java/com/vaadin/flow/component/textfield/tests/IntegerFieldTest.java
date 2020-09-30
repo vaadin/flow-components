@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 
 import org.junit.Assert;
@@ -22,9 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.textfield.IntegerField;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class IntegerFieldTest extends TextFieldTest {
 
@@ -131,6 +131,14 @@ public class IntegerFieldTest extends TextFieldTest {
 
         assertValidValues(-5, -1, 3, 7);
         assertInvalidValues(0, 4, -4);
+    }
+
+    @Override
+    @Test
+    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+        ComponentFromTest
+                .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(1,
+                        IntegerField.class);
     }
 
     private void assertValidValues(Integer... values) {

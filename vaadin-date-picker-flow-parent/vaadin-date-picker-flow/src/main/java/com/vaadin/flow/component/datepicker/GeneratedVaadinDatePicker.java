@@ -1184,17 +1184,23 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            a function that converts a string value to a model value
      * @param modelToPresentation
      *            a function that converts a model value to a string value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
      * @param <P>
      *            the property type
      */
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
-            SerializableFunction<T, P> modelToPresentation) {
+            SerializableFunction<T, P> modelToPresentation,
+            boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -1214,7 +1220,6 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -1245,7 +1250,6 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -1255,6 +1259,6 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      */
     public GeneratedVaadinDatePicker() {
         this(null, null, null, (SerializableFunction) null,
-                (SerializableFunction) null);
+                (SerializableFunction) null, false);
     }
 }
