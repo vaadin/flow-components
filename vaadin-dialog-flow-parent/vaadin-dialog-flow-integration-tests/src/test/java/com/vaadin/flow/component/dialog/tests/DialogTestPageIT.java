@@ -100,6 +100,15 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void dialogWithVerticalLayout_noScrollbar() {
+        findElement(By.id("dialog-with-vertical-layout")).click();
+
+        WebElement overlay = findElement(By.id("overlay"));
+        TestBenchElement content = (TestBenchElement) findInShadowRoot(overlay, By.id("content")).get(0);
+
+        Assert.assertEquals(content.getProperty("offsetHeight"), content.getProperty("scrollHeight"));
+    }
+    @Test
     public void dialogNotAttachedToThePage_openAndClose_dialogIsAttachedAndRemoved() {
         WebElement open = findElement(By.id("dialog-outside-ui-open"));
 
