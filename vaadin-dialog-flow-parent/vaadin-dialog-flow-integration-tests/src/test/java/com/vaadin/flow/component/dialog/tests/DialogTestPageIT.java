@@ -30,6 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -88,6 +89,25 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 eventSourceMessage.getText());
     }
 
+    @Test
+    public void dialogWithContentMargin_wrapperDoesNotCollapse() {
+        findElement(By.id("dialog-open")).click();
+
+        WebElement overlay = findElement(By.id("overlay"));
+        TestBenchElement content = (TestBenchElement) findInShadowRoot(overlay, By.id("content")).get(0);
+
+        Assert.assertEquals(content.getProperty("offsetHeight"), content.getProperty("scrollHeight"));
+    }
+
+    @Test
+    public void dialogWithVerticalLayout_noScrollbar() {
+        findElement(By.id("dialog-with-vertical-layout")).click();
+
+        WebElement overlay = findElement(By.id("overlay"));
+        TestBenchElement content = (TestBenchElement) findInShadowRoot(overlay, By.id("content")).get(0);
+
+        Assert.assertEquals(content.getProperty("offsetHeight"), content.getProperty("scrollHeight"));
+    }
     @Test
     public void dialogNotAttachedToThePage_openAndClose_dialogIsAttachedAndRemoved() {
         WebElement open = findElement(By.id("dialog-outside-ui-open"));
