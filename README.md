@@ -4,6 +4,12 @@ This is a maven multi-module project including all vaadin flow components.
 
 `master` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
 
+## LICENSE
+SPDX-License-Identifier: Apache-2.0 OR Commercial Vaadin Add-on License version 3
+
+This project is dual-licensed under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0) and [Commercial Vaadin Add-on License version 3](https://vaadin.com/license/cval-3.0) (CVALv3). 
+For specific module(s), check the LICENSE file under the parent module.
+
 ## Compiling all the components and their modules including ITs
 
 - `mvn clean compile -DskipTests -T C2`
