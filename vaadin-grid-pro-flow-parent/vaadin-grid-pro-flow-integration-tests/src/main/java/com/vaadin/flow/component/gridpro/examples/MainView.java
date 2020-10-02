@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
@@ -19,6 +20,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-grid-pro")
+// TODO remove this workaround after versions can be bumped
+@NpmPackage(value = "@vaadin/vaadin-select", version = "2.3.0")
 public class MainView extends VerticalLayout {
 
     public MainView() {

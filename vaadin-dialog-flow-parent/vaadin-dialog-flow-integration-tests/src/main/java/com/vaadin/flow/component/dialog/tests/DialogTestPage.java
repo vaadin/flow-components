@@ -20,6 +20,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -46,6 +47,7 @@ public class DialogTestPage extends Div {
         createDivInDialog();
         createResizableDraggableDialog();
         changeDialogDimensions();
+        addVerticalLayoutWithNoPadding();
     }
 
     private void createDialogWithAddOpenedChangeListener() {
@@ -256,5 +258,17 @@ public class DialogTestPage extends Div {
 
         add(attachedDialog, openSelfAttachedButton, openAttachedButton,
             changeDimensionSelfAttachedButton, changeDimensionAttachedButton);
+    }
+
+    private void addVerticalLayoutWithNoPadding() {
+        NativeButton button = new NativeButton("Dialog with vertical-layout");
+        button.setId("dialog-with-vertical-layout");
+        Dialog dialog = new Dialog();
+        VerticalLayout layout = new VerticalLayout();
+        layout.setPadding(false);
+        layout.add(new Label("content 1"), new Label("content 2"));
+        dialog.add(layout);
+        button.addClickListener(e -> dialog.open());
+        add(button);
     }
 }

@@ -41,7 +41,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     public Checkbox() {
         // initial value, default value, accept null value
-        super(false, false, false);
+        super(false, false, false, true);
         getElement().addPropertyChangeListener("indeterminate",
                 "indeterminate-changed", NO_OP);
         getElement().addPropertyChangeListener("checked", "checked-changed",

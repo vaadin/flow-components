@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
@@ -34,9 +35,15 @@ public class GridOnClientAndServerIT extends AbstractComponentIT {
     TestBenchElement parent  = $("grid-on-client-and-slot").first();
 
     TreeGridElement treeGrid = parent.$(TreeGridElement.class).id("tree");
-    treeGrid.getExpandToggleElement(0, 0).click();;
+    treeGrid.getExpandToggleElement(0, 0).click();
     GridTHTDElement cell = treeGrid.getCell(1, 0);
 
     Assert.assertEquals("child 1-1", cell.getText().trim());
+
+    findElement(By.id("add-new-grid-button")).click();
+    treeGrid.getExpandToggleElement(3, 0).click();
+    cell = treeGrid.getCell(4, 0);
+
+    Assert.assertEquals("child 2-1", cell.getText().trim());
   }
 }
