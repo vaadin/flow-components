@@ -85,6 +85,13 @@ async function main() {
     return [target, content];
   });
 
+  await visitFilesRecursive(`${mod}/${id}/src`, (source, target, content) => {
+    if (/BigDecimalField\.java$/.test(source)) {
+      content = content.replace(/( *)return (getElement\(\).getProperty\("_decimalSeparator"\).charAt\(0\);)/, '$1String prop = getElement().getProperty("_decimalSeparator");\n$1return prop == null || prop.isEmpty() ? \'.\' : $2');
+    }
+    return [target, content];
+  });
+
   await visitFilesRecursive(`${mod}/${id}-integration-tests/src`, (source, target, content) => {
     // replace test-template localName for the new computed above
     content = content.replace(/(\@Tag.*|\@JsModule.*|\$\(")test-template/g, `$1${id}-test-template`);

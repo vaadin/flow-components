@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.textfield.EmailField;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.component.textfield.EmailField;
 
 /**
  * Tests for the {@link EmailField}.
@@ -49,4 +50,10 @@ public class EmailFieldTest {
                 emailField.getElement().getProperty("value"));
     }
 
+    @Test
+    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+        ComponentFromTest
+                .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
+                        "foo@example.com", EmailField.class);
+    }
 }

@@ -28,7 +28,6 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -86,7 +85,7 @@ public class BigDecimalField
      * Constructs an empty {@code BigDecimalField}.
      */
     public BigDecimalField() {
-        super(null, null, String.class, PARSER, FORMATTER);
+        super(null, null, String.class, PARSER, FORMATTER, true);
 
         setLocale(Optional.ofNullable(UI.getCurrent()).map(UI::getLocale)
                 .orElse(Locale.ROOT));
@@ -341,7 +340,8 @@ public class BigDecimalField
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      *
      * @return the {@code title} property from the webcomponent
      */
@@ -445,6 +445,7 @@ public class BigDecimalField
     }
 
     private char getDecimalSeparator() {
-        return getElement().getProperty("_decimalSeparator").charAt(0);
+        String prop = getElement().getProperty("_decimalSeparator");
+        return prop == null || prop.isEmpty() ? '.' : getElement().getProperty("_decimalSeparator").charAt(0);
     }
 }
