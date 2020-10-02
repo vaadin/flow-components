@@ -56,7 +56,7 @@ computeFastBuild() {
     echo "Running validation against non-PR branch, running IT test set"
     return -1
   fi
-  [ -z "$PR" ] && return
+
   ghUrl="https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR"
   prTitle=`curl -s $ghUrl | jq -r .title`
   echo "$prTitle" | grep -v '\[skip ci\]' >/dev/null || return 0
