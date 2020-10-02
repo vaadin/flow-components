@@ -45,7 +45,24 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * Constructs an empty {@code TextField}.
      */
     public TextField() {
-        super("", "", false);
+        this(true);
+    }
+
+    /**
+     * Constructs an empty {@code TextField}.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     * 
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     */
+    private TextField(boolean isInitialValueOptional) {
+        super("", "", false, isInitialValueOptional);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -192,8 +209,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(), getValueChangeTimeout(),
-                getSynchronizationRegistration());
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
     @Override
@@ -245,8 +262,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * Specifies if the field value gets automatically selected when
-     * the field gains focus.
+     * Specifies if the field value gets automatically selected when the field
+     * gains focus.
      *
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
@@ -260,8 +277,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * selected when the field gains focus, <code>false</code> otherwise.
      *
      * @param autoselect
-     *            <code>true</code> to set auto select on,
-     *            <code>false</code> otherwise
+     *            <code>true</code> to set auto select on, <code>false</code>
+     *            otherwise
      */
     @Override
     public void setAutoselect(boolean autoselect) {
@@ -269,8 +286,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * Gets the visibility state of the button which clears the text
-     * field.
+     * Gets the visibility state of the button which clears the text field.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
@@ -391,17 +407,19 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * Sets a regular expression for the value to pass on the client-side. The pattern
-     * must be a valid JavaScript Regular Expression that matches the entire value,
-     * not just some subset.
+     * Sets a regular expression for the value to pass on the client-side. The
+     * pattern must be a valid JavaScript Regular Expression that matches the
+     * entire value, not just some subset.
      *
      * @param pattern
      *            the new String pattern
      *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
-     *     https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
-     * @see <a href="https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
-     *     https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
+     *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
+     *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
     @Override
     public void setPattern(String pattern) {
@@ -420,7 +438,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      *
      * @return the {@code title} property from the webcomponent
      */
