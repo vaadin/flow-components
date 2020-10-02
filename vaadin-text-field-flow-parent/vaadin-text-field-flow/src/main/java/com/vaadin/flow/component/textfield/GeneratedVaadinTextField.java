@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Generated;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -24,7 +29,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -32,10 +36,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-
-import javax.annotation.Generated;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -867,7 +867,8 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      * </p>
      *
      * @param title
@@ -1076,10 +1077,46 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
             SerializableFunction<T, P> modelToPresentation) {
+        this(initialValue, defaultValue, elementPropertyType,
+                presentationToModel, modelToPresentation, false);
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinTextField component with the given
+     * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that converts a string value to a model value
+     * @param modelToPresentation
+     *            a function that converts a model value to a string value
+     * 
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> GeneratedVaadinTextField(T initialValue, T defaultValue,
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation,
+            boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -1097,9 +1134,34 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      */
     public GeneratedVaadinTextField(T initialValue, T defaultValue,
             boolean acceptNullValues) {
+        this(initialValue, defaultValue, acceptNullValues, false);
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinTextField component with the given
+     * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param acceptNullValues
+     *            whether <code>null</code> is accepted as a model value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     */
+    public GeneratedVaadinTextField(T initialValue, T defaultValue,
+            boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -1127,10 +1189,48 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
             SerializableBiFunction<R, T, P> modelToPresentation) {
+        this(initialValue, defaultValue, elementPropertyType,
+                presentationToModel, modelToPresentation, false);
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinTextField component with the given
+     * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     * 
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that accepts this component and a property value
+     *            and returns a model value
+     * @param modelToPresentation
+     *            a function that accepts this component and a model value and
+     *            returns a property value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> GeneratedVaadinTextField(T initialValue, T defaultValue,
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation,
+            boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }

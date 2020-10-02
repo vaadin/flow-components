@@ -68,7 +68,6 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         container.getClassList().add("draggable-leaf-only");
         container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
         container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
-        container.getStyle().set("display", "inline-block");
 
         getElement().appendVirtualChild(container);
 
@@ -631,7 +630,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         String appId = UI.getCurrent().getInternals().getAppId();
         int nodeId = container.getNode().getId();
         String renderer = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
+                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
                 appId, nodeId);
         template.setProperty("innerHTML", renderer);
 

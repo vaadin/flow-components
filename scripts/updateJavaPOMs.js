@@ -108,6 +108,12 @@ async function consolidatePomIT() {
       artifactId: ['vaadin-flow-components-shared'],
       version: ['${project.version}'],
       scope: ['test']
+    }, {
+      groupId: ['com.vaadin'],
+      artifactId: ['flow-lit-template'],
+    }, {
+      groupId: ['com.vaadin'],
+      artifactId: ['flow-polymer-template'],      
     });
   });
 }
