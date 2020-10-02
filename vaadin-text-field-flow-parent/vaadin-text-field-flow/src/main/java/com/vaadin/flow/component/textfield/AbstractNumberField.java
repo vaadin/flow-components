@@ -63,6 +63,53 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     /**
      * Sets up the common logic for number fields.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     * 
+     * @param parser
+     *            function to parse the client-side value string into
+     *            server-side value
+     * @param formatter
+     *            function to format the server-side value into client-side
+     *            value string
+     * @param absoluteMin
+     *            the smallest possible value of the number type of the field,
+     *            will be used as the default min value at server-side
+     * @param absoluteMax
+     *            the largest possible value of the number type of the field,
+     *            will be used as the default max value at server-side
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     */
+    public AbstractNumberField(SerializableFunction<String, T> parser,
+            SerializableFunction<T, String> formatter, double absoluteMin,
+            double absoluteMax, boolean isInitialValueOptional) {
+        super(null, null, String.class, parser, formatter,
+                isInitialValueOptional);
+
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
+        // Not setting these defaults to the web component, so it will have
+        // undefined as min and max
+        this.min = absoluteMin;
+        this.max = absoluteMax;
+        this.step = 1.0;
+
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
+
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
+    }
+
+    /**
+     * Sets up the common logic for number fields.
      * 
      * @param parser
      *            function to parse the client-side value string into
@@ -80,22 +127,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     public AbstractNumberField(SerializableFunction<String, T> parser,
             SerializableFunction<T, String> formatter, double absoluteMin,
             double absoluteMax) {
-        super(null, null, String.class, parser, formatter);
-
-        // workaround for https://github.com/vaadin/flow/issues/3496
-        setInvalid(false);
-
-        // Not setting these defaults to the web component, so it will have
-        // undefined as min and max
-        this.min = absoluteMin;
-        this.max = absoluteMax;
-        this.step = 1.0;
-
-        setValueChangeMode(ValueChangeMode.ON_CHANGE);
-
-        addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
+        this(parser, formatter, absoluteMin, absoluteMax, false);
     }
 
     /**
@@ -162,8 +194,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the visibility of the control buttons for increasing/decreasing
-     * the value accordingly to the default or specified step.
+     * Sets the visibility of the control buttons for increasing/decreasing the
+     * value accordingly to the default or specified step.
      *
      * @see #setStep(double)
      *
@@ -177,8 +209,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Gets whether the control buttons for increasing/decreasing
-     * the value are visible.
+     * Gets whether the control buttons for increasing/decreasing the value are
+     * visible.
      *
      * @see #setStep(double)
      *
@@ -212,7 +244,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      *
      * @return the {@code title} property from the webcomponent
      */

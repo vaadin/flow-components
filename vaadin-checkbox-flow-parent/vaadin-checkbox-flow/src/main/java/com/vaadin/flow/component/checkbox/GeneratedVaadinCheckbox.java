@@ -348,7 +348,6 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
         super("checked", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }
@@ -356,6 +355,41 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Constructs a new GeneratedVaadinCheckbox component with the given
      * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "checked"} property value,
+     * otherwise element {@code "checked"} property is ignored and the initial
+     * value is set,
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param acceptNullValues
+     *            whether <code>null</code> is accepted as a model value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "checked"}
+     *            property value, otherwise element {@code "checked"} property
+     *            is ignored and the initial value is set
+     */
+    public GeneratedVaadinCheckbox(T initialValue, T defaultValue,
+            boolean acceptNullValues, boolean isInitialValueOptional) {
+        super("checked", defaultValue, acceptNullValues);
+        if ((getElement().getProperty("checked") == null
+                || !isInitialValueOptional) && initialValue != null) {
+            setPresentationValue(initialValue);
+        }
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinCheckbox component with the given
+     * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "checked"} property value,
+     * otherwise element {@code "checked"} property is ignored and the initial
+     * value is set,
      *
      * @param initialValue
      *            the initial value to set to the value
@@ -366,11 +400,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      */
     public GeneratedVaadinCheckbox(T initialValue, T defaultValue,
             boolean acceptNullValues) {
-        super("checked", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
-            setPresentationValue(initialValue);
-        }
+        this(initialValue, defaultValue, acceptNullValues, false);
     }
 
     /**
@@ -399,7 +429,6 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
         super("checked", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
-            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }

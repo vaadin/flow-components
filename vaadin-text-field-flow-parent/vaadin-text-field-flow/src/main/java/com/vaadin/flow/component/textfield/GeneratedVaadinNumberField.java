@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import javax.annotation.Generated;
+
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
-
-import javax.annotation.Generated;
 
 /**
  * <p>
@@ -182,6 +182,42 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
     /**
      * Constructs a new GeneratedVaadinNumberField component with the given
      * arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that converts a string value to a model value
+     * @param modelToPresentation
+     *            a function that converts a model value to a string value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> GeneratedVaadinNumberField(T initialValue, T defaultValue,
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation,
+            boolean isInitialValueOptional) {
+        super(initialValue, defaultValue, elementPropertyType,
+                presentationToModel, modelToPresentation,
+                isInitialValueOptional);
+    }
+
+    /**
+     * Constructs a new GeneratedVaadinNumberField component with the given
+     * arguments.
      *
      * @param initialValue
      *            the initial value to set to the value
@@ -200,8 +236,8 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
             SerializableFunction<T, P> modelToPresentation) {
-        super(initialValue, defaultValue, elementPropertyType,
-                presentationToModel, modelToPresentation);
+        this(initialValue, defaultValue, elementPropertyType,
+                presentationToModel, modelToPresentation, false);
     }
 
     /**

@@ -25,11 +25,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
-
 @Route("vaadin-avatar/avatar-group-test")
 public class AvatarGroupPage extends Div {
 

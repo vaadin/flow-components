@@ -69,7 +69,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * Default constructor.
      */
     public DatePicker() {
-        this((LocalDate) null);
+        this((LocalDate) null, true);
     }
 
     /**
@@ -81,7 +81,29 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #setValue(Object)
      */
     public DatePicker(LocalDate initialDate) {
-        super(initialDate, null, String.class, PARSER, FORMATTER);
+        this(initialDate, false);
+    }
+
+    /**
+     * Convenience constructor to create a date picker with a pre-selected date
+     * in current UI locale format.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialDate
+     *            the pre-selected date in the picker
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @see #setValue(Object)
+     */
+    private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
+        super(initialDate, null, String.class, PARSER, FORMATTER,
+                isInitialValueOptional);
         setLocale(UI.getCurrent().getLocale());
 
         // workaround for https://github.com/vaadin/flow/issues/3496
