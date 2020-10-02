@@ -24,14 +24,6 @@
       <artifactId>flow-html-components</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-lit-template</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-polymer-template</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
     </dependency>
@@ -135,6 +127,14 @@
       <artifactId>vaadin-flow-components-shared</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-lit-template</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-polymer-template</artifactId>
     </dependency>
   </dependencies>
   <build>
