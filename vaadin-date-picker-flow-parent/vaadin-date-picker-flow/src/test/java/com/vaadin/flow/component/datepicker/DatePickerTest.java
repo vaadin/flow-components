@@ -15,24 +15,43 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import java.time.LocalDate;
-
-import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.vaadin.flow.component.UI;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.LocalDate;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
+
+import net.jcip.annotations.NotThreadSafe;
+
 @NotThreadSafe
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
+
+    private static LocalDate TEST_VALUE = LocalDate.now();
+
+    private static class TestDatePicker
+            extends GeneratedVaadinDatePicker<TestDatePicker, LocalDate> {
+
+        TestDatePicker() {
+            super(TEST_VALUE, null, String.class, value -> null, value -> null,
+                    true);
+        }
+    }
 
     private UI ui;
 
@@ -119,6 +138,29 @@ public class DatePickerTest {
                 picker.isClearButtonVisible());
         assertClearButtonPropertyValueEquals(picker, true);
         assertClearButtonPropertyValueEquals(picker, false);
+    }
+
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-date-picker");
+        element.setProperty("value", "2007-12-03");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(TestDatePicker.class))
+                .thenAnswer(invocation -> new TestDatePicker());
+
+        TestDatePicker field = Component.from(element, TestDatePicker.class);
+        Assert.assertEquals("2007-12-03",
+                field.getElement().getPropertyRaw("value"));
     }
 
     public void assertClearButtonPropertyValueEquals(DatePicker picker,

@@ -497,6 +497,16 @@
       </dependency>
       <dependency>
         <groupId>com.vaadin</groupId>
+        <artifactId>flow-lit-template</artifactId>
+        <version>${flow.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-polymer-template</artifactId>
+        <version>${flow.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
         <artifactId>flow-component-demo-helpers</artifactId>
         <version>${flow.version}</version>
         <exclusions>
