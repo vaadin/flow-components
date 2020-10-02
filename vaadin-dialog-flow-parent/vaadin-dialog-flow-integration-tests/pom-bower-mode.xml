@@ -55,6 +55,11 @@
             <artifactId>vaadin-combo-box-flow</artifactId>
             <version>3.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <version>2.3-SNAPSHOT</version>
+        </dependency>
 
         <!--Test scoped -->
         <dependency>

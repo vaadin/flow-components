@@ -56,6 +56,11 @@
       <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-ordered-layout-flow</artifactId>
+      <version>${vaadin.ordered.layout.version}</version>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
