@@ -51,7 +51,7 @@ saveFailedTests() {
 }
 
 computeFastBuild() {
-  [ -z "$PR" ] && return
+  [ -z "$PR" ] && return 1
   ghUrl="https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR"
   prTitle=`curl -s $ghUrl | jq -r .title`
   echo "$prTitle" | grep -v '\[skip ci\]' >/dev/null || return 0
