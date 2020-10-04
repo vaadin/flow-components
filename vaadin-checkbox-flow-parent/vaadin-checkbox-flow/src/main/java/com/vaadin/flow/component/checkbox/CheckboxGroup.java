@@ -77,8 +77,8 @@ public class CheckboxGroup<T>
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
-    private final AtomicReference<DataProvider<T, ?>> dataProvider =
-            new AtomicReference<>(DataProvider.ofItems());
+    private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
+            DataProvider.ofItems());
 
     private boolean isReadOnly;
 
@@ -99,12 +99,13 @@ public class CheckboxGroup<T>
     public CheckboxGroup() {
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
-                CheckboxGroup::modelToPresentation);
+                CheckboxGroup::modelToPresentation, true);
         registerValidation();
     }
 
     @Override
-    public CheckboxGroupDataView<T> setItems(DataProvider<T, Void> dataProvider) {
+    public CheckboxGroupDataView<T> setItems(
+            DataProvider<T, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getGenericDataView();
     }
@@ -115,17 +116,16 @@ public class CheckboxGroup<T>
         // We don't use DataProvider.withConvertedFilter() here because it's
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<T, Void> convertedDataProvider =
-                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
-                        inMemoryDataProvider) {
-                    @Override
-                    protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
-                        // Just ignore the query filter (Void) and apply the
-                        // predicate only
-                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                                .orElse(item -> true);
-                    }
-                };
+        DataProvider<T, Void> convertedDataProvider = new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                inMemoryDataProvider) {
+            @Override
+            protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                // Just ignore the query filter (Void) and apply the
+                // predicate only
+                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        .orElse(item -> true);
+            }
+        };
         return setItems(convertedDataProvider);
     }
 
@@ -543,7 +543,10 @@ public class CheckboxGroup<T>
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
-                                                  JsonArray presentation) {
+            JsonArray presentation) {
+        if (group.keyMapper == null) {
+            return Collections.emptySet();
+        }
         JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
@@ -553,7 +556,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> JsonArray modelToPresentation(CheckboxGroup<T> group,
-                                                     Set<T> model) {
+            Set<T> model) {
         JsonArray array = Json.createArray();
         if (model.isEmpty()) {
             return array;
@@ -583,9 +586,8 @@ public class CheckboxGroup<T>
 
     @SuppressWarnings("unchecked")
     private IdentifierProvider<T> getIdentifierProvider() {
-        IdentifierProvider<T> identifierProviderObject =
-                (IdentifierProvider<T>) ComponentUtil.getData(this,
-                        IdentifierProvider.class);
+        IdentifierProvider<T> identifierProviderObject = ComponentUtil
+                .getData(this, IdentifierProvider.class);
         if (identifierProviderObject == null) {
             DataProvider<T, ?> dataProvider = getDataProvider();
             if (dataProvider != null) {
