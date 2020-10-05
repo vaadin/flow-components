@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.radiobutton.demo;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -27,6 +31,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.component.radiobutton.demo.data.DepartmentData;
 import com.vaadin.flow.component.radiobutton.demo.entity.Department;
 import com.vaadin.flow.data.binder.Binder;
@@ -35,10 +40,10 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
-import java.util.List;
-
 @Route("vaadin-radio-button")
 public class RadioButtonGroupView extends DemoView {
+
+    private static final String DATA_VIEW = "Data View";
 
     @Override
     protected void initView() {
@@ -46,7 +51,10 @@ public class RadioButtonGroupView extends DemoView {
         entityList();
         disabledAndDisabledItem();
         valueChangeEvent();
-        configurationForReqired(); // Validation
+        dataViewRefreshItem(); // Data View
+        dataViewAddAndRemoveItem();
+        dataViewFiltering();
+        configurationForRequired(); // Validation
         customOptions(); // Presentation
         usingTemplateRenderer();
         themeVariantsHorizontal();// Theme Variants
@@ -131,7 +139,7 @@ public class RadioButtonGroupView extends DemoView {
         addCard("Value change event", radioGroup, value);
     }
 
-    private void configurationForReqired() {
+    private void configurationForRequired() {
         // begin-source-example
         // source-example-heading: Required
         Employee employee = new Employee();
@@ -239,6 +247,94 @@ public class RadioButtonGroupView extends DemoView {
         addCard("Theme variants", "Direction", horizontal, vertical);
     }
 
+    private void dataViewRefreshItem() {
+        // begin-source-example
+        // source-example-heading: Refresh Items
+        RadioButtonGroup<Employee> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setLabel("Assignable Employees: ");
+        Employee employee1 = new Employee("Employee One");
+        Employee employee2 = new Employee("Employee Two");
+        Employee employee3 = new Employee("Employee Three");
+        RadioButtonGroupListDataView<Employee> dataView = radioButtonGroup
+                .setItems(employee1, employee2, employee3);
+        radioButtonGroup.setValue(employee3);
+        radioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        Button updateButton = new Button("Update second employee's name",
+                click -> {
+                    employee2.setTitle("Employee 2");
+                    dataView.refreshItem(employee2);
+                });
+        // end-source-example
+
+        addCard(DATA_VIEW, "Refresh Items", radioButtonGroup, updateButton);
+    }
+
+    private void dataViewAddAndRemoveItem() {
+        // begin-source-example
+        // source-example-heading: Add and Remove Item
+        RadioButtonGroup<Employee> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setLabel("Assignable Employees: ");
+        List<Employee> employeeList = getEmployeeList();
+        RadioButtonGroupListDataView<Employee> dataView = radioButtonGroup
+                .setItems(employeeList);
+        radioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        AtomicInteger employeeCounter = new AtomicInteger(1);
+        Button addButton = new Button("Add to Options",
+                click -> dataView.addItem(new Employee(
+                        "Employee " + (employeeCounter.incrementAndGet()))));
+        Button removeButton = new Button("Remove from Options", click -> {
+            int itemCount = dataView.getItemCount();
+            if (itemCount > 0) {
+                dataView.removeItem(
+                        dataView.getItem(itemCount - 1));
+            }
+        });
+        // end-source-example
+
+        HorizontalLayout layout = new HorizontalLayout(radioButtonGroup,
+                addButton, removeButton);
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
+
+        addCard(DATA_VIEW, "Add and Remove Item", layout);
+    }
+
+    private List<Employee> getEmployeeList() {
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(new Employee("Employee 1"));
+        return employeeList;
+    }
+
+    private void dataViewFiltering() {
+        // begin-source-example
+        // source-example-heading: Filtering Items
+        RadioButtonGroup<Integer> numbers = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<Integer> numbersDataView = numbers
+                .setItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+        RadioButtonGroup<String> oddEven = new RadioButtonGroup<>();
+        oddEven.setLabel("Select Sub-set: ");
+        oddEven.setItems("Odd Numbers", "Even Numbers", "No Filter");
+        oddEven.addValueChangeListener(event -> {
+            switch (event.getValue()) {
+            case "Odd Numbers":
+                numbersDataView.setFilter(number -> number % 2 == 1);
+                break;
+
+            case "Even Numbers":
+                numbersDataView.setFilter(number -> number % 2 == 0);
+                break;
+
+            default:
+                numbersDataView.removeFilters();
+                break;
+            }
+        });
+        // end-source-example
+
+        addCard(DATA_VIEW, "Filtering Items", oddEven, numbers);
+    }
+
     private void styling() {
         Paragraph p1 = new Paragraph(
                 "To read about styling you can read the related tutorial ");
@@ -265,6 +361,10 @@ public class RadioButtonGroupView extends DemoView {
         public Employee() {
         }
 
+        public Employee(String title) {
+            this.title = title;
+        }
+
         private Employee(String title, String image) {
             this.title = title;
             this.image = image;
@@ -284,6 +384,11 @@ public class RadioButtonGroupView extends DemoView {
 
         public void setImage(String image) {
             this.image = image;
+        }
+
+        @Override
+        public String toString() {
+            return title;
         }
     }
 }
