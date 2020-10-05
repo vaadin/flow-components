@@ -7,6 +7,7 @@
   };
 
   window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
+  let isItemCacheInitialized = false;
 
   window.Vaadin.Flow.gridConnector = {
     initLazy: grid => tryCatchWrapper(function(grid) {
@@ -34,60 +35,65 @@
       const GridElement = window.Vaadin.Flow.Legacy.GridElement;
       const ItemCache = window.Vaadin.Flow.Legacy.ItemCache;
 
-      // Storing original implementation of the method to be used for client
-      // side only grids
-      ItemCache.prototype.ensureSubCacheForScaledIndexOriginal = ItemCache.prototype.ensureSubCacheForScaledIndex;
-      ItemCache.prototype.ensureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
-        if (!this.grid.$connector) {
-          this.ensureSubCacheForScaledIndexOriginal(scaledIndex);
-          return;
-        }
-
-        if (!this.itemCaches[scaledIndex]) {
-          this.grid.$connector.beforeEnsureSubCacheForScaledIndex(this, scaledIndex);
-        }
-      })
-
-      ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
-        if (!this.itemCaches[scaledIndex]) {
-          const subCache = new ItemCache.prototype.constructor(this.grid, this, this.items[scaledIndex]);
-          subCache.itemkeyCaches = {};
-          if(!this.itemkeyCaches) {
-            this.itemkeyCaches = {};
+      // Make sure ItemCache patching is done only once, but delay it for when
+      // a server grid is initialized
+      if (!isItemCacheInitialized) {
+        isItemCacheInitialized = true;
+        // Storing original implementation of the method to be used for client
+        // side only grids
+        ItemCache.prototype.ensureSubCacheForScaledIndexOriginal = ItemCache.prototype.ensureSubCacheForScaledIndex;
+        ItemCache.prototype.ensureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
+          if (!this.grid.$connector) {
+            this.ensureSubCacheForScaledIndexOriginal(scaledIndex);
+            return;
           }
-          this.itemCaches[scaledIndex] = subCache;
-          this.itemkeyCaches[this.grid.getItemId(subCache.parentItem)] = subCache;
-          this.grid._loadPage(0, subCache);
-        }
-      })
 
-      ItemCache.prototype.getCacheAndIndexByKey = tryCatchWrapper(function(key) {
-        for (let index in this.items) {
-          if(grid.getItemId(this.items[index]) === key) {
-            return {cache: this, scaledIndex: index};
+          if (!this.itemCaches[scaledIndex]) {
+            this.grid.$connector.beforeEnsureSubCacheForScaledIndex(this, scaledIndex);
           }
-        }
-        const keys = Object.keys(this.itemkeyCaches);
-        for (let i = 0; i < keys.length; i++) {
-          const expandedKey = keys[i];
-          const subCache = this.itemkeyCaches[expandedKey];
-          let cacheAndIndex = subCache.getCacheAndIndexByKey(key);
-          if(cacheAndIndex) {
-            return cacheAndIndex;
-          }
-        }
-        return undefined;
-      })
+        });
 
-      ItemCache.prototype.getLevel = tryCatchWrapper(function() {
-        let cache = this;
-        let level = 0;
-        while (cache.parentCache) {
-          cache = cache.parentCache;
-          level++;
-        }
-        return level;
-      })
+        ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
+          if (!this.itemCaches[scaledIndex]) {
+            const subCache = new ItemCache.prototype.constructor(this.grid, this, this.items[scaledIndex]);
+            subCache.itemkeyCaches = {};
+            if(!this.itemkeyCaches) {
+              this.itemkeyCaches = {};
+            }
+            this.itemCaches[scaledIndex] = subCache;
+            this.itemkeyCaches[this.grid.getItemId(subCache.parentItem)] = subCache;
+            this.grid._loadPage(0, subCache);
+          }
+        });
+
+        ItemCache.prototype.getCacheAndIndexByKey = tryCatchWrapper(function(key) {
+          for (let index in this.items) {
+            if(this.grid.getItemId(this.items[index]) === key) {
+              return {cache: this, scaledIndex: index};
+            }
+          }
+          const keys = Object.keys(this.itemkeyCaches);
+          for (let i = 0; i < keys.length; i++) {
+            const expandedKey = keys[i];
+            const subCache = this.itemkeyCaches[expandedKey];
+            let cacheAndIndex = subCache.getCacheAndIndexByKey(key);
+            if(cacheAndIndex) {
+              return cacheAndIndex;
+            }
+          }
+          return undefined;
+        });
+
+        ItemCache.prototype.getLevel = tryCatchWrapper(function() {
+          let cache = this;
+          let level = 0;
+          while (cache.parentCache) {
+            cache = cache.parentCache;
+            level++;
+          }
+          return level;
+        });
+      }
 
       const rootPageCallbacks = {};
       const treePageCallbacks = {};
