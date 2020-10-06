@@ -1088,6 +1088,7 @@ public class GridDemo extends DemoView {
         filterRow.getCell(firstNameColumn).setComponent(firstNameField);
         firstNameField.setSizeFull();
         firstNameField.setPlaceholder("Filter");
+        firstNameField.getElement().setAttribute("focus-target", "");
 
         // Second filter
         TextField ageField = new TextField();
@@ -1101,6 +1102,7 @@ public class GridDemo extends DemoView {
         filterRow.getCell(ageColumn).setComponent(ageField);
         ageField.setSizeFull();
         ageField.setPlaceholder("Filter");
+        ageField.getElement().setAttribute("focus-target", "");
 
         // Third filter
         TextField cityField = new TextField();
@@ -1114,6 +1116,7 @@ public class GridDemo extends DemoView {
         filterRow.getCell(cityColumn).setComponent(cityField);
         cityField.setSizeFull();
         cityField.setPlaceholder("Filter");
+        cityField.getElement().setAttribute("focus-target", "");
 
         // Fourth filter
         TextField postalCodeField = new TextField();
@@ -1127,6 +1130,7 @@ public class GridDemo extends DemoView {
         filterRow.getCell(postalCodeColumn).setComponent(postalCodeField);
         postalCodeField.setSizeFull();
         postalCodeField.setPlaceholder("Filter");
+        postalCodeField.getElement().setAttribute("focus-target", "");
         add(grid);
         // end-source-example
         grid.setId("grid-with-filters");
