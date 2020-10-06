@@ -317,6 +317,7 @@ public class DatePickerView extends DemoView {
         datePicker.setPlaceholder("Syntymäpäivä");
         datePicker.setLocale(new Locale("fi"));
 
+        /* Note that a week starts on Sunday ("sunnuntai"). */
         datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("viikko")
                 .setCalendar("kalenteri").setClear("tyhjennä")
                 .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
