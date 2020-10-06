@@ -22,5 +22,5 @@ import java.io.Serializable;
  */
 @FunctionalInterface
 public interface IconFactory extends Serializable {
-    Icon create();
+    IronIcon create();
 }
