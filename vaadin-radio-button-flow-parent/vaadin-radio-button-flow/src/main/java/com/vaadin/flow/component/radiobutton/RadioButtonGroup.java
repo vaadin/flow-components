@@ -16,26 +16,40 @@
 package com.vaadin.flow.component.radiobutton;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
+import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -53,13 +67,15 @@ import com.vaadin.flow.shared.Registration;
  */
 @NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.4.1")
 public class RadioButtonGroup<T>
-        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T> implements
-        HasItemsAndComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
-        HasDataProvider<T>, HasValidation {
+        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
+        implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
+        HasListDataView<T, RadioButtonGroupListDataView<T>>,
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
+            DataProvider.ofItems());
 
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
@@ -70,6 +86,12 @@ public class RadioButtonGroup<T>
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
+
+    private int lastNotifiedDataSize = -1;
+
+    private volatile int lastFetchedDataSize = -1;
+
+    private SerializableConsumer<UI> sizeRequest;
 
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
@@ -95,14 +117,97 @@ public class RadioButtonGroup<T>
     }
 
     @Override
+    public RadioButtonGroupDataView<T> setItems(
+            DataProvider<T, Void> dataProvider) {
+        setDataProvider(dataProvider);
+        return getGenericDataView();
+    }
+
+    @Override
+    public RadioButtonGroupDataView<T> setItems(
+            InMemoryDataProvider<T> inMemoryDataProvider) {
+        // We don't use DataProvider.withConvertedFilter() here because it's
+        // implementation does not apply the filter converter if Query has a
+        // null filter
+        DataProvider<T, Void> convertedDataProvider = new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                inMemoryDataProvider) {
+            @Override
+            protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                // Just ignore the query filter (Void) and apply the
+                // predicate only
+                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        .orElse(item -> true);
+            }
+        };
+        return setItems(convertedDataProvider);
+    }
+
+    @Override
+    public RadioButtonGroupListDataView<T> setItems(
+            ListDataProvider<T> dataProvider) {
+        setDataProvider(dataProvider);
+        return getListDataView();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} instead.
+     */
+    @Deprecated
+    public void setItems(Stream<T> streamOfItems) {
+        setItems(DataProvider.fromStream(streamOfItems));
+    }
+
+    /**
+     * Gets the list data view for the RadioButtonGroup. This data view should
+     * only be used when the items are in-memory and set with:
+     * <ul>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
+     * </ul>
+     * If the items are not in-memory an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         RadioButtonGroup
+     */
+    @Override
+    public RadioButtonGroupListDataView<T> getListDataView() {
+        return new RadioButtonGroupListDataView<>(this::getDataProvider, this);
+    }
+
+    /**
+     * Gets the generic data view for the RadioButtonGroup. This data view should
+     * only be used when {@link #getListDataView()} is not applicable for the
+     * underlying data provider.
+     *
+     * @return the generic DataView instance implementing
+     *         {@link RadioButtonGroupDataView}
+     */
+    @Override
+    public RadioButtonGroupDataView<T> getGenericDataView() {
+        return new RadioButtonGroupDataView<>(this::getDataProvider, this);
+    }
+
+
+    @Override
     protected boolean hasValidValue() {
         String selectedKey = getElement().getProperty("value");
         return itemEnabledProvider.test(keyMapper.get(selectedKey));
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link RadioButtonGroupListDataView} or
+     *             {@link RadioButtonGroupDataView}
+     */
+    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        this.dataProvider = dataProvider;
+        this.dataProvider.set(dataProvider);
         reset();
 
         setupDataProviderListener(dataProvider);
@@ -145,9 +250,13 @@ public class RadioButtonGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
+     * @deprecated use {@link #getListDataView()} or
+     *             {@link #getGenericDataView()} instead
      */
+    @Deprecated
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
+        return Optional.ofNullable(dataProvider).map(AtomicReference::get)
+                .orElse(null);
     }
 
     /**
@@ -227,7 +336,7 @@ public class RadioButtonGroup<T>
      * Specifies that the user must select in a value.
      * <p>
      * NOTE: The required indicator will not be visible, if there is no
-     * {@code label} property set for the radiobutton group.
+     * {@code label} property set for the RadioButtonGroup.
      *
      * @param required
      *            the boolean value to set
@@ -292,16 +401,68 @@ public class RadioButtonGroup<T>
         keyMapper.removeAll();
         removeAll();
         clear();
-        getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
-                .forEach(this::add);
+        synchronized (dataProvider) {
+            final AtomicInteger itemCounter = new AtomicInteger(0);
+            getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
+                    .forEach(component -> {
+                        add(component);
+                        itemCounter.incrementAndGet();
+                    });
+            lastFetchedDataSize = itemCounter.get();
+
+            // Ignore new size requests unless the last one has been executed
+            // so as to avoid multiple beforeClientResponses.
+            if (sizeRequest == null) {
+                sizeRequest = ui -> {
+                    fireSizeEvent();
+                    sizeRequest = null;
+                };
+                // Size event is fired before client response so as to avoid
+                // multiple size change events during server round trips
+                runBeforeClientResponse(sizeRequest);
+            }
+        }
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void fireSizeEvent() {
+        final int newSize = lastFetchedDataSize;
+        if (lastNotifiedDataSize != newSize) {
+            lastNotifiedDataSize = newSize;
+            fireEvent(new ItemCountChangeEvent<>(this, newSize, false));
+        }
     }
 
     private void resetRadioButton(T item) {
-        getRadioButtons()
-                .filter(radioButton -> getDataProvider()
-                        .getId(radioButton.getItem())
-                        .equals(getDataProvider().getId(item)))
-                .findFirst().ifPresent(this::updateButton);
+        getRadioButtons().filter(radioButton ->
+                getItemId(radioButton.getItem()).equals(getItemId(item)))
+                .findFirst()
+                .ifPresent(this::updateButton);
+    }
+
+    private Object getItemId(T item) {
+        return getIdentifierProvider().apply(item);
+    }
+
+    @SuppressWarnings("unchecked")
+    private IdentifierProvider<T> getIdentifierProvider() {
+        IdentifierProvider<T> identifierProviderObject =
+                (IdentifierProvider<T>) ComponentUtil.getData(this,
+                        IdentifierProvider.class);
+        if (identifierProviderObject == null) {
+            DataProvider<T, ?> dataProvider = getDataProvider();
+            if (dataProvider != null) {
+                return dataProvider::getId;
+            } else {
+                return IdentifierProvider.identity();
+            }
+        } else {
+            return identifierProviderObject;
+        }
     }
 
     private Component createRadioButton(T item) {
