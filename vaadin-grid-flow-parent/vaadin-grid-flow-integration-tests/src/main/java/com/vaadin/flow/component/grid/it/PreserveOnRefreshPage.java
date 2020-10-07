@@ -22,7 +22,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
-@Route("preserve-on-refresh")
+@Route("vaadin-grid/preserve-on-refresh")
 @PreserveOnRefresh
 public class PreserveOnRefreshPage extends Div {
 

@@ -24,7 +24,7 @@ import org.junit.Test;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("treegrid-filter-expand")
+@TestPath("vaadin-grid/treegrid-filter-expand")
 public class TreeGridFilterExpandIT extends AbstractTreeGridIT {
 
     @Before

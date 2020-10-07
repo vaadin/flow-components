@@ -27,8 +27,8 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 /**
  * Simple template example.
  */
-@Tag("test-template")
-@JsModule("test-template.js")
+@Tag("vaadin-notification-flow-test-template")
+@JsModule("vaadin-notification-flow-test-template.js")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id("container")

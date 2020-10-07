@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.CURRENT_ITEM_SPAN;
@@ -31,7 +31,7 @@ import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataVi
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_SORT_DATA_VIEW;
 
-@TestPath("radio-Button-group-data-view")
+@TestPath("vaadin-radio-button/radio-Button-group-data-view")
 public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
 
     private static final String CHANGED_1 = "changed-1";

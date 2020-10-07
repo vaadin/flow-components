@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("initial-open-on-click")
+@TestPath("vaadin-context-menu/initial-open-on-click")
 public class InitialOpenOnClickIT extends AbstractContextMenuIT {
 
     @Before

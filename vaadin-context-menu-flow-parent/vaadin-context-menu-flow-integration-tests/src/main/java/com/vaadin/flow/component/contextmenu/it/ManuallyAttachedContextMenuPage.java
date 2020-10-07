@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd
  */
-@Route("manually-attached-context-menu")
+@Route("vaadin-context-menu/manually-attached-context-menu")
 public class ManuallyAttachedContextMenuPage extends Div {
 
     public ManuallyAttachedContextMenuPage() {

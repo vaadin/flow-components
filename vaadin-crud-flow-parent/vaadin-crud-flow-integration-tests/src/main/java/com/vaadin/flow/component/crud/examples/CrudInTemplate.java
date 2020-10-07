@@ -14,7 +14,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Route
+@Route(value = "vaadin-crud/crudintemplate")
 @Tag("crud-app")
 @JsModule("./src/crud-in-template.js")
 public class CrudInTemplate extends PolymerTemplate<TemplateModel> {

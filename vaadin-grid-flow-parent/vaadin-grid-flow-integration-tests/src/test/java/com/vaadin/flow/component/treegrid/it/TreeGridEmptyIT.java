@@ -20,10 +20,10 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-empty")
+@TestPath("vaadin-grid/treegrid-empty")
 public class TreeGridEmptyIT extends AbstractComponentIT {
 
     @Test

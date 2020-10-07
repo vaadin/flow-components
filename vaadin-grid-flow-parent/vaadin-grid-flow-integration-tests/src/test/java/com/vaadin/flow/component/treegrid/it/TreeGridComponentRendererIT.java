@@ -9,7 +9,7 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-component-renderer")
+@TestPath("vaadin-grid/treegrid-component-renderer")
 public class TreeGridComponentRendererIT extends AbstractTreeGridIT {
 
     @Before

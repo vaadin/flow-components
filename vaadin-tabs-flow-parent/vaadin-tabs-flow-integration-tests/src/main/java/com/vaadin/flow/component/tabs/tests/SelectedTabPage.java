@@ -22,7 +22,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
 
-@Route("selected-tab")
+@Route("vaadin-tabs/selected-tab")
 public class SelectedTabPage extends Div {
 
     public SelectedTabPage() {

@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 
-@Route("SalesDashboard")
+@Route("vaadin-board/SalesDashboard")
 @CssImport("styles.css")
 public class SalesDashboard extends Div {
 

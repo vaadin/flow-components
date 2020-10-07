@@ -9,7 +9,8 @@ import org.junit.Test;
 public class ErrorIT extends AbstractParallelTest {
     @Before
     public void init() {
-        getDriver().get(getBaseURL()+ "/error");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-custom-field") + "/error";
+        getDriver().get(url);
     }
 
     @Test

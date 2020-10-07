@@ -9,7 +9,8 @@ public class I18nIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/overlay/ptbr");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/overlay/ptbr";
+        getDriver().get(url);
     }
 
     @Test

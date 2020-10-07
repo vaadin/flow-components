@@ -24,17 +24,17 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("string-items-text-renderer")
+@TestPath("vaadin-combo-box/string-items-text-renderer")
 public class StringItemsWithTextRendererIT extends AbstractComponentIT {
 
     @Test
     public void stringItemsAreRendered() {
         open();
 
-        findElement(By.id("list")).sendKeys(Keys.ARROW_DOWN);
+        $("vaadin-combo-box").id("list").sendKeys(Keys.ARROW_DOWN);
 
         WebElement overlay = findElement(
                 By.tagName("vaadin-combo-box-overlay"));
@@ -53,9 +53,9 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected rendered the second item text", "bar",
                 items.get(1));
 
-        findElement(By.id("list")).sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
+        $("vaadin-combo-box").id("list").sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
 
         Assert.assertEquals("Unexpected selected item text", "foo",
-                findElement(By.id("info")).getText());
+                $("div").id("info").getText());
     }
 }

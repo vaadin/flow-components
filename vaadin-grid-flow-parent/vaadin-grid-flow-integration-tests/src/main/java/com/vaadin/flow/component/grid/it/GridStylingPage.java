@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-styling")
+@Route("vaadin-grid/grid-styling")
 public class GridStylingPage extends Div {
 
     public GridStylingPage() {

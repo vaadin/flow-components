@@ -1,0 +1,9 @@
+{
+  "name": "vaadin-flow-components",
+  "version": "1.0.0",
+  "devDependencies": {
+    "xml2js": "^0.4.23",
+    "replace-in-file": "6.1.0"
+  },
+  "license": "APACHE"
+}

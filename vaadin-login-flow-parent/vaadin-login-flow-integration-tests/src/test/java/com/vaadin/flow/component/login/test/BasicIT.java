@@ -14,7 +14,8 @@ public abstract class BasicIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") ;
+        getDriver().get(url);
     }
 
     public abstract LoginFormElement getLoginForm();
@@ -55,7 +56,8 @@ public abstract class BasicIT extends AbstractParallelTest {
 
     @Test
     public void testNoForgotPasswordButton() {
-        getDriver().get(getBaseURL() + "/no-forgot-password");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/no-forgot-password";
+        getDriver().get(url);
 
         Assert.assertTrue(getLoginForm().getForgotPasswordButton()
                 .hasAttribute("hidden"));

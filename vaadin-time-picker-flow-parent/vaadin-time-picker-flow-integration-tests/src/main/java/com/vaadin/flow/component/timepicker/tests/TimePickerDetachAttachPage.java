@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for attaching / detaching {@link TimePicker}.
  */
-@Route("time-picker-detach-attach")
+@Route("vaadin-time-picker/time-picker-detach-attach")
 public class TimePickerDetachAttachPage extends Div {
 
     /**

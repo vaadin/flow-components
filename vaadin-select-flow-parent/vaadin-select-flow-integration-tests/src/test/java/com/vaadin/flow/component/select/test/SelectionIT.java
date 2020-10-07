@@ -6,7 +6,7 @@ import org.junit.Test;
 /**
  * Tests for selecting items.
  */
-@TestPath("")
+@TestPath("vaadin-select/")
 public class SelectionIT extends AbstractSelectIT {
 
     @Test

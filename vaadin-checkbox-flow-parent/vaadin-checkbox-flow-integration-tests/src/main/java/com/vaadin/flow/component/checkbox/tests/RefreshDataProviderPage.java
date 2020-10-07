@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("refresh-data-provider")
+@Route("vaadin-checkbox/refresh-data-provider")
 public class RefreshDataProviderPage extends Div {
 
     public RefreshDataProviderPage() {

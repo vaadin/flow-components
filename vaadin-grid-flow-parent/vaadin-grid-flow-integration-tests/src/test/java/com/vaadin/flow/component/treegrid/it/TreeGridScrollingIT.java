@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-scrolling")
+@TestPath("vaadin-grid/treegrid-scrolling")
 public class TreeGridScrollingIT extends AbstractTreeGridIT {
 
     @Before

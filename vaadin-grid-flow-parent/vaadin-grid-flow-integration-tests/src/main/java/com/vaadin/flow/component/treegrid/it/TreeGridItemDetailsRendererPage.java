@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
 import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
 import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
 
-@Route("treegrid-item-details-renderer")
+@Route("vaadin-grid/treegrid-item-details-renderer")
 public class TreeGridItemDetailsRendererPage extends Div {
 
     public TreeGridItemDetailsRendererPage() {

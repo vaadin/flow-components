@@ -20,10 +20,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("changing-data-size")
+@TestPath("vaadin-grid/changing-data-size")
 public class ChangingDataSizeIT extends AbstractComponentIT {
 
     @Test

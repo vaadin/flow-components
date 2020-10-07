@@ -16,7 +16,8 @@ public class TemplateSupportIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/crudintemplate");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/crudintemplate";
+        getDriver().get(url);
     }
 
     @After

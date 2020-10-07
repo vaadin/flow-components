@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import static com.vaadin.flow.component.grid.it.dataview.AbstractItemCountGridPage.DEFAULT_DATA_PROVIDER_SIZE;
 
-@TestPath("item-count-unknown")
+@TestPath("vaadin-grid/item-count-unknown")
 public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
 
     @Test

@@ -18,10 +18,10 @@ package com.vaadin.flow.component.checkbox.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("injected-checkbox")
+@TestPath("vaadin-checkbox/injected-checkbox")
 public class InjectedCheckboxIT extends AbstractComponentIT {
 
     @Test

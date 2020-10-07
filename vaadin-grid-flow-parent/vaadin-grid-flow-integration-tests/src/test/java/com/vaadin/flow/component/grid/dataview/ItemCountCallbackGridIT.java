@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 
-@TestPath("item-count-callback")
+@TestPath("vaadin-grid/item-count-callback")
 public class ItemCountCallbackGridIT extends AbstractItemCountGridIT {
 
     @Test

@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.router.Route;
 
-@Route("clientside-filter")
+@Route("vaadin-combo-box/clientside-filter")
 public class ClientSideFilterPage extends Div {
 
     public ClientSideFilterPage() {

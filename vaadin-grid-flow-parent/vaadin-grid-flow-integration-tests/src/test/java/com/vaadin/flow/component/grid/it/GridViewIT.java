@@ -21,7 +21,7 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import com.vaadin.tests.TabbedComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;

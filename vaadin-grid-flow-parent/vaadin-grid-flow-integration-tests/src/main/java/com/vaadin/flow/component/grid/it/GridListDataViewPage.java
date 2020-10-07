@@ -33,7 +33,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route("grid-list-data-view-page")
+@Route("vaadin-grid/grid-list-data-view-page")
 @Theme(Lumo.class)
 public class GridListDataViewPage extends Div {
 

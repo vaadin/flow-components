@@ -30,7 +30,7 @@ import com.vaadin.flow.router.Route;
  * 
  * @author Vaadin Ltd.
  */
-@Route("auto-attached-context-menu")
+@Route("vaadin-context-menu/auto-attached-context-menu")
 public class AutoAttachedContextMenuPage extends Div {
 
     public AutoAttachedContextMenuPage() {

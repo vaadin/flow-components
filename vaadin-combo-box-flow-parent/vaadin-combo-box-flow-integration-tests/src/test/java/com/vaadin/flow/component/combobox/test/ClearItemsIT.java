@@ -21,7 +21,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("clear-items")
+@TestPath("vaadin-combo-box/clear-items")
 public class ClearItemsIT extends AbstractComboBoxIT {
 
     private ComboBoxElement combo;

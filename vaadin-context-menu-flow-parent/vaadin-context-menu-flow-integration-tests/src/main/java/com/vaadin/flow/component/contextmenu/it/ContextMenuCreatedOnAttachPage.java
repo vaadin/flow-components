@@ -5,7 +5,7 @@ import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Route("on-attach-listener")
+@Route("vaadin-context-menu/on-attach-listener")
 public class ContextMenuCreatedOnAttachPage extends Div {
     public ContextMenuCreatedOnAttachPage() {
         createContextMenuAndTarget("target-open-left-click", true);

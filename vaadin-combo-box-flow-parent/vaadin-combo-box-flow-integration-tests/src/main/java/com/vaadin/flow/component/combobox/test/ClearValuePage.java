@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
-@Route("clear-value")
+@Route("vaadin-combo-box/clear-value")
 public class ClearValuePage extends Div {
     static final String INITIAL_VALUE = "two";
 

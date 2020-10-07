@@ -24,10 +24,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("notification-test")
+@TestPath("vaadin-notification/notification-test")
 public class NotificationTestPageIT extends AbstractComponentIT {
 
     private static final String NOTIFICATION_CARD_TAG = "vaadin-notification-card";

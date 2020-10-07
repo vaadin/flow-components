@@ -31,7 +31,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("drag-and-drop")
+@Route("vaadin-grid/drag-and-drop")
 @JavaScript("DragAndDropHelpers.js")
 public class DragAndDropGridPage extends Div {
 

@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-serialization-page")
+@Route("vaadin-grid/grid-serialization-page")
 public class GridSerializationPage extends Div {
 
     public static class Pojo {

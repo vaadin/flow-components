@@ -23,7 +23,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-@Route
+@Route(value = "vaadin-grid/gridsetitemsafterdetachpage")
 public class GridSetItemsAfterDetachPage extends VerticalLayout {
 
     public GridSetItemsAfterDetachPage() {

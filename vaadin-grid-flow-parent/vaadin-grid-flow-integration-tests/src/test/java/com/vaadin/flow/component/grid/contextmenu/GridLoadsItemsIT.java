@@ -26,10 +26,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-loads-items")
+@TestPath("vaadin-grid/grid-loads-items")
 public class GridLoadsItemsIT extends AbstractComponentIT {
 
     @Test

@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 
-@Route("avatar-test")
+@Route("vaadin-avatar/avatar-test")
 public class AvatarPage extends Div {
 
     public AvatarPage() {

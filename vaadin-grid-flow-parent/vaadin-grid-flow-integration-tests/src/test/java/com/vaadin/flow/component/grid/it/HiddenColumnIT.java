@@ -24,10 +24,10 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("hidden-column")
+@TestPath("vaadin-grid/hidden-column")
 public class HiddenColumnIT extends AbstractComponentIT {
 
     private GridElement grid;

@@ -38,7 +38,7 @@ import com.vaadin.flow.router.Route;
  * Test view for changing the ValueChangMode of TextField, TextArea and
  * PasswordField.
  */
-@Route("value-change-mode-test")
+@Route("vaadin-text-field/value-change-mode-test")
 public class ValueChangeModePage extends Div {
 
     private int counter = 0;

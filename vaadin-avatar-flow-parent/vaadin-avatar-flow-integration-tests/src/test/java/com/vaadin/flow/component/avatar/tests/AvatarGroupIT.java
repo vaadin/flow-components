@@ -17,7 +17,7 @@
 package com.vaadin.flow.component.avatar.tests;
 
 import com.vaadin.flow.component.avatar.testbench.AvatarGroupElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
@@ -33,7 +33,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
  *
  * @author Vaadin Ltd.
  */
-@TestPath("avatar-group-test")
+@TestPath("vaadin-avatar/avatar-group-test")
 public class AvatarGroupIT extends AbstractComponentIT {
 
     @Before

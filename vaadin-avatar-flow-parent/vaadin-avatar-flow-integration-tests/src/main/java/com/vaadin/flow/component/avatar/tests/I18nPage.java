@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route("i18n-test")
+@Route("vaadin-avatar/i18n-test")
 public class I18nPage extends Div {
 
     public I18nPage() {

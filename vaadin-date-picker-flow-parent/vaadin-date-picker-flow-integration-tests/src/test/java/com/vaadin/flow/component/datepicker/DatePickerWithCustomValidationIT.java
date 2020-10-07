@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-@TestPath("required-field-custom-validator")
+@TestPath("vaadin-date-picker/required-field-custom-validator")
 public class DatePickerWithCustomValidationIT extends AbstractComponentIT {
 
     @Test

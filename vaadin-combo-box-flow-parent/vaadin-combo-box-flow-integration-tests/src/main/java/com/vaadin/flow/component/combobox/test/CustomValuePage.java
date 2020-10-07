@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
-@Route("custom-value")
+@Route("vaadin-combo-box/custom-value")
 public class CustomValuePage extends Div {
 
     private ComboBox<String> combo = new ComboBox<>();

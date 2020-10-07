@@ -22,7 +22,7 @@ import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Route("injected-datepicker")
+@Route("vaadin-date-picker/injected-datepicker")
 @JsModule("injected-datepicker-i18n.js")
 @Tag("injected-datepicker-i18n")
 public class InjectedDatePickerI18nPage extends PolymerTemplate<TemplateModel> {

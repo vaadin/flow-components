@@ -20,13 +20,13 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Test for https://github.com/vaadin/vaadin-combo-box-flow/issues/219
  */
-@TestPath("validation-connector")
+@TestPath("vaadin-combo-box/validation-connector")
 public class ValidationConnectorErrorIT extends AbstractComponentIT {
 
     @Test

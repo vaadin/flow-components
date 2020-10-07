@@ -21,10 +21,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("dialog-with-combo")
+@TestPath("vaadin-dialog/dialog-with-combo")
 public class DialogWithComboBoxIT extends AbstractComponentIT {
 
     @Test
@@ -37,7 +37,7 @@ public class DialogWithComboBoxIT extends AbstractComponentIT {
         WebElement combo = findElement(By.id("combo"));
         combo.sendKeys(Keys.ARROW_DOWN);
 
-        WebElement info = findElement(By.id("info"));
+        WebElement info = $("div").id("info");
         waitUntil(driver -> info.getText().equals(Boolean.TRUE.toString()));
 
         Assert.assertTrue(findElement(By.tagName("vaadin-combo-box-overlay"))
@@ -53,7 +53,7 @@ public class DialogWithComboBoxIT extends AbstractComponentIT {
         WebElement combo = findElement(By.id("combo"));
         getInShadowRoot(combo, By.id("toggleButton")).click();
 
-        WebElement info = findElement(By.id("info"));
+        WebElement info = $("div").id("info");
         waitUntil(driver -> info.getText().equals(Boolean.TRUE.toString()));
 
         Assert.assertTrue(findElement(By.tagName("vaadin-combo-box-overlay"))

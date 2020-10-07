@@ -26,7 +26,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.router.Route;
 
-@Route("multi-select")
+@Route("vaadin-list-box/multi-select")
 public class MultiSelectListBoxPage extends Div {
 
     public MultiSelectListBoxPage() {

@@ -15,7 +15,8 @@ public class AppLayoutIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-app-layout") ;
+        getDriver().get(url);
     }
 
     @Test
@@ -27,12 +28,12 @@ public class AppLayoutIT extends AbstractParallelTest {
 
         Assert.assertNotNull(layout.getDrawerToggle());
 
-        layout.$("a").attribute("href", "Page1").first().click();
+        layout.$("a").attribute("href", "vaadin-app-layout/Page1").first().click();
         Assert.assertEquals("This is Page 1",
             $(AppLayoutElement.class).waitForFirst().getContent()
                 .getText());
 
-        layout.$("a").attribute("href", "Page2").first().click();
+        layout.$("a").attribute("href", "vaadin-app-layout/Page2").first().click();
         Assert.assertEquals("This is Page 2",
             $(AppLayoutElement.class).waitForFirst().getContent()
                 .getText());
@@ -49,7 +50,8 @@ public class AppLayoutIT extends AbstractParallelTest {
 
     @Test
     public void navigateToNotFound() {
-        getDriver().get(getBaseURL() + "/nonexistingpage");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-app-layout") + "/nonexistingpage";
+        getDriver().get(url);
         Assert.assertTrue(
             $(AppLayoutElement.class).waitForFirst().getContent()
                 .getText().contains("Could not navigate to"));

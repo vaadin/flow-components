@@ -24,7 +24,7 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
-@Route("menu-bar-test")
+@Route("vaadin-menu-bar/menu-bar-test")
 @PreserveOnRefresh
 public class MenuBarTestPage extends Div {
 

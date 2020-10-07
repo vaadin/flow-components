@@ -30,7 +30,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Route("templated-columns")
+@Route("vaadin-grid/templated-columns")
 @Tag("templated-columns")
 // Order matters see https://github.com/vaadin/flow/issues/5591
 @JsModule("src/templated-columns.js")

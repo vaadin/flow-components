@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -27,7 +27,7 @@ import org.openqa.selenium.WebElement;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("checkbox-test")
+@TestPath("vaadin-checkbox/checkbox-test")
 public class CheckboxPageIT extends AbstractComponentIT {
 
     // could use checkboxelement but that requires TB-elements dependency

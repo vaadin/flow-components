@@ -35,7 +35,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("binder-validation")
+@Route("vaadin-text-field/binder-validation")
 public class BinderValidationPage extends Div {
 
     private Binder<Bean> binder = new Binder<>(Bean.class);

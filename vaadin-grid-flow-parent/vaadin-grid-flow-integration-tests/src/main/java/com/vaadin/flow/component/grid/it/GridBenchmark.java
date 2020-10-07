@@ -43,7 +43,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 import org.slf4j.LoggerFactory;
 
-@Route("benchmark")
+@Route("vaadin-grid/benchmark")
 @Theme(Lumo.class)
 @JsModule("./benchmark.js")
 public class GridBenchmark extends Div implements HasUrlParameter<String> {

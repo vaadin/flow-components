@@ -23,7 +23,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 
-@Route("text-renderer")
+@Route("vaadin-grid/text-renderer")
 public class TextRendererPage extends Div {
 
     public TextRendererPage() {

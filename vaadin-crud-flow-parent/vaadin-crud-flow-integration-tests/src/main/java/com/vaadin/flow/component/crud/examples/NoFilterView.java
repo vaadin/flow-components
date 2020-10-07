@@ -9,7 +9,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
-@Route
+@Route(value = "vaadin-crud/nofilter")
 @Theme(Lumo.class)
 public class NoFilterView extends VerticalLayout {
 

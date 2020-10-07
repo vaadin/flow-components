@@ -20,7 +20,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
-@TestPath("item-count-estimate")
+@TestPath("vaadin-grid/item-count-estimate")
 public class ItemCountEstimateGridIT extends AbstractItemCountGridIT {
 
     @Test

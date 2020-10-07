@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,7 +26,7 @@ import org.openqa.selenium.By;
 /**
  * Tests reorder of columns
  */
-@TestPath(TreeGridOrderColumnsPage.VIEW)
+@TestPath("vaadin-grid/" + TreeGridOrderColumnsPage.VIEW)
 public class TreeGridOrderColumnsIT extends AbstractComponentIT {
 
     private TreeGridElement treeGrid;

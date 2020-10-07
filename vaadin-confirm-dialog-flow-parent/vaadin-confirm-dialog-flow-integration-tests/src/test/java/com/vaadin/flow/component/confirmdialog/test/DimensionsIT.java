@@ -17,7 +17,8 @@ public class DimensionsIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/Dimensions");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-confirm-dialog") + "/Dimensions";
+        getDriver().get(url);
 
         waitUntil(ExpectedConditions
             .presenceOfElementLocated(By.id(Dimensions.VIEW_ID)));

@@ -22,7 +22,7 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("auto-focus-filter")
+@TestPath("vaadin-combo-box/auto-focus-filter")
 public class AutoFocusFilterIT extends AbstractComboBoxIT {
 
     @Before

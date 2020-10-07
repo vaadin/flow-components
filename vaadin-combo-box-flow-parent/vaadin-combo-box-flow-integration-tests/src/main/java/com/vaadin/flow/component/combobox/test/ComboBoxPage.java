@@ -39,7 +39,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link ComboBox}.
  */
-@Route("combo-box-test")
+@Route("vaadin-combo-box/combo-box-test")
 public class ComboBoxPage extends Div {
 
     /**

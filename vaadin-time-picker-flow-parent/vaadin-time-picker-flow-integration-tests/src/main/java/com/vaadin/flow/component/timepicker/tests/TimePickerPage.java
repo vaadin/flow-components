@@ -24,7 +24,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("time-picker-it")
+@Route("vaadin-time-picker/time-picker-it")
 public class TimePickerPage extends Div {
 
     public TimePickerPage() {

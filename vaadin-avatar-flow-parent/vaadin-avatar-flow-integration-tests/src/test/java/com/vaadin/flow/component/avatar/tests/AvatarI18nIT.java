@@ -18,7 +18,7 @@ package com.vaadin.flow.component.avatar.tests;
 
 import com.vaadin.flow.component.avatar.testbench.AvatarElement;
 import com.vaadin.flow.component.avatar.testbench.AvatarGroupElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,7 +31,7 @@ import org.openqa.selenium.WebElement;
  *
  * @author Vaadin Ltd.
  */
-@TestPath("i18n-test")
+@TestPath("vaadin-avatar/i18n-test")
 public class AvatarI18nIT extends AbstractComponentIT {
 
     private WebElement dataTitle;

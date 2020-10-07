@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Route;
 
-@Route("splitter-position")
+@Route("vaadin-split-layout/splitter-position")
 public class SplitterPositionView extends Div {
 
     public static final double INITIAL_POSITION = 70;

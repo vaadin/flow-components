@@ -19,11 +19,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("data-provider-id")
+@TestPath("vaadin-checkbox/data-provider-id")
 public class DataProviderIdPageIT extends AbstractComponentIT {
 
     @Test

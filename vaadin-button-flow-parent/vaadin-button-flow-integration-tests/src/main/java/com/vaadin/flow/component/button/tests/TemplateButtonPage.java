@@ -24,7 +24,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Tag("template-button")
-@Route("template-button")
+@Route("vaadin-button/template-button")
 @JsModule("./template-button.js")
 public class TemplateButtonPage extends PolymerTemplate<TemplateModel> {
 

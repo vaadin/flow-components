@@ -13,7 +13,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-component-hierarchy-column")
+@Route("vaadin-grid/treegrid-component-hierarchy-column")
 public class TreeGridComponentHierarchyColumnPage extends Div {
 
     public TreeGridComponentHierarchyColumnPage() {

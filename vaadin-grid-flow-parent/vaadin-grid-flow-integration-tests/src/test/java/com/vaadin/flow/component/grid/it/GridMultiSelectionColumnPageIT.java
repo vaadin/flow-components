@@ -20,10 +20,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-multi-selection-column")
+@TestPath("vaadin-grid/grid-multi-selection-column")
 public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
     @Test

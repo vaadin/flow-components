@@ -40,7 +40,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * Test page for dynamically adding new columns with different renderers after
  * the Grid has already been attached and rendered.
  */
-@Route("adding-columns")
+@Route("vaadin-grid/adding-columns")
 @Theme(Lumo.class)
 public class AddingColumnsPage extends Div {
 

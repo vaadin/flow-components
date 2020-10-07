@@ -31,7 +31,7 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.WebElement;
 
-@TestPath("lazy-loading")
+@TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
 
     private ComboBoxElement stringBox;

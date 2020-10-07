@@ -29,7 +29,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-huge-tree")
+@Route("vaadin-grid/treegrid-huge-tree")
 public class TreeGridHugeTreePage extends Div {
 
     private TreeGrid<String> treeGrid;

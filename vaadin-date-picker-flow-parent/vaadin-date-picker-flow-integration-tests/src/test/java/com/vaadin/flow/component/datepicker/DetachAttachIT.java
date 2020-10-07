@@ -22,12 +22,12 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-@TestPath("detach-attach")
+@TestPath("vaadin-date-picker/detach-attach")
 public class DetachAttachIT extends AbstractComponentIT {
 
     @Before

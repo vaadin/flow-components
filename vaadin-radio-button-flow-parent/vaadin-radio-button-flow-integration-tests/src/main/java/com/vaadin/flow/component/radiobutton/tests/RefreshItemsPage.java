@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.router.Route;
 
-@Route("refresh-items")
+@Route("vaadin-radio-button/refresh-items")
 public class RefreshItemsPage extends Div {
 
     public RefreshItemsPage() {

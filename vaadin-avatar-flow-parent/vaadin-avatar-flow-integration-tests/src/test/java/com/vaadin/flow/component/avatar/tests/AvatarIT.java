@@ -16,7 +16,7 @@
 
 package com.vaadin.flow.component.avatar.tests;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,7 +29,7 @@ import org.openqa.selenium.WebElement;
  *
  * @author Vaadin Ltd.
  */
-@TestPath("avatar-test")
+@TestPath("vaadin-avatar/avatar-test")
 public class AvatarIT extends AbstractComponentIT {
 
     private WebElement getPropsBtn;

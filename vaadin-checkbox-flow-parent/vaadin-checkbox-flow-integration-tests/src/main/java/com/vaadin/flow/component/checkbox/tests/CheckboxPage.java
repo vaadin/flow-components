@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test view for {@link Checkbox}.
  */
 @Theme(Lumo.class)
-@Route("checkbox-test")
+@Route("vaadin-checkbox/checkbox-test")
 public class CheckboxPage extends Div {
 
     public static class Bean {

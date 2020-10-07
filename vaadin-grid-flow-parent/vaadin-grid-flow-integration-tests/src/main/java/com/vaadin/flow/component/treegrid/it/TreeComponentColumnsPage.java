@@ -39,7 +39,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * Test page for dynamically adding new columns with different renderers when
  * the TreeGrid is added.
  */
-@Route("tree-component-columns")
+@Route("vaadin-grid/tree-component-columns")
 @Theme(Lumo.class)
 public class TreeComponentColumnsPage extends Div {
 

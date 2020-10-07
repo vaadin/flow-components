@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.menubar.demo.MenuBarView;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 
 /**
  * Integration tests for the {@link MenuBarView}.

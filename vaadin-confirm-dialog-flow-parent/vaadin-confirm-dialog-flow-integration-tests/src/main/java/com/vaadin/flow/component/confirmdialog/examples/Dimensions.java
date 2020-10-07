@@ -8,7 +8,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Dimensions
  */
-@Route("Dimensions")
+@Route("vaadin-confirm-dialog/Dimensions")
 public class Dimensions extends Div {
 
     public static String VIEW_ID = "dimensions";

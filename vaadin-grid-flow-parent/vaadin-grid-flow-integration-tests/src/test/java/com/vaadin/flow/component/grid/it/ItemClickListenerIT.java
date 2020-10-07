@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -29,7 +29,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.WebElement;
 
-@TestPath("item-click-listener")
+@TestPath("vaadin-grid/item-click-listener")
 public class ItemClickListenerIT extends AbstractComponentIT {
 
     private GridElement grid;

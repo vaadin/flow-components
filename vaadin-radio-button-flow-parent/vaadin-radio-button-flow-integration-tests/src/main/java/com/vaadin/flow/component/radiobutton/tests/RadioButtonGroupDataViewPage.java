@@ -17,7 +17,7 @@ import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 
-@Route("radio-Button-group-data-view")
+@Route("vaadin-radio-button/radio-Button-group-data-view")
 public class RadioButtonGroupDataViewPage extends Div {
 
     private static final String FIRST = "first";
