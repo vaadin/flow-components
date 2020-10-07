@@ -39,17 +39,10 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
     private static final String FIRST = "first";
     private static final String SECOND = "second";
 
-    private static boolean isOpened = false;
 
     @Before
     public void openPage() {
-
-        if (isOpened)
-            return;
-
         open();
-
-        isOpened = true;
     }
 
     @Test
