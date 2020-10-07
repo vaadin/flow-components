@@ -25,11 +25,11 @@ import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("vaadin-radio-button/refresh-data-provider")
-public class RefreshDataProviderPageIT extends AbstractComponentIT {
+@TestPath("vaadin-radio-button/refresh-items")
+public class RefreshItemsPageIT extends AbstractComponentIT {
 
     @Test
-    public void resetComponentOnDataProviderRefresh() {
+    public void resetComponentOnItemRefresh() {
         open();
 
         findElement(By.id("reset")).click();
