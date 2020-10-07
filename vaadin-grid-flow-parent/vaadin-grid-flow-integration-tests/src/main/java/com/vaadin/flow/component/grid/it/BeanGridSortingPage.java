@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("bean-grid-sorting")
+@Route("vaadin-grid/bean-grid-sorting")
 public class BeanGridSortingPage extends Div {
 
     public BeanGridSortingPage() {

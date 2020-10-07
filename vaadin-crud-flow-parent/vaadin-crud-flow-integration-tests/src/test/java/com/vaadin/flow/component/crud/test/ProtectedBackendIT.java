@@ -17,7 +17,8 @@ public class ProtectedBackendIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/protectedbackend");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/protectedbackend";
+        getDriver().get(url);
     }
 
     @Test

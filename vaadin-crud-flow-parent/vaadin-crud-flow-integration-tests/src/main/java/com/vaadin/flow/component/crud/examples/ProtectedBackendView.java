@@ -12,7 +12,7 @@ import java.util.List;
 
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
-@Route
+@Route(value = "vaadin-crud/protectedbackend")
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
 public class ProtectedBackendView extends VerticalLayout {

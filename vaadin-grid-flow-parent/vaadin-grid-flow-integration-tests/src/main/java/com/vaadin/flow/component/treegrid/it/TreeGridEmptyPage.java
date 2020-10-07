@@ -22,7 +22,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-empty")
+@Route("vaadin-grid/treegrid-empty")
 public class TreeGridEmptyPage extends Div {
 
     public TreeGridEmptyPage() {

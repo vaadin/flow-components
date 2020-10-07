@@ -5,7 +5,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-on-client-and-slot")
+@Route("vaadin-grid/grid-on-client-and-slot")
 public class GridOnClientAndSlotPage extends Div {
     public GridOnClientAndSlotPage() {
         GridOnClientAndSlot gridOnClientAndSlot = new GridOnClientAndSlot();

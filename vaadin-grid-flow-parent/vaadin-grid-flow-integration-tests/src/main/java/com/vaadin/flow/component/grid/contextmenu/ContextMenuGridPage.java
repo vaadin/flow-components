@@ -28,7 +28,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("context-menu-grid")
+@Route("vaadin-grid/context-menu-grid")
 public class ContextMenuGridPage extends Div {
 
     private static final String NO_TARGET_ITEM = "no target item";

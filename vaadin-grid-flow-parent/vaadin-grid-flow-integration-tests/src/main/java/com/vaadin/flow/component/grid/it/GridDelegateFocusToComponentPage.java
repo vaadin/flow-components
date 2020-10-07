@@ -23,7 +23,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route("delegate-focus-inside-component-renderer")
+@Route("vaadin-grid/delegate-focus-inside-component-renderer")
 public class GridDelegateFocusToComponentPage extends Div {
 
     public GridDelegateFocusToComponentPage() {

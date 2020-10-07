@@ -21,7 +21,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-on-flex-layout")
+@TestPath("vaadin-grid/grid-on-flex-layout")
 public class GridOnFlexLayoutIT extends GridSizeIT {
 
     @Test

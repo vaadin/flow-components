@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link IntegerField}.
  */
-@Route("integer-field-test")
+@Route("vaadin-text-field/integer-field-test")
 public class IntegerFieldPage extends Div {
 
     private Div messageContainer;

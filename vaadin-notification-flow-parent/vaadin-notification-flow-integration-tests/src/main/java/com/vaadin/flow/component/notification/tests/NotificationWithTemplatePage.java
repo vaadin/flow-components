@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
 
-@Route("notification-template-test")
+@Route("vaadin-notification/notification-template-test")
 public class NotificationWithTemplatePage extends Div {
 
     private Notification notification;

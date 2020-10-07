@@ -9,7 +9,8 @@ public class NameFieldViewIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL()+ "/custom-field-helper");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-custom-field") + "/custom-field-helper";
+        getDriver().get(url);
     }
 
     @Test

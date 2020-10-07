@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link TextField}.
  */
-@Route("text-field-detach-attach")
+@Route("vaadin-text-field/text-field-detach-attach")
 public class TextFieldDetachAttachPage extends Div {
 
     /**

@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view that uses Grid with different pageSize settings.
  */
-@Route("grid-page-size")
+@Route("vaadin-grid/grid-page-size")
 public class GridPageSizePage extends Div {
 
     private DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(

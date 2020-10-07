@@ -19,17 +19,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("select-invisible-grid")
+@TestPath("vaadin-grid/select-invisible-grid")
 public class SelectAndMakeVisibleIT extends AbstractComponentIT {
 
     @Test
     public void selectRowAndMakeGridVisible() throws InterruptedException {
         open();
 
-        findElement(By.id("select")).click();
+        $("button").id("select").click();
         checkLogsForErrors();
 
         Long selectedLength = (Long) getCommandExecutor().executeScript(

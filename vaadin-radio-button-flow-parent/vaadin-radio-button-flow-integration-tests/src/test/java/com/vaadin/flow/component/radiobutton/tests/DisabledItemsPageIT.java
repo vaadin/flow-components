@@ -17,14 +17,14 @@ package com.vaadin.flow.component.radiobutton.tests;
 
 import java.util.List;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-@TestPath("disabled-items")
+@TestPath("vaadin-radio-button/disabled-items")
 public class DisabledItemsPageIT extends AbstractComponentIT {
 
     @Test

@@ -30,7 +30,7 @@ import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
@@ -39,7 +39,7 @@ import com.vaadin.testbench.TestBenchElement;
  * Verify that when component's internal validation passes, but Binder
  * validation fails, Binder validation status is effective.
  */
-@TestPath("binder-validation")
+@TestPath("vaadin-text-field/binder-validation")
 public class BinderValidationPageIT extends AbstractComponentIT {
 
     @Before

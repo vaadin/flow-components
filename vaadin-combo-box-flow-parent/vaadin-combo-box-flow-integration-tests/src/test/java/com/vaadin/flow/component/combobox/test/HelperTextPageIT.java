@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("helper-text")
+@TestPath("vaadin-combo-box/helper-text")
 public class HelperTextPageIT extends AbstractComboBoxIT {
 
     @Before

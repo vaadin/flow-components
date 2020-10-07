@@ -23,7 +23,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
 
-@Route("item-click-listener")
+@Route("vaadin-grid/item-click-listener")
 public class ItemClickListenerPage extends Div {
 
     public ItemClickListenerPage() {

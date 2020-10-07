@@ -18,11 +18,11 @@ package com.vaadin.flow.component.button.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("icon-button")
+@TestPath("vaadin-button/icon-button")
 public class IconForButtonIT extends AbstractComponentIT {
 
     @Test

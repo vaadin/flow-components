@@ -17,7 +17,7 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.List;
 
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.tests.ComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;

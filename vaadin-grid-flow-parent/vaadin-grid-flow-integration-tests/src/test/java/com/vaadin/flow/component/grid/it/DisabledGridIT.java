@@ -24,11 +24,11 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("disabled-grid")
+@TestPath("vaadin-grid/disabled-grid")
 public class DisabledGridIT extends AbstractComponentIT {
 
     @Test

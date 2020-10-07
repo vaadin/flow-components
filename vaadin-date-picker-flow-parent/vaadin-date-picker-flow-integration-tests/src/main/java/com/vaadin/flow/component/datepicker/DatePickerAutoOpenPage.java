@@ -21,7 +21,7 @@ import com.vaadin.flow.router.Route;
 
 import java.util.function.Consumer;
 
-@Route
+@Route(value = "vaadin-date-picker/datepickerautoopenpage")
 public class DatePickerAutoOpenPage extends Div {
     public DatePickerAutoOpenPage() {
         final DatePicker datePicker = new DatePicker();

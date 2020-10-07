@@ -20,7 +20,7 @@ import java.util.Arrays;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-with-full-size-in-template")
+@Route("vaadin-grid/grid-with-full-size-in-template")
 public class GridFullSizeInATemplatePage extends GridInATemplate {
 
     public GridFullSizeInATemplatePage() {

@@ -21,7 +21,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 
-@Route("icon-button")
+@Route("vaadin-button/icon-button")
 public class IconForButtonPage extends Div {
 
     public IconForButtonPage() {

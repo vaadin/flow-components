@@ -23,10 +23,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("notification-template-test")
+@TestPath("vaadin-notification/notification-template-test")
 public class NotificationWithTemplateIT extends AbstractComponentIT {
 
     private static final String NOTIFICATION_CONTAINER_TAG = "vaadin-notification-container";

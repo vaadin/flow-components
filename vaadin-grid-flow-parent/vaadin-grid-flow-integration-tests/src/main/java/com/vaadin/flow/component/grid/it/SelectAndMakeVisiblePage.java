@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("select-invisible-grid")
+@Route("vaadin-grid/select-invisible-grid")
 public class SelectAndMakeVisiblePage extends Div {
 
     public SelectAndMakeVisiblePage() {

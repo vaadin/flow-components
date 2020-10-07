@@ -10,7 +10,8 @@ public class BasicIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-custom-field") ;
+        getDriver().get(url);
     }
 
     @Test

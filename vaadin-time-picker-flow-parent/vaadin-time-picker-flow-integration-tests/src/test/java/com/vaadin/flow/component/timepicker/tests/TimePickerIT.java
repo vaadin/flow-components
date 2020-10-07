@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.timepicker.tests;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * Integration tests for the {@link TimePickerPage}.
  */
-@TestPath("time-picker-it")
+@TestPath("vaadin-time-picker/time-picker-it")
 public class TimePickerIT extends AbstractComponentIT {
 
     @Before

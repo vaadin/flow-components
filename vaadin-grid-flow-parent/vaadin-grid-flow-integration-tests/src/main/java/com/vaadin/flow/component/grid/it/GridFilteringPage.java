@@ -16,7 +16,7 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-filtering")
+@Route("vaadin-grid/grid-filtering")
 public class GridFilteringPage extends Div {
 
     private static final Set<String> DATA = getData();

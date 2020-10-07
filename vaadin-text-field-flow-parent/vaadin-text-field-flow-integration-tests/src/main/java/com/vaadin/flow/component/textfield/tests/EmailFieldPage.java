@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Test view for {@link EmailField}.
  */
-@Route("email-field-test")
+@Route("vaadin-text-field/email-field-test")
 public class EmailFieldPage extends Div {
 
     /**

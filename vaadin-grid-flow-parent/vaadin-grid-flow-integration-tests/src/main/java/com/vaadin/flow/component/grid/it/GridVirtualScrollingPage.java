@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd.
  */
-@Route("grid-virtual-scrolling")
+@Route("vaadin-grid/grid-virtual-scrolling")
 public class GridVirtualScrollingPage extends Div {
 
     private DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(

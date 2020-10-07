@@ -21,7 +21,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("column-auto-width")
+@Route("vaadin-grid/column-auto-width")
 public class ColumnAutoWidthPage extends Div {
 
     public static final String GRID_ID = "auto-width-grid";

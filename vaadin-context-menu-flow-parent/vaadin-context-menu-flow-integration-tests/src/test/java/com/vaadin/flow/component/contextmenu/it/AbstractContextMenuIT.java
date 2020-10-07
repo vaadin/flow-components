@@ -23,7 +23,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.testbench.TestBenchElement;
 
 public abstract class AbstractContextMenuIT extends AbstractComponentIT {

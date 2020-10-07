@@ -14,7 +14,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-expand-all")
+@Route("vaadin-grid/treegrid-expand-all")
 public class TreeGridExpandAllPage extends Div {
     private TreeGrid<String> treeGrid;
     private TreeDataProvider<String> inMemoryDataProvider;

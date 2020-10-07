@@ -10,7 +10,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
-@Route("RowTypes")
+@Route("vaadin-board/RowTypes")
 @StyleSheet("rowtypes.css")
 @JsModule("rowtypes.js")
 @BodySize

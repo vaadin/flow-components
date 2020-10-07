@@ -23,7 +23,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Route("null-value-change")
+@Route("vaadin-combo-box/null-value-change")
 public class NullValueChangePage extends Div {
 
     public static class Person implements Serializable {

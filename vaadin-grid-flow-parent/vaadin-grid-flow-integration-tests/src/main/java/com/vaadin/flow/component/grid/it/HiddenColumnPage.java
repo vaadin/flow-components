@@ -27,7 +27,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
-@Route("hidden-column")
+@Route("vaadin-grid/hidden-column")
 public class HiddenColumnPage extends Div {
 
     public HiddenColumnPage() {

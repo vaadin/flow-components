@@ -16,7 +16,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("hidden-editor-buttons")
+@Route("vaadin-grid/hidden-editor-buttons")
 public class HiddenEditorButtonsPage extends Div {
 
     private Map<Person, Component> cache = new HashMap<>();

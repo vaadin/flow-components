@@ -24,7 +24,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
 
-@Route("treegrid-details-row")
+@Route("vaadin-grid/treegrid-details-row")
 public class TreeGridDetailsRowPage extends Div {
 
     public static final String PARENT_1_CHILD_1 = "parent1-child1";

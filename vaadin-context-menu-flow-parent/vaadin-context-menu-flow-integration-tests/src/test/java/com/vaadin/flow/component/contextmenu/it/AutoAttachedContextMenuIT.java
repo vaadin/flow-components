@@ -25,7 +25,7 @@ import com.vaadin.flow.testutil.TestPath;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("auto-attached-context-menu")
+@TestPath("vaadin-context-menu/auto-attached-context-menu")
 public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
 
     public static final String TARGET_ID = "target-for-not-attached-context-menu";

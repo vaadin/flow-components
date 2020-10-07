@@ -5,10 +5,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("ordered-layout-tests")
+@TestPath("vaadin-ordered-layout/ordered-layout-tests")
 public class OrderedLayoutIT extends AbstractComponentIT {
 
     @Test

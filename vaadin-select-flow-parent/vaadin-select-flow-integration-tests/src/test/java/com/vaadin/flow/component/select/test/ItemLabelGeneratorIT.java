@@ -3,7 +3,7 @@ package com.vaadin.flow.component.select.test;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Test;
 
-@TestPath("")
+@TestPath("vaadin-select/")
 public class ItemLabelGeneratorIT extends AbstractSelectIT {
 
     @Test

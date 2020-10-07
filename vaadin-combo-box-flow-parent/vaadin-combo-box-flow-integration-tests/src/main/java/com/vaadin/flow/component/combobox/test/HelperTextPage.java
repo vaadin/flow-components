@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
-@Route("helper-text")
+@Route("vaadin-combo-box/helper-text")
 public class HelperTextPage extends Div {
 
     public HelperTextPage() {

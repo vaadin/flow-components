@@ -24,12 +24,12 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("component-renderer")
+@TestPath("vaadin-combo-box/component-renderer")
 public class ComponentRendererIT extends AbstractComponentIT {
 
     @Test

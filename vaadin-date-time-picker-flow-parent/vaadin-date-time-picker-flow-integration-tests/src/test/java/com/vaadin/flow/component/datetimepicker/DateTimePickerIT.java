@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
@@ -35,7 +35,7 @@ import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 /**
  * Integration tests for the {@link DateTimePickerView}.
  */
-@TestPath("date-time-picker-it")
+@TestPath("vaadin-date-time-picker/date-time-picker-it")
 public class DateTimePickerIT extends AbstractComponentIT {
 
     private DateTimePickerElement picker;

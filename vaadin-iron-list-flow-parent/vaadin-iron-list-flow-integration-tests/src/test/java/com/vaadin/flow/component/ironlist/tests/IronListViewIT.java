@@ -27,7 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import com.vaadin.tests.TabbedComponentDemoTest;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonType;

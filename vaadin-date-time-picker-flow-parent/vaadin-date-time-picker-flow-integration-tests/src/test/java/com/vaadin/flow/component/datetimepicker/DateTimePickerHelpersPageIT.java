@@ -1,14 +1,14 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-@TestPath("helper-text-component")
+@TestPath("vaadin-date-time-picker/helper-text-component")
 public class DateTimePickerHelpersPageIT extends AbstractComponentIT {
 
     @Before

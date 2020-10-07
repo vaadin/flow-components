@@ -8,7 +8,7 @@ import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertFalse;
 
-@TestPath(TreeGridBasicFeaturesPage.VIEW)
+@TestPath("vaadin-grid/" + TreeGridBasicFeaturesPage.VIEW)
 public class TreeGridExpandDataRequestIT extends AbstractTreeGridIT {
 
     @Before

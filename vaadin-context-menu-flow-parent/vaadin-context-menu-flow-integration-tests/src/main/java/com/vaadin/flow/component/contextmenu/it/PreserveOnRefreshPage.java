@@ -24,7 +24,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd.
  */
-@Route("preserve-on-refresh")
+@Route("vaadin-context-menu/preserve-on-refresh")
 @PreserveOnRefresh
 public class PreserveOnRefreshPage extends Div {
 

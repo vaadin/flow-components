@@ -15,7 +15,7 @@ import com.vaadin.flow.router.Route;
  * an exception on the client side.
  *
  */
-@Route(value = "reattach-test")
+@Route(value = "vaadin-select/reattach-test")
 public class TestReattachView extends Div {
 
     public TestReattachView() {

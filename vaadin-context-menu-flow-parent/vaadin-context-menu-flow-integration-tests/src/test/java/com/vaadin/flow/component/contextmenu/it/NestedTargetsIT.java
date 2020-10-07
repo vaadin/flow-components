@@ -25,7 +25,7 @@ import com.vaadin.flow.testutil.TestPath;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("nested-targets")
+@TestPath("vaadin-context-menu/nested-targets")
 public class NestedTargetsIT extends AbstractContextMenuIT {
 
     @Before

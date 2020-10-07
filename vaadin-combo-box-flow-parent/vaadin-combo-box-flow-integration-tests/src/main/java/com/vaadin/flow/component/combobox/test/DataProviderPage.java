@@ -28,7 +28,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("data-provider")
+@Route("vaadin-combo-box/data-provider")
 public class DataProviderPage extends Div {
     static final String COMBO_BOX_WITH_GET_ID_ID = "comboBoxWithGetId";
     static final String COMBO_BOX_WITHOUT_GET_ID_ID = "comboBoxWithoutGetId";

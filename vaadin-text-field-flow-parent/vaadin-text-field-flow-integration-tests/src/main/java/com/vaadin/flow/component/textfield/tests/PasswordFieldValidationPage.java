@@ -23,7 +23,7 @@ import com.vaadin.flow.testutil.ValidationTestView;
 /**
  * View for testing validation with {@link PasswordField}.
  */
-@Route("passwork-field-validation")
+@Route("vaadin-text-field/passwork-field-validation")
 public class PasswordFieldValidationPage extends ValidationTestView {
 
     @Override

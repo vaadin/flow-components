@@ -20,10 +20,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("template-button")
+@TestPath("vaadin-button/template-button")
 public class TemplateButtonIT extends AbstractComponentIT {
 
     @Test

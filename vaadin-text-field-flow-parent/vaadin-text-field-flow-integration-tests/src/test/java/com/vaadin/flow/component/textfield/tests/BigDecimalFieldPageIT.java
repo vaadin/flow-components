@@ -25,7 +25,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -35,7 +35,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 /**
  * Integration tests for {@link BigDecimalField}.
  */
-@TestPath("big-decimal-field-test")
+@TestPath("vaadin-text-field/big-decimal-field-test")
 public class BigDecimalFieldPageIT extends AbstractComponentIT {
 
     private BigDecimalFieldElement field;

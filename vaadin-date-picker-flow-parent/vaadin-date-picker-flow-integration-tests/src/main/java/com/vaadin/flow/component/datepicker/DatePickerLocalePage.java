@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("date-picker-locale")
+@Route("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocalePage extends Div {
 
     private final LocalDate may3rd = LocalDate.of(2018, Month.MAY, 3);
