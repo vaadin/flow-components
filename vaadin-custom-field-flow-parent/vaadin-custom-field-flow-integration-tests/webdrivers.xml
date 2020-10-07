@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<root>
+    <windows>
+        <driver id="googlechrome">
+            <version id="2.38">
+                <bitrate thirtytwobit="true" sixtyfourbit="true">
+                    <filelocation>http://chromedriver.storage.googleapis.com/2.38/chromedriver_win32.zip</filelocation>
+                    <hash>913f2233ad1de3ef32c597d10688ef2fef2333d5</hash>
+                    <hashtype>sha1</hashtype>
+                </bitrate>
+            </version>
+        </driver>
+        <driver id="edge">
+            <version id="6.17134">
+                <bitrate sixtyfourbit="true" thirtytwobit="true">
+                    <filelocation>https://download.microsoft.com/download/F/8/A/F8AF50AB-3C3A-4BC4-8773-DC27B32988DD/MicrosoftWebDriver.exe</filelocation>
+                    <hash>e53eecfb3fc02aebea34a39d9097b9d4fab669c8</hash>
+                    <hashtype>sha1</hashtype>
+                </bitrate>
+            </version>
+        </driver>        
+    </windows>
+    <linux>
+        <driver id="googlechrome">
+            <version id="2.38">
+                <bitrate sixtyfourbit="true">
+                    <filelocation>https://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip</filelocation>
+                    <hash>37741d14df5ed6bc3fcdf025b2d2ae1a0fc73216</hash>
+                    <hashtype>sha1</hashtype>
+                </bitrate>
+            </version>
+        </driver>
+    </linux>
+    <osx>
+        <driver id="googlechrome">
+            <version id="2.38">
+                <bitrate sixtyfourbit="true">
+                    <filelocation>https://chromedriver.storage.googleapis.com/2.38/chromedriver_mac64.zip</filelocation>
+                    <hash>54b11f9c3d64e84a9f4da3592154bfb0dedb59af</hash>
+                    <hashtype>sha1</hashtype>
+                </bitrate>
+            </version>
+        </driver>
+    </osx>
+</root>
