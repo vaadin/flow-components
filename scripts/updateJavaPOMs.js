@@ -2,7 +2,6 @@
 /**
  * Update POMs for all modules of a component.
  * Example
- *   git clone git@github.com:vaadin/vaadin-button-flow.git
  *   ./scripts/updateJavaPOMs.js vaadin-button-flow-parent
  */
 
@@ -87,13 +86,7 @@ async function consolidatePomParent() {
 }
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
-  consolidate(template, `${mod}/${name}-flow/pom.xml`, js => {
-    js.project.dependencies[0].dependency.push({
-      groupId: ['org.slf4j'],
-      artifactId: ['slf4j-simple'],
-      scope: ['test']
-    })
-  });
+  consolidate(template, `${mod}/${name}-flow/pom.xml`);
 }
 async function consolidatePomTB() {
   consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
@@ -102,20 +95,7 @@ async function consolidatePomDemo() {
   consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
 }
 async function consolidatePomIT() {
-  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`, js => {
-    js.project.dependencies[0].dependency.push({
-      groupId: ['com.vaadin'],
-      artifactId: ['vaadin-flow-components-shared'],
-      version: ['${project.version}'],
-      scope: ['test']
-    }, {
-      groupId: ['com.vaadin'],
-      artifactId: ['flow-lit-template'],
-    }, {
-      groupId: ['com.vaadin'],
-      artifactId: ['flow-polymer-template'],      
-    });
-  });
+  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
 }
 
 consolidatePomParent();
