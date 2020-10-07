@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-charts-flow-parent</artifactId>
+        <version>7.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vaadin-charts-flow-demo</artifactId>
+    <version>7.1-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>Vaadin Charts for Flow Demo</name>
+
+    <properties>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
+
+        <frontend.working.directory>${project.basedir}/src/main/webapp</frontend.working.directory>
+
+        <war.source.excludes></war.source.excludes>
+
+        <jetty.jvm.args></jetty.jvm.args>
+        <jetty.resource.directory>${frontend.working.directory}</jetty.resource.directory>
+    </properties>
+    <repositories>
+        <repository>
+            <id>webjars</id>
+            <url>https://dl.bintray.com/webjars/maven</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow-examples</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.lukehutch</groupId>
+            <artifactId>fast-classpath-scanner</artifactId>
+            <version>2.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.12</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/config.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/config.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${frontend.working.directory}/frontend/bower_components</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${maven.war.plugin.version}</version>
+                <configuration>
+                    <warSourceExcludes>${war.source.excludes}</warSourceExcludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArgs>${jetty.jvm.args}</jvmArgs>
+                    <webAppConfig>
+                        <containerIncludeJarPattern>^$</containerIncludeJarPattern>
+                        <resourceBases>
+                            <resourceBase>${jetty.resource.directory}</resourceBase>
+                        </resourceBases>
+                    </webAppConfig>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--This profile is only present for quick testing againt the element from GitHub-->
+        <!--Do not use with production mode-->
+        <profile>
+            <id>bower</id>
+            <activation>
+                <property>
+                    <name>useBower</name>
+                </property>
+            </activation>
+
+            <properties>
+                <buildtools.directory>build-tools</buildtools.directory>
+
+                <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
+                <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
+                <node.version>v8.9.0</node.version>
+                <yarn.version>v1.3.2</yarn.version>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend.maven.plugin.version}</version>
+
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <yarnVersion>${yarn.version}</yarnVersion>
+                            <workingDirectory>${buildtools.directory}</workingDirectory>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <id>install-tools-then-build</id>
+                                <goals>
+                                    <goal>install-node-and-yarn</goal>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${buildtools.directory}</workingDirectory>
+                                    <arguments>run install-bower-dependencies</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>webjars</id>
+            <activation>
+                <property>
+                    <name>!useBower</name>
+                </property>
+            </activation>
+
+            <dependencies>
+                <!--VAADIN COMPONENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-icons</artifactId>
+                    <version>4.3.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-split-layout</artifactId>
+                    <version>4.1.0</version>
+                </dependency>
+
+                <!-- COMPATIBILITY MODE-->
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>flow-server-compatibility-mode</artifactId>
+                    <version>${flow.version}</version>
+                </dependency>
+
+                <!--PAPER ELEMENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-button</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-icon-button</artifactId>
+                    <version>2.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-styles</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+
+                <!--IRON ELEMENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-collapse</artifactId>
+                    <version>2.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-icon</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-icons</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-iconset-svg</artifactId>
+                    <version>2.1.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-resizable-behavior</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+
+                <!--APP ELEMENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.oyeharry</groupId>
+                    <artifactId>app-menu</artifactId>
+                    <version>2.1.2</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>productionMode</id>
+            <activation>
+                <property>
+                    <name>vaadin.productionMode</name>
+                </property>
+            </activation>
+
+            <properties>
+                <jetty.jvm.args>-Dvaadin.productionMode</jetty.jvm.args>
+                <jetty.resource.directory>${project.build.directory}/${project.build.finalName}</jetty.resource.directory>
+                <war.source.excludes>frontend/**</war.source.excludes>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>flow-server-production-mode</artifactId>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <frontendWorkingDirectory>${frontend.working.directory}/frontend</frontendWorkingDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>copy-production-files</goal>
+                                    <goal>package-for-production</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

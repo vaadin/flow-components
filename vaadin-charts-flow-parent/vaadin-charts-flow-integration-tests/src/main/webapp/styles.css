@@ -1,0 +1,22 @@
+.main-view {
+	font-family: sans-serif;
+	padding: 20px;
+}
+
+.main-view a[router-link] {
+	display: block;
+	margin-top: 10px;
+}
+
+.container {
+	margin-top: 20px;
+	border-top: 1px solid black;
+}
+
+.container>h2 {
+	margin-bottom: 0;
+}
+
+.container paper-input {
+	width: 200px;
+}
