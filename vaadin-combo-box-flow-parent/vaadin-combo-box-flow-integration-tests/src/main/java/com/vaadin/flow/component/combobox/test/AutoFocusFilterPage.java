@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Route("auto-focus-filter")
+@Route("vaadin-combo-box/auto-focus-filter")
 public class AutoFocusFilterPage extends Div {
 
     public AutoFocusFilterPage() {

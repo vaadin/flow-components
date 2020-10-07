@@ -24,7 +24,7 @@ import com.vaadin.testbench.TestBenchElement;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("manually-attached-context-menu")
+@TestPath("vaadin-context-menu/manually-attached-context-menu")
 public class ManuallyAttachedContextMenuIT extends AbstractContextMenuIT {
 
     @Before

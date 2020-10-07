@@ -41,7 +41,7 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testOverlaySelfAttached() {
-        getDriver().get(super.getBaseURL() + "/overlayselfattached");
+        getDriver().get(super.getBaseURL() + "/vaadin-login/overlayselfattached");
 
         Assert.assertFalse($(LoginOverlayElement.class).exists());
         openOverlay();
@@ -58,7 +58,8 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testTitleComponent() {
-        getDriver().get(getBaseURL() + "/component-title");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/component-title";
+        getDriver().get(url);
         openOverlay();
 
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
@@ -89,7 +90,8 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testResetTitleComponent() {
-        getDriver().get(getBaseURL() + "/component-title");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/component-title";
+        getDriver().get(url);
         checkTitleComponentWasReset();
     }
 
@@ -105,7 +107,8 @@ public class OverlayIT extends BasicIT {
     }
 
     public void testTitleAndDescriptionStrings() {
-        getDriver().get(getBaseURL() + "/property-title-description");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/property-title-description";
+        getDriver().get(url);
         openOverlay();
 
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();

@@ -20,11 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("combo-box-in-template")
+@TestPath("vaadin-combo-box/combo-box-in-template")
 public class ComboBoxInTemplateIT extends AbstractComponentIT {
 
     private TestBenchElement message;

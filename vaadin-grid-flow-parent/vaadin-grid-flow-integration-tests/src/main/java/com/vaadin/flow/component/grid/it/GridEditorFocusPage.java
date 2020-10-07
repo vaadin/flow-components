@@ -42,7 +42,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("editor-focus")
+@Route("vaadin-grid/editor-focus")
 public class GridEditorFocusPage extends Div {
 
     public GridEditorFocusPage() {

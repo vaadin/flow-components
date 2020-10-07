@@ -21,7 +21,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-with-full-size-in-template")
+@TestPath("vaadin-grid/grid-with-full-size-in-template")
 public class GridFullSizeInATemplateIT extends GridSizeIT {
 
     @Test

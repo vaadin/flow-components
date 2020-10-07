@@ -27,7 +27,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("filtering")
+@Route("vaadin-combo-box/filtering")
 public class FilteringPage extends Div {
 
     private Div message = new Div();

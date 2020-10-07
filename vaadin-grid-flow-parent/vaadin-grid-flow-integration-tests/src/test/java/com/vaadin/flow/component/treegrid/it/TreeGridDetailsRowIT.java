@@ -17,7 +17,7 @@ package com.vaadin.flow.component.treegrid.it;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +26,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-@TestPath("treegrid-details-row")
+@TestPath("vaadin-grid/treegrid-details-row")
 public class TreeGridDetailsRowIT extends AbstractComponentIT {
 
     @Test

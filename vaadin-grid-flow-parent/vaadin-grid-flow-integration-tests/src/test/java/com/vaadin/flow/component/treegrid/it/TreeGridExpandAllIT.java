@@ -29,7 +29,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
-@TestPath("treegrid-expand-all")
+@TestPath("vaadin-grid/treegrid-expand-all")
 public class TreeGridExpandAllIT extends AbstractTreeGridIT {
 
     private static final int ATTEMPTS = 50;
@@ -73,8 +73,8 @@ public class TreeGridExpandAllIT extends AbstractTreeGridIT {
 
         waitUntil(driver -> getTreeGrid().getRowCount() == 5);
 
-        findElement(By.id("collapse")).click();
-        findElement(By.id("expand")).click();
+        $("button").id("collapse").click();
+        $("button").id("expand").click();
         waitUntil(driver -> getTreeGrid().getRowCount() == 5);
 
         findElement(By.id("add-new")).click();

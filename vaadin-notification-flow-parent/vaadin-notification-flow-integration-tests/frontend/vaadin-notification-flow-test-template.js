@@ -10,7 +10,7 @@ class TemplateButton extends PolymerElement {
 `;
   }
     static get is() {
-      return 'test-template'
+      return 'vaadin-notification-flow-test-template'
   }
 }
         

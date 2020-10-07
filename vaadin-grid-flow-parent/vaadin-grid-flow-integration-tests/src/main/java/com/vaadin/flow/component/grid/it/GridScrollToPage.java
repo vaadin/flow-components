@@ -9,7 +9,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("grid-scroll-to")
+@Route("vaadin-grid/grid-scroll-to")
 public class GridScrollToPage extends Div {
     public GridScrollToPage() {
         Grid<String> grid = new Grid<>();

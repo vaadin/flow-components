@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Test view for {@link Checkbox}.
  */
-@Route("detach-reattach")
+@Route("vaadin-checkbox/detach-reattach")
 public class DetachReattachPage extends Div {
 
     public DetachReattachPage() {

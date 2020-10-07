@@ -26,10 +26,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-header-row-with-components")
+@TestPath("vaadin-grid/grid-header-row-with-components")
 public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
 
     private GridElement grid;

@@ -28,7 +28,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("editor-refresh")
+@Route("vaadin-grid/editor-refresh")
 public class GridEditorRefreshPage extends Div {
 
     public GridEditorRefreshPage() {

@@ -5,7 +5,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
-@Route("custom-field-helper")
+@Route("vaadin-custom-field/custom-field-helper")
 public class NameFieldView extends Div {
 
     public NameFieldView(){

@@ -24,7 +24,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("serial")
-@Route("treegrid-filter-expand")
+@Route("vaadin-grid/treegrid-filter-expand")
 public class TreeGridFilterExpandView extends VerticalLayout {
 
     public TreeGridFilterExpandView() {

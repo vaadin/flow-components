@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("data-provider-id")
+@Route("vaadin-checkbox/data-provider-id")
 public class DataProviderIdPage extends Div {
 
     public static class Message {

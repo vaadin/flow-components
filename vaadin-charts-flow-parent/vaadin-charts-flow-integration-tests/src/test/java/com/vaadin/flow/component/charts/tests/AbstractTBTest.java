@@ -28,11 +28,11 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.DefaultBrowserFactory;
-import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.tests.ParallelTest;
 import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
 
 public abstract class AbstractTBTest extends ParallelTest {
@@ -70,7 +70,7 @@ public abstract class AbstractTBTest extends ParallelTest {
                 "Could not find required element in the shadowRoot");
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         if (System.getProperty(PROPERTY_TEST_ALL_BROWSERS) == null) {
             return Arrays.asList(BrowserUtil.chrome());
@@ -78,13 +78,10 @@ public abstract class AbstractTBTest extends ParallelTest {
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
         return Arrays.asList(
-                BrowserUtil.chrome(),
-                BrowserUtil.firefox(),
-                DesiredCapabilities.iphone(),
-                DesiredCapabilities.ipad(),
-                browserFactory.create(Browser.SAFARI, "11.0", Platform.SIERRA),
-                browserFactory.create(Browser.EDGE, "16", Platform.WIN10),
-                browserFactory.create(Browser.IE11, "11", Platform.WIN10)
+                BrowserUtil.chrome()
+                
+                
+                
                 );
     }
 
@@ -114,7 +111,7 @@ public abstract class AbstractTBTest extends ParallelTest {
      * @return The URL path to the UI class to test
      */
     protected String getDeploymentPath() {
-        return "/" + getTestView().getCanonicalName();
+        return "/" + "vaadin-charts/" + getTestView().getCanonicalName();
     }
 
     /**

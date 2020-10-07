@@ -27,7 +27,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.Route;
 
-@Route(TreeGridMemory.PATH)
+@Route("vaadin-grid/" + TreeGridMemory.PATH)
 public class TreeGridMemory extends AbstractBeansMemoryTest<TreeGrid<Person>> {
 
     public static final String PATH = "tree-grid-memory";

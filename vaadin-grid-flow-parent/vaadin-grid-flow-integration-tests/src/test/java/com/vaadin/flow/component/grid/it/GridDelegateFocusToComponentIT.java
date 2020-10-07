@@ -24,11 +24,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("delegate-focus-inside-component-renderer")
+@TestPath("vaadin-grid/delegate-focus-inside-component-renderer")
 public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
 
     @Test
@@ -69,7 +69,7 @@ public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
                 .build().perform();
 
 
-        WebElement info = findElement(By.id("info"));
+        WebElement info = $("div").id("info");
         Assert.assertEquals("foo", info.getText());
 
 

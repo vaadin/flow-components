@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
-@Route("initial-open-on-click")
+@Route("vaadin-context-menu/initial-open-on-click")
 public class InitialOpenOnClickPage extends Div {
 
     public InitialOpenOnClickPage() {

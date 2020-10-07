@@ -11,12 +11,14 @@ public class CustomSearchIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") ;
+        getDriver().get(url);
     }
 
     @Test
     public void filterSearchBar() {
-        getDriver().get(getBaseURL() + "/customsearch");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/customsearch";
+        getDriver().get(url);
 
         GridElement grid = $(CrudElement.class).waitForFirst().getGrid();
         Assert.assertEquals(3, grid.getRowCount());

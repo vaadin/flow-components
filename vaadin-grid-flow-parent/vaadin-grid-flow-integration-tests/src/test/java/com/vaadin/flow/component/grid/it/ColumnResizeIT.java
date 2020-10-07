@@ -23,12 +23,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.annotations.RunLocally;
 
-@TestPath("column-resize-event")
+@TestPath("vaadin-grid/column-resize-event")
 public class ColumnResizeIT extends AbstractComponentIT {
 
     private GridElement grid;

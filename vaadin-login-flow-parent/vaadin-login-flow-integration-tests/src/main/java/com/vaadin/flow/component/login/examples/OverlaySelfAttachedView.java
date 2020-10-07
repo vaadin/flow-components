@@ -5,7 +5,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.Route;
 
-@Route
+@Route(value = "vaadin-login/overlayselfattached")
 public class OverlaySelfAttachedView extends Div {
 
     public OverlaySelfAttachedView() {

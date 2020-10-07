@@ -25,7 +25,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("update-editor")
+@Route("vaadin-grid/update-editor")
 public class UpdateEditorComponentPage extends Div {
 
     public UpdateEditorComponentPage() {

@@ -23,10 +23,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("column-auto-width")
+@TestPath("vaadin-grid/column-auto-width")
 public class ColumnAutoWidthIT extends AbstractComponentIT {
 
     private GridElement grid;

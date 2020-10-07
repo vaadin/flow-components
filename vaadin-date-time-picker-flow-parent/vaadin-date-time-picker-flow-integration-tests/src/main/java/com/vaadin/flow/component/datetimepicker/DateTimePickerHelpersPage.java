@@ -5,7 +5,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
-@Route("helper-text-component")
+@Route("vaadin-date-time-picker/helper-text-component")
 public class DateTimePickerHelpersPage extends Div {
 
     public DateTimePickerHelpersPage() {

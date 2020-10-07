@@ -23,7 +23,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("date-picker-in-a-grid-header")
+@Route("vaadin-date-picker/date-picker-in-a-grid-header")
 public class DatePickerInAGridHeaderPage extends Div {
 
     public DatePickerInAGridHeaderPage() {

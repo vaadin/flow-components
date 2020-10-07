@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("date-time-picker-it")
+@Route("vaadin-date-time-picker/date-time-picker-it")
 public class DateTimePickerPage extends Div {
 
     public DateTimePickerPage() {

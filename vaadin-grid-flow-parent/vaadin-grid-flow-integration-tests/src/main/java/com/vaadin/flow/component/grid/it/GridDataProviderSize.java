@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 /**
  * @author Vaadin Ltd.
  */
-@Route("grid-data-provider-size")
+@Route("vaadin-grid/grid-data-provider-size")
 public class GridDataProviderSize extends Div {
 
     public GridDataProviderSize() {

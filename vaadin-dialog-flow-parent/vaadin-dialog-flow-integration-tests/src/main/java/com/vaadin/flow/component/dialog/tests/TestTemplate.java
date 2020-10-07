@@ -28,8 +28,8 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 /**
  * Simple template example.
  */
-@Tag("test-template")
-@JsModule("./src/test-template.js")
+@Tag("vaadin-dialog-flow-test-template")
+@JsModule("./src/vaadin-dialog-flow-test-template.js")
 @HtmlImport("frontend://src/test-template.html")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 

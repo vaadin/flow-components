@@ -27,7 +27,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
-@Route("dynamic-editor-keyboard")
+@Route("vaadin-grid/dynamic-editor-keyboard")
 public class DynamicEditorKBNavigationPage extends Div {
 
     public DynamicEditorKBNavigationPage() {

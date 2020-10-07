@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
 import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
 import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
 
-@Route("treegrid-huge-tree-navigation")
+@Route("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationPage extends Div {
 
     private TreeGrid<String> treeGrid;

@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("dialog-template-test")
+@Route("vaadin-dialog/dialog-template-test")
 public class DialogWithTemplatePage extends Div {
 
     private Dialog dialog;

@@ -41,7 +41,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.router.Route;
 
-@Route(TreeGridBasicFeaturesPage.VIEW)
+@Route("vaadin-grid/" + TreeGridBasicFeaturesPage.VIEW)
 public class TreeGridBasicFeaturesPage extends Div {
 
     public static final String VIEW = "treegrid-basic-features";

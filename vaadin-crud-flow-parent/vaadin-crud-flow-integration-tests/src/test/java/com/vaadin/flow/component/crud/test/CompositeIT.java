@@ -11,7 +11,8 @@ public class CompositeIT extends AbstractParallelTest {
 
     @Test
     public void compositeTouchesDirtyState() {
-        getDriver().get(getBaseURL() + "/composite");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/composite";
+        getDriver().get(url);
 
         final CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.getNewItemButton().get().click();

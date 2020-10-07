@@ -10,7 +10,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
-@Route("FeaturesDiy")
+@Route("vaadin-confirm-dialog/FeaturesDiy")
 @BodySize
 public class FeaturesDiy extends Features {
 

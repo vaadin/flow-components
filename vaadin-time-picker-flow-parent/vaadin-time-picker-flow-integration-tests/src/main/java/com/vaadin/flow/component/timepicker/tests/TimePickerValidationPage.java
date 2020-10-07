@@ -27,7 +27,7 @@ import java.time.LocalTime;
 /**
  * View for testing validation with {@link TimePicker}.
  */
-@Route("time-picker-validation")
+@Route("vaadin-time-picker/time-picker-validation")
 public class TimePickerValidationPage extends ValidationTestView {
 
     public TimePickerValidationPage() {

@@ -31,7 +31,7 @@ import com.vaadin.flow.testutil.TestPath;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPath("treegrid-basic-features")
+@TestPath("vaadin-grid/treegrid-basic-features")
 public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
 
     @Parameters

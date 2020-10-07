@@ -17,7 +17,7 @@ package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +32,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 /**
  * Integration tests for {@link EmailField}.
  */
-@TestPath("email-field-test")
+@TestPath("vaadin-text-field/email-field-test")
 public class EmailFieldPageIT extends AbstractComponentIT {
 
     @Before

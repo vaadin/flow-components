@@ -13,7 +13,7 @@ import com.vaadin.flow.router.Route;
 /**
  * vaadin/vaadin-combo-box-flow#296 - Filtering problem using slow DataProvider
  */
-@Route("filter-debounce")
+@Route("vaadin-combo-box/filter-debounce")
 public class FilterDebouncePage extends VerticalLayout {
 
     public FilterDebouncePage() {

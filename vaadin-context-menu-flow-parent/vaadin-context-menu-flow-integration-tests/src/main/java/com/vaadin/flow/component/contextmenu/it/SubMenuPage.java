@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
-@Route("sub-menu-test")
+@Route("vaadin-context-menu/sub-menu-test")
 public class SubMenuPage extends Div {
 
     private Paragraph target;

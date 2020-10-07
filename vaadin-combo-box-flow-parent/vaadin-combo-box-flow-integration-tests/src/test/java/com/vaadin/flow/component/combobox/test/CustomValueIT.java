@@ -26,7 +26,7 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-@TestPath("custom-value")
+@TestPath("vaadin-combo-box/custom-value")
 public class CustomValueIT extends AbstractComboBoxIT {
 
     ComboBoxElement combo;

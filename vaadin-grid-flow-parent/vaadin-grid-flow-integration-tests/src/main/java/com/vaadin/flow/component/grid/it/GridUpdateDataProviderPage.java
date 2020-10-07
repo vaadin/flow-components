@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd.
  */
-@Route("grid-page")
+@Route("vaadin-grid/grid-page")
 public class GridUpdateDataProviderPage extends Div {
 
     public static class Pojo {

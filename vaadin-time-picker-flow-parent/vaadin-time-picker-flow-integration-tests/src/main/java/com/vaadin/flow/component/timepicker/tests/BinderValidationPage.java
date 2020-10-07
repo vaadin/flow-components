@@ -24,7 +24,7 @@ import com.vaadin.flow.router.Route;
 import javax.validation.constraints.NotNull;
 import java.time.LocalTime;
 
-@Route("binder-validation")
+@Route("vaadin-time-picker/binder-validation")
 public class BinderValidationPage extends Div {
 
     public static final String BINDER_ERROR_MSG = "binder";

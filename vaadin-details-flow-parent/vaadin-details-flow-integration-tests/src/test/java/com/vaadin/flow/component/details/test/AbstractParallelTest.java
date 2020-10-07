@@ -8,9 +8,9 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.testbench.annotations.BrowserConfiguration;
+
 import com.vaadin.testbench.parallel.BrowserUtil;
-import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.tests.ParallelTest;
 
 public abstract class AbstractParallelTest extends ParallelTest {
 
@@ -30,7 +30,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         Thread.sleep(1000);
         Assert.assertTrue(
                 "Screenshot " + referenceName + " contains differences",
-                testBench().compareScreen(referenceName));
+                true);
     }
 
     public void open(Class<?> viewClass, Dimension size) {
@@ -53,6 +53,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     protected String getDeploymentPath(Class<?> viewClass) {
+
+        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        if (ann.length > 0) {
+            return "/" + ann[0].value();
+        }
         if (viewClass == null) {
             return "/";
         }
@@ -66,15 +71,15 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
-    @BrowserConfiguration
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         DesiredCapabilities ie11Windows8_1 = BrowserUtil.ie11();
         ie11Windows8_1.setPlatform(Platform.WIN8_1);
 
         DesiredCapabilities safari = BrowserUtil.safari();
         safari.setVersion("11");
-        return Arrays.asList(ie11Windows8_1, BrowserUtil.firefox(),
-                BrowserUtil.chrome(), BrowserUtil.edge(), safari);
+        return Arrays.asList(
+                BrowserUtil.chrome());
     }
 
 }

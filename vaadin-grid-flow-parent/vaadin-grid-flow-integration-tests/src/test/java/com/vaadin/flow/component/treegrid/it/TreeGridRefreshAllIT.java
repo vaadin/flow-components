@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("treegrid-refresh-all")
+@TestPath("vaadin-grid/treegrid-refresh-all")
 public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
 
     private WebElement refreshAllButton;

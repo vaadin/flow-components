@@ -21,7 +21,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
-@Route("required-field-custom-validator")
+@Route("vaadin-text-field/required-field-custom-validator")
 public class RequiredTextFieldPageWithCustomServerSideValidator extends Div {
 
     public static class StringWrapper {

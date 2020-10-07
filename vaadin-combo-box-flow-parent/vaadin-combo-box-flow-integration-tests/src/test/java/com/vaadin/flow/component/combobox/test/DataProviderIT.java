@@ -23,10 +23,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("data-provider")
+@TestPath("vaadin-combo-box/data-provider")
 public class DataProviderIT extends AbstractComponentIT {
     @Before
     public void init() {
