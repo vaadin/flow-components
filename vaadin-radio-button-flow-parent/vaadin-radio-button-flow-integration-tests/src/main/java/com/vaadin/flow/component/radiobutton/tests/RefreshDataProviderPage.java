@@ -22,22 +22,23 @@ import java.util.List;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-radio-button/refresh-items")
-public class RefreshItemsPage extends Div {
+@Route("vaadin-radio-button/refresh-data-provider")
+public class RefreshDataProviderPage extends Div {
 
-    public RefreshItemsPage() {
+    public RefreshDataProviderPage() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar"));
-        group.setItems(items);
+        group.setDataProvider(new ListDataProvider<>(items));
 
         NativeButton button = new NativeButton("Update items", e -> {
             items.add("baz");
             items.remove(0);
-            group.setItems(items);
+            group.getDataProvider().refreshAll();
         });
 
         button.setId("reset");

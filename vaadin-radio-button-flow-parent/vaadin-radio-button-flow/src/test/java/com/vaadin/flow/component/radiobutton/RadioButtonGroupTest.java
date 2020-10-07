@@ -16,16 +16,9 @@
 package com.vaadin.flow.component.radiobutton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,21 +27,15 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
-
 public class RadioButtonGroupTest {
 
     private static final String OUTER_HTML = "<vaadin-radio-button>\n <span>%s</span>\n</vaadin-radio-button>";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private class RadioButtunWithInitialValue extends
             GeneratedVaadinRadioGroup<RadioButtunWithInitialValue, String> {
@@ -186,13 +173,11 @@ public class RadioButtonGroupTest {
         ItemHelper item1 = new ItemHelper("foo", "01");
         ItemHelper item2 = new ItemHelper("baz", "02");
 
-        RadioButtonGroupListDataView<ItemHelper> dataView = group.setItems(item1, item2);
+        group.setItems(item1, item2);
 
         item1.setName("zoo");
         item2.setName("bar");
-        dataView.refreshItem(item1);
-        dataView.refreshItem(item2);
-
+        group.getDataProvider().refreshAll();
 
         List<Component> components = group.getChildren()
                 .collect(Collectors.toList());
@@ -214,11 +199,11 @@ public class RadioButtonGroupTest {
         ItemHelper item1 = new ItemHelper("foo", "01");
         ItemHelper item2 = new ItemHelper("baz", "02");
 
-        RadioButtonGroupListDataView<ItemHelper> dataView = group.setItems(item1, item2);
+        group.setItems(item1, item2);
 
         item1.setName("zoo");
         item2.setName("bar");
-        dataView.refreshItem(item2);
+        group.getDataProvider().refreshItem(item2);
 
         List<Component> components = group.getChildren()
                 .collect(Collectors.toList());
@@ -254,26 +239,5 @@ public class RadioButtonGroupTest {
         RadioButtunWithInitialValue field = Component.from(element,
                 RadioButtunWithInitialValue.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
-    }
-
-    @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(
-                "RadioButtonGroupListDataView only supports 'ListDataProvider' " +
-                        "or it's subclasses, but was given a " +
-                        "'AbstractBackEndDataProvider'");
-
-        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
-        final RadioButtonGroupListDataView<String> listDataView = radioButtonGroup
-                .setItems(Arrays.asList("one", "two"));
-
-        DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Stream.of("one"),
-                        query -> 1);
-
-        radioButtonGroup.setItems(dataProvider);
-
-        radioButtonGroup.getListDataView();
     }
 }
