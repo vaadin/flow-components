@@ -1,0 +1,9 @@
+This Add-on component ("Software") to Vaadin Framework is distributed
+under the terms of Commercial Vaadin Add-On License version 3.0
+("CVALv3") included as LICENSE.txt in this software package.
+
+You must either accept the terms of the above mentioned license agreement
+or delete the Software immediately. 
+
+This software may also be available for download under alternative
+licenses at http://vaadin.com/directory.
