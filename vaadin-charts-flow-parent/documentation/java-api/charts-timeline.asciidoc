@@ -1,0 +1,95 @@
+---
+title: Timeline
+order: 8
+layout: page
+---
+
+[[charts.timeline]]
+= Timeline
+
+A charts timeline feature allows selecting different time ranges for which to display the chart data,
+as well as navigating between such ranges. It is especially useful when working with large time
+<<dummy/../../../charts/java-api/charts-basic-use#charts.basic-use.data, `series`>>.
+Adding a timeline to your chart is very easy - just set the 'timeline' property to 'true',
+that is, call [methodname]#setTimeline(true)#.
+You can enable the timeline in a chart that displays one or more time series.
+Most of the chart types support the timeline.
+There are few exceptions which are listed here:
+<<charts-charttypes#charts.charttypes.pie, `pie`>>,
+<<charts-charttypes#charts.charttypes.gauge, `gauge`>>,
+<<charts-charttypes#charts.charttypes.solidgauge, `solidgauge`>>,
+<<charts-charttypes#charts.charttypes.funnel, `pyramid`>>, and
+<<charts-charttypes#charts.charttypes.funnel, `funnel`>>.
+
+You can change the time range using the navigator at the bottom of the chart.
+To be able to use the navigator, the X values of the corresponding data series should be of the type [classname]#Date#.
+Also integer values can be used, in which case they are interpreted as milliseconds since the 01/01/1970 epoch.
+If you have multiple series, the first one is presented in the navigator.
+
+[[figure.charts.timeline.timeline-intro]]
+.Vaadin chart with a timeline.
+image::img/timeline_intro_screen.png[]
+
+Another way to change the time range is to use the range selector. The range selector includes
+a set of predefined time ranges for easier navigation, for example, 1 month, 3 month, 6 month etc. To specify a custom time range, you can
+use range selector text fields for setting start and end of the time interval.
+
+You can configure the range navigator and selector in the chart configuration.
+To show or hide the navigator, call [methodname]#setEnabled()#. You can use [classname]#Navigator# and
+[classname]#PlotOptionsSeries# to change the appearance of the navigator.
+[source, java]
+----
+Navigator navigator = configuration.getNavigator();
+navigator.setEnabled(true);
+navigator.setMargin(75);
+----
+
+You can specify the index of the button to appear pre-selected with the [methodname]#setSelected(index)# method.
+
+[source, java]
+----
+RangeSelector rangeSelector = new RangeSelector();
+rangeSelector.setSelected(4);
+
+Chart chart = new Chart();
+chart.setTimeline(true);
+Configuration configuration = chart.getConfiguration();
+configuration.setRangeSelector(rangeSelector);
+chart.drawChart();
+----
+You can customize the date format for the time range input fields by specifying formatter strings
+for displaying and editing the dates, as well as a corresponding JavaScript parser
+function to parse edited values:
+
+[source, java]
+----
+RangeSelector rangeSelector = new RangeSelector();
+rangeSelector.setInputDateFormat("%YYYY-%MM-%DD:%H:%M");
+rangeSelector.setInputEditDateFormat("%YYYY-%MM-%DD:%H:%M");
+rangeSelector.setInputDateParser(
+    "function(value) {" +
+    "value = value.split(/[:\\-]/);\n" +
+    "return Date.UTC(\n" +
+        "   parseInt(value[0], 10),\n" +
+        "   parseInt(value[1], 10),\n" +
+        "   parseInt(value[2], 10),\n" +
+        "   parseInt(value[3], 10),\n" +
+        "   parseInt(value[4], 10),\n" +
+    ");}");
+configuration.setRangeSelector(rangeSelector);
+----
+Timeline charts allow comparing the charts series against each other.
+Setting the compare property to either [constant]#Compare.PERCENT# or [constant]#Compare.VALUE# will show the difference between
+charts data series in percentage or absolute values respectively.
+[source, java]
+----
+PlotOptionsSeries plotOptions = new PlotOptionsSeries();
+plotOptions.setCompare(Compare.PERCENT);
+configuration.setPlotOptions(plotOptions);
+----
+[[figure.charts.timeline.timeline-compare]]
+.Vaadin chart with a percentage comparison between series.
+image::img/timeline_charts_compare.png[]
+
+You can find more examples in the Timeline section of
+https://demo.vaadin.com/charts/CompareMultipleSeries[Vaadin Charts Demo].
