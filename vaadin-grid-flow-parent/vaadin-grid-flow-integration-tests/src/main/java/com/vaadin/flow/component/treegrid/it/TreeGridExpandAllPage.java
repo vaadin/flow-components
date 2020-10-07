@@ -70,7 +70,14 @@ public class TreeGridExpandAllPage extends Div {
         treeGrid.addCollapseListener(e -> treeGrid.recalculateColumnWidths());
         treeGrid.addExpandListener(e -> treeGrid.recalculateColumnWidths());
 
-        add(treeGrid);
+        NativeButton expandTree = new NativeButton("Expand and scroll",
+                event -> treeGrid.expand("Granddad 0",
+                        "Dad is very long and large 0/0",
+                        "Dad is very long and large 0/1",
+                        "Dad is very long and large 0/2"));
+        expandTree.setId("expand-tree");
+
+        add(treeGrid, expandTree);
     }
     private void initializeDataProvider() {
         TreeData<String> data = new TreeData<>();
