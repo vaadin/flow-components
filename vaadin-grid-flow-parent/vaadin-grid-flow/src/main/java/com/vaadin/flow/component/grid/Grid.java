@@ -15,26 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -120,11 +100,30 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Server-side component for the {@code <vaadin-grid>} element.
@@ -2121,6 +2120,28 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return columnLayers.get(0).asFooterRow();
         }
         return insertColumnLayer(getLastFooterLayerIndex() + 1).asFooterRow();
+    }
+
+
+    /**
+     * Removes all footer rows of the grid.
+     * <p>
+     * It can be used to recalculate the footer rows. Therefore you have to remove all footers and the recalculated
+     * footer rows.
+     */
+    public void removeAllFooterRows() {
+        columnLayers.stream()
+                .filter(ColumnLayer::isFooterRow)
+                .map(columnLayer -> {
+                    if (columnLayer.isHeaderRow()) {
+                        columnLayer.removeFooterRow();
+                        return null;
+                    } else {
+                        return columnLayer;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .forEach(this::removeColumnLayer);
     }
 
     protected List<ColumnLayer> getColumnLayers() {

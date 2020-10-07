@@ -189,6 +189,13 @@ class ColumnLayer implements Serializable {
     }
 
     /**
+     * Removes the FooterRow of this layer.
+     */
+    protected void removeFooterRow() {
+        footerRow = null;
+    }
+
+    /**
      * Gets the Grid that owns this layer of columns.
      * 
      * @return the grid that owns this layer
