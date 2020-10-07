@@ -1,0 +1,31 @@
+<!-- Dependency resources -->
+<link rel="import"
+      href="bower_components/polymer/polymer-element.html">
+<!-- Added Web Component dependencies to make Vaadin Designer preview work -->
+<link rel="import"
+      href="bower_components/vaadin-button/src/vaadin-button.html">
+<link rel="import" href="bower_components/iron-icon/iron-icon.html">
+
+<!-- Defines the reviews-list element -->
+<dom-module id="template-button">
+    <template>
+
+        <vaadin-button id="button">
+            Template caption
+        </vaadin-button>
+
+        <vaadin-button id="icon-button">
+            <iron-icon icon="lumo:edit"></iron-icon>
+            <span>Template with icon</span>
+        </vaadin-button>
+    </template>
+    <script>
+        class TemplateButton extends Polymer.Element {
+            static get is() {
+                return 'template-button'
+            }
+        }
+
+        customElements.define(TemplateButton.is, TemplateButton);
+    </script>
+</dom-module>
