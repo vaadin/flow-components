@@ -1,0 +1,24 @@
+bin
+target
+integration-tests
+pom.xml.bak
+
+# Eclipse
+.project
+.settings
+.classpath
+*.iml
+
+# Idea files
+.idea/
+*.iml
+
+.vscode
+types.d.ts
+tsconfig.json
+webpack.*
+node_modules
+.driver
+package*json
+pnpm*
+error-screenshots
