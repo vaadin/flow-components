@@ -2,7 +2,6 @@
 /**
  * Update POMs for all modules of a component.
  * Example
- *   git clone git@github.com:vaadin/vaadin-button-flow.git
  *   ./scripts/updateJavaPOMs.js vaadin-button-flow-parent
  */
 
@@ -13,6 +12,7 @@ const path = require('path');
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
 const name = mod.replace('-flow-parent', '');
+const propertyName = artifactId2versionName(name);
 const componentName = name.replace('vaadin-', '');
 const versionName = `version.${name.replace(/-/g, '.')}`;
 const desc = name.split('-').map(w => w.replace(/./, m => m.toUpperCase())).join(' ');
@@ -36,7 +36,12 @@ function artifactId2versionName(artifactId) {
 async function readRootPoms() {
   rootJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
   rootVersion = rootJs.project.version[0];
-  originalVersion = (await xml2js.parseStringPromise(fs.readFileSync(`${mod}/pom.xml`, 'utf8'))).project.version[0];
+  const projectVersion = (await xml2js.parseStringPromise(fs.readFileSync(`${mod}/pom.xml`, 'utf8'))).project.version;
+  if (projectVersion) {
+    originalVersion = projectVersion[0];
+  } else {
+    originalVersion = rootJs.project.properties[0][propertyName][0];
+  }
   oldVersionSchema = (/^14\.[3-4]/.test(rootVersion));
   if (oldVersionSchema) {
     componentVersion = `\$\{${artifactId2versionName(name)}\}`;
@@ -75,7 +80,11 @@ function renamePlugin(js){
 
 function setDependenciesVersion(dependencies) {
   dependencies && dependencies[0] && dependencies[0].dependency.forEach(dep => {
-    if (dep.groupId[0] === 'com.vaadin' && /^vaadin-.*(flow.*|testbench)$/.test(dep.artifactId[0])) {
+    if (dep.groupId[0] === 'com.vaadin' 
+      && /^vaadin-.*(flow|testbench)$/.test(dep.artifactId[0])
+      && !/shared/.test(dep.artifactId[0])
+      ) {
+      console.log(dep.artifactId[0])
       version = oldVersionSchema ? artifactId2versionName(dep.artifactId[0].replace(/-(flow.*|testbench)$/, '')) : 'project.version';
       dep.version = [`\$\{${version}\}`];
     }
@@ -113,13 +122,7 @@ async function consolidatePomParent() {
 }
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
-  await consolidate(template, `${mod}/${name}-flow/pom.xml`, js => {
-    js.project.dependencies[0].dependency.push({
-      groupId: ['org.slf4j'],
-      artifactId: ['slf4j-simple'],
-      scope: ['test']
-    })
-  });
+  await consolidate(template, `${mod}/${name}-flow/pom.xml`);
 }
 async function consolidatePomTB() {
   await consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
@@ -128,19 +131,11 @@ async function consolidatePomDemo() {
   await consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
 }
 async function consolidatePomIT() {
-  await consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`, js => {
-    js.project.dependencies[0].dependency.push({
-      groupId: ['com.vaadin'],
-      artifactId: ['vaadin-flow-components-shared'],
-      version: [oldVersionSchema ? '${vaadin.flow.components.shared.version}' : '${project.version}'],
-      scope: ['test']
-    });
-  });
+  await consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
 }
 
 async function saveRootPom() {
   if (oldVersionSchema) {
-    const propertyName = artifactId2versionName(name);
     console.log(`updating ${propertyName} = ${originalVersion} in root pom.xml`);
     rootJs.project.properties[0]['vaadin.flow.components.shared.version'] = [rootVersion];
     rootJs.project.properties[0][propertyName] = [originalVersion];
