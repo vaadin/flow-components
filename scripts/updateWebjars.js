@@ -19,32 +19,31 @@ async function computeModules() {
 }
 
 /**
- * Update webjars for one module
+ * Update webjars for one pom file
  */
-async function updateWebjars(moduleName){
+async function updateWebjars(pom){
 
     const vaadinWebjarGroupId = `org.webjars.bowergithub.vaadin`;
-    updateFile = false;
+    const updateFile = false;
+    const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
+    name = pomJs.project.artifactId[0];
 
-    subModule = moduleName.replace('-parent','');
-    pom = './' + moduleName + '/' + subModule + '/pom.xml';
-    pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
     //collect vaadin webjars
-    webjars = pomJs.project.dependencies[0].dependency.filter(dep => dep.groupId == vaadinWebjarGroupId);
+    const deps = pomJs.project.dependencyManagement ? pomJs.project.dependencyManagement[0].dependencies : pomJs.project.dependencies; 
+    const webjars = deps[0].dependency.filter(dep => dep.groupId == vaadinWebjarGroupId);
 
     for (j=0; j<webjars.length; j++){
-        
-        webjarName = webjars[j].artifactId +'';
-        webjarVersion = webjars[j].version +'';
-        updatedVersion = await findUpdatedVersion(webjarName, webjarVersion);
+        const webjarName = webjars[j].artifactId +'';
+        const webjarVersion = webjars[j].version +'';
+        const updatedVersion = await findUpdatedVersion(webjarName, webjarVersion);
         
         if (updatedVersion != webjarVersion){
-            updateFile = true;
+            const updateFile = true;
             webjars[j].version = updatedVersion; 
             pomJs.project.dependencies[0].dependency.filter(dep => {
                 if (dep.artifactId == webjarName){
                     dep.version = updatedVersion;
-                    console.log('\x1b[33m', "In "+subModule+',' +dep.artifactId+ " has been updated from "+ webjarVersion +" to " + updatedVersion);
+                    console.log('\x1b[33m', "In "+name+',' +dep.artifactId+ " has been updated from "+ webjarVersion +" to " + updatedVersion);
                 }
             })
         }
@@ -55,9 +54,8 @@ async function updateWebjars(moduleName){
         console.log('\x1b[32m', `Writing ${pom}`);
         fs.writeFileSync(pom, updatedPom + '\n', 'utf8'); 
     } else {
-        console.log("\x1b[0m",'No need to updated '+ subModule);
+        console.log("\x1b[0m",'No need to updated '+ name);
     }
-       
 }
 
 /**
@@ -100,8 +98,11 @@ async function getMetadata(name) {
 async function main() {
   await computeModules();
   for (i = 0; i < modules.length; i++){
-    await updateWebjars(modules[i]);
+    name = modules[i].replace('-parent','');
+    pom = './' + modules[i] + '/' + name + '/pom.xml';
+    await updateWebjars(pom);
   }
+  await updateWebjars('./pom.xml');
 }
 
 main();

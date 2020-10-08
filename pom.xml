@@ -79,9 +79,6 @@
     <vaadin.crud.version>2.3-SNAPSHOT</vaadin.crud.version>
     <vaadin.grid.pro.version>2.2-SNAPSHOT</vaadin.grid.pro.version>
     <vaadin.rich.text.editor.version>2.3-SNAPSHOT</vaadin.rich.text.editor.version>
-    <vaadin.usage.statistics.version>2.1.0</vaadin.usage.statistics.version>
-    <vaadin.development.mode.detector.version>2.0.4</vaadin.development.mode.detector.version>
-    <vaadin.element.mixin.version>2.4.2</vaadin.element.mixin.version>
   </properties>
   <modules>
     <module>vaadin-flow-components-shared</module>
@@ -603,17 +600,17 @@
       <dependency>
         <groupId>org.webjars.bowergithub.vaadin</groupId>
         <artifactId>vaadin-development-mode-detector</artifactId>
-        <version>${vaadin.development.mode.detector.version}</version>
+        <version>2.0.4</version>
       </dependency>
       <dependency>
         <groupId>org.webjars.bowergithub.vaadin</groupId>
         <artifactId>vaadin-element-mixin</artifactId>
-        <version>${vaadin.element.mixin.version}</version>
+        <version>2.4.2</version>
       </dependency>
       <dependency>
         <groupId>org.webjars.bowergithub.vaadin</groupId>
         <artifactId>vaadin-usage-statistics</artifactId>
-        <version>${vaadin.usage.statistics.version}</version>
+        <version>2.1.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
