@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-time-picker-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-time-picker-flow-demo</artifactId>
-  <version>${vaadin.time.picker.version}</version>
   <packaging>${packaging.type}</packaging>
   <name>Vaadin Time Picker Flow Demo</name>
   <dependencies>
@@ -34,12 +33,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-time-picker-flow</artifactId>
-      <version>${vaadin.time.picker.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${vaadin.combo.box.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-list-box-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-list-box-integration-tests</artifactId>
-  <version>${vaadin.list.box.version}</version>
   <packaging>war</packaging>
   <name>Vaadin List Box Integration Tests</name>
   <properties>
@@ -23,12 +22,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-list-box-testbench</artifactId>
-      <version>${vaadin.list.box.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-list-box-flow</artifactId>
-      <version>${vaadin.list.box.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -68,7 +67,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-list-box-flow-demo</artifactId>
-      <version>${vaadin.list.box.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -78,7 +77,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

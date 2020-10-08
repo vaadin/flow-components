@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-charts-integration-tests</artifactId>
-  <version>${vaadin.charts.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Charts Integration Tests</name>
   <properties>
@@ -18,7 +17,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-charts-flow-demo</artifactId>
-      <version>${vaadin.charts.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -33,19 +32,19 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-charts-testbench</artifactId>
-      <version>${vaadin.charts.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
-      <version>${vaadin.button.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-checkbox-testbench</artifactId>
-      <version>${vaadin.checkbox.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -57,7 +56,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

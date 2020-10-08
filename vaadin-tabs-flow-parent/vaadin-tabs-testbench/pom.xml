@@ -4,10 +4,9 @@
   <parent>
     <artifactId>vaadin-tabs-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-tabs-testbench</artifactId>
-  <version>${vaadin.tabs.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Tabs Testbench API</name>
   <dependencies>

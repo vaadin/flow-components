@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-board-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-board-integration-tests</artifactId>
-  <version>${vaadin.board.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Board Integration Tests</name>
   <properties>
@@ -39,7 +38,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-board-flow</artifactId>
-      <version>${vaadin.board.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -50,7 +49,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-board-testbench</artifactId>
-      <version>${vaadin.board.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -62,7 +61,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
