@@ -39,7 +39,7 @@ async function readRootPoms() {
   const projectVersion = (await xml2js.parseStringPromise(fs.readFileSync(`${mod}/pom.xml`, 'utf8'))).project.version;
   if (projectVersion) {
     originalVersion = projectVersion[0];
-  } else {
+  } else if (rootJs.project.properties[0][propertyName]) {
     originalVersion = rootJs.project.properties[0][propertyName][0];
   }
   oldVersionSchema = (/^14\.[3-4]/.test(rootVersion));
@@ -104,7 +104,11 @@ async function consolidate(template, pom, cb) {
 
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
   tplJs.project.parent[0].version = [rootVersion];
-  tplJs.project.version = [componentVersion];
+  if (oldVersionSchema) {
+    tplJs.project.version = [componentVersion];
+  } else {
+    delete tplJs.project.version;
+  }
   cb && cb(tplJs);
 
   const xml = new xml2js.Builder().buildObject(tplJs);
