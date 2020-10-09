@@ -29,8 +29,12 @@ async function updateWebjars(pom){
     name = pomJs.project.artifactId[0];
 
     //collect vaadin webjars
-    const deps = pomJs.project.dependencyManagement ? pomJs.project.dependencyManagement[0].dependencies : pomJs.project.dependencies; 
-    const webjars = deps[0].dependency.filter(dep => dep.groupId == vaadinWebjarGroupId);
+    //if there is dependencyManagement section, collect both places
+    const deps = pomJs.project.dependencyManagement ? 
+          [].concat(pomJs.project.dependencyManagement[0].dependencies[0].dependency, pomJs.project.dependencies[0].dependency): 
+          pomJs.project.dependencies[0].dependency;
+
+    const webjars = deps.filter(dep => dep.groupId == vaadinWebjarGroupId);
 
     for (j=0; j<webjars.length; j++){
         const webjarName = webjars[j].artifactId +'';
