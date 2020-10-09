@@ -597,44 +597,38 @@
         <version>${testbench.version}</version>
         <scope>test</scope>
       </dependency>
-	</dependencies>
-  </dependencyManagement>
-    <dependencies>
-	<!-- there should be a way to remove this when in npm-mode -->
-        <dependency>
-            <groupId>org.webjars.bowergithub.polymer</groupId>
-            <artifactId>polymer</artifactId>
-            <version>2.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.webcomponents</groupId>
-            <artifactId>webcomponentsjs</artifactId>
-            <version>1.2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.webcomponents</groupId>
-            <artifactId>shadycss</artifactId>
-            <version>1.5.0-1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-element-mixin</artifactId>
-            <!--  IMPORTANT NOTE: if you update this version check that
-               transitive dependencies (mvn dependency:tree) versions are
-               also the most recent ones: see below. At the moment these are
-               two deps "vaadin-usage-statistics" and
-               "vaadin-development-mode-detector"  -->
-            <version>2.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-usage-statistics</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-development-mode-detector</artifactId>
-            <version>2.0.4</version>
-        </dependency>
     </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.webjars.bowergithub.polymer</groupId>
+      <artifactId>polymer</artifactId>
+      <version>2.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bowergithub.webcomponents</groupId>
+      <artifactId>webcomponentsjs</artifactId>
+      <version>1.2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bowergithub.webcomponents</groupId>
+      <artifactId>shadycss</artifactId>
+      <version>1.5.0-1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bowergithub.vaadin</groupId>
+      <artifactId>vaadin-element-mixin</artifactId>
+      <version>2.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bowergithub.vaadin</groupId>
+      <artifactId>vaadin-usage-statistics</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bowergithub.vaadin</groupId>
+      <artifactId>vaadin-development-mode-detector</artifactId>
+      <version>2.0.4</version>
+    </dependency>
+  </dependencies>
 </project>
