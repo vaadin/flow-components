@@ -30,10 +30,10 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
             return;
           }
 
-        if (!this.itemCaches[scaledIndex]) {
-          this.doEnsureSubCacheForScaledIndex(scaledIndex);
-        }
-      })
+          if (!this.itemCaches[scaledIndex]) {
+            this.doEnsureSubCacheForScaledIndex(scaledIndex);
+          }
+        });
 
         ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
           if (!this.itemCaches[scaledIndex]) {
