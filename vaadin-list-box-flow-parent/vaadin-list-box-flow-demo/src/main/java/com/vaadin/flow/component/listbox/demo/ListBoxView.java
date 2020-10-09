@@ -49,10 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ListBoxView extends DemoView {
 
     private static final String DATA_VIEW = "Data View";
-    private static final String OPTION_ONE = "Option one";
-    private static final String OPTION_TWO = "Option two";
-    private static final String OPTION_THREE = "Option three";
-    private static final String OPTION_FOUR = "Option four";
     private static final String PRESENTATION = "Presentation";
 
     @Override
@@ -73,8 +69,8 @@ public class ListBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic usage
         ListBox<String> listBox = new ListBox<>();
-        listBox.setItems(OPTION_ONE, OPTION_TWO, OPTION_THREE);
-        listBox.setValue(OPTION_ONE);
+        listBox.setItems("Option one", "Option two", "Option three");
+        listBox.setValue("Option one");
         // end-source-example
 
         addCard("Basic usage", listBox);
@@ -84,9 +80,9 @@ public class ListBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Disabled item
         ListBox<String> listBox = new ListBox<>();
-        listBox.setItems(OPTION_ONE, OPTION_TWO, OPTION_THREE);
-        listBox.setValue(OPTION_ONE);
-        listBox.setItemEnabledProvider(item -> !OPTION_THREE.equals(item));
+        listBox.setItems("Option one", "Option two", "Option three");
+        listBox.setValue("Option one");
+        listBox.setItemEnabledProvider(item -> !"Option three".equals(item));
         // end-source-example
 
         addCard("Disabled item", listBox);
@@ -96,8 +92,8 @@ public class ListBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Multi select list box
         MultiSelectListBox<String> listBox = new MultiSelectListBox<>();
-        listBox.setItems(OPTION_ONE, OPTION_TWO, OPTION_THREE,
-                OPTION_FOUR);
+        listBox.setItems("Option one", "Option two", "Option three",
+                "Option four");
         // end-source-example
 
         addCard("Multi select list box", listBox);
@@ -181,13 +177,13 @@ public class ListBoxView extends DemoView {
     private void dataViewRefreshItem() {
         // begin-source-example
         // source-example-heading: Refresh Items
-        MultiSelectListBox<Employee> listBox = new MultiSelectListBox<>();
+        MultiSelectListBox<Employee> multiSelectListBox =
+                                                    new MultiSelectListBox<>();
         Employee employee1 = new Employee("Employee One");
         Employee employee2 = new Employee("Employee Two");
         Employee employee3 = new Employee("Employee Three");
-        ListBoxListDataView<Employee> dataView = listBox
-                .setItems(employee1, employee2, employee3);
-        listBox.setValue(createSet(employee3));
+        ListBoxListDataView<Employee> dataView = multiSelectListBox
+                                    .setItems(employee1, employee2, employee3);
 
         Button updateButton = new Button("Update second employee's name",
                 click -> {
@@ -196,7 +192,7 @@ public class ListBoxView extends DemoView {
                 });
         // end-source-example
 
-        addCard(DATA_VIEW, "Refresh Items", listBox, updateButton);
+        addCard(DATA_VIEW, "Refresh Items", multiSelectListBox, updateButton);
     }
 
     private void dataViewAddAndRemoveItem() {

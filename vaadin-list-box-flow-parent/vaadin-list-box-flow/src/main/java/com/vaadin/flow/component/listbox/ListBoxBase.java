@@ -37,6 +37,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -46,6 +47,7 @@ import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -140,8 +142,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      */
     @Deprecated
     public DataProvider<ITEM, ?> getDataProvider() {
-        return Optional.ofNullable(dataProvider).map(AtomicReference::get)
-                .orElse(null);
+        return dataProvider.get();
     }
 
     /**
@@ -285,12 +286,35 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Set a generic data provider for the ListBox to use and returns the base
+     * {@link ListBoxDataView} that provides API to get information on the items.
+     * <p>
+     * This method should be used only when the data provider type is not either
+     * {@link ListDataProvider} or {@link BackEndDataProvider}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     * @return ListBoxDataView providing information on the data
+     */
     @Override
     public ListBoxDataView<ITEM> setItems(DataProvider<ITEM, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getGenericDataView();
     }
 
+    /**
+     * Sets an in-memory data provider for the ListBox to use
+     * <p>
+     * Note! Using a {@link ListDataProvider} instead of a
+     * {@link InMemoryDataProvider} is recommended to get access to
+     * {@link ListBoxListDataView} API by using
+     * {@link HasListDataView#setItems(ListDataProvider)}.
+     *
+     * @param inMemoryDataProvider
+     *            InMemoryDataProvider to use, not <code>null</code>
+     * @return ListBoxDataView providing information on the data
+     */
     @Override
     public ListBoxDataView<ITEM> setItems(
             InMemoryDataProvider<ITEM> inMemoryDataProvider) {
@@ -312,10 +336,19 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         return setItems(convertedDataProvider);
     }
 
+    /**
+     * Sets a ListDataProvider for the ListBox to use and returns a
+     * {@link ListDataView} that provides information and allows operations on
+     * the items.
+     *
+     * @param listDataProvider
+     *            ListDataProvider providing items to the ListBox.
+     * @return ListBoxListDataView providing access to the items
+     */
     @Override
     public ListBoxListDataView<ITEM> setItems(
-            ListDataProvider<ITEM> dataProvider) {
-        setDataProvider(dataProvider);
+            ListDataProvider<ITEM> listDataProvider) {
+        setDataProvider(listDataProvider);
         return getListDataView();
     }
 

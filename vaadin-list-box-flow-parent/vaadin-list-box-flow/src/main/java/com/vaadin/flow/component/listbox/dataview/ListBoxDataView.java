@@ -31,7 +31,8 @@ import com.vaadin.flow.function.SerializableSupplier;
 public class ListBoxDataView<T> extends AbstractDataView<T> {
 
     /**
-     * Constructs a new DataView.
+     * Constructs a new generic data view for ListBox and verifies the passed
+     *       data provider is compatible with this data view implementation.
      *
      * @param dataProviderSupplier
      *            data provider supplier

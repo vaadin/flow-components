@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.CURRENT_ITEM_SPAN;

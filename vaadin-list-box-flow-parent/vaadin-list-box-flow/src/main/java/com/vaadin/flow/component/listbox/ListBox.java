@@ -58,8 +58,9 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
 
         List<VaadinItem<T>> itemComponents = listBox.getItemComponents();
         return IntStream.range(0, itemComponents.size()).filter(
-                i -> listBox.getItemId(selectedItem)
-                        .equals(listBox.getItemId(itemComponents.get(i).getItem())))
+                idx -> listBox.getItemId(selectedItem)
+                        .equals(listBox.getItemId(itemComponents.get(idx)
+                                .getItem())))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException(
                         "Could not find given value from the item set"));
     }
