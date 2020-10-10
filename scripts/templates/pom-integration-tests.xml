@@ -9,6 +9,7 @@
   </parent>
 
   <artifactId>component-integration-tests</artifactId>
+  <version>component</version>
   <packaging>war</packaging>
 
   <name>component Integration Tests</name>
