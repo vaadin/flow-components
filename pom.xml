@@ -45,7 +45,6 @@
     <osgi.bundle.description/>
     <vaadin.flow.components.shared.version>17.0-SNAPSHOT</vaadin.flow.components.shared.version>
     <vaadin.accordion.version>4.0-SNAPSHOT</vaadin.accordion.version>
-    <vaadin.avatar.version>undefined-SNAPSHOT</vaadin.avatar.version>
     <vaadin.app.layout.version>4.0-SNAPSHOT</vaadin.app.layout.version>
     <vaadin.button.version>4.0-SNAPSHOT</vaadin.button.version>
     <vaadin.checkbox.version>4.0-SNAPSHOT</vaadin.checkbox.version>
@@ -84,7 +83,6 @@
   <modules>
     <module>vaadin-flow-components-shared</module>
     <module>vaadin-accordion-flow-parent</module>
-    <module>vaadin-avatar-flow-parent</module>
     <module>vaadin-app-layout-flow-parent</module>
     <module>vaadin-button-flow-parent</module>
     <module>vaadin-checkbox-flow-parent</module>
