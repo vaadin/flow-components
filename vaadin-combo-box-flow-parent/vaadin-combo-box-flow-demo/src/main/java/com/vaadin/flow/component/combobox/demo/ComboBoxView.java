@@ -314,7 +314,7 @@ public class ComboBoxView extends DemoView {
     private void lazyLoadingWithCustomItemCountEstimate() {
         // @formatter:off
         // begin-source-example
-        // source-example-heading: Fast Scroll with Custom Item Count Estimate
+        // source-example-heading: Custom Item Count Estimate And Increase
         // PersonService can be found:
         // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
         // The backend will have 12345 items
@@ -355,7 +355,7 @@ public class ComboBoxView extends DemoView {
         //@formatter:on
 
         comboBox.setId("custom-item-count-estimate");
-        addCard("Lazy Loading", "Fast Scroll with Custom Item Count Estimate",
+        addCard("Lazy Loading", "Custom Item Count Estimate And Increase",
                 layout);
     }
 
