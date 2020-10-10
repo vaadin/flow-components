@@ -7,6 +7,7 @@
     <version>17.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-crud-flow</artifactId>
+  <version>${vaadin.crud.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Crud</name>
   <dependencies>
@@ -33,12 +34,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.grid.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

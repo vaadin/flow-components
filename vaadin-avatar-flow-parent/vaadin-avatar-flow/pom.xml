@@ -7,6 +7,7 @@
     <version>17.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-avatar-flow</artifactId>
+  <version>${vaadin.avatar.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Avatar</name>
   <dependencies>

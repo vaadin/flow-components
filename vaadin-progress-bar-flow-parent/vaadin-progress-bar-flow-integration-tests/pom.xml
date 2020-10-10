@@ -7,6 +7,7 @@
     <version>17.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-progress-bar-integration-tests</artifactId>
+  <version>${vaadin.progress.bar.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Progress Bar Integration Tests</name>
   <properties>
@@ -22,12 +23,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-progress-bar-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.progress.bar.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-progress-bar-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.progress.bar.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -52,7 +53,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-progress-bar-flow-demo</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.progress.bar.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -62,7 +63,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

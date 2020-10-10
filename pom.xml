@@ -43,6 +43,43 @@
     <osgi.bundle.package.private/>
     <osgi.bundle.bundle.activator/>
     <osgi.bundle.description/>
+    <vaadin.flow.components.shared.version>17.0-SNAPSHOT</vaadin.flow.components.shared.version>
+    <vaadin.accordion.version>4.0-SNAPSHOT</vaadin.accordion.version>
+    <vaadin.avatar.version>undefined-SNAPSHOT</vaadin.avatar.version>
+    <vaadin.app.layout.version>4.0-SNAPSHOT</vaadin.app.layout.version>
+    <vaadin.button.version>4.0-SNAPSHOT</vaadin.button.version>
+    <vaadin.checkbox.version>4.0-SNAPSHOT</vaadin.checkbox.version>
+    <vaadin.combo.box.version>5.0-SNAPSHOT</vaadin.combo.box.version>
+    <vaadin.context.menu.version>5.0-SNAPSHOT</vaadin.context.menu.version>
+    <vaadin.custom.field.version>5.0-SNAPSHOT</vaadin.custom.field.version>
+    <vaadin.date.picker.version>4.0-SNAPSHOT</vaadin.date.picker.version>
+    <vaadin.date.time.picker.version>3.0-SNAPSHOT</vaadin.date.time.picker.version>
+    <vaadin.details.version>4.0-SNAPSHOT</vaadin.details.version>
+    <vaadin.dialog.version>4.0-SNAPSHOT</vaadin.dialog.version>
+    <vaadin.form.layout.version>4.0-SNAPSHOT</vaadin.form.layout.version>
+    <vaadin.grid.version>6.0-SNAPSHOT</vaadin.grid.version>
+    <vaadin.icons.version>4.0-SNAPSHOT</vaadin.icons.version>
+    <vaadin.iron.list.version>4.0-SNAPSHOT</vaadin.iron.list.version>
+    <vaadin.list.box.version>4.0-SNAPSHOT</vaadin.list.box.version>
+    <vaadin.login.version>4.0-SNAPSHOT</vaadin.login.version>
+    <vaadin.menu.bar.version>3.0-SNAPSHOT</vaadin.menu.bar.version>
+    <vaadin.notification.version>4.0-SNAPSHOT</vaadin.notification.version>
+    <vaadin.ordered.layout.version>4.0-SNAPSHOT</vaadin.ordered.layout.version>
+    <vaadin.progress.bar.version>4.0-SNAPSHOT</vaadin.progress.bar.version>
+    <vaadin.radio.button.version>4.0-SNAPSHOT</vaadin.radio.button.version>
+    <vaadin.select.version>4.0-SNAPSHOT</vaadin.select.version>
+    <vaadin.split.layout.version>4.0-SNAPSHOT</vaadin.split.layout.version>
+    <vaadin.tabs.version>4.0-SNAPSHOT</vaadin.tabs.version>
+    <vaadin.text.field.version>4.0-SNAPSHOT</vaadin.text.field.version>
+    <vaadin.time.picker.version>4.0-SNAPSHOT</vaadin.time.picker.version>
+    <vaadin.upload.version>4.0-SNAPSHOT</vaadin.upload.version>
+    <vaadin.board.version>5.0-SNAPSHOT</vaadin.board.version>
+    <vaadin.charts.version>9.0-SNAPSHOT</vaadin.charts.version>
+    <vaadin.confirm.dialog.version>4.0-SNAPSHOT</vaadin.confirm.dialog.version>
+    <vaadin.cookie.consent.version>4.0-SNAPSHOT</vaadin.cookie.consent.version>
+    <vaadin.crud.version>4.0-SNAPSHOT</vaadin.crud.version>
+    <vaadin.grid.pro.version>4.0-SNAPSHOT</vaadin.grid.pro.version>
+    <vaadin.rich.text.editor.version>4.0-SNAPSHOT</vaadin.rich.text.editor.version>
   </properties>
   <modules>
     <module>vaadin-flow-components-shared</module>
@@ -418,7 +455,7 @@
               </configuration>
             </execution>
           </executions>
-        </plugin>        
+        </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
@@ -447,7 +484,7 @@
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
           <version>1.0.0</version>
-        </plugin>        
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>

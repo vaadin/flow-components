@@ -7,6 +7,7 @@
     <version>17.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-grid-pro-integration-tests</artifactId>
+  <version>${vaadin.grid.pro.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Grid Pro Integration Tests</name>
   <properties>
@@ -22,33 +23,33 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-pro-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.grid.pro.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.ordered.layout.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-pro-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.grid.pro.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.combo.box.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.text.field.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -82,7 +83,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.flow.components.shared.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
