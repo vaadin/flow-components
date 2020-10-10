@@ -55,4 +55,15 @@ async function main() {
 
 }
 
-main().then(arr => console.log(arr.join('\n')));
+main().then(arr => {
+  if (process.argv[2] == '--json') {
+    const o = {};
+    arr.forEach(line => {
+      const e = line.split(':');
+      o[e[0]] = e[1];
+    });
+    console.log(JSON.stringify(o));
+  } else {
+    console.log(arr.join('\n'))
+  }
+});
