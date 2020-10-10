@@ -71,7 +71,7 @@ do
   setPomVersion $i $modVersion
 done
 
-[ "$versionBase" = 14.4 ] && lastTag=`git tag | grep "^$versionBase" | tail -1`
+[ "$versionBase" = 14.4 || "$versionBase" = 17.0 ] && lastTag=`git tag | grep "^$versionBase" | tail -1`
 if [ -n "$lastTag" ]
 then
   modified=`git diff --name-only $lastTag  HEAD | grep '.java$' | cut -d "/" -f1 | grep parent | sort -u | perl -pe 's,-flow-parent,,g'`
