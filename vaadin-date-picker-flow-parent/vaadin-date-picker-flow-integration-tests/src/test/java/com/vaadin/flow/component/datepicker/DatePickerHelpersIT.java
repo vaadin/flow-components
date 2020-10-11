@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.datepicker;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
