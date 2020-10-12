@@ -4,7 +4,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
@@ -14,7 +13,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Route(value = "vaadin-accordion/accordionintemplate")
 @Tag("accordion-app")
 @JsModule("./accordion-in-template.js")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.1")
 public class AccordionInTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id

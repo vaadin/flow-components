@@ -44,6 +44,8 @@ import elemental.json.Json;
 
 public class ComboBoxTest {
 
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -178,6 +180,15 @@ public class ComboBoxTest {
     public void ensureComboBoxIsFocusable() {
         Assert.assertTrue("ComboBox should be focusable",
                 Focusable.class.isAssignableFrom(ComboBox.class));
+    }
+
+    @Test
+    public void setAutoOpenDisabled() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertTrue(comboBox.isAutoOpen());
+        comboBox.setAutoOpen(false);
+        Assert.assertTrue(comboBox.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false));
+        Assert.assertFalse(comboBox.isAutoOpen());
     }
 
     @Test
