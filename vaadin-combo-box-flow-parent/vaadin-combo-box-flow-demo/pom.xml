@@ -24,14 +24,6 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>flow-lit-template</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-polymer-template</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
       <version>${project.version}</version>
     </dependency>

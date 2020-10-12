@@ -525,12 +525,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * The method is not supported for the {@link ComboBox} component.
+     * The method is not supported for the {@link ComboBox} component, use
+     * another overloaded method with filter converter
+     * {@link #setItems(InMemoryDataProvider, SerializableFunction)}
      * <p>
      * Always throws an {@link UnsupportedOperationException}.
-     * <p>
-     * Use another overloaded method with filter converter
-     * {@link #setItems(InMemoryDataProvider, SerializableFunction)}
      *
      * @throws UnsupportedOperationException
      *

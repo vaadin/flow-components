@@ -18,20 +18,24 @@ package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractDataView;
+import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Implementation of generic data view for ComboBox.
+ * Implementation of generic data view for ComboBox. This implementation does
+ * not depend on a certain type of data provider, i.e. whether is it of
+ * in-memory or backend type. It can be used if the type of data provider
+ * is not either {@link ListDataProvider} or {@link BackEndDataProvider}.
  *
- * @param <T>
- *            the item type
+ * @param <T> the item type
  * @since
  */
 public class ComboBoxDataView<T> extends AbstractDataView<T> {

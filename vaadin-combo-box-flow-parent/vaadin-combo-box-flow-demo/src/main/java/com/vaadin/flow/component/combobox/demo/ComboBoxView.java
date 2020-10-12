@@ -300,8 +300,9 @@ public class ComboBoxView extends DemoView {
          * By using these callbacks the ComboBox doesn't load all the items to
          * the server memory right away. The ComboBox calls the first provided
          * callback to fetch items from the given range with the given filter.
-         * The second callback provides the number of items that match the
-         * query.
+         * The second callback is optional and can be used to determine an
+         * exact count of items that match the query, if the exact count is
+         * desired.
          */
         comboBox.setItems(
                 query -> service.fetch(query.getFilter().orElse(null),
@@ -333,9 +334,9 @@ public class ComboBoxView extends DemoView {
          * items and as the user scrolls down it automatically increases the
          * size by 200 until the backend runs out of items.
          *
-         * In case of huge number of items in the backend, combo box's text
-         * filter can be used to decrease the number of shown items and the
-         * scrolling can be customized accordingly by constraining the estimated
+         * Depending on the desired UX and the backend performance, the
+         * scrolling experience and the number of items in the drop down can be
+         * customized accordingly by constraining the page size, estimated
          * item count and its increase.
          */
         comboBox.setPageSize(10);
