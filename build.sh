@@ -40,8 +40,8 @@ saveFailedTests() {
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
   ### collect tests numbers for TC status
-  nskipped=`grep -Po '<skipped>\K[^</skipped>]*' integration-tests/target/failsafe-reports/failsafe-summary.xml`
-  ncompleted=`grep -Po '<completed>\K[^</completed>]*' integration-tests/target/failsafe-reports/failsafe-summary.xml`
+  ncompleted=`grep -Poh 'Tests run:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'`
+  nskipped=`grep -Poh 'Skipped:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'` 
   if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$try
