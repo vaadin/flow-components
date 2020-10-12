@@ -39,6 +39,9 @@ saveFailedTests() {
   try=$1
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
+  ### collect tests numbers for TC status
+  nskipped=`grep -Po '<skipped>\K[^</skipped>]*' integration-tests/target/failsafe-reports/failsafe-summary.xml`
+  ncompleted=`grep -Po '<completed>\K[^</completed>]*' integration-tests/target/failsafe-reports/failsafe-summary.xml`
   if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$try
@@ -162,7 +165,7 @@ else
         $cmd
         error=$?
         saveFailedTests run-2
-        tcStatus $error "Test failed: $nfailed" "Success ($nfailed tests failed on the 1st run, but passed on the 2nd try.)"
+        tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped ($nfailed tests failed among on the 1st run, but passed on the 2nd try.)"
       fi
   fi
   exit $error
