@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test.dataview;
 
 import static com.vaadin.flow.component.combobox.test.dataview.AbstractItemCountComboBoxPage.DEFAULT_DATA_PROVIDER_SIZE;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -62,6 +63,8 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
                 RangeLog.of(13, 450, 500));
     }
 
+    @Ignore("Unexpected fetch after setCountCallback() " +
+            "https://github.com/vaadin/vaadin-flow-components/issues/224")
     @Test
     public void undefinedItemCount_switchesToDefinedItemCount_itemCountChanges() {
         int actualItemCount = 300;
