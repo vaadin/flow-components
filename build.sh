@@ -162,7 +162,7 @@ else
         $cmd
         error=$?
         saveFailedTests run-2
-        tcStatus $error "Test failed: $nfailed" "Success"
+        tcStatus $error "Test failed: $nfailed" "Success ($nfailed tests failed on the 1st run, but passed on the 2nd try.)"
       fi
   fi
   exit $error
