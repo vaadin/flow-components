@@ -105,6 +105,27 @@ public class TimePickerIT extends AbstractComponentIT {
                 "6:00 PM", picker.getLastItemText());
     }
 
+    @Test
+    public void timePickerHelperText() {
+        TimePickerElement picker = $(TimePickerElement.class)
+              .id("time-picker-helper-text");
+        Assert.assertEquals("Helper text", picker.getHelperText());
+
+        $("button").id("button-clear-helper-text").click();
+        Assert.assertEquals("", picker.getHelperText());
+    }
+
+    @Test
+    public void timePickerHelperComponent() {
+        TimePickerElement picker = $(TimePickerElement.class)
+              .id("time-picker-helper-component");
+        Assert.assertEquals("helper-component",
+              picker.getHelperComponent().getAttribute("id"));
+
+        $("button").id("button-clear-helper-component").click();
+        Assert.assertNull(picker.getHelperComponent());
+    }
+
     private void selectStep(String step) {
         NativeSelectElement select = $(NativeSelectElement.class)
                 .id("step-picker");

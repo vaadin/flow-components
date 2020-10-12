@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox.testbench;
 
 import java.util.List;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.TestBenchElement;
@@ -28,7 +29,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-combo-box")
 public class ComboBoxElement extends TestBenchElement
-        implements HasLabel, HasSelectByText {
+        implements HasLabel, HasSelectByText, HasHelper {
 
     @Override
     public void selectByText(String text) {

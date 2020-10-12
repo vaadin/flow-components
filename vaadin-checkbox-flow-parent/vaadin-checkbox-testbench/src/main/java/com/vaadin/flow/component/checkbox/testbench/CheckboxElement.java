@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox.testbench;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -24,7 +25,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-checkbox")
-public class CheckboxElement extends TestBenchElement implements HasLabel {
+public class CheckboxElement extends TestBenchElement implements HasLabel,
+      HasHelper {
     /**
      * Checks whether the checkbox is checked.
      *
