@@ -43,7 +43,7 @@ import com.vaadin.flow.router.Route;
 public class ComboBoxPage extends Div {
 
     /**
-     * Data class for a Grid.
+     * Data class for a ComboBox.
      *
      */
     public enum Title {

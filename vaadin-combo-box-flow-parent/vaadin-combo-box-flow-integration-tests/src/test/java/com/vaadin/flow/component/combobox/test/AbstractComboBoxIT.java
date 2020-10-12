@@ -141,6 +141,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
+        comboBox.openPopup();
         executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
                 comboBox, index);
     }
@@ -158,6 +159,10 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
     protected void clickButton(String id) {
         $("button").id(id).click();
+    }
+
+    protected boolean isButtonEnabled(String id) {
+        return $("button").id(id).isEnabled();
     }
 
     protected List<?> getItems(WebElement combo) {
