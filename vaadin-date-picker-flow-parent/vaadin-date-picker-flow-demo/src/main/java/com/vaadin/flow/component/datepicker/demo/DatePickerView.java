@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.datepicker.demo;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Locale;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
@@ -22,16 +27,12 @@ import com.vaadin.flow.component.datepicker.demo.entity.Appointment;
 import com.vaadin.flow.component.datepicker.demo.entity.Person;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * View for {@link DatePicker} demo.
@@ -47,6 +48,7 @@ public class DatePickerView extends DemoView {
         disabledAndReadonly();
         clearButton();
         valueChangeEvent();
+        helperText();
         configurationForRequired(); // Validation
         minAndMaXDateValidation();
         customValidator();
@@ -56,6 +58,7 @@ public class DatePickerView extends DemoView {
         customDateParser();
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
+        helperTextVariants();
         styling(); // Styling
     }
 
@@ -133,6 +136,24 @@ public class DatePickerView extends DemoView {
         VerticalLayout verticalLayout = new VerticalLayout(datePicker, value);
         verticalLayout.setPadding(false);
         addCard("Value change event", verticalLayout);
+    }
+
+    private void helperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and Helper component
+        DatePicker datePickerHelperText = new DatePicker("Delivery");
+        datePickerHelperText.setHelperText("Select a delivery date");
+
+        DatePicker datePickerHelperComponent = new DatePicker("Order");
+        datePickerHelperComponent
+              .setHelperComponent(new Span("Select an order date"));
+        // end-source-example
+
+        datePickerHelperText.getStyle().set("margin-right", "15px");
+
+        div.add(datePickerHelperText, datePickerHelperComponent);
+        addCard("Helper text and Helper component", div);
     }
 
     private void configurationForRequired() {
@@ -359,6 +380,28 @@ public class DatePickerView extends DemoView {
         // end-source-example
 
         addCard("Theme Variants", "Small text field", datePicker);
+    }
+
+    private void helperTextVariants(){
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and component above the field
+        DatePicker datePickerHelperTextAbove = new DatePicker("Label");
+        datePickerHelperTextAbove.setHelperText("Helper text above the field");
+        datePickerHelperTextAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+
+        DatePicker datePickerHelperComponentAbove = new DatePicker("Label");
+        datePickerHelperComponentAbove
+              .setHelperComponent(new Span("Helper component above the field"));
+        datePickerHelperComponentAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+        add(datePickerHelperTextAbove, datePickerHelperComponentAbove);
+        // end-source-example
+
+        datePickerHelperTextAbove.getStyle().set("margin-right", "15px");
+        div.add(datePickerHelperTextAbove, datePickerHelperComponentAbove);
+        addCard("Theme Variants", "Helper text and component above the field", div);
     }
 
     private void styling() {

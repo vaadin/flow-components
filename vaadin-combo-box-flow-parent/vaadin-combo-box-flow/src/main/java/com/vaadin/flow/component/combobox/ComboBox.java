@@ -28,6 +28,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -101,7 +102,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
-        HasLazyDataView<T, String, ComboBoxLazyDataView<T>> {
+        HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";

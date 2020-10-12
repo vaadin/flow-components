@@ -26,6 +26,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
@@ -62,11 +63,11 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.3.0")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.4.0")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker> {
+        Focusable<DateTimePicker>, HasHelper {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();

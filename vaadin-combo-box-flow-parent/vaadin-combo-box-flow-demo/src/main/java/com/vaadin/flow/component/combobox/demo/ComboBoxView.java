@@ -38,6 +38,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -75,6 +76,7 @@ public class ComboBoxView extends DemoView {
         lazyLoadingWithExactItemCount();
         lazyLoadingWithCustomItemCountEstimate();
         pagedRepository();
+        helperText();
         configurationForRequired(); // Validation
         customFiltering(); // Filtering
         filteringAndSortingWithDataView();
@@ -82,6 +84,7 @@ public class ComboBoxView extends DemoView {
         usingTemplateRenderer();
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
+        helperTextAbove();
         styling(); // Styling
     }
 
@@ -382,6 +385,32 @@ public class ComboBoxView extends DemoView {
         addCard("Lazy Loading", "Lazy Loading from Paged Repository", comboBox);
     }
 
+    private void helperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        ComboBox<String> helperTextCombobox = new ComboBox<>("Language");
+        helperTextCombobox
+              .setItems("Java", "Python", "C++", "Scala", "JavaScript");
+        helperTextCombobox
+              .setHelperText("Select the language you are most familiar with");
+
+        ComboBox<String> helperComponentCombobox = new ComboBox<>("Continent");
+        helperComponentCombobox
+              .setItems("North America", "South America", "Africa", "Europe",
+                    "Asia", "Australia", "Antarctica");
+        helperComponentCombobox
+              .setHelperComponent(new Span("Select the continent of your residence"));
+
+        add(helperTextCombobox, helperComponentCombobox);
+
+        // end-source-example
+        helperTextCombobox.getStyle().set("margin-right", "15px");
+        div.add(helperTextCombobox, helperComponentCombobox);
+
+        addCard("Helper text and helper component", div);
+    }
+
     private void configurationForRequired() {
         // begin-source-example
         // source-example-heading: Required
@@ -565,6 +594,25 @@ public class ComboBoxView extends DemoView {
         comboBox.getElement().setAttribute("theme", "small");
         // end-source-example
         addCard("Theme Variants", "Small size", comboBox);
+    }
+
+    private void helperTextAbove() {
+        // begin-source-example
+        // source-example-heading: Helper text above the component
+
+        ComboBox<String> helperTextAbove = new ComboBox<>();
+        helperTextAbove.setLabel("Label");
+        helperTextAbove.setItems("Option 1", "Option 2");
+        helperTextAbove.setHelperText(
+              "Helper text positioned above the field using `helper-above-field` theme");
+        helperTextAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+
+        add(helperTextAbove);
+        // end-source-example
+
+        addCard("Theme Variants", "Helper text above the component",
+              helperTextAbove);
     }
 
     private void styling() {
