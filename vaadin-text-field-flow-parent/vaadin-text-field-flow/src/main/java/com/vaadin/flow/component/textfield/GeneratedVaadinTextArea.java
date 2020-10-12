@@ -147,7 +147,7 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha8",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.8.1")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -955,6 +955,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
+            setModelValue(initialValue, false);
             setPresentationValue(initialValue);
         }
     }

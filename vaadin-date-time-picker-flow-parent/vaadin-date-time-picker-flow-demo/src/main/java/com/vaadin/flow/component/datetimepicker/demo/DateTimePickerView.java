@@ -32,6 +32,7 @@ import com.vaadin.flow.component.datetimepicker.demo.entity.Appointment;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
@@ -53,12 +54,14 @@ public class DateTimePickerView extends DemoView {
         timePickerStep();
         createMinAndMaxDateTimePicker();
         valueChangeEvent();
+        helperTextAndComponent();
         configurationForRequired(); // Validation
         customValidator();
         datePickerWithWeekNumbers(); // Presentation
         finnishDateTimePicker(); // Localization
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
+        themeVariantsHelperAbove();
         styling(); // Styling
     }
 
@@ -161,6 +164,29 @@ public class DateTimePickerView extends DemoView {
                 value);
         verticalLayout.setPadding(false);
         addCard("Value change event", verticalLayout);
+    }
+
+    private void helperTextAndComponent() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        DateTimePicker dateTimePicker = new DateTimePicker(
+              "Pick-up time");
+        dateTimePicker
+              .setHelperText("Please, select the most suitable time");
+
+        DateTimePicker dateTimePickerHelperComponent = new DateTimePicker(
+              "Arrival time");
+        dateTimePickerHelperComponent
+              .setHelperComponent(new Span("Select your arrival time"));
+
+        add(dateTimePicker, dateTimePickerHelperComponent);
+        // end-source-example
+
+        dateTimePicker.getStyle().set("margin-right", "15px");
+        div.add(dateTimePicker, dateTimePickerHelperComponent);
+
+        addCard("Helper text and helper component", div);
     }
 
     private void configurationForRequired() {
@@ -297,6 +323,20 @@ public class DateTimePickerView extends DemoView {
         // end-source-example
 
         addCard("Theme Variants", "Small text field", dateTimePicker);
+    }
+
+    private void themeVariantsHelperAbove() {
+        // begin-source-example
+        // source-example-heading: Helper text above
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.setLabel("Label");
+        dateTimePicker.setHelperText("Helper is positioned above the field");
+        dateTimePicker.addThemeName("helper-above-field");
+
+        add(dateTimePicker);
+        // end-source-example
+
+        addCard("Theme Variants", "Helper text above", dateTimePicker);
     }
 
     private void styling() {
