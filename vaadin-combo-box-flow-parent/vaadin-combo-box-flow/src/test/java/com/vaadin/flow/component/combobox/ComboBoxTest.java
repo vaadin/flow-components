@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -32,8 +33,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -340,6 +345,83 @@ public class ComboBoxTest {
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
+    @Test
+    public void dataCommunicator_newComboBoxCreated_dataCommunicatorWithEmptyDataProviderCreated() {
+        ComboBox<Object> comboBox = new ComboBox<>();
+        DataProvider<Object, ?> dataProvider = comboBox.getDataProvider();
+
+        Assert.assertNotNull(
+                "Data Communicator and Data Provider should be created "
+                        + "within combo box constructor",
+                dataProvider);
+        Assert.assertEquals(DataCommunicator.EmptyDataProvider.class,
+                dataProvider.getClass());
+    }
+
+    @Test
+    public void setDataProvider_inMemoryDataProvider_fetchesEagerly() {
+        ComboBox<Object> comboBox = new ComboBox<>();
+        DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
+        ui.add(comboBox);
+
+        DataProvider<Object, Void> dataProvider = Mockito.spy(
+                new AbstractDataProvider<Object, Void>() {
+
+            @Override
+            public boolean isInMemory() {
+                return true;
+            }
+
+            @Override
+            public int size(Query query) {
+                return 0;
+            }
+
+            @Override
+            public Stream<Object> fetch(Query query) {
+                return Stream.empty();
+            }
+        });
+
+        comboBox.setDataProvider(dataProvider, filter -> null);
+
+        // Verify that the data communicator and data provider have been created
+        Assert.assertNotNull(
+                "Data Communicator and Data Provider should be created "
+                        + "within setDataProvider()",
+                comboBox.getDataProvider());
+
+        fakeClientCommunication(ui);
+        Mockito.verify(dataProvider).size(Mockito.any());
+    }
+
+    @Test
+    public void setDataProvider_backendDataProvider_fetchesOnOpened() {
+        ComboBox<Object> comboBox = new ComboBox<>();
+        DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
+        ui.add(comboBox);
+
+        DataProvider<Object, Void> dataProvider = Mockito.spy(DataProvider
+                .fromCallbacks(query -> Stream.empty(), query -> 0));
+
+        comboBox.setDataProvider(dataProvider, filter -> null);
+        // Verify that the data communicator and data provider have been created
+        Assert.assertNotNull(
+                "Data Communicator and Data Provider should be created "
+                        + "within setDataProvider()",
+                comboBox.getDataProvider());
+
+        fakeClientCommunication(ui);
+        Mockito.verify(dataProvider, Mockito.times(0)).size(Mockito.any());
+
+        // Simulate open event and reset
+        comboBox.setOpened(true);
+        comboBox.setPageSize(42);
+        fakeClientCommunication(ui);
+
+        Mockito.verify(dataProvider).size(Mockito.any());
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);
@@ -358,5 +440,11 @@ public class ComboBoxTest {
     private void expectIllegalStateException(String expectedMessage) {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(expectedMessage);
+    }
+
+    private void fakeClientCommunication(UI ui) {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }
