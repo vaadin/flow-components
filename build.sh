@@ -154,6 +154,7 @@ else
   then
       tcLog "There were $nfailed Failed Tests: "
       echo "$failed"
+      rerunFailed=$nfailed
 
       if [ "$nfailed" -le 15 ]
       then
@@ -165,7 +166,7 @@ else
         $cmd
         error=$?
         saveFailedTests run-2
-        tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped ($nfailed tests failed among on the 1st run, but passed on the 2nd try.)"
+        tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
       fi
   fi
   exit $error
