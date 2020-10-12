@@ -72,6 +72,7 @@ public class ComboBoxView extends DemoView {
         valueChangeEvent();
         customValues();
         storingCustomValues();
+        autoOpenDisabled();
         lazyLoading(); // Lazy loading
         lazyLoadingWithExactItemCount();
         lazyLoadingWithCustomItemCountEstimate();
@@ -160,12 +161,24 @@ public class ComboBoxView extends DemoView {
     private void displayClearButton() {
         // begin-source-example
         // source-example-heading: Display the clear button
-        ComboBox comboBox = new ComboBox();
+        ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("Option one", "Option two");
         comboBox.setClearButtonVisible(true);
         // end-source-example
 
         addCard("Display the clear button", comboBox);
+    }
+
+    private void autoOpenDisabled() {
+        Span note = new Span("Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems("Option one", "Option two");
+        comboBox.setAutoOpen(false);
+        // end-source-example
+
+        addCard("Auto open disabled", note, comboBox);
     }
 
     private void valueChangeEvent() {
@@ -275,7 +288,7 @@ public class ComboBoxView extends DemoView {
          * that is shown in its current view "window". The data is provided
          * based on string filter, offset and limit.
          *
-         * When the user scrolls to the end, combo box will automatically 
+         * When the user scrolls to the end, combo box will automatically
          * extend and fetch more items until the backend runs out of items.
          */
         comboBox.setItems(

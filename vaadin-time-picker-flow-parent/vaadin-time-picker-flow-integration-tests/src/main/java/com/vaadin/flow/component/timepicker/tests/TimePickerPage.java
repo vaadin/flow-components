@@ -31,6 +31,7 @@ public class TimePickerPage extends Div {
 
     public TimePickerPage() {
         createDefaultTimePicker();
+        createAutoOpenDisabledTimePicker();
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
@@ -44,6 +45,19 @@ public class TimePickerPage extends Div {
         TimePicker timePicker = new TimePicker();
         timePicker.setId("simple-picker");
         timePicker.setLabel("Default TimePicker");
+
+        timePicker.addValueChangeListener(
+                event -> updateMessage(message, timePicker));
+
+        add(timePicker, message);
+    }
+
+    private void createAutoOpenDisabledTimePicker() {
+        Div message = createMessageDiv("autoopendisabled-picker-message");
+        TimePicker timePicker = new TimePicker();
+        timePicker.setId("autoopendisabled-picker");
+        timePicker.setLabel("Auto open disabled TimePicker");
+        timePicker.setAutoOpen(false);
 
         timePicker.addValueChangeListener(
                 event -> updateMessage(message, timePicker));
