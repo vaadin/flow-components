@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -22,6 +23,14 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
+
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.BACKEND_COMBO_BOX;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.CLIENT_FILTER_COMBO_BOX;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.IN_MEMORY_COMBO_BOX;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.OPTIONS_COMBO_BOX;
 
 @TestPath("vaadin-combo-box/clientside-filter")
 public class ClientSideFilterIT extends AbstractComboBoxIT {
@@ -35,7 +44,8 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
     @Test
     public void filter_itemsShouldBeThere() {
         // First combobox.
-        ComboBoxElement comboBox = $(ComboBoxElement.class).first();
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(OPTIONS_COMBO_BOX);
 
         comboBox.sendKeys("2");
 
@@ -52,7 +62,7 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
                 && "Option 3".equals(getItemLabel(items, 0)));
 
         // Second combobox.
-        comboBox = $(ComboBoxElement.class).get(1);
+        comboBox = $(ComboBoxElement.class).id(CLIENT_FILTER_COMBO_BOX);
 
         comboBox.sendKeys("mo");
 
@@ -70,6 +80,84 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
                         && "Apple Safari".equals(getItemLabel(items, 3))
                         && "Microsoft Edge".equals(getItemLabel(items, 4)));
 
+    }
+
+    @Test
+    public void itemCountChange_clientFilterAppliedOnItemsCountLessThanPageSize_serverSideNotNotified() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(CLIENT_FILTER_COMBO_BOX);
+
+        Assert.assertEquals("Expected 5 items before opening", 5,
+                getItemCount(CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+
+        comboBox.openPopup();
+
+        waitForItems(comboBox, items -> items.size() == 5);
+
+        Assert.assertEquals("Expected 5 items before filtering", 5,
+                getItemCount(CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+
+        comboBox.sendKeys("M");
+
+        waitForItems(comboBox, items -> items.size() == 3);
+
+        Assert.assertEquals(
+                "Expected no item count change events on client filter change",
+                5, getItemCount(CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+    }
+
+    @Test
+    public void itemCountChange_clientFilterAppliedOnItemsCountMoreThanPageSize_serverSideNotified() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(IN_MEMORY_COMBO_BOX);
+
+        Assert.assertEquals("Expected 100 items before opening", 100,
+                getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+
+        comboBox.openPopup();
+
+        waitForItems(comboBox, items -> items.size() == 100);
+
+        Assert.assertEquals("Expected 100 items before filtering", 100,
+                getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+
+        comboBox.sendKeys("1");
+
+        waitForItems(comboBox, items -> items.size() == 19);
+
+        // TODO: client filter should not fire the item count change event
+        //  https://github.com/vaadin/vaadin-flow-components/issues/210
+        Assert.assertEquals("Expected 19 items after filtering", 19,
+                getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+    }
+
+    @Test
+    public void itemCountChange_clientFilterAppliedOnBackendData_serverSideNotified() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(BACKEND_COMBO_BOX);
+
+        Assert.assertEquals("Expected 0 items before opening", 0,
+                getItemCount(BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+
+        comboBox.openPopup();
+
+        waitForItems(comboBox, items -> items.size() == 30);
+
+        Assert.assertEquals("Expected 30 items before filtering", 30,
+                getItemCount(BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+
+        comboBox.sendKeys("1");
+
+        waitForItems(comboBox, items -> items.size() == 12);
+
+        // TODO: client filter should not fire the item count change event
+        //  https://github.com/vaadin/vaadin-flow-components/issues/210
+        Assert.assertEquals("Expected 12 items after filtering", 12,
+                getItemCount(BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+    }
+
+    private int getItemCount(String id) {
+        return Integer.parseInt($("span").id(id).getText());
     }
 
 }
