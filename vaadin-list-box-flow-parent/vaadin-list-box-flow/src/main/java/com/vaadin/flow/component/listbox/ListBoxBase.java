@@ -415,16 +415,14 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     private IdentifierProvider<ITEM> getIdentifierProvider() {
         IdentifierProvider<ITEM> identifierProviderObject =
                 (IdentifierProvider<ITEM>) ComponentUtil.getData(this,
-                        IdentifierProvider.class);
-        if (identifierProviderObject == null) {
-            DataProvider<ITEM, ?> dataProvider = getDataProvider();
-            if (dataProvider != null) {
-                return dataProvider::getId;
-            } else {
-                return IdentifierProvider.identity();
-            }
-        } else {
+                                                    IdentifierProvider.class);
+        if (identifierProviderObject != null)
             return identifierProviderObject;
-        }
+
+        DataProvider<ITEM, ?> dataProvider = getDataProvider();
+        if (dataProvider != null)
+            return dataProvider::getId;
+
+        return IdentifierProvider.identity();
     }
 }

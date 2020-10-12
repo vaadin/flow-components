@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -64,18 +65,21 @@ public class MultiSelectListBox<T>
     }
 
     private static <T> JsonArray modelToPresentation(
-            MultiSelectListBox<T> listBox, Set<T> model) {
+                                  MultiSelectListBox<T> listBox, Set<T> model) {
         JsonArray array = Json.createArray();
-        model.stream()
-                .filter(selectedItem -> listBox.getItems()
-                        .stream()
-                        .anyMatch(item ->
-                                listBox.getItemId(selectedItem)
-                                        .equals(listBox.getItemId(item))))
-                .forEach(itm -> {
-                    int idx = listBox.getItems().indexOf(itm);
-                    array.set(array.length(), idx);
-                });
+
+        AtomicInteger idx = new AtomicInteger(0);
+        listBox.getItems().forEach(item -> {
+                int index = idx.getAndIncrement();
+                Object itemId = listBox.getItemId( item );
+                model.stream()
+                        .filter( selectedItem ->
+                            itemId.equals(listBox.getItemId(selectedItem)) )
+                        .findFirst().ifPresent( ignored ->
+                            array.set(array.length(), index) );
+            }
+        );
+
         return array;
     }
 
