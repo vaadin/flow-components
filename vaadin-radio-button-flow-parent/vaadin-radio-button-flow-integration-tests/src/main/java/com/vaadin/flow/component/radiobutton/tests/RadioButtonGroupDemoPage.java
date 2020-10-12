@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.radiobutton.GeneratedVaadinRadioGroup;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
@@ -72,6 +73,7 @@ public class RadioButtonGroupDemoPage extends DemoView {
     @Override
     protected void initView() {
         addBasicFeatures();
+        addHelperText();
         addComponentWithLabelAndErrorMessage();
         addItemRenderer();
         addItemLabelGenerator();
@@ -101,6 +103,34 @@ public class RadioButtonGroupDemoPage extends DemoView {
         button.setId("group-with-label-button");
         addCard("Group with label and error message", group,
                 button);
+    }
+
+    private void addHelperText() {
+        // begin-source-example
+        // source-example-heading: Helper text
+        RadioButtonGroup<String> groupWitHelperText = new RadioButtonGroup<>();
+        groupWitHelperText.setId("group-with-helper-text");
+        groupWitHelperText.setItems("foo", "bar", "baz");
+        groupWitHelperText.setHelperText("helperText");
+
+        RadioButtonGroup<String> groupWitHelperComponent = new RadioButtonGroup<>();
+        groupWitHelperComponent.setId("group-with-helper-component");
+        groupWitHelperComponent.setItems("foo", "bar", "baz");
+        Span helperComponent = new Span("helperComponent");
+        helperComponent.setId("helper-component");
+        groupWitHelperComponent.setHelperComponent(helperComponent);
+        // end-source-example
+        
+        NativeButton clearHelperText = new NativeButton("clear helper text", 
+            e -> groupWitHelperText.setHelperText(null));
+        clearHelperText.setId("clear-helper-text-button");
+
+        NativeButton clearHelperComponent = new NativeButton("clear helper component", 
+            e -> groupWitHelperComponent.setHelperComponent(null));
+        clearHelperComponent.setId("clear-helper-component-button");
+
+        addCard("Helper text", groupWitHelperText, groupWitHelperComponent,
+            clearHelperText, clearHelperComponent);
     }
 
     private void addComponentWithThemeVariant() {
