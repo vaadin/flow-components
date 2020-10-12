@@ -109,4 +109,13 @@ public class DatePickerElement extends TestBenchElement implements HasLabel,
     public String getInputValue() {
         return getPropertyString("_inputValue");
     }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getPropertyBoolean("autoOpenDisabled");
+    }
 }
