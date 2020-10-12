@@ -21,7 +21,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("allow-nested-nulls")
