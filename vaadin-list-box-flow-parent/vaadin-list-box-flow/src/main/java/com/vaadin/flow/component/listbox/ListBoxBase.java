@@ -15,26 +15,44 @@
  */
 package com.vaadin.flow.component.listbox;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
+import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -48,26 +66,40 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
-        implements HasItemsAndComponents<ITEM>, HasDataProvider<ITEM>, HasSize {
+        implements HasItemComponents<ITEM>, HasSize,
+        HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
+        HasDataView<ITEM, Void, ListBoxDataView<ITEM>> {
 
-    private DataProvider<ITEM, ?> dataProvider = DataProvider.ofItems();
+    private final AtomicReference<DataProvider<ITEM, ?>> dataProvider =
+            new AtomicReference<>(DataProvider.ofItems());
     private List<ITEM> items;
     private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>();
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
     private Registration dataProviderListenerRegistration;
 
+    private int lastNotifiedDataSize = -1;
+    private volatile int lastFetchedDataSize = -1;
+    private SerializableConsumer<UI> sizeRequest;
+
     <P> ListBoxBase(String propertyName, Class<P> elementPropertyType,
-            VALUE defaultValue,
-            SerializableBiFunction<C, P, VALUE> presentationToModel,
-            SerializableBiFunction<C, VALUE, P> modelToPresentation) {
+                    VALUE defaultValue,
+                    SerializableBiFunction<C, P, VALUE> presentationToModel,
+                    SerializableBiFunction<C, VALUE, P> modelToPresentation) {
         super(propertyName, defaultValue, elementPropertyType,
                 presentationToModel, modelToPresentation);
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link ListBoxListDataView} or
+     *             {@link ListBoxDataView}
+     */
+    @Deprecated
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
-        this.dataProvider = Objects.requireNonNull(dataProvider);
-        setupDataProviderListener(dataProvider);
+        this.dataProvider.set( Objects.requireNonNull(dataProvider) );
+        setupDataProviderListener(this.dataProvider.get());
     }
 
     private void setupDataProviderListener(DataProvider<ITEM, ?> dataProvider) {
@@ -95,19 +127,22 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         if (dataProviderListenerRegistration != null) {
-        	dataProviderListenerRegistration.remove();
-        	dataProviderListenerRegistration = null;
+            dataProviderListenerRegistration.remove();
+            dataProviderListenerRegistration = null;
         }
         super.onDetach(detachEvent);
-    }	
+    }
 
     /**
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
+     * @deprecated use {@link #getListDataView()} or
+     *             {@link #getGenericDataView()} instead
      */
+    @Deprecated
     public DataProvider<ITEM, ?> getDataProvider() {
-        return dataProvider;
+        return dataProvider.get();
     }
 
     /**
@@ -178,9 +213,30 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     private void rebuild() {
         clear();
         removeAll();
-        items = getDataProvider().fetch(new Query<>())
-                .collect(Collectors.toList());
-        items.stream().map(this::createItemComponent).forEach(this::add);
+
+        synchronized (dataProvider) {
+            final AtomicInteger itemCounter = new AtomicInteger(0);
+            items = getDataProvider().fetch(new Query<>())
+                    .collect(Collectors.toList());
+            items.stream().map(this::createItemComponent)
+                    .forEach(component -> {
+                        add(component);
+                        itemCounter.incrementAndGet();
+                    });
+            lastFetchedDataSize = itemCounter.get();
+
+            // Ignore new size requests unless the last one has been executed
+            // so as to avoid multiple beforeClientResponses.
+            if (sizeRequest == null) {
+                sizeRequest = ui -> {
+                    fireSizeEvent();
+                    sizeRequest = null;
+                };
+                // Size event is fired before client response so as to avoid
+                // multiple size change events during server round trips
+                runBeforeClientResponse(sizeRequest);
+            }
+        }
     }
 
     private VaadinItem<ITEM> createItemComponent(ITEM item) {
@@ -190,10 +246,11 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     private void refresh(ITEM item) {
-        VaadinItem<ITEM> itemComponent = getItemComponents().stream()
-                .filter(component -> component.getItem().equals(item))
-                .findFirst().get();
-        refresh(itemComponent);
+        getItemComponents().stream()
+                .filter(vaadinItem -> getItemId(vaadinItem.getItem())
+                        .equals(getItemId(item)))
+                .findFirst()
+                .ifPresent(this::refresh);
     }
 
     private void refresh(VaadinItem<ITEM> itemComponent) {
@@ -227,5 +284,145 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         return getChildren().filter(VaadinItem.class::isInstance)
                 .map(component -> (VaadinItem<ITEM>) component)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Set a generic data provider for the ListBox to use and returns the base
+     * {@link ListBoxDataView} that provides API to get information on the items.
+     * <p>
+     * This method should be used only when the data provider type is not either
+     * {@link ListDataProvider} or {@link BackEndDataProvider}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     * @return ListBoxDataView providing information on the data
+     */
+    @Override
+    public ListBoxDataView<ITEM> setItems(DataProvider<ITEM, Void> dataProvider) {
+        setDataProvider(dataProvider);
+        return getGenericDataView();
+    }
+
+    /**
+     * Sets an in-memory data provider for the ListBox to use
+     * <p>
+     * Note! Using a {@link ListDataProvider} instead of a
+     * {@link InMemoryDataProvider} is recommended to get access to
+     * {@link ListBoxListDataView} API by using
+     * {@link HasListDataView#setItems(ListDataProvider)}.
+     *
+     * @param inMemoryDataProvider
+     *            InMemoryDataProvider to use, not <code>null</code>
+     * @return ListBoxDataView providing information on the data
+     */
+    @Override
+    public ListBoxDataView<ITEM> setItems(
+            InMemoryDataProvider<ITEM> inMemoryDataProvider) {
+        // We don't use DataProvider.withConvertedFilter() here because it's
+        // implementation does not apply the filter converter if Query has a
+        // null filter
+        DataProvider<ITEM, Void> convertedDataProvider =
+                new DataProviderWrapper<ITEM, Void, SerializablePredicate<ITEM>>(
+                        inMemoryDataProvider) {
+                    @Override
+                    protected SerializablePredicate<ITEM> getFilter(
+                            Query<ITEM, Void> query) {
+                        // Just ignore the query filter (Void) and apply the
+                        // predicate only
+                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                                .orElse(item -> true);
+                    }
+                };
+        return setItems(convertedDataProvider);
+    }
+
+    /**
+     * Sets a ListDataProvider for the ListBox to use and returns a
+     * {@link ListDataView} that provides information and allows operations on
+     * the items.
+     *
+     * @param listDataProvider
+     *            ListDataProvider providing items to the ListBox.
+     * @return ListBoxListDataView providing access to the items
+     */
+    @Override
+    public ListBoxListDataView<ITEM> setItems(
+            ListDataProvider<ITEM> listDataProvider) {
+        setDataProvider(listDataProvider);
+        return getListDataView();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link HasListDataView#setItems(Collection)} instead.
+     */
+    @Deprecated
+    public void setItems(Stream<ITEM> streamOfItems) {
+        setItems(DataProvider.fromStream(streamOfItems));
+    }
+
+    /**
+     * Gets the list data view for the ListBox. This data view should
+     * only be used when the items are in-memory and set with:
+     * <ul>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
+     * </ul>
+     * If the items are not in-memory an exception is thrown.
+     *
+     * @return the list data view that provides access to the data bound to the
+     *         ListBox
+     */
+    @Override
+    public ListBoxListDataView<ITEM> getListDataView() {
+        return new ListBoxListDataView<>(this::getDataProvider, this);
+    }
+
+    /**
+     * Gets the generic data view for the ListBox. This data view should
+     * only be used when {@link #getListDataView()} is not applicable for the
+     * underlying data provider.
+     *
+     * @return the generic DataView instance implementing
+     *         {@link ListBoxDataView}
+     */
+    @Override
+    public ListBoxDataView<ITEM> getGenericDataView() {
+        return new ListBoxDataView<>(this::getDataProvider, this);
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void fireSizeEvent() {
+        final int newSize = lastFetchedDataSize;
+        if (lastNotifiedDataSize != newSize) {
+            lastNotifiedDataSize = newSize;
+            fireEvent(new ItemCountChangeEvent<>(this, newSize, false));
+        }
+    }
+
+    protected Object getItemId(ITEM item) {
+        return getIdentifierProvider().apply(item);
+    }
+
+    @SuppressWarnings("unchecked")
+    private IdentifierProvider<ITEM> getIdentifierProvider() {
+        IdentifierProvider<ITEM> identifierProviderObject =
+                (IdentifierProvider<ITEM>) ComponentUtil.getData(this,
+                                                    IdentifierProvider.class);
+        if (identifierProviderObject != null)
+            return identifierProviderObject;
+
+        DataProvider<ITEM, ?> dataProvider = getDataProvider();
+        if (dataProvider != null)
+            return dataProvider::getId;
+
+        return IdentifierProvider.identity();
     }
 }
