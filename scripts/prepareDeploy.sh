@@ -19,14 +19,15 @@ getLatest() {
 
 getPlatformVersion() {
   [ "$1" = vaadin-iron-list ] && name="iron-list" || name=$1
+
   echo "$versions" | jq -r ".core, .vaadin | .[\"$name\"]| .javaVersion" | grep -v null
 }
 
 getNextVersion() {
   [ -z "$1" ] && return
-  prefix=`echo $1 | perl -pe 's/[0-1]+$//'`
-  number=`echo $1 | perl -pe 's/.*([0-1]+)$/$1/'`
-  number=`expr $number + 1`
+  prefix=`echo $1 | perl -pe 's/[0-9]+$//'`
+  number=`echo $1 | perl -pe 's/.*([0-9]+)$/$1/'`
+  number=`expr $number + 1` || exit 1
   echo $prefix$number
 }
 
@@ -88,6 +89,7 @@ then
   do
     modVersion=`getPlatformVersion $i`
     nextVersion=`getNextVersion $modVersion`
+    [ "$modVersion" = "$nextVersion" ] && echo Error Increasing version && exit 1
     setPomVersion $i $nextVersion
   done
 fi
