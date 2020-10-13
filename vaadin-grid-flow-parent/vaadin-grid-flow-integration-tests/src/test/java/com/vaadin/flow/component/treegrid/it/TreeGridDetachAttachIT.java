@@ -48,4 +48,26 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
         Assert.assertEquals("0 | 0", grid.getCell(0, 0).getText());
     }
 
+    @Test
+    public void keep_expansions_on_reattach() {
+        Assert.assertFalse(grid.isRowExpanded(2, 0));
+        grid.expandWithClick(2);
+        Assert.assertTrue(grid.isRowExpanded(2, 0));
+
+        toggleAttachedButton.click();
+        toggleAttachedButton.click();
+
+        grid = $(TreeGridElement.class).first();
+        Assert.assertTrue(grid.isRowExpanded(2, 0));
+    }
+
+    @Test
+    public void keep_expansions_on_refresh() {
+        Assert.assertFalse(grid.isRowExpanded(2, 0));
+        grid.expandWithClick(2);
+        Assert.assertTrue(grid.isRowExpanded(2, 0));
+        getDriver().navigate().refresh();
+        grid = $(TreeGridElement.class).first();
+        Assert.assertTrue(grid.isRowExpanded(2, 0));
+    }
 }

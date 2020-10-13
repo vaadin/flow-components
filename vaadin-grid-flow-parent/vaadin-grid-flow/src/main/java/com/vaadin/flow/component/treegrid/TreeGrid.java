@@ -4,14 +4,14 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
- * the License. 
+ * the License.
  */
 package com.vaadin.flow.component.treegrid;
 
@@ -43,12 +43,14 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
+import com.vaadin.flow.data.provider.hierarchy.HierarchyMapper;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -62,9 +64,14 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * A grid component for displaying hierarchical tabular data.
@@ -149,6 +156,56 @@ public class TreeGrid<T> extends Grid<T>
 
     private Registration dataProviderRegistration;
 
+    {
+        // Get fields through reflection
+        final Field hierarchyMapperField;
+        final Field expandedItemIdsField;
+        final Field objectIdKeyMapField;
+        try {
+            objectIdKeyMapField = KeyMapper.class
+                .getDeclaredField("objectIdKeyMap");
+            hierarchyMapperField = HierarchicalDataCommunicator.class
+                .getDeclaredField("mapper");
+            expandedItemIdsField = HierarchyMapper.class
+                .getDeclaredField("expandedItemIds");
+
+            expandedItemIdsField.setAccessible(true);
+            hierarchyMapperField.setAccessible(true);
+            objectIdKeyMapField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Create attach listener
+        addAttachListener(event -> {
+            try {
+                HierarchicalDataCommunicator<T> communicator = getDataCommunicator();
+                HierarchyMapper mapper = (HierarchyMapper) hierarchyMapperField
+                    .get(communicator);
+                Set<Object> expandedItemIds = (Set<Object>) expandedItemIdsField
+                    .get(mapper);
+                HashMap<Object, String> objectIdKeyMap = (HashMap) objectIdKeyMapField
+                    .get(communicator.getKeyMapper());
+
+                HierarchicalUpdate update = (HierarchicalUpdate) getArrayUpdater()
+                    .startUpdate(mapper.getRootSize());
+                update.enqueue("$connector.expandItems",
+                    expandedItemIds
+                        .stream()
+                        .map(objectIdKeyMap::get)
+                        .map(key -> {
+                            JsonObject json = Json.createObject();
+                            json.put("key", key);
+                            return json;
+                        }).collect(
+                        JsonUtils.asArray()));
+                event.getUI().beforeClientResponse(this, ctx -> update.commit());
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
      * on property names. Use an alternative constructor, such as
@@ -170,7 +227,7 @@ public class TreeGrid<T> extends Grid<T>
      * to Strings. Full names of the properties will be used as the
      * {@link Column#setKey(String) column keys} and the property captions will
      * be used as the {@link Column#setHeader(String) column headers}.
-     * 
+     *
      * @param beanType
      *            the bean type to use, not {@code null}
      */
@@ -228,7 +285,7 @@ public class TreeGrid<T> extends Grid<T>
      * Default property name is 'key' and value is generated by bean's hashCode
      * method.
      * </p>
-     * 
+     *
      * @param propertyName
      *            Property name in JSON data
      * @param uniqueKeyProvider
@@ -244,7 +301,7 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Gets value provider for unique key in row's generated JSON.
-     * 
+     *
      * @return ValueProvider for unique key for row
      */
     @Override
@@ -317,7 +374,7 @@ public class TreeGrid<T> extends Grid<T>
      * {@link #setDataProvider(HierarchicalDataProvider)} instead. This method
      * is inherited from Grid and it will throw an
      * {@link UnsupportedOperationException}.
-     * 
+     *
      * @param dataProvider
      *            the data provider
      * @return the data view
@@ -385,7 +442,7 @@ public class TreeGrid<T> extends Grid<T>
      * Tree grid supports only hierarchical data so use another method instead.
      * This method is inherited from Grid and it will throw an
      * {@link UnsupportedOperationException}.
-     * 
+     *
      * @param items
      *            the items to display, not {@code null}
      * @return the data view
@@ -428,7 +485,7 @@ public class TreeGrid<T> extends Grid<T>
     /**
      * Tree grid does not support list data view, this will throw an
      * {@link UnsupportedOperationException}.
-     * 
+     *
      * @return exception is thrown
      * @deprecated not supported
      */
@@ -536,7 +593,7 @@ public class TreeGrid<T> extends Grid<T>
      * <code>"property.nestedProperty"</code>
      * <p>
      * Note that this also resets the headers and footers.
-     * 
+     *
      * @param propertyName
      *            a target hierarchy column property name
      * @return the created hierarchy column
@@ -562,7 +619,7 @@ public class TreeGrid<T> extends Grid<T>
      * <code>"property.nestedProperty"</code>
      * <p>
      * Note that this also resets the headers and footers.
-     * 
+     *
      * @param propertyName
      *            a target hierarchy column property name
      * @param valueProvider
@@ -593,7 +650,7 @@ public class TreeGrid<T> extends Grid<T>
      * <code>"property.nestedProperty"</code>
      * <p>
      * Note that this also resets the headers and footers.
-     * 
+     *
      * @param hierarchyPropertyName
      *            a target hierarchy column property name
      * @param valueProvider
@@ -743,7 +800,7 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Expands the given items.
-     * 
+     *
      * @param items
      *            the items to expand
      * @param userOriginated
@@ -826,7 +883,7 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Collapse the given items.
-     * 
+     *
      * @param items
      *            the collection of items to collapse
      * @param userOriginated
@@ -870,7 +927,7 @@ public class TreeGrid<T> extends Grid<T>
      * collapses the given items as well as their children and grandchildren.
      * <p>
      * This method will <i>not</i> fire events for collapsed nodes.
-     * 
+     *
      * @param items
      *            the items to collapse recursively
      * @param depth
@@ -891,7 +948,7 @@ public class TreeGrid<T> extends Grid<T>
      * items while {@code getItemsWithChildrenRecursively(items, 2)} gets the
      * given items as well as their children and grandchildren.
      * </p>
-     * 
+     *
      * @param items
      *            the items to expand recursively
      * @param depth
