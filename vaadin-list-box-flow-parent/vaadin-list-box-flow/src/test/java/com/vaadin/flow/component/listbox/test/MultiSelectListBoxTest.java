@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -32,6 +33,8 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
@@ -45,6 +48,7 @@ public class MultiSelectListBoxTest {
 
     private List<Item> items;
     private ListDataProvider<Item> dataProvider;
+    private ListBoxListDataView<Item> dataView;
 
     private List<Set<Item>> eventValues;
 
@@ -64,7 +68,7 @@ public class MultiSelectListBoxTest {
         items.add(foo);
         items.add(bar);
         dataProvider = new ListDataProvider<>(items);
-        listBox.setDataProvider(dataProvider);
+        dataView = listBox.setItems(dataProvider);
 
         eventValues = new ArrayList<>();
         listBox.addValueChangeListener(e -> eventValues.add(e.getValue()));
@@ -134,7 +138,8 @@ public class MultiSelectListBoxTest {
     public void changeData_refreshAll_itemComponentsUpdated() {
         foo.setName("foo updated");
         bar.setName("bar updated");
-        dataProvider.refreshAll();
+        dataView.refreshItem(foo);
+        dataView.refreshItem(bar);
         assertItemContents("foo updated", "bar updated");
     }
 
@@ -142,7 +147,7 @@ public class MultiSelectListBoxTest {
     public void changeData_refreshItem_itemComponentUpdated() {
         foo.setName("foo updated");
         bar.setName("bar updated");
-        dataProvider.refreshItem(foo);
+        dataView.refreshItem(foo);
         assertItemContents("foo updated", "bar");
     }
 
@@ -180,6 +185,27 @@ public class MultiSelectListBoxTest {
     @Test(expected = UnsupportedOperationException.class)
     public void getSelectedItems_modifySet_throws() {
         listBox.getSelectedItems().add(new Item("baz"));
+    }
+
+    @Test
+    public void dataViewForFaultyDataProvider_throwsException() {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage(
+                "ListBoxListDataView only supports 'ListDataProvider' " +
+                        "or it's subclasses, but was given a " +
+                        "'AbstractBackEndDataProvider'");
+
+        MultiSelectListBox<String> multiSelectListBox = new MultiSelectListBox<>();
+        final ListBoxListDataView<String> dataView = multiSelectListBox
+                .setItems(Arrays.asList("one", "two"));
+
+        DataProvider<String, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> Stream.of("one"),
+                        query -> 1);
+
+        multiSelectListBox.setItems(dataProvider);
+
+        multiSelectListBox.getListDataView();
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
