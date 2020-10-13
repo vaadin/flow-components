@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Read Arguments
+
 if [ -n "$1" ]
 then
   for i in $*
@@ -60,11 +60,9 @@ computeFastBuild() {
   return 1
 }
 
-## Set default build paramters
 [ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -z "$FORK_COUNT" ] && FORK_COUNT="5"
 
-## Show info about environment
 tcLog "Show info (forks=$FORK_COUNT parallel=$TESTS_IN_PARALLEL)"
 echo $SHELL
 type java && java -version
@@ -74,29 +72,19 @@ type npm && npm --version
 type pnpm && pnpm --version
 uname -a
 
-## Compile all java files including tests in ITs modules
-cmd="mvn clean test-compile -DskipFrontend -B -q"
-tcLog "Compiling flow components - $cmd"
-$cmd || tcStatus 1 "Compilation failed"
-
-## Notify TC that we are going to run maven tests
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
-## Compile and install all modules excluding ITs
 cmd="mvn install -Drelease -B -q -T $FORK_COUNT"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
 then
-  ## Some times install fails because of maven multithread race condition
-  ## running a second time it is mitigated
   tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
   sleep 30
   $cmd || tcStatus 1 "Unit-Testing failed"
 fi
 
-## Skip IT's if developer passed [skip ci] labels in commit messages
 tcLog "Checking for skip-ci labels"
 if computeFastBuild
 then
@@ -105,17 +93,13 @@ then
   tcStatus 0 "" "Success - skip-ci"
 fi
 
-## Install node modules used for merging ITs
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd || exit 1
 
-## Create the integration-tests by coping all module ITs
 cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd || tcStatus 1 "Merging ITs failed"
-
-## Compute variable to run tests
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 if [ -n "$SAUCE_USER" ]
@@ -123,10 +107,8 @@ then
    test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
+echo "$args"
 
-args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
-
-## Install a selenium hub in local host to run tests against chrome
 if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
@@ -139,6 +121,8 @@ then
     docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE" || exit 1
     set +x
 fi
+
+args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
 
 reuse_browser() {
     [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
@@ -165,9 +149,9 @@ else
 
   if [ "$nfailed" -gt 0 ]
   then
-      ## Give a second try to failed tests
       tcLog "There were $nfailed Failed Tests: "
       echo "$failed"
+
       if [ "$nfailed" -le 15 ]
       then
         failed=`echo "$failed" | tr '\n' ','`
