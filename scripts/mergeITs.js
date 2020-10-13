@@ -60,7 +60,7 @@ async function createPom() {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
     // Add component-flow and component-testbench dependencies
-    const componentVersion = /^14\.[3-4]/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
+    const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
     addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
     addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
     // Read original IT dependencies in master and add them

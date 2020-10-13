@@ -19,14 +19,15 @@ getLatest() {
 
 getPlatformVersion() {
   [ "$1" = vaadin-iron-list ] && name="iron-list" || name=$1
+
   echo "$versions" | jq -r ".core, .vaadin | .[\"$name\"]| .javaVersion" | grep -v null
 }
 
 getNextVersion() {
   [ -z "$1" ] && return
-  prefix=`echo $1 | perl -pe 's/[0-1]+$//'`
-  number=`echo $1 | perl -pe 's/.*([0-1]+)$/$1/'`
-  number=`expr $number + 1`
+  prefix=`echo $1 | perl -pe 's/[0-9]+$//'`
+  number=`echo $1 | perl -pe 's/.*([0-9]+)$/$1/'`
+  number=`expr $number + 1` || exit 1
   echo $prefix$number
 }
 
@@ -76,12 +77,19 @@ done
 [ "$versionBase" = 14.4 -o "$versionBase" = 17.0 ] && lastTag=`git tag | grep "^$versionBase" | head -1`
 if [ -n "$lastTag" ]
 then
-  modules=`git diff --name-only $lastTag  HEAD | grep '.java$' | cut -d "/" -f1 | grep parent | sort -u | perl -pe 's,-flow-parent,,g'`
+  shift
+  ## allow setting modules to build from command line or via env var
+  [ -n "$modified" ] || modified=$*
+  ## otherwise utilise git history to figure out modified modules
+  [ -n "$modified" ] || modified=`git diff --name-only $lastTag  HEAD | grep '.java$' | cut -d "/" -f1 | grep parent | sort -u | perl -pe 's,-flow-parent,,g'`
+
+  [ -n "$modified" ] && modules="$modified"
   echo "Increasing version of the modified modules since last release $lastTag"
   for i in $modules
   do
     modVersion=`getPlatformVersion $i`
     nextVersion=`getNextVersion $modVersion`
+    [ "$modVersion" = "$nextVersion" ] && echo Error Increasing version && exit 1
     setPomVersion $i $nextVersion
   done
 fi
