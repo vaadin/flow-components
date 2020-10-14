@@ -3,7 +3,7 @@
 ### Overview
 Vaadin Cookie Consent is a web component used for showing a cookie consent banner the first time a user visits the application.
 
-### License & Author
+### License
 
 This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 
