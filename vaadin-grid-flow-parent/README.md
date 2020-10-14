@@ -51,4 +51,5 @@ Documentation for Flow can be found on [vaadin.com website](https://vaadin.com/d
 - Wait for response from one of Vaadin Flow team members
 
 ## License
+
 Apache License 2.0

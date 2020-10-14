@@ -2,11 +2,9 @@
 
 Vaadin Crud for Flow is a UI component add-on for Vaadin which provides CRUD UI for any data backend.
 
-## License & Author
+### License
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
-
-Vaadin Crud is written by Vaadin Ltd.
+This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 
 To purchase a license, visit http://vaadin.com/pricing
 
@@ -62,11 +60,11 @@ private CrudEditor<Person> createPersonEditor() {
 ```
 
 #### Disabling grid filters
-Crud supports custom grids by accepting a `Grid` as a constructor parameter; 
+Crud supports custom grids by accepting a `Grid` as a constructor parameter;
 however, a built-in `Grid` implementation called `CrudGrid` is provided.
 
-When no `Grid` is supplied to the `Crud` constructor, it uses this `CrudGrid`. 
-`CrudGrid` allows the search filters which are normally at the top of each column to be enabled or disabled. 
+When no `Grid` is supplied to the `Crud` constructor, it uses this `CrudGrid`.
+`CrudGrid` allows the search filters which are normally at the top of each column to be enabled or disabled.
 Setting the `enableDefaultFilters` constructor parameter to false disables it.
 
 ```java
@@ -107,7 +105,7 @@ Clone the project in GitHub (or fork it if you plan on contributing)
 git clone git@github.com:vaadin/vaadin-crud-flow.git
 ```
 
-To build and install the project into the local repository run 
+To build and install the project into the local repository run
 
 ```mvn install -DskipITs```
 

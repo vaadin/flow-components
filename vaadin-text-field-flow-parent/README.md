@@ -15,7 +15,7 @@ Run from the command line:
 
 Then navigate to `http://localhost:9998/vaadin-text-field` for the demo of TextField,
 to `http://localhost:9998/vaadin-password-field` for the demo of PasswordField and to
-`http://localhost:9998/vaadin-text-area` for the demo of TextArea 
+`http://localhost:9998/vaadin-text-area` for the demo of TextArea
 
 
 ## Running Integration tests
@@ -53,4 +53,5 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Wait for response from one of Vaadin Flow team members
 
 ## License
+
 Apache License 2.0
