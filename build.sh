@@ -39,6 +39,9 @@ saveFailedTests() {
   try=$1
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
+  ### collect tests numbers for TC status
+  ncompleted=`grep -Poh 'Tests run:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'`
+  nskipped=`grep -Poh 'Skipped:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'` 
   if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$try
@@ -151,6 +154,7 @@ else
   then
       tcLog "There were $nfailed Failed Tests: "
       echo "$failed"
+      rerunFailed=$nfailed
 
       if [ "$nfailed" -le 15 ]
       then
@@ -162,7 +166,7 @@ else
         $cmd
         error=$?
         saveFailedTests run-2
-        tcStatus $error "Test failed: $nfailed" "Success"
+        tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
       fi
   fi
   exit $error
