@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -333,9 +334,16 @@ public class CheckboxGroup<T>
     }
 
     private void reset() {
+        // Cache helper component before removal
+        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
         removeAll();
         clear();
+
+        // reinsert helper component
+        // see https://github.com/vaadin/vaadin-checkbox/issues/191
+        setHelperComponent(helperComponent);
+
         getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
                 .forEach(this::add);
     }
