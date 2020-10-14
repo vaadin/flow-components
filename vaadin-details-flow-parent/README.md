@@ -2,12 +2,6 @@
 
 Vaadin Details for Flow is a UI component add-on for Vaadin.
 
-## License & Author
-
-Apache License 2.0
-
-Vaadin Details is written by Vaadin Ltd.
-
 ### Installing
 Add Details to your project
 ```xml
@@ -49,3 +43,8 @@ To compile and run demos locally execute
 mvn compile
 mvn -pl vaadin-details-flow-demo -Pwar jetty:run
 ```
+
+### License
+
+Apache License 2.0
+

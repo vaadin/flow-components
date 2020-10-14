@@ -101,6 +101,4 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 ## LICENSE
 SPDX-License-Identifier: Apache-2.0 OR Commercial Vaadin Add-on License version 3
 
-This project is dual-licensed under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0) and [Commercial Vaadin Add-on License version 3](https://vaadin.com/license/cval-3.0) (CVALv3). 
-
 For specific module(s), check the LICENSE file under the parent module.

@@ -19,7 +19,7 @@ Run from the command line:
 - `mvn clean install -DskipTests`
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
@@ -38,4 +38,5 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Wait for response from one of Vaadin Flow team members
 
 ## License
+
 Apache License 2.0
