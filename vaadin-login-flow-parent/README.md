@@ -2,14 +2,6 @@
 
 Vaadin Login for Flow is a UI component add-on for Vaadin.
 
-## License & Author
-
-Apache License 2.0
-
-Vaadin Login is written by Vaadin Ltd.
-
-To purchase a license, visit http://vaadin.com/pricing
-
 ### Installing
 Add Login to your project
 ```xml
@@ -53,3 +45,8 @@ To compile and run demos locally execute
 mvn compile
 mvn -pl vaadin-login-flow-demo -Pwar jetty:run
 ```
+
+### License
+
+Apache License 2.0
+

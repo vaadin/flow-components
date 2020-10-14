@@ -61,8 +61,7 @@ mvn compile
 mvn -pl vaadin-select-flow-demo -Pwar jetty:run
 ```
 
-## License & Author
+### License
 
-This component distributed under Apache 2.0 license. For license terms, see LICENSE.txt.
+Apache License 2.0
 
-Vaadin Select is written by Vaadin Ltd.
