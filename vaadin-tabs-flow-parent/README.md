@@ -5,7 +5,7 @@ element for use from the server side with [Vaadin Flow](https://github.com/vaadi
 
 `master` branch is the latest version that will at some point be released in the [Vaadin platform](https://github.com/vaadin/platform). See other branches for other framework versions:
  - `1.0` branch is Vaadin 10 LTS (Flow/Flow-component version 1.0)
- 
+
 ## Running the component demo
 Run from the command line:
 - `mvn -pl vaadin-tabs-flow-demo -Pwar install jetty:run`
@@ -37,4 +37,5 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Wait for response from one of Vaadin Flow team members
 
 ## License
+
 Apache License 2.0

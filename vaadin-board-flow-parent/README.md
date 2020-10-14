@@ -7,7 +7,7 @@ Vaadin Board key feature is how it effectively reorders UI components on differe
 
 This version is for Vaadin 10 and newer. For a Vaadin Framework 8 compatible version, see https://vaadin.com/directory/component/vaadin-board/1.0.1
 
-### License & Author
+### License
 
 This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 
