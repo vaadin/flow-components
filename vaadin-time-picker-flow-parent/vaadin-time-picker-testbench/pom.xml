@@ -4,10 +4,9 @@
   <parent>
     <artifactId>vaadin-time-picker-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-time-picker-testbench</artifactId>
-  <version>${vaadin.time.picker.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Time Picker Testbench API</name>
   <dependencies>

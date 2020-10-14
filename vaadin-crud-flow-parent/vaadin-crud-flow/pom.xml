@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-crud-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-crud-flow</artifactId>
-  <version>${vaadin.crud.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Crud</name>
   <dependencies>
@@ -34,12 +33,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${vaadin.text.field.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-flow</artifactId>
-      <version>${vaadin.grid.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin.webjar</groupId>

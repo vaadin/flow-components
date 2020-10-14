@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-date-picker-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-date-picker-integration-tests</artifactId>
-  <version>${vaadin.date.picker.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Date Picker Integration Tests</name>
   <properties>
@@ -34,17 +33,17 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-picker-flow</artifactId>
-      <version>${vaadin.date.picker.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-picker-flow-demo</artifactId>
-      <version>${vaadin.date.picker.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-flow</artifactId>
-      <version>${vaadin.grid.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -67,13 +66,13 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-picker-testbench</artifactId>
-      <version>${vaadin.date.picker.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

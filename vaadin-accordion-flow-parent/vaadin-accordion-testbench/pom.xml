@@ -4,10 +4,9 @@
   <parent>
     <artifactId>vaadin-accordion-flow-parent</artifactId>
     <groupId>com.vaadin</groupId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-accordion-testbench</artifactId>
-  <version>${vaadin.accordion.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Accordion Testbench API</name>
   <dependencies>
@@ -19,7 +18,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-details-testbench</artifactId>
-      <version>${vaadin.details.version}</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>

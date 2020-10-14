@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-grid-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-grid-flow</artifactId>
-  <version>${vaadin.grid.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Grid</name>
   <dependencies>
@@ -107,7 +106,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -141,7 +140,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${vaadin.text.field.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

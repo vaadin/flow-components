@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-button-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-button-flow</artifactId>
-  <version>${vaadin.button.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Button</name>
   <dependencies>
@@ -62,7 +61,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons-flow</artifactId>
-      <version>${vaadin.icons.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

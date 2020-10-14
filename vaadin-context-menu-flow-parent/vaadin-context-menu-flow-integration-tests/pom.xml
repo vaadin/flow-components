@@ -4,10 +4,9 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-context-menu-flow-parent</artifactId>
-    <version>14.4-SNAPSHOT</version>
+    <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-context-menu-integration-tests</artifactId>
-  <version>${vaadin.context.menu.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Context Menu Integration Tests</name>
   <properties>
@@ -34,12 +33,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow-demo</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -57,7 +56,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-testbench</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -69,7 +68,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
