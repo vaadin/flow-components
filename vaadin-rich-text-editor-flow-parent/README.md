@@ -2,11 +2,9 @@
 
 Vaadin Rich Text Editor for Flow is a UI component add-on for Vaadin which provides rich text editor functionality.
 
-## License & Author
+### License
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
-
-Vaadin Rich Text Editor is written by Vaadin Ltd.
+This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 
 To purchase a license, visit http://vaadin.com/pricing
 

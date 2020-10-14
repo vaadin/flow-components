@@ -2,11 +2,9 @@
 
 Vaadin GridPro for Flow is a high quality data grid / data table UI component add-on for Vaadin.
 
-## License & Author
+### License
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
-
-Vaadin GridPro is written by Vaadin Ltd.
+This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 
 To purchase a license, visit http://vaadin.com/pricing
 
