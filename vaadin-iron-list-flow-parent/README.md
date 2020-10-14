@@ -12,7 +12,7 @@ Run from the command line:
 
 Then navigate to `http://localhost:9998/iron-list` for the demo.
 
-## Running Integration tests 
+## Running Integration tests
 
 For running integration tests demos execute one of the following lines depending on the desired mode
 - `mvn -pl vaadin-iron-list-flow-integration-tests clean jetty:run`
@@ -47,4 +47,5 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Wait for response from one of Vaadin Flow team members
 
 ## License
+
 Apache License 2.0

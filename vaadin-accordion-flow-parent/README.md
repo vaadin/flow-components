@@ -2,12 +2,6 @@
 
 Accordion for Vaadin Flow is a UI component add-on for Vaadin which provides an accordion component.
 
-### License & Author
-
-Apache License 2.0
-
-Vaadin Accordion is written by Vaadin Ltd.
-
 ### Installing
 Add Accordion to your project
 ```xml
@@ -41,7 +35,7 @@ Clone the project in GitHub (or fork it if you plan on contributing)
 git clone git@github.com:vaadin/vaadin-accordion-flow.git
 ```
 
-To build and install the project into the local repository run 
+To build and install the project into the local repository run
 
 ```mvn install -DskipITs```
 
@@ -55,3 +49,7 @@ To compile and run demos locally execute
 mvn compile
 mvn -pl vaadin-accordion-flow-demo -Pwar jetty:run
 ```
+
+### License
+
+Apache License 2.0

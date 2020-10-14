@@ -1,15 +1,10 @@
 # Vaadin CustomField for Flow
 
-Vaadin CustomField for Flow is a UI component add-on for Vaadin. 
-It is a field whose UI content can be constructed by the user, enabling 
+Vaadin CustomField for Flow is a UI component add-on for Vaadin.
+It is a field whose UI content can be constructed by the user, enabling
 the creation of e.g. form fields by composing Vaadin components.
 Customization of both the visual presentation and the logic of the field is
 possible.
-## License & Author
-
-Apache License 2.0
-
-Vaadin CustomField is written by Vaadin Ltd.
 
 ### Installing
 Add CustomField to your project
@@ -71,3 +66,8 @@ To compile and run demos locally execute
 mvn compile
 mvn -pl vaadin-custom-field-flow-demo -Pwar jetty:run
 ```
+
+### License
+
+Apache License 2.0
+
