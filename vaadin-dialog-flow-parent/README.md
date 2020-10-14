@@ -47,4 +47,5 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Wait for response from one of Vaadin Flow team members
 
 ## License
+
 Apache License 2.0

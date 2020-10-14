@@ -3,10 +3,6 @@
 ### Overview
 Vaadin App Layout is a component providing a quick and easy way to get a common application layout structure done.
 
-### License & Author
-
-Apache License 2.0
-
 ### Installing
 Add App Layout to your project:
 ```
@@ -47,3 +43,7 @@ public class AboutView extends Div {
 }
 
 ```
+
+### License
+
+Apache License 2.0
