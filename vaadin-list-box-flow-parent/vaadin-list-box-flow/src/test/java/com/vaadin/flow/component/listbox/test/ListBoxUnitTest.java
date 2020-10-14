@@ -1,10 +1,15 @@
 package com.vaadin.flow.component.listbox.test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 
 public class ListBoxUnitTest {
 
@@ -48,6 +53,40 @@ public class ListBoxUnitTest {
         assertDisabledItem(1, false);
     }
 
+    @Test
+    public void setIdentifierProvider_shouldSelectCorrectItem_dueToIdentifier() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        ListBox<CustomItem> listBox = new ListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        listBox.setValue(new CustomItem(1L));
+
+        Assert.assertNotNull(listBox.getValue());
+        Assert.assertEquals(listBox.getValue().getName(), "First");
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        listBox.setValue(new CustomItem(2L));
+
+        Assert.assertNotNull(listBox.getValue());
+        Assert.assertEquals(Long.valueOf(2L), listBox.getValue().getId());
+    }
+
     private void assertDisabledItem(int index, boolean disabled) {
         if (disabled) {
             Assert.assertNotNull(listBox.getElement().getChild(index)
@@ -57,5 +96,4 @@ public class ListBoxUnitTest {
                     .getAttribute("disabled"));
         }
     }
-
 }

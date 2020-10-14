@@ -133,4 +133,18 @@ public class MultiSelectListBox<T>
                 .selectionChange(new MultiSelectionEvent<>(this, this,
                         event.getOldValue(), event.isFromClient())));
     }
+
+    @Override
+    protected boolean valueEquals(Set<T> value1, Set<T> value2) {
+        assert value1 != null && value2 != null;
+        if (value1.size() != value2.size()) {
+            return false;
+        }
+
+        Set<Object> ids1 = value1.stream().map(super::getItemId)
+                .collect(Collectors.toSet());
+        Set<Object> ids2 = value2.stream().map(super::getItemId)
+                .collect(Collectors.toSet());
+        return ids1.equals(ids2);
+    }
 }

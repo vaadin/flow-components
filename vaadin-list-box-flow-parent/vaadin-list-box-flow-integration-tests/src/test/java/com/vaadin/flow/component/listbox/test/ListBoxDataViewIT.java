@@ -37,6 +37,8 @@ import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_BO
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_BOX_FOR_LIST_DATA_VIEW;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_BOX_FOR_SORT_DATA_VIEW;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_BOX_SELECTED_IDS_SPAN;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_BOX_SELECTION_UPDATE_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_ADD_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_ADD_FILTER_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_NEXT_BUTTON;
@@ -46,6 +48,8 @@ import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DA
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_SET_FILTER_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_SORT_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_UPDATE_BUTTON;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN;
 
 @TestPath("vaadin-list-box/list-box-data-view")
 public class ListBoxDataViewIT extends AbstractComponentIT {
@@ -65,18 +69,18 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         findElement(By.id(DATA_VIEW_UPDATE_BUTTON)).click();
 
-        WebElement group = findElement(By.id(LIST_BOX_FOR_DATA_VIEW));
-        List<WebElement> buttons = group
+        WebElement listBox = findElement(By.id(LIST_BOX_FOR_DATA_VIEW));
+        List<WebElement> items = listBox
                 .findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 2, buttons.size());
+        Assert.assertEquals("ListBox should have items", 2, items.size());
 
         Assert.assertEquals("First RadioButton should be updated to", CHANGED_1,
-                buttons.get(0).getText());
+                items.get(0).getText());
 
         Assert.assertEquals(
                 "Second RadioButton should still holds the old value", SECOND,
-                buttons.get(1).getText());
+                items.get(1).getText());
     }
 
     @Test
@@ -84,100 +88,100 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         findElement(By.id(LIST_DATA_VIEW_UPDATE_BUTTON)).click();
 
-        WebElement group = findElement(By.id(LIST_BOX_FOR_LIST_DATA_VIEW));
-        List<WebElement> buttons = group
+        WebElement listBox = findElement(By.id(LIST_BOX_FOR_LIST_DATA_VIEW));
+        List<WebElement> items = listBox
                 .findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 2, buttons.size());
+        Assert.assertEquals("ListBox should have items", 2, items.size());
 
         Assert.assertEquals("First RadioButton should be updated to", CHANGED_1,
-                buttons.get(0).getText());
+                items.get(0).getText());
 
         Assert.assertEquals(
                 "Second RadioButton should still holds the old value", SECOND,
-                buttons.get(1).getText());
+                items.get(1).getText());
     }
 
     @Test
     public void testListDataView_addItem_shouldAddOneAndOnlyOneItem() {
 
-        WebElement group = findElement(By.id(LIST_BOX_FOR_ADD_TO_DATA_VIEW));
-        List<WebElement> buttons = group
+        WebElement listBox = findElement(By.id(LIST_BOX_FOR_ADD_TO_DATA_VIEW));
+        List<WebElement> items = listBox
                 .findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 1, buttons.size());
+        Assert.assertEquals("ListBox should have items", 1, items.size());
 
         findElement(By.id(LIST_DATA_VIEW_ADD_BUTTON)).click();
 
         waitForElementPresent(By.tagName(VAADIN_ITEM));
 
-        group = findElement(By.id(LIST_BOX_FOR_ADD_TO_DATA_VIEW));
-        buttons = group.findElements(By.tagName(VAADIN_ITEM));
+        listBox = findElement(By.id(LIST_BOX_FOR_ADD_TO_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 2, buttons.size());
+        Assert.assertEquals("ListBox should have items", 2, items.size());
 
         Assert.assertEquals("First RadioButton should have the text", FIRST,
-                buttons.get(0).getText());
+                items.get(0).getText());
 
         Assert.assertEquals("Second RadioButton should have the text", SECOND,
-                buttons.get(1).getText());
+                items.get(1).getText());
     }
 
     @Test
     public void testListDataView_removeItem_shouldRemoveOneAndOnlyOneItem() {
 
-        WebElement group = findElement(
+        WebElement listBox = findElement(
                 By.id(LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW));
-        List<WebElement> buttons = group
+        List<WebElement> items = listBox
                 .findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 2, buttons.size());
+        Assert.assertEquals("ListBox should have items", 2, items.size());
 
         findElement(By.id(LIST_DATA_VIEW_REMOVE_BUTTON)).click();
 
         waitForElementPresent(By.tagName(VAADIN_ITEM));
 
-        group = findElement(By.id(LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW));
-        buttons = group.findElements(By.tagName(VAADIN_ITEM));
+        listBox = findElement(By.id(LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 1, buttons.size());
+        Assert.assertEquals("ListBox should have items", 1, items.size());
 
         Assert.assertEquals("First RadioButton should have the text", FIRST,
-                buttons.get(0).getText());
+                items.get(0).getText());
     }
 
     @Test
     public void testListDataView_addAndRemoveFilters_shouldProduceCorrectNumberOfRadioButtons() {
 
-        WebElement group = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
-        List<WebElement> buttons = group
+        WebElement listBox = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
+        List<WebElement> items = listBox
                 .findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 10, buttons.size());
+        Assert.assertEquals("ListBox should have items", 10, items.size());
 
         findElement(By.id(LIST_DATA_VIEW_SET_FILTER_BUTTON)).click();
         waitForElementPresent(By.tagName(VAADIN_ITEM));
 
-        group = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
-        buttons = group.findElements(By.tagName(VAADIN_ITEM));
+        listBox = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 5, buttons.size());
+        Assert.assertEquals("ListBox should have items", 5, items.size());
 
         findElement(By.id(LIST_DATA_VIEW_ADD_FILTER_BUTTON)).click();
         waitForElementPresent(By.tagName(VAADIN_ITEM));
 
-        group = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
-        buttons = group.findElements(By.tagName(VAADIN_ITEM));
+        listBox = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 4, buttons.size());
+        Assert.assertEquals("ListBox should have items", 4, items.size());
 
         findElement(By.id(LIST_DATA_VIEW_REMOVE_FILTER_BUTTON)).click();
         waitForElementPresent(By.tagName(VAADIN_ITEM));
 
-        group = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
-        buttons = group.findElements(By.tagName(VAADIN_ITEM));
+        listBox = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals("ListBox should have items", 10, buttons.size());
+        Assert.assertEquals("ListBox should have items", 10, items.size());
     }
 
     @Test
@@ -223,28 +227,58 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
     @Test
     public void testListDataView_setSortComparator_shouldSortTheItems() {
 
-        WebElement group = findElement(By.id(LIST_BOX_FOR_SORT_DATA_VIEW));
-        List<WebElement> buttons = group
+        WebElement listBox = findElement(By.id(LIST_BOX_FOR_SORT_DATA_VIEW));
+        List<WebElement> items = listBox
                 .findElements(By.tagName(VAADIN_ITEM));
 
         Assert.assertEquals("first rendered radio button's text should be",
-                "third", buttons.get(0).getText());
+                "third", items.get(0).getText());
         Assert.assertEquals("second rendered radio button's text should be",
-                "first", buttons.get(1).getText());
+                "first", items.get(1).getText());
         Assert.assertEquals("third rendered radio button's text should be",
-                "second", buttons.get(2).getText());
+                "second", items.get(2).getText());
 
         findElement(By.id(LIST_DATA_VIEW_SORT_BUTTON)).click();
         waitForElementPresent(By.tagName(VAADIN_ITEM));
 
-        group = findElement(By.id(LIST_BOX_FOR_SORT_DATA_VIEW));
-        buttons = group.findElements(By.tagName(VAADIN_ITEM));
+        listBox = findElement(By.id(LIST_BOX_FOR_SORT_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
         Assert.assertEquals("first rendered radio button's text should be",
-                "first", buttons.get(0).getText());
+                "first", items.get(0).getText());
         Assert.assertEquals("second rendered radio button's text should be",
-                "second", buttons.get(1).getText());
+                "second", items.get(1).getText());
         Assert.assertEquals("third rendered radio button's text should be",
-                "third", buttons.get(2).getText());
+                "third", items.get(2).getText());
+    }
+
+    @Test
+    public void setIdentifierProvider_forMultiSelectListBox_shouldSelectCorrectItems_dueToIdentifier() {
+        WebElement selectedIdsSpan = findElement(
+                By.id(MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN));
+        Assert.assertEquals("Selected item ids should be", "1, 3",
+                selectedIdsSpan.getText());
+
+        findElement(By.id(MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON)).click();
+
+        selectedIdsSpan = findElement(
+                By.id(MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN));
+        Assert.assertEquals("Selected item ids should be", "2, 4",
+                selectedIdsSpan.getText());
+    }
+
+    @Test
+    public void setIdentifierProvider_forListBox_shouldSelectCorrectItem_dueToIdentifier() {
+        WebElement selectedIdsSpan = findElement(
+                By.id(LIST_BOX_SELECTED_IDS_SPAN));
+        Assert.assertEquals("Selected item id should be", "3",
+                selectedIdsSpan.getText());
+
+        findElement(By.id(LIST_BOX_SELECTION_UPDATE_BUTTON)).click();
+
+        selectedIdsSpan = findElement(
+                By.id(LIST_BOX_SELECTED_IDS_SPAN));
+        Assert.assertEquals("Selected item ids should be", "2",
+                selectedIdsSpan.getText());
     }
 }

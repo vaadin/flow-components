@@ -64,4 +64,13 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
                 .findFirst().orElseThrow(() -> new IllegalArgumentException(
                         "Could not find given value from the item set"));
     }
+
+    @Override
+    protected boolean valueEquals(T value1, T value2) {
+        if (value1 == null && value2 == null)
+            return true;
+        if (value1 == null || value2 == null)
+            return false;
+        return getItemId(value1).equals(getItemId(value2));
+    }
 }

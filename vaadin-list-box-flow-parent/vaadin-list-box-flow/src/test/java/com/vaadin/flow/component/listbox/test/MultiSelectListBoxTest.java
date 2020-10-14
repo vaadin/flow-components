@@ -208,6 +208,47 @@ public class MultiSelectListBoxTest {
         multiSelectListBox.getListDataView();
     }
 
+    @Test
+    public void setIdentifierProvider_shouldSelectCorrectItems_dueToIdentifier() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        MultiSelectListBox<CustomItem> multiSelectListBox =
+                new MultiSelectListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        multiSelectListBox.setValue(createSet(new CustomItem(1L)));
+
+        long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId)
+                .toArray();
+        Assert.assertArrayEquals(new long[] {1L}, selectedIds);
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        multiSelectListBox.setValue(Collections.singleton(new CustomItem(2L)));
+
+        selectedIds = multiSelectListBox.getSelectedItems()
+                .stream()
+                .mapToLong(CustomItem::getId)
+                .toArray();
+        Assert.assertArrayEquals(new long[] {2L}, selectedIds);
+    }
+
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
         Assert.assertEquals(expectedValues.length, eventValues.size());
         IntStream.range(0, expectedValues.length).forEach(i -> {
@@ -270,5 +311,4 @@ public class MultiSelectListBoxTest {
             return name;
         }
     }
-
 }
