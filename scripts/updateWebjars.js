@@ -24,7 +24,7 @@ async function computeModules() {
 async function updateWebjars(pom){
 
     const vaadinWebjarGroupId = `org.webjars.bowergithub.vaadin`;
-    const updateFile = false;
+    let updateFile = false;
     const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
     name = pomJs.project.artifactId[0];
 
@@ -40,10 +40,20 @@ async function updateWebjars(pom){
         const webjarName = webjars[j].artifactId +'';
         const webjarVersion = webjars[j].version +'';
         const updatedVersion = await findUpdatedVersion(webjarName, webjarVersion);
-        
+
         if (updatedVersion != webjarVersion){
-            const updateFile = true;
+            updateFile = true;
             webjars[j].version = updatedVersion; 
+
+			if (pomJs.project.dependencyManagement){
+				pomJs.project.dependencyManagement[0].dependencies[0].dependency.filter(dep => {
+					if (dep.artifactId == webjarName){
+						dep.version = updatedVersion;
+						console.log('\x1b[33m', "In "+name+' dependencyManagement,' +dep.artifactId+ " has been updated from "+ webjarVersion +" to " + updatedVersion);
+					}
+				})
+			}
+
             pomJs.project.dependencies[0].dependency.filter(dep => {
                 if (dep.artifactId == webjarName){
                     dep.version = updatedVersion;
