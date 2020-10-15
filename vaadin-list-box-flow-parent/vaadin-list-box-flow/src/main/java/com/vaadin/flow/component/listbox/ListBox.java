@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.listbox;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.data.selection.SingleSelect;
@@ -65,6 +66,21 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
                         "Could not find given value from the item set"));
     }
 
+    /**
+     * Compares to value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first instance
+     * @param value2
+     *            the second instance
+     * @return <code>true</code> if the instances are equal; otherwise
+     *         <code>false</code>
+     */
     @Override
     protected boolean valueEquals(T value1, T value2) {
         if (value1 == null && value2 == null)

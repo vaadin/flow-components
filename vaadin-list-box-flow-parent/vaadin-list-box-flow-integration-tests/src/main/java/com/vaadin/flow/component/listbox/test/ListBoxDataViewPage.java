@@ -64,8 +64,10 @@ public class ListBoxDataViewPage extends Div {
     static final String LIST_DATA_VIEW_NEXT_BUTTON = "list-data-view-next-button";
     static final String LIST_DATA_VIEW_PREV_BUTTON = "list-data-view-prev-button";
     static final String LIST_DATA_VIEW_SORT_BUTTON = "list-data-view-sort-button";
-    static final String LIST_BOX_SELECTION_UPDATE_BUTTON = "list-box-selection-update-button";
+    static final String LIST_BOX_SELECTION_BY_ID_UPDATE_BUTTON = "list-box-selection-by-id-update-button";
+    static final String LIST_BOX_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON = "list-box-selection-by-id-and-name-update-button";
     static final String MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON = "multi-select-list-box-selection-update-button";
+    static final String MULTI_SELECT_LIST_BOX_SELECTION_BY_ID_AND_NAME_BUTTON = "multi-select-list-box-selection-by-id-and-name-button";
 
     static final String CURRENT_ITEM_SPAN = "current-item-span";
     static final String HAS_NEXT_ITEM_SPAN = "has-next-item-span";
@@ -290,17 +292,19 @@ public class ListBoxDataViewPage extends Div {
                 .reduce((a, b) -> a + ", " + b)
                 .ifPresent(selectedIdsSpan::setText);
 
-        Button updateButton = new Button("Update", click -> {
+        Button updateAndSelectByIdButton =
+                new Button("Update & Select by Id", click -> {
             // Make the names of unselected items similar to the name of selected
             // one to mess with the <equals> implementation in CustomItem:
             second.setName("First");
             listDataView.refreshItem(second);
 
             fourth.setName("Third");
-            listDataView.refreshItem(third);
+            listDataView.refreshItem(fourth);
 
             // Select the items not only with the reference of existing items,
-            // but also the Id:
+            // but also the Id to verify <equals> is not in use and the
+            // selection is happening only based on identifier:
             Set<CustomItem> newSelected = new HashSet<>(Arrays.asList(
                     second, new CustomItem(4L)));
             multiSelectListBox.setValue(newSelected);
@@ -312,9 +316,30 @@ public class ListBoxDataViewPage extends Div {
                     .reduce((a, b) -> a + ", " + b)
                     .ifPresent(selectedIdsSpan::setText);
         });
-        updateButton.setId(MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON);
+        updateAndSelectByIdButton
+                .setId(MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON);
 
-        add(multiSelectListBox, selectedIdsSpan, updateButton);
+        Button selectByIdAndNameButton =
+                new Button("Select by Id and Name", click -> {
+            // Select the items not only with the reference of existing items,
+            // but also the Id and a challenging name to verify <equals> is not
+            // in use and the selection is happening only based on identifier:
+            Set<CustomItem> newSelected = new HashSet<>(Arrays.asList(
+                    first, new CustomItem(3L, "Third")));
+            multiSelectListBox.setValue(newSelected);
+
+            multiSelectListBox.getSelectedItems()
+                    .stream()
+                    .map(item -> String.valueOf(item.getId()))
+                    .sorted()
+                    .reduce((a, b) -> a + ", " + b)
+                    .ifPresent(selectedIdsSpan::setText);
+        });
+        selectByIdAndNameButton
+                .setId(MULTI_SELECT_LIST_BOX_SELECTION_BY_ID_AND_NAME_BUTTON);
+
+        add(multiSelectListBox, selectedIdsSpan, updateAndSelectByIdButton,
+                selectByIdAndNameButton);
     }
 
     private void createIdentifierProviderForListBox() {
@@ -336,9 +361,11 @@ public class ListBoxDataViewPage extends Div {
         selectedIdsSpan.setId(LIST_BOX_SELECTED_IDS_SPAN);
         selectedIdsSpan.setText(String.valueOf(listBox.getValue().getId()));
 
-        Button updateButton = new Button("Update", click -> {
-            // Make the names of unselected items similar to the name of selected
-            // one to mess with the <equals> implementation in CustomItem:
+        Button updateAndSelectByIdOnlyButton =
+                new Button("Update & Select by Id", click -> {
+            // Make the names of unselected items similar to the name of
+            // selected one to mess with the <equals> implementation in
+            // CustomItem:
             first.setName("Second");
             listDataView.refreshItem(first);
 
@@ -351,9 +378,23 @@ public class ListBoxDataViewPage extends Div {
 
             selectedIdsSpan.setText(String.valueOf(listBox.getValue().getId()));
         });
-        updateButton.setId(LIST_BOX_SELECTION_UPDATE_BUTTON);
+        updateAndSelectByIdOnlyButton
+                .setId(LIST_BOX_SELECTION_BY_ID_UPDATE_BUTTON);
 
-        add(listBox, selectedIdsSpan, updateButton);
+        Button selectByIdAndNameButton =
+                new Button("Select by Id and Name", click -> {
+                    // Select the item with the Id and a challenging wrong name
+                    // to verify <equals> method is not in use:
+                    listBox.setValue(new CustomItem(3L, "Second"));
+
+                    selectedIdsSpan.setText(
+                            String.valueOf(listBox.getValue().getId()));
+                });
+        selectByIdAndNameButton
+                .setId(LIST_BOX_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON);
+
+        add(listBox, selectedIdsSpan, updateAndSelectByIdOnlyButton,
+                selectByIdAndNameButton);
     }
 
     private static class GenericDataProvider

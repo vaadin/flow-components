@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
@@ -17,6 +19,9 @@ public class ListBoxUnitTest {
     private static final String ITEM2 = "2";
 
     private ListBox<String> listBox;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void init() {
@@ -54,7 +59,7 @@ public class ListBoxUnitTest {
     }
 
     @Test
-    public void setIdentifierProvider_shouldSelectCorrectItem_dueToIdentifier() {
+    public void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -85,6 +90,77 @@ public class ListBoxUnitTest {
 
         Assert.assertNotNull(listBox.getValue());
         Assert.assertEquals(Long.valueOf(2L), listBox.getValue().getId());
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        ListBox<CustomItem> listBox = new ListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        listBox.setValue(new CustomItem(1L));
+
+        Assert.assertNotNull(listBox.getValue());
+        Assert.assertEquals(listBox.getValue().getName(), "First");
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item with an Id and the name that can be wrongly equals to
+        // another items, should verify that <equals> method is not in use:
+        listBox.setValue(new CustomItem(3L, "Second"));
+
+        Assert.assertNotNull(listBox.getValue());
+        Assert.assertEquals(Long.valueOf(3L), listBox.getValue().getId());
+    }
+
+    @Test
+    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        ListBox<CustomItem> listBox = new ListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
+
+        listBox.setValue(new CustomItem(null, "Second"));
+
+        Assert.assertNotNull(listBox.getValue());
+        Assert.assertEquals(Long.valueOf(2L), listBox.getValue().getId());
+    }
+
+    @Test
+    public void setIdentifierProviderOnId_setItemWithNullId_shouldThrowException() {
+
+        thrown.expect(NullPointerException.class);
+
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        ListBox<CustomItem> listBox = new ListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        listBox.setValue(new CustomItem(null, "First"));
     }
 
     private void assertDisabledItem(int index, boolean disabled) {
