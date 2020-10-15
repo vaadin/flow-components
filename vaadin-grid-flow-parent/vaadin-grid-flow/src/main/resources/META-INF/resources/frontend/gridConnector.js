@@ -35,6 +35,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           }
         });
 
+        ItemCache.prototype.isLoading = tryCatchWrapper(function() {
+          return Boolean(ensureSubCacheQueue.length || Object.keys(this.pendingRequests).length || Object.keys(this.itemCaches).filter(index => {
+            return this.itemCaches[index].isLoading();
+          })[0]);
+        });
+
         ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
           if (!this.itemCaches[scaledIndex]) {
             const subCache = new ItemCache.prototype.constructor(this.grid, this, this.items[scaledIndex]);
