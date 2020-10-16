@@ -133,4 +133,35 @@ public class MultiSelectListBox<T>
                 .selectionChange(new MultiSelectionEvent<>(this, this,
                         event.getOldValue(), event.isFromClient())));
     }
+
+    /**
+     * Compares two value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first set of instance
+     * @param value2
+     *            the second set of instance
+     * @return <code>true</code> if sets are equal in size and also the items;
+     *         otherwise <code>false</code>
+     */
+    @Override
+    protected boolean valueEquals(Set<T> value1, Set<T> value2) {
+        if (value1 == null && value2 == null)
+            return true;
+        if (value1 == null || value2 == null)
+            return false;
+        if (value1.size() != value2.size())
+            return false;
+
+        Set<Object> ids1 = value1.stream().map(super::getItemId)
+                .collect(Collectors.toSet());
+        Set<Object> ids2 = value2.stream().map(super::getItemId)
+                .collect(Collectors.toSet());
+        return ids1.equals(ids2);
+    }
 }
