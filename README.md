@@ -99,6 +99,4 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Wait for response from one of Vaadin Flow team members
 
 ## LICENSE
-SPDX-License-Identifier: Apache-2.0 OR Commercial Vaadin Add-on License version 3
-
 For specific module(s), check the LICENSE file under the parent module.
