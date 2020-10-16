@@ -20,8 +20,16 @@ quit() {
 }
 
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-# Target branch in platform has same name as branch in vaadin-flow-components
-TARGET_BRANCH="$CURRENT_BRANCH"
+
+if [ $# -eq 0 ]
+  then
+    # Target branch in platform has same name as branch in vaadin-flow-components
+    TARGET_BRANCH="$CURRENT_BRANCH"
+  else
+    # allow pass target branch in platform repo
+    # this is used for unifing the builds between update npm/webjar and platform
+    TARGET_BRANCH=$1
+fi
 
 # Needs to point to a valid repo from vaadin platform
 [ -z ${PATH_TO_PLATFORM+x} ] \
