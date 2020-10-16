@@ -135,7 +135,7 @@ public class MultiSelectListBox<T>
     }
 
     /**
-     * Compares to value instances to each other to determine whether they are
+     * Compares two value instances to each other to determine whether they are
      * equal. Equality is used to determine whether to update internal state and
      * fire an event when {@link #setValue(Object)} or
      * {@link #setModelValue(Object, boolean)} is called. Subclasses can
