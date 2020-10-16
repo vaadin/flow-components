@@ -289,9 +289,15 @@ public class RadioButtonGroup<T>
     }
 
     private void reset() {
+        // Cache helper component before removal
+        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
         removeAll();
         clear();
+
+        // reinsert helper component
+        setHelperComponent(helperComponent);
+
         getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
                 .forEach(this::add);
     }
