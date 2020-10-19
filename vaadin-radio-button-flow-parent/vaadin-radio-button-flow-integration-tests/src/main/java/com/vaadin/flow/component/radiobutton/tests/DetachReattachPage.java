@@ -37,11 +37,11 @@ public class DetachReattachPage extends Div {
         valueA.setId("valueA");
         valueB.setId("valueB");
 
-        NativeButton addForm = new NativeButton("Add Group", e -> attachTemplate(value));
-        NativeButton removeForm = new NativeButton("Remove Group", e -> remove(detachReattachTemplate));
+        NativeButton addGroup = new NativeButton("Add Group", e -> attachTemplate(value));
+        NativeButton removeGroup = new NativeButton("Remove Group", e -> remove(detachReattachTemplate));
 
-        addForm.setId("addForm");
-        removeForm.setId("removeForm");
+        addGroup.setId("addGroup");
+        removeGroup.setId("removeGroup");
 
         Div valueBlock = new Div();
         NativeButton getValue = new NativeButton("Get Value", e ->
@@ -49,7 +49,7 @@ public class DetachReattachPage extends Div {
         valueBlock.setId("valueBlock");
         getValue.setId("getValue");
 
-        add(valueA, valueB, addForm, removeForm, valueBlock, getValue);
+        add(valueA, valueB, addGroup, removeGroup, valueBlock, getValue);
     }
 
     private void attachTemplate(String val) {

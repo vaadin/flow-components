@@ -34,17 +34,17 @@ public class DetachReattachIT extends AbstractComponentIT {
         WebElement valueBlock = findElement(By.id("valueBlock"));
         WebElement getValue = findElement(By.id("getValue"));
 
-        WebElement addForm = findElement(By.id("addForm"));
-        WebElement removeForm = findElement(By.id("removeForm"));
+        WebElement addGroup = findElement(By.id("addGroup"));
+        WebElement removeGroup = findElement(By.id("removeGroup"));
 
         valueA.click();
-        addForm.click();
+        addGroup.click();
         getValue.click();
         Assert.assertEquals(valueBlock.getText(), "A");
 
-        removeForm.click();
+        removeGroup.click();
         valueB.click();
-        addForm.click();
+        addGroup.click();
         getValue.click();
         Assert.assertEquals(valueBlock.getText(), "B");
     }

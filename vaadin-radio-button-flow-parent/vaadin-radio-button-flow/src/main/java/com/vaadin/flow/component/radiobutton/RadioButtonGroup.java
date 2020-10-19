@@ -245,6 +245,7 @@ public class RadioButtonGroup<T>
         	dataProviderListenerRegistration = null;
         }
         super.onDetach(detachEvent);
+        reset();
     }
 
     /**
