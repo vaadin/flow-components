@@ -24,6 +24,7 @@ import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -52,15 +53,16 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
         this.dataCommunicator = dataCommunicator;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Stream<T> getItems() {
-        return getDataProvider().fetch(dataCommunicator.buildQuery(0,
-                Integer.MAX_VALUE));
+        return getDataProvider().fetch(getQuery());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public int getItemCount() {
-        return dataCommunicator.getItemCount();
+        return getDataProvider().size(getQuery());
     }
 
     @Override
@@ -81,5 +83,10 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     public Registration addItemCountChangeListener(
             ComponentEventListener<ItemCountChangeEvent<?>> listener) {
         return super.addItemCountChangeListener(listener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Query getQuery() {
+        return dataCommunicator.buildQuery(0, Integer.MAX_VALUE);
     }
 }
