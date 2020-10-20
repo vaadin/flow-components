@@ -24,6 +24,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.provider.ArrayUpdater;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.DataProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,18 +36,54 @@ import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
+import org.mockito.Mockito;
+
+import elemental.json.JsonValue;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
     private List<String> items;
     private ComboBoxListDataView<String> dataView;
     private ComboBox<String> component;
+    private DataCommunicatorTest.MockUI ui;
+    private DataCommunicator<String> dataCommunicator;
 
     @Before
     public void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         component = new ComboBox<>();
-        dataView = component.setItems(items);
+        ui = new DataCommunicatorTest.MockUI();
+        ui.add(component);
+
+        ArrayUpdater.Update update = new ArrayUpdater.Update() {
+
+            @Override
+            public void clear(int start, int length) {
+
+            }
+
+            @Override
+            public void set(int start, List<JsonValue> items) {
+
+            }
+
+            @Override
+            public void commit(int updateId) {
+
+            }
+        };
+
+        ArrayUpdater arrayUpdater = Mockito.mock(ArrayUpdater.class);
+        Mockito.when(arrayUpdater.startUpdate(Mockito.anyInt()))
+                .thenReturn(update);
+
+        dataCommunicator = new DataCommunicator<>((item, jsonObject) -> {
+        }, arrayUpdater, null, component.getElement().getNode());
+
+        dataCommunicator.setDataProvider(DataProvider.ofCollection(items),
+                null);
+
+        dataView = new ComboBoxListDataView<>(dataCommunicator, component);
     }
 
     @Test
@@ -87,26 +126,33 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     }
 
     @Test
-    public void getItems_withInMemoryAndTextFilter_filteredItemsObtained() {
-        ComboBox<String> comboBox = getDefaultLocaleComboBox();
+    public void getItems_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
         items = Arrays.asList("foo", "bar", "banana");
-        ComboBoxListDataView<String> dataView = comboBox.setItems(items);
-        setClientFilter(comboBox, "ba");
-        dataView.setFilter(item -> item.length() == 3);
+        dataCommunicator.setDataProvider(DataProvider.ofCollection(items),
+                null);
+        dataView = new ComboBoxListDataView<>(dataCommunicator, component);
+
+        setClientFilter(component, "ba");
+        fakeClientCommunication();
+
         Stream<String> filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "bar" }, filteredItems.toArray());
+
+        // Check that the client filter does not affect the item handling API
+        // in data view
+        Assert.assertArrayEquals("The client filter shouldn't impact the items",
+                new String[] { "foo", "bar", "banana" }, filteredItems.toArray());
+
+        dataView.setFilter(item -> item.length() == 3);
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set after in-memory filter",
+                new String[] { "foo", "bar" }, filteredItems.toArray());
 
         // Remove the filters
         dataView.removeFilters();
         filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "bar", "banana" }, filteredItems.toArray());
-        setClientFilter(comboBox, "");
-        filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "foo", "bar", "banana" },
-                filteredItems.toArray());
+        Assert.assertArrayEquals(
+                "Unexpected data set after removing in-memory filter",
+                new String[] { "foo", "bar", "banana" }, filteredItems.toArray());
     }
 
     @Test
@@ -177,9 +223,10 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         }
     }
 
-
-    private String getClientSideFilter() {
-        return component.getElement().getProperty("_clientSideFilter");
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
     private static class Item {
