@@ -1691,10 +1691,7 @@ public class GridDemo extends DemoView {
                 .withProperty("firstName", Person::getFirstName)
                 .withProperty("lastname", Person::getLastName)
                 .withProperty("address", Person::getAddress)
-                .withProperty("image", Person::getImage)
-                .withEventHandler("handleClick", person -> {
-                    grid.getDataProvider().refreshItem(person);
-                }));
+                .withProperty("image", Person::getImage));
         add(grid);
 
         // end-source-example
@@ -1725,11 +1722,7 @@ public class GridDemo extends DemoView {
                 "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
                         + "<div>Hi! My name is <b>[[item.firstName]]!</b></div>"
                         + "</div>")
-                .withProperty("firstName", Person::getFirstName)
-                // This is now how we open the details
-                .withEventHandler("handleClick", person -> {
-                    grid.getDataProvider().refreshItem(person);
-                }));
+                .withProperty("firstName", Person::getFirstName));
 
         // Disable the default way of opening item details:
         grid.setDetailsVisibleOnClick(false);
