@@ -12,7 +12,7 @@
 const { create } = require('domain');
 const fs = require('fs');
 const exec = require('util').promisify(require('child_process').exec);
-let from, to, version;
+let from, to, version, flowVersion;
 
 const keyName = {
   feat: 'New Features',
@@ -34,7 +34,7 @@ function computeVersion() {
     if (r) {
       version = r[1] + (parseInt(r[2]) + 1);
     }
-  }  
+  }
 }
 
 // Compute tags used for commit delimiters
@@ -43,7 +43,7 @@ async function getReleases() {
     switch(process.argv[i]) {
       case '--version':
         version = process.argv[++i]
-        break;      
+        break;
       case '--from':
         from = process.argv[++i]
         break;
@@ -56,10 +56,13 @@ async function getReleases() {
     const branch = await run(`git rev-parse --abbrev-ref HEAD`);
     await run(`git pull origin ${branch} --tags`);
     const tags = (await run(`git tag --merged ${branch} --sort=-committerdate`));
-    from = tags.split('\n')[3];
+    from = tags.split('\n')[0];
   }
+  flowVersion = (await run('grep /flow.version pom.xml')).replace(/.*>(.*)<.*/, '$1');
+  pomVersion = (await run('grep /version pom.xml')).split('\n')[0].replace(/.*>(.*)<.*/, '$1')
   !to && (to = 'HEAD');
   computeVersion();
+  !version && (version = pomVersion)
 }
 
 // Parse git log string and return an array of parsed commits as a JS object.
@@ -97,7 +100,7 @@ function parseLog(log) {
           commit.title += line;
         }
         break;
-      case 'body': 
+      case 'body':
         result = /^([A-Z][\w-]+): +(.*)$/.exec(line);
         if (result) {
           let k = result[1].toLowerCase();
@@ -116,19 +119,26 @@ function parseLog(log) {
           if (commit) {
             commit.body = commit.body.trim();
           }
-          commit = {head: {}, title: '', body: '', isIncluded: false, isBreaking: false, footers: {fixes: []}, commits: []};
+          commit = {head: {}, title: '', body: '', isIncluded: false, isBreaking: false, components: [], footers: {fixes: []}, commits: []};
           commits.push(commit);
           commit.commit = result[1];
           pos = 'head';
         } else {
-          commit.body += `${line}\n`;          
+          if (line.startsWith('    ')) {
+            commit.body += `${line}\n`;
+          } else if (/^vaadin-.*-flow-parent/.test(line)){
+            const wc = line.replace(/^vaadin-(.*)-flow-parent.*/, '$1');
+            if (!commit.components.includes(wc)) {
+              commit.components.push(wc);
+            }
+          }
         }
     }
   });
   return commits;
 }
 
-// Parse body part of a commit and extract squashed commits, nesting them 
+// Parse body part of a commit and extract squashed commits, nesting them
 // to the commit JS object passed as argument
 function parseBody(commit) {
   commit.originalBody = commit.body.trim();
@@ -147,8 +157,8 @@ function parseBody(commit) {
         return;
       }
       nestedCommit = {
-        type: result[1].toLowerCase(), 
-        title: result[3], 
+        type: result[1].toLowerCase(),
+        title: result[3],
         breaking: !!result[2],
         skip: !result[2] && !/(feat|fix|perf)/.test(result[1].toLowerCase()),
         footers: {
@@ -192,7 +202,7 @@ function createLink(type, id, wrap) {
 // convert GH internal links to absolute links
 function parseLinks(message) {
   const r = /^(?:([\da-f]+) )?(.*)(?:\((#\d+)\))?(.*)/.exec(message);
-  return !r ? message : 
+  return !r ? message :
     (r[1] ? createLink('commit', r[1]) + ' ' : '') + r[2][0].toUpperCase() + r[2].slice(1) + createLink('pull', r[3], true) + r[4] + '.';
 }
 
@@ -248,13 +258,13 @@ function logCommitByBreakingChange(commits){
 function logByComponent(commits) {
   const byComponent = {};
   commits.forEach(commit => {
-    commit.footers['web-component'].forEach(name => {
+    commit.components.forEach(name => {
       byComponent[name] = [...(byComponent[name] || []), commit];
     });
   });
 
   Object.keys(byComponent).forEach(k => {
-    console.log(`#### Changes in &lt;vaadin-${k}&gt;`)
+    console.log(`\n#### Changes in &lt;vaadin-${k}&gt;`)
     logCommitsByType(byComponent[k]);
   });
 }
@@ -279,17 +289,19 @@ This is a release of the Java integration for [Vaadin Components](https://github
 
   logByComponent(includedCommits);
 
-  console.log(`### Compatibility
-  - This release use Web Components listed in Vaadin Platform [18.0.0.alpha2](https://github.com/vaadin/platform/releases/tag/18.0.0.alpha2)
-  - Tested with Vaadin Flow version [5.0.0.alpha1](https://github.com/vaadin/flow/releases/tag/5.0.0.alpha2)`);
+  console.log(`
+### Compatibility
+  - This release use Web Components listed in Vaadin Platform [${version}](https://github.com/vaadin/platform/releases/tag/${version})
+  - Tested with Vaadin Flow version [${flowVersion}](https://github.com/vaadin/flow/releases/tag/${flowVersion})`);
 }
 
 async function main() {
   await getReleases();
-  const gitLog = await run(`git log ${from}..${to}`);
+  const gitLog = await run(`git log ${from}..${to} --name-only`);
   commits = parseLog(gitLog);
   commits.forEach(commit => parseBody(commit));
   generateReleaseNotes(commits);
+  // console.log(JSON.stringify(commits, null, 1));
 }
 
 main();
