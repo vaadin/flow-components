@@ -1523,8 +1523,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             String filter = lastFilter;
             lastFilter = null;
             /*
-             * Call to 'DataCommunicator::reset' is done inside the filter
-             * slot callback, so we don't need to explicitly call it.
+             * This filter slot will eventually call the filter consumer in
+             * data communicator and 'DataCommunicator::reset' is done inside
+             * this consumer, so we don't need to explicitly call it.
              */
             filterSlot.accept(filter);
         }
