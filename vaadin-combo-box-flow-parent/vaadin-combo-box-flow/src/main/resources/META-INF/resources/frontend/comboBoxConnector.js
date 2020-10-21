@@ -4,7 +4,7 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
 
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box');
     };
 
     window.Vaadin.Flow.comboBoxConnector = {
