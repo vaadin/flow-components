@@ -24,28 +24,41 @@ import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-radio-button/detach-reattach")
 public class DetachReattachIT extends AbstractComponentIT {
-
     @Test
     public void attachWithValue_detach_attachWithAnotherValue() {
         open();
-        WebElement valueA = findElement(By.id("valueA"));
-        WebElement valueB = findElement(By.id("valueB"));
-
         WebElement valueBlock = findElement(By.id("valueBlock"));
-        WebElement getValue = findElement(By.id("getValue"));
 
-        WebElement addGroup = findElement(By.id("addGroup"));
-        WebElement removeGroup = findElement(By.id("removeGroup"));
-
-        valueA.click();
-        addGroup.click();
-        getValue.click();
+        clickButton("valueA");
+        clickButton("addGroup");
+        clickButton("getValueTemplate");
         Assert.assertEquals(valueBlock.getText(), "A");
 
-        removeGroup.click();
-        valueB.click();
-        addGroup.click();
-        getValue.click();
+        clickButton("removeGroup");
+        clickButton("valueB");
+        clickButton("addGroup");
+        clickButton("getValueTemplate");
         Assert.assertEquals(valueBlock.getText(), "B");
+    }
+
+    @Test
+    public void selectValue_detachRadioButtonGroup_reattach_valuesChecked() {
+        open();
+        WebElement valueBlock = findElement(By.id("valueBlock"));
+
+        clickButton("setValue");
+        clickButton("getValue");
+        String value = valueBlock.getText();
+
+        clickButton("detach");
+        clickButton("attach");
+        clickButton("getValue");
+        Assert.assertEquals("Radio button should remain checked on reattach",
+                value,
+                valueBlock.getText());
+    }
+
+    private void clickButton(String id) {
+        $("#" + id).first().click();
     }
 }
