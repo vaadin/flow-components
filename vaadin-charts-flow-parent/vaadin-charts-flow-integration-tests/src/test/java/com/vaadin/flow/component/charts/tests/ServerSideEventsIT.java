@@ -54,7 +54,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+    @org.junit.Ignore("Does not pass in mono-repo - 100% failure")
     public void chartClick_occured_eventIsFired() {
         WebElement chart = getChartElement();
 
