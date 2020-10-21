@@ -39,6 +39,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -73,6 +74,7 @@ public class ComboBoxView extends DemoView {
         customValues();
         storingCustomValues();
         autoOpenDisabled();
+        itemCountChangeNotification();
         lazyLoading(); // Lazy loading
         lazyLoadingWithExactItemCount();
         lazyLoadingWithCustomItemCountEstimate();
@@ -179,6 +181,50 @@ public class ComboBoxView extends DemoView {
         // end-source-example
 
         addCard("Auto open disabled", note, comboBox);
+    }
+
+    private void itemCountChangeNotification() {
+        // begin-source-example
+        // source-example-heading: Item Count Change Notification
+        ComboBox<String> comboBox = new ComboBox<>("Cars");
+        comboBox.setPlaceholder("Select a car to buy");
+
+        ComboBoxListDataView<String> dataView = comboBox.setItems("Honda",
+                "Audi", "Tesla");
+
+        Button buyCarButton = new Button("Buy a car", click ->
+                comboBox.getOptionalValue().ifPresent(dataView::removeItem));
+
+        /*
+         * If you want to get notified when the ComboBox's items count has
+         * changed on the server side, i.e. due to adding or removing an
+         * item(s), or by changing the server-side filtering, you can add a
+         * listener using a data view API.
+         *
+         * Please note that the ComboBox's client filter change won't fire
+         * the event, since it doesn't change the item count
+         * on the server side, but only reduces the item list in UI and makes
+         * it easier to search through the items.
+         */
+        dataView.addItemCountChangeListener(event ->
+                comboBox.getOptionalValue().ifPresent(car -> {
+                    if (event.getItemCount() > 0) {
+                        Notification.show(String.format(
+                                "%s is sold. Hurry, only %d car(s) left", car,
+                                event.getItemCount()), 3000,
+                                Notification.Position.MIDDLE);
+                    } else {
+                        Notification.show("All cars were sold out, come next week", 3000,
+                                Notification.Position.MIDDLE);
+                        buyCarButton.setEnabled(false);
+                    }
+                    comboBox.clear();
+                }));
+        // end-source-example
+
+        HorizontalLayout layout = new HorizontalLayout(comboBox, buyCarButton);
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        addCard("Item Count Change Notification", layout);
     }
 
     private void valueChangeEvent() {

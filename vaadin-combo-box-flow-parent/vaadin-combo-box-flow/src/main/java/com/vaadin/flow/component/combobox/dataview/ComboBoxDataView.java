@@ -57,8 +57,25 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
         this.dataCommunicator = dataCommunicator;
     }
 
+    /**
+     * Gets the item at the given index from the data available in the
+     * ComboBox's server-side.
+     * <p>
+     * This method does not take into account the ComboBox client filtering,
+     * since it doesn't change the item count on the server side, but only
+     * makes it easier for users to search through the items in the UI.
+     *
+     * @param index
+     *            item index number
+     * @return item on index
+     * @throws IndexOutOfBoundsException
+     *             requested index is outside of the data set
+     */
     @Override
     public T getItem(int index) {
+        // TODO: change the implementation to make the returned item not depend
+        //  on client filter applied
+        //  https://github.com/vaadin/vaadin-flow-components/issues/282
         return dataCommunicator.getItem(index);
     }
 
@@ -67,6 +84,15 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
         return DataProvider.class;
     }
 
+    /**
+     * Gets the items available on the ComboBox's server side.
+     * <p>
+     * This method does not take into account the ComboBox client filtering,
+     * since it doesn't change the item count on the server side, but only
+     * makes it easier for users to search through the items in the UI.
+     *
+     * @return items available on the server side
+     */
     @Override
     public Stream<T> getItems() {
         return dataCommunicator.getDataProvider()
@@ -84,8 +110,13 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      * {@inheritDoc}
      * <p>
      * Combo box fires {@link ItemCountChangeEvent} and notifies all the
-     * listeners added by this method, if the items count changed due to combo
-     * box's client filter applied by user.
+     * listeners added by this method, if the items count changed, for
+     * instance, due to adding or removing an item(s).
+     * <p>
+     * ComboBox's client filter change won't fire
+     * {@link ItemCountChangeEvent}, since it doesn't change the item count
+     * on the server side, but only makes it easier for users to search
+     * through the items in the UI.
      */
     @Override
     public Registration addItemCountChangeListener(

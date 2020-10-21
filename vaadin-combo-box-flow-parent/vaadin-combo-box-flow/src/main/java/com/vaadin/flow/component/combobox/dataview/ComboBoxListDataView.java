@@ -25,6 +25,7 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -53,12 +54,38 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
         this.dataCommunicator = dataCommunicator;
     }
 
+    /**
+     * Gets the items available on the ComboBox's server side.
+     * <p>
+     * Data is sorted the same way as in the ComboBox, but it does not take
+     * into account the ComboBox client filtering, since it doesn't change
+     * the item count on the server side, but only makes it easier for users
+     * to search through the items in the UI.
+     * Only the server-side filtering considered, which is set by:
+     * {@link #setFilter(SerializablePredicate)} or
+     * {@link #addFilter(SerializablePredicate)}.
+     *
+     * @return filtered and sorted items available in server-side
+     */
     @SuppressWarnings("unchecked")
     @Override
     public Stream<T> getItems() {
         return getDataProvider().fetch(getQuery());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method takes into account only the server-side filtering, which
+     * is set by:
+     * {@link #setFilter(SerializablePredicate)} or
+     * {@link #addFilter(SerializablePredicate)}.
+     * ComboBox's client filter is not considered, since it doesn't change
+     * the item count on the server side, but only makes it easier for users
+     * to search through the items in the UI.
+     *
+     * @return filtered item count
+     */
     @SuppressWarnings("unchecked")
     @Override
     public int getItemCount() {
@@ -76,8 +103,15 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * {@inheritDoc}
      * <p>
      * Combo box fires {@link ItemCountChangeEvent} and notifies all the
-     * listeners added by this method, if the items count changed due to combo
-     * box's client filter applied by user.
+     * listeners added by this method, if the items count changed due to
+     * adding or removing an item(s), or by changing the server-side filtering
+     * with {@link #setFilter(SerializablePredicate)} or
+     * {@link #addFilter(SerializablePredicate)}.
+     * <p>
+     * ComboBox's client filter change won't fire
+     * {@link ItemCountChangeEvent}, since it doesn't change the item count
+     * on the server side, but only makes it easier for users to search
+     * through the items in the UI.
      */
     @Override
     public Registration addItemCountChangeListener(
