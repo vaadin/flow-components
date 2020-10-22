@@ -37,6 +37,8 @@ function computeVersion() {
     if (r) {
       version = r[1] + (parseInt(r[2]) + 1);
     }
+  } else if (/^(.*)(\d+)$/.exec(to)) {
+    version = to;
   }
 }
 
@@ -75,6 +77,8 @@ async function getReleases() {
   !to && (to = 'HEAD');
   computeVersion();
   !version && (version = pomVersion)
+  console.log(flowVersion, pomVersion, version)
+  process.exit();
 }
 
 // Parse git log string and return an array of parsed commits as a JS object.
