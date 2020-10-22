@@ -11,8 +11,6 @@
  * Use --product to change product name, default is Flow Components
  */
 
-const { create } = require('domain');
-const fs = require('fs');
 const exec = require('util').promisify(require('child_process').exec);
 let product = 'Flow Components'
 let from, to, version, flowVersion, compact;
