@@ -2,25 +2,29 @@
 /**
  * Create change-log.
  * Example
- *   ./scripts/generateChangeLog.js --from from_tag --to to_tag --version version
+ *   ./scripts/generateChangeLog.js --from from_tag --to to_tag --version version --compact
  *
  * When --to is not given HEAD is selected.
  * When --from is not given latest tag is selected.
  * When --version is not given version is computed increasing from.
+ * When --compact is set, output is not structured in component sections, default is false
+ * Use --product to change product name, default is Flow Components
  */
 
 const { create } = require('domain');
 const fs = require('fs');
 const exec = require('util').promisify(require('child_process').exec);
-let from, to, version, flowVersion;
+let product = 'Flow Components'
+let from, to, version, flowVersion, compact;
 
 const keyName = {
+  break: 'Breaking Change',
   feat: 'New Features',
-  refactor: 'Code Refactoring',
   fix: 'Fixes',
+  refactor: 'Code Refactoring',
+  test: 'Tests',
   chore: 'Chore',
   ci: 'Continuous Integration',
-  test: 'Tests'
 }
 
 async function run(cmd) {
@@ -50,12 +54,18 @@ async function getReleases() {
       case '--to':
         to = process.argv[++i]
         break;
-    }
+      case '--product':
+        product = process.argv[++i]
+        break;
+      case '--compact':
+        compact = true;
+        break;
+      }
   }
   if (!from) {
     const branch = await run(`git rev-parse --abbrev-ref HEAD`);
     await run(`git pull origin ${branch} --tags`);
-    const tags = (await run(`git tag --merged ${branch} --sort=-committerdate`));
+    const tags = await run(`git tag --merged ${branch} --sort=-committerdate`);
     from = tags.split('\n')[0];
   }
   flowVersion = (await run('grep /flow.version pom.xml')).replace(/.*>(.*)<.*/, '$1');
@@ -197,63 +207,74 @@ function createGHLink(path) {
 }
 // create link to low-components repo given a type or id
 function createLink(type, id, wrap) {
-  return id ? `${wrap ? '(' : ''}[${id}](${createGHLink(`vaadin-flow-component/${type}/${id})`)}${wrap ? ')' : ''}` : '';
+  return id ? `${wrap ? '(' : ''}[${id}](${createGHLink(`vaadin-flow-components/${type}/${id})`)}${wrap ? ')' : ''}` : '';
 }
 // convert GH internal links to absolute links
 function parseLinks(message) {
-  const r = /^(?:([\da-f]+) )?(.*)(?:\((#\d+)\))?(.*)/.exec(message);
-  return !r ? message :
-    (r[1] ? createLink('commit', r[1]) + ' ' : '') + r[2][0].toUpperCase() + r[2].slice(1) + createLink('pull', r[3], true) + r[4] + '.';
+  message = message.trim();
+  message = message.replace(/^([\da-f]+) /, `${createLink('commit', '$1')} `);
+  message = message.replace(/ *\(#(\d+)\)$/g, `. **PR:** ${createLink('pull', '$1')}`);
+  return message;
 }
 
-// log web-component footers
-function logWCFoot(c) {
-  if (c.footers['web-component'][0]) {
-    const component = `component${c.footers['web-component'][1] ? 's' : ''}`;
-    console.log(`    **${component}**: ${c.footers['web-component'].map(k => '[' + k + '](' + createGHLink('vaadin-' + k) +')').join(', ')}`);
+// return web-components affected by this commit
+function getComponents(c) {
+  if (c.components[0]) {
+    const component = `Component${c.components[1] ? 's' : ''}`;
+    return `**${component}**: ${c.components.map(k => '[' + k + '](' + createGHLink('vaadin-' + k) +')').join(', ')}`;
   }
 }
-// log fix footers
-function logLinkFoot(c) {
+// return ticket links for this commit
+function getTickets(c) {
   if (c.footers['fixes'][0]) {
     const fix = `fix${c.footers['fixes'][1] ? 'es' : ''}`;
+    const ticket = `Ticket${c.footers['fixes'].length > 1 ? 's' : ''}`;
     const links = c.footers['fixes'].reduce((prev, f) => {
       let link = f;
       if (/^#?\d/.test(f)) {
         f = f.replace(/^#/, '');
-        link = `createLink('issues', f)`;
+        link = `${createLink('issues', f)}`;
       } else if (/^(vaadin\/|https:\/\/github.com\/vaadin\/).*\d+$/.test(f)) {
+        const of = f;
         const n = f.replace(/^.*?(\d+)$/, '$1');
-        f = f.replace(/^https:\/\/github.com\/vaadin\//, '');
-        link = `[${n}](${createGHLink(f)}`;
+        f = f.replace(/^(https:\/\/github.com\/vaadin|vaadin)\//, '').replace('#', '/issues/');
+        link = `[${n}](${createGHLink(f)})`;
       }
       return (prev ? `${prev}, ` : '') + link;
     }, '');
-    console.log(`    **${fix}**: ${links}`);
+    return `. **${ticket}** ${links}`;
   }
 }
 
 // log a commit for release notes
-function logCommit(c) {
-  console.log(`    - ${parseLinks(c.commit.substring(0, 7) + ' ' + c.title)}${c.body && '\n    ' + c.body} `);
-  logLinkFoot(c);
+function logCommit(c, withComponents) {
+  let log = '     - ' + parseLinks(c.commit.substring(0, 7) + ' ' + c.title[0].toUpperCase() + c.title.slice(1));;
+  const tickets = getTickets(c);
+  tickets && (log += `. ${tickets}`); 
+  if (compact) {
+    const components = getComponents(c);
+    components && (log += `. ${components}`);
+  }
+  c.body && (log += `\n\n${c.body}`);
+  console.log(log);
 }
+
 // log a set of commits, and group by types
 function logCommitsByType(commits) {
   if (!commits[0]) return;
   const byType = {};
-  commits.forEach(commit => byType[commit.type] = [...(byType[commit.type] || []), commit]);
-  Object.keys(byType).forEach(k => {
-    console.log(`\n - **${keyName[k]}**:`);
-    byType[k].forEach(c => logCommit(c));
+  commits.forEach(commit => {
+    const type = commit.isBreaking ? 'break' : commit.type;
+    byType[type] = [...(byType[type] || []), commit];
+  });
+  Object.keys(keyName).forEach(k => {
+    if (byType[k]) {
+      console.log(`\n - **${keyName[k]}**:`);
+      byType[k].forEach(c => logCommit(c));
+    }
   });
 }
-// log breaking changes in a commit
-function logCommitByBreakingChange(commits){
-  if (!commits[0]) return;
-  console.log(`\n - **Breaking Changes**:`);
-  commits.forEach(c => logCommit(c));
-}
+
 // log a set of commits, and group by web component
 function logByComponent(commits) {
   const byComponent = {};
@@ -264,30 +285,25 @@ function logByComponent(commits) {
   });
 
   Object.keys(byComponent).forEach(k => {
-    console.log(`\n#### Changes in &lt;vaadin-${k}&gt;`)
+    console.log(`\n#### Changes in \`vaadin-${k}-flow\``);
     logCommitsByType(byComponent[k]);
   });
 }
 
 // Output the release notes for the set of commits
 function generateReleaseNotes(commits) {
-  let featuredCommits = [];
-  let breakingCommits = [];
-
-  let includedCommits = commits.filter(c => c.isIncluded);
-
-  includedCommits.forEach(commit => {
-    breakingCommits = breakingCommits.concat([ ...(commit.breaking ? [commit] : []), ...(commit.commits.filter(c => c.breaking))]);
-    featuredCommits = featuredCommits.concat([ ...(!commit.skip && !commit.breaking ? [commit] : []), ...(commit.commits.filter(c => !c.breaking && !c.skip))]);
-  });
-
   console.log(`
-## Vaadin Flow Components V${version}
-This is a release of the Java integration for [Vaadin Components](https://github.com/vaadin/vaadin) to be used from the server side Java with [Vaadin Flow](https://vaadin.com/flow).
-### Changes from [${from}](https://github.com/vaadin-flow-components/releases/tag/${from})
+## Vaadin ${product} V${version}
+This is a release of the Java integration for [Vaadin Components](https://github.com/vaadin/vaadin) to be used from the Java server side with [Vaadin Flow](https://vaadin.com/flow).
+### Changes in ${product} from [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
   `)
 
-  logByComponent(includedCommits);
+  const includedCommits = commits.filter(c => c.isIncluded);
+  if (compact) {
+    logCommitsByType(includedCommits);
+  } else {
+    logByComponent(includedCommits);
+  }
 
   console.log(`
 ### Compatibility
@@ -295,13 +311,14 @@ This is a release of the Java integration for [Vaadin Components](https://github
   - Tested with Vaadin Flow version [${flowVersion}](https://github.com/vaadin/flow/releases/tag/${flowVersion})`);
 }
 
+
+// MAIN
 async function main() {
   await getReleases();
   const gitLog = await run(`git log ${from}..${to} --name-only`);
   commits = parseLog(gitLog);
   commits.forEach(commit => parseBody(commit));
   generateReleaseNotes(commits);
-  // console.log(JSON.stringify(commits, null, 1));
 }
 
 main();
