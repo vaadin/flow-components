@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.combobox.demo.entity;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Person implements Cloneable {
     private int id;
@@ -18,8 +19,20 @@ public class Person implements Cloneable {
 
     }
 
+    public Person(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            firstName = "";
+            lastName = "";
+        }
+        String[] names = fullName.split("\\\\s+");
+        firstName = names[0];
+        if (names.length > 1) {
+            lastName = names[1];
+        }
+    }
+
     public Person(int id, String firstName, String lastName, int age,
-            Address address, String phoneNumber) {
+                  Address address, String phoneNumber) {
         super();
         this.id = id;
         this.firstName = firstName;
