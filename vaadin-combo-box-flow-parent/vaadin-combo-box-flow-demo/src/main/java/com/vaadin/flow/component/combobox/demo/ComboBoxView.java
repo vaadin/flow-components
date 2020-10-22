@@ -33,6 +33,7 @@ import com.vaadin.flow.component.combobox.demo.entity.Element;
 import com.vaadin.flow.component.combobox.demo.entity.Person;
 import com.vaadin.flow.component.combobox.demo.entity.Project;
 import com.vaadin.flow.component.combobox.demo.entity.Song;
+import com.vaadin.flow.component.combobox.demo.entity.Ticket;
 import com.vaadin.flow.component.combobox.demo.service.PersonService;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -186,43 +187,46 @@ public class ComboBoxView extends DemoView {
     private void itemCountChangeNotification() {
         // begin-source-example
         // source-example-heading: Item Count Change Notification
-        ComboBox<String> comboBox = new ComboBox<>("Cars");
-        comboBox.setPlaceholder("Select a car to buy");
+        ComboBox<Ticket> comboBox = new ComboBox<>("Available tickets");
+        comboBox.setPlaceholder("Select a ticket");
 
-        ComboBoxListDataView<String> dataView = comboBox.setItems("Honda",
-                "Audi", "Tesla");
+        Collection<Ticket> tickets = generateTickets();
 
-        Button buyCarButton = new Button("Buy a car", click ->
+        ComboBoxListDataView<Ticket> dataView = comboBox.setItems(tickets);
+
+        Button buyTicketButton = new Button("Buy a ticket", click ->
                 comboBox.getOptionalValue().ifPresent(dataView::removeItem));
 
         /*
          * If you want to get notified when the ComboBox's items count has
-         * changed on the server side, i.e. due to adding or removing an
+         * changed on the server-side, i.e. due to adding or removing an
          * item(s), or by changing the server-side filtering, you can add a
          * listener using a data view API.
          *
-         * Please note that the ComboBox's client filter change won't fire
-         * the event, since it doesn't change the item count
-         * on the server side, but only reduces the item list in UI and makes
-         * it easier to search through the items.
+         * Please note that the ComboBox's client-side filter change won't fire
+         * the event, since it doesn't change the item count on the server-side,
+         * but only reduces the item list in UI and makes it easier to search
+         * through the items.
          */
-        dataView.addItemCountChangeListener(event ->
-                comboBox.getOptionalValue().ifPresent(car -> {
+        dataView.addItemCountChangeListener(
+                event -> comboBox.getOptionalValue().ifPresent(ticket -> {
                     if (event.getItemCount() > 0) {
                         Notification.show(String.format(
-                                "%s is sold. Hurry, only %d car(s) left", car,
-                                event.getItemCount()), 3000,
+                                "Ticket with %s is sold. %d ticket(s) left",
+                                ticket, event.getItemCount()), 3000,
                                 Notification.Position.MIDDLE);
                     } else {
-                        Notification.show("All cars were sold out, come next week", 3000,
-                                Notification.Position.MIDDLE);
-                        buyCarButton.setEnabled(false);
+                        Notification.show(
+                                "All tickets were sold out",
+                                3000, Notification.Position.MIDDLE);
+                        buyTicketButton.setEnabled(false);
                     }
                     comboBox.clear();
                 }));
         // end-source-example
 
-        HorizontalLayout layout = new HorizontalLayout(comboBox, buyCarButton);
+        HorizontalLayout layout = new HorizontalLayout(comboBox,
+                buyTicketButton);
         layout.setAlignItems(FlexComponent.Alignment.BASELINE);
         addCard("Item Count Change Notification", layout);
     }
@@ -702,6 +706,16 @@ public class ComboBoxView extends DemoView {
         listOfSongs.add(
                 new Song("Voices of a Distant Star", "Killigrew", "Animus II"));
         return listOfSongs;
+    }
+
+    private Collection<Ticket> generateTickets() {
+        Collection<Ticket> tickets = new ArrayList<>();
+        for (int row = 1; row < 51; row++) {
+            for (int seat = 1; seat < 51; seat++) {
+                tickets.add(new Ticket(row, seat));
+            }
+        }
+        return tickets;
     }
 
     private Div createMessageDiv(String id) {

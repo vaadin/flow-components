@@ -55,11 +55,11 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     }
 
     /**
-     * Gets the items available on the ComboBox's server side.
+     * Gets the items available on the ComboBox's server-side.
      * <p>
      * Data is sorted the same way as in the ComboBox, but it does not take
-     * into account the ComboBox client filtering, since it doesn't change
-     * the item count on the server side, but only makes it easier for users
+     * into account the ComboBox client-side filtering, since it doesn't change
+     * the item count on the server-side, but only makes it easier for users
      * to search through the items in the UI.
      * Only the server-side filtering considered, which is set by:
      * {@link #setFilter(SerializablePredicate)} or
@@ -80,8 +80,8 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * is set by:
      * {@link #setFilter(SerializablePredicate)} or
      * {@link #addFilter(SerializablePredicate)}.
-     * ComboBox's client filter is not considered, since it doesn't change
-     * the item count on the server side, but only makes it easier for users
+     * ComboBox's client-side filter is not considered, since it doesn't change
+     * the item count on the server-side, but only makes it easier for users
      * to search through the items in the UI.
      *
      * @return filtered item count
@@ -108,9 +108,9 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * with {@link #setFilter(SerializablePredicate)} or
      * {@link #addFilter(SerializablePredicate)}.
      * <p>
-     * ComboBox's client filter change won't fire
+     * ComboBox's client-side filter change won't fire
      * {@link ItemCountChangeEvent}, since it doesn't change the item count
-     * on the server side, but only makes it easier for users to search
+     * on the server-side, but only makes it easier for users to search
      * through the items in the UI.
      */
     @Override

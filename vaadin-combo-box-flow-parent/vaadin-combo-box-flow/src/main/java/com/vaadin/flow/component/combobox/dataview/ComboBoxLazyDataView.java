@@ -115,9 +115,9 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
      * instance, due to fetching more items while scrolling with unknown item
      * count.
      * <p>
-     * ComboBox's client filter change won't fire
+     * ComboBox's client-side filter change won't fire
      * {@link ItemCountChangeEvent}, since it doesn't change the item count
-     * on the server side, but only makes it easier for users to search
+     * on the server-side, but only makes it easier for users to search
      * through the items in the UI.
      */
     @Override
@@ -130,9 +130,9 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
      * Gets the item at the given index from the data available in the
      * ComboBox's server-side.
      * <p>
-     * This method does not take into account the ComboBox client filtering,
-     * since it doesn't change the item count on the server side, but only
-     * makes it easier for users to search through the items in the UI.
+     * This method does not take into account the ComboBox client-side
+     * filtering, since it doesn't change the item count on the server-side,
+     * but only makes it easier for users to search through the items in the UI.
      *
      * @param index
      *            item index number
@@ -143,24 +143,24 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     @Override
     public T getItem(int index) {
         // TODO: change the implementation to make the returned item not depend
-        //  on client filter applied
+        //  on client-side filter applied
         //  https://github.com/vaadin/vaadin-flow-components/issues/282
         return super.getItem(index);
     }
 
     /**
-     * Gets the items available on the ComboBox's server side.
+     * Gets the items available on the ComboBox's server-side.
      * <p>
-     * This method does not take into account the ComboBox client filtering,
-     * since it doesn't change the item count on the server side, but only
+     * This method does not take into account the ComboBox client-filtering,
+     * since it doesn't change the item count on the server-side, but only
      * makes it easier for users to search through the items in the UI.
      *
-     * @return items available on the server side
+     * @return items available on the server-side
      */
     @Override
     public Stream<T> getItems() {
         // TODO: change the implementation to make the returned item not depend
-        //  on client filter applied
+        //  on client-side filter applied
         //  https://github.com/vaadin/vaadin-flow-components/issues/282
         return super.getItems();
     }
