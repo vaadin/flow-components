@@ -15,7 +15,7 @@ public class Task2 extends DemoView {
         PersonDataProvider dataProvider = new PersonDataProvider();
 
         // TODO: use the existing PersonDataProvider to populate combo box
-        //  with the items
+        //  with the persons
 
         addCard("Task2", comboBox);
     }

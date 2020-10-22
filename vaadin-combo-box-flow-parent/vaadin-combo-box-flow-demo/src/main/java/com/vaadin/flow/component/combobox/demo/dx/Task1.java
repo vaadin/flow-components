@@ -14,11 +14,7 @@ public class Task1 extends DemoView {
     protected void initView() {
         ComboBox<Person> comboBox = new ComboBox<>();
 
-        // TODO: create the items fetch callback and set it to combo box
-
-        // TODO: Use PersonService::getPersons to fetch the persons
-
-        // TODO: Note that the PersonService uses Person entity as a filter type
+        // TODO: show the persons from PersonService in combo box
 
         addCard("Task1", comboBox);
     }
