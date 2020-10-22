@@ -43,8 +43,6 @@ import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-// FIXME remove once https://github.com/vaadin/flow/pull/5660 is available 
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "1.5.0")
 @Route("iron-list")
 public class IronListView extends DemoView {
 
