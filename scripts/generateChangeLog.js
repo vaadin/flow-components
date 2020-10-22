@@ -12,6 +12,7 @@
  */
 
 const fs = require('fs');
+const https = require("https");
 const exec = require('util').promisify(require('child_process').exec);
 let product = 'Flow Components'
 let from, to, version, flowVersion, pomVersion, compact;
@@ -29,6 +30,23 @@ const keyName = {
 async function run(cmd) {
   const { stdout, stderr } = await exec(cmd, {maxBuffer: 5000 * 1024});
   return stdout.trim();
+}
+
+async function getPlatformVersions(branch) {
+  return new Promise(resolve => {
+    https.get(`https://raw.githubusercontent.com/vaadin/platform/${branch}/versions.json`, res => {
+      res.setEncoding("utf8");
+      let body = "";
+      res.on("data", data => {
+        body += data;
+      });
+      res.on("end", () => {
+        resolve(body);
+      });
+    });
+  }).then(body => {
+    return JSON.parse(body);
+  });
 }
 
 function computeVersion() {
@@ -72,13 +90,20 @@ async function getReleases() {
   fs.readFileSync('pom.xml', 'utf8').split("\n").forEach(line => {
     let r;
     !pomVersion && (r = /<version>(.*)<\/version>/.exec(line)) && (pomVersion = r[1]);
-    !flowVersion && (r = /<flow.version>(.*)<\/flow.version>/.exec(line)) && (flowVersion = r[1]);
   });
+
+  const platform = pomVersion.replace(/(\.\d+|-SNAPSHOT)$/, '');
+  let json;
+  try {
+    json = await getPlatformVersions(platform);
+  } catch (error) {
+    json = await getPlatformVersions('master');
+  }
+  flowVersion = json.core.flow.javaVersion;
+
   !to && (to = 'HEAD');
   computeVersion();
   !version && (version = pomVersion)
-  console.log(flowVersion, pomVersion, version)
-  process.exit();
 }
 
 // Parse git log string and return an array of parsed commits as a JS object.
