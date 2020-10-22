@@ -111,10 +111,9 @@ function parseLog(log) {
   let commits = [];
   let commit, pos, result;
   log.split('\n').forEach(line => {
-    pos != 'head' && (line = line.replace(/^    /, ''));
     switch(pos) {
       case 'head':
-        if (!line) {
+        if (!line.trim()) {
           pos = 'title';
           break;
         }
@@ -125,11 +124,11 @@ function parseLog(log) {
         }
         break;
       case 'title':
-        if (!line) {
+        if (!line.trim()) {
           pos = 'body';
           break;
         }
-        result = /^(\w+)(!?): +(.*)$/.exec(line);
+        result = /^ +(\w+)(!?): +(.*)$/.exec(line);
         if (result) {
           commit.type = result[1].toLowerCase();
           commit.breaking = !!result[2];
@@ -142,12 +141,12 @@ function parseLog(log) {
         }
         break;
       case 'body':
-        result = /^([A-Z][\w-]+): +(.*)$/.exec(line);
+        result = /^ +([A-Z][\w-]+): +(.*)$/.exec(line);
         if (result) {
           let k = result[1].toLowerCase();
           if (/(fixes|fix|related-to|connected-to)/i.test(k)) {
             commit.footers.fixes = commit.footers.fixes || []
-            commit.footers.fixes.push(...result[2].split(/[, ]+/));
+            commit.footers.fixes.push(...result[2].split(/[, ]+/).filter(s => /\d+/.test(s)));
           } else {
             commit.footers[k] = commit.footers[k] || []
             commit.footers[k].push(result[2]);
@@ -165,7 +164,7 @@ function parseLog(log) {
           commit.commit = result[1];
           pos = 'head';
         } else {
-          if (line.startsWith('    ')) {
+          if (line.startsWith(' ')) {
             commit.body += `${line}\n`;
           } else if (/^vaadin-.*-flow-parent/.test(line)){
             const wc = line.replace(/^vaadin-(.*)-flow-parent.*/, '$1');
@@ -202,11 +201,13 @@ function parseBody(commit) {
         title: result[3],
         breaking: !!result[2],
         skip: !result[2] && !/(feat|fix|perf)/.test(result[1].toLowerCase()),
+        commit: commit.commit,
+        body: '',
         footers: {
           "web-component": commit.footers['web-component']
         }
       }
-      commit.isIncluded = commit.isIncluded && !nestedCommit.skip;
+      commit.isIncluded = commit.isIncluded || !nestedCommit.skip || nestedCommit.breaking;
       commit.isBreaking = commit.isBreaking || nestedCommit.breaking;
       commit.commits.push(nestedCommit);
       return;
@@ -237,14 +238,14 @@ function createGHLink(path) {
   return `https://github.com/vaadin/${path}`;
 }
 // create link to low-components repo given a type or id
-function createLink(type, id, wrap) {
-  return id ? `${wrap ? '(' : ''}[${id}](${createGHLink(`vaadin-flow-components/${type}/${id})`)}${wrap ? ')' : ''}` : '';
+function createLink(type, id, char) {
+  return id ? `[${char ? char : id}](${createGHLink(`vaadin-flow-components/${type}/${id})`)}` : '';
 }
 // convert GH internal links to absolute links
 function parseLinks(message) {
   message = message.trim();
-  message = message.replace(/^([\da-f]+) /, `${createLink('commit', '$1')} `);
-  message = message.replace(/ *\(#(\d+)\)$/g, `. **PR:** ${createLink('pull', '$1')}`);
+  message = message.replace(/^([\da-f]+) /, `${createLink('commit', '$1', '⧉')} `);
+  message = message.replace(/ *\(#(\d+)\)$/g, `. **PR:**${createLink('pull', '$1')}`);
   return message;
 }
 
@@ -252,12 +253,12 @@ function parseLinks(message) {
 function getComponents(c) {
   if (c.components[0]) {
     const component = `Component${c.components[1] ? 's' : ''}`;
-    return `**${component}**: ${c.components.map(k => '[' + k + '](' + createGHLink('vaadin-' + k) +')').join(', ')}`;
+    return `**${component}:**${c.components.map(k => '[' + k + '](' + createGHLink('vaadin-' + k) +')').join(', ')}`;
   }
 }
 // return ticket links for this commit
 function getTickets(c) {
-  if (c.footers['fixes'][0]) {
+  if (c.footers['fixes'] && c.footers['fixes'][0]) {
     const fix = `fix${c.footers['fixes'][1] ? 'es' : ''}`;
     const ticket = `Ticket${c.footers['fixes'].length > 1 ? 's' : ''}`;
     const links = c.footers['fixes'].reduce((prev, f) => {
@@ -273,20 +274,20 @@ function getTickets(c) {
       }
       return (prev ? `${prev}, ` : '') + link;
     }, '');
-    return `. **${ticket}** ${links}`;
+    return `**${ticket}:**${links}`;
   }
 }
 
 // log a commit for release notes
 function logCommit(c, withComponents) {
-  let log = '     - ' + parseLinks(c.commit.substring(0, 7) + ' ' + c.title[0].toUpperCase() + c.title.slice(1));;
+  let log = '    - ' + parseLinks(c.commit.substring(0, 7) + ' ' + c.title[0].toUpperCase() + c.title.slice(1));;
   const tickets = getTickets(c);
   tickets && (log += `. ${tickets}`); 
   if (compact) {
     const components = getComponents(c);
     components && (log += `. ${components}`);
   }
-  c.body && (log += `\n\n${c.body}`);
+  c.body && (log += `\n\n        _${c.body}_`);
   console.log(log);
 }
 
@@ -295,7 +296,7 @@ function logCommitsByType(commits) {
   if (!commits[0]) return;
   const byType = {};
   commits.forEach(commit => {
-    const type = commit.isBreaking ? 'break' : commit.type;
+    const type = commit.breaking ? 'break' : commit.type;
     byType[type] = [...(byType[type] || []), commit];
   });
   Object.keys(keyName).forEach(k => {
@@ -309,13 +310,19 @@ function logCommitsByType(commits) {
 // log a set of commits, and group by web component
 function logByComponent(commits) {
   const byComponent = {};
-  commits.forEach(commit => {
-    commit.components.forEach(name => {
+  function addCommit(commit, components) {
+    components.forEach(name => {
       byComponent[name] = [...(byComponent[name] || []), commit];
+    });
+  }
+  commits.forEach(commit => {
+    !commit.skip && addCommit(commit, commit.components);
+    commit.commits.forEach(c => {
+      !c.skip && addCommit(c, commit.components);
     });
   });
 
-  Object.keys(byComponent).forEach(k => {
+  Object.keys(byComponent).sort().forEach(k => {
     console.log(`\n#### Changes in \`vaadin-${k}-flow\``);
     logCommitsByType(byComponent[k]);
   });
