@@ -11,9 +11,10 @@
  * Use --product to change product name, default is Flow Components
  */
 
+const fs = require('fs');
 const exec = require('util').promisify(require('child_process').exec);
 let product = 'Flow Components'
-let from, to, version, flowVersion, compact;
+let from, to, version, flowVersion, pomVersion, compact;
 
 const keyName = {
   break: 'Breaking Change',
@@ -66,8 +67,11 @@ async function getReleases() {
     const tags = await run(`git tag --merged ${branch} --sort=-committerdate`);
     from = tags.split('\n')[0];
   }
-  flowVersion = (await run('grep /flow.version pom.xml')).replace(/.*>(.*)<.*/, '$1');
-  pomVersion = (await run('grep /version pom.xml')).split('\n')[0].replace(/.*>(.*)<.*/, '$1')
+  fs.readFileSync('pom.xml', 'utf8').split("\n").forEach(line => {
+    let r;
+    !pomVersion && (r = /<version>(.*)<\/version>/.exec(line)) && (pomVersion = r[1]);
+    !flowVersion && (r = /<flow.version>(.*)<\/flow.version>/.exec(line)) && (flowVersion = r[1]);
+  });
   !to && (to = 'HEAD');
   computeVersion();
   !version && (version = pomVersion)
