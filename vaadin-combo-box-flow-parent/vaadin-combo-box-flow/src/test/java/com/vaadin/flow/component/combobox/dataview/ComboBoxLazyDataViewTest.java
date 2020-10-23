@@ -93,7 +93,6 @@ public class ComboBoxLazyDataViewTest {
         }, arrayUpdater, null, comboBox.getElement().getNode());
 
         dataCommunicator.setDataProvider(dataProvider, null);
-        dataCommunicator.setPageSize(50);
 
         dataView = new ComboBoxLazyDataView<>(dataCommunicator, comboBox);
     }

@@ -33,12 +33,14 @@ import com.vaadin.flow.component.combobox.demo.entity.Element;
 import com.vaadin.flow.component.combobox.demo.entity.Person;
 import com.vaadin.flow.component.combobox.demo.entity.Project;
 import com.vaadin.flow.component.combobox.demo.entity.Song;
+import com.vaadin.flow.component.combobox.demo.entity.Ticket;
 import com.vaadin.flow.component.combobox.demo.service.PersonService;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -73,6 +75,7 @@ public class ComboBoxView extends DemoView {
         customValues();
         storingCustomValues();
         autoOpenDisabled();
+        itemCountChangeNotification();
         lazyLoading(); // Lazy loading
         lazyLoadingWithExactItemCount();
         lazyLoadingWithCustomItemCountEstimate();
@@ -179,6 +182,53 @@ public class ComboBoxView extends DemoView {
         // end-source-example
 
         addCard("Auto open disabled", note, comboBox);
+    }
+
+    private void itemCountChangeNotification() {
+        // begin-source-example
+        // source-example-heading: Item Count Change Notification
+        ComboBox<Ticket> comboBox = new ComboBox<>("Available tickets");
+        comboBox.setPlaceholder("Select a ticket");
+
+        Collection<Ticket> tickets = generateTickets();
+
+        ComboBoxListDataView<Ticket> dataView = comboBox.setItems(tickets);
+
+        Button buyTicketButton = new Button("Buy a ticket", click ->
+                comboBox.getOptionalValue().ifPresent(dataView::removeItem));
+
+        /*
+         * If you want to get notified when the ComboBox's items count has
+         * changed on the server-side, i.e. due to adding or removing an
+         * item(s), or by changing the server-side filtering, you can add a
+         * listener using a data view API.
+         *
+         * Please note that the ComboBox's client-side filter change won't fire
+         * the event, since it doesn't change the item count on the server-side,
+         * but only reduces the item list in UI and makes it easier to search
+         * through the items.
+         */
+        dataView.addItemCountChangeListener(
+                event -> comboBox.getOptionalValue().ifPresent(ticket -> {
+                    if (event.getItemCount() > 0) {
+                        Notification.show(String.format(
+                                "Ticket with %s is sold. %d ticket(s) left",
+                                ticket, event.getItemCount()), 3000,
+                                Notification.Position.MIDDLE);
+                    } else {
+                        Notification.show(
+                                "All tickets were sold out",
+                                3000, Notification.Position.MIDDLE);
+                        buyTicketButton.setEnabled(false);
+                    }
+                    comboBox.clear();
+                }));
+        // end-source-example
+
+        HorizontalLayout layout = new HorizontalLayout(comboBox,
+                buyTicketButton);
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        addCard("Item Count Change Notification", layout);
     }
 
     private void valueChangeEvent() {
@@ -656,6 +706,16 @@ public class ComboBoxView extends DemoView {
         listOfSongs.add(
                 new Song("Voices of a Distant Star", "Killigrew", "Animus II"));
         return listOfSongs;
+    }
+
+    private Collection<Ticket> generateTickets() {
+        Collection<Ticket> tickets = new ArrayList<>();
+        for (int row = 1; row < 51; row++) {
+            for (int seat = 1; seat < 51; seat++) {
+                tickets.add(new Ticket(row, seat));
+            }
+        }
+        return tickets;
     }
 
     private Div createMessageDiv(String id) {
