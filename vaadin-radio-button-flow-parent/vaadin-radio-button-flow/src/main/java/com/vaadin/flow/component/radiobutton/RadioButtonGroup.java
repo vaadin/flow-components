@@ -231,6 +231,12 @@ public class RadioButtonGroup<T>
     }
 
     @Override
+    public void setValue(T value) {
+        super.setValue(value);
+        getRadioButtons().forEach(rb -> rb.setChecked(rb.getItem().equals(value)));
+    }
+
+    @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
