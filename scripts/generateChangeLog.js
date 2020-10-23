@@ -18,7 +18,8 @@ let product = 'Flow Components'
 let from, to, version, flowVersion, pomVersion, compact;
 
 const keyName = {
-  break: 'Breaking Change',
+  bfp: '[Warranty Fixes](https://vaadin.com/support/for-business#warranty)',
+  break: 'Breaking Changes',
   feat: 'New Features',
   fix: 'Fixes',
   refactor: 'Code Refactoring',
@@ -144,7 +145,10 @@ function parseLog(log) {
         result = /^ +([A-Z][\w-]+): +(.*)$/.exec(line);
         if (result) {
           let k = result[1].toLowerCase();
-          if (/(fixes|fix|related-to|connected-to)/i.test(k)) {
+          if (k == 'warranty') {
+            commit.bfp = true;
+          }
+          if (/(fixes|fix|related-to|connected-to|warranty)/i.test(k)) {
             commit.footers.fixes = commit.footers.fixes || []
             commit.footers.fixes.push(...result[2].split(/[, ]+/).filter(s => /\d+/.test(s)));
           } else {
@@ -215,7 +219,7 @@ function parseBody(commit) {
       commit.commits.push(nestedCommit);
       return;
     }
-    result = /^(fixes|fix|related-to|connected-to):? +(.+)$/i.exec(line);
+    result = /^(fixes|fix|related-to|connected-to|warranty):? +(.+)$/i.exec(line);
     if (result) {
       commit.footers.fixes.push(...result[2].split(/[, ]+/));
       nestedCommit = undefined;
@@ -299,7 +303,7 @@ function logCommitsByType(commits) {
   if (!commits[0]) return;
   const byType = {};
   commits.forEach(commit => {
-    const type = commit.breaking ? 'break' : commit.type;
+    const type = commit.bfp ? 'bfp': commit.breaking ? 'break' : commit.type;
     byType[type] = [...(byType[type] || []), commit];
   });
   Object.keys(keyName).forEach(k => {
