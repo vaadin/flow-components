@@ -16,16 +16,23 @@ class PersonService {
         this.personData = new PersonData(personCount);
     }
 
-    Stream<Person> getPersons(int pageSize, int page, Person filter) {
+    /**
+     * Provides a persons for a given page, and with a given age.
+     */
+    Stream<Person> getPersons(int pageSize, int page, Integer ageFilter) {
         return personData.getPersons().stream()
-                .filter(person -> filter == null || person.toString()
-                        .toLowerCase().contains(filter.toString()))
+                .filter(person -> ageFilter == null
+                        || person.getAge() == ageFilter)
                 .skip(page * pageSize).limit(pageSize);
     }
 
-    int getPersonsCount(Person filter) {
+    /**
+     * Provides a number of persons with a given age.
+     */
+    int getPersonsCount(Integer ageFilter) {
         return (int) personData.getPersons().stream()
-                .filter(person -> filter == null || person.toString()
-                        .toLowerCase().contains(filter.toString())).count();
+                .filter(person -> ageFilter == null
+                        || person.getAge() == ageFilter)
+                .count();
     }
 }

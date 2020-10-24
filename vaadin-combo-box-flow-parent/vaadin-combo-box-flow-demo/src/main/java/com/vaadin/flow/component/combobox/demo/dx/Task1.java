@@ -14,7 +14,9 @@ public class Task1 extends DemoView {
     protected void initView() {
         ComboBox<Person> comboBox = new ComboBox<>();
 
-        // TODO: show the persons from PersonService in combo box
+        // TODO: show the persons from PersonService in combo box and
+        //  let the user filter them by age when typing the text into combo
+        //  box's input field
 
         addCard("Task1", comboBox);
     }
