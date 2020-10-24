@@ -58,7 +58,7 @@ public class AvatarGroupView extends DemoView {
 
         AvatarGroupItem avatarWithImageResource = new AvatarGroupItem();
         StreamResource avatarResource = new StreamResource("user+.png",
-            () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/user.png"));
         avatarWithImageResource.setImageResource(avatarResource);
         items.add(avatarWithImageResource);
 
