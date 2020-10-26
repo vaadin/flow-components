@@ -6,10 +6,10 @@
     <artifactId>vaadin-progress-bar-flow-parent</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
-  <artifactId>vaadin-progress-bar-integration-tests</artifactId>
+  <artifactId>vaadin-progress-bar-integration-tests-bower-mode</artifactId>
   <version>${vaadin.progress.bar.version}</version>
   <packaging>war</packaging>
-  <name>Vaadin Progress Bar Integration Tests</name>
+  <name>Vaadin Progress Bar Integration Tests in Bower Mode</name>
   <properties>
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>

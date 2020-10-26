@@ -6,10 +6,10 @@
     <artifactId>vaadin-list-box-flow-parent</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
-  <artifactId>vaadin-list-box-integration-tests</artifactId>
+  <artifactId>vaadin-list-box-integration-tests-bower-mode</artifactId>
   <version>${vaadin.list.box.version}</version>
   <packaging>war</packaging>
-  <name>Vaadin List Box Integration Tests</name>
+  <name>Vaadin List Box Integration Tests in Bower Mode</name>
   <properties>
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>

@@ -6,10 +6,10 @@
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
     <version>14.4-SNAPSHOT</version>
   </parent>
-  <artifactId>vaadin-cookie-consent-integration-tests</artifactId>
+  <artifactId>vaadin-cookie-consent-integration-tests-bower-mode</artifactId>
   <version>${vaadin.cookie.consent.version}</version>
   <packaging>war</packaging>
-  <name>Vaadin Cookie Consent Integration Tests</name>
+  <name>Vaadin Cookie Consent Integration Tests in Bower Mode</name>
   <properties>
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
