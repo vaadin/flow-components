@@ -75,7 +75,8 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
     public void setIdentifierProvider(
             IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
-        Optional.of(identifierChangedCallback)
-                .ifPresent(callback -> callback.accept(identifierProvider));
+
+        if (identifierChangedCallback != null)
+            identifierChangedCallback.accept(identifierProvider);
     }
 }
