@@ -176,7 +176,8 @@ public class RadioButtonGroup<T>
      */
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
-        return new RadioButtonGroupListDataView<>(this::getDataProvider, this);
+        return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     /**
@@ -189,7 +190,8 @@ public class RadioButtonGroup<T>
      */
     @Override
     public RadioButtonGroupDataView<T> getGenericDataView() {
-        return new RadioButtonGroupDataView<>(this::getDataProvider, this);
+        return new RadioButtonGroupDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
 
@@ -513,6 +515,30 @@ public class RadioButtonGroup<T>
         }
     }
 
+    /**
+     * Compares two value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first instance
+     * @param value2
+     *            the second instance
+     * @return <code>true</code> if the instances are equal; otherwise
+     *         <code>false</code>
+     */
+    @Override
+    protected boolean valueEquals(T value1, T value2) {
+        if (value1 == null && value2 == null)
+            return true;
+        if (value1 == null || value2 == null)
+            return false;
+        return getItemId(value1).equals(getItemId(value2));
+    }
+
     private void updateEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
@@ -541,5 +567,9 @@ public class RadioButtonGroup<T>
         }
         validationRegistration = getElement().addPropertyChangeListener("value",
                 validationListener);
+    }
+
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+        keyMapper.setIdentifierGetter(identifierProvider);
     }
 }

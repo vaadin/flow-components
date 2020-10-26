@@ -30,6 +30,9 @@ import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataVi
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_LIST_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_SORT_DATA_VIEW;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_SELECTED_ID_SPAN;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON;
 
 @TestPath("vaadin-radio-button/radio-Button-group-data-view")
 public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
@@ -233,4 +236,26 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
                 "third", buttons.get(2).getText());
     }
 
+    @Test
+    public void setIdentifierProvider_setItem_shouldSelectCorrectItemBasedOnIdentifier() {
+        WebElement selectedIdsSpan = findElement(
+                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        Assert.assertEquals("Selected item id should be", "3",
+                selectedIdsSpan.getText());
+
+        findElement(By.id(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON)).click();
+
+        selectedIdsSpan = findElement(
+                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        Assert.assertEquals("Selected item ids should be", "2",
+                selectedIdsSpan.getText());
+
+        findElement(By.id(RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON))
+                .click();
+
+        selectedIdsSpan = findElement(
+                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        Assert.assertEquals("Selected item ids should be", "3",
+                selectedIdsSpan.getText());
+    }
 }
