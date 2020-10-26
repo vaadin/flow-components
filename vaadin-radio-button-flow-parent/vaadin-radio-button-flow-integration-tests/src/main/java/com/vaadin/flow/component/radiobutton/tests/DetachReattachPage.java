@@ -68,8 +68,7 @@ public class DetachReattachPage extends Div {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setId("group");
 
-        List<String> items = new LinkedList<>(Arrays.asList("foo", "bar", "baz"));
-        group.setItems(new ListDataProvider<>(items));
+        group.setItems("foo", "bar", "baz");
 
         NativeButton detach = new NativeButton("detach", e -> remove(group));
         detach.setId("detach");
