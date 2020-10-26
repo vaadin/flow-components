@@ -24,26 +24,30 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
     private List<String> items;
     private ComboBoxListDataView<String> dataView;
     private ComboBox<String> component;
+    private DataCommunicatorTest.MockUI ui;
 
     @Before
     public void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         component = new ComboBox<>();
+        ui = new DataCommunicatorTest.MockUI();
+        ui.add(component);
+
         dataView = component.setItems(items);
     }
 
@@ -55,58 +59,31 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     }
 
     @Test
-    public void getItems_withTextFilter_filteredItemsObtained() {
-        ComboBox<String> comboBox = getDefaultLocaleComboBox();
-        ComboBoxListDataView<String> dataView = comboBox.setItems(items);
-        setClientFilter(comboBox, "middle");
-        Stream<String> filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "middle" }, filteredItems.toArray());
-
-        // Remove the filters
-        setClientFilter(comboBox, "");
-        filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "first", "middle", "last" },
-                filteredItems.toArray());
-    }
-
-    @Test
-    public void getItems_withInMemoryFilter_filteredItemsObtained() {
-        dataView.setFilter("middle"::equals);
-        Stream<String> filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "middle" }, filteredItems.toArray());
-
-        // Remove the filters
-        dataView.removeFilters();
-        filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "first", "middle", "last" },
-                filteredItems.toArray());
-    }
-
-    @Test
-    public void getItems_withInMemoryAndTextFilter_filteredItemsObtained() {
-        ComboBox<String> comboBox = getDefaultLocaleComboBox();
+    public void getItems_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
         items = Arrays.asList("foo", "bar", "banana");
-        ComboBoxListDataView<String> dataView = comboBox.setItems(items);
-        setClientFilter(comboBox, "ba");
-        dataView.setFilter(item -> item.length() == 3);
+        dataView = component.setItems(items);
+
+        setClientFilter(component, "ba");
+        fakeClientCommunication();
+
         Stream<String> filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "bar" }, filteredItems.toArray());
+
+        // Check that the client filter does not affect the item handling API
+        // in data view
+        Assert.assertArrayEquals("The client filter shouldn't impact the items",
+                new String[] { "foo", "bar", "banana" }, filteredItems.toArray());
+
+        dataView.setFilter(item -> item.length() == 3);
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set after in-memory filter",
+                new String[] { "foo", "bar" }, filteredItems.toArray());
 
         // Remove the filters
         dataView.removeFilters();
         filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "bar", "banana" }, filteredItems.toArray());
-        setClientFilter(comboBox, "");
-        filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "foo", "bar", "banana" },
-                filteredItems.toArray());
+        Assert.assertArrayEquals(
+                "Unexpected data set after removing in-memory filter",
+                new String[] { "foo", "bar", "banana" }, filteredItems.toArray());
     }
 
     @Test
@@ -116,13 +93,31 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     }
 
     @Test
-    public void getItemCount_withFilter_totalItemsCountObtained() {
-        dataView.setFilter(item -> item.equalsIgnoreCase("middle"));
+    public void getItemCount_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
+        items = Arrays.asList("foo", "bar", "banana");
+        dataView = component.setItems(items);
 
-        Assert.assertEquals("Unexpected item count", 1,
-                dataView.getItemCount());
+        setClientFilter(component, "ba");
+        fakeClientCommunication();
 
-        Assert.assertTrue("Unexpected item", dataView.contains(items.get(1)));
+        int itemCount = dataView.getItemCount();
+
+        // Check that the client filter does not affect the item count
+        Assert.assertEquals(
+                "The client filter shouldn't impact the items count",
+                3, itemCount);
+
+        dataView.setFilter(item -> item.length() == 3);
+        itemCount = dataView.getItemCount();
+        Assert.assertEquals("Unexpected item count after server side filter",
+                2, itemCount);
+
+        // Remove the filters
+        dataView.removeFilters();
+        itemCount = dataView.getItemCount();
+        Assert.assertEquals(
+                "Unexpected item count after removing server side filter",
+                3, itemCount);
     }
 
     @Test
@@ -177,9 +172,10 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         }
     }
 
-
-    private String getClientSideFilter() {
-        return component.getElement().getProperty("_clientSideFilter");
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
     private static class Item {

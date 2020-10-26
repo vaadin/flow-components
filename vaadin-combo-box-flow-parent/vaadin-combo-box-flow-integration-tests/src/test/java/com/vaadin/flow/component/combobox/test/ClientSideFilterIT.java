@@ -125,10 +125,8 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         waitForItems(comboBox, items -> items.size() == 19);
 
-        // TODO: client filter should not fire the item count change event
-        //  https://github.com/vaadin/vaadin-flow-components/issues/210
-        Assert.assertEquals("Expected 19 items after filtering", 19,
-                getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+        Assert.assertEquals("Expected no item count change events on client filter change",
+                100, getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
     }
 
     @Test
@@ -150,10 +148,9 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         waitForItems(comboBox, items -> items.size() == 12);
 
-        // TODO: client filter should not fire the item count change event
-        //  https://github.com/vaadin/vaadin-flow-components/issues/210
-        Assert.assertEquals("Expected 12 items after filtering", 12,
-                getItemCount(BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+        Assert.assertEquals(
+                "Expected no item count change events on client filter change",
+                30, getItemCount(BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID));
     }
 
     private int getItemCount(String id) {

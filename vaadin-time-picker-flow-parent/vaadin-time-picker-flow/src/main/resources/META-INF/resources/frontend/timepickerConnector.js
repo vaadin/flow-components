@@ -1,6 +1,6 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker-flow');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker');
     };
 
     // Execute callback when predicate returns true.

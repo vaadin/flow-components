@@ -858,13 +858,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return filterConverter.apply(filterText);
         };
 
-        SerializableConsumer<C> providerFilterSlot = dataCommunicator
+        SerializableConsumer<DataCommunicator.Filter<C>> providerFilterSlot = dataCommunicator
                 .setDataProvider(dataProvider,
-                        convertOrNull.apply(getFilterString()));
+                        convertOrNull.apply(getFilterString()), false);
 
         filterSlot = filter -> {
             if (!Objects.equals(filter, lastFilter)) {
-                providerFilterSlot.accept(convertOrNull.apply(filter));
+                DataCommunicator.Filter<C> objectFilter =
+                        new DataCommunicator.Filter<C>(
+                                convertOrNull.apply(filter), filter.isEmpty());
+                providerFilterSlot.accept(objectFilter);
                 lastFilter = filter;
             }
         };
@@ -1507,7 +1510,25 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void resetDataCommunicator() {
-        dataCommunicator.reset();
+        /*
+         * The client filter from combo box will be used in the data
+         * communicator only within 'setRequestedRange' calls to data provider,
+         * and then will be erased to not affect the data view item count
+         * handling methods. Thus, if the current client filter is not empty,
+         * then we need to re-set it in the data communicator.
+         */
+        if (lastFilter == null || lastFilter.isEmpty()) {
+            dataCommunicator.reset();
+        } else {
+            String filter = lastFilter;
+            lastFilter = null;
+            /*
+             * This filter slot will eventually call the filter consumer in
+             * data communicator and 'DataCommunicator::reset' is done inside
+             * this consumer, so we don't need to explicitly call it.
+             */
+            filterSlot.accept(filter);
+        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
