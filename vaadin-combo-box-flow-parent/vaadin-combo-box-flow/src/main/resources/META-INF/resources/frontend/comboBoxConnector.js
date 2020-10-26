@@ -21,7 +21,7 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
             const pageCallbacks = {};
             let cache = {};
             let lastFilter = '';
-            const placeHolder = new Vaadin.ComboBoxPlaceholder();
+            const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
             const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
             const serverFacade = (() => {
