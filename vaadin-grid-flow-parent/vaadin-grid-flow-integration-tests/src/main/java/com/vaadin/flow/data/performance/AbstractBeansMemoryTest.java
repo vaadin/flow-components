@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
+import org.openjdk.jol.info.GraphLayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -38,7 +38,6 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 
-@SuppressWarnings("restriction")
 public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
         implements HasUrlParameter<String> {
 
@@ -136,7 +135,7 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
         }
 
         memoryLabel.setText(
-                String.valueOf(ObjectSizeCalculator.getObjectSize(component)));
+                String.valueOf(GraphLayout.parseInstance(component).totalSize()));
     }
 
     private void createMenu(T component) {
