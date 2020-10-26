@@ -8,11 +8,11 @@
     <version>component</version>
   </parent>
 
-  <artifactId>component-integration-tests</artifactId>
+  <artifactId>component-integration-tests-bower-mode</artifactId>
   <version>component</version>
   <packaging>war</packaging>
 
-  <name>component Integration Tests</name>
+  <name>component Integration Tests in Bower Mode</name>
 
   <properties>
     <failOnMissingWebXml>false</failOnMissingWebXml>
