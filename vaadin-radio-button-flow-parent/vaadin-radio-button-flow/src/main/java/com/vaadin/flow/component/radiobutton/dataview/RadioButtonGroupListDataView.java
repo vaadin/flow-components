@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.radiobutton.dataview;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -73,6 +75,7 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
     public void setIdentifierProvider(
             IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
-        identifierChangedCallback.accept(identifierProvider);
+        Optional.of(identifierChangedCallback)
+                .ifPresent(callback -> callback.accept(identifierProvider));
     }
 }
