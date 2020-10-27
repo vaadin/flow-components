@@ -503,7 +503,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public ComboBoxListDataView<T> setItems(ItemFilter<T> itemFilter,
             @SuppressWarnings("unchecked") T... items) {
-        return setItems(itemFilter, Arrays.asList(items));
+        return setItems(itemFilter, new ArrayList<>(Arrays.asList(items)));
     }
 
     /**
