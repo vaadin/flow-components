@@ -2666,7 +2666,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * model.
      *
      * @param item
-     *            the item to select
+     *            the item to select, not null
      *
      * @see #getSelectionModel()
      * @see GridSelectionModel
@@ -2680,7 +2680,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * model.
      *
      * @param item
-     *            the item to deselect
+     *            the item to deselect, not null
      *
      * @see #getSelectionModel()
      * @see GridSelectionModel
