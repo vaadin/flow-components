@@ -558,6 +558,10 @@
                     <name>vaadin.devmode.liveReload.enabled</name>
                     <value>false</value>
                   </property>
+                  <property>
+                    <name>skipJetty</name>
+                    <value>${skipTests}</value>
+                  </property>
                 </properties>
               </configuration>
             </execution>
