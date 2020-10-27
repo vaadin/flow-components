@@ -75,16 +75,15 @@ then
     modVersion=`getPlatformVersion $i`
     setPomVersion $i $modVersion
   done
-
-  lastTag=`git tag | grep "^$versionBase" | head -1`
+  git pull origin $branch --tags --ff-only --quiet
+  lastTag=`git tag --merged $branch --sort=-committerdate | head -1`
   if [ -n "$lastTag" ]
   then
     shift
     ## allow setting modules to build from command line or via env var
     [ -n "$modified" ] || modified=$*
     ## otherwise utilise git history to figure out modified modules
-    [ -n "$modified" ] || modified=`git diff --name-only $lastTag  HEAD | grep '.java$' | cut -d "/" -f1 | grep parent | sort -u | perl -pe 's,-flow-parent,,g'`
-
+    [ -n "$modified" ] || modified=`git log $lastTag..HEAD --name-only | grep '^vaadin-.*-flow-parent' | egrep -v 'flow-demo|flow-integration-tests' | sed -e 's,-flow-parent.*,,g' | sort -u`
     [ -n "$modified" ] && modules="$modified"
     echo "Increasing version of the modified modules since last release $lastTag"
     for i in $modules
@@ -98,8 +97,8 @@ then
 fi
 
 echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile=$profile"
-
-build=vaadin-flow-components-shared
+## '.' points to the root project, 'vaadin-flow-components-shared' has the dependencies for demo and tests
+build=.,vaadin-flow-components-shared
 for i in $modules
 do
   [ -d "$i" -o -d "$i-flow-parent" ] && build=$build,$i-flow-parent/$i-flow,$i-flow-parent/$i-testbench,$i-flow-parent/$i-flow-demo
