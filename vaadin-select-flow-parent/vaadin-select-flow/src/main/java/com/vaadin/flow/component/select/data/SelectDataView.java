@@ -93,7 +93,8 @@ public class SelectDataView<T> extends AbstractDataView<T> {
             IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
 
-        if (identifierChangedCallback != null)
+        if (identifierChangedCallback != null) {
             identifierChangedCallback.accept(identifierProvider);
+        }
     }
 }

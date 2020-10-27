@@ -762,10 +762,12 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     protected boolean valueEquals(T value1, T value2) {
-        if (value1 == null && value2 == null)
+        if (value1 == null && value2 == null) {
             return true;
-        if (value1 == null || value2 == null)
+        }
+        if (value1 == null || value2 == null) {
             return false;
+        }
         return getItemId(value1).equals(getItemId(value2));
     }
 
