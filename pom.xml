@@ -414,11 +414,15 @@
                     <name>vaadin.devmode.liveReload.enabled</name>
                     <value>false</value>
                   </property>
+                  <property>
+                    <name>skipJetty</name>
+                    <value>${skipTests}</value>
+                  </property>
                 </properties>
               </configuration>
             </execution>
           </executions>
-        </plugin>        
+        </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
@@ -447,7 +451,7 @@
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
           <version>1.0.0</version>
-        </plugin>        
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
