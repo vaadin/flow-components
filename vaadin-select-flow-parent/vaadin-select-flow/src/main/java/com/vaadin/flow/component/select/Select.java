@@ -507,7 +507,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public SelectDataView<T> getGenericDataView() {
-        return new SelectDataView<>(this::getDataProvider, this);
+        return new SelectDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     /**
@@ -525,7 +526,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public SelectListDataView<T> getListDataView() {
-        return new SelectListDataView<>(this::getDataProvider, this);
+        return new SelectListDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     @Override
@@ -743,6 +745,30 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         initConnector();
     }
 
+    /**
+     * Compares two value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first instance
+     * @param value2
+     *            the second instance
+     * @return <code>true</code> if the instances are equal; otherwise
+     *         <code>false</code>
+     */
+    @Override
+    protected boolean valueEquals(T value1, T value2) {
+        if (value1 == null && value2 == null)
+            return true;
+        if (value1 == null || value2 == null)
+            return false;
+        return getItemId(value1).equals(getItemId(value2));
+    }
+
     private void initConnector() {
         runBeforeClientResponse(ui -> {
             ui.getPage().executeJs(
@@ -956,5 +982,13 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         } else {
             return identifierProviderObject;
         }
+    }
+
+    private Object getItemId(T item) {
+        return getIdentifierProvider().apply(item);
+    }
+
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+        keyMapper.setIdentifierGetter(identifierProvider);
     }
 }

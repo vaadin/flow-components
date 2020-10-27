@@ -153,7 +153,8 @@ public class CheckboxGroup<T>
      */
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
-        return new CheckboxGroupListDataView<>(this::getDataProvider, this);
+        return new CheckboxGroupListDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     /**
@@ -166,7 +167,8 @@ public class CheckboxGroup<T>
      */
     @Override
     public CheckboxGroupDataView<T> getGenericDataView() {
-        return new CheckboxGroupDataView<>(this::getDataProvider, this);
+        return new CheckboxGroupDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -606,5 +608,9 @@ public class CheckboxGroup<T>
         } else {
             return identifierProviderObject;
         }
+    }
+
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+        keyMapper.setIdentifierGetter(identifierProvider);
     }
 }

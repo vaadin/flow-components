@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.select;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +21,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -689,6 +691,109 @@ public class SelectTest {
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
+    @Test
+    public void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        Select<CustomItem> select = new Select<>();
+        SelectListDataView<CustomItem> listDataView = select.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        select.setValue(new CustomItem(1L));
+
+        Assert.assertNotNull(select.getValue());
+        Assert.assertEquals(select.getValue().getName(), "First");
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        select.setValue(new CustomItem(2L));
+
+        Assert.assertNotNull(select.getValue());
+        Assert.assertEquals(Long.valueOf(2L), select.getValue().getId());
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        Select<CustomItem> select = new Select<>();
+        SelectListDataView<CustomItem> listDataView = select.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        select.setValue(new CustomItem(1L));
+
+        Assert.assertNotNull(select.getValue());
+        Assert.assertEquals("First", select.getValue().getName());
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item with an Id and the name that can be wrongly equals to
+        // another items, should verify that <equals> method is not in use:
+        select.setValue(new CustomItem(3L, "Second"));
+
+        Assert.assertNotNull(select.getValue());
+        Assert.assertEquals(Long.valueOf(3L), select.getValue().getId());
+    }
+
+    @Test
+    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        Select<CustomItem> select = new Select<>();
+        SelectListDataView<CustomItem> listDataView = select.setItems(items);
+
+        select.setValue(new CustomItem(null, "Second"));
+
+        Assert.assertNotNull(select.getValue());
+        Assert.assertEquals(Long.valueOf(2L), select.getValue().getId());
+    }
+
+    @Test
+    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        Select<CustomItem> select = new Select<>();
+        SelectListDataView<CustomItem> listDataView = select.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        select.setValue(new CustomItem(null, "First"));
+        Assert.assertNull(select.getValue().getId());
+    }
+
     private void validateItem(int index, String textContent, String label,
             boolean enabled) {
         Element item = getListBoxChild(index);
@@ -731,4 +836,42 @@ public class SelectTest {
         }
     }
 
+    private class CustomItem {
+        private Long id;
+        private String name;
+
+        public CustomItem(Long id) {
+            this(id, null);
+        }
+
+        public CustomItem(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CustomItem)) return false;
+            CustomItem that = (CustomItem) o;
+            return Objects.equals(getName(), that.getName());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getName());
+        }
+    }
 }
