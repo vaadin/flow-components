@@ -101,8 +101,8 @@
             <configuration>
               <archive>
                 <manifestFile>
-                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                </manifestFile>
+                                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                                </manifestFile>
                 <manifestEntries>
                   <Built-By/>
                 </manifestEntries>

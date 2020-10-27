@@ -79,7 +79,8 @@ async function consolidate(template, pom, cb) {
 }
 
 async function consolidatePomParent() {
-  consolidate('pom-parent.xml', `${mod}/pom.xml`, js => {
+  const template = proComponents.includes(componentName) ? 'pom-parent-pro.xml' : 'pom-parent.xml';
+  consolidate(template, `${mod}/pom.xml`, js => {
     renameComponent(js.project.modules[0].module, name);
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
   });

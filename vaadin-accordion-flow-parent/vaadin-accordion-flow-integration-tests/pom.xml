@@ -159,7 +159,7 @@
       <id>run-jetty</id>
       <activation>
         <property>
-          <name>!skipTests</name>
+          <name>!skipJetty</name>
         </property>
       </activation>
       <build>
