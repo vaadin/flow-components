@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -33,6 +34,7 @@ public class RadioButtonGroupDataViewPage extends Div {
     static final String RADIO_GROUP_FOR_FILTER_DATA_VIEW = "radio-group-for-filter-data-view";
     static final String RADIO_GROUP_FOR_NEXT_PREV_DATA_VIEW = "radio-group-for-next-prev-data-view";
     static final String RADIO_GROUP_FOR_SORT_DATA_VIEW = "radio-group-for-sort-data-view";
+    static final String RADIO_GROUP_SELECTED_ID_SPAN = "radio-group-for-selected-ids-span";
 
     static final String DATA_VIEW_UPDATE_BUTTON = "data-view-update-button";
     static final String LIST_DATA_VIEW_UPDATE_BUTTON = "list-data-view-update-button";
@@ -44,10 +46,13 @@ public class RadioButtonGroupDataViewPage extends Div {
     static final String LIST_DATA_VIEW_NEXT_BUTTON = "list-data-view-next-button";
     static final String LIST_DATA_VIEW_PREV_BUTTON = "list-data-view-prev-button";
     static final String LIST_DATA_VIEW_SORT_BUTTON = "list-data-view-sort-button";
+    static final String RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON = "radio-group-selection-by-id-update-button";
+    static final String RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON = "radio-group-selection-by-id-and-name-update-button";
 
     static final String CURRENT_ITEM_SPAN = "current-item-span";
     static final String HAS_NEXT_ITEM_SPAN = "has-next-item-span";
     static final String HAS_PREV_ITEM_SPAN = "has-prev-item-span";
+
 
     public RadioButtonGroupDataViewPage() {
         createGenericDataView();
@@ -57,6 +62,7 @@ public class RadioButtonGroupDataViewPage extends Div {
         createFilterItemsByDataView();
         createNextPreviousItemDataView();
         createSetSortComparatorDataView();
+        createIdentifierProviderForListBox();
     }
 
     private void createGenericDataView() {
@@ -235,6 +241,63 @@ public class RadioButtonGroupDataViewPage extends Div {
         add(rbgForSortDataView, dataViewSortButton);
     }
 
+    private void createIdentifierProviderForListBox() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> listDataView =
+                radioButtonGroup.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        radioButtonGroup.setValue(new CustomItem(3L));
+
+        Span selectedIdSpan = new Span();
+        selectedIdSpan.setId(RADIO_GROUP_SELECTED_ID_SPAN);
+        selectedIdSpan.setText(String.valueOf(radioButtonGroup.getValue().getId()));
+
+        Button updateAndSelectByIdOnlyButton =
+                new Button("Update & Select by Id", click -> {
+                    // Make the names of unselected items similar to the name of
+                    // selected one to mess with the <equals> implementation in
+                    // CustomItem:
+                    first.setName("Second");
+                    listDataView.refreshItem(first);
+
+                    third.setName("Second");
+                    listDataView.refreshItem(third);
+
+                    // Select the item not with the reference of existing item,
+                    // and instead with just the Id:
+                    radioButtonGroup.setValue(new CustomItem(2L));
+
+                    selectedIdSpan.setText(String.valueOf(
+                            radioButtonGroup.getValue().getId()));
+                });
+        updateAndSelectByIdOnlyButton
+                .setId(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON);
+
+        Button selectByIdAndNameButton =
+                new Button("Select by Id and Name", click -> {
+                    // Select the item with the Id and a challenging wrong name
+                    // to verify <equals> method is not in use:
+                    radioButtonGroup.setValue(new CustomItem(3L, "Second"));
+
+                    selectedIdSpan.setText(
+                            String.valueOf(radioButtonGroup.getValue().getId()));
+                });
+        selectByIdAndNameButton
+                .setId(RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON);
+
+        add(radioButtonGroup, selectedIdSpan, updateAndSelectByIdOnlyButton,
+                selectByIdAndNameButton);
+    }
+
     private static class GenericDataProvider
             extends AbstractDataProvider<Item, Void> {
         private final transient List<Item> items;
@@ -306,6 +369,45 @@ public class RadioButtonGroupDataViewPage extends Div {
 
         public String toString() {
             return String.valueOf(this.value);
+        }
+    }
+
+    private static class CustomItem {
+        private Long id;
+        private String name;
+
+        public CustomItem(Long id) {
+            this(id, null);
+        }
+
+        public CustomItem(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CustomItem)) return false;
+            CustomItem that = (CustomItem) o;
+            return Objects.equals(getName(), that.getName());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getName());
         }
     }
 }
