@@ -43,7 +43,7 @@
     <osgi.bundle.package.private/>
     <osgi.bundle.bundle.activator/>
     <osgi.bundle.description/>
-    <vaadin.flow.components.shared.version>17.0-SNAPSHOT</vaadin.flow.components.shared.version>
+    <vaadin.flow.components.shared.version>${project.version}</vaadin.flow.components.shared.version>
     <vaadin.accordion.version>4.0-SNAPSHOT</vaadin.accordion.version>
     <vaadin.app.layout.version>4.0-SNAPSHOT</vaadin.app.layout.version>
     <vaadin.button.version>4.0-SNAPSHOT</vaadin.button.version>
