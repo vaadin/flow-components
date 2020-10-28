@@ -158,6 +158,10 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
+      <properties>
+        <com.vaadin.tests.SharedBrowser.reuseBrowser>false</com.vaadin.tests.SharedBrowser.reuseBrowser>
+        <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
+      </properties>
       <build>
         <plugins>
           <plugin>
