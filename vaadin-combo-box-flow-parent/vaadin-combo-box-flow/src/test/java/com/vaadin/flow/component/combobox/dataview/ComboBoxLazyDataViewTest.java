@@ -18,8 +18,11 @@ package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,6 +36,7 @@ import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.function.SerializableConsumer;
 
 import elemental.json.JsonValue;
 
@@ -50,6 +54,19 @@ public class ComboBoxLazyDataViewTest {
     private DataCommunicatorTest.MockUI ui;
     private DataCommunicator<String> dataCommunicator;
     private ArrayUpdater arrayUpdater;
+    private SerializableConsumer<DataCommunicator.Filter<String>> filterSlot;
+
+    private CallbackDataProvider<String, String> undefinedItemCountDataProvider = DataProvider
+            .fromFilteringCallbacks(
+                    query -> IntStream.range(0, 1000)
+                            .mapToObj(index -> "Item " + index)
+                            .filter(item -> item
+                                    .contains(query.getFilter().orElse("")))
+                            .skip(query.getOffset()).limit(query.getLimit()),
+                    query -> {
+                        Assert.fail("No item count query expected");
+                        return 0;
+                    });
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -60,8 +77,12 @@ public class ComboBoxLazyDataViewTest {
                 .fromFilteringCallbacks(query -> {
                     query.getOffset();
                     query.getLimit();
-                    return Stream.of(items);
-                }, query -> 3);
+                    return Stream.of(items).filter(
+                            item -> item.contains(query.getFilter().orElse("")))
+                            .skip(query.getOffset()).limit(query.getLimit());
+                }, query -> (int) Stream.of(items).filter(
+                        item -> item.contains(query.getFilter().orElse("")))
+                        .count());
 
         comboBox = new ComboBox<>();
         ui = new DataCommunicatorTest.MockUI();
@@ -92,7 +113,8 @@ public class ComboBoxLazyDataViewTest {
         dataCommunicator = new DataCommunicator<>((item, jsonObject) -> {
         }, arrayUpdater, null, comboBox.getElement().getNode());
 
-        dataCommunicator.setDataProvider(dataProvider, null);
+        // set combo box client-side filter to empty by default
+        filterSlot = dataCommunicator.setDataProvider(dataProvider, "", true);
 
         dataView = new ComboBoxLazyDataView<>(dataCommunicator, comboBox);
     }
@@ -115,21 +137,21 @@ public class ComboBoxLazyDataViewTest {
                 event -> itemCount.set(event.getItemCount()));
         dataCommunicator.setRequestedRange(0, 50);
 
-        fakeClientCommunication();
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
         Assert.assertEquals("Expected 3 items before setItemCountCallback()", 3,
                 itemCount.getAndSet(0));
 
         dataView.setItemCountCallback(query -> 2);
 
-        fakeClientCommunication();
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
         Assert.assertEquals("Expected 2 items after setItemCountCallback()", 2,
                 itemCount.get());
     }
 
     @Test
-    public void getLazyDataView_defaulDataProvider_dataViewReturned() {
+    public void getLazyDataView_defaultDataProvider_dataViewReturned() {
         ComboBox<String> comboBox = new ComboBox<>();
         ComboBoxLazyDataView<String> lazyDataView = comboBox.getLazyDataView();
 
@@ -213,10 +235,179 @@ public class ComboBoxLazyDataViewTest {
         comboBox.getLazyDataView().getItemCountEstimateIncrease();
     }
 
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+    @Test
+    public void getItems_withDefinedItemCountAndNoClientSideFilter_returnsNotFilteredItems() {
+        Stream<String> filteredItems = dataView.getItems();
+
+        Assert.assertArrayEquals("Unexpected items obtained",
+                new String[] { "foo", "bar", "baz" }, filteredItems.toArray());
+    }
+
+    @Test
+    public void getItems_withDefinedItemCountAndClientSideFilter_returnsNotFilteredItems() {
+        dataCommunicator.setRequestedRange(0, 50);
+        // Apply the client filter
+        filterSlot.accept(new DataCommunicator.Filter<>("ba", false));
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+
+        // Verify the cached items data is updated in data communicator
+        Assert.assertEquals(2, dataCommunicator.getItemCount());
+        Assert.assertEquals("bar", dataCommunicator.getItem(0));
+        Assert.assertEquals("baz", dataCommunicator.getItem(1));
+
+        Stream<String> filteredItems = dataView.getItems();
+
+        // Check that the client filter does not affect the item handling API
+        // in data view
+        Assert.assertArrayEquals("The client filter shouldn't impact the items",
+                new String[] { "foo", "bar", "baz" }, filteredItems.toArray());
+
+        // Reset the client filter and check again
+        filterSlot.accept(new DataCommunicator.Filter<>("", true));
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals(
+                "The client filter reset shouldn't impact the items",
+                new String[] { "foo", "bar", "baz" }, filteredItems.toArray());
+    }
+
+    @Test
+    public void getItems_withUnknownItemCountAndNoClientSideFilter_returnsNotFilteredItems() {
+        dataCommunicator.setDataProvider(undefinedItemCountDataProvider, "",
+                true);
+        dataView.setItemCountUnknown();
+
+        List<String> items = dataView.getItems().collect(Collectors.toList());
+        Assert.assertEquals(1000, items.size());
+        Assert.assertEquals("Item 0", items.get(0));
+        Assert.assertEquals("Item 999", items.get(items.size() - 1));
+    }
+
+    @Test
+    public void getItems_withUnknownItemCountAndClientSideFilter_returnsNotFilteredItems() {
+        filterSlot = dataCommunicator
+                .setDataProvider(undefinedItemCountDataProvider, "", true);
+        dataView.setItemCountUnknown();
+
+        dataCommunicator.setRequestedRange(0, 50);
+        // Apply the client filter
+        filterSlot.accept(new DataCommunicator.Filter<>("777", false));
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+
+        // Verify the cached items data is updated in data communicator
+        Assert.assertEquals(1, dataCommunicator.getItemCount());
+        Assert.assertEquals("Item 777", dataCommunicator.getItem(0));
+
+        List<String> items = dataView.getItems().collect(Collectors.toList());
+
+        // Check that the client filter does not affect the item handling API
+        // in data view
+        Assert.assertEquals(1000, items.size());
+        Assert.assertEquals("Item 0", items.get(0));
+        Assert.assertEquals("Item 999", items.get(items.size() - 1));
+
+        // Reset the client filter and check again
+        filterSlot.accept(new DataCommunicator.Filter<>("", true));
+        items = dataView.getItems().collect(Collectors.toList());
+        Assert.assertEquals(1000, items.size());
+        Assert.assertEquals("Item 0", items.get(0));
+        Assert.assertEquals("Item 999", items.get(items.size() - 1));
+    }
+
+    @Test
+    public void getItem_withDefinedItemCountAndNoClientSideFilter_returnsItemFromNotFilteredSet() {
+        Assert.assertEquals("Invalid item on index 1", "bar",
+                dataView.getItem(1));
+    }
+
+    @Test
+    public void getItem_withDefinedItemCountAndClientSideFilter_returnsItemFromNotFilteredSet() {
+        filterSlot.accept(new DataCommunicator.Filter<>("bar", false));
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        Assert.assertEquals("Invalid item on index 0", "foo",
+                dataView.getItem(0));
+    }
+
+    @Test
+    public void getItem_withUnknownItemCountAndNoClientSideFilter_returnsItemFromNotFilteredSet() {
+        dataCommunicator.setDataProvider(undefinedItemCountDataProvider, "",
+                true);
+        dataView.setItemCountUnknown();
+
+        Assert.assertEquals("Invalid item on index 777", "Item 777",
+                dataView.getItem(777));
+    }
+
+    @Test
+    public void getItem_withUnknownItemCountAndClientSideFilter_returnsItemFromNotFilteredSet() {
+        filterSlot = dataCommunicator
+                .setDataProvider(undefinedItemCountDataProvider, "", true);
+        dataView.setItemCountUnknown();
+
+        filterSlot.accept(new DataCommunicator.Filter<>("777", false));
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        Assert.assertEquals("Invalid item on index 0", "Item 0",
+                dataView.getItem(0));
+    }
+
+    @Test
+    public void getItem_negativeIndex_throws() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage("Index must be non-negative");
+        dataView.getItem(-1);
+    }
+
+    @Test
+    public void getItem_definedItemCountAndEmptyData_throws() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage("Requested index 0 on empty data.");
+        dataCommunicator.setDataProvider(DataProvider.fromCallbacks(query -> {
+            query.getOffset();
+            query.getLimit();
+            return Stream.empty();
+        }, query -> 0), null);
+
+        dataView.getItem(0);
+    }
+
+    @Test
+    public void getItem_undefinedItemCountAndEmptyData_returnEmptyItem() {
+        dataCommunicator.setDataProvider(DataProvider.fromCallbacks(query -> {
+            query.getOffset();
+            query.getLimit();
+            return Stream.empty();
+        }, query -> 0), null);
+        dataView.setItemCountUnknown();
+
+        Assert.assertNull(dataView.getItem(1234567));
+    }
+
+    @Test
+    public void getItem_definedItemCountAndOutsideOfRange_throws() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage(
+                "Given index 3 is outside of the accepted range '0 - 2'");
+        dataView.getItem(3);
+    }
+
+    @Test
+    public void getItem_undefinedItemCountAndOutsideOfRange_returnEmptyItem() {
+        dataCommunicator.setDataProvider(undefinedItemCountDataProvider, "",
+                true);
+        dataView.setItemCountUnknown();
+
+        Assert.assertNull(dataView.getItem(1234567));
+    }
+
+    @Test
+    public void getItem_withCountCallbackAndOutsideOfRange_throw() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage(
+                "Given index 1234567 is outside of the accepted range '0 - 999'");
+        dataCommunicator.setDataProvider(undefinedItemCountDataProvider, "",
+                true);
+        dataView.setItemCountCallback(query -> 1000);
+
+        dataView.getItem(1234567);
     }
 
 }

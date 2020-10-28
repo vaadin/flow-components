@@ -34,6 +34,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -48,6 +49,7 @@ import com.vaadin.flow.shared.Registration;
 public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
     private ComboBox<String> comboBox;
+    private DataCommunicatorTest.MockUI ui;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -57,10 +59,9 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
         comboBox = getComponent();
+        ui = new DataCommunicatorTest.MockUI();
+        ui.add(comboBox);
         dataView = comboBox.setItems(dataProvider, textFilter -> item -> true);
-        // Open the comboBox explicitly, because it is not initialized
-        // eagerly with in-memory data provider
-        comboBox.setOpened(true);
         component = comboBox;
     }
 
@@ -144,19 +145,6 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(IdentifierProvider.identity());
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void getItem_itemRequested_dataCommunicatorInvoked() {
-        DataCommunicator<String> dataCommunicator = Mockito
-                .mock(DataCommunicator.class);
-        Mockito.when(dataCommunicator.getDataProvider())
-                .thenReturn((DataProvider) DataProvider.ofItems());
-        ComboBoxDataView<String> dataView = new ComboBoxDataView<>(
-                dataCommunicator, new ComboBox<>());
-        dataView.getItem(42);
-        Mockito.verify(dataCommunicator).getItem(42);
     }
 
     @Test
@@ -274,6 +262,74 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
                         + "%noverloaded method instead"));
         component.setItems(dataProvider);
     }
+
+    @Test
+    public void getItems_noClientSideFilter_returnsNotFilteredItems() {
+        Stream<String> filteredItems = dataView.getItems();
+
+        Assert.assertArrayEquals("Unexpected items obtained",
+                new String[] { "first", "middle", "last" }, filteredItems.toArray());
+    }
+
+    @Test
+    public void getItems_withClientSideFilter_returnsNotFilteredItems() {
+        ComboBoxDataViewTestHelper.setClientSideFilter(comboBox, "middle");
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+
+        Stream<String> filteredItems = dataView.getItems();
+
+        // Check that the client filter does not affect the item handling API
+        // in data view
+        Assert.assertArrayEquals("The client filter shouldn't impact the items",
+                new String[] { "first", "middle", "last" }, filteredItems.toArray());
+
+        // Reset the client filter and check again
+        ComboBoxDataViewTestHelper.setClientSideFilter(comboBox, "");
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals(
+                "The client filter reset shouldn't impact the items",
+                new String[] { "first", "middle", "last"  }, filteredItems.toArray());
+    }
+
+    @Test
+    public void getItem_noClientSideFilter_returnsItemFromNotFilteredSet() {
+        Assert.assertEquals("Invalid item on index 1", "middle",
+                dataView.getItem(1));
+    }
+
+    @Test
+    public void getItem_withClientSideFilter_returnsItemFromNotFilteredSet() {
+        ComboBoxDataViewTestHelper.setClientSideFilter(comboBox, "middle");
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        Assert.assertEquals("Invalid item on index 0", "first",
+                dataView.getItem(0));
+    }
+
+    @Test
+    public void getItem_negativeIndex_throws() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage("Index must be non-negative");
+        dataView.getItem(-1);
+    }
+
+    @Test
+    public void getItem_emptyData_throws() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage("Requested index 0 on empty data.");
+        dataView = comboBox.setItems();
+
+        dataView.getItem(0);
+    }
+
+    @Test
+    public void getItem_outsideOfRange_throws() {
+        expectedException.expect(IndexOutOfBoundsException.class);
+        expectedException.expectMessage(
+                "Given index 3 is outside of the accepted range '0 - 2'");
+        dataView.getItem(3);
+    }
+
 
     @Override
     protected ComboBox<String> getComponent() {
