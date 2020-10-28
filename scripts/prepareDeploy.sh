@@ -64,6 +64,7 @@ flow=`getLatest flow $flow`
 echo "Setting version=$version to vaadin-flow-components"
 mvn -B -q versions:set -DnewVersion=$version || exit 1
 setPomVersion flow $flow
+setPomVersion vaadin-flow-components-shared $version || exit 1
 
 ## Compute modules to build and deploy
 modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 | cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
@@ -109,3 +110,4 @@ echo "##teamcity[setParameter name='components.branch' value='$branch']"
 echo "##teamcity[setParameter name='maven.profile' value='$profile']"
 echo "##teamcity[setParameter name='flow.version' value='$flow']"
 echo "##teamcity[setParameter name='build.modules' value='$build']"
+echo "##teamcity[setParameter name='vaadin.flow.components.shared.version' value='$version']"
