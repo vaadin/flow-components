@@ -64,6 +64,7 @@ flow=`getLatest flow $flow`
 echo "Setting version=$version to vaadin-flow-components"
 mvn -B -q versions:set -DnewVersion=$version || exit 1
 setPomVersion flow $flow
+setPomVersion vaadin-flow-components-shared $version || exit 1
 
 ## Compute modules to build and deploy
 modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 | cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
