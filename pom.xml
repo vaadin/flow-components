@@ -26,9 +26,11 @@
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <driver.binary.downloader.maven.plugin.version>1.0.18
         </driver.binary.downloader.maven.plugin.version>
-    <testbench.testsInParalel>2</testbench.testsInParalel>
-    <testbench.runLocaly>CHROME</testbench.runLocaly>
-    <failsafe.forkCount>2</failsafe.forkCount>
+    <failsafe.forkCount>4</failsafe.forkCount>
+    <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
+    <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
+    <useLocalWebDriver>true</useLocalWebDriver>
+    <failIfNoTests>false</failIfNoTests>
     <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
     <powermock.version>1.7.1</powermock.version>
     <jackson.version>2.9.10.4</jackson.version>
@@ -131,6 +133,17 @@
       <modules>
         <module>integration-tests</module>
       </modules>
+    </profile>
+    <profile>
+      <id>local</id>
+      <activation>
+        <property>
+          <name>com.vaadin.testbench.Parameters.hubHostname</name>
+        </property>
+      </activation>
+      <properties>
+        <useLocalWebDriver>false</useLocalWebDriver>
+      </properties>
     </profile>
   </profiles>
   <repositories>
@@ -284,8 +297,12 @@
                 <goal>deploy-war</goal>
               </goals>
               <configuration>
-                <daemon>true</daemon>
-                <scanIntervalSeconds>0</scanIntervalSeconds>
+                <systemProperties>
+                  <systemProperty>
+                    <name>vaadin.productionMode</name>
+                    <value>true</value>
+                  </systemProperty>
+                </systemProperties>
               </configuration>
             </execution>
             <execution>

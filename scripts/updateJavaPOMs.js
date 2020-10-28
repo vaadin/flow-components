@@ -117,10 +117,6 @@ async function consolidatePomParent() {
     delete js.project.version;
   });
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> b054d3eee... chore: simply and align bundle configuration of pro/core components (#397)
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
   await consolidate(template, `${mod}/${name}-flow/pom.xml`);
