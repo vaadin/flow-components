@@ -141,8 +141,8 @@ then
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests,integration-tests/pom-bower-mode.xml $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-  tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests,integration-tests/pom-bower-mode.xml ..."
+  cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/pom-bower-mode.xml $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests/pom-bower-mode.xml ..."
   echo $cmd
   $cmd
   error=$?
@@ -160,7 +160,7 @@ else
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests,integration-tests/pom-bower-mode.xml -Dit.test=$failed $(reuse_browser false)"
+        cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/pom-bower-mode.xml -Dit.test=$failed $(reuse_browser false)"
         tcLog "Re-Running $nfailed failed tests ..."
         echo $cmd
         $cmd
