@@ -59,8 +59,18 @@ To select which browsers to test, set the `TESTBENCH_GRID_BROWSERS` environment 
 ```
 TESTBENCH_GRID_BROWSERS=edge,safari-13,firefox
 ```
+
+
+
 Then run the following command, replacing the `***` with your Sauce Labs credentials.
-- `mvn verify -P saucelabs -Dtest.use.hub=true -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Dcom.vaadin.tests.SharedBrowser.reuseBrowser=false -Drun-it -pl integration-tests`
+
+For testing one component run:
+
+- `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-integration-tests`
+
+For running all merged components execute:
+
+- `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
 
 ## Build script
 
