@@ -119,6 +119,9 @@
           <name>!test.use.hub</name>
         </property>
       </activation>
+      <properties>
+        <useLocalWebDriver>true</useLocalWebDriver>
+      </properties>
       <build>
         <plugins>
           <plugin>

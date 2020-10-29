@@ -177,7 +177,9 @@
     <profile>
       <id>saucelabs</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>sauce.user</name>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -195,6 +197,9 @@
           <name>!test.use.hub</name>
         </property>
       </activation>
+      <properties>
+        <useLocalWebDriver>true</useLocalWebDriver>
+      </properties>
       <build>
         <plugins>
           <plugin>
