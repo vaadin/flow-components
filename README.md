@@ -74,9 +74,9 @@ For running all merged components execute:
 
 ## Build script
 
-The `./build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
+The `./scripts/build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
 It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
-Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid combo-box`
+Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
 
 ## Update package version for `@NpmPackage` in all files
 There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
