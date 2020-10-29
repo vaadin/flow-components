@@ -126,10 +126,10 @@
     <profile>
       <id>saucelabs</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>sauce.user</name>
+        </property>
       </activation>
-<<<<<<< HEAD
-=======
       <dependencies>
         <dependency>
           <groupId>com.saucelabs</groupId>
@@ -142,7 +142,6 @@
         <com.vaadin.tests.SharedBrowser.reuseBrowser>false</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
       </properties>
->>>>>>> d26cda688... chore: configure some maven properties for better DX (#325)
       <build>
         <plugins>
           <plugin>
@@ -159,6 +158,9 @@
           <name>!test.use.hub</name>
         </property>
       </activation>
+      <properties>
+        <useLocalWebDriver>true</useLocalWebDriver>
+      </properties>
       <build>
         <plugins>
           <plugin>
