@@ -88,6 +88,7 @@ async function createPom(pomFile, pomTemplateFile, artifactID) {
   tplJs.project.artifactId = [artifactID];
   tplJs.project.parent[0].artifactId = ['vaadin-flow-components'];
   tplJs.project.parent[0].version = [version];
+  delete tplJs.project.version;
   const tests = tplJs.project.build[0].plugins[0].plugin.find(p => p.artifactId[0] === 'maven-failsafe-plugin');
   tests.configuration = [{excludes: [{exclude: exclude}]}]
   if (!fs.existsSync(itFolder)) {

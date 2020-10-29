@@ -72,6 +72,12 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-radio-button-testbench</artifactId>
+      <version>${vaadin.radio.button.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>flow-server-production-mode</artifactId>
       <version>${flow.version}</version>
     </dependency>

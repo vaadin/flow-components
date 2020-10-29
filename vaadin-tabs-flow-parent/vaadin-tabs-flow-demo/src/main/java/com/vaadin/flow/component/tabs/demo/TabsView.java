@@ -244,7 +244,7 @@ public class TabsView extends DemoView {
         // begin-source-example
         // source-example-heading: Tabs with custom content
         Image image1 = new Image(
-                "https://api.adorable.io/avatars/100/peter.png", "Peter");
+                "https://randomuser.me/api/portraits/men/76.jpg", "Peter");
         image1.setWidth("24px");
         image1.setHeight("24px");
         image1.getStyle().set("borderRadius", "50%");

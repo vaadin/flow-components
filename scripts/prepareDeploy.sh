@@ -64,38 +64,41 @@ flow=`getLatest flow $flow`
 echo "Setting version=$version to vaadin-flow-components"
 mvn -B -q versions:set -DnewVersion=$version || exit 1
 setPomVersion flow $flow
+setPomVersion vaadin-flow-components-shared $version || exit 1
 
 ## Compute modules to build and deploy
 modules=`grep '<module>' pom.xml | grep parent | cut -d '>' -f2 | cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
 
-for i in $modules
-do
-  modVersion=`getPlatformVersion $i`
-  setPomVersion $i $modVersion
-done
-
-[ "$versionBase" = 14.4 -o "$versionBase" = 17.0 ] && lastTag=`git tag | grep "^$versionBase" | head -1`
-if [ -n "$lastTag" ]
+if [ "$versionBase" = 14.4 -o "$versionBase" = 17.0 ]
 then
-  shift
-  ## allow setting modules to build from command line or via env var
-  [ -n "$modified" ] || modified=$*
-  ## otherwise utilise git history to figure out modified modules
-  [ -n "$modified" ] || modified=`git diff --name-only $lastTag  HEAD | grep '.java$' | cut -d "/" -f1 | grep parent | sort -u | perl -pe 's,-flow-parent,,g'`
-
-  [ -n "$modified" ] && modules="$modified"
-  echo "Increasing version of the modified modules since last release $lastTag"
-  for i in $modules
+for i in $modules
   do
     modVersion=`getPlatformVersion $i`
-    nextVersion=`getNextVersion $modVersion`
-    [ "$modVersion" = "$nextVersion" ] && echo Error Increasing version && exit 1
-    setPomVersion $i $nextVersion
+    setPomVersion $i $modVersion
   done
+  git pull origin $branch --tags --ff-only --quiet
+  lastTag=`git tag --merged $branch --sort=-committerdate | head -1`
+  if [ -n "$lastTag" ]
+  then
+    shift
+    ## allow setting modules to build from command line or via env var
+    [ -n "$modified" ] || modified=$*
+    ## otherwise utilise git history to figure out modified modules
+    [ -n "$modified" ] || modified=`git log $lastTag..HEAD --name-only | egrep '\-flow/|-testbench/|parent/pom.xml' | sed -e 's,-flow-parent.*,,g' | sort -u`
+    [ -n "$modified" ] && modules="$modified"
+    echo "Increasing version of the modified modules since last release $lastTag"
+    for i in $modules
+    do
+      modVersion=`getPlatformVersion $i`
+      nextVersion=`getNextVersion $modVersion`
+      [ "$modVersion" = "$nextVersion" ] && echo Error Increasing version && exit 1
+      setPomVersion $i $nextVersion
+    done
+  fi
 fi
 
 echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile=$profile"
-## '.' points to the root project, 'vaadin-flow-components-shared' has the dependencies for demo and tests 
+## '.' points to the root project, 'vaadin-flow-components-shared' has the dependencies for demo and tests
 build=.,vaadin-flow-components-shared
 for i in $modules
 do
@@ -107,3 +110,4 @@ echo "##teamcity[setParameter name='components.branch' value='$branch']"
 echo "##teamcity[setParameter name='maven.profile' value='$profile']"
 echo "##teamcity[setParameter name='flow.version' value='$flow']"
 echo "##teamcity[setParameter name='build.modules' value='$build']"
+echo "##teamcity[setParameter name='vaadin.flow.components.shared.version' value='$version']"
