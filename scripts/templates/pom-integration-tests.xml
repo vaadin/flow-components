@@ -13,11 +13,6 @@
 
   <name>component Integration Tests</name>
 
-  <properties>
-    <failOnMissingWebXml>false</failOnMissingWebXml>
-    <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-  </properties>
-
   <dependencies>
   </dependencies>
 
