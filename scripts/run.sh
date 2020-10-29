@@ -1,12 +1,8 @@
 #!/bin/sh
 #
-# This script displays a menu for selecting actions
+# This script displays a menu for selecting maven actions
 # to run in this project.
 #
-
-## echo is different for bash or regular sh
-e=`echo -e`
-[ "$e" = -e ] && echo='echo' || echo='echo -e'
 
 ## by default 4 forks are used (set in pom), but it can be changed
 [ -n "$1" ] && fork="-Dfailsafe.forkCount=$1"
@@ -14,19 +10,22 @@ e=`echo -e`
 ## List all modules and ask for one to the user
 askModule() {
   [ -z "$modules" ] && modules=`cat pom.xml | grep 'module>vaadin.*parent</module' | sed -e 's,.*<module>,,g' | sed -e 's,-flow-parent.*,,g' | sort | cat -n -`
-  $echo "\nList of Modules\n$modules\nType the number of component:  \c"
+  max=`echo "$modules" | wc -l`
+  printf "\nList of Modules\n$modules\nType the number of component:  "
   read module
-  case $module in
-   [1-9]*) module=`echo "$modules" | head -$module | tail -1 | awk '{print $2}'`;;
-   *) $echo "Incorrect option $module"
-  esac
+  if [ -n "$module" -a "$module" -ge 1 -a "$module" -le $max ]
+  then
+    module=`echo "$modules" | head -$module | tail -1 | awk '{print $2}'`
+  else
+   printf "Incorrect option $module it should be in the range 1 - %s\n" $max && exit 1
+  fi
 }
 ## Check whether there are sauce credentials, otherwise ask for them
 askSauce() {
   if [ -z "$SAUCE_USER" -a -z "$SAUCE_ACCESS_KEY" ]
   then
-     $echo "You need to set SAUCE_USER and SAUCE_ACCESS_KEY env vars"
-     $echo "Otherwise type your SauceLabs credentials SAUCE_USER:SAUCE_ACCESS_KEY " 
+     printf "You need to set SAUCE_USER and SAUCE_ACCESS_KEY env vars"
+     printf "Otherwise type your SauceLabs credentials SAUCE_USER:SAUCE_ACCESS_KEY "
      read sauce
      SAUCE_USER=`echo $sauce | cut -d ":" -f1`
      SAUCE_ACCESS_KEY=`echo $sauce | cut -d ":" -f2`
@@ -36,7 +35,7 @@ askSauce() {
 }
 ## Ask for a list of tests to run
 askITests() {
-  $echo "Specify classes to test (separated by comma), empty for all: [all]: \c"
+  printf "Specify classes to test (separated by comma), empty for all: [all]: "
   read itests
   [ -n "$itests" ] && itests="-Dit.test=$itests"
 }
@@ -44,7 +43,7 @@ askITests() {
 askUTests() {
   utests="-Dtest=none"
   [ -n "$itests" ] && return
-  $echo "Do you want to run also Unit Tests y/n [n]: \c"
+  printf "Do you want to run also Unit Tests y/n [n]: "
   read run
   [ "$run" = y ] && utests=""
 }
@@ -53,12 +52,12 @@ mergeITs() {
   [ ! -d node_modules ] && npm install
   pom=integration-tests/pom.xml
   modified=`[ -f $pom ] && find vaadin*parent/*integration-tests/src -mnewer $pom`
-  [ ! -f $pom -o -n "$modified" ] && node ./scripts/mergeITs.js
+  [ -f "$pom" -a -z "$modified" ] && node ./scripts/mergeITs.js
 }
 ## Ask whether to run dev-server before running ITs
 askDevSrv() {
   [ -z "$utests" ] && start=n || start=y
-  $echo "Start jetty (answer n if jetty is running in background) ? y/n [$start]: \c"
+  printf "Start jetty (answer n if jetty is running in background) ? y/n [$start]: "
   read run
   [ -z "$run" ] && run=$start
   [ "$run" = "n" ] && jetty="-DskipJetty"
@@ -68,25 +67,25 @@ runFrontend() {
   [ -n "$module" ] && folder=$module-flow-parent/$module-flow-integration-tests || folder=integration-tests
   bundle=$module/classes/META-INF/VAADIN/build/vaadin-bundle*js
   modified=`[ -f $bundle ] && find $module/src -mnewer $bundle`
-  [ ! -f "$module" -o -n "$modified" ] && frontend="-DskipFrontend"
+  [ -f "$bundle" -a -z "$modified" ] && frontend="-DskipFrontend"
 }
 
 ## Ask for run options
 clear
-$echo "List of Options"
+printf "List of Options\n"
 cat -n <<EOF
   one compile  - Compile one component (including tests)                     - mvn clean test-comple -pl component...
   one demo     - Run DevServer on the DEMO of one component                  - mvn jetty:run -pl component ...
   one test  IT - Verify Integration-Tests of one component                   - mvn verify -pl component -Dit.Test=...
   one jetty IT - Start Jetty Server on one component IT module               - mvn jetty:run -pl component ...
   one sauce IT - Verify Integration-Tests of one component in SauceLabs      - mvn verify -pl component -Dsauce.user ...
-  all compile  - Compile all components (including tests)                    - mvn clean test-compile ... 
+  all compile  - Compile all components (including tests)                    - mvn clean test-compile ...
   all install  - Install modules in local maven (demos, addons & testbenchs) - mvn install ...
   all test  IT - Verify merged IT's of all component (takes a while)         - mvn verify -pl integration-tests -Dit.Test=...
   all jetty IT - Start Jetty Server on merged IT's module                    - mvn jetty:run -pl integration-tests ...
   all sauce IT - Run Integration-Tests of all component in SauceLabs         - mvn verify -pl integration-tests -Dsauce.user ...
 EOF
-$echo "Your option:  \c"
+printf "Your option:  "
 read option
 ## compose the mvn cli command based on the selected option
 case $option in
@@ -103,10 +102,10 @@ case $option in
 esac
 
 ## execute mvn command and check error status
-$echo "\nRunning:\n$cmd\n"
-[ -n "$browser" ] && $echo "Wait until server starts, then open the URL: http://localhost:8080/$module\n"
+printf "\nRunning:\n$cmd\n\n"
+[ -n "$browser" ] && printf "Wait until server starts, then open the URL: http://localhost:8080/$module\n\n"
 start=`date +%s`
 $cmd
-$echo "\n$cmd\nexited with status: $?, after "$(expr `date +%s` - $start)" secs.\n"
+printf "\n$cmd\nexited with status: $?, after "$(expr `date +%s` - $start)" secs.\n\n"
 
 
