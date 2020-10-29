@@ -30,12 +30,37 @@ final class ItemFetchHelper implements Serializable {
     private ItemFetchHelper() {
     }
 
+    /**
+     * Gets the items available in the ComboBox's service-side by requesting the
+     * data provider directly, and not using the data communicator's cache.
+     * 
+     * @param dataCommunicator
+     *            data communicator of the ComboBox
+     * @param <T>
+     *            item type
+     * @return stream of items available for the ComboBox
+     */
     @SuppressWarnings("unchecked")
     static <T> Stream<T> getItems(DataCommunicator<T> dataCommunicator) {
         return dataCommunicator.getDataProvider()
                 .fetch(getQuery(dataCommunicator));
     }
 
+    /**
+     * Gets the item at the given index from the data available in the
+     * ComboBox's server-side by requesting the data provider directly, and not
+     * using the data communicator's cache.
+     * 
+     * @param dataCommunicator
+     *            data communicator of the ComboBox
+     * @param index
+     *            item index number
+     * @param <T>
+     *            item type
+     * @return item on index
+     * @throws IndexOutOfBoundsException
+     *             requested index is outside of the data set
+     */
     @SuppressWarnings("unchecked")
     static <T> T getItem(DataCommunicator<T> dataCommunicator, int index) {
         if (index < 0) {
@@ -48,8 +73,8 @@ final class ItemFetchHelper implements Serializable {
                         .format("Requested index %d on empty data.", index));
             } else if (index >= itemCount) {
                 throw new IndexOutOfBoundsException(String.format(
-                        "Given index %d is outside of the accepted range '0 - %d'",
-                        index, itemCount - 1));
+                        "Given index %d should be less than the item count '%d'",
+                        index, itemCount));
             }
         }
         return (T) dataCommunicator.getDataProvider()
@@ -57,11 +82,37 @@ final class ItemFetchHelper implements Serializable {
                 .orElse(null);
     }
 
+    /**
+     * Creates a query to be used by data provider for fetching a whole range of
+     * items taking into account the filtering and sorting of a given data
+     * communicator.
+     * 
+     * @param dataCommunicator
+     *            data communicator of the ComboBox
+     * @param <T>
+     *            item type
+     * @return query object
+     */
     @SuppressWarnings("rawtypes")
     static <T> Query getQuery(DataCommunicator<T> dataCommunicator) {
         return getQuery(dataCommunicator, 0, Integer.MAX_VALUE);
     }
 
+    /**
+     * Creates a query to be used by data provider for fetching a given range of
+     * items taking into account the filtering and sorting of a given data
+     * communicator.
+     * 
+     * @param dataCommunicator
+     *            data communicator of the ComboBox
+     * @param offset
+     *            offset for data request
+     * @param limit
+     *            number of items to fetch
+     * @param <T>
+     *            item type
+     * @return query object
+     */
     @SuppressWarnings("rawtypes")
     static <T> Query getQuery(DataCommunicator<T> dataCommunicator, int offset,
             int limit) {

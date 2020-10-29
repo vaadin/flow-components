@@ -385,7 +385,7 @@ public class ComboBoxLazyDataViewTest {
     public void getItem_definedItemCountAndOutsideOfRange_throws() {
         expectedException.expect(IndexOutOfBoundsException.class);
         expectedException.expectMessage(
-                "Given index 3 is outside of the accepted range '0 - 2'");
+                "Given index 3 should be less than the item count '3'");
         dataView.getItem(3);
     }
 
@@ -402,7 +402,7 @@ public class ComboBoxLazyDataViewTest {
     public void getItem_withCountCallbackAndOutsideOfRange_throw() {
         expectedException.expect(IndexOutOfBoundsException.class);
         expectedException.expectMessage(
-                "Given index 1234567 is outside of the accepted range '0 - 999'");
+                "Given index 1234567 should be less than the item count '1000'");
         dataCommunicator.setDataProvider(undefinedItemCountDataProvider, "",
                 true);
         dataView.setItemCountCallback(query -> 1000);

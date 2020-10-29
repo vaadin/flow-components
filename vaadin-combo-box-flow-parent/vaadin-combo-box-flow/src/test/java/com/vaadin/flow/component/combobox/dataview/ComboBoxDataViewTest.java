@@ -326,7 +326,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
     public void getItem_outsideOfRange_throws() {
         expectedException.expect(IndexOutOfBoundsException.class);
         expectedException.expectMessage(
-                "Given index 3 is outside of the accepted range '0 - 2'");
+                "Given index 3 should be less than the item count '3'");
         dataView.getItem(3);
     }
 
