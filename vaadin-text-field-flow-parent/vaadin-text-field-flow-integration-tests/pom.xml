@@ -169,75 +169,15 @@
     <profile>
       <id>saucelabs</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>sauce.user</name>
+        </property>
       </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.saucelabs</groupId>
-          <artifactId>ci-sauce</artifactId>
-          <version>${ci-sauce.version}</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-      <properties>
-        <com.vaadin.tests.SharedBrowser.reuseBrowser>false</com.vaadin.tests.SharedBrowser.reuseBrowser>
-        <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
-      </properties>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>2.20</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <systemPropertyVariables>
-                <sauce.user>${sauce.user}</sauce.user>
-                <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
-                <sauce.options>${sauce.options}</sauce.options>
-              </systemPropertyVariables>
-              <trimStackTrace>false</trimStackTrace>
-            </configuration>
-          </plugin>
-          <plugin>
             <groupId>com.saucelabs.maven.plugin</groupId>
             <artifactId>sauce-connect-plugin</artifactId>
-            <version>2.1.25</version>
-            <configuration>
-              <sauceUsername>${sauce.user}</sauceUsername>
-              <sauceAccessKey>${sauce.sauceAccessKey}</sauceAccessKey>
-              <options>${sauce.options}</options>
-            </configuration>
-            <dependencies>
-              <dependency>
-                <groupId>com.saucelabs</groupId>
-                <artifactId>ci-sauce</artifactId>
-                <version>${ci-sauce.version}</version>
-              </dependency>
-            </dependencies>
-            <executions>
-              <execution>
-                <id>start-sauceconnect</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>start-sauceconnect</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>stop-sauceconnect</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>stop-sauceconnect</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>
@@ -249,6 +189,9 @@
           <name>!test.use.hub</name>
         </property>
       </activation>
+      <properties>
+        <useLocalWebDriver>true</useLocalWebDriver>
+      </properties>
       <build>
         <plugins>
           <plugin>
