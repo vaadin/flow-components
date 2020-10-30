@@ -171,7 +171,7 @@ run_tests(){
         then
           failed=`echo "$failed" | tr '\n' ','`
           mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-          cmd="mvn verify -B -q -DtestMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
+          cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
           tcLog "Re-Running $nfailed failed tests ..."
           echo $cmd
           $cmd
