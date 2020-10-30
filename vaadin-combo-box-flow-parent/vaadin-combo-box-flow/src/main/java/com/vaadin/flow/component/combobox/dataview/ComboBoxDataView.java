@@ -73,10 +73,7 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      */
     @Override
     public T getItem(int index) {
-        // TODO: change the implementation to make the returned item not depend
-        //  on client-side filter applied
-        //  https://github.com/vaadin/vaadin-flow-components/issues/282
-        return dataCommunicator.getItem(index);
+        return ItemFetchHelper.getItem(dataCommunicator, index);
     }
 
     @Override
@@ -95,8 +92,7 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      */
     @Override
     public Stream<T> getItems() {
-        return dataCommunicator.getDataProvider()
-                .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
+        return ItemFetchHelper.getItems(dataCommunicator);
     }
 
     @Override
