@@ -31,7 +31,7 @@ askSauce() {
      SAUCE_ACCESS_KEY=`echo $sauce | cut -d ":" -f2`
   fi
   # used internally in TB classes
-  TESTBENCH_GRID_BROWSERS=edge,safari-13,firefox
+  export TESTBENCH_GRID_BROWSERS=${TESTBENCH_GRID_BROWSERS:-edge,safari-13,firefox}
 }
 ## Ask for a list of tests to run
 askITests() {
@@ -93,16 +93,16 @@ case $option in
    2) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-demo -Pwar"; browser=true;;
    3) askModule; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -q -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $fork";;
    4) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
-   5) askSauce; askModule; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $fork -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   5) askSauce; askModule; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $fork -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
    6) cmd="mvn clean test-compile -DskipFrontend -B -q -T 1C";;
    7) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
    8) mergeITs; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -q -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $fork";;
    9) mergeITs; cmd="mvn jetty:run -am -B -q -DskipTests -Drun-it -pl integration-tests"; browser=true;;
-   10) askSauce; mergeITs; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -Drun-it $utests $itests $frontend $jetty $fork -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   10) askSauce; mergeITs; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -Drun-it $utests $itests $frontend $jetty $fork -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
 esac
 
 ## execute mvn command and check error status
-printf "\nRunning:\n$cmd\n\n"
+printf "\nRunning: $TESTBENCH_GRID_BROWSERS\n$cmd\n\n"
 [ -n "$browser" ] && printf "Wait until server starts, then open the URL: http://localhost:8080/$module\n\n"
 start=`date +%s`
 $cmd
