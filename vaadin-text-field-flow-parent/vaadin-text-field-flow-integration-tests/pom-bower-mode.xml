@@ -72,10 +72,6 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>flow-server-production-mode</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-flow-demo</artifactId>
       <version>${vaadin.text.field.version}</version>
     </dependency>

@@ -37,10 +37,6 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>flow-server-production-mode</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
       <artifactId>flow-component-demo-helpers</artifactId>
     </dependency>
     <dependency>
