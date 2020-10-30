@@ -4,7 +4,15 @@ This is a maven multi-module project including all vaadin flow components.
 
 `master` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
 
-## Compiling all the components and their modules including ITs
+## Quick start
+
+It's provided a script that facilitates running most common tasks for running or testing components.
+
+Execute `./scripts/run.sh` and select the appropriate menu options.
+
+NOTE: a valid unix terminal with a regular shell is needed for running the utility.
+
+## Compiling all modules but excluding ITs
 
 - `mvn clean compile -DskipTests -T C2`
 
