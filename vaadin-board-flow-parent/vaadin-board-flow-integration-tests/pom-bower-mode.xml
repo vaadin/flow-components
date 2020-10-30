@@ -121,13 +121,6 @@
           <plugin>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-maven-plugin</artifactId>
-            <configuration>
-              <webAppConfig>
-                <resourceBases>
-                  <resourceBase>${project.build.directory}/${project.build.finalName}/</resourceBase>
-                </resourceBases>
-              </webAppConfig>
-            </configuration>
           </plugin>
         </plugins>
       </build>

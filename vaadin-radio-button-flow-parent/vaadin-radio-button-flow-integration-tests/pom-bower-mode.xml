@@ -76,7 +76,6 @@
       <version>${vaadin.radio.button.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
@@ -148,7 +147,6 @@
           <plugin>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-maven-plugin</artifactId>
-
           </plugin>
         </plugins>
       </build>
