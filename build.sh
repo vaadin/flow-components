@@ -158,7 +158,7 @@ run_tests(){
       $cmd
       error=$?
 
-      [ ! -d integration-tests/target/failsafe-reports ] && exit 1
+      [ ! -d integration-tests/target/failsafe-reports ] && return 1
       saveFailedTests run-1 $testMode
 
       if [ "$nfailed" -gt 0 ]
@@ -180,9 +180,9 @@ run_tests(){
           tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
         fi
       fi
-      exit $error
+      return $error
     fi
 }
 
-run_tests npm-it
-run_tests bower-it
+(run_tests npm-it) || exit $?
+(run_tests bower-it) || exit $?
