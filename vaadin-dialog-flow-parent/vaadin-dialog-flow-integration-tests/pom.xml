@@ -169,9 +169,7 @@
     <profile>
       <id>saucelabs</id>
       <activation>
-        <property>
-          <name>sauce.user</name>
-        </property>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <build>
         <plugins>
@@ -201,10 +199,6 @@
           <plugin>
             <groupId>com.lazerycode.selenium</groupId>
             <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
           </plugin>
         </plugins>
       </build>
