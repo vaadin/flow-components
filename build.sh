@@ -11,7 +11,7 @@ then
       parallel=*)
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
       *)
-        modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
+        modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
         elements="$elements $i"
        ;;
      esac
@@ -37,6 +37,7 @@ tcStatus() {
 
 saveFailedTests() {
   try=$1
+  testFolder=$2
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
   ### collect tests numbers for TC status
@@ -44,11 +45,11 @@ saveFailedTests() {
   nskipped=`grep -Poh 'Skipped:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'` 
   if [ "$nfailed" -ge 1 ]
   then
-    mkdir -p integration-tests/error-screenshots/$try
-    mv integration-tests/error-screenshots/*.png integration-tests/error-screenshots/$try
+    mkdir -p integration-tests/error-screenshots/$testFolder/$try
+    mv integration-tests/error-screenshots/*.png integration-tests/error-screenshots/$testFolder/$try
     for i in $failed
     do
-      cp integration-tests/target/failsafe-reports/$i.txt integration-tests/error-screenshots/$try
+      cp integration-tests/target/failsafe-reports/$i.txt integration-tests/error-screenshots/$testFolder/$try
     done
   fi
 }
@@ -131,43 +132,57 @@ reuse_browser() {
     [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
 }
 
-if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
-then
-  ### Run IT's in original modules
-  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-  tcLog "Running module ITs - mvn clean verify -pl ..."
-  echo $cmd
-  $cmd
-else
-  mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
-  ### Run IT's in merged module
-  cmd="mvn verify -B -q -Dbower-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/pom-bower-mode.xml $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-  tcLog "Running merged ITs - mvn verify -B -Dbower-it -Drelease -pl integration-tests/pom-bower-mode.xml ..."
-  echo $cmd
-  $cmd
-  error=$?
+run_tests(){
+    testMode=$1
+	if [ "$testMode" = "bower-it" ]
+	then
+	  pomFile="pom-bower-mode.xml"
+	elif [ "$testMode" = "npm-it" ]
+	then
+	  pomFile="pom.xml"
+	fi
+	
+	if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
+    then
+      ### Run IT's in original modules
+      cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+      tcLog "Running module ITs - mvn clean verify -pl ..."
+      echo $cmd
+      $cmd
+    else
+      mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
+      ### Run IT's in merged module
+      cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+      tcLog "Running merged ITs - mvn verify -B -D$testMode -Drelease -pl integration-tests/$pomFile ..."
+      echo $cmd
+      $cmd
+      error=$?
 
-  [ ! -d integration-tests/target/failsafe-reports ] && exit 1
-  saveFailedTests run-1
+      [ ! -d integration-tests/target/failsafe-reports ] && exit 1
+      saveFailedTests run-1 $testMode
 
-  if [ "$nfailed" -gt 0 ]
-  then
-      tcLog "There were $nfailed Failed Tests: "
-      echo "$failed"
-      rerunFailed=$nfailed
-
-      if [ "$nfailed" -le 15 ]
+      if [ "$nfailed" -gt 0 ]
       then
-        failed=`echo "$failed" | tr '\n' ','`
-        mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -q -Dbower-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/pom-bower-mode.xml -Dit.test=$failed $(reuse_browser false)"
-        tcLog "Re-Running $nfailed failed tests ..."
-        echo $cmd
-        $cmd
-        error=$?
-        saveFailedTests run-2
-        tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
+        tcLog "There were $nfailed Failed Tests: "
+        echo "$failed"
+        rerunFailed=$nfailed
+
+        if [ "$nfailed" -le 15 ]
+        then
+          failed=`echo "$failed" | tr '\n' ','`
+          mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
+          cmd="mvn verify -B -q -DtestMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
+          tcLog "Re-Running $nfailed failed tests ..."
+          echo $cmd
+          $cmd
+          error=$?
+          saveFailedTests run-2 $testMode
+          tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
+        fi
       fi
-  fi
-  exit $error
-fi
+      exit $error
+    fi
+}
+
+run_tests npm-it
+run_tests bower-it
