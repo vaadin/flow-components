@@ -1,0 +1,18 @@
+<!-- Dependency resources -->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<!-- Defines the example-template element -->
+<dom-module id="detach-reattach">
+    <template>
+        <vaadin-radio-group id="testGroup"></vaadin-radio-group>
+    </template>
+
+    <script>
+        class DetachReattach extends Polymer.Element {
+            static get is() {
+                return 'detach-reattach'
+            }
+        }
+        customElements.define(DetachReattach.is, DetachReattach);
+    </script>
+</dom-module>

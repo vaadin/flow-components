@@ -153,7 +153,7 @@ run_tests(){
       mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
       ### Run IT's in merged module
       cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-      tcLog "Running merged ITs - mvn verify -B -D$testMode -Drelease -pl integration-tests/$pomFile ..."
+      tcLog "Running merged ITs under $testMode - mvn verify -B -D$testMode -Drelease -pl integration-tests/$pomFile ..."
       echo $cmd
       $cmd
       error=$?
@@ -172,12 +172,12 @@ run_tests(){
           failed=`echo "$failed" | tr '\n' ','`
           mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
           cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
-          tcLog "Re-Running $nfailed failed tests ..."
+          tcLog "Re-Running $nfailed failed tests($testMode) ..."
           echo $cmd
           $cmd
           error=$?
           saveFailedTests run-2 $testMode
-          tcStatus $error "Test failed: $nfailed" "(IT)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
+          tcStatus $error "Test failed: $nfailed" "($testMode)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
         fi
       fi
       return $error
