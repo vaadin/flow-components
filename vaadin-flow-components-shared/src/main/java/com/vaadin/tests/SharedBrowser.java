@@ -1,10 +1,17 @@
 package com.vaadin.tests;
 
-import com.vaadin.testbench.Parameters;
-import com.vaadin.testbench.ScreenshotOnFailureRule;
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchDriverProxy;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.remote.Command;
@@ -17,29 +24,18 @@ import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.remote.http.W3CHttpCommandCodec;
 import org.openqa.selenium.remote.http.W3CHttpResponseCodec;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.vaadin.testbench.Parameters;
+import com.vaadin.testbench.ScreenshotOnFailureRule;
+import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.TestBenchDriverProxy;
 
 public class SharedBrowser {
-    private static final String reuseBrowserProperty =
-        SharedBrowser.class.getName() + ".reuseBrowser";
-    private static final boolean browserReuseAllowed;
+    private static final boolean browserReuseAllowed = Boolean
+            .getBoolean(SharedBrowser.class.getName() + ".reuseBrowser");
+    private static final boolean browserHeadless = !Boolean
+            .getBoolean("disableHeadless");
     private static Logger logger = Logger
-        .getLogger(SharedBrowser.class.getName());
-
-    static {
-        final String propertyValue = System.getProperty(reuseBrowserProperty);
-        browserReuseAllowed =
-            propertyValue == null || propertyValue.isEmpty() || Boolean
-                .parseBoolean(propertyValue);
-    }
+            .getLogger(SharedBrowser.class.getName());
 
     URL url;
     SessionId sessionId;
@@ -54,7 +50,7 @@ public class SharedBrowser {
         if (driver == null) {
             synchronized (this) {
                 if (driver == null) {
-                    useDriver(driverSupplier.get());
+                    useDriver(driverSupplier.getDriver());
                     return driver;
                 }
             }
@@ -75,17 +71,29 @@ public class SharedBrowser {
         url = null;
     }
 
-    Optional<WebDriver> setup(ISetup realSetup, Supplier<WebDriver> getDriver,
-        ScreenshotOnFailureRule screenshotOnFailure) throws Exception {
+    void setup(ISetup realSetup, DriverConsumer setDriver,
+            DriverSupplier getDriver,
+            ScreenshotOnFailureRule screenshotOnFailure) throws Exception {
         if (!browserReuseAllowed || Parameters.getTestsInParallel() != 1) {
             realSetup.setup();
-            return Optional.empty();
+        } else {
+            screenshotOnFailure.setQuitDriverOnFinish(false);
+            WebDriver driver = getDriver(() -> {
+                if (Parameters.isLocalWebDriverUsed()) {
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    if (browserHeadless) {
+                        chromeOptions.addArguments("--headless",
+                                "--disable-gpu");
+                    }
+                    return (TestBench
+                            .createDriver(new ChromeDriver(chromeOptions)));
+                } else {
+                    realSetup.setup();
+                    return getDriver.getDriver();
+                }
+            });
+            setDriver.setDriver(driver);
         }
-        screenshotOnFailure.setQuitDriverOnFinish(false);
-        return Optional.of(getDriver(() -> {
-            realSetup.setup();
-            return getDriver.get();
-        }));
     }
 
     private TestBenchDriverProxy createDriverFromSession(
@@ -157,12 +165,18 @@ public class SharedBrowser {
         return Optional.of(result);
     }
 
+    @FunctionalInterface
     interface ISetup {
         void setup() throws Exception;
     }
 
     @FunctionalInterface
     interface DriverSupplier {
-        WebDriver get() throws Exception;
+        WebDriver getDriver() throws Exception;
+    }
+    
+    @FunctionalInterface
+    interface DriverConsumer {
+        void setDriver(WebDriver driver) throws Exception;
     }
 }
