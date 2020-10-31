@@ -11,8 +11,7 @@ public abstract class ComponentDemoTest extends com.vaadin.flow.demo.ComponentDe
 
     @Override
     public void setup() throws Exception {
-        browser.setup(super::setup, this::getDriver, screenshotOnFailure)
-            .ifPresent(this::setDriver);
+        browser.setup(super::setup, this::setDriver, this::getDriver, screenshotOnFailure);
     }
 
     @Override
