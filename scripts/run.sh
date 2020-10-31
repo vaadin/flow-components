@@ -5,7 +5,9 @@
 #
 
 ## by default 4 forks are used (set in pom), but it can be changed
-[ -n "$1" ] && fork="-Dfailsafe.forkCount=$1"
+[ -n "$FORKS" ] && args="-Dfailsafe.forkCount=$FORKS";
+## bu default local tests are runn in headless, but can be disabled
+[ "$HEADLESS" = false ] && args="$args -DdisableHeadless"
 
 ## List all modules and ask for one to the user
 askModule() {
@@ -43,31 +45,29 @@ askITests() {
 askUTests() {
   utests="-Dtest=none"
   [ -n "$itests" ] && return
-  printf "Do you want to run also Unit Tests y/n [n]: "
+  printf "Do you want to run also Unit Tests y/n [y]: "
   read run
-  [ "$run" = y ] && utests=""
+  [ "$run" != n ] && utests=""
 }
 ## Run the mergeITs script if it was not run or there are modifications in modules
 mergeITs() {
   [ ! -d node_modules ] && npm install
   pom=integration-tests/pom.xml
   modified=`[ -f $pom ] && find vaadin*parent/*integration-tests/src -mnewer $pom`
-  [ -f "$pom" -a -z "$modified" ] || node ./scripts/mergeITs.js
+  [ -f $pom -a -z "$modified" ] || node ./scripts/mergeITs.js
 }
 ## Ask whether to run dev-server before running ITs
-askDevSrv() {
-  [ -z "$utests" ] && start=n || start=y
-  printf "Start jetty (answer n if jetty is running in background) ? y/n [$start]: "
+askJetty() {
+  printf "Start jetty (answer n if jetty is running in background) ? y/n [y]: "
   read run
-  [ -z "$run" ] && run=$start
   [ "$run" = "n" ] && jetty="-DskipJetty"
 }
 ## Decide whether to run frontend compilation
 runFrontend() {
   [ -n "$module" ] && folder=$module-flow-parent/$module-flow-integration-tests || folder=integration-tests
-  bundle=$module/classes/META-INF/VAADIN/build/vaadin-bundle*js
-  modified=`[ -f $bundle ] && find $module/src -mnewer $bundle`
-  [ -f "$bundle" -a -z "$modified" ] && frontend="-DskipFrontend"
+  bundle=$folder/target/classes/META-INF/VAADIN/build/vaadin-bundle*js
+  modified=`[ -f $bundle ] && find $folder/src -mnewer $bundle`
+  [ -f $bundle -a -z "$modified" ] && frontend="-DskipFrontend"
 }
 
 ## Ask for run options
@@ -91,14 +91,14 @@ read option
 case $option in
    1) askModule; cmd="mvn clean test-compile -amd -B -q -DskipFrontend -pl $module-flow-parent";;
    2) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-demo -Pwar"; browser=true;;
-   3) askModule; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -q -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $fork";;
+   3) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -q -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
    4) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
-   5) askSauce; askModule; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $fork -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   5) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
    6) cmd="mvn clean test-compile -DskipFrontend -B -q -T 1C";;
    7) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
-   8) mergeITs; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -q -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $fork";;
+   8) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -q -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $args";;
    9) mergeITs; cmd="mvn jetty:run -am -B -q -DskipTests -Drun-it -pl integration-tests"; browser=true;;
-   10) askSauce; mergeITs; askITests; askUTests; askDevSrv; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -Drun-it $utests $itests $frontend $jetty $fork -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   10) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -Drun-it $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
 esac
 
 ## execute mvn command and check error status
