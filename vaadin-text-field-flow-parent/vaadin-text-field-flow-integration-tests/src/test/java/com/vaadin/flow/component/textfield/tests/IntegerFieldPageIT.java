@@ -196,19 +196,16 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
     @Test
     @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void integerOverflow_noException_valueSetToNull() {
-
         // max int
-        field.sendKeys("2147483647" + Keys.ENTER);
+        field.setValue("2147483647");
         assertValueChange(1, null, "2147483647");
 
         // increase by one to overflow
         field.sendKeys(Keys.BACK_SPACE + "8" + Keys.ENTER);
         assertValueChange(2, "2147483647", null);
 
-        field.setValue("");
-
         // min int
-        field.sendKeys("-2147483648" + Keys.ENTER);
+        field.setValue("-2147483648");
         assertValueChange(3, null, "-2147483648");
 
         // decrease by one to overflow
