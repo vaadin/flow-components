@@ -39,13 +39,6 @@ public class FormLayoutIT extends ComponentDemoTest {
     }
 
     @Test
-    @Ignore
-    /*
-     * The test works locally but fails on TC. Disabling it for now.
-     *
-     * The issue is that the fields do not behave the same (responsive) way when
-     * you resize the browser window
-     */
     public void custom_responsive_layouting() {
         WebElement firstLayout = layout
                 .findElement(By.tagName("vaadin-form-layout"));
