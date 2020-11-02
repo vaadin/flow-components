@@ -345,10 +345,18 @@ function generateReleaseNotes(commits) {
   console.log(`
 ## Vaadin ${product} V${version}
 This is a release of the Java integration for [Vaadin Components](https://github.com/vaadin/vaadin) to be used from the Java server side with [Vaadin Flow](https://vaadin.com/flow).
-### Changes in ${product} from [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
   `)
 
   const includedCommits = commits.filter(c => c.isIncluded);
+  if (includedCommits.length) {
+    console.log(`
+### Changes in ${product} from [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
+    `)
+  } else {
+    console.log(`
+### There are no Changes in ${product} since [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
+    `)
+  }
   if (compact) {
     logCommitsByType(includedCommits);
   } else {
