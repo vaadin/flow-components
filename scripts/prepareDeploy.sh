@@ -85,7 +85,7 @@ then
     [ -n "$modified" ] || modified=$*
     ## otherwise utilise git history to figure out modified modules
     [ -n "$modified" ] || modified=`git log $lastTag..HEAD --name-only | egrep '\-flow/|-testbench/|parent/pom.xml' | sed -e 's,-flow-parent.*,,g' | sort -u`
-    [ -n "$modified" ] && modules="$modified"
+    modules="$modified"
     echo "Increasing version of the modified modules since last release $lastTag"
     for i in $modules
     do
