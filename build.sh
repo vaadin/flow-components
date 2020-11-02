@@ -10,6 +10,8 @@ then
         FORK_COUNT=`echo $i | cut -d = -f2`;;
       parallel=*)
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
+	  testMode=*)
+	    TEST_MODE=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
         elements="$elements $i"
@@ -66,6 +68,8 @@ computeFastBuild() {
 
 [ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -z "$FORK_COUNT" ] && FORK_COUNT="5"
+### By default, run test under npm-it
+[ -z "$TEST_MODE" ] && TEST_MODE="npm-it"
 
 tcLog "Show info (forks=$FORK_COUNT parallel=$TESTS_IN_PARALLEL)"
 echo $SHELL
@@ -132,57 +136,52 @@ reuse_browser() {
     [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
 }
 
-run_tests(){
-    testMode=$1
-	if [ "$testMode" = "bower-it" ]
-	then
-	  pomFile="pom-bower-mode.xml"
-	elif [ "$testMode" = "npm-it" ]
-	then
-	  pomFile="pom.xml"
-	fi
+testMode=$TEST_MODE
+if [ "$testMode" = "bower-it" ]
+then
+  pomFile="pom-bower-mode.xml"
+elif [ "$testMode" = "npm-it" ]
+then
+  pomFile="pom.xml"
+fi
 	
-	if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
+if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
+then
+  ### Run IT's in original modules
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  tcLog "Running module ITs - mvn clean verify -pl ..."
+  echo $cmd
+  $cmd
+else
+  mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
+  ### Run IT's in merged module
+  cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  tcLog "Running merged ITs under $testMode - mvn verify -B -D$testMode -Drelease -pl integration-tests/$pomFile ..."
+  echo $cmd
+  $cmd
+  error=$?
+
+  [ ! -d integration-tests/target/failsafe-reports ] && return 1
+  saveFailedTests run-1 $testMode
+
+  if [ "$nfailed" -gt 0 ]
+  then
+    tcLog "There were $nfailed Failed Tests: "
+    echo "$failed"
+    rerunFailed=$nfailed
+
+    if [ "$nfailed" -le 15 ]
     then
-      ### Run IT's in original modules
-      cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-      tcLog "Running module ITs - mvn clean verify -pl ..."
-      echo $cmd
-      $cmd
-    else
-      mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
-      ### Run IT's in merged module
-      cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-      tcLog "Running merged ITs under $testMode - mvn verify -B -D$testMode -Drelease -pl integration-tests/$pomFile ..."
+      failed=`echo "$failed" | tr '\n' ','`
+      mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
+      cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
+      tcLog "Re-Running $nfailed failed tests($testMode) ..."
       echo $cmd
       $cmd
       error=$?
-
-      [ ! -d integration-tests/target/failsafe-reports ] && return 1
-      saveFailedTests run-1 $testMode
-
-      if [ "$nfailed" -gt 0 ]
-      then
-        tcLog "There were $nfailed Failed Tests: "
-        echo "$failed"
-        rerunFailed=$nfailed
-
-        if [ "$nfailed" -le 15 ]
-        then
-          failed=`echo "$failed" | tr '\n' ','`
-          mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-          cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
-          tcLog "Re-Running $nfailed failed tests($testMode) ..."
-          echo $cmd
-          $cmd
-          error=$?
-          saveFailedTests run-2 $testMode
-          tcStatus $error "Test failed: $nfailed" "($testMode)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
-        fi
-      fi
-      return $error
+      saveFailedTests run-2 $testMode
+      tcStatus $error "Test failed: $nfailed" "($testMode)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
     fi
-}
-
-(run_tests npm-it) || exit $?
-(run_tests bower-it) || exit $?
+  fi
+  exit $error
+fi
