@@ -21,17 +21,19 @@
     <jetty.version>9.4.15.v20190215</jetty.version>
     <jetty.http.port>8080</jetty.http.port>
     <jetty.stop.port>9999</jetty.stop.port>
-    <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
+    <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
     <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <driver.binary.downloader.maven.plugin.version>1.0.18
         </driver.binary.downloader.maven.plugin.version>
-    <testbench.testsInParalel>2</testbench.testsInParalel>
-    <testbench.runLocaly>CHROME</testbench.runLocaly>
-    <failsafe.forkCount>2</failsafe.forkCount>
+    <failsafe.forkCount>4</failsafe.forkCount>
+    <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
+    <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
+    <failIfNoTests>false</failIfNoTests>
     <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
     <powermock.version>1.7.1</powermock.version>
     <jackson.version>2.9.10.4</jackson.version>
+    <sauce-connect.version>2.1.25</sauce-connect.version>
     <ci-sauce.version>1.149</ci-sauce.version>
     <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
     <osgi.bundle.import.package>*</osgi.bundle.import.package>
@@ -349,8 +351,12 @@
                 <goal>deploy-war</goal>
               </goals>
               <configuration>
-                <daemon>true</daemon>
-                <scanIntervalSeconds>0</scanIntervalSeconds>
+                <systemProperties>
+                  <systemProperty>
+                    <name>vaadin.productionMode</name>
+                    <value>true</value>
+                  </systemProperty>
+                </systemProperties>
               </configuration>
             </execution>
             <execution>
@@ -377,11 +383,50 @@
           <configuration>
             <forkCount>${failsafe.forkCount}</forkCount>
             <reuseForks>true</reuseForks>
+            <trimStackTrace>false</trimStackTrace>
             <systemPropertyVariables>
+              <useLocalWebDriver>${useLocalWebDriver}</useLocalWebDriver>
               <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
-              <com.vaadin.testbench.Parameters.testsInParallel>${testbench.testsInParalel}</com.vaadin.testbench.Parameters.testsInParallel>
+              <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
+              <com.vaadin.testbench.Parameters.testsInParallel>${com.vaadin.testbench.Parameters.testsInParallel}</com.vaadin.testbench.Parameters.testsInParallel>
+              <sauce.user>${sauce.user}</sauce.user>
+              <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
+              <sauce.options>${sauce.options}</sauce.options>
             </systemPropertyVariables>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.saucelabs.maven.plugin</groupId>
+          <artifactId>sauce-connect-plugin</artifactId>
+          <version>${sauce-connect.version}</version>
+          <configuration>
+            <sauceUsername>${sauce.user}</sauceUsername>
+            <sauceAccessKey>${sauce.sauceAccessKey}</sauceAccessKey>
+            <options>${sauce.options}</options>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>com.saucelabs</groupId>
+              <artifactId>ci-sauce</artifactId>
+              <version>${ci-sauce.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>start-sauceconnect</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>start-sauceconnect</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>stop-sauceconnect</id>
+              <phase>post-integration-test</phase>
+              <goals>
+                <goal>stop-sauceconnect</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
