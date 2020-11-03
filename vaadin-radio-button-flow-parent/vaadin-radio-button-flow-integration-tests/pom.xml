@@ -68,7 +68,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-radio-button-testbench</artifactId>
-      <version>${vaadin.radio.button.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
