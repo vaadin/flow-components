@@ -103,7 +103,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
-      <version>${project.version}</version>
+      <version>${vaadin.button.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
