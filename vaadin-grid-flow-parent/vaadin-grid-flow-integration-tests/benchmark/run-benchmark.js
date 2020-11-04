@@ -26,10 +26,11 @@ const gridPath = path.resolve(GRID_DIR);
 const refGridPath = path.resolve(REF_GRID_DIR);
 
 const gridTestPath = path.resolve(gridPath, TEST_DIR);
-const refGridTestPath = path.resolve(refGridPath, TEST_DIR);
+const refGridTestPath = path.resolve(refGridPath, 'vaadin-grid-flow-parent',TEST_DIR);
 
 const resultsPath = path.resolve('./results');
 
+const JETTY_PORT = 8080;
 const REF_JETTY_PORT = 8088;
 // The branch whose latest revision is used as the reference Grid
 const REF_GIT_BRANCH = 'benchmark';
@@ -77,9 +78,9 @@ browsers.forEach((browserName) => {
   });
 });
 
-const startJetty = (cwd) => {
+const startJetty = (cwd,port,stopPort) => {
   return new Promise((resolve) => {
-    const jetty = spawn('mvn', ['-B', '-q', 'jetty:run'], { cwd });
+    const jetty = spawn('mvn', ['-B', '-q', 'jetty:run', `-Djetty.http.port=${port}`, `-Djetty.stop.port=${stopPort}`], { cwd });
     processes.push(jetty);
     jetty.stderr.on('data', (data) => console.error(data.toString()));
     jetty.stdout.on('data', (data) => {
@@ -92,34 +93,18 @@ const startJetty = (cwd) => {
 
 const prepareReferenceGrid = () => {
   execSync(
-    `git clone --depth=1 --single-branch --branch ${REF_GIT_BRANCH} https://github.com/vaadin/vaadin-grid-flow.git ${refGridPath}`
+    `git clone --depth=1 --single-branch --branch ${REF_GIT_BRANCH} https://github.com/vaadin/vaadin-flow-components.git ${refGridPath}`
   );
 
-  // Add Jetty config to start the server on a different port
   const pomFile = path.resolve(refGridTestPath, 'pom.xml');
   const pomFileContent = fs.readFileSync(pomFile, 'utf8');
-
-  const result = pomFileContent.replace(
-    /<artifactId>jetty-maven-plugin<\/artifactId>/g,
-    `
-    <artifactId>jetty-maven-plugin</artifactId>
-      <configuration>
-        <httpConnector>
-          <port>${REF_JETTY_PORT}</port>
-        </httpConnector>
-        <stopPort>${REF_JETTY_PORT + 1}</stopPort>
-      </configuration>
-    `
-  );
-
-  fs.writeFileSync(pomFile, result, 'utf8');
 
   execSync(`mvn versions:set -B -q -DnewVersion=${REF_GIT_BRANCH}-BENCHMARK`, {
     cwd: refGridPath,
   });
 
   console.log('Installing the reference grid');
-  execSync(`mvn -B -q install -DskipTests`, { cwd: refGridPath });
+  execSync(`mvn -B -q install -pl vaadin-grid-flow-parent/vaadin-grid-flow-integration-tests -am -DskipTests`, { cwd: refGridPath });
 };
 
 const getTestResultValue = (testResultsFilePath) => {
@@ -155,10 +140,10 @@ const runTachometerTest = ({ gridVariantName, metricName, browserName }) => {
   args.push('--json-file', testResultsFilePath);
   args.push('--browser', browserParamValue);
   let clientHostname = process.env['CLIENT_HOSTNAME'] || 'localhost';
-  const ports = [9998, REF_JETTY_PORT];
+  const ports = [JETTY_PORT, REF_JETTY_PORT];
   ports.forEach((port) => {
     args.push(
-      `http://${clientHostname}:${port}/benchmark?variant=${gridVariantName}&metric=${metricName}`
+      `http://${clientHostname}:${port}/vaadin-grid/benchmark?variant=${gridVariantName}&metric=${metricName}`
     );
   });
 
@@ -224,10 +209,10 @@ const run = async () => {
   prepareReferenceGrid();
 
   console.log('Starting the Jetty server: Grid');
-  await startJetty(gridTestPath);
+  await startJetty(gridTestPath,JETTY_PORT,JETTY_PORT+1);
 
   console.log('Starting the Jetty server: reference Grid');
-  await startJetty(refGridTestPath);
+  await startJetty(refGridTestPath,REF_JETTY_PORT,REF_JETTY_PORT+1);
 
   if (
     !fs.existsSync(path.resolve(gridTestPath, 'node_modules', '.bin', 'tach'))
