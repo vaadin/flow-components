@@ -25,7 +25,9 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -38,6 +40,9 @@ import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
+import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
+import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -54,6 +59,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -96,6 +102,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
+
+    private Registration dataChangeListenerRegistration;
+
     private boolean resetPending = true;
 
     private boolean emptySelectionAllowed;
@@ -125,6 +134,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         getElement().appendChild(listBox.getElement());
 
         registerValidation();
+
+        addDataChangeListener();
     }
 
     /**
@@ -449,6 +460,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        removeFilteringAndSorting();
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -743,6 +755,16 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+        addDataChangeListener();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataChangeListenerRegistration != null) {
+            dataChangeListenerRegistration.remove();
+            dataChangeListenerRegistration = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     /**
@@ -840,6 +862,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
                 .map(child -> (VaadinItem<T>) child);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
         listBox.removeAll();
@@ -852,9 +875,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createItem)
+            getDataProvider().fetch(getQuery()).map(item -> createItem((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -992,5 +1015,39 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Query getQuery() {
+        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
+                getComponentInMemoryFilter());
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializablePredicate<T> getComponentInMemoryFilter() {
+        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
+                ComponentInMemoryFilter.class);
+        return componentFilter != null ? componentFilter.getFilter() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializableComparator<T> getComponentSorting() {
+        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
+                ComponentSorting.class);
+        return componentSorting != null ? componentSorting.getSortComparator()
+                : null;
+    }
+
+    private void removeFilteringAndSorting() {
+        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
+        ComponentUtil.setData(this, ComponentSorting.class, null);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void addDataChangeListener() {
+        if (dataChangeListenerRegistration == null) {
+            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
+                    (ComponentEventListener) event -> reset());
+        }
     }
 }

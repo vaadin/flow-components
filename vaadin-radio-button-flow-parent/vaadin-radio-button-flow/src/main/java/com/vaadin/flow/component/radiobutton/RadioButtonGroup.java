@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
@@ -34,6 +35,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
+import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
+import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -50,6 +54,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -88,6 +93,8 @@ public class RadioButtonGroup<T>
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
+    private Registration dataChangeListenerRegistration;
+
     private int lastNotifiedDataSize = -1;
 
     private volatile int lastFetchedDataSize = -1;
@@ -115,6 +122,7 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation, true);
 
         registerValidation();
+        addDataChangeListener();
     }
 
     @Override
@@ -211,6 +219,7 @@ public class RadioButtonGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        removeFilteringAndSorting();
         reset();
 
         setupDataProviderListener(dataProvider);
@@ -244,6 +253,7 @@ public class RadioButtonGroup<T>
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
+        addDataChangeListener();
     }
 
     @Override
@@ -251,6 +261,10 @@ public class RadioButtonGroup<T>
         if (dataProviderListenerRegistration != null) {
         	dataProviderListenerRegistration.remove();
         	dataProviderListenerRegistration = null;
+        }
+        if (dataChangeListenerRegistration != null) {
+            dataChangeListenerRegistration.remove();
+            dataChangeListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -406,6 +420,7 @@ public class RadioButtonGroup<T>
         super.setInvalid(invalid);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
@@ -418,9 +433,9 @@ public class RadioButtonGroup<T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
+            getDataProvider().fetch(getQuery()).map(item -> createRadioButton((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -579,5 +594,39 @@ public class RadioButtonGroup<T>
 
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Query getQuery() {
+        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
+                getComponentInMemoryFilter());
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializablePredicate<T> getComponentInMemoryFilter() {
+        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
+                ComponentInMemoryFilter.class);
+        return componentFilter != null ? componentFilter.getFilter() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializableComparator<T> getComponentSorting() {
+        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
+                ComponentSorting.class);
+        return componentSorting != null ? componentSorting.getSortComparator()
+                : null;
+    }
+
+    private void removeFilteringAndSorting() {
+        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
+        ComponentUtil.setData(this, ComponentSorting.class, null);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void addDataChangeListener() {
+        if (dataChangeListenerRegistration == null) {
+            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
+                    (ComponentEventListener) event -> reset());
+        }
     }
 }

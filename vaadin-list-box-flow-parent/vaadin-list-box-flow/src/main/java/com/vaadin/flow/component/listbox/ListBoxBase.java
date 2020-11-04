@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
@@ -38,6 +39,9 @@ import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
+import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
+import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -52,6 +56,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -76,6 +81,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>();
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
     private Registration dataProviderListenerRegistration;
+    private Registration dataChangeListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
     private volatile int lastFetchedDataSize = -1;
@@ -87,6 +93,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                     SerializableBiFunction<C, VALUE, P> modelToPresentation) {
         super(propertyName, defaultValue, elementPropertyType,
                 presentationToModel, modelToPresentation);
+        addDataChangeListener();
     }
 
     /**
@@ -99,6 +106,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Deprecated
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set( Objects.requireNonNull(dataProvider) );
+        removeFilteringAndSorting();
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -122,6 +130,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
+        addDataChangeListener();
     }
 
     @Override
@@ -129,6 +138,10 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
             dataProviderListenerRegistration = null;
+        }
+        if (dataChangeListenerRegistration != null) {
+            dataChangeListenerRegistration.remove();
+            dataChangeListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -210,13 +223,14 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                         + "https://github.com/vaadin/vaadin-list-box/issues/19");
     }
 
+    @SuppressWarnings("unchecked")
     private void rebuild() {
         clear();
         removeAll();
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            items = getDataProvider().fetch(new Query<>())
+            items = (List<ITEM>) getDataProvider().fetch(getQuery())
                     .collect(Collectors.toList());
             items.stream().map(this::createItemComponent)
                     .forEach(component -> {
@@ -424,5 +438,39 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             return dataProvider::getId;
 
         return IdentifierProvider.identity();
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Query getQuery() {
+        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
+                getComponentInMemoryFilter());
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializablePredicate<ITEM> getComponentInMemoryFilter() {
+        ComponentInMemoryFilter<ITEM> componentFilter = ComponentUtil.getData(this,
+                ComponentInMemoryFilter.class);
+        return componentFilter != null ? componentFilter.getFilter() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializableComparator<ITEM> getComponentSorting() {
+        ComponentSorting<ITEM> componentSorting = ComponentUtil.getData(this,
+                ComponentSorting.class);
+        return componentSorting != null ? componentSorting.getSortComparator()
+                : null;
+    }
+
+    private void removeFilteringAndSorting() {
+        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
+        ComponentUtil.setData(this, ComponentSorting.class, null);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void addDataChangeListener() {
+        if (dataChangeListenerRegistration == null) {
+            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
+                    (ComponentEventListener) event -> rebuild());
+        }
     }
 }

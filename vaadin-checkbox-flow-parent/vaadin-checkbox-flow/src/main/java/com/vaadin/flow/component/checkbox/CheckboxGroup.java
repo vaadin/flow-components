@@ -27,8 +27,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -37,6 +40,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
+import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
+import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -53,6 +59,7 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -98,11 +105,14 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private Registration dataChangeListenerRegistration;
+
     public CheckboxGroup() {
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
         registerValidation();
+        addDataChangeListener();
     }
 
     @Override
@@ -209,6 +219,7 @@ public class CheckboxGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        removeFilteringAndSorting();
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -421,6 +432,21 @@ public class CheckboxGroup<T>
     }
 
     @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        addDataChangeListener();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (dataChangeListenerRegistration != null) {
+            dataChangeListenerRegistration.remove();
+            dataChangeListenerRegistration = null;
+        }
+        super.onDetach(detachEvent);
+    }
+
+    @Override
     protected boolean valueEquals(Set<T> value1, Set<T> value2) {
         assert value1 != null && value2 != null;
         if (value1.size() != value2.size()) {
@@ -448,6 +474,7 @@ public class CheckboxGroup<T>
         return selectedItems.stream().allMatch(itemEnabledProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
@@ -461,9 +488,11 @@ public class CheckboxGroup<T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
+
+            getDataProvider().fetch(getQuery())
+                    .map(item -> createCheckBox((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -612,5 +641,39 @@ public class CheckboxGroup<T>
 
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Query getQuery() {
+        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
+                getComponentInMemoryFilter());
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializablePredicate<T> getComponentInMemoryFilter() {
+        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
+                ComponentInMemoryFilter.class);
+        return componentFilter != null ? componentFilter.getFilter() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SerializableComparator<T> getComponentSorting() {
+        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
+                ComponentSorting.class);
+        return componentSorting != null ? componentSorting.getSortComparator()
+                : null;
+    }
+
+    private void removeFilteringAndSorting() {
+        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
+        ComponentUtil.setData(this, ComponentSorting.class, null);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void addDataChangeListener() {
+        if (dataChangeListenerRegistration == null) {
+            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
+                    (ComponentEventListener) event -> reset());
+        }
     }
 }

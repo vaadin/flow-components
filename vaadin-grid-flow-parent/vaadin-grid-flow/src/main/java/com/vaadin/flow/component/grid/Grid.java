@@ -77,6 +77,9 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
+import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
+import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -111,6 +114,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -1164,6 +1168,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
 
+    private SerializableConsumer<?> filterSlot;
+
     private Class<T> beanType;
     private PropertySet<T> propertySet;
 
@@ -1192,6 +1198,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
+
+    private Registration dataChangeListenerRegistration;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -1365,6 +1373,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
+        addDataChangeListener();
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -2341,7 +2350,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @deprecated use instead one of the {@code setItems} methods which provide
      *             access to either {@link GridListDataView} or
      *             {@link GridLazyDataView}
@@ -2352,7 +2361,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         handleDataProviderChange(dataProvider);
 
         deselectAll();
-        getDataCommunicator().setDataProvider(dataProvider, null);
+        filterSlot = getDataCommunicator().setDataProvider(dataProvider, null);
 
         /*
          * The visibility of the selectAll checkbox depends on whether the
@@ -2473,7 +2482,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * </ul>
      * If the items are not fetched lazily an exception is thrown. When the
      * items are in-memory, use {@link #getListDataView()} instead.
-     * 
+     *
      * @return the lazy data view that provides access to the data bound to the
      *         grid
      */
@@ -2869,7 +2878,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
-     * 
+     *
      * @param internalId
      *            the internal identifier of the column to get
      * @return the column corresponding to the given column identifier, or
@@ -3185,6 +3194,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (getDataProvider() != null && dataProviderChangeRegistration == null) {
             handleDataProviderChange(getDataProvider());
         }
+        addDataChangeListener();
     }
 
     @Override
@@ -3192,6 +3202,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (dataProviderChangeRegistration != null) {
             dataProviderChangeRegistration.remove();
             dataProviderChangeRegistration = null;
+        }
+        if (dataChangeListenerRegistration != null) {
+            dataChangeListenerRegistration.remove();
+            dataChangeListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -3210,9 +3224,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         sortOrder.clear();
         if (order.isEmpty()) {
-            // Grid is not sorted anymore.
+            // Grid is not sorted anymore with client-side sorting.
             getDataCommunicator().setBackEndSorting(Collections.emptyList());
-            getDataCommunicator().setInMemorySorting(null);
+            getDataCommunicator().setInMemorySorting(getComponentSorting().orElse(null));
             fireEvent(new SortEvent<>(this, new ArrayList<>(sortOrder),
                     userOriginated));
             return;
@@ -3263,7 +3277,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void sort(boolean userOriginated) {
         // Set sort orders
         // In-memory comparator
-        getDataCommunicator().setInMemorySorting(createSortingComparator());
+        updateSorting();
 
         // Back-end sort properties
         List<QuerySortOrder> sortProperties = new ArrayList<>();
@@ -4081,7 +4095,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Set the behavior when facing nested <code>null</code> values. By default the value
      * is <code>NestedNullBehavior.THROW</code>.
-     * 
+     *
      * @param nestedNullBehavior the behavior when facing nested <code>null</code> values.
      */
     public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
@@ -4090,10 +4104,88 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Get the behavior when facing nested <code>null</code> values.
-     * 
+     *
      * @return The current behavior when facing nested <code>null</code> values.
      */
     public NestedNullBehavior getNestedNullBehavior() {
     	return nestedNullBehavior;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<SerializablePredicate<T>> getComponentInMemoryFilter() {
+        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
+                ComponentInMemoryFilter.class);
+        return componentFilter != null
+                ? Optional.ofNullable(componentFilter.getFilter())
+                : Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<SerializableComparator<T>> getComponentSorting() {
+        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
+                ComponentSorting.class);
+        return componentSorting != null
+                ? Optional.ofNullable(componentSorting.getSortComparator())
+                : Optional.empty();
+    }
+
+    private void addDataChangeListener() {
+        if (dataChangeListenerRegistration == null) {
+            dataChangeListenerRegistration = addListener(
+                    ComponentDataChangeEvent.class,
+                    (ComponentEventListener) event -> {
+                        updateSorting();
+                        updateFiltering();
+
+                        dataCommunicator.reset();
+                        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                                ctx -> getElement()
+                                        .callJsFunction("$connector.reset")));
+                    });
+        }
+    }
+
+    private void updateFiltering() {
+        Optional<SerializablePredicate<T>> componentInMemoryFilter = getComponentInMemoryFilter();
+
+        // As long as the Grid currently contains only an
+        // in-memory filter stored and only list data view
+        // has a filter setup API, we can safely cast the
+        // filter slot type into in-memory filter (predicate).
+        @SuppressWarnings("unchecked")
+        SerializableConsumer<SerializablePredicate<T>> inMemoryFilter = (SerializableConsumer<SerializablePredicate<T>>) filterSlot;
+        inMemoryFilter
+                .accept(componentInMemoryFilter.orElse(null));
+    }
+
+    private void updateSorting() {
+        final SerializableComparator<T> currentClientSorting = createSortingComparator();
+        final Optional<SerializableComparator<T>> componentSorting = getComponentSorting();
+        if (componentSorting.isPresent()) {
+            if (currentClientSorting != null) {
+                getDataCommunicator().setInMemorySorting(
+                        combineSortings(currentClientSorting,
+                                componentSorting.get()));
+            } else {
+                getDataCommunicator().setInMemorySorting(
+                        componentSorting.get());
+            }
+        } else {
+            getDataCommunicator().setInMemorySorting(currentClientSorting);
+        }
+    }
+
+    private SerializableComparator<T> combineSortings(
+            SerializableComparator<T> originalSorting,
+            SerializableComparator<T> addedSorting) {
+        Objects.requireNonNull(originalSorting);
+        Objects.requireNonNull(addedSorting);
+        return (c1, c2) -> {
+            int result = originalSorting.compare(c1, c2);
+            if (result == 0) {
+                result = addedSorting.compare(c1, c2);
+            }
+            return result;
+        };
     }
 }

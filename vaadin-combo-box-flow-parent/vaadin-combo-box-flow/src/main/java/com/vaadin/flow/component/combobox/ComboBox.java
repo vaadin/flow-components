@@ -22,11 +22,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -41,6 +43,9 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
+import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
+import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -60,6 +65,7 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableBiPredicate;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -249,6 +255,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
 
+    private Registration dataChangeListenerRegistration;
+
     private Element template;
 
     private int customValueListenersCount;
@@ -287,6 +295,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setPageSize(pageSize);
 
         addAttachListener(e -> initConnector());
+        addDataChangeListener();
 
         setItems(new DataCommunicator.EmptyDataProvider<>());
     }
@@ -593,11 +602,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             @Override
             protected SerializablePredicate<T> getFilter(
                     Query<T, String> query) {
-                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = getComponentInMemoryFilter();
+                        return Optional
+                                .ofNullable(inMemoryDataProvider.getFilter())
                         .orElse(item -> true)
                         .and(item -> filterConverter
                                 .apply(query.getFilter().orElse(""))
-                                .test(item));
+                                        .test(item))
+                                .and(componentInMemoryFilter
+                                        .orElse(item -> true));
             }
         };
 
@@ -923,6 +936,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataProvider != null && dataProviderListener == null) {
             setupDataProviderListener(dataProvider);
         }
+        addDataChangeListener();
     }
 
     @Override
@@ -930,6 +944,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataProviderListener != null) {
             dataProviderListener.remove();
             dataProviderListener = null;
+        }
+        if (dataChangeListenerRegistration != null) {
+            dataChangeListenerRegistration.remove();
+            dataChangeListenerRegistration = null;
         }
         removeLazyOpenRegistration();
         super.onDetach(detachEvent);
@@ -1043,7 +1061,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 "List data provider cannot be null");
 
         setDataProvider(listDataProvider,
-                filterText -> item -> itemFilter.test(item, filterText));
+                filterText -> {
+                    final Optional<SerializablePredicate<T>> componentInMemoryFilter = getComponentInMemoryFilter();
+                    return item -> itemFilter.test(item, filterText)
+                            && componentInMemoryFilter.orElse(ignore -> true)
+                                    .test(item);
+                });
     }
 
     /**
@@ -1565,6 +1588,41 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (lazyOpenRegistration != null) {
             lazyOpenRegistration.remove();
             lazyOpenRegistration = null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<SerializablePredicate<T>> getComponentInMemoryFilter() {
+        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
+                ComponentInMemoryFilter.class);
+        return componentFilter != null
+                ? Optional.ofNullable(componentFilter.getFilter())
+                : Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<SerializableComparator<T>> getComponentSorting() {
+        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
+                ComponentSorting.class);
+        return componentSorting != null
+                ? Optional.ofNullable(componentSorting.getSortComparator())
+                : Optional.empty();
+    }
+
+    private void addDataChangeListener() {
+        if (dataChangeListenerRegistration == null) {
+            dataChangeListenerRegistration = ComponentUtil.addListener(this,
+                    ComponentDataChangeEvent.class,
+                    (ComponentEventListener) event -> {
+                        SerializableComparator<T> componentSorting = getComponentSorting()
+                                .orElse(null);
+                        dataCommunicator.setInMemorySorting(componentSorting);
+                        // Erase the current filter to ensure the execution of
+                        // filter consumer
+                        lastFilter = null;
+                        filterSlot.accept("");
+                        reset();
+                    });
         }
     }
 
