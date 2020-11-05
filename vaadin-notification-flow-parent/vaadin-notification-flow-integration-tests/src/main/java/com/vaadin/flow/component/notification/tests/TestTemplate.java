@@ -29,7 +29,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
  * Simple template example.
  */
 @Tag("vaadin-notification-flow-test-template")
-@HtmlImport("src/test-template.html")
+@HtmlImport("src/vaadin-notification-flow-test-template.html")
 @JsModule("vaadin-notification-flow-test-template.js")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 
