@@ -33,7 +33,7 @@ const resultsPath = path.resolve('./results');
 const JETTY_PORT = 8080;
 const REF_JETTY_PORT = 8088;
 // The branch whose latest revision is used as the reference Grid
-const REF_GIT_BRANCH = 'benchmark';
+const REF_GIT_BRANCH = 'grid-benchmark';
 
 const processes = [];
 const cleanup = () => processes.forEach((ps) => ps.kill());
