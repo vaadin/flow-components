@@ -54,7 +54,7 @@ async function computeVersion() {
 }
 
 // Creates the pom.xml for the integration-tests module
-async function createPom() {
+async function createPom(pomFile, pomTemplateFile, artifactID) {
 
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
@@ -64,7 +64,7 @@ async function createPom() {
     addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
     addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
     // Read original IT dependencies in master and add them
-    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'))
+    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/`+pomFile, 'utf8'))
     js.project.dependencies[0].dependency.forEach(dep => {
       addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0]);
     });
@@ -82,10 +82,10 @@ async function createPom() {
     }
   ]));
 
-  const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/pom-integration-tests.xml`, 'utf8'));
+  const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/`+pomTemplateFile, 'utf8'));
   tplJs.project.dependencies = [{dependency}];
 
-  tplJs.project.artifactId = ['vaadin-flow-components-integration-tests'];
+  tplJs.project.artifactId = [artifactID];
   tplJs.project.parent[0].artifactId = ['vaadin-flow-components'];
   tplJs.project.parent[0].version = [version];
   delete tplJs.project.version;
@@ -96,7 +96,7 @@ async function createPom() {
     fs.mkdirSync(itFolder)
   }
   const xml = new xml2js.Builder().buildObject(tplJs);
-  const pom = `${itFolder}/pom.xml`;
+  const pom = `${itFolder}/`+pomFile;
   console.log(`writing ${pom}`);
   fs.writeFileSync(pom, xml + '\n', 'utf8');
 }
@@ -204,7 +204,9 @@ async function main() {
   await computeModules();
   await copySources();
   await createFrontendIndex();
-  await createPom();
+  await createPom('pom.xml', 'pom-integration-tests.xml', 'vaadin-flow-components-integration-tests');
+  //V14.X needs to validate the bower Mode
+  await createPom('pom-bower-mode.xml', 'pom-bower-mode.xml','vaadin-flow-components-integration-tests-bower-mode');
 }
 
 main();

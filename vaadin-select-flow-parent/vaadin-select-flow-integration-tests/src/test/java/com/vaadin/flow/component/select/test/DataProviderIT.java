@@ -5,6 +5,7 @@ import java.util.List;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @TestPath("vaadin-select/")
@@ -118,6 +119,7 @@ public class DataProviderIT extends AbstractSelectIT {
     }
 
     @Test
+    @Ignore("Unstable test when migrated to mono-repo, bower mode")
     public void testDataProvider_testRefreshSelectedItem_itemIsUpdatedCorrectly() {
         SelectElement.ItemElement itemElement = selectElement.getItems().get(2);
         Assert.assertEquals("invalid key", 3 + "", itemElement.getPropertyString("value"));

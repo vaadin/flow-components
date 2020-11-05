@@ -122,15 +122,84 @@
   </modules>
   <profiles>
     <profile>
-      <id>default</id>
+      <id>npm-it</id>
       <activation>
         <property>
-          <name>run-it</name>
+          <name>npm-it</name>
         </property>
       </activation>
       <modules>
         <module>integration-tests</module>
       </modules>
+
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>com.vaadin</groupId>
+              <artifactId>flow-maven-plugin</artifactId>
+              <version>${flow.version}</version>
+              <configuration>
+                <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
+              </configuration>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>prepare-frontend</goal>
+                    <goal>build-frontend</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+    <profile>
+      <id>bower-it</id>
+      <activation>
+        <property>
+          <name>bower-it</name>
+        </property>
+      </activation>
+      <modules>
+        <module>integration-tests/pom-bower-mode.xml</module>
+      </modules>
+      <dependencies>
+        <dependency>
+          <groupId>com.vaadin</groupId>
+          <artifactId>flow-server-production-mode</artifactId>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-maven-plugin</artifactId>
+            <version>${flow.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>copy-production-files</goal>
+                  <goal>package-for-production</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-maven-plugin</artifactId>
+            <version>${jetty.version}</version>
+            <configuration>
+              <webAppConfig>
+                <resourceBases>
+                  <resourceBase>${project.build.directory}/${project.build.finalName}/</resourceBase>
+                </resourceBases>
+              </webAppConfig>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
   <repositories>
@@ -462,22 +531,6 @@
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>com.vaadin</groupId>
-          <artifactId>flow-maven-plugin</artifactId>
-          <version>${flow.version}</version>
-          <configuration>
-            <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>prepare-frontend</goal>
-                <goal>build-frontend</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
