@@ -2,18 +2,17 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
 <!-- Defines the example-template element -->
-<dom-module id="test-template">
+<dom-module id="detach-reattach">
     <template>
-        <div id="container"></div>
-        <button id="btn">Click me!</button>
+        <vaadin-radio-group id="testGroup"></vaadin-radio-group>
     </template>
 
     <script>
-        class TestTemplate extends Polymer.Element {
+        class DetachReattach extends Polymer.Element {
             static get is() {
-                return 'test-template'
+                return 'detach-reattach'
             }
         }
-        customElements.define(TestTemplate.is, TestTemplate);
+        customElements.define(DetachReattach.is, DetachReattach);
     </script>
 </dom-module>

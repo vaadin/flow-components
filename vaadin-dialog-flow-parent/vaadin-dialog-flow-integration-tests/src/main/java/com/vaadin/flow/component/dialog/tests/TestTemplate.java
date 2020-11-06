@@ -30,7 +30,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
  */
 @Tag("vaadin-dialog-flow-test-template")
 @JsModule("./src/vaadin-dialog-flow-test-template.js")
-@HtmlImport("frontend://src/test-template.html")
+@HtmlImport("frontend://src/vaadin-dialog-flow-test-template.html")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id("container")
