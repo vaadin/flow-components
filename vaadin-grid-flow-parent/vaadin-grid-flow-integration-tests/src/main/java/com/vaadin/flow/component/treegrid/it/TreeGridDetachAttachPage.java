@@ -19,9 +19,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/treegrid-detach-attach")
+@PreserveOnRefresh
 public class TreeGridDetachAttachPage extends Div {
 
     private TreeGrid<HierarchicalTestBean> grid;
