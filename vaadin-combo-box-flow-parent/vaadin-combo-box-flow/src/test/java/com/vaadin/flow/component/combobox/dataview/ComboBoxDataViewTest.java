@@ -136,7 +136,8 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         // In-memory combo box data view
         dataCommunicator.setDataProvider(DataProvider.ofCollection(items),
                 null);
-        dataView = new ComboBoxListDataView<>(dataCommunicator, comboBox);
+        dataView = new ComboBoxListDataView<>(dataCommunicator, comboBox,
+                (filter, sorting) -> {});
         // We need to repopulate the keyMapper after setting a new data provider
         items.forEach(keyMapper::key);
 

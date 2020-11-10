@@ -25,9 +25,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -40,9 +38,6 @@ import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.data.binder.HasItemComponents;
-import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
-import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
-import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -59,9 +54,11 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -103,8 +100,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
-    private Registration dataChangeListenerRegistration;
-
     private boolean resetPending = true;
 
     private boolean emptySelectionAllowed;
@@ -134,8 +129,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         getElement().appendChild(listBox.getElement());
 
         registerValidation();
-
-        addDataChangeListener();
     }
 
     /**
@@ -539,7 +532,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Override
     public SelectListDataView<T> getListDataView() {
         return new SelectListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged);
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     @Override
@@ -755,16 +748,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        addDataChangeListener();
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        if (dataChangeListenerRegistration != null) {
-            dataChangeListenerRegistration.remove();
-            dataChangeListenerRegistration = null;
-        }
-        super.onDetach(detachEvent);
     }
 
     /**
@@ -1019,35 +1002,77 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     @SuppressWarnings("rawtypes")
     private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
-                getComponentInMemoryFilter());
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializablePredicate<T> getComponentInMemoryFilter() {
-        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
-                ComponentInMemoryFilter.class);
-        return componentFilter != null ? componentFilter.getFilter() : null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializableComparator<T> getComponentSorting() {
-        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
-                ComponentSorting.class);
-        return componentSorting != null ? componentSorting.getSortComparator()
-                : null;
+        return new Query<>(0, Integer.MAX_VALUE, null,
+                InnerSelectListDataView.getComponentSortComparator(this)
+                        .orElse(null),
+                InnerSelectListDataView.getComponentFilter(this).orElse(null));
     }
 
     private void removeFilteringAndSorting() {
-        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
-        ComponentUtil.setData(this, ComponentSorting.class, null);
+        InnerSelectListDataView.removeComponentFilter(this);
+        InnerSelectListDataView.removeComponentSortComparator(this);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void addDataChangeListener() {
-        if (dataChangeListenerRegistration == null) {
-            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
-                    (ComponentEventListener) event -> reset());
+    private static final class InnerSelectListDataView
+            extends SelectListDataView {
+
+        private InnerSelectListDataView(
+                SerializableSupplier dataProviderSupplier, Select select,
+                SerializableBiConsumer dataChangedCallback) {
+            super(dataProviderSupplier, select, dataChangedCallback);
+        }
+
+        /**
+         * Gets the in-memory filter of a given Select instance.
+         *
+         * @param select
+         *            Select instance the filter is bound to
+         * @param <T>
+         *            item type
+         * @return optional Select's in-memory filter.
+         */
+        static <T> Optional<SerializablePredicate<T>> getComponentFilter(
+                Select<T> select) {
+            return SelectListDataView.getComponentFilter(select);
+        }
+
+        /**
+         * Gets the in-memory sort comparator of a given Select instance.
+         *
+         * @param select
+         *            Select instance the sort comparator is bound to
+         * @param <T>
+         *            item type
+         * @return optional Select's in-memory sort comparator.
+         */
+        static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
+                Select<T> select) {
+            return SelectListDataView.getComponentSortComparator(select);
+        }
+
+        /**
+         * Removes the in-memory filter from a given Select instance.
+         *
+         * @param select
+         *            Select instance the filter is removed from
+         * @param <T>
+         *            items type
+         */
+        static <T> void removeComponentFilter(Select<T> select) {
+            SelectListDataView.setComponentFilter(select, null);
+        }
+
+        /**
+         * Removes the in-memory sort comparator from a given Select instance.
+         *
+         * @param select
+         *            Select instance the sort comparator is removed from
+         * @param <T>
+         *            items type
+         */
+        static <T> void removeComponentSortComparator(Select<T> select) {
+            SelectListDataView.setComponentSortComparator(select, null);
         }
     }
 }

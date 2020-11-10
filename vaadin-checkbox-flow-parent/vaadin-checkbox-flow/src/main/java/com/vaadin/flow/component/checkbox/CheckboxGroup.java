@@ -27,11 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -40,9 +37,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
-import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
-import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
-import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -59,9 +53,11 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -105,14 +101,11 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
-    private Registration dataChangeListenerRegistration;
-
     public CheckboxGroup() {
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
         registerValidation();
-        addDataChangeListener();
     }
 
     @Override
@@ -164,7 +157,7 @@ public class CheckboxGroup<T>
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
         return new CheckboxGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged);
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     /**
@@ -432,21 +425,6 @@ public class CheckboxGroup<T>
     }
 
     @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        addDataChangeListener();
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        if (dataChangeListenerRegistration != null) {
-            dataChangeListenerRegistration.remove();
-            dataChangeListenerRegistration = null;
-        }
-        super.onDetach(detachEvent);
-    }
-
-    @Override
     protected boolean valueEquals(Set<T> value1, Set<T> value2) {
         assert value1 != null && value2 != null;
         if (value1.size() != value2.size()) {
@@ -645,35 +623,84 @@ public class CheckboxGroup<T>
 
     @SuppressWarnings("rawtypes")
     private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
-                getComponentInMemoryFilter());
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializablePredicate<T> getComponentInMemoryFilter() {
-        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
-                ComponentInMemoryFilter.class);
-        return componentFilter != null ? componentFilter.getFilter() : null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializableComparator<T> getComponentSorting() {
-        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
-                ComponentSorting.class);
-        return componentSorting != null ? componentSorting.getSortComparator()
-                : null;
+        return new Query<>(0, Integer.MAX_VALUE, null,
+                InnerCheckboxGroupListDataView.getComponentSortComparator(this)
+                        .orElse(null),
+                InnerCheckboxGroupListDataView.getComponentFilter(this)
+                        .orElse(null));
     }
 
     private void removeFilteringAndSorting() {
-        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
-        ComponentUtil.setData(this, ComponentSorting.class, null);
+        InnerCheckboxGroupListDataView.removeComponentFilter(this);
+        InnerCheckboxGroupListDataView.removeComponentSortComparator(this);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void addDataChangeListener() {
-        if (dataChangeListenerRegistration == null) {
-            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
-                    (ComponentEventListener) event -> reset());
+    private static final class InnerCheckboxGroupListDataView
+            extends CheckboxGroupListDataView {
+
+        private InnerCheckboxGroupListDataView(
+                SerializableSupplier dataProviderSupplier,
+                CheckboxGroup checkboxGroup,
+                SerializableBiConsumer dataChangedCallback) {
+            super(dataProviderSupplier, checkboxGroup, dataChangedCallback);
+        }
+
+        /**
+         * Gets the in-memory filter of a given CheckboxGroup instance.
+         *
+         * @param checkboxGroup
+         *            CheckboxGroup instance the filter is bound to
+         * @param <T>
+         *            item type
+         * @return optional CheckboxGroup's in-memory filter.
+         */
+        static <T> Optional<SerializablePredicate<T>> getComponentFilter(
+                CheckboxGroup<T> checkboxGroup) {
+            return CheckboxGroupListDataView.getComponentFilter(checkboxGroup);
+        }
+
+        /**
+         * Gets the in-memory sort comparator of a given CheckboxGroup instance.
+         *
+         * @param checkboxGroup
+         *            CheckboxGroup instance the sort comparator is bound to
+         * @param <T>
+         *            item type
+         * @return optional CheckboxGroup's in-memory sort comparator.
+         */
+        static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
+                CheckboxGroup<T> checkboxGroup) {
+            return CheckboxGroupListDataView
+                    .getComponentSortComparator(checkboxGroup);
+        }
+
+        /**
+         * Removes the in-memory filter from a given CheckboxGroup instance.
+         *
+         * @param checkboxGroup
+         *            CheckboxGroup instance the filter is removed from
+         * @param <T>
+         *            items type
+         */
+        static <T> void removeComponentFilter(CheckboxGroup<T> checkboxGroup) {
+            CheckboxGroupListDataView.setComponentFilter(checkboxGroup, null);
+        }
+
+        /**
+         * Removes the in-memory sort comparator from a given CheckboxGroup
+         * instance.
+         *
+         * @param checkboxGroup
+         *            CheckboxGroup instance the sort comparator is removed from
+         * @param <T>
+         *            items type
+         */
+        static <T> void removeComponentSortComparator(
+                CheckboxGroup<T> checkboxGroup) {
+            CheckboxGroupListDataView.setComponentSortComparator(checkboxGroup,
+                    null);
         }
     }
+
 }

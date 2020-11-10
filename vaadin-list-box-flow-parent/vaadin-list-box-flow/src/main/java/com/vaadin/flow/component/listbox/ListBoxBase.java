@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
@@ -39,9 +38,6 @@ import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
-import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
-import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
-import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -55,10 +51,12 @@ import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -81,7 +79,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>();
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
     private Registration dataProviderListenerRegistration;
-    private Registration dataChangeListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
     private volatile int lastFetchedDataSize = -1;
@@ -93,7 +90,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                     SerializableBiFunction<C, VALUE, P> modelToPresentation) {
         super(propertyName, defaultValue, elementPropertyType,
                 presentationToModel, modelToPresentation);
-        addDataChangeListener();
     }
 
     /**
@@ -130,7 +126,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
-        addDataChangeListener();
     }
 
     @Override
@@ -138,10 +133,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
             dataProviderListenerRegistration = null;
-        }
-        if (dataChangeListenerRegistration != null) {
-            dataChangeListenerRegistration.remove();
-            dataChangeListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -392,7 +383,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      */
     @Override
     public ListBoxListDataView<ITEM> getListDataView() {
-        return new ListBoxListDataView<>(this::getDataProvider, this);
+        return new ListBoxListDataView<>(this::getDataProvider, this,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -442,35 +434,78 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     @SuppressWarnings("rawtypes")
     private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
-                getComponentInMemoryFilter());
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializablePredicate<ITEM> getComponentInMemoryFilter() {
-        ComponentInMemoryFilter<ITEM> componentFilter = ComponentUtil.getData(this,
-                ComponentInMemoryFilter.class);
-        return componentFilter != null ? componentFilter.getFilter() : null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializableComparator<ITEM> getComponentSorting() {
-        ComponentSorting<ITEM> componentSorting = ComponentUtil.getData(this,
-                ComponentSorting.class);
-        return componentSorting != null ? componentSorting.getSortComparator()
-                : null;
+        return new Query<>(0, Integer.MAX_VALUE, null,
+                InnerListBoxListDataView.getComponentSortComparator(this)
+                        .orElse(null),
+                InnerListBoxListDataView.getComponentFilter(this).orElse(null));
     }
 
     private void removeFilteringAndSorting() {
-        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
-        ComponentUtil.setData(this, ComponentSorting.class, null);
+        InnerListBoxListDataView.removeComponentFilter(this);
+        InnerListBoxListDataView.removeComponentSortComparator(this);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void addDataChangeListener() {
-        if (dataChangeListenerRegistration == null) {
-            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
-                    (ComponentEventListener) event -> rebuild());
+    private static final class InnerListBoxListDataView
+            extends ListBoxListDataView {
+
+        private InnerListBoxListDataView(
+                SerializableSupplier dataProviderSupplier, ListBoxBase listBox,
+                SerializableBiConsumer dataChangedCallback) {
+            super(dataProviderSupplier, listBox, dataChangedCallback);
+        }
+
+        /**
+         * Gets the in-memory filter of a given ListBox instance.
+         *
+         * @param listBoxBase
+         *            ListBox instance the filter is bound to
+         * @param <T>
+         *            item type
+         * @return optional ListBox's in-memory filter.
+         */
+        static <T> Optional<SerializablePredicate<T>> getComponentFilter(
+                ListBoxBase listBoxBase) {
+            return ListBoxListDataView.getComponentFilter(listBoxBase);
+        }
+
+        /**
+         * Gets the in-memory sort comparator of a given ListBox instance.
+         *
+         * @param listBoxBase
+         *            ListBox instance the sort comparator is bound to
+         * @param <T>
+         *            item type
+         * @return optional ListBox's in-memory sort comparator.
+         */
+        static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
+                ListBoxBase listBoxBase) {
+            return ListBoxListDataView.getComponentSortComparator(listBoxBase);
+        }
+
+        /**
+         * Removes the in-memory filter from a given ListBoxBase instance.
+         *
+         * @param listBoxBase
+         *            ListBoxBase instance the filter is removed from
+         * @param <T>
+         *            items type
+         */
+        static <T> void removeComponentFilter(ListBoxBase listBoxBase) {
+            ListBoxListDataView.setComponentFilter(listBoxBase, null);
+        }
+
+        /**
+         * Removes the in-memory sort comparator from a given ListBoxBase
+         * instance.
+         *
+         * @param listBoxBase
+         *            ListBoxBase instance the sort comparator is removed from
+         * @param <T>
+         *            items type
+         */
+        static <T> void removeComponentSortComparator(ListBoxBase listBoxBase) {
+            ListBoxListDataView.setComponentSortComparator(listBoxBase, null);
         }
     }
 }

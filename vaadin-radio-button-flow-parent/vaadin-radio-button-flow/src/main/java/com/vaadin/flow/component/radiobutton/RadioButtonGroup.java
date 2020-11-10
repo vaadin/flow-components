@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
@@ -35,9 +34,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
-import com.vaadin.flow.data.provider.ComponentDataChangeEvent;
-import com.vaadin.flow.data.provider.ComponentInMemoryFilter;
-import com.vaadin.flow.data.provider.ComponentSorting;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -54,9 +50,11 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -93,8 +91,6 @@ public class RadioButtonGroup<T>
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
-    private Registration dataChangeListenerRegistration;
-
     private int lastNotifiedDataSize = -1;
 
     private volatile int lastFetchedDataSize = -1;
@@ -122,7 +118,6 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation, true);
 
         registerValidation();
-        addDataChangeListener();
     }
 
     @Override
@@ -185,7 +180,7 @@ public class RadioButtonGroup<T>
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
         return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged);
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     /**
@@ -253,7 +248,6 @@ public class RadioButtonGroup<T>
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
-        addDataChangeListener();
     }
 
     @Override
@@ -261,10 +255,6 @@ public class RadioButtonGroup<T>
         if (dataProviderListenerRegistration != null) {
         	dataProviderListenerRegistration.remove();
         	dataProviderListenerRegistration = null;
-        }
-        if (dataChangeListenerRegistration != null) {
-            dataChangeListenerRegistration.remove();
-            dataChangeListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -598,35 +588,88 @@ public class RadioButtonGroup<T>
 
     @SuppressWarnings("rawtypes")
     private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null, getComponentSorting(),
-                getComponentInMemoryFilter());
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializablePredicate<T> getComponentInMemoryFilter() {
-        ComponentInMemoryFilter<T> componentFilter = ComponentUtil.getData(this,
-                ComponentInMemoryFilter.class);
-        return componentFilter != null ? componentFilter.getFilter() : null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private SerializableComparator<T> getComponentSorting() {
-        ComponentSorting<T> componentSorting = ComponentUtil.getData(this,
-                ComponentSorting.class);
-        return componentSorting != null ? componentSorting.getSortComparator()
-                : null;
+        return new Query<>(0, Integer.MAX_VALUE, null,
+                InnerRadioButtonGroupListDataView
+                        .getComponentSortComparator(this).orElse(null),
+                InnerRadioButtonGroupListDataView.getComponentFilter(this)
+                        .orElse(null));
     }
 
     private void removeFilteringAndSorting() {
-        ComponentUtil.setData(this, ComponentInMemoryFilter.class, null);
-        ComponentUtil.setData(this, ComponentSorting.class, null);
+        InnerRadioButtonGroupListDataView.removeComponentFilter(this);
+        InnerRadioButtonGroupListDataView.removeComponentSortComparator(this);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void addDataChangeListener() {
-        if (dataChangeListenerRegistration == null) {
-            dataChangeListenerRegistration = addListener(ComponentDataChangeEvent.class,
-                    (ComponentEventListener) event -> reset());
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static final class InnerRadioButtonGroupListDataView
+            extends RadioButtonGroupListDataView {
+
+        private InnerRadioButtonGroupListDataView(
+                SerializableSupplier dataProviderSupplier,
+                RadioButtonGroup radioButtonGroup,
+                SerializableBiConsumer dataChangedCallback) {
+            super(dataProviderSupplier, radioButtonGroup, dataChangedCallback);
+        }
+
+        /**
+         * Gets the in-memory filter of a given RadioButtonGroup instance.
+         *
+         * @param radioButtonGroup
+         *            RadioButtonGroup instance the filter is bound to
+         * @param <T>
+         *            item type
+         * @return optional RadioButtonGroup's in-memory filter.
+         */
+        public static <T> Optional<SerializablePredicate<T>> getComponentFilter(
+                RadioButtonGroup<T> radioButtonGroup) {
+            return RadioButtonGroupListDataView
+                    .getComponentFilter(radioButtonGroup);
+        }
+
+        /**
+         * Gets the in-memory sort comparator of a given RadioButtonGroup
+         * instance.
+         *
+         * @param radioButtonGroup
+         *            RadioButtonGroup instance the sort comparator is bound to
+         * @param <T>
+         *            item type
+         * @return optional RadioButtonGroup's in-memory sort comparator.
+         */
+        public static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
+                RadioButtonGroup<T> radioButtonGroup) {
+            return RadioButtonGroupListDataView
+                    .getComponentSortComparator(radioButtonGroup);
+        }
+
+        /**
+         * Removes the in-memory filter from a given RadioButtonGroup instance.
+         *
+         * @param radioButtonGroup
+         *            RadioButtonGroup instance the filter is removed from
+         * @param <T>
+         *            items type
+         */
+        public static <T> void removeComponentFilter(
+                RadioButtonGroup<T> radioButtonGroup) {
+            RadioButtonGroupListDataView.setComponentFilter(radioButtonGroup,
+                    null);
+        }
+
+        /**
+         * Removes the in-memory sort comparator from a given RadioButtonGroup
+         * instance.
+         *
+         * @param radioButtonGroup
+         *            RadioButtonGroup instance the sort comparator is removed
+         *            from
+         * @param <T>
+         *            items type
+         */
+        public static <T> void removeComponentSortComparator(
+                RadioButtonGroup<T> radioButtonGroup) {
+            RadioButtonGroupListDataView
+                    .setComponentSortComparator(radioButtonGroup, null);
         }
     }
 }

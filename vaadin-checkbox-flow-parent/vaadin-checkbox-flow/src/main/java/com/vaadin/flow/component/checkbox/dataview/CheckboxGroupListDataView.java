@@ -19,7 +19,10 @@ import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
@@ -42,11 +45,15 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
      *            data provider supplier
      * @param checkboxGroup
      *            checkbox group instance for this DataView
+     * @param dataChangedCallback
+     *            callback, which is being invoked when the CheckboxGroup's
+     *            filtering or sorting changes, not <code>null</code>
      */
     public CheckboxGroupListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
-            CheckboxGroup<T> checkboxGroup) {
-        super(dataProviderSupplier, checkboxGroup);
+            CheckboxGroup<T> checkboxGroup,
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
+        super(dataProviderSupplier, checkboxGroup, dataChangedCallback);
     }
 
     /**
@@ -60,12 +67,16 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
      * @param identifierChangedCallback
      *            callback method which should be called when identifierProvider
      *            is changed
+     * @param dataChangedCallback
+     *            callback, which is being invoked when the CheckboxGroup's
+     *            filtering or sorting changes, not <code>null</code>
      */
     public CheckboxGroupListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             CheckboxGroup<T> checkboxGroup,
-            SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback) {
-        super(dataProviderSupplier, checkboxGroup);
+            SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
+        super(dataProviderSupplier, checkboxGroup, dataChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 
