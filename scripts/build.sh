@@ -10,12 +10,29 @@ then
         FORK_COUNT=`echo $i | cut -d = -f2`;;
       parallel=*)
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
+      pr=*)
+        pr=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
        ;;
      esac
   done
+fi
+
+## compute modules that were modified in this PR
+if [ -z "$modules" -a -n "$pr" ]
+then
+  modified=`curl -s https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$pr/files \
+    | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
+  if [ `echo "$modules" | wc -w` -lt 5 ]
+  then
+    for i in $modified
+    do
+      modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
+      elements="$elements $i"
+    done
+  fi
 fi
 
 tcMsg() (
@@ -40,8 +57,8 @@ saveFailedTests() {
   failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
   ### collect tests numbers for TC status
-  ncompleted=`grep -Poh 'Tests run:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'`
-  nskipped=`grep -Poh 'Skipped:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'` 
+  ncompleted=`grep 'Tests run: ' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$3} END { print SUM }'`
+  nskipped=`grep 'Tests run: ' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$9} END { print SUM }'`
   if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$try
@@ -147,11 +164,12 @@ reuse_browser() {
     [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
 }
 
+
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
   cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-  tcLog "Running module ITs - mvn clean verify -pl ..."
+  tcLog "Running module ITs ($elements) - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 else
