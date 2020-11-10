@@ -191,6 +191,8 @@ else
       echo "$failed"
       rerunFailed=$nfailed
 
+      set -x
+
       if [ "$nfailed" -le 15 ]
       then
         failed=`echo "$failed" | tr '\n' ','`
