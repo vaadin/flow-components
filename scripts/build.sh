@@ -182,6 +182,7 @@ else
         echo $cmd
         $cmd
         error=$?
+        tcLog "Re-Run exited with code $error"
         saveFailedTests run-2
         tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried), ignored: $nskipped"
       else
