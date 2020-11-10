@@ -8,8 +8,7 @@ public abstract class ParallelTest extends com.vaadin.testbench.parallel.Paralle
 
     @Override
     public void setup() throws Exception {
-        browser.setup(super::setup, this::getDriver, screenshotOnFailure)
-            .ifPresent(this::setDriver);
+        browser.setup(super::setup, this::setDriver, this::getDriver, screenshotOnFailure);
     }
 
     protected int getDeploymentPort() {

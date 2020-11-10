@@ -16,11 +16,9 @@
 
 package com.vaadin.flow.component.combobox.dataview;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -63,8 +61,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
-        setClientFilter(component, "ba");
-        fakeClientCommunication();
+        ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
         Stream<String> filteredItems = dataView.getItems();
 
@@ -97,8 +95,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
-        setClientFilter(component, "ba");
-        fakeClientCommunication();
+        ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
         int itemCount = dataView.getItemCount();
 
@@ -146,36 +144,6 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     @Override
     protected HasListDataView<String, ComboBoxListDataView<String>> getComponent() {
         return new ComboBox<>();
-    }
-
-    private ComboBox<String> getDefaultLocaleComboBox() {
-        return new ComboBox<String>() {
-            @Override
-            protected Locale getLocale() {
-                return Locale.getDefault();
-            }
-        };
-    }
-
-    private void setClientFilter(ComboBox<String> comboBox,
-            String clientFilter) {
-        try {
-            // Reset the client filter on server side as though it's sent from
-            // client
-            Method setRequestedRangeMethod = ComboBox.class.getDeclaredMethod(
-                    "setRequestedRange", int.class, int.class, String.class);
-            setRequestedRangeMethod.setAccessible(true);
-            setRequestedRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
-                    clientFilter);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private static class Item {

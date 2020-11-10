@@ -2,8 +2,10 @@
 /**
  * Update the NpmPackage annotation for all modules in the project
  * by checking versions published in npm repository.
+ * By using `--exclude <component>,<component>`, the certain package update will be skipped
  * Example
- *   ./scripts/updateNpmVer.js vaadin-button-flow-parent
+ *   ./scripts/updateNpmVer.js
+ *   ./scripts/updateNpmVer.js --exclude button,text-field
  */
 
 const fs = require('fs');
@@ -11,6 +13,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const replace = require('replace-in-file');
 
+let exclude=[];
 
 async function computeModules(){
   const cmd = 'grep -r @NpmPackage ./vaadin*parent/*/src/*/java';
@@ -67,13 +70,43 @@ async function calculateVersions(data) {
   return data;
 }
 
+/**
+ * Allow exclude certain component package update, use ',' as separator
+ */
+async function excludeComponents() {
+  for (i = 2;process.argv[i]; i++) {
+    switch(process.argv[i]) {
+      case '--exclude':
+        components = process.argv[++i]
+        break;
+      }
+  }
+  
+  exclude=components.split(',');
+  
+  packageBase='@vaadin/vaadin-';
+  for(j = 0; j < exclude.length; j++){
+	  exclude[j] = packageBase.concat(exclude[j]);
+  }
+  
+  return exclude;
+}
+
 async function main() {
   console.log("Updating the NpmPackage annotation.")
   const modules = await computeModules();
-
+  if (process.argv.length > 2){
+    exclude = await excludeComponents();
+  } 
+  
   for (i = 0; i < modules.length; i++){
-    modules[i] = await calculateVersions(modules[i]);
-    await updateFiles(modules[i]);
+	if (exclude.includes(modules[i].package)){
+		console.log('\x1b[33m',"skip updating "+ modules[i].package +" package");
+	} else {
+		modules[i] = await calculateVersions(modules[i]);
+        await updateFiles(modules[i]);
+	}
+    
   }
 }
 

@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -420,6 +421,18 @@ public class ComboBoxTest {
         fakeClientCommunication(ui);
 
         Mockito.verify(dataProvider).size(Mockito.any());
+    }
+
+    @Test
+    public void setItems_withItemFilterAndArrayOfItems_shouldReturnMutableListDataView() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ComboBox.ItemFilter<String> itemFilter = (item, filter) -> true;
+        ComboBoxListDataView<String> listDataView = comboBox
+                .setItems(itemFilter, "First", "Second", "Third");
+        listDataView.addItem("Fourth");
+        listDataView.removeItem("First");
+        listDataView.removeItem("Third");
+        Assert.assertEquals(2L, listDataView.getItemCount());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
