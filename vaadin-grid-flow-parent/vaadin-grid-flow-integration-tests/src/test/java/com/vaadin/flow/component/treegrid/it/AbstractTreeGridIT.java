@@ -13,6 +13,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
     private TreeGridElement grid;
 
     public void setupTreeGrid() {
+        waitUntil(e -> $(TreeGridElement.class).exists(), 500);
         grid = $(TreeGridElement.class).first();
     }
 
