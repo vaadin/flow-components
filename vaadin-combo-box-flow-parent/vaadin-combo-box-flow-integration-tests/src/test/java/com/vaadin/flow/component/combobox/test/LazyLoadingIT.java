@@ -375,8 +375,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         filterBox.setFilter("Person");
 
-        Assert.assertEquals("None of the items should match the filter.", 0,
-                getNonEmptyOverlayContents().size());
+        Assert.assertEquals("None of the items should match the filter " +
+                        "and overlay is not displayed", 0,
+                $("vaadin-combo-box-overlay").all().size());
 
         filterBox.setFilter("10");
 
@@ -465,7 +466,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         Assert.assertEquals(item, getSelectedItemLabel(stringBox));
     }
 
-    @Test 
+    @Test
     public void autoOpenDisabled_setValue_valueChanged() {
         String item = "Item 151";
         stringBox.openPopup();
