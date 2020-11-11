@@ -719,7 +719,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *                                                        query.getOffset,
      *                                                        query.getLimit()),
      *                 orderCountStr -> Integer.parseInt(orderCountStr));}
-     * Note: Validations for {@code orderCountStr} are omitted for briefness.
+     * Note: Validations for <code>orderCountStr</code> are omitted for
+     * briefness.
      * <p>
      * Combo box's client-side filter typed by the user is transformed into a
      * callback's filter through the given filter converter.
@@ -766,7 +767,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *                                                        query.getLimit()),
      *                 query -> orderService.getSize(query.getFilter()),
      *                 orderCountStr -> Integer.parseInt(orderCountStr));}
-     * Note: Validations for {@code orderCountStr} are omitted for briefness.
+     * Note: Validations for <code>orderCountStr</code> are omitted for
+     * briefness.
      * <p>
      * Combo box's client-side filter typed by the user is transformed into a
      * custom filter type through the given filter converter.

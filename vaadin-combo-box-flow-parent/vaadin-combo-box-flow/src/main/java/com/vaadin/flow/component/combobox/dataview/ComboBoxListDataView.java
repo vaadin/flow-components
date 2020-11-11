@@ -131,10 +131,11 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * only defines which items are shown for a single request and erases on
      * drop down close.
      * <p>
-     * A filter bound to the component. Any other component using the same
-     * {@link DataProvider} object would not be affected by setting a filter
-     * through data view of another component. A filter set by this method won't
-     * be retained when a new {@link DataProvider} is set to the component.
+     * This filter is bound to the component. Thus, any other component using
+     * the same {@link DataProvider} object would not be affected by setting a
+     * filter through data view of another component. A filter set by this
+     * method won't be retained when a new {@link DataProvider} is set to the
+     * component.
      *
      * @param filter
      *            the filter to add, not <code>null</code>
@@ -170,10 +171,11 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * modify the data set on server-side, but only defines which items are
      * shown for a single request and erases on drop down close.
      * <p>
-     * A filter bound to the component. Any other component using the same
-     * {@link DataProvider} object would not be affected by setting a filter
-     * through data view of another component. A filter set by this method won't
-     * be retained when a new {@link DataProvider} is set to the component.
+     * This filter is bound to the component. Thus, any other component using
+     * the same {@link DataProvider} object would not be affected by setting a
+     * filter through data view of another component. A filter set by this
+     * method won't be retained when a new {@link DataProvider} is set to the
+     * component.
      *
      * @param filter
      *            filter to be set, or <code>null</code> to clear any previously
