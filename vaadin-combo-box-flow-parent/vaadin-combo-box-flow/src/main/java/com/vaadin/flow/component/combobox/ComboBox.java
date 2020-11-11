@@ -719,6 +719,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *                                                        query.getOffset,
      *                                                        query.getLimit()),
      *                 orderCountStr -> Integer.parseInt(orderCountStr));}
+     * Note: Validations for {@code orderCountStr} are omitted for briefness.
      * <p>
      * Combo box's filter-string typed by the user is transformed into a
      * callback's filter through the given filter converter.
@@ -765,8 +766,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *                                                        query.getLimit()),
      *                 query -> orderService.getSize(query.getFilter()),
      *                 orderCountStr -> Integer.parseInt(orderCountStr));}
+     * Note: Validations for {@code orderCountStr} are omitted for briefness.
      * <p>
-     * Combo box's filter-string typed by the user is transformed into a
+     * Combo box's client-side filter typed by the user is transformed into a
      * custom filter type through the given filter converter.
      * <p>
      * The returned data view object can be used for further configuration, or
@@ -1457,17 +1459,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Supply items lazily with a callback from a backend. The component will
+     * Supply items lazily with a callback from a backend. The ComboBox will
      * automatically fetch more items and adjust its size until the backend runs
      * out of items. Usage example without component provided filter:
      * <p>
-     * {@code component.setItems(query ->
+     * {@code comboBox.setItems(query ->
      *             orderService.getOrders(query.getOffset(), query.getLimit());}
      * <p>
      * Since ComboBox supports filtering, it can be fetched via
      * query.getFilter():
      * <p>
-     * {@code component.setItems(query ->
+     * {@code comboBox.setItems(query ->
      *             orderService.getOrders(query.getFilter(), query.getOffset(),
      *                                      query.getLimit());}
      * <p>
@@ -1476,7 +1478,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * data, like {@link Collection}, use
      * {@link HasListDataView#setItems(Collection)} instead.
      * <p>
-     * Custom filter type converters can be used, see:
+     * If item filtering by some value type other than String is preferred and
+     * backend service is able to fetch and filter items by such type, converter
+     * for client side's filter string can be set along with fetch callback.
+     * See:
      * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback,
      *                                      SerializableFunction)}
      *
@@ -1495,17 +1500,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Supply items lazily with callbacks: the first one fetches the items based
      * on offset, limit and an optional filter, the second provides the exact
      * count of items in the backend. Use this only in case getting the count is
-     * cheap and the user benefits from the component showing immediately the
+     * cheap and the user benefits from the ComboBox showing immediately the
      * exact size. Usage example without component provided filter:
      * <p>
-     * {@code component.setItems(
+     * {@code comboBox.setItems(
      *      query -> orderService.getOrders(query.getOffset, query.getLimit()),
      *      query -> orderService.getSize());}
      * <p>
      * Since ComboBox supports filtering, it can be fetched via
      * query.getFilter():
      * <p>
-     * {@code component.setItems(
+     * {@code comboBox.setItems(
      *      query -> orderService.getOrders(query.getFilter(), query.getOffset,
      *                                          query.getLimit()),
      *      query -> orderService.getSize(query.getFilter()));}
@@ -1515,7 +1520,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * data, like {@link Collection}, use
      * {@link HasListDataView#setItems(Collection)} instead.
      * <p>
-     * Custom filter type converters can be used, see:
+     * If item filtering by some value type other than String is preferred and
+     * backend service is able to fetch and filter items by such type, converter
+     * for client side's filter string can be set along with fetch callback.
+     * See:
      * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback,
      *                                      CallbackDataProvider.CountCallback,
      *                                      SerializableFunction)}

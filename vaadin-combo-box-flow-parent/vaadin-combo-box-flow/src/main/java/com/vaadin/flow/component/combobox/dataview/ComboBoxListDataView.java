@@ -123,15 +123,18 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
 
     /**
      * Adds a filter to be applied to all queries. The filter will be used in
-     * addition to any filter that has been set or added previously. The filter
-     * is applied on data view and is different from the filter string that can
-     * be typed in by the user in UI.
+     * addition to any filter that has been set or added previously through
+     * {@link #setFilter} or {@link #addFilter}. This filter is applied to data
+     * set permanently until it's changed through {@link #setFilter} or
+     * {@link #removeFilters}, in contrary with the client-side filter that can
+     * be typed in by user and does not modify the data set on server-side, but
+     * only defines which items are shown for a single request and erases on
+     * drop down close.
      * <p>
-     * A filter bound to data set, not to the component. That means this filter
-     * and previously added filters won't be retained when a new data or
-     * {@link DataProvider} is set to the component. Any other component using
-     * the same {@link DataProvider} object would be affected by adding a filter
-     * through data view of another component.
+     * A filter bound to the component. Any other component using the same
+     * {@link DataProvider} object would not be affected by setting a filter
+     * through data view of another component. A filter set by this method won't
+     * be retained when a new {@link DataProvider} is set to the component.
      *
      * @param filter
      *            the filter to add, not <code>null</code>
@@ -161,14 +164,16 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     /**
      * Sets a filter to be applied to the data. The filter replaces any filter
      * that has been set or added previously. {@code null} will clear all
-     * filters. The filter is applied on data view and is different from the
-     * filter string that can be typed in by the user in UI.
+     * filters. This filter is applied to data set permanently until it's
+     * changed through {@link #setFilter} or {@link #removeFilters}, in contrary
+     * with the client-side filter that can be typed in by user and does not
+     * modify the data set on server-side, but only defines which items are
+     * shown for a single request and erases on drop down close.
      * <p>
-     * A filter bound to data set, not to the component. That means this filter
-     * won't be retained when a new data or {@link DataProvider} is set to the
-     * component. Any other component using the same {@link DataProvider} object
-     * would be affected by setting a filter through data view of another
-     * component.
+     * A filter bound to the component. Any other component using the same
+     * {@link DataProvider} object would not be affected by setting a filter
+     * through data view of another component. A filter set by this method won't
+     * be retained when a new {@link DataProvider} is set to the component.
      *
      * @param filter
      *            filter to be set, or <code>null</code> to clear any previously

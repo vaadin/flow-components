@@ -561,6 +561,8 @@ public class ComboBoxView extends DemoView {
 
         ComboBox<Person> comboBox = new ComboBox<>("Person");
         comboBox.setPlaceholder("Enter minimum age to filter");
+        comboBox.setPattern("^\\d+$");
+        comboBox.setPreventInvalidInput(true);
 
         // Configuring fetch callback with a filter converter, so entered filter
         // strings can refer also to other typed properties like age (integer):
