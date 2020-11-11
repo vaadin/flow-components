@@ -721,7 +721,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *                 orderCountStr -> Integer.parseInt(orderCountStr));}
      * Note: Validations for {@code orderCountStr} are omitted for briefness.
      * <p>
-     * Combo box's filter-string typed by the user is transformed into a
+     * Combo box's client-side filter typed by the user is transformed into a
      * callback's filter through the given filter converter.
      * <p>
      * The returned data view object can be used for further configuration, or
