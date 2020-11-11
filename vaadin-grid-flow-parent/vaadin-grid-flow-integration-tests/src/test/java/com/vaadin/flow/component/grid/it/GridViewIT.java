@@ -947,6 +947,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    @Ignore("see #635 (fails NPM mode in TC)")
     public void bufferedEditor_invalidName() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1099,6 +1100,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    @Ignore("see #635 (fails NPM mode in TC)")
     public void notBufferedEditor() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1153,6 +1155,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicEditor_bufferedMode() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1296,6 +1299,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicNotBufferedEditor() throws InterruptedException {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1359,6 +1363,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicNotBufferedEditor_navigateUsingKeyboard()
             throws InterruptedException {
         openTabAndCheckForErrors("grid-editor");
@@ -1412,6 +1417,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicNotBufferedEditor_closeEditorUsingKeyboard()
             throws InterruptedException {
         GridElement grid = assertCloseEditorUsingKeyBoard(
