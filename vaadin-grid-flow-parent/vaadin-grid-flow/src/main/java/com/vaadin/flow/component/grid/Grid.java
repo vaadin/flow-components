@@ -85,6 +85,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
@@ -3217,8 +3218,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (order.isEmpty()) {
             // Grid is not sorted anymore with client-side sorting.
             getDataCommunicator().setBackEndSorting(Collections.emptyList());
-            getDataCommunicator().setInMemorySorting(InnerGridListDataView
-                    .getComponentSortComparator(this).orElse(null));
+            getDataCommunicator().setInMemorySorting(
+                    (SerializableComparator<T>) DataViewUtils
+                            .getComponentSortComparator(this).orElse(null));
             fireEvent(new SortEvent<>(this, new ArrayList<>(sortOrder),
                     userOriginated));
             return;
@@ -3269,8 +3271,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void sort(boolean userOriginated) {
         // Set sort orders
         // In-memory comparator
-        updateSorting(InnerGridListDataView.getComponentSortComparator(this)
-                .orElse(null));
+        updateSorting((SerializableComparator<T>) DataViewUtils
+                .getComponentSortComparator(this).orElse(null));
 
         // Back-end sort properties
         List<QuerySortOrder> sortProperties = new ArrayList<>();
@@ -4153,27 +4155,5 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             return result;
         };
-    }
-
-    private static final class InnerGridListDataView extends GridListDataView {
-
-        private InnerGridListDataView(DataCommunicator dataCommunicator,
-                Grid grid, SerializableBiConsumer dataChangedCallback) {
-            super(dataCommunicator, grid, dataChangedCallback);
-        }
-
-        /**
-         * Returns an in-memory sort comparator of a given Grid instance.
-         *
-         * @param grid
-         *            Grid instance the filter bound to
-         * @param <T>
-         *            item type
-         * @return optional Grid's in-memory sort comparator.
-         */
-        static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
-                Grid<T> grid) {
-            return GridListDataView.getComponentSortComparator(grid);
-        }
     }
 }

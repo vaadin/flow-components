@@ -41,6 +41,7 @@ import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -51,12 +52,9 @@ import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -435,77 +433,13 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @SuppressWarnings("rawtypes")
     private Query getQuery() {
         return new Query<>(0, Integer.MAX_VALUE, null,
-                InnerListBoxListDataView.getComponentSortComparator(this)
-                        .orElse(null),
-                InnerListBoxListDataView.getComponentFilter(this).orElse(null));
+                DataViewUtils.getComponentSortComparator(this).orElse(null),
+                DataViewUtils.getComponentFilter(this).orElse(null));
     }
 
     private void removeFilteringAndSorting() {
-        InnerListBoxListDataView.removeComponentFilter(this);
-        InnerListBoxListDataView.removeComponentSortComparator(this);
+        DataViewUtils.removeComponentFilter(this);
+        DataViewUtils.removeComponentSortComparator(this);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static final class InnerListBoxListDataView
-            extends ListBoxListDataView {
-
-        private InnerListBoxListDataView(
-                SerializableSupplier dataProviderSupplier, ListBoxBase listBox,
-                SerializableBiConsumer dataChangedCallback) {
-            super(dataProviderSupplier, listBox, dataChangedCallback);
-        }
-
-        /**
-         * Gets the in-memory filter of a given ListBox instance.
-         *
-         * @param listBoxBase
-         *            ListBox instance the filter is bound to
-         * @param <T>
-         *            item type
-         * @return optional ListBox's in-memory filter.
-         */
-        static <T> Optional<SerializablePredicate<T>> getComponentFilter(
-                ListBoxBase listBoxBase) {
-            return ListBoxListDataView.getComponentFilter(listBoxBase);
-        }
-
-        /**
-         * Gets the in-memory sort comparator of a given ListBox instance.
-         *
-         * @param listBoxBase
-         *            ListBox instance the sort comparator is bound to
-         * @param <T>
-         *            item type
-         * @return optional ListBox's in-memory sort comparator.
-         */
-        static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
-                ListBoxBase listBoxBase) {
-            return ListBoxListDataView.getComponentSortComparator(listBoxBase);
-        }
-
-        /**
-         * Removes the in-memory filter from a given ListBoxBase instance.
-         *
-         * @param listBoxBase
-         *            ListBoxBase instance the filter is removed from
-         * @param <T>
-         *            items type
-         */
-        static <T> void removeComponentFilter(ListBoxBase listBoxBase) {
-            ListBoxListDataView.setComponentFilter(listBoxBase, null);
-        }
-
-        /**
-         * Removes the in-memory sort comparator from a given ListBoxBase
-         * instance.
-         *
-         * @param listBoxBase
-         *            ListBoxBase instance the sort comparator is removed from
-         * @param <T>
-         *            items type
-         */
-        static <T> void removeComponentSortComparator(ListBoxBase listBoxBase) {
-            ListBoxListDataView.setComponentSortComparator(listBoxBase, null);
-        }
-    }
 }

@@ -41,6 +41,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -54,11 +55,8 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
-import com.vaadin.flow.function.SerializableBiConsumer;
-import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -1003,76 +1001,12 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @SuppressWarnings("rawtypes")
     private Query getQuery() {
         return new Query<>(0, Integer.MAX_VALUE, null,
-                InnerSelectListDataView.getComponentSortComparator(this)
-                        .orElse(null),
-                InnerSelectListDataView.getComponentFilter(this).orElse(null));
+                DataViewUtils.getComponentSortComparator(this).orElse(null),
+                DataViewUtils.getComponentFilter(this).orElse(null));
     }
 
     private void removeFilteringAndSorting() {
-        InnerSelectListDataView.removeComponentFilter(this);
-        InnerSelectListDataView.removeComponentSortComparator(this);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static final class InnerSelectListDataView
-            extends SelectListDataView {
-
-        private InnerSelectListDataView(
-                SerializableSupplier dataProviderSupplier, Select select,
-                SerializableBiConsumer dataChangedCallback) {
-            super(dataProviderSupplier, select, dataChangedCallback);
-        }
-
-        /**
-         * Gets the in-memory filter of a given Select instance.
-         *
-         * @param select
-         *            Select instance the filter is bound to
-         * @param <T>
-         *            item type
-         * @return optional Select's in-memory filter.
-         */
-        static <T> Optional<SerializablePredicate<T>> getComponentFilter(
-                Select<T> select) {
-            return SelectListDataView.getComponentFilter(select);
-        }
-
-        /**
-         * Gets the in-memory sort comparator of a given Select instance.
-         *
-         * @param select
-         *            Select instance the sort comparator is bound to
-         * @param <T>
-         *            item type
-         * @return optional Select's in-memory sort comparator.
-         */
-        static <T> Optional<SerializableComparator<T>> getComponentSortComparator(
-                Select<T> select) {
-            return SelectListDataView.getComponentSortComparator(select);
-        }
-
-        /**
-         * Removes the in-memory filter from a given Select instance.
-         *
-         * @param select
-         *            Select instance the filter is removed from
-         * @param <T>
-         *            items type
-         */
-        static <T> void removeComponentFilter(Select<T> select) {
-            SelectListDataView.setComponentFilter(select, null);
-        }
-
-        /**
-         * Removes the in-memory sort comparator from a given Select instance.
-         *
-         * @param select
-         *            Select instance the sort comparator is removed from
-         * @param <T>
-         *            items type
-         */
-        static <T> void removeComponentSortComparator(Select<T> select) {
-            SelectListDataView.setComponentSortComparator(select, null);
-        }
+        DataViewUtils.removeComponentFilter(this);
+        DataViewUtils.removeComponentSortComparator(this);
     }
 }

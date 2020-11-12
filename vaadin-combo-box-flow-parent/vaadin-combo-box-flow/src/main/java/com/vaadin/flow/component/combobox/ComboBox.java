@@ -48,6 +48,7 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
@@ -596,7 +597,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             @Override
             protected SerializablePredicate<T> getFilter(
                     Query<T, String> query) {
-                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = InnerComboBoxListDataView
+                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
                                 .getComponentFilter(comboBox);
                         return Optional
                                 .ofNullable(inMemoryDataProvider.getFilter())
@@ -1053,7 +1054,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         setDataProvider(listDataProvider,
                 filterText -> {
-                    Optional<SerializablePredicate<T>> componentInMemoryFilter = InnerComboBoxListDataView
+                    Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
                             .getComponentFilter(this);
                     return item -> itemFilter.test(item, filterText)
                             && componentInMemoryFilter.orElse(ignore -> true)
@@ -1591,29 +1592,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         lastFilter = null;
         filterSlot.accept("");
         reset();
-    }
-
-    private static final class InnerComboBoxListDataView
-            extends ComboBoxListDataView {
-
-        private InnerComboBoxListDataView(DataCommunicator dataCommunicator,
-                ComboBox comboBox, SerializableBiConsumer dataChangedCallback) {
-            super(dataCommunicator, comboBox, dataChangedCallback);
-        }
-
-        /**
-         * Returns an in-memory filter of a given ComboBox instance.
-         *
-         * @param comboBox
-         *            ComboBox instance the filter bound to
-         * @param <T>
-         *            item type
-         * @return optional ComboBox's in-memory filter.
-         */
-        static <T> Optional<SerializablePredicate<T>> getComponentFilter(
-                ComboBox<T> comboBox) {
-            return ComboBoxListDataView.getComponentFilter(comboBox);
-        }
     }
 
 }
