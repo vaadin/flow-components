@@ -126,9 +126,7 @@ public class GridViewIT extends GridViewBase {
                 isRowSelected(grid, 0));
 
         // scroll to bottom
-        for (int i = 0; i < 10; i++) {
-            scroll(grid, 100 + (100 * i));
-        }
+        scroll(grid, 1000);
         waitUntilCellHasText(grid, "Person 499");
         // select item that is not in cache
         clickElementWithJs(toggleButton);
@@ -136,15 +134,6 @@ public class GridViewIT extends GridViewBase {
                 getSelectionMessage(null, GridView.items.get(0), false),
                 messageDiv.getText());
         // scroll back up
-        scroll(grid, 100);
-        WebElement table = findInShadowRoot(grid, By.id("table")).get(0);
-        // Actually scroll up to have grid do a correct event.
-        while (!getCells(grid).stream()
-                .filter(cell -> "Person 1".equals(cell.getText())).findFirst()
-                .isPresent()) {
-            executeScript("arguments[0].scrollTop -= 100;", table);
-        }
-        // scroll the first row so it is visible.
         scroll(grid, 0);
         Assert.assertTrue("Person 1 was not marked as selected",
                 isRowSelected(grid, 0));
@@ -211,25 +200,16 @@ public class GridViewIT extends GridViewBase {
                 isRowSelected(grid, 0));
 
         // scroll to bottom
-        for (int i = 0; i < 10; i++) {
-            scroll(grid, 100 + (100 * i));
-        }
+        scroll(grid, 1000);
         waitUntilCellHasText(grid, "Person 499");
+
         // select item that is not in cache
         toggleButton.click();
         Assert.assertEquals(
                 getSelectionMessage(null, GridView.items.get(0), false),
                 messageDiv.getText());
+
         // scroll back up
-        scroll(grid, 100);
-        WebElement table = findInShadowRoot(grid, By.id("table")).get(0);
-        // Actually scroll up to have grid do a correct event.
-        while (!getCells(grid).stream()
-                .filter(cell -> "Person 1".equals(cell.getText())).findFirst()
-                .isPresent()) {
-            executeScript("arguments[0].scrollTop -= 100;", table);
-        }
-        // scroll the first row so it is visible.
         scroll(grid, 0);
         Assert.assertTrue("Person 1 was not marked as selected",
                 isRowSelected(grid, 0));
