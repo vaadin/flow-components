@@ -50,7 +50,7 @@ pomBase=`getBaseVersion $pomVersion`
 
 ### Load versions file for this platform release
 branch=$versionBase
-[ $branch = "18.0" ] && branch=master
+[ $branch = "19.0" ] && branch=master
 versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 [ $? != 0 ] && branch=master && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
