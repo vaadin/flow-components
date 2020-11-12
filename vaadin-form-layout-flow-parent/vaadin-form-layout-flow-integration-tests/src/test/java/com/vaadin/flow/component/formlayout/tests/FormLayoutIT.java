@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.formlayout.tests;
 
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +49,12 @@ public class FormLayoutIT extends ComponentDemoTest {
         List<WebElement> textFields = firstLayout
                 .findElements(By.tagName("vaadin-text-field"));
         Assert.assertEquals(3, textFields.size());
+        
+        executeScript("arguments[0].responsiveStep = "
+                + "[{minWidth: '0px', columns:1},"
+                + "{minWidth: '600px', columns:2},"
+                + "{minWidth: '700px', columns:3}]"
+                , firstLayout);
 
         // 3 columns, all should be horizontally aligned (tolerance of some pixels)
         getDriver().manage().window().setSize(new Dimension(1000, 1000));
@@ -57,20 +62,20 @@ public class FormLayoutIT extends ComponentDemoTest {
         int y1 = textFields.get(1).getLocation().getY();
         Assert.assertTrue("All 3 columns should be horizontally aligned y1="
                 + y1 + " y2=" + y2, Math.abs(y2 - y1) < 2);
-        System.err.println(y1 + " " + y2);
 
 
         // window resized, should be in 2 column mode, two below one
         getDriver().manage().window().setSize(new Dimension(620, 620));
+
         y2 = textFields.get(2).getLocation().getY();
         y1 = textFields.get(1).getLocation().getY();
-        System.err.println(y1 + " " + y2);
         Assert.assertTrue(
                 "Layout should be in 2 column mode, last field should be below the first two y1="
                         + y1 + " y2=" + y2, y2 > y1 + 2);
 
+
         // resized to 1 column mode, fields should be arranged below one another
-        getDriver().manage().window().setSize(new Dimension(300, 620));
+        getDriver().manage().window().setSize(new Dimension(100, 620));
         y1 = textFields.get(1).getLocation().getY();
         int y0 = textFields.get(0).getLocation().getY();
         Assert.assertTrue(
