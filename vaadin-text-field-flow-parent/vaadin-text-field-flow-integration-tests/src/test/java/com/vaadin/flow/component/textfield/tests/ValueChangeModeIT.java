@@ -198,9 +198,11 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         Assert.assertFalse(failMessage, isMessageUpdated());
     }
 
+    int count = 0;
     private boolean isMessageUpdated() {
         String messageText = message.getText();
         boolean isUpdated = !message.getText().equals(lastMessageText);
+        System.err.println(++count + " lastMessage:" + lastMessageText + " newMessage:" + messageText);
         lastMessageText = messageText;
         return isUpdated;
     }
