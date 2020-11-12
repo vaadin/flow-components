@@ -100,7 +100,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Deprecated
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set( Objects.requireNonNull(dataProvider) );
-        removeFilteringAndSorting();
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -219,7 +219,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            items = (List<ITEM>) getDataProvider().fetch(getQuery())
+            items = (List<ITEM>) getDataProvider()
+                    .fetch(DataViewUtils.getQuery(this))
                     .collect(Collectors.toList());
             items.stream().map(this::createItemComponent)
                     .forEach(component -> {
@@ -428,18 +429,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             return dataProvider::getId;
 
         return IdentifierProvider.identity();
-    }
-
-    @SuppressWarnings("rawtypes")
-    private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null,
-                DataViewUtils.getComponentSortComparator(this).orElse(null),
-                DataViewUtils.getComponentFilter(this).orElse(null));
-    }
-
-    private void removeFilteringAndSorting() {
-        DataViewUtils.removeComponentFilter(this);
-        DataViewUtils.removeComponentSortComparator(this);
     }
 
 }

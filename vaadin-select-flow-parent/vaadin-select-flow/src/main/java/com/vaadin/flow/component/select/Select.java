@@ -451,7 +451,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
-        removeFilteringAndSorting();
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -856,7 +856,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(getQuery()).map(item -> createItem((T) item))
+            getDataProvider().fetch(DataViewUtils.getQuery(this)).map(item -> createItem((T) item))
                     .forEach(component -> {
                         add((Component) component);
                         itemCounter.incrementAndGet();
@@ -998,15 +998,4 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    @SuppressWarnings("rawtypes")
-    private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null,
-                DataViewUtils.getComponentSortComparator(this).orElse(null),
-                DataViewUtils.getComponentFilter(this).orElse(null));
-    }
-
-    private void removeFilteringAndSorting() {
-        DataViewUtils.removeComponentFilter(this);
-        DataViewUtils.removeComponentSortComparator(this);
-    }
 }

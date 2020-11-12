@@ -210,7 +210,7 @@ public class CheckboxGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
-        removeFilteringAndSorting();
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -465,7 +465,7 @@ public class CheckboxGroup<T>
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
 
-            getDataProvider().fetch(getQuery())
+            getDataProvider().fetch(DataViewUtils.getQuery(this))
                     .map(item -> createCheckBox((T) item))
                     .forEach(component -> {
                         add((Component) component);
@@ -617,18 +617,6 @@ public class CheckboxGroup<T>
 
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
-    }
-
-    @SuppressWarnings("rawtypes")
-    private Query getQuery() {
-        return new Query<>(0, Integer.MAX_VALUE, null,
-                DataViewUtils.getComponentSortComparator(this).orElse(null),
-                DataViewUtils.getComponentFilter(this).orElse(null));
-    }
-
-    private void removeFilteringAndSorting() {
-        DataViewUtils.removeComponentFilter(this);
-        DataViewUtils.removeComponentSortComparator(this);
     }
 
 }
