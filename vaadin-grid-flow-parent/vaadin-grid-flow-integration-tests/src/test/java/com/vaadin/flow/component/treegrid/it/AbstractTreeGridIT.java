@@ -108,7 +108,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
         try {
             waitUntil(test -> grid.hasRow(rowIndex) && expectedText
                     .equals(grid.getRow(rowIndex).getCell(column).getText()),
-                    20);
+                    500);
         } catch (Exception e) {
             Assert.fail(
                     String.format(
