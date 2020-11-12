@@ -24,6 +24,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.tests.AbstractComponentIT;
+
+import static org.junit.Assert.assertTrue;
+
 import com.vaadin.flow.testutil.TestPath;
 
 /**
@@ -157,32 +160,34 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
     private void testValueChangeTimeout(WebElement field, String componentName)
             throws InterruptedException {
+        long last = System.currentTimeMillis();
+
         clickButton(componentName + "-lazy");
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "The value change event should not be sent on first key stroke when using ValueChangeMode.LAZY");
+        waitUntilMessageUpdated();
+        assertTrue(-last + (last = System.currentTimeMillis()) > 1000);
 
         for (int i = 0; i < 2; i++) {
             field.sendKeys("1");
-            Thread.sleep(600);
             assertMessageNotUpdated(
                     "The value change event should not be sent until timeout elapsed since last keystroke when using ValueChangeMode.LAZY");
         }
 
-        waitUntilMessageUpdated(400,
-                "The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY");
+        waitUntilMessageUpdated();
+        assertTrue("The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY",
+                  -last + (last = System.currentTimeMillis()) > 1000);
 
         clickButton(componentName + "-timeout");
         field.sendKeys("1");
-        assertMessageUpdated(
-                "The value change event should be sent on first key stroke when using ValueChangeMode.TIMEOUT");
+        waitUntilMessageUpdated();
+        assertTrue("The value change event should be sent on first key stroke when using ValueChangeMode.TIMEOUT",
+                  -last + (last = System.currentTimeMillis()) < 1000);
+
 
         field.sendKeys("1");
-        Thread.sleep(600);
         assertMessageNotUpdated(
-                "The value change event should not be sent until timeout elapsed since last event when using ValueChangeMode.TIMEOUT");
-
-        waitUntilMessageUpdated(400,
                 "The value change event should be sent when timeout elapsed since last event when using ValueChangeMode.TIMEOUT");
     }
 
@@ -202,9 +207,12 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private boolean isMessageUpdated() {
         String messageText = message.getText();
         boolean isUpdated = !message.getText().equals(lastMessageText);
-        System.err.println(++count + " lastMessage:" + lastMessageText + " newMessage:" + messageText);
         lastMessageText = messageText;
         return isUpdated;
+    }
+
+    private void waitUntilMessageUpdated() {
+        waitUntilMessageUpdated(2000, "It took more than 2000ms to change the message, probably CI performance problems");
     }
 
     private void waitUntilMessageUpdated(long timeout, String failMessage) {
