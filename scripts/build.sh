@@ -54,11 +54,12 @@ tcStatus() {
 
 saveFailedTests() {
   try=$1
-  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
+  failedMethods=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*:(.*)\((.*)\).*,$2.$1,g' | sort -u`
+  failed=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*:(.*)\((.*)\).*,$2,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
   ### collect tests numbers for TC status
-  ncompleted=`grep 'Tests run: ' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$3} END { print SUM }'`
-  nskipped=`grep 'Tests run: ' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$9} END { print SUM }'`
+  ncompleted=`grep 'Tests run: ' vaadin*/*flow/target/surefire-reports/*.txt integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$3} END { print SUM }'`
+  nskipped=`grep 'Tests run: ' vaadin*/*flow/target/surefire-reports/*.txt integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$9} END { print SUM }'`
   if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$try
@@ -187,18 +188,16 @@ else
   if [ "$nfailed" -gt 0 ]
   then
       ## Give a second try to failed tests
-      tcLog "There were $nfailed IT classes: "
-      echo "$failed"
+      tcLog "There were $nfailed failed IT classes in first round."
+      echo "$failedMethods"
+
       rerunFailed=$nfailed
-
-      set -x
-
       if [ "$nfailed" -le 15 ]
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
         cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dit.test=$failed $(reuse_browser false)"
-        tcLog "Re-Running $nfailed IT classes ..."
+        tcLog "Re-Running $nfailed failed IT classes ..."
         echo $cmd
         $cmd
         error=$?
