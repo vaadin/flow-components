@@ -84,6 +84,7 @@ public class ComboBoxView extends DemoView {
         configurationForRequired(); // Validation
         customFiltering(); // Filtering
         filteringAndSortingWithDataView();
+        filteringWithTypesOtherThanString();
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
         themeVariantsTextAlign(); // Theme variants
@@ -549,6 +550,35 @@ public class ComboBoxView extends DemoView {
         personAgeFilter.setWidth(WIDTH_STRING);
         addCard("Filtering", "Filtering and Sorting with Data View", comboBox,
                 personAgeFilter, sortPersons);
+    }
+
+    private void filteringWithTypesOtherThanString() {
+        // begin-source-example
+        // source-example-heading: Filtering with types other than String
+        // PersonService can be found:
+        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
+        PersonService personService = new PersonService(500);
+
+        ComboBox<Person> comboBox = new ComboBox<>("Person");
+        comboBox.setPlaceholder("Enter minimum age to filter");
+        comboBox.setPattern("^\\d+$");
+        comboBox.setPreventInvalidInput(true);
+
+        // Configuring fetch callback with a filter converter, so entered filter
+        // strings can refer also to other typed properties like age (integer):
+        comboBox.setItemsWithFilterConverter(
+                query -> personService.fetchOlderThan(
+                        query.getFilter().orElse(null), query.getOffset(),
+                        query.getLimit()),
+                ageStr -> ageStr.trim().isEmpty() ? null
+                        : Integer.parseInt(ageStr)
+            );
+        // end-source-example
+        comboBox.setItemLabelGenerator(person -> person.getFirstName() + " "
+                + person.getLastName() + " - " + person.getAge());
+        comboBox.setClearButtonVisible(true);
+        comboBox.setWidth(WIDTH_STRING);
+        addCard("Filtering", "Filtering with types other than String", comboBox);
     }
 
     private void customOptionsDemo() {
