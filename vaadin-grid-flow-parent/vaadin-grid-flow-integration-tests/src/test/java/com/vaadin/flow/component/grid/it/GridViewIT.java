@@ -1033,7 +1033,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void bufferedEditor_validName() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1099,7 +1098,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void notBufferedEditor() {
         openTabAndCheckForErrors("grid-editor");
 
