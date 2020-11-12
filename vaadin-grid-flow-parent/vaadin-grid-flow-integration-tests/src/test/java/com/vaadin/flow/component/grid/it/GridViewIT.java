@@ -15,23 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.ColumnTextAlign;
-import com.vaadin.flow.component.grid.testbench.GridColumnElement;
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.tests.TabbedComponentDemoTest;
-import com.vaadin.testbench.TestBenchElement;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -41,10 +24,26 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.testbench.TestBenchElement;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Integration tests for the {@link GridView}.
  */
-public class GridViewIT extends TabbedComponentDemoTest {
+public class GridViewIT extends GridViewBase {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
@@ -434,7 +433,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         getCellContent(grid.getCell(1, 2)).click();
         assertAmountOfOpenDetails(grid, 1);
-        Assert.assertThat(
+        assertThat(
                 grid.findElement(By.className("custom-details"))
                         .getAttribute("innerHTML"),
                 CoreMatchers.containsString("Hi! My name is <b>Person 2!</b>"));
@@ -444,7 +443,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         getCellContent(grid.getCell(1, 2)).click();
         getCellContent(grid.getCell(3, 2)).click();
-        Assert.assertThat(
+        assertThat(
                 "Details should be closed after clicking the button again",
                 grid.findElement(By.className("custom-details"))
                         .getAttribute("innerHTML"),
@@ -645,12 +644,12 @@ public class GridViewIT extends TabbedComponentDemoTest {
         List<WebElement> columnGroups = grid
                 .findElements(By.tagName("vaadin-grid-column-group"));
 
-        Assert.assertThat(
+        assertThat(
                 "The first column group should have 'Basic Information' header text",
                 columnGroups.get(0).getAttribute("innerHTML"),
                 CoreMatchers.containsString("Basic Information"));
 
-        Assert.assertThat(
+        assertThat(
                 "The second column group should have 'Address Information' header text",
                 columnGroups.get(1).getAttribute("innerHTML"),
                 CoreMatchers.containsString("Address Information"));
@@ -658,7 +657,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         List<WebElement> columns = grid
                 .findElements(By.tagName("vaadin-grid-column"));
 
-        Assert.assertThat("There should be a cell with the renderered footer",
+        assertThat("There should be a cell with the renderered footer",
                 columns.get(0).getAttribute("innerHTML"),
                 CoreMatchers.containsString("Total: 500 people"));
     }
@@ -839,7 +838,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         filteringField.sendKeys("sek");
         blur();
 
-        Assert.assertThat(
+        assertThat(
                 "The first company name should contain the applied filter string",
                 grid.getCell(0, 0).getInnerHTML().toLowerCase(),
                 CoreMatchers.containsString("sek"));
@@ -947,159 +946,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void bufferedEditor_invalidName() {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class).id("buffered-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-        String personName = nameCell.getText();
-
-        WebElement edit = findElement(By.className("edit"));
-        edit.click();
-
-        // Write invalid name. There should be a status message with validation
-        // error.
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-
-        nameInput.clear();
-        nameInput.sendKeys("foo");
-        nameInput.sendKeys(Keys.ENTER);
-
-        GridTHTDElement editColumn = row.getCell(grid.getAllColumns().get(2));
-        editColumn.$("vaadin-button").attribute("class", "save").first()
-                .click();
-
-        String validation = findElement(By.id("validation")).getText();
-        // There is an error in the status message
-        Assert.assertEquals("Name should start with Person", validation);
-
-        WebElement msg = findElement(By.id("buffered-editor-msg"));
-        // No save events
-        Assert.assertEquals("", msg.getText());
-
-        editColumn.$("vaadin-button").attribute("class", "cancel").first()
-                .click();
-
-        Assert.assertEquals(personName, nameCell.getText());
-        // Still no any save events
-        Assert.assertEquals("", msg.getText());
-    }
-
-    @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void bufferedEditor_cancelWithEscape() {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class).id("buffered-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-        String personName = nameCell.getText();
-
-        WebElement edit = findElement(By.className("edit"));
-        edit.click();
-
-        // Test cancel by ESC
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-
-        nameInput.clear();
-        nameInput.sendKeys("foo");
-        nameInput.sendKeys(Keys.ESCAPE);
-
-        Assert.assertFalse("Edit button should be visible",
-                nameCell.$("vaadin-text-field").exists());
-
-        nameColumn = grid.getColumn("Name");
-        nameCell = row.getCell(nameColumn);
-        Assert.assertEquals("Field name should not have changed.", personName,
-                nameCell.getText());
-
-    }
-
-    @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void bufferedEditor_validName() {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class).id("buffered-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-        String personName = nameCell.getText();
-
-        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
-
-        WebElement edit = findElement(By.className("edit"));
-        edit.click();
-
-        // check that shown Edit buttons are disabled
-        WebElement nextEditButton = grid.getRow(1)
-                .getCell(grid.getAllColumns().get(2)).$("vaadin-button")
-                .first();
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                nextEditButton.getAttribute("disabled"));
-
-        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
-
-        TestBenchElement subscriberCheckbox = subscriberCell
-                .$("vaadin-checkbox").first();
-        boolean isSubscriber = subscriberCheckbox
-                .getAttribute("checked") != null;
-
-        // Write valid name.
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-
-        nameInput.sendKeys("foo");
-        nameInput.sendKeys(Keys.ENTER);
-
-        subscriberCheckbox.click();
-
-        GridColumnElement editColumn = grid.getAllColumns().get(2);
-
-        TestBenchElement save = row.getCell(editColumn).$("vaadin-button")
-                .first();
-        save.click();
-
-        String validation = findElement(By.id("validation")).getText();
-        // Validation is empty
-        Assert.assertEquals("", validation);
-
-        // New data should be shown in the grid cell
-        Assert.assertEquals(personName + "foo", nameCell.getText());
-        Assert.assertEquals(String.valueOf(!isSubscriber),
-                subscriberCell.getText());
-
-        // There should be an event for the edited person
-        WebElement msg = findElement(By.id("buffered-editor-msg"));
-        Assert.assertEquals(personName + "foo, " + !isSubscriber,
-                msg.getText());
-    }
-
-    @Test
     public void notBufferedEditor() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1154,94 +1000,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void dynamicEditor_bufferedMode() {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-
-        GridColumnElement editColumn = grid.getAllColumns().get(3);
-
-        WebElement editButon = row.getCell(editColumn).$("vaadin-button")
-                .first();
-        editButon.click();
-
-        // check that shown Edit buttons are disabled
-        WebElement nextEditButton = grid.getRow(1).getCell(editColumn)
-                .$("vaadin-button").first();
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                nextEditButton.getAttribute("disabled"));
-
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-
-        nameInput.sendKeys("foo");
-        nameInput.sendKeys(Keys.ENTER);
-
-        GridTHTDElement email = row.getCell(grid.getAllColumns().get(2));
-
-        TestBenchElement emailField = email.$("vaadin-text-field").first();
-        TestBenchElement emailInput = emailField.$("input").first();
-
-        // clear the email and type wrong value
-        emailInput.clear();
-        emailInput.sendKeys("bar");
-        emailInput.sendKeys(Keys.ENTER);
-
-        TestBenchElement save = row.getCell(editColumn).$("vaadin-button")
-                .first();
-        save.click();
-
-        // Check there is a validation error
-        WebElement validation = findElement(By.id("email-validation"));
-        Assert.assertEquals("Invalid email", validation.getText());
-
-        GridTHTDElement subscriberCell = row
-                .getCell(grid.getAllColumns().get(1));
-
-        // Switch subscriber value off
-        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
-        checkbox.click();
-
-        // email field should become read-only
-        emailField = email.$("vaadin-text-field").first();
-        emailInput = emailField.$("input").first();
-
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                emailInput.getAttribute("readonly"));
-
-        Assert.assertEquals("Not a subscriber",
-                emailInput.getAttribute("value"));
-
-        // Switch subscriber value on
-        checkbox = subscriberCell.$("vaadin-checkbox").first();
-        checkbox.click();
-
-        emailField = email.$("vaadin-text-field").first();
-        emailInput = emailField.$("input").first();
-        emailInput.sendKeys("@example.com");
-        emailInput.sendKeys(Keys.ENTER);
-        save.click();
-
-        WebElement updatedItemMsg = findElement(
-                By.id("buffered-dynamic-editor-msg"));
-
-        waitUntil(driver -> !updatedItemMsg.getText().isEmpty());
-
-        Assert.assertEquals("Person 1foo, true, bar@example.com",
-                updatedItemMsg.getText());
-    }
-
-    @Test
     public void dynamicEditor_bufferedMode_useKeyboardToSwitchEditorComponent() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -1254,187 +1012,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
         grid.getRow(0).getCell(editColumn).$("vaadin-button").first().click();
 
         assertBufferedEditing(grid);
-    }
-
-    @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void dynamicEditor_bufferedMode_updateSubscriberValue_useKeyboardToSwitchEditorComponent() {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        // start to edit
-        GridColumnElement editColumn = grid.getAllColumns().get(3);
-        row.getCell(editColumn).$("vaadin-button").first().click();
-
-        GridTHTDElement subscriberCell = row
-                .getCell(grid.getAllColumns().get(1));
-        subscriberCell.$("vaadin-checkbox").first().click();
-
-        GridTHTDElement nameCell = row.getCell(grid.getColumn("Name"));
-
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-        nameInput.sendKeys(Keys.TAB);
-
-        // skip checkbox and focus the email field
-        new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
-
-        TestBenchElement emailField = row.getCell(grid.getAllColumns().get(2))
-                .$("vaadin-text-field").first();
-        Assert.assertNotNull(emailField.getAttribute("focused"));
-        Assert.assertEquals("Not a subscriber",
-                emailField.getAttribute("value"));
-
-        subscriberCell.$("vaadin-checkbox").first().click();
-
-        assertBufferedEditing(grid);
-    }
-
-    @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void dynamicNotBufferedEditor() throws InterruptedException {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class)
-                .id("not-buffered-dynamic-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-        String personName = nameCell.getText();
-
-        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
-
-        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
-
-        row.doubleClick();
-
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-        nameInput.sendKeys("foo");
-        nameInput.sendKeys(Keys.ENTER);
-
-        GridTHTDElement emailCell = row.getCell(grid.getAllColumns().get(2));
-        Assert.assertEquals(1, emailCell.$("vaadin-text-field").all().size());
-
-        TestBenchElement subscriberCheckbox = subscriberCell
-                .$("vaadin-checkbox").first();
-        subscriberCheckbox.click();
-
-        // The editor component should disappear for non-subscriber
-        Assert.assertEquals(0, emailCell.$("vaadin-text-field").all().size());
-
-        subscriberCheckbox.click();
-        // Now it should return back
-        Assert.assertEquals(1, emailCell.$("vaadin-text-field").all().size());
-
-        TestBenchElement emailInput = emailCell.$("vaadin-text-field").first()
-                .$("input").first();
-        emailInput.clear();
-        emailInput.sendKeys("bar@example.com");
-        emailCell.sendKeys(Keys.ENTER);
-
-        // click on another row
-        grid.getRow(1).click(10, 10);
-
-        // New data should be shown in the grid cell
-        Assert.assertEquals(personName + "foo", nameCell.getText());
-        Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
-        Assert.assertEquals("bar@example.com",
-                row.getCell(grid.getAllColumns().get(2)).getText());
-
-        // The edited person should have new data
-        WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals(personName + "foo, true, bar@example.com",
-                msg.getText());
-    }
-
-    @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void dynamicNotBufferedEditor_navigateUsingKeyboard()
-            throws InterruptedException {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class)
-                .id("not-buffered-dynamic-editor");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-        String personName = nameCell.getText();
-
-        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
-
-        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
-
-        row.doubleClick();
-
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
-
-        nameInput.sendKeys("foo");
-        nameInput.sendKeys(Keys.ENTER);
-        nameInput.click();
-        nameInput.sendKeys(Keys.TAB);
-
-        new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
-
-        new Actions(getDriver())
-                .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
-                .sendKeys("org").build().perform();
-
-        // click on another row
-        grid.getRow(1).click(10, 10);
-
-        // New data should be shown in the grid cell
-        Assert.assertEquals(personName + "foo", nameCell.getText());
-        Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
-        Assert.assertEquals("mailss@example.org",
-                row.getCell(grid.getAllColumns().get(2)).getText());
-
-        // The edited person should have new data
-        WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals(personName + "foo, true, mailss@example.org",
-                msg.getText());
-    }
-
-    @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
-    public void dynamicNotBufferedEditor_closeEditorUsingKeyboard()
-            throws InterruptedException {
-        GridElement grid = assertCloseEditorUsingKeyBoard(
-                "not-buffered-dynamic-editor");
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement emailColumn = grid.getColumn("E-mail");
-        GridTHTDElement emailCell = row.getCell(emailColumn);
-
-        row.doubleClick();
-
-        TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
-
-        TestBenchElement emailInput = emailField.$("input").first();
-        emailInput.click();
-        emailInput.sendKeys(Keys.TAB);
-        assertNotBufferedEditorClosed(grid);
     }
 
     @Test
@@ -1491,68 +1068,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
         $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item").get(subMenuIndex).click();
     }
 
-    private void assertElementHasFocus(WebElement element) {
-        Assert.assertTrue("Element should have focus",
-                (Boolean) executeScript(
-                        "return document.activeElement === arguments[0]",
-                        element));
-    }
-
-    private GridElement assertCloseEditorUsingKeyBoard(String gridId) {
-        openTabAndCheckForErrors("grid-editor");
-
-        GridElement grid = $(GridElement.class).id(gridId);
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-
-        row.doubleClick();
-
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        nameInput.click();
-
-        nameInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
-
-        assertNotBufferedEditorClosed(grid);
-
-        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
-        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
-
-        row.doubleClick();
-
-        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
-        checkbox.click();
-
-        checkbox.sendKeys(Keys.TAB);
-
-        assertNotBufferedEditorClosed(grid);
-
-        // restore the previous state
-        row.doubleClick();
-
-        checkbox = subscriberCell.$("vaadin-checkbox").first();
-        checkbox.click();
-
-        // close the editor
-        grid.getRow(1).click(5, 5);
-
-        return grid;
-    }
-
-    private void assertNotBufferedEditorClosed(GridElement grid) {
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTRElement row = grid.getRow(0);
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-        Assert.assertEquals(
-                "Unexpected shown text field in the name cell when the editor should be closed",
-                0, nameCell.$("vaadin-text-field").all().size());
-    }
 
     private void assertFirstCells(GridElement grid, String... cellContents) {
         IntStream.range(0, cellContents.length).forEach(i -> {
@@ -1572,7 +1087,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     private void assertRendereredContent(String expected, String content) {
-        Assert.assertThat(content,
+        assertThat(content,
                 CoreMatchers.allOf(
                         CoreMatchers.startsWith("<flow-component-renderer"),
                         CoreMatchers.containsString(expected),
@@ -1628,17 +1143,17 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         String html = headerCell.getInnerHTML();
         if (withSorter) {
-            Assert.assertThat(html,
+            assertThat(html,
                     CoreMatchers.containsString("<vaadin-grid-sorter"));
         } else {
-            Assert.assertThat(html, CoreMatchers
+            assertThat(html, CoreMatchers
                     .not(CoreMatchers.containsString("<vaadin-grid-sorter")));
         }
         if (componentRenderer) {
-            Assert.assertThat(html,
+            assertThat(html,
                     CoreMatchers.containsString("<flow-component-renderer"));
         }
-        Assert.assertThat(html, CoreMatchers.containsString(text));
+        assertThat(html, CoreMatchers.containsString(text));
     }
 
     private boolean hasComponentRendereredHeaderCell(WebElement grid,
@@ -1711,41 +1226,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
                         "return arguments[0].querySelectorAll('vaadin-grid-column')["
                                 + column + "].textAlign;",
                         grid));
-    }
-
-    private void assertBufferedEditing(GridElement grid) {
-        GridTRElement row = grid.getRow(0);
-
-        GridColumnElement nameColumn = grid.getColumn("Name");
-        GridTHTDElement nameCell = row.getCell(nameColumn);
-
-        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
-
-        TestBenchElement nameInput = nameField.$("input").first();
-        nameInput.click();
-
-        nameInput.sendKeys("foo");
-
-        // skip checkbox and focus the email field
-        new Actions(getDriver()).sendKeys(Keys.TAB).sendKeys(Keys.TAB).build()
-                .perform();
-
-        // change the e-mail to .org
-        new Actions(getDriver())
-                .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
-                .sendKeys("org").build().perform();
-
-        // press enter on the save button
-        new Actions(getDriver()).sendKeys(Keys.TAB).sendKeys(Keys.ENTER).build()
-                .perform();
-
-        WebElement updatedItemMsg = findElement(
-                By.id("buffered-dynamic-editor-msg"));
-
-        waitUntil(driver -> !updatedItemMsg.getText().isEmpty());
-
-        Assert.assertEquals("Person 1foo, true, mailss@example.org",
-                updatedItemMsg.getText());
     }
 
     private void verifyOpened(int overlayNumber) {
