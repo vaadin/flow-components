@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -39,7 +38,6 @@ public class FormLayoutIT extends ComponentDemoTest {
     }
 
     @Test
-    @Ignore
     /*
      * The test works locally but fails on TC. Disabling it for now.
      *
@@ -53,43 +51,31 @@ public class FormLayoutIT extends ComponentDemoTest {
                 .findElements(By.tagName("vaadin-text-field"));
         Assert.assertEquals(3, textFields.size());
 
+        // 3 columns, all should be horizontally aligned (tolerance of some pixels)
         getDriver().manage().window().setSize(new Dimension(1000, 1000));
-
-        // 3 columns, all should be horizontally aligned (tolerance of 2 pixels
-        // given)
         int y2 = textFields.get(2).getLocation().getY();
         int y1 = textFields.get(1).getLocation().getY();
-
         Assert.assertTrue("All 3 columns should be horizontally aligned y1="
                 + y1 + " y2=" + y2, Math.abs(y2 - y1) < 2);
-        Assert.assertTrue(Math.abs(textFields.get(1).getLocation().getY()
-                - textFields.get(0).getLocation().getY()) < 2);
+        System.err.println(y1 + " " + y2);
 
-        getDriver().manage().window().setSize(new Dimension(380, 620));
 
-        // window resized, should be in 2 column mode, last textfield below
-        // other two
+        // window resized, should be in 2 column mode, two below one
+        getDriver().manage().window().setSize(new Dimension(620, 620));
         y2 = textFields.get(2).getLocation().getY();
         y1 = textFields.get(1).getLocation().getY();
-
+        System.err.println(y1 + " " + y2);
         Assert.assertTrue(
                 "Layout should be in 2 column mode, last field should be below the first two y1="
-                        + y1 + " y2=" + y2, y1 > y1);
-        Assert.assertTrue(textFields.get(2).getLocation().getY() > textFields
-                .get(0).getLocation().getY());
-
-        getDriver().manage().window().setSize(new Dimension(300, 620));
+                        + y1 + " y2=" + y2, y2 > y1 + 2);
 
         // resized to 1 column mode, fields should be arranged below one another
-        y2 = textFields.get(2).getLocation().getY();
+        getDriver().manage().window().setSize(new Dimension(300, 620));
         y1 = textFields.get(1).getLocation().getY();
-        Assert.assertTrue(
-                "Layout should be in 1 column mode, all fields should be below one another y1="
-                        + y1 + " y2=" + y2, y2 > y1);
-
         int y0 = textFields.get(0).getLocation().getY();
-        y1 = textFields.get(1).getLocation().getY();
-        Assert.assertTrue("y0=" + y0 + " y1=" + y1, y1 > y0);
+        Assert.assertTrue(
+                "Layout should be in 1 column mode, all fields should be below one another y0="
+                        + y0 + " y1=" + y1, y1 > y0);
     }
 
     @Test
