@@ -203,7 +203,7 @@ else
         error=$?
         tcLog "Re-Run exited with code $error"
         saveFailedTests run-2
-        tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried), ignored: $nskipped"
+        tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried, $nfailed failed), ignored: $nskipped"
       else
         tcStatus $error "(IT1)Test failed: $nfailed" "(IT1)Tests passed: $ncompleted (more than 15 failed), ignored: $nskipped"
       fi
