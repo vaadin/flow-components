@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -24,9 +23,9 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/disabled-grid")
 public class DisabledGridIT extends AbstractComponentIT {
@@ -97,7 +96,6 @@ public class DisabledGridIT extends AbstractComponentIT {
         assertEmptyMessage(message);
     }
 
-    @Ignore // https://github.com/vaadin/flow/issues/3998
     @Test
     public void gridIsDisabled_componentsInHeaderHaveDisabledAttribute() {
         open();

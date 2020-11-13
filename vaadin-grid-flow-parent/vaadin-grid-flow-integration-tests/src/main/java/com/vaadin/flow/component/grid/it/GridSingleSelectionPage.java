@@ -108,9 +108,11 @@ public class GridSingleSelectionPage extends VerticalLayout {
                 ITEMS_GRID);
         Button text = new Button();
         grid.addSelectionListener( e -> {
-            text.setId("item"+ e.getFirstSelectedItem().get());
-            text.setText("The row "+ e.getFirstSelectedItem().get() + " is selected");
-            add(text);
+            if (e.getFirstSelectedItem().isPresent()) {
+                text.setId("item"+ e.getFirstSelectedItem().get());
+                text.setText("The row "+ e.getFirstSelectedItem().get() + " is selected");
+                add(text);
+            }
         });
         return grid;
     }
