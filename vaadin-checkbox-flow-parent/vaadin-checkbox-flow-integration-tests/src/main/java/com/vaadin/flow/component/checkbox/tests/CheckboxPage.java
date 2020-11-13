@@ -20,15 +20,12 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test view for {@link Checkbox}.
  */
-@Theme(Lumo.class)
 @Route("vaadin-checkbox/checkbox-test")
 public class CheckboxPage extends Div {
 
