@@ -25,7 +25,7 @@ if [ -z "$modules" -a -n "$PR" ]
 then
   modified=`curl -s https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR/files \
     | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
-  if [ `echo "$modules" | wc -w` -lt 5 ]
+  if [ `echo "$modified" | wc -w` -lt 5 ]
   then
     for i in $modified
     do
