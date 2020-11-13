@@ -74,19 +74,19 @@ public class IconIT extends AbstractComponentIT {
     @Test
     public void allAvailableIcons() {
         WebElement allIcons = findElement(By.id("all-icons"));
-        List<WebElement> children = allIcons
-                .findElements(By.tagName("vaadin-vertical-layout"));
+        List<WebElement> labels = allIcons
+                .findElements(By.tagName("label"));
+        List<WebElement> icons = allIcons
+                .findElements(By.tagName("iron-icon"));
 
-        Assert.assertEquals(VaadinIcon.values().length, children.size());
+        Assert.assertEquals(VaadinIcon.values().length, labels.size());
+        Assert.assertEquals(VaadinIcon.values().length, icons.size());
 
-        for (int i = 0; i < children.size(); i++) {
-            WebElement icon = children.get(i)
-                    .findElement(By.tagName("iron-icon"));
-            WebElement label = children.get(i).findElement(By.tagName("label"));
+        for (int i = 0; i < labels.size(); i+=17) {
+            WebElement label = labels.get(i);
+            WebElement icon = icons.get(i);
             String enumName = VaadinIcon.values()[i].name();
-
             Assert.assertEquals(enumName, label.getText());
-
             assertIconProperty(icon, "vaadin",
                     enumName.toLowerCase().replace('_', '-'));
         }

@@ -10,14 +10,31 @@ then
         FORK_COUNT=`echo $i | cut -d = -f2`;;
       parallel=*)
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
-	  testMode=*)
-	    TEST_MODE=`echo $i | cut -d = -f2`;;
+      pr=*)
+        PR=`echo $i | cut -d = -f2`;;
+      testMode=*)
+	      TEST_MODE=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
         elements="$elements $i"
        ;;
      esac
   done
+fi
+
+## compute modules that were modified in this PR
+if [ -z "$modules" -a -n "$PR" ]
+then
+  modified=`curl -s https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR/files \
+    | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
+  if [ `echo "$modified" | wc -w` -lt 5 ]
+  then
+    for i in $modified
+    do
+      modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
+      elements="$elements $i"
+    done
+  fi
 fi
 
 tcMsg() (
@@ -39,12 +56,12 @@ tcStatus() {
 
 saveFailedTests() {
   try=$1
-  testFolder=$2
-  failed=`egrep '<<< ERROR|<<< FAILURE' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*/(.*).txt:.*,$1,g' | sort -u`
+  failedMethods=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*:(.*)\((.*)\).*,$2.$1,g' | sort -u`
+  failed=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*:(.*)\((.*)\).*,$2,g' | sort -u`
   nfailed=`echo "$failed" | wc -w`
   ### collect tests numbers for TC status
-  ncompleted=`grep -Poh 'Tests run:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'`
-  nskipped=`grep -Poh 'Skipped:\K[^,]*' integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$1} END { print SUM }'` 
+  ncompleted=`grep 'Tests run: ' vaadin*/*flow/target/surefire-reports/*.txt integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$3} END { print SUM }'`
+  nskipped=`grep 'Tests run: ' vaadin*/*flow/target/surefire-reports/*.txt integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$9} END { print SUM }'`
   if [ "$nfailed" -ge 1 ]
   then
     mkdir -p integration-tests/error-screenshots/$testFolder/$try
@@ -80,16 +97,23 @@ type npm && npm --version
 type pnpm && pnpm --version
 uname -a
 
+## Compile all java files including tests in ITs modules
+cmd="mvn clean test-compile -DskipFrontend -B -q $args"
+tcLog "Compiling flow components - $cmd"
+$cmd || tcStatus 1 "Compilation failed"
+
+## Notify TC that we are going to run maven tests
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
-cmd="mvn install -Drelease -B -q -T $FORK_COUNT"
+## Compile and install all modules excluding ITs
+cmd="mvn install -Drelease -B -q -T $FORK_COUNT $args"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
 then
   tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
-  sleep 30
+  sleep 15
   $cmd || tcStatus 1 "Unit-Testing failed"
 fi
 
@@ -112,7 +136,7 @@ $cmd || tcStatus 1 "Merging ITs failed"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 if [ -n "$SAUCE_USER" ]
 then
-   test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
+   test -n "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 echo "$args"
@@ -148,15 +172,15 @@ fi
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-  tcLog "Running module ITs - mvn clean verify -pl ..."
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  tcLog "Running module ITs ($elements) - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
-  tcLog "Running merged ITs under $testMode - mvn verify -B -D$testMode -Drelease -pl integration-tests/$pomFile ..."
+  cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests/$pomFile ..."
   echo $cmd
   $cmd
   error=$?
@@ -166,22 +190,26 @@ else
 
   if [ "$nfailed" -gt 0 ]
   then
-    tcLog "There were $nfailed Failed Tests: "
-    echo "$failed"
-    rerunFailed=$nfailed
+      ## Give a second try to failed tests
+      tcLog "There were $nfailed failed IT classes in first round."
+      echo "$failedMethods"
 
-    if [ "$nfailed" -le 15 ]
-    then
-      failed=`echo "$failed" | tr '\n' ','`
-      mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-      cmd="mvn verify -B -q -D$testMode -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dit.test=$failed $(reuse_browser false)"
-      tcLog "Re-Running $nfailed failed tests($testMode) ..."
-      echo $cmd
-      $cmd
-      error=$?
-      saveFailedTests run-2 $testMode
-      tcStatus $error "Test failed: $nfailed" "($testMode)Tests passed: $ncompleted, ignored: $nskipped (there were $rerunFailed tests failing on the 1st run, but passed on the 2nd try.)"
-    fi
+      rerunFailed=$nfailed
+      if [ "$nfailed" -le 15 ]
+      then
+        failed=`echo "$failed" | tr '\n' ','`
+        mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
+        cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dtest=none -Dit.test=$failed $(reuse_browser false)"
+        tcLog "Re-Running $nfailed failed IT classes ..."
+        echo $cmd
+        $cmd
+        error=$?
+        tcLog "Re-Run exited with code $error"
+        saveFailedTests run-2
+        tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried, $nfailed failed), ignored: $nskipped"
+      else
+        tcStatus $error "(IT1)Test failed: $nfailed" "(IT1)Tests passed: $ncompleted (more than 15 failed), ignored: $nskipped"
+      fi
   fi
   exit $error
 fi
