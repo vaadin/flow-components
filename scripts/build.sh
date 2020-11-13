@@ -11,7 +11,7 @@ then
       parallel=*)
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
       pr=*)
-        pr=`echo $i | cut -d = -f2`;;
+        PR=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -21,9 +21,9 @@ then
 fi
 
 ## compute modules that were modified in this PR
-if [ -z "$modules" -a -n "$pr" ]
+if [ -z "$modules" -a -n "$PR" ]
 then
-  modified=`curl -s https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$pr/files \
+  modified=`curl -s https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR/files \
     | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
   if [ `echo "$modules" | wc -w` -lt 5 ]
   then
