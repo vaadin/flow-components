@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toMap;
 
 @Route(value = "vaadin-accordion")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class MainView extends HorizontalLayout {
 
     public static final String ACCORDION_EVENTS = "accordion-events";

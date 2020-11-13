@@ -26,7 +26,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route(value = "vaadin-crud/customsearch")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class CustomSearchView extends VerticalLayout {
 
     final private List<Person> data = PersonCrudDataProvider.generatePersonsList();

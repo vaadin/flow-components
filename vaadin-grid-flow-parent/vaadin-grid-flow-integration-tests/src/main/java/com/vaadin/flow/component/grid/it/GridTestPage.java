@@ -42,7 +42,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  *
  */
 @Route("vaadin-grid-test")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class GridTestPage extends Div {
 
     private static class Item implements Serializable {

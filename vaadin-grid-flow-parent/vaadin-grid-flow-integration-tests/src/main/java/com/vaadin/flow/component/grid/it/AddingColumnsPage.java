@@ -41,7 +41,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * the Grid has already been attached and rendered.
  */
 @Route("vaadin-grid/adding-columns")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class AddingColumnsPage extends Div {
 
     private Grid<Person> grid = new Grid<>();

@@ -9,7 +9,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class AppRouterLayout extends AppLayout {
 
     public static final String CUSTOM_TOGGLE_ID = "toggle-with-icon";

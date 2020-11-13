@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test view for {@link Checkbox}.
  */
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 @Route("vaadin-checkbox/checkbox-test")
 public class CheckboxPage extends Div {
 

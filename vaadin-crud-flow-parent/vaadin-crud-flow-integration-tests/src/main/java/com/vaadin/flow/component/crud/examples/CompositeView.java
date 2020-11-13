@@ -20,7 +20,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route(value = "vaadin-crud/composite")
-@Theme(Lumo.class)
+@Theme(themeClass =Lumo.class)
 public class CompositeView extends Div {
 
     public CompositeView() {

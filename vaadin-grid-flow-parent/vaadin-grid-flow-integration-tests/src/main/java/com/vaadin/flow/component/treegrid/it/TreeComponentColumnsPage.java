@@ -40,7 +40,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * the TreeGrid is added.
  */
 @Route("vaadin-grid/tree-component-columns")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class TreeComponentColumnsPage extends Div {
 
     public TreeComponentColumnsPage() {

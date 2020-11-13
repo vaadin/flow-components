@@ -25,7 +25,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route("vaadin-grid/scroll-over-100k")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class GridTestScrollingOver100kLines extends Div {
 
     public GridTestScrollingOver100kLines() {

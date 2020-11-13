@@ -32,7 +32,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * the Grid is added.
  */
 @Route("vaadin-grid/component-columns")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class ComponentColumnsPage extends Div {
 
     public ComponentColumnsPage() {

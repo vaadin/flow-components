@@ -19,7 +19,7 @@ import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 
 @Route(value = "vaadin-crud")
-@Theme(Lumo.class)
+@Theme(themeClass = Lumo.class)
 public class MainView extends VerticalLayout {
 
     final VerticalLayout eventsPanel;
