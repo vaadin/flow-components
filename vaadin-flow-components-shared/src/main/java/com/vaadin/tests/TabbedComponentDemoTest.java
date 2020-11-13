@@ -1,9 +1,10 @@
 package com.vaadin.tests;
 
+import java.util.List;
+
 import org.junit.AfterClass;
 import org.openqa.selenium.remote.DesiredCapabilities;
-
-import java.util.List;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public abstract class TabbedComponentDemoTest extends com.vaadin.flow.demo.TabbedComponentDemoTest {
 
@@ -27,5 +28,10 @@ public abstract class TabbedComponentDemoTest extends com.vaadin.flow.demo.Tabbe
     @AfterClass
     public static void runAfterTest() {
         browser.clear();
+    }
+
+    @Override
+    protected <T> T waitUntil(ExpectedCondition<T> condition) {
+        return super.waitUntil(condition, 120);
     }
 }
