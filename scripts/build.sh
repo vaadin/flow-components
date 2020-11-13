@@ -96,7 +96,7 @@ type pnpm && pnpm --version
 uname -a
 
 ## Compile all java files including tests in ITs modules
-cmd="mvn clean test-compile -DskipFrontend -B -q"
+cmd="mvn clean test-compile -DskipFrontend -B -q $args"
 tcLog "Compiling flow components - $cmd"
 $cmd || tcStatus 1 "Compilation failed"
 
@@ -105,7 +105,7 @@ tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
 ## Compile and install all modules excluding ITs
-cmd="mvn install -Drelease -B -q -T $FORK_COUNT"
+cmd="mvn install -Drelease -B -q -T $FORK_COUNT $args"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
@@ -113,7 +113,7 @@ then
   ## Some times install fails because of maven multithread race condition
   ## running a second time it is mitigated
   tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
-  sleep 30
+  sleep 15
   $cmd || tcStatus 1 "Unit-Testing failed"
 fi
 
@@ -141,7 +141,7 @@ $cmd || tcStatus 1 "Merging ITs failed"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 if [ -n "$SAUCE_USER" ]
 then
-   test -n  "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
+   test -n "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 
@@ -169,14 +169,14 @@ reuse_browser() {
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
   tcLog "Running module ITs ($elements) - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
@@ -196,7 +196,7 @@ else
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dit.test=$failed $(reuse_browser false)"
+        cmd="mvn verify -B -q -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dtest=none -Dit.test=$failed $(reuse_browser false)"
         tcLog "Re-Running $nfailed failed IT classes ..."
         echo $cmd
         $cmd
