@@ -307,6 +307,7 @@
           </executions>
           <configuration>
             <forkCount>${failsafe.forkCount}</forkCount>
+            <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
             <reuseForks>true</reuseForks>
             <systemPropertyVariables>
               <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>

@@ -1,16 +1,16 @@
 package com.vaadin.flow.component.crud.test;
 
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import java.util.List;
 
 public class BasicUseIT extends AbstractParallelTest {
 
@@ -59,20 +59,20 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
-    @Ignore("Unable to access the sorting controls in Grid")
     public void sortEnabledInGrid() {
         GridElement grid = $(GridElement.class).waitForFirst();
-        Assert.assertTrue(grid.getHeaderCell(1).$("vaadin-grid-sorter").exists());
+        Assert.assertTrue(grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").exists());
     }
 
     @Test
-    @Ignore("Unable to access the sorting controls in Grid")
     public void sortOrdersCorrect() {
         GridElement grid = $(GridElement.class).waitForFirst();
-        List<TestBenchElement> sorters = grid.getHeaderCell(1).$("vaadin-grid-sorter").all();
 
-        sorters.get(0).click(); // First name ascending
-        sorters.get(2).click(); sorters.get(2).click(); // Last name descending
+        TestBenchElement firstNameSorter = grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").get(0);
+        TestBenchElement lasttNameSorter = grid.getHeaderCellContent(0, 2).$("vaadin-grid-sorter").get(0);
+
+        firstNameSorter.click(); // First name ascending
+        lasttNameSorter.click(); lasttNameSorter.click(); // Last name descending
 
         ButtonElement showFilterButton = getTestButton("showFilter");
         showFilterButton.click();

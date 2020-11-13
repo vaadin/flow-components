@@ -89,14 +89,14 @@ public class CustomGridIT extends AbstractParallelTest {
         GridElement grid = $(GridElement.class).first();
 
         customGridClickToEditButton().click();
-        
+
         crud.getNewItemButton().ifPresent(button -> button.click());
         Assert.assertEquals("New item", getEditorHeaderText(crud));
-        
+
         crud.getEditorCancelButton().click();
         grid.getCell(0, 0).click();
-        String editorHeaderText = getEditorHeaderText(crud);
-        Assert.assertEquals("Edit item", editorHeaderText);
+
+        waitUntil((c) -> "Edit item".equals(getEditorHeaderText(crud)), 200);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class CustomGridIT extends AbstractParallelTest {
 
         crud.$("vaadin-crud-edit").first().click();
         Assert.assertEquals("Edit item", getEditorHeaderText(crud));
-        
+
         crud.getEditorCancelButton().click();
 
         newItemButton().click();

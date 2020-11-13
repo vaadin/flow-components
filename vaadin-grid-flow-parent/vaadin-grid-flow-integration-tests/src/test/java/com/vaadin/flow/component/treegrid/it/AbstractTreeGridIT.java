@@ -13,6 +13,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
     private TreeGridElement grid;
 
     public void setupTreeGrid() {
+        waitUntil(e -> $(TreeGridElement.class).exists(), 500);
         grid = $(TreeGridElement.class).first();
     }
 
@@ -107,7 +108,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
         try {
             waitUntil(test -> grid.hasRow(rowIndex) && expectedText
                     .equals(grid.getRow(rowIndex).getCell(column).getText()),
-                    20);
+                    500);
         } catch (Exception e) {
             Assert.fail(
                     String.format(
