@@ -37,7 +37,6 @@ import com.vaadin.testbench.TestBenchElement;
 public class GridView2IT extends GridViewBase {
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void bufferedEditor_invalidName() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -86,7 +85,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void bufferedEditor_cancelWithEscape() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -124,7 +122,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void bufferedEditor_validName() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -190,7 +187,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicEditor_bufferedMode() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -278,7 +274,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicEditor_bufferedMode_updateSubscriberValue_useKeyboardToSwitchEditorComponent() {
         openTabAndCheckForErrors("grid-editor");
 
@@ -319,7 +314,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicNotBufferedEditor() throws InterruptedException {
         openTabAndCheckForErrors("grid-editor");
 
@@ -383,7 +377,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicNotBufferedEditor_navigateUsingKeyboard()
             throws InterruptedException {
         openTabAndCheckForErrors("grid-editor");
@@ -437,7 +430,6 @@ public class GridView2IT extends GridViewBase {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode in TC)")
     public void dynamicNotBufferedEditor_closeEditorUsingKeyboard()
             throws InterruptedException {
         GridElement grid = assertCloseEditorUsingKeyBoard(
