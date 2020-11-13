@@ -31,7 +31,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route("vaadin-charts")
-@Theme(value = Lumo.class)
+@Theme(themeClass = Lumo.class)
 @StyleSheet("context://styles.css")
 public class MainView extends Div implements HasUrlParameter<String> {
     public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.examples.";
