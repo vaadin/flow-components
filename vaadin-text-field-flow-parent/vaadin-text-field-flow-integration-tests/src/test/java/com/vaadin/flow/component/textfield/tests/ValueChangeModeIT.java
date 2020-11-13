@@ -111,8 +111,6 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private void testValueChangeModes(WebElement field, String componentName)
             throws InterruptedException {
 
-        long last = System.currentTimeMillis();
-
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
@@ -122,8 +120,6 @@ public class ValueChangeModeIT extends AbstractComponentIT {
             // "committing" the change and firing a change-event.
             field.sendKeys(Keys.ENTER);
             waitUntilMessageUpdated();
-//            assertTrue("By default the value change events should be sent when clicking enter (ValueChangeMode should be ON_CHANGE)",
-//                    -last + (last = System.currentTimeMillis()) < 1000);
         }
 
         field.sendKeys("1");
@@ -131,9 +127,6 @@ public class ValueChangeModeIT extends AbstractComponentIT {
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
         blur();
         waitUntilMessageUpdated();
-//        assertTrue("The value change events should be sent on blur",
-//                -last + (last = System.currentTimeMillis()) < 1000);
-
 
         clickButton(componentName + "-on-blur");
 
@@ -147,15 +140,11 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
         blur();
         waitUntilMessageUpdated();
-//        assertTrue("The value change events should be sent on blur when using ValueChangeMode.ON_BLUR",
-//                -last + (last = System.currentTimeMillis()) < 1000);
 
         clickButton(componentName + "-eager");
         field.sendKeys("1");
 
         waitUntilMessageUpdated();
-//        assertTrue("The value change events should be sent on every key stroke when using ValueChangeMode.EAGER",
-//                -last + (last = System.currentTimeMillis()) < 1000);
 
         blur();
         assertMessageNotUpdated(
@@ -193,9 +182,6 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         clickButton(componentName + "-timeout");
         field.sendKeys("1");
         waitUntilMessageUpdated();
-//        assertTrue("The value change event should be sent on first key stroke when using ValueChangeMode.TIMEOUT",
-//                  -last + (last = System.currentTimeMillis()) < 1000);
-
 
         field.sendKeys("1");
         assertMessageNotUpdated(
@@ -214,7 +200,6 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         Assert.assertFalse(failMessage, isMessageUpdated());
     }
 
-    int count = 0;
     private boolean isMessageUpdated() {
         String messageText = message.getText();
         boolean isUpdated = !message.getText().equals(lastMessageText);
