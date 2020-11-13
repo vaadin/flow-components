@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/treegrid-details-row")
 public class TreeGridDetailsRowIT extends AbstractComponentIT {
@@ -58,7 +58,7 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 2,1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 2, 5);
 
         List<WebElement> detailsElement = treegrid
                 .findElements(By.tagName("flow-component-renderer"));
@@ -83,7 +83,7 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 2,1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 2, 5);
 
         List<WebElement> detailsElement = treegrid
                 .findElements(By.tagName("flow-component-renderer"));
@@ -109,7 +109,7 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 2,1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 2, 5);
 
         List<WebElement> detailsElement = treegrid
                 .findElements(By.tagName("flow-component-renderer"));
