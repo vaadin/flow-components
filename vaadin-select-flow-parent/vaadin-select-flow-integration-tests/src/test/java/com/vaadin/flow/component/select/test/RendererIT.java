@@ -14,7 +14,6 @@ import org.openqa.selenium.WebElement;
 public class RendererIT extends AbstractSelectIT {
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testRenderer_componentRendererSet_rendersComponentsThatWork() {
         page.clickRendererButton();
 
@@ -51,19 +50,22 @@ public class RendererIT extends AbstractSelectIT {
 
             // remove button
             buttons.get(1).click();
-            buttons = item.findElements(By.tagName("button"));
-            Assert.assertEquals(1, buttons.size());
+            waitUntil(e -> {
+                List<WebElement> bts = item.findElements(By.tagName("button"));
+                return 1 == bts.size();
+            }, 200);
 
             // update click causes refreshItem which renders item again
             buttons.get(0).click();
-            span = item.findElement(By.tagName("span"));
-            Assert.assertEquals("Invalid text", "Item-" + i + "-UPDATED", span.getText());
-
+            final String expected = "Item-" + i + "-UPDATED";
+            waitUntil(e -> {
+                TestBenchElement elm = item.findElement(By.tagName("span"));
+                return expected.equals(elm.getText());
+            }, 200);
         }
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void testRenderer_initialComponentRendererSet_rendersComponentsThatWork() {
         openWithExtraParameter("renderer");
 
