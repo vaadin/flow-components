@@ -25,11 +25,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route("vaadin-grid/sorting")
-@Theme(themeClass = Lumo.class)
 public class SortingPage extends Div {
 
     public SortingPage() {

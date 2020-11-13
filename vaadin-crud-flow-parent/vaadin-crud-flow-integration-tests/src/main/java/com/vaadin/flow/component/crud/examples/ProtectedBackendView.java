@@ -3,8 +3,6 @@ package com.vaadin.flow.component.crud.examples;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,6 @@ import java.util.List;
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
 @Route(value = "vaadin-crud/protectedbackend")
-@Theme(themeClass = Lumo.class)
 public class ProtectedBackendView extends VerticalLayout {
 
     public ProtectedBackendView() {

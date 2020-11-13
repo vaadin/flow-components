@@ -7,11 +7,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route(value = "vaadin-crud/editorposition")
-@Theme(themeClass = Lumo.class)
 public class EditorPositionView extends VerticalLayout {
 
     public EditorPositionView() {

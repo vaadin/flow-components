@@ -33,15 +33,12 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Test page for dynamically adding new columns with different renderers after
  * the Grid has already been attached and rendered.
  */
 @Route("vaadin-grid/adding-columns")
-@Theme(themeClass = Lumo.class)
 public class AddingColumnsPage extends Div {
 
     private Grid<Person> grid = new Grid<>();

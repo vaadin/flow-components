@@ -32,8 +32,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Page created for testing purposes. Not suitable for demos.
@@ -42,7 +40,6 @@ import com.vaadin.flow.theme.lumo.Lumo;
  *
  */
 @Route("vaadin-grid-test")
-@Theme(themeClass = Lumo.class)
 public class GridTestPage extends Div {
 
     private static class Item implements Serializable {
