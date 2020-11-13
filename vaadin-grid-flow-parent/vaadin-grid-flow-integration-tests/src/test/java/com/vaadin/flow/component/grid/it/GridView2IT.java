@@ -34,6 +34,7 @@ import com.vaadin.testbench.TestBenchElement;
  * 
  * These test pass, but they slow down builds in TC and reduces stability.
  */
+@Ignore("Enabling this increases the build total build time in 10 minutes and causes: Out of memory - GC overhead limit exceeded")
 public class GridView2IT extends GridViewBase {
 
     @Test
