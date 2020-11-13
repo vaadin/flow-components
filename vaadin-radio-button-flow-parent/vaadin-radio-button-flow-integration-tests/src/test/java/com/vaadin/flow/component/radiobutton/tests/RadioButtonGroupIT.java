@@ -289,28 +289,23 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         }
 
         executeScript("arguments[0].value=1;", group);
+        // It takes a while to update DOM in busy CI
+        waitUntil(e -> {
+            List<WebElement> els = group.findElements(By.xpath("./*"));
+            // Expected one label to have been added to radio-button-group
+            // Second element should be a label as first element was selected",
+            return els.size() == 7 && "label".equals(els.get(1).getTagName());
+        }, 200);
 
-        elements = group.findElements(By.xpath("./*"));
-
-        Assert.assertEquals(
-                "Expected one label to have been added to radio-button-group",
-                7, elements.size());
-
-        Assert.assertEquals(
-                "Second element should be a label as first element was selected",
-                "label", elements.get(1).getTagName());
 
         executeScript("arguments[0].value=5;", group);
-
-        elements = group.findElements(By.xpath("./*"));
-
-        Assert.assertEquals(
-                "Expected label to stay, just change place in radio-button-group",
-                7, elements.size());
-
-        Assert.assertEquals(
-                "Fifth element should be a label as fourth element was selected",
-                "label", elements.get(5).getTagName());
+        // It takes a while to update DOM in busy CI
+        waitUntil(e -> {
+            List<WebElement> els = group.findElements(By.xpath("./*"));
+            // Expected label to stay, just change place in radio-button-group
+            // Fifth element should be a label as fourth element was selected
+            return els.size() == 7 && "label".equals(els.get(5).getTagName());
+        }, 200);
     }
 
     @Test
@@ -368,7 +363,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
                 .id("group-with-helper-component");
         WebElement helperComponent = groupWithHelperComponent.getHelperComponent();
         Assert.assertEquals("helper-component", helperComponent.getAttribute("id"));
-        
+
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(groupWithHelperComponent.getHelperComponent());
     }

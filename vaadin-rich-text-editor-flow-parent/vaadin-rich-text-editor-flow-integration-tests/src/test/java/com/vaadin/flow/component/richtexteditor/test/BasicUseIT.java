@@ -1,15 +1,15 @@
 package com.vaadin.flow.component.richtexteditor.test;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
+import com.vaadin.testbench.TestBenchElement;
 
 public class BasicUseIT extends AbstractParallelTest {
 
@@ -27,8 +27,6 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
-    @Ignore("For some reasons neither sendKeys nor setting innerHTML don't "
-            + "send new value to the server being testing via sauce, but the test works locally")
     public void setValueCorrectly() {
         TestBenchElement editor = $(RichTextEditorElement.class).waitForFirst()
                 .getEditor();
@@ -158,8 +156,6 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
-    @Ignore("For some reasons neither sendKeys nor setting innerHTML don't "
-            + "send new value to the server being testing via sauce, but the test works locally")
     public void richTextEditorInATemplate_settingAndGettingValueCorrectly() {
         RichTextEditorElement templateRte = $("rte-in-a-template")
                 .id("template").$(RichTextEditorElement.class).first();

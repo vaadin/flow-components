@@ -225,9 +225,9 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private void resetHistory() {
+        waitUntil(e -> $(ButtonElement.class).exists());
         WebElement resetHistoryButton = $(ButtonElement.class).id("resetHistory");
         resetHistoryButton.click();
-
     }
 
     private SeriesCheckboxClickEvent readCheckboxEventDetails() {
