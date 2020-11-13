@@ -50,12 +50,6 @@ public class FormLayoutIT extends ComponentDemoTest {
                 .findElements(By.tagName("vaadin-text-field"));
         Assert.assertEquals(3, textFields.size());
         
-        executeScript("arguments[0].responsiveStep = "
-                + "[{minWidth: '0px', columns:1},"
-                + "{minWidth: '600px', columns:2},"
-                + "{minWidth: '700px', columns:3}]"
-                , firstLayout);
-
         // 3 columns, all should be horizontally aligned (tolerance of some pixels)
         getDriver().manage().window().setSize(new Dimension(1000, 1000));
         int y2 = textFields.get(2).getLocation().getY();
