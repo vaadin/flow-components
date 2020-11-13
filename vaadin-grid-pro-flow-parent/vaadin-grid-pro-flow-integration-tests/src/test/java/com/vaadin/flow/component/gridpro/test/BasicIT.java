@@ -99,6 +99,8 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("City 1", cell.$("span").first().getText());
 
         AssertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
+
+        waitUntil(e -> cell.$("vaadin-combo-box").exists());
         TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
         comboBox.getCommandExecutor().executeScript("arguments[0].open()",
                 comboBox);
