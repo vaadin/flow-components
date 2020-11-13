@@ -597,7 +597,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             @Override
             protected SerializablePredicate<T> getFilter(
                     Query<T, String> query) {
-                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
+                        final Optional<SerializablePredicate<?>> componentInMemoryFilter = DataViewUtils
                                 .getComponentFilter(comboBox);
                         return Optional
                                 .ofNullable(inMemoryDataProvider.getFilter())
@@ -605,7 +605,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         .and(item -> filterConverter
                                 .apply(query.getFilter().orElse(""))
                                         .test(item))
-                                .and(componentInMemoryFilter
+                                .and((SerializablePredicate<T>) componentInMemoryFilter
                                         .orElse(item -> true));
             }
         };
@@ -1054,10 +1054,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         setDataProvider(listDataProvider,
                 filterText -> {
-                    Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
+                    Optional<SerializablePredicate<?>> componentInMemoryFilter = DataViewUtils
                             .getComponentFilter(this);
                     return item -> itemFilter.test(item, filterText)
-                            && componentInMemoryFilter.orElse(ignore -> true)
+                            && ((SerializablePredicate<T>) componentInMemoryFilter
+                                    .orElse(ignore -> true))
                                     .test(item);
                 });
     }
