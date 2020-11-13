@@ -593,19 +593,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // null filter
         DataProvider<T, String> convertedDataProvider =
                 new DataProviderWrapper<T, String, SerializablePredicate<T>>(
-                inMemoryDataProvider) {
-            @Override
-            protected SerializablePredicate<T> getFilter(
-                    Query<T, String> query) {
-                        final Optional<SerializablePredicate<?>> componentInMemoryFilter = DataViewUtils
+                        inMemoryDataProvider) {
+                    @Override
+                    protected SerializablePredicate<T> getFilter(
+                            Query<T, String> query) {
+                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
                                 .getComponentFilter(comboBox);
                         return Optional
                                 .ofNullable(inMemoryDataProvider.getFilter())
-                        .orElse(item -> true)
-                        .and(item -> filterConverter
-                                .apply(query.getFilter().orElse(""))
+                                .orElse(item -> true)
+                                .and(item -> filterConverter
+                                        .apply(query.getFilter().orElse(""))
                                         .test(item))
-                                .and((SerializablePredicate<T>) componentInMemoryFilter
+                                .and(componentInMemoryFilter
                                         .orElse(item -> true));
             }
         };
@@ -1054,11 +1054,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         setDataProvider(listDataProvider,
                 filterText -> {
-                    Optional<SerializablePredicate<?>> componentInMemoryFilter = DataViewUtils
+                    Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
                             .getComponentFilter(this);
                     return item -> itemFilter.test(item, filterText)
-                            && ((SerializablePredicate<T>) componentInMemoryFilter
-                                    .orElse(ignore -> true))
+                            && componentInMemoryFilter.orElse(ignore -> true)
                                     .test(item);
                 });
     }
