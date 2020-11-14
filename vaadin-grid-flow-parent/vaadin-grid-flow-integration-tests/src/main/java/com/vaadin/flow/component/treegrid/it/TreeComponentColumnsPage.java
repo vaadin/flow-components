@@ -32,15 +32,12 @@ import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Test page for dynamically adding new columns with different renderers when
  * the TreeGrid is added.
  */
 @Route("vaadin-grid/tree-component-columns")
-@Theme(Lumo.class)
 public class TreeComponentColumnsPage extends Div {
 
     public TreeComponentColumnsPage() {

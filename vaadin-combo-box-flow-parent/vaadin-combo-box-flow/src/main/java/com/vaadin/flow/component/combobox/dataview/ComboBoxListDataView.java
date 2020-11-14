@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.function.SerializableBiConsumer;
@@ -124,5 +125,74 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     public Registration addItemCountChangeListener(
             ComponentEventListener<ItemCountChangeEvent<?>> listener) {
         return super.addItemCountChangeListener(listener);
+    }
+
+    /**
+     * Adds a filter to be applied to all queries. The filter will be used in
+     * addition to any filter that has been set or added previously through
+     * {@link #setFilter} or {@link #addFilter}. This filter is applied to data
+     * set permanently until it's changed through {@link #setFilter} or
+     * {@link #removeFilters}, in contrary with the client-side filter that can
+     * be typed in by user and does not modify the data set on server-side, but
+     * only defines which items are shown for a single request and erases on
+     * drop down close.
+     * <p>
+     * This filter is bound to the component. Thus, any other component using
+     * the same {@link DataProvider} object would not be affected by setting a
+     * filter through data view of another component. A filter set by this
+     * method won't be retained when a new {@link DataProvider} is set to the
+     * component.
+     *
+     * @param filter
+     *            the filter to add, not <code>null</code>
+     * @return ComboBoxListDataView instance
+     *
+     * @see #setFilter(SerializablePredicate)
+     * @see #removeFilters()
+     */
+    @Override
+    public ComboBoxListDataView<T> addFilter(SerializablePredicate<T> filter) {
+        return (ComboBoxListDataView<T>) super.addFilter(filter);
+    }
+
+    /**
+     * Removes all in-memory filters set or added.
+     *
+     * @return ComboBoxListDataView instance
+     *
+     * @see #addFilter(SerializablePredicate)
+     * @see #setFilter(SerializablePredicate)
+     */
+    @Override
+    public ComboBoxListDataView<T> removeFilters() {
+        return (ComboBoxListDataView<T>) super.removeFilters();
+    }
+
+    /**
+     * Sets a filter to be applied to the data. The filter replaces any filter
+     * that has been set or added previously. {@code null} will clear all
+     * filters. This filter is applied to data set permanently until it's
+     * changed through {@link #setFilter} or {@link #removeFilters}, in contrary
+     * with the client-side filter that can be typed in by user and does not
+     * modify the data set on server-side, but only defines which items are
+     * shown for a single request and erases on drop down close.
+     * <p>
+     * This filter is bound to the component. Thus, any other component using
+     * the same {@link DataProvider} object would not be affected by setting a
+     * filter through data view of another component. A filter set by this
+     * method won't be retained when a new {@link DataProvider} is set to the
+     * component.
+     *
+     * @param filter
+     *            filter to be set, or <code>null</code> to clear any previously
+     *            set filters
+     * @return ComboBoxListDataView instance
+     *
+     * @see #addFilter(SerializablePredicate)
+     * @see #removeFilters()
+     */
+    @Override
+    public ComboBoxListDataView<T> setFilter(SerializablePredicate<T> filter) {
+        return (ComboBoxListDataView<T>) super.setFilter(filter);
     }
 }
