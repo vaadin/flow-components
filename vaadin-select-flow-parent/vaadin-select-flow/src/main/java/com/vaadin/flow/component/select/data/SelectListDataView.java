@@ -29,7 +29,7 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
      *            supplier from which the DataProvider can be gotten
      * @param select
      *            select component that the dataView is bound to
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the Select's filtering
      *            or sorting changes, not <code>null</code>
      */
@@ -37,8 +37,8 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             Select<T> select,
             SerializableBiConsumer<SerializablePredicate<T>,
-                    SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, select, dataChangedCallback);
+                    SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, select, filterOrSortingChangedCallback);
     }
 
     /**
@@ -52,7 +52,7 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
      * @param identifierChangedCallback
      *            callback method which should be called when identifierProvider
      *            is changed
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the Select's filtering
      *            or sorting changes, not <code>null</code>
      */
@@ -61,8 +61,8 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
             Select<T> select,
             SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
             SerializableBiConsumer<SerializablePredicate<T>,
-                    SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, select, dataChangedCallback);
+                    SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, select, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 

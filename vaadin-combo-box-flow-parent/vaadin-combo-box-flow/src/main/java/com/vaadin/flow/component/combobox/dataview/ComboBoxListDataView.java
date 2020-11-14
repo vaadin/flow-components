@@ -48,14 +48,14 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      *            the data communicator of the ComboBox, not <code>null</code>
      * @param comboBox
      *            the ComboBox component, not <code>null</code>
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the ComboBox's filtering
      *            or sorting changes, not <code>null</code>
      */
     public ComboBoxListDataView(DataCommunicator<T> dataCommunicator,
             ComboBox<T> comboBox,
-            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
-        super(dataCommunicator::getDataProvider, comboBox, dataChangedCallback);
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataCommunicator::getDataProvider, comboBox, filterOrSortingChangedCallback);
         this.dataCommunicator = dataCommunicator;
     }
 

@@ -45,15 +45,15 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
      *            data provider supplier
      * @param checkboxGroup
      *            checkbox group instance for this DataView
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the CheckboxGroup's
      *            filtering or sorting changes, not <code>null</code>
      */
     public CheckboxGroupListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             CheckboxGroup<T> checkboxGroup,
-            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, checkboxGroup, dataChangedCallback);
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, checkboxGroup, filterOrSortingChangedCallback);
     }
 
     /**
@@ -67,7 +67,7 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
      * @param identifierChangedCallback
      *            callback method which should be called when identifierProvider
      *            is changed
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the CheckboxGroup's
      *            filtering or sorting changes, not <code>null</code>
      */
@@ -75,8 +75,8 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             CheckboxGroup<T> checkboxGroup,
             SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
-            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, checkboxGroup, dataChangedCallback);
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, checkboxGroup, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 

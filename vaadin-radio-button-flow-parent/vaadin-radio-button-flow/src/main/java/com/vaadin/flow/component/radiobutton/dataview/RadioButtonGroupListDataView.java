@@ -47,15 +47,15 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
      *            data provider supplier
      * @param radioButtonGroup
      *            radioButton Group instance for this DataView
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the RadioButtonGroup's
      *            filtering or sorting changes, not <code>null</code>
      */
     public RadioButtonGroupListDataView(
             SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
             RadioButtonGroup radioButtonGroup,
-            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, radioButtonGroup, dataChangedCallback);
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, radioButtonGroup, filterOrSortingChangedCallback);
     }
 
     /**
@@ -69,7 +69,7 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
      * @param identifierChangedCallback
      *            callback method which should be called when identifierProvider
      *            is changed
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the RadioButtonGroup's
      *            filtering or sorting changes, not <code>null</code>
      */
@@ -77,8 +77,8 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
             SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
             RadioButtonGroup radioButtonGroup,
             SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
-            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, radioButtonGroup, dataChangedCallback);
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, radioButtonGroup, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 

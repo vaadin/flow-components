@@ -41,14 +41,14 @@ public class ListBoxListDataView<T> extends AbstractListDataView<T> {
      *            data provider supplier
      * @param listBox
      *            listBox instance for this DataView
-     * @param dataChangedCallback
+     * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the ListBox's filtering
      *            or sorting changes, not <code>null</code>
      */
     public ListBoxListDataView(
             SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
             ListBoxBase listBox,
-            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> dataChangedCallback) {
-        super(dataProviderSupplier, listBox, dataChangedCallback);
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, listBox, filterOrSortingChangedCallback);
     }
 }

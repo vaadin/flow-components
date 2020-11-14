@@ -1167,6 +1167,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
 
+    // This callback is only used by GridListDataView when the data filtering
+    // is being changed through its API
     private SerializableConsumer<?> filterSlot;
 
     private Class<T> beanType;
@@ -3216,7 +3218,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         sortOrder.clear();
         if (order.isEmpty()) {
-            // Grid is not sorted anymore with client-side sorting.
+            // Grid's sorting is being reset by Grid's sort API or by clicking
+            // on a Grid's sortable column header, but the sorting, which was
+            // set through the GridListDataView API, is being preserved.
             getDataCommunicator().setBackEndSorting(Collections.emptyList());
             getDataCommunicator().setInMemorySorting(
                     (SerializableComparator<T>) DataViewUtils
