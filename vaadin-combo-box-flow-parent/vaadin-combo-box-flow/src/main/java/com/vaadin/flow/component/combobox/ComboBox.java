@@ -724,11 +724,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * adjust its size until the backend runs out of items.
      * Usage example:
      * <p>
-     * {@code comboBox.setItems((filter, offset, limit) ->
-     *                      orderService.getOrders(filter, offset, limit),
-     *                                    textFilter -> new Order(textFilter));}
+     * {@code comboBox.setItemsWithFilterConverter(
+     *                 query -> orderService.getOrdersByCount(query.getFilter(),
+     *                                                        query.getOffset,
+     *                                                        query.getLimit()),
+     *                 orderCountStr -> Integer.parseInt(orderCountStr));}
+     * Note: Validations for <code>orderCountStr</code> are omitted for
+     * briefness.
      * <p>
-     * Combo box's filter-string typed by the user is transformed into a
+     * Combo box's client-side filter typed by the user is transformed into a
      * callback's filter through the given filter converter.
      * <p>
      * The returned data view object can be used for further configuration, or
@@ -744,7 +748,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the user into a callback's object filter
      * @param <C> filter type used by a callback
      *
-     * @return LazyDataView instance for further configuration
+     * @return ComboBoxLazyDataView instance for further configuration
      */
     public <C> ComboBoxLazyDataView<T> setItemsWithFilterConverter(
             CallbackDataProvider.FetchCallback<T, C> fetchCallback,
@@ -762,21 +766,21 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Supply items lazily with callbacks: the first one fetches the items based
      * on offset, limit and an optional filter, the second provides the exact
-     * count of items in the backend. Use this in case getting the count is
+     * count of items in the backend. Use this only in case getting the count is
      * cheap and the user benefits from the component showing immediately the
      * exact size.
-     * <p>
-     * Combo box's filter-string typed by the user is transformed into a
-     * callback's filter type through the given filter converter.
      * Usage example:
      * <p>
-     * {@code comboBox.setItems(
-     *                    query -> orderService.getOrders(query.getOffset,
-     *                                     query.getLimit(), query.getFilter()),
-     *                    query -> orderService.getSize(query.getFilter()),
-     *                    textFilter -> new Order(textFilter));}
+     * {@code comboBox.setItemsWithFilterConverter(
+     *                 query -> orderService.getOrdersByCount(query.getFilter(),
+     *                                                        query.getOffset,
+     *                                                        query.getLimit()),
+     *                 query -> orderService.getSize(query.getFilter()),
+     *                 orderCountStr -> Integer.parseInt(orderCountStr));}
+     * Note: Validations for <code>orderCountStr</code> are omitted for
+     * briefness.
      * <p>
-     * Combo box's filter-string typed by the user is transformed into a
+     * Combo box's client-side filter typed by the user is transformed into a
      * custom filter type through the given filter converter.
      * <p>
      * The returned data view object can be used for further configuration, or
@@ -792,7 +796,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the user into a callback's object filter
      * @param <C> filter type used by a callbacks
      *
-     * @return LazyDataView instance for further configuration
+     * @return ComboBoxLazyDataView instance for further configuration
      */
     public <C> ComboBoxLazyDataView<T> setItemsWithFilterConverter(
             CallbackDataProvider.FetchCallback<T, C> fetchCallback,
@@ -1470,6 +1474,89 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public boolean isClearButtonVisible() {
         return super.isClearButtonVisibleBoolean();
+    }
+
+    /**
+     * Supply items lazily with a callback from a backend. The ComboBox will
+     * automatically fetch more items and adjust its size until the backend runs
+     * out of items. Usage example without component provided filter:
+     * <p>
+     * {@code comboBox.setItems(query ->
+     *             orderService.getOrders(query.getOffset(), query.getLimit());}
+     * <p>
+     * Since ComboBox supports filtering, it can be fetched via
+     * query.getFilter():
+     * <p>
+     * {@code comboBox.setItems(query ->
+     *             orderService.getOrders(query.getFilter(), query.getOffset(),
+     *                                      query.getLimit());}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     * <p>
+     * If item filtering by some value type other than String is preferred and
+     * backend service is able to fetch and filter items by such type, converter
+     * for client side's filter string can be set along with fetch callback.
+     * See:
+     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback,
+     *                                      SerializableFunction)}
+     *
+     * @param fetchCallback function that returns a stream of items from the
+     *                      backend based on the offset, limit and an optional
+     *                      filter provided by the query object
+     * @return ComboBoxLazyDataView instance for further configuration
+     */
+    @Override
+    public ComboBoxLazyDataView<T> setItems(
+            CallbackDataProvider.FetchCallback<T, String> fetchCallback) {
+        return HasLazyDataView.super.setItems(fetchCallback);
+    }
+
+    /**
+     * Supply items lazily with callbacks: the first one fetches the items based
+     * on offset, limit and an optional filter, the second provides the exact
+     * count of items in the backend. Use this only in case getting the count is
+     * cheap and the user benefits from the ComboBox showing immediately the
+     * exact size. Usage example without component provided filter:
+     * <p>
+     * {@code comboBox.setItems(
+     *      query -> orderService.getOrders(query.getOffset, query.getLimit()),
+     *      query -> orderService.getSize());}
+     * <p>
+     * Since ComboBox supports filtering, it can be fetched via
+     * query.getFilter():
+     * <p>
+     * {@code comboBox.setItems(
+     *      query -> orderService.getOrders(query.getFilter(), query.getOffset,
+     *                                          query.getLimit()),
+     *      query -> orderService.getSize(query.getFilter()));}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     * <p>
+     * If item filtering by some value type other than String is preferred and
+     * backend service is able to fetch and filter items by such type, converter
+     * for client side's filter string can be set along with fetch callback.
+     * See:
+     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback,
+     *                                      CallbackDataProvider.CountCallback,
+     *                                      SerializableFunction)}
+     *
+     * @param fetchCallback function that returns a stream of items from the
+     *                      back end for a query
+     * @param countCallback function that return the number of items in the
+     *                      back end for a query
+     * @return ComboBoxLazyDataView instance for further configuration
+     */
+    @Override
+    public ComboBoxLazyDataView<T> setItems(
+            CallbackDataProvider.FetchCallback<T, String> fetchCallback,
+            CallbackDataProvider.CountCallback<T, String> countCallback) {
+        return HasLazyDataView.super.setItems(fetchCallback, countCallback);
     }
 
     CompositeDataGenerator<T> getDataGenerator() {

@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -57,7 +56,6 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
     }
 
     @Test
-    @Ignore("see #635 (fails NPM mode")
     public void expandVariousDepth() {
         Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
 
@@ -117,7 +115,6 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
     }
 
     @Test
-    @Ignore("see #635 (fails in both BOWER and NPM modes")
     public void partialCollapse() {
         Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
 

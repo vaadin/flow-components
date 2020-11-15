@@ -24,15 +24,12 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Test page for dynamically adding new columns with different renderers when
  * the Grid is added.
  */
 @Route("vaadin-grid/component-columns")
-@Theme(Lumo.class)
 public class ComponentColumnsPage extends Div {
 
     public ComponentColumnsPage() {
