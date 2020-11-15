@@ -110,7 +110,6 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -3204,6 +3203,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         super.onDetach(detachEvent);
     }
 
+    /**
+     * Sets the sort orders of the Grid and updates data communicator's
+     * in-memory and backend sorting accordingly.
+     * <p>
+     * Notifies sort listeners with updated sort orders and whether the sorting
+     * updated originated from user.
+     * 
+     * @param order
+     *            sort order to be set to Grid.
+     * @param userOriginated
+     *            <code>true</code> if the sorting changes as a result of user
+     *            interaction, <code>false</code> if changed by Grid API call.
+     */
     private void setSortOrder(List<GridSortOrder<T>> order,
             boolean userOriginated) {
         Objects.requireNonNull(order, "Sort order list cannot be null");
@@ -3230,7 +3242,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
         sortOrder.addAll(order);
-        sort(userOriginated);
+        updateSorting(userOriginated);
     }
 
     /**
@@ -3272,10 +3284,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 directions);
     }
 
-    private void sort(boolean userOriginated) {
+    /**
+     * Updates an in-memory and backend sortings in Grid's data communicator
+     * taking into account Grid's sort orders and in-memory comparator.
+     * <p>
+     * Notifies sort listeners with updated sort orders and whether the sorting
+     * updated originated from user.
+     * 
+     * @param userOriginated
+     *            <code>true</code> if the sorting changes as a result of user
+     *            interaction, <code>false</code> if changed by Grid API call.
+     */
+    private void updateSorting(boolean userOriginated) {
         // Set sort orders
         // In-memory comparator
-        updateSorting((SerializableComparator<T>) DataViewUtils
+        updateInMemorySorting((SerializableComparator<T>) DataViewUtils
                 .getComponentSortComparator(this).orElse(null));
 
         // Back-end sort properties
@@ -4113,7 +4136,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void onInMemoryFilterOrSortingChange(
             SerializablePredicate<T> filter,
             SerializableComparator<T> sortComparator) {
-        updateSorting(sortComparator);
+        updateInMemorySorting(sortComparator);
         updateInMemoryFiltering(filter);
 
         dataCommunicator.reset();
@@ -4131,7 +4154,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .accept(componentInMemoryFilter);
     }
 
-    private void updateSorting(SerializableComparator<T> componentSorting) {
+    /**
+     * Updates an in-memory sorting in Grid's data communicator, taking into
+     * account an internal sort orders of the Grid and a sort comparator,
+     * handled by GridListDataView API.
+     * 
+     * @param componentSorting
+     *            Grid's in-memory sort comparator which is handled by
+     *            GridListDataView API
+     */
+    private void updateInMemorySorting(
+            SerializableComparator<T> componentSorting) {
         final SerializableComparator<T> currentClientSorting = createSortingComparator();
         if (componentSorting != null) {
             if (currentClientSorting != null) {
