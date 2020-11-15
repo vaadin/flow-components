@@ -876,7 +876,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         convertOrNull.apply(getFilterString()), false);
 
         filterSlot = filter -> {
-            if (!Objects.equals(filter, lastFilter)) {
+            if (!Objects.equals(filter, lastFilter) ||
+                    // Since the data communicator erases the combo box
+                    // non-empty filter after each request, the filter needs
+                    // to be set again to data communicator even if the same
+                    // as last sent.
+                    !filter.isEmpty()) {
                 DataCommunicator.Filter<C> objectFilter =
                         new DataCommunicator.Filter<C>(
                                 convertOrNull.apply(filter), filter.isEmpty());
