@@ -4,13 +4,10 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
 @Route(value = "vaadin-crud/nofilter")
-@Theme(Lumo.class)
 public class NoFilterView extends VerticalLayout {
 
     public NoFilterView() {
