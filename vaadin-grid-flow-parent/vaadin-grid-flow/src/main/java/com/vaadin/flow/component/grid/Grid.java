@@ -144,6 +144,25 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
         HasTheme, HasDataGenerators<T> {
 
+    /**
+     * behavior when parsing nested properties which may contain
+     * <code>null</code> values in the property chain
+     */
+    public enum NestedNullBehavior {
+        /**
+         * throw a NullPointerException if there is a nested
+         * <code>null</code> value
+         */
+        THROW,
+        /**
+         * silently ignore any exceptions caused by nested <code>null</code>
+         * values
+         */
+        ALLOW_NULLS
+    }
+
+    private NestedNullBehavior nestedNullBehavior = NestedNullBehavior.THROW;
+
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
 
@@ -1467,12 +1486,25 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         String columnId = createColumnId(false);
 
         C column = addColumn(new ColumnPathRenderer<T>(columnId,
-                value -> formatValueToSendToTheClient(
-                        valueProvider.apply(value))),
+                item -> formatValueToSendToTheClient(
+                        applyValueProvider(valueProvider, item))),
                 columnFactory);
         ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
-                valueProvider.apply(a), valueProvider.apply(b)));
+                applyValueProvider(valueProvider,a), applyValueProvider(valueProvider,b)));
         return column;
+    }
+
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider, T item) {
+        Object value;
+        try {
+            value = valueProvider.apply(item);
+        } catch (NullPointerException npe) {
+            value = null;
+            if (NestedNullBehavior.THROW == nestedNullBehavior) {
+                throw npe;
+            }
+        }
+        return value;
     }
 
     private String formatValueToSendToTheClient(Object value) {
@@ -3193,7 +3225,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Objects.requireNonNull(valueProvider);
 
         return addDataGenerator((item, data) -> data.put(property,
-                JsonSerializer.toJson(valueProvider.apply(item))));
+                JsonSerializer.toJson(applyValueProvider(valueProvider,item))));
     }
 
     @Override
@@ -3911,4 +3943,22 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
+    /**
+     * Set the behavior when facing nested <code>null</code> values. By default the value
+     * is <code>NestedNullBehavior.THROW</code>.
+     * 
+     * @param nestedNullBehavior the behavior when facing nested <code>null</code> values.
+     */
+    public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
+    	this.nestedNullBehavior = nestedNullBehavior;
+    }
+
+    /**
+     * Get the behavior when facing nested <code>null</code> values.
+     * 
+     * @return The current behavior when facing nested <code>null</code> values.
+     */
+    public NestedNullBehavior getNestedNullBehavior() {
+    	return nestedNullBehavior;
+    }
 }
