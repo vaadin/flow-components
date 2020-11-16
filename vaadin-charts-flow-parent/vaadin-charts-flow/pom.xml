@@ -10,6 +10,9 @@
   <version>${vaadin.charts.version}</version>
   <packaging>jar</packaging>
   <name>Vaadin Charts</name>
+  <properties>
+    <osgi.bundle.license>https://vaadin.com/license/cval-3.0</osgi.bundle.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -45,40 +48,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <instructions>
-            <Bundle-Name>${project.artifactId}</Bundle-Name>
-            <Bundle-SymbolicName>${project.groupId}.flow.component.charts</Bundle-SymbolicName>
-            <Import-Package>*</Import-Package>
-            <Export-Package>com.vaadin.flow.component.*;-noimport:=true</Export-Package>
-            <Private-Package/>
-            <Bundle-Activator/>
-            <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
-            <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
-            <Bundle-Description/>
-            <Vaadin-Package-Version>1</Vaadin-Package-Version>
-            <Implementation-Title>Vaadin Charts</Implementation-Title>
-            <_removeheaders>Built-By</_removeheaders>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <profiles>
     <profile>
       <id>attach-docs</id>
