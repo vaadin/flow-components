@@ -38,20 +38,6 @@ async function renameBase(js) {
   js.project.parent[0].version = [parentJs.project.version[0]];
 }
 
-function renamePlugin(js){
-  // component name in Bundle-SymbolicName uses '.' as separator
-  const symbolicName = componentName.replace('-', '.');
-  // Implementation Title uses uppercase for the first letter in each word
-  nameArray = componentName.split('-');
-  for(let i = 0; nameArray && i < nameArray.length; i++) {
-    nameArray[i] = nameArray[i].charAt(0).toUpperCase() + nameArray[i].slice(1);
-  }
-  impTitle = nameArray.join(' ');
-
-  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Bundle-SymbolicName'][0].replace(/proComponent/, symbolicName);
-  js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0] = js.project.build[0].plugins[0].plugin[0].configuration[0].instructions[0]['Implementation-Title'][0].replace(/proComponent/, impTitle);
-}
-
 function setDependenciesVersion(dependencies) {
   dependencies && dependencies[0] && dependencies[0].dependency.forEach(dep => {
     if (dep.groupId[0] === 'com.vaadin' && /^vaadin-.*(flow|testbench)$/.test(dep.artifactId[0])) {
@@ -66,9 +52,6 @@ async function consolidate(template, pom, cb) {
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   await renameBase(tplJs);
-  if (template === "pom-flow-pro.xml"){
-    renamePlugin(tplJs);
-  }
 
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
   cb && cb(tplJs);
@@ -85,6 +68,7 @@ async function consolidatePomParent() {
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
   });
 }
+
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
   consolidate(template, `${mod}/${name}-flow/pom.xml`);
@@ -93,7 +77,7 @@ async function consolidatePomTB() {
   consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
 }
 async function consolidatePomDemo() {
-  consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
+  await consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
 }
 async function consolidatePomIT() {
   consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
