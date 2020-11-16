@@ -45,6 +45,7 @@
     <osgi.bundle.package.private/>
     <osgi.bundle.bundle.activator/>
     <osgi.bundle.description/>
+    <osgi.bundle.title>${project.name}</osgi.bundle.title>
   </properties>
   <modules>
     <module>vaadin-flow-components-shared</module>
@@ -196,6 +197,7 @@
               <Bundle-Activator>${osgi.bundle.bundle.activator}</Bundle-Activator>
               <Bundle-License>${osgi.bundle.license}</Bundle-License>
               <Bundle-Description>${osgi.bundle.description}</Bundle-Description>
+              <Implementation-Title>${osgi.bundle.title}</Implementation-Title>
               <_removeheaders>Built-By</_removeheaders>
               <_dsannotations>*</_dsannotations>
               <_metatypeannotations>*</_metatypeannotations>
@@ -381,6 +383,12 @@
                 <replacement/>
                 <failIfNoMatch>false</failIfNoMatch>
               </configuration>
+            </execution>
+            <execution>
+              <id>parse-version</id>
+              <goals>
+                <goal>parse-version</goal>
+              </goals>
             </execution>
           </executions>
         </plugin>
