@@ -159,9 +159,7 @@
     <profile>
       <id>saucelabs</id>
       <activation>
-        <property>
-          <name>sauce.user</name>
-        </property>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <build>
         <plugins>
