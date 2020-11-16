@@ -68,9 +68,11 @@
   </build>
   <profiles>
     <profile>
-      <id>default</id>
+      <id>jar</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!war</name>
+        </property>
       </activation>
       <properties>
         <packaging.type>jar</packaging.type>
