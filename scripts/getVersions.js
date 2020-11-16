@@ -47,12 +47,24 @@ async function main() {
   return getVersions(isMaster ? 'master' : branch).then(json => {
     return ['core', 'vaadin'].reduce((prev, k) => {
       return prev.concat(Object.keys(json[k]).filter(pkg => /\-/.test(pkg) && json[k][pkg].javaVersion).map(pkg => {
-        const branch = json[k][pkg].javaVersion.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
-        return `${pkg === 'iron-list' ? 'vaadin-' + pkg : pkg}-flow-parent:${branch}`
+        const version = json[k][pkg].javaVersion;
+        const branch = version.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
+        return `${pkg === 'iron-list' ? 'vaadin-' + pkg : pkg}-flow-parent:${branch}:${version}`
       }));
     }, []);
   });
 
 }
 
-main().then(arr => console.log(arr.join('\n')));
+main().then(arr => {
+  if (process.argv[2] == '--json') {
+    const o = {};
+    arr.forEach(line => {
+      const e = line.split(':');
+      o[e[0]] = e[1];
+    });
+    console.log(JSON.stringify(o));
+  } else {
+    console.log(arr.join('\n'))
+  }
+});

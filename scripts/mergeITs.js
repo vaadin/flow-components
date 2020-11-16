@@ -60,8 +60,9 @@ async function createPom() {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
     // Add component-flow and component-testbench dependencies
-    addDependency(prev, 'com.vaadin', `${id}-flow`, '${project.version}');
-    addDependency(prev, 'com.vaadin', `${id}-testbench`, '${project.version}', 'test');
+    const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
+    addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
+    addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
     // Read original IT dependencies in master and add them
     const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'))
     js.project.dependencies[0].dependency.forEach(dep => {
@@ -87,6 +88,7 @@ async function createPom() {
   tplJs.project.artifactId = ['vaadin-flow-components-integration-tests'];
   tplJs.project.parent[0].artifactId = ['vaadin-flow-components'];
   tplJs.project.parent[0].version = [version];
+  delete tplJs.project.version;
   const tests = tplJs.project.build[0].plugins[0].plugin.find(p => p.artifactId[0] === 'maven-failsafe-plugin');
   tests.configuration = [{excludes: [{exclude: exclude}]}]
   if (!fs.existsSync(itFolder)) {
