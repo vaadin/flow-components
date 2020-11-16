@@ -137,6 +137,11 @@ function parseLog(log) {
           commit.skip = !commit.breaking && !/(feat|fix|perf)/.test(commit.type);
           commit.isIncluded = !commit.skip;
           commit.title += result[3];
+          if (commit.type == 'chore' && /Update.*(NpmPackages|Webjar)/i.test(commit.title)) {
+            commit.title = 'Increase Web-Component version';
+            commit.skip = false;
+            commit.isIncluded = true;
+          }
         } else {
           commit.title += line;
         }
@@ -289,7 +294,7 @@ function getTickets(c) {
 function logCommit(c, withComponents) {
   let log = '    - ' + parseLinks(c.commit.substring(0, 7) + ' ' + c.title[0].toUpperCase() + c.title.slice(1));;
   const tickets = getTickets(c);
-  tickets && (log += `. ${tickets}`); 
+  tickets && (log += `. ${tickets}`);
   if (compact) {
     const components = getComponents(c);
     components && (log += `. ${components}`);
@@ -340,10 +345,18 @@ function generateReleaseNotes(commits) {
   console.log(`
 ## Vaadin ${product} V${version}
 This is a release of the Java integration for [Vaadin Components](https://github.com/vaadin/vaadin) to be used from the Java server side with [Vaadin Flow](https://vaadin.com/flow).
-### Changes in ${product} from [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
   `)
 
   const includedCommits = commits.filter(c => c.isIncluded);
+  if (includedCommits.length) {
+    console.log(`
+### Changes in ${product} from [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
+    `)
+  } else {
+    console.log(`
+### There are no Changes in ${product} since [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
+    `)
+  }
   if (compact) {
     logCommitsByType(includedCommits);
   } else {
