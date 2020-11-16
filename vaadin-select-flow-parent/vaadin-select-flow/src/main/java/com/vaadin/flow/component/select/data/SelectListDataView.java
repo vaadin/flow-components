@@ -4,7 +4,10 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
@@ -26,11 +29,16 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
      *            supplier from which the DataProvider can be gotten
      * @param select
      *            select component that the dataView is bound to
+     * @param filterOrSortingChangedCallback
+     *            callback, which is being invoked when the Select's filtering
+     *            or sorting changes, not <code>null</code>
      */
     public SelectListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
-            Select<T> select) {
-        super(dataProviderSupplier, select);
+            Select<T> select,
+            SerializableBiConsumer<SerializablePredicate<T>,
+                    SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, select, filterOrSortingChangedCallback);
     }
 
     /**
@@ -44,12 +52,17 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
      * @param identifierChangedCallback
      *            callback method which should be called when identifierProvider
      *            is changed
+     * @param filterOrSortingChangedCallback
+     *            callback, which is being invoked when the Select's filtering
+     *            or sorting changes, not <code>null</code>
      */
     public SelectListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             Select<T> select,
-            SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback) {
-        super(dataProviderSupplier, select);
+            SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
+            SerializableBiConsumer<SerializablePredicate<T>,
+                    SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, select, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 

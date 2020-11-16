@@ -48,6 +48,7 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
@@ -60,6 +61,7 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableBiPredicate;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -584,20 +586,26 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             SerializableFunction<String, SerializablePredicate<T>> filterConverter) {
         Objects.requireNonNull(filterConverter,
                 "FilterConverter cannot be null");
+        final ComboBox<T> comboBox = this;
         // We don't use DataProvider.withConvertedFilter() here because its
         // implementation does not apply the filter converter if Query has a
         // null filter
         DataProvider<T, String> convertedDataProvider =
                 new DataProviderWrapper<T, String, SerializablePredicate<T>>(
-                inMemoryDataProvider) {
-            @Override
-            protected SerializablePredicate<T> getFilter(
-                    Query<T, String> query) {
-                return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                        .orElse(item -> true)
-                        .and(item -> filterConverter
-                                .apply(query.getFilter().orElse(""))
-                                .test(item));
+                        inMemoryDataProvider) {
+                    @Override
+                    protected SerializablePredicate<T> getFilter(
+                            Query<T, String> query) {
+                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
+                                .getComponentFilter(comboBox);
+                        return Optional
+                                .ofNullable(inMemoryDataProvider.getFilter())
+                                .orElse(item -> true)
+                                .and(item -> filterConverter
+                                        .apply(query.getFilter().orElse(""))
+                                        .test(item))
+                                .and(componentInMemoryFilter
+                                        .orElse(item -> true));
             }
         };
 
@@ -681,7 +689,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxListDataView<T> getListDataView() {
-        return new ComboBoxListDataView<T>(dataCommunicator, this);
+        return new ComboBoxListDataView<T>(dataCommunicator, this,
+                this::onInMemoryFilterOrSortingChange);
     }
 
     /**
@@ -1047,7 +1056,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 "List data provider cannot be null");
 
         setDataProvider(listDataProvider,
-                filterText -> item -> itemFilter.test(item, filterText));
+                filterText -> {
+                    Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
+                            .getComponentFilter(this);
+                    return item -> itemFilter.test(item, filterText)
+                            && componentInMemoryFilter.orElse(ignore -> true)
+                                    .test(item);
+                });
     }
 
     /**
@@ -1653,6 +1668,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             lazyOpenRegistration.remove();
             lazyOpenRegistration = null;
         }
+    }
+
+    private void onInMemoryFilterOrSortingChange(
+            SerializablePredicate<T> filter,
+            SerializableComparator<T> sortComparator) {
+        dataCommunicator.setInMemorySorting(sortComparator);
+        // Erase the current filter to ensure the execution of
+        // filter consumer
+        lastFilter = null;
+        filterSlot.accept("");
+        reset();
     }
 
 }

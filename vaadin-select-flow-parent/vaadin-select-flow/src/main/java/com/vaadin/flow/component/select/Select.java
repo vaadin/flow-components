@@ -41,6 +41,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -96,6 +97,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
+
     private boolean resetPending = true;
 
     private boolean emptySelectionAllowed;
@@ -449,6 +451,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -527,7 +530,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Override
     public SelectListDataView<T> getListDataView() {
         return new SelectListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged);
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     @Override
@@ -840,6 +843,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
                 .map(child -> (VaadinItem<T>) child);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
         listBox.removeAll();
@@ -852,9 +856,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createItem)
+            getDataProvider().fetch(DataViewUtils.getQuery(this)).map(item -> createItem((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -993,4 +997,5 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
+
 }

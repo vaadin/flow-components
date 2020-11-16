@@ -17,11 +17,13 @@
 package com.vaadin.flow.component.combobox.test;
 
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.AGE_FILTER;
+import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.FIRST_COMBO_BOX_ID;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_COUNT;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_SELECT;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REMOVE_ITEM;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REVERSE_SORTING;
+import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SECOND_COMBO_BOX_ID;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEM_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_NEXT_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_PREVIOUS_DATA;
@@ -39,19 +41,21 @@ import org.openqa.selenium.Keys;
 @TestPath("combobox-list-data-view-page")
 public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
-    private ComboBoxElement comboBox;
+    private ComboBoxElement firstComboBox;
+    private ComboBoxElement secondComboBox;
 
     @Before
     public void init() {
         open();
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
-        comboBox = $(ComboBoxElement.class).first();
+        firstComboBox = $(ComboBoxElement.class).id(FIRST_COMBO_BOX_ID);
+        secondComboBox = $(ComboBoxElement.class).id(SECOND_COMBO_BOX_ID);
     }
 
     @Test
     public void getItemCount_showsInitialItemsCount() {
-        verifyDataProviderItemCount("Expected initial item count = 250", 250);
+        verifyNotifiedItemCount("Expected initial item count = 250", 250);
     }
 
     @Test
@@ -109,57 +113,72 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
         setAgeFilter("50");
 
         // There are 2 persons with an age = 50 (Person 50 and Person 150)
-        verifyDataProviderItemCount(
+        verifyNotifiedItemCount(
                 "Expected size = 2 after applying programmatic filter", 2);
 
-        comboBox.openPopup();
+        firstComboBox.openPopup();
         assertLoadedItemsCount("Should be 2 persons after filtering", 2,
-                comboBox);
+                firstComboBox);
+
+        // Verify that the second combo box has not been impacted by filtering
+        Assert.assertEquals(
+                "Second combo box should not be impacted by "
+                        + "the programmatic filter applied to first combo box",
+                250, getItems(secondComboBox).size());
 
         // Apply text filter
-        comboBox.sendKeys("Person 50");
+        firstComboBox.sendKeys("Person 50");
 
         // There are only 1 person with an age = 50 and name 'Person 50'
-        waitForItems(comboBox, items -> items.size() == 1
+        waitForItems(firstComboBox, items -> items.size() == 1
                 && "Person 50".equals(getItemLabel(items, 0)));
 
         // No item count change on server side, because the filtered items
         // count are 2 < page size.
-        verifyDataProviderItemCount(
+        verifyNotifiedItemCount(
                 "Expected no item count change on server side", 2);
 
         // Reset client filter
-        resetTextFilter(comboBox);
+        resetTextFilter(firstComboBox);
 
         // Check there are 2 Persons after resetting the client filter
-        waitForItems(comboBox, items -> items.size() == 2);
+        waitForItems(firstComboBox, items -> items.size() == 2);
 
         // Reset server filter
         resetAgeFilter();
 
         // Check there are 250 Persons again after resetting all filters
-        waitForItems(comboBox, items -> items.size() == 250);
+        waitForItems(firstComboBox, items -> items.size() == 250);
     }
 
     @Test
     public void addItemCountChangeListener_newItemAdded_itemCountChanged() {
         // Add custom value
-        comboBox.sendKeys("Person NEW", Keys.ENTER);
-        verifyDataProviderItemCount(
+        firstComboBox.sendKeys("Person NEW", Keys.ENTER);
+        verifyNotifiedItemCount(
                 "Expected item count = 251 after adding a new item", 251);
 
-        comboBox.openPopup();
-        verifyDataProviderItemCount(
+        firstComboBox.openPopup();
+        verifyNotifiedItemCount(
                 "Expected item count = 251 after adding a new item and pop up",
                 251);
+
+        Assert.assertEquals(
+                "A new Person is expected to be added to a second combo box also",
+                251, getItems(secondComboBox).size());
 
         // Remove recently added item
         selectItem(250);
         removeItem();
 
-        comboBox.openPopup();
-        verifyDataProviderItemCount(
+        firstComboBox.openPopup();
+        verifyNotifiedItemCount(
                 "Expected item count = 250 after removing an item", 250);
+
+        Assert.assertEquals(
+                "The last Person is expected to be removed from a second " +
+                        "combo box also",
+                250, getItems(secondComboBox).size());
     }
 
     @Test
@@ -171,6 +190,9 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
         // Person 99 is the biggest string in terms of native string comparison
         verifySelectedPerson(99);
+
+        // Verify that the second combo box has not impacted by the sorting
+        assertItem(getItems(secondComboBox), 0, "Person 0 lastName");
     }
 
     private void showSelectedPerson() {
@@ -224,7 +246,7 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 $(IntegerFieldElement.class).id(ITEM_SELECT).getValue());
     }
 
-    private void verifyDataProviderItemCount(String message,
+    private void verifyNotifiedItemCount(String message,
             int expectedItemCount) {
         Assert.assertEquals(message, String.valueOf(expectedItemCount),
                 $("span").id(ITEM_COUNT).getText());

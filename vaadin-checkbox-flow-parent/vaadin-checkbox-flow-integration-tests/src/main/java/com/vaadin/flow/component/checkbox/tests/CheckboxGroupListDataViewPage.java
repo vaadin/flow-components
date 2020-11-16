@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -25,12 +23,15 @@ import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-checkbox-group-list-data-view")
 public class CheckboxGroupListDataViewPage extends Div {
 
     static final String CHECKBOX_GROUP = "checkbox-group-data-view";
+    static final String OTHER_CHECKBOX_GROUP = "other-checkbox-group-data-view";
     static final String ITEMS_SIZE = "size-span-data-view";
     static final String ITEM_PRESENT = "item-present-span-data-view";
     static final String ALL_ITEMS = "all-items-span-data-view";
@@ -49,16 +50,23 @@ public class CheckboxGroupListDataViewPage extends Div {
     public CheckboxGroupListDataViewPage() {
         CheckboxGroup<CheckboxGroupDemoPage.Person> checkboxGroup =
                 new CheckboxGroup<>();
+        CheckboxGroup<CheckboxGroupDemoPage.Person> otherCheckBox = new CheckboxGroup<>();
+
         CheckboxGroupDemoPage.Person john =
                 new CheckboxGroupDemoPage.Person(1, "John");
         CheckboxGroupDemoPage.Person paul =
                 new CheckboxGroupDemoPage.Person(2, "Paul");
         CheckboxGroupDemoPage.Person mike =
                 new CheckboxGroupDemoPage.Person(3, "Mike");
+
+        final ListDataProvider<CheckboxGroupDemoPage.Person> personListDataProvider = DataProvider
+                .ofItems(john, paul, mike);
+
         CheckboxGroupListDataView<CheckboxGroupDemoPage.Person> dataView =
-                checkboxGroup.setItems(new ArrayList<>(Arrays.asList(
-                        john, paul, mike)
-                ));
+                checkboxGroup.setItems(personListDataProvider);
+
+        otherCheckBox.setItems(personListDataProvider);
+
         Span sizeSpan = new Span(String.valueOf(dataView.getItemCount()));
         Span containsItemSpan = new Span(String.valueOf(
                 dataView.contains(john)));
@@ -104,15 +112,16 @@ public class CheckboxGroupListDataViewPage extends Div {
         Button updateName = new Button("Update first name",
                 event -> {
                     CheckboxGroupDemoPage.Person updatedPerson =
-                            dataView.getItem(3);
+                            dataView.getItem(0);
                     updatedPerson.setName("Jack");
                     dataView.refreshItem(updatedPerson);
                 });
         Button deletePerson = new Button("Delete person",
                 event -> dataView.removeItem(
-                        new CheckboxGroupDemoPage.Person(4, null)));
+                        new CheckboxGroupDemoPage.Person(1, null)));
 
         checkboxGroup.setId(CHECKBOX_GROUP);
+        otherCheckBox.setId(OTHER_CHECKBOX_GROUP);
         sizeSpan.setId(ITEMS_SIZE);
         containsItemSpan.setId(ITEM_PRESENT);
         allItemsSpan.setId(ALL_ITEMS);
@@ -131,6 +140,6 @@ public class CheckboxGroupListDataViewPage extends Div {
         add(checkboxGroup, sizeSpan, containsItemSpan, allItemsSpan,
                 itemOnIndexSpan, currentItemSpan, hasNextItemSpan,
                 hasPrevItemSpan, filterButton, sortButton, nextItemButton,
-                prevItemButton, addNew, updateName, deletePerson);
+                prevItemButton, addNew, updateName, deletePerson, otherCheckBox);
     }
 }

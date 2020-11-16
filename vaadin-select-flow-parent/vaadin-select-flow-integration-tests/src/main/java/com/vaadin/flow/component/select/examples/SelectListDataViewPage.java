@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.select.examples;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -10,11 +8,14 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.select.data.SelectListDataView;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-select-list-data-view")
 public class SelectListDataViewPage extends Div {
     public static final String SELECT = "select-data-view";
+    public static final String OTHER_SELECT = "other-select-data-view";
     public static final String ITEMS_SIZE = "size-span-data-view";
     public static final String ITEM_PRESENT = "item-present-span-data-view";
     public static final String ALL_ITEMS = "all-items-span-data-view";
@@ -38,14 +39,17 @@ public class SelectListDataViewPage extends Div {
 
     public SelectListDataViewPage() {
         Select<Person> select = new Select<>();
+        Select<Person> otherSelect = new Select<>();
+
         Person john = new Person(1, "John");
         Person paul = new Person(2, "Paul");
         Person mike = new Person(3, "Mike");
 
-        SelectListDataView<Person> dataView =
-                select.setItems(new ArrayList<>(Arrays.asList(
-                john, paul, mike)
-        ));
+        final ListDataProvider<Person> dataProvider = DataProvider.ofItems(john,
+                paul, mike);
+
+        SelectListDataView<Person> dataView = select.setItems(dataProvider);
+        otherSelect.setItems(dataProvider);
 
         Span sizeSpan = new Span(String.valueOf(dataView.getItemCount()));
         Span containsItemSpan = new Span(String.valueOf(
@@ -92,15 +96,16 @@ public class SelectListDataViewPage extends Div {
         NativeButton updateName = new NativeButton("Update first name",
                 event -> {
                     Person updatedPerson =
-                            dataView.getItem(3);
+                            dataView.getItem(0);
                     updatedPerson.setName("Jack");
                     dataView.refreshItem(updatedPerson);
                 });
         NativeButton deletePerson = new NativeButton("Delete person",
                 event -> dataView.removeItem(
-                        new Person(4, null)));
+                        new Person(1, null)));
 
         select.setId(SELECT);
+        otherSelect.setId(OTHER_SELECT);
         sizeSpan.setId(ITEMS_SIZE);
         containsItemSpan.setId(ITEM_PRESENT);
         allItemsSpan.setId(ALL_ITEMS);
@@ -119,7 +124,7 @@ public class SelectListDataViewPage extends Div {
         add(select, sizeSpan, containsItemSpan, allItemsSpan,
                 itemOnIndexSpan, currentItemSpan, hasNextItemSpan,
                 hasPrevItemSpan, filterButton, sortButton, nextItemButton,
-                prevItemButton, addNew, updateName, deletePerson);
+                prevItemButton, addNew, updateName, deletePerson, otherSelect);
     }
 
     public static class Person {

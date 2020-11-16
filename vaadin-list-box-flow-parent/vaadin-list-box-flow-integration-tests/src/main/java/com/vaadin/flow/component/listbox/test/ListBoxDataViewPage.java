@@ -34,6 +34,8 @@ import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 
@@ -53,6 +55,11 @@ public class ListBoxDataViewPage extends Div {
     static final String LIST_BOX_FOR_FILTER_DATA_VIEW = "list-box-for-filter-data-view";
     static final String LIST_BOX_FOR_NEXT_PREV_DATA_VIEW = "list-box-for-next-prev-data-view";
     static final String LIST_BOX_FOR_SORT_DATA_VIEW = "list-box-for-sort-data-view";
+
+    static final String OTHER_LIST_BOX_FOR_ADD_TO_DATA_VIEW = "other-list-box-for-add-to-data-view";
+    static final String OTHER_LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW = "other-list-box-for-remove-from-data-view";
+    static final String OTHER_LIST_BOX_FOR_FILTER_DATA_VIEW = "other-list-box-for-filter-data-view";
+    static final String OTHER_LIST_BOX_FOR_SORT_DATA_VIEW = "other-list-box-for-sort-data-view";
 
     static final String DATA_VIEW_UPDATE_BUTTON = "data-view-update-button";
     static final String LIST_DATA_VIEW_UPDATE_BUTTON = "list-data-view-update-button";
@@ -139,14 +146,20 @@ public class ListBoxDataViewPage extends Div {
 
     private void createAddItemByDataView() {
         Item first = new Item(1L, FIRST);
-        List<Item> items = new ArrayList<>();
-        items.add(first);
 
         ListBox<Item> listBoxForAddToDataView = new ListBox<>();
         listBoxForAddToDataView.setId(LIST_BOX_FOR_ADD_TO_DATA_VIEW);
 
+        ListBox<Item> otherListBox = new ListBox<>();
+        otherListBox.setId(OTHER_LIST_BOX_FOR_ADD_TO_DATA_VIEW);
+
+        final ListDataProvider<Item> listDataProvider = DataProvider
+                .ofItems(first);
+
         ListBoxListDataView<Item> dataView = listBoxForAddToDataView
-                .setItems(items);
+                .setItems(listDataProvider);
+
+        otherListBox.setItems(listDataProvider);
 
         NativeButton dataViewAddButton = new NativeButton("Add", click -> {
             Item second = new Item(2L, SECOND);
@@ -154,32 +167,48 @@ public class ListBoxDataViewPage extends Div {
         });
         dataViewAddButton.setId(LIST_DATA_VIEW_ADD_BUTTON);
 
-        add(listBoxForAddToDataView, dataViewAddButton);
+        add(listBoxForAddToDataView, otherListBox, dataViewAddButton);
     }
 
     private void createRemoveItemByDataView() {
         Item first = new Item(1L, FIRST);
         Item second = new Item(2L, SECOND);
-        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
         ListBox<Item> listBoxForRemoveFromDataView = new ListBox<>();
         listBoxForRemoveFromDataView.setId(LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW);
 
+        ListBox<Item> otherListBox = new ListBox<>();
+        otherListBox.setId(OTHER_LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW);
+
+        final ListDataProvider<Item> listDataProvider = DataProvider
+                .ofItems(first, second);
+
         ListBoxListDataView<Item> dataView = listBoxForRemoveFromDataView
-                .setItems(items);
+                .setItems(listDataProvider);
+
+        otherListBox.setItems(listDataProvider);
 
         NativeButton dataViewRemoveButton = new NativeButton("Remove",
                 click -> dataView.removeItem(second));
         dataViewRemoveButton.setId(LIST_DATA_VIEW_REMOVE_BUTTON);
 
-        add(listBoxForRemoveFromDataView, dataViewRemoveButton);
+        add(listBoxForRemoveFromDataView, otherListBox, dataViewRemoveButton);
     }
 
     private void createFilterItemsByDataView() {
         ListBox<Integer> numbers = new ListBox<>();
         numbers.setId(LIST_BOX_FOR_FILTER_DATA_VIEW);
+
+        ListBox<Integer> otherNumbers = new ListBox<>();
+        otherNumbers.setId(OTHER_LIST_BOX_FOR_FILTER_DATA_VIEW);
+
+        final ListDataProvider<Integer> dataProvider = DataProvider.ofItems(1,
+                2, 3, 4, 5, 6, 7, 8, 9, 10);
+
         ListBoxListDataView<Integer> numbersDataView = numbers
-                .setItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+                .setItems(dataProvider);
+
+        otherNumbers.setItems(dataProvider);
 
         NativeButton filterOdds = new NativeButton("Filter Odds",
                 click -> numbersDataView.setFilter(num -> num % 2 == 0));
@@ -194,7 +223,8 @@ public class ListBoxDataViewPage extends Div {
                 click -> numbersDataView.removeFilters());
         noFilter.setId(LIST_DATA_VIEW_REMOVE_FILTER_BUTTON);
 
-        add(numbers, filterOdds, filterMultiplesOfThree, noFilter);
+        add(numbers, otherNumbers, filterOdds, filterMultiplesOfThree,
+                noFilter);
     }
 
     private void createNextPreviousItemDataView() {
@@ -248,20 +278,27 @@ public class ListBoxDataViewPage extends Div {
         Item first = new Item(1L, FIRST);
         Item second = new Item(2L, SECOND);
         Item third = new Item(3L, THIRD);
-        List<Item> items = new ArrayList<>(Arrays.asList(third, first, second));
 
         ListBox<Item> listBoxForSortDataView = new ListBox<>();
         listBoxForSortDataView.setId(LIST_BOX_FOR_SORT_DATA_VIEW);
 
+        ListBox<Item> otherListBox = new ListBox<>();
+        otherListBox.setId(OTHER_LIST_BOX_FOR_SORT_DATA_VIEW);
+
+        final ListDataProvider<Item> dataProvider = DataProvider.ofItems(third,
+                first, second);
+
         ListBoxListDataView<Item> dataView = listBoxForSortDataView
-                .setItems(items);
+                .setItems(dataProvider);
+
+        otherListBox.setItems(dataProvider);
 
         NativeButton dataViewSortButton = new NativeButton("Sort",
                 click -> dataView.setSortComparator((item1, item2) -> item1
                         .getValue().compareToIgnoreCase(item2.getValue())));
         dataViewSortButton.setId(LIST_DATA_VIEW_SORT_BUTTON);
 
-        add(listBoxForSortDataView, dataViewSortButton);
+        add(listBoxForSortDataView, otherListBox, dataViewSortButton);
     }
 
     private void createIdentifierProviderForMultiSelectListBox() {
