@@ -18,6 +18,9 @@ package com.vaadin.flow.component.listbox.dataview;
 import com.vaadin.flow.component.listbox.ListBoxBase;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
@@ -38,10 +41,14 @@ public class ListBoxListDataView<T> extends AbstractListDataView<T> {
      *            data provider supplier
      * @param listBox
      *            listBox instance for this DataView
+     * @param filterOrSortingChangedCallback
+     *            callback, which is being invoked when the ListBox's filtering
+     *            or sorting changes, not <code>null</code>
      */
     public ListBoxListDataView(
             SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
-            ListBoxBase listBox) {
-        super(dataProviderSupplier, listBox);
+            ListBoxBase listBox,
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataProviderSupplier, listBox, filterOrSortingChangedCallback);
     }
 }

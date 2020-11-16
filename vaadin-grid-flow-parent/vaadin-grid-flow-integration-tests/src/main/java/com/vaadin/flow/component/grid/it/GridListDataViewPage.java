@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,6 +30,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Address;
 import com.vaadin.flow.data.bean.Gender;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/grid-list-data-view-page")
@@ -44,18 +48,36 @@ public class GridListDataViewPage extends Div {
     public static final String ADD_ITEM = "addItem";
     public static final String UPDATE_ITEM = "updateItem";
     public static final String DELETE_ITEM = "deleteItem";
+    public static final String FIRST_GRID_ID = "first-grid";
+    public static final String SECOND_GRID_ID = "second-grid";
+    public static final String ADD_EXTRA_PERSONS_FOR_SORTING = "add-extra-persons";
+    public static final String ADD_SERVER_SIDE_SORTING = "add-server-side-sorting";
+    public static final String REMOVE_SERVER_SIDE_SORTING = "remove-server-side-sorting";
 
     public GridListDataViewPage() {
         List<Person> personList = generatePersonItems();
+        final ListDataProvider<Person> dataProvider = DataProvider
+                .ofCollection(personList);
+
         Grid<Person> grid = new Grid<>(Person.class);
+        grid.setId(FIRST_GRID_ID);
+
+        Grid<Person> secondGrid = new Grid<>(Person.class);
+        secondGrid.setId(SECOND_GRID_ID);
+
         final GridListDataView<Person> dataView = grid
-                .setItems(personList);
+                .setItems(dataProvider);
+
+        secondGrid.setItems(dataProvider);
 
         grid.removeColumnByKey("id");
+        secondGrid.removeColumnByKey("id");
 
         // The Grid<>(Person.class) sorts the properties and in order to
         // reorder the properties we use the 'setColumns' method.
         grid.setColumns("firstName", "lastName", "age");
+        secondGrid.setColumns("firstName", "lastName", "age");
+
         Span count = new Span(Integer.toString(dataView.getItemCount()));
         count.setId(ITEM_COUNT);
         Span itemData = new Span("Item: ");
@@ -111,6 +133,23 @@ public class GridListDataViewPage extends Div {
                     dataView.removeItem(deletedPerson);
                 });
         deletePerson.setId(DELETE_ITEM);
+        Button addExtraPersons = new Button("Add extra Persons", event -> {
+            Person person18 = new Person("Person 99", "lastName",
+                    "person99@test.com", 18, Gender.UNKNOWN, new Address());
+            Person person42 = new Person("Person 99", "lastName",
+                    "person99@test.com", 42, Gender.UNKNOWN, new Address());
+
+            dataView.addItems(Arrays.asList(person18, person42));
+        });
+        addExtraPersons.setId(ADD_EXTRA_PERSONS_FOR_SORTING);
+
+        Button addSorting = new Button("Add sorting by Age", event -> dataView
+                .setSortOrder(Person::getAge, SortDirection.DESCENDING));
+        addSorting.setId(ADD_SERVER_SIDE_SORTING);
+
+        Button removeSorting = new Button("Remove sorting by Age",
+                event -> dataView.removeSorting());
+        removeSorting.setId(REMOVE_SERVER_SIDE_SORTING);
 
         dataView.addItemCountChangeListener(event -> {
             count.setText(Integer.toString(event.getItemCount()));
@@ -135,7 +174,8 @@ public class GridListDataViewPage extends Div {
 
         add(grid, rowSelect, filterByFirstName, selectItemOnRow, showItemData,
                 showNextData, showPreviousData, count, itemData,
-                addNewPerson, updateFirstNameField, deletePerson);
+                addNewPerson, updateFirstNameField, deletePerson,
+                addExtraPersons, addSorting, removeSorting, secondGrid);
     }
 
     private List<Person> generatePersonItems() {

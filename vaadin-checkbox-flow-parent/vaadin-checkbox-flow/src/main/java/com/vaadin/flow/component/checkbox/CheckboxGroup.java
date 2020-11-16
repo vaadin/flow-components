@@ -40,6 +40,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -154,7 +155,7 @@ public class CheckboxGroup<T>
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
         return new CheckboxGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged);
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     /**
@@ -209,6 +210,7 @@ public class CheckboxGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -448,6 +450,7 @@ public class CheckboxGroup<T>
         return selectedItems.stream().allMatch(itemEnabledProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
@@ -461,9 +464,11 @@ public class CheckboxGroup<T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
+
+            getDataProvider().fetch(DataViewUtils.getQuery(this))
+                    .map(item -> createCheckBox((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -613,4 +618,5 @@ public class CheckboxGroup<T>
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
+
 }

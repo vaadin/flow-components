@@ -41,6 +41,7 @@ import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -99,6 +100,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Deprecated
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set( Objects.requireNonNull(dataProvider) );
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -210,13 +212,15 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                         + "https://github.com/vaadin/vaadin-list-box/issues/19");
     }
 
+    @SuppressWarnings("unchecked")
     private void rebuild() {
         clear();
         removeAll();
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            items = getDataProvider().fetch(new Query<>())
+            items = (List<ITEM>) getDataProvider()
+                    .fetch(DataViewUtils.getQuery(this))
                     .collect(Collectors.toList());
             items.stream().map(this::createItemComponent)
                     .forEach(component -> {
@@ -378,7 +382,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      */
     @Override
     public ListBoxListDataView<ITEM> getListDataView() {
-        return new ListBoxListDataView<>(this::getDataProvider, this);
+        return new ListBoxListDataView<>(this::getDataProvider, this,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -425,4 +430,5 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
         return IdentifierProvider.identity();
     }
+
 }

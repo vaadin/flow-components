@@ -37,6 +37,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -177,7 +178,7 @@ public class RadioButtonGroup<T>
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
         return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged);
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     /**
@@ -211,6 +212,7 @@ public class RadioButtonGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         setupDataProviderListener(dataProvider);
@@ -406,6 +408,7 @@ public class RadioButtonGroup<T>
         super.setInvalid(invalid);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
@@ -418,9 +421,10 @@ public class RadioButtonGroup<T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
+            getDataProvider().fetch(DataViewUtils.getQuery(this))
+                    .map(item -> createRadioButton((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -580,4 +584,5 @@ public class RadioButtonGroup<T>
     private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
+
 }

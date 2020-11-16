@@ -132,7 +132,7 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
                 }, null, null, component.getElement().getNode());
 
         ComboBoxListDataView<Item> dataView = new ComboBoxListDataView<>(
-                dataCommunicator, component);
+                dataCommunicator, component, (filter, sorting) -> {});
         DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
         items.forEach(keyMapper::key);
 
