@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload.receivers;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.io.Serializable;
 
@@ -64,5 +65,24 @@ public class FileData implements Serializable {
      */
     public OutputStream getOutputBuffer() {
         return outputBuffer;
+    }
+
+    /**
+     *
+     * @return Temporary file containing the uploaded data.
+     * @throws NullPointerException if outputBuffer is null
+     * @throws UnsupportedOperationException if outputBuffer is not an {@link UploadOutputStream}
+     */
+    public File getFile() {
+        if (outputBuffer == null) {
+            throw new NullPointerException("OutputBuffer is null");
+        }
+        if (outputBuffer instanceof UploadOutputStream) {
+            return ((UploadOutputStream) outputBuffer).getFile();
+        }
+        final String MESSAGE = String
+            .format("%s not supported. Use a UploadOutputStream",
+                outputBuffer.getClass());
+        throw new UnsupportedOperationException(MESSAGE);
     }
 }

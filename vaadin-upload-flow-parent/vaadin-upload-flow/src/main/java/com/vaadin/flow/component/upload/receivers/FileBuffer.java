@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload.receivers;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -89,9 +90,9 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
      */
     public InputStream getInputStream() {
         if (file != null) {
+            final File path = file.getFile();
             try {
-                return new FileInputStream(
-                        ((FileOutputStream) file.getOutputBuffer()).getFD());
+                return new FileInputStream(path);
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
                         "Failed to create InputStream for: '" + getFileName()
