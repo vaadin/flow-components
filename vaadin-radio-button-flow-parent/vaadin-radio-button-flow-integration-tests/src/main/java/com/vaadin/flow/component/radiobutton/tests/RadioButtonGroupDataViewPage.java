@@ -15,6 +15,8 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 
@@ -35,6 +37,10 @@ public class RadioButtonGroupDataViewPage extends Div {
     static final String RADIO_GROUP_FOR_NEXT_PREV_DATA_VIEW = "radio-group-for-next-prev-data-view";
     static final String RADIO_GROUP_FOR_SORT_DATA_VIEW = "radio-group-for-sort-data-view";
     static final String RADIO_GROUP_SELECTED_ID_SPAN = "radio-group-for-selected-ids-span";
+    static final String OTHER_RADIO_GROUP_FOR_ADD_TO_DATA_VIEW = "other-radio-group-for-add-to-data-view";
+    static final String OTHER_RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW = "other-radio-group-for-remove-from-data-view";
+    static final String OTHER_RADIO_GROUP_FOR_FILTER_DATA_VIEW = "other-radio-group-for-filter-data-view";
+    static final String OTHER_RADIO_GROUP_FOR_SORT_DATA_VIEW = "other-radio-group-for-sort-data-view";
 
     static final String DATA_VIEW_UPDATE_BUTTON = "data-view-update-button";
     static final String LIST_DATA_VIEW_UPDATE_BUTTON = "list-data-view-update-button";
@@ -116,14 +122,20 @@ public class RadioButtonGroupDataViewPage extends Div {
 
     private void createAddItemByDataView() {
         Item first = new Item(1L, FIRST);
-        List<Item> items = new ArrayList<>();
-        items.add(first);
 
         RadioButtonGroup<Item> rbgForAddToDataView = new RadioButtonGroup<>();
         rbgForAddToDataView.setId(RADIO_GROUP_FOR_ADD_TO_DATA_VIEW);
 
+        RadioButtonGroup<Item> otherRbgForAddToDataView = new RadioButtonGroup<>();
+        otherRbgForAddToDataView.setId(OTHER_RADIO_GROUP_FOR_ADD_TO_DATA_VIEW);
+
+        final ListDataProvider<Item> listDataProvider = DataProvider
+                .ofItems(first);
+
         RadioButtonGroupListDataView<Item> dataView = rbgForAddToDataView
-                .setItems(items);
+                .setItems(listDataProvider);
+
+        otherRbgForAddToDataView.setItems(listDataProvider);
 
         NativeButton dataViewAddButton = new NativeButton("Add", click -> {
             Item second = new Item(2L, SECOND);
@@ -131,32 +143,50 @@ public class RadioButtonGroupDataViewPage extends Div {
         });
         dataViewAddButton.setId(LIST_DATA_VIEW_ADD_BUTTON);
 
-        add(rbgForAddToDataView, dataViewAddButton);
+        add(rbgForAddToDataView, otherRbgForAddToDataView, dataViewAddButton);
     }
 
     private void createRemoveItemByDataView() {
         Item first = new Item(1L, FIRST);
         Item second = new Item(2L, SECOND);
-        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
         RadioButtonGroup<Item> rbgForRemoveFromDataView = new RadioButtonGroup<>();
         rbgForRemoveFromDataView.setId(RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW);
 
+        RadioButtonGroup<Object> otherRbgForRemoveFromDataView = new RadioButtonGroup<>();
+        otherRbgForRemoveFromDataView
+                .setId(OTHER_RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW);
+
+        ListDataProvider<Item> listDataProvider = DataProvider.ofItems(first,
+                second);
+
         RadioButtonGroupListDataView<Item> dataView = rbgForRemoveFromDataView
-                .setItems(items);
+                .setItems(listDataProvider);
+
+        otherRbgForRemoveFromDataView.setItems(listDataProvider);
 
         NativeButton dataViewRemoveButton = new NativeButton("Remove",
                 click -> dataView.removeItem(second));
         dataViewRemoveButton.setId(LIST_DATA_VIEW_REMOVE_BUTTON);
 
-        add(rbgForRemoveFromDataView, dataViewRemoveButton);
+        add(rbgForRemoveFromDataView, otherRbgForRemoveFromDataView,
+                dataViewRemoveButton);
     }
 
     private void createFilterItemsByDataView() {
         RadioButtonGroup<Integer> numbers = new RadioButtonGroup<>();
         numbers.setId(RADIO_GROUP_FOR_FILTER_DATA_VIEW);
+
+        RadioButtonGroup<Integer> otherNumbers = new RadioButtonGroup<>();
+        otherNumbers.setId(OTHER_RADIO_GROUP_FOR_FILTER_DATA_VIEW);
+
+        final ListDataProvider<Integer> listDataProvider = DataProvider
+                .ofItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
         RadioButtonGroupListDataView<Integer> numbersDataView = numbers
-                .setItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+                .setItems(listDataProvider);
+
+        otherNumbers.setItems(listDataProvider);
 
         NativeButton filterOdds = new NativeButton("Filter Odds",
                 click -> numbersDataView.setFilter(num -> num % 2 == 0));
@@ -171,7 +201,8 @@ public class RadioButtonGroupDataViewPage extends Div {
                 click -> numbersDataView.removeFilters());
         noFilter.setId(LIST_DATA_VIEW_REMOVE_FILTER_BUTTON);
 
-        add(numbers, filterOdds, filterMultiplesOfThree, noFilter);
+        add(numbers, otherNumbers, filterOdds, filterMultiplesOfThree,
+                noFilter);
     }
 
     private void createNextPreviousItemDataView() {
@@ -225,20 +256,27 @@ public class RadioButtonGroupDataViewPage extends Div {
         Item first = new Item(1L, FIRST);
         Item second = new Item(2L, SECOND);
         Item third = new Item(3L, THIRD);
-        List<Item> items = new ArrayList<>(Arrays.asList(third, first, second));
 
         RadioButtonGroup<Item> rbgForSortDataView = new RadioButtonGroup<>();
         rbgForSortDataView.setId(RADIO_GROUP_FOR_SORT_DATA_VIEW);
 
+        RadioButtonGroup<Item> otherRbgForSortDataView = new RadioButtonGroup<>();
+        otherRbgForSortDataView.setId(OTHER_RADIO_GROUP_FOR_SORT_DATA_VIEW);
+
+        final ListDataProvider<Item> listDataProvider = DataProvider
+                .ofItems(third, first, second);
+
         RadioButtonGroupListDataView<Item> dataView = rbgForSortDataView
-                .setItems(items);
+                .setItems(listDataProvider);
+
+        otherRbgForSortDataView.setItems(listDataProvider);
 
         NativeButton dataViewSortButton = new NativeButton("Sort",
                 click -> dataView.setSortComparator((item1, item2) -> item1
                         .getValue().compareToIgnoreCase(item2.getValue())));
         dataViewSortButton.setId(LIST_DATA_VIEW_SORT_BUTTON);
 
-        add(rbgForSortDataView, dataViewSortButton);
+        add(rbgForSortDataView, otherRbgForSortDataView, dataViewSortButton);
     }
 
     private void createIdentifierProviderForListBox() {

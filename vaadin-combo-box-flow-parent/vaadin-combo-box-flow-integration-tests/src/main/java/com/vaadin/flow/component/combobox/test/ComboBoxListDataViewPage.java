@@ -27,12 +27,16 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 
 @Route("combobox-list-data-view-page")
 public class ComboBoxListDataViewPage extends Div {
 
+    public static final String FIRST_COMBO_BOX_ID = "first-combo-box";
+    public static final String SECOND_COMBO_BOX_ID = "second-combo-box";
     public static final String ITEM_COUNT = "itemCount";
     public static final String ITEM_DATA = "itemData";
     public static final String ITEM_SELECT = "itemSelect";
@@ -45,12 +49,21 @@ public class ComboBoxListDataViewPage extends Div {
 
     public ComboBoxListDataViewPage() {
         List<Person> personList = generatePersonItems();
+        final ListDataProvider<Person> dataProvider = DataProvider
+                .ofCollection(personList);
+
         ComboBox<Person> comboBox = new ComboBox<>();
         comboBox.setAllowCustomValue(true);
         comboBox.setItemLabelGenerator(Person::getFirstName);
+        comboBox.setId(FIRST_COMBO_BOX_ID);
+
+        ComboBox<Person> secondComboBox = new ComboBox<>();
+        secondComboBox.setId(SECOND_COMBO_BOX_ID);
 
         final ComboBoxListDataView<Person> dataView = comboBox
-                .setItems(personList);
+                .setItems(dataProvider);
+
+        secondComboBox.setItems(dataProvider);
 
         // Add custom item to collection
         comboBox.addCustomValueSetListener(event -> {
@@ -145,7 +158,7 @@ public class ComboBoxListDataViewPage extends Div {
 
         add(comboBox, itemSelect, filterByAge, reverseSorting,
                 selectItemOnIndex, showItemData, showNextData, showPreviousData,
-                removePerson, count, itemData);
+                removePerson, count, itemData, secondComboBox);
     }
 
     private List<Person> generatePersonItems() {

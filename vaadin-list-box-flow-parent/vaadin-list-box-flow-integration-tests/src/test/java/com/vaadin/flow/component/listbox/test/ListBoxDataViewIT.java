@@ -18,14 +18,13 @@ package com.vaadin.flow.component.listbox.test;
 
 import java.util.List;
 
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.CURRENT_ITEM_SPAN;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.DATA_VIEW_UPDATE_BUTTON;
@@ -49,9 +48,13 @@ import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DA
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_SET_FILTER_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_SORT_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.LIST_DATA_VIEW_UPDATE_BUTTON;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.MULTI_SELECT_LIST_BOX_SELECTION_BY_ID_AND_NAME_BUTTON;
 import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON;
-import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.OTHER_LIST_BOX_FOR_ADD_TO_DATA_VIEW;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.OTHER_LIST_BOX_FOR_FILTER_DATA_VIEW;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.OTHER_LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW;
+import static com.vaadin.flow.component.listbox.test.ListBoxDataViewPage.OTHER_LIST_BOX_FOR_SORT_DATA_VIEW;
 
 @TestPath("vaadin-list-box/list-box-data-view")
 public class ListBoxDataViewIT extends AbstractComponentIT {
@@ -127,6 +130,11 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("Second RadioButton should have the text", SECOND,
                 items.get(1).getText());
+
+        listBox = findElement(By.id(OTHER_LIST_BOX_FOR_ADD_TO_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
+
+        Assert.assertEquals("ListBox should have items", 2, items.size());
     }
 
     @Test
@@ -150,6 +158,12 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("First RadioButton should have the text", FIRST,
                 items.get(0).getText());
+
+        listBox = findElement(By.id(OTHER_LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
+
+        Assert.assertEquals("Unexpected item count after removing one item "
+                + "for second radio button group", 1, items.size());
     }
 
     @Test
@@ -176,6 +190,13 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
         items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
         Assert.assertEquals("ListBox should have items", 4, items.size());
+
+        listBox = findElement(By.id(OTHER_LIST_BOX_FOR_FILTER_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
+
+        Assert.assertEquals(
+                "Unexpected filtering for second radion button group", 10,
+                items.size());
 
         findElement(By.id(LIST_DATA_VIEW_REMOVE_FILTER_BUTTON)).click();
         waitForElementPresent(By.tagName(VAADIN_ITEM));
@@ -252,6 +273,14 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
                 "second", items.get(1).getText());
         Assert.assertEquals("third rendered item's text should be",
                 "third", items.get(2).getText());
+
+        listBox = findElement(By.id(OTHER_LIST_BOX_FOR_SORT_DATA_VIEW));
+        items = listBox.findElements(By.tagName(VAADIN_ITEM));
+
+        Assert.assertArrayEquals(
+                "Unexpected sorting for second radio button " + "group",
+                new String[] { "third", "first", "second" },
+                items.stream().map(WebElement::getText).toArray());
     }
 
     @Test

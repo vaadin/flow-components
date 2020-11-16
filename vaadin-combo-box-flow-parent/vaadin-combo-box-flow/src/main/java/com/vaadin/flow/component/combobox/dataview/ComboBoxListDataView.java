@@ -25,6 +25,8 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -47,10 +49,14 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      *            the data communicator of the ComboBox, not <code>null</code>
      * @param comboBox
      *            the ComboBox component, not <code>null</code>
+     * @param filterOrSortingChangedCallback
+     *            callback, which is being invoked when the ComboBox's filtering
+     *            or sorting changes, not <code>null</code>
      */
     public ComboBoxListDataView(DataCommunicator<T> dataCommunicator,
-            ComboBox<T> comboBox) {
-        super(dataCommunicator::getDataProvider, comboBox);
+            ComboBox<T> comboBox,
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
+        super(dataCommunicator::getDataProvider, comboBox, filterOrSortingChangedCallback);
         this.dataCommunicator = dataCommunicator;
     }
 

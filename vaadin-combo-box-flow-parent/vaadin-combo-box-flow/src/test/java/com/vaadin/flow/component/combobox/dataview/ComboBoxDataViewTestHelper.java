@@ -18,8 +18,8 @@ package com.vaadin.flow.component.combobox.dataview;
 
 import java.lang.reflect.Method;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 
 final class ComboBoxDataViewTestHelper {
 
@@ -41,7 +41,7 @@ final class ComboBoxDataViewTestHelper {
         }
     }
 
-    static void fakeClientCommunication(DataCommunicatorTest.MockUI ui) {
+    static void fakeClientCommunication(UI ui) {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
