@@ -9,6 +9,9 @@
   <artifactId>vaadin-rich-text-editor-flow</artifactId>
   <packaging>jar</packaging>
   <name>Vaadin Rich Text Editor</name>
+  <properties>
+    <osgi.bundle.license>https://vaadin.com/license/cval-3.0</osgi.bundle.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -145,6 +148,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+<<<<<<< HEAD
   <build>
     <plugins>
       <plugin>
@@ -179,6 +183,8 @@
       </plugin>
     </plugins>
   </build>
+=======
+>>>>>>> b054d3eee... chore: simply and align bundle configuration of pro/core components (#397)
   <profiles>
     <profile>
       <id>attach-docs</id>
