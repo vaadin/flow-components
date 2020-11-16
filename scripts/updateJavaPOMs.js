@@ -85,6 +85,20 @@ async function consolidatePomParent() {
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
   });
 }
+
+async function removePlugin(pom, pluginId){
+  const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
+  if(pomJs.project.profiles[0].profile[2].build[0].plugins[0].plugin){
+  }
+
+  pomJs.project.profiles[0].profile[2].build[0].plugins[0].plugin=
+  pomJs.project.profiles[0].profile[2].build[0].plugins[0].plugin.filter(plugin => !(plugin.artifactId== pluginId))
+
+  const xml = new xml2js.Builder().buildObject(pomJs);
+  console.log(`Update ${pom}`);
+  fs.writeFileSync(pom, xml + '\n', 'utf8');
+}
+
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
   consolidate(template, `${mod}/${name}-flow/pom.xml`);
@@ -93,7 +107,11 @@ async function consolidatePomTB() {
   consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
 }
 async function consolidatePomDemo() {
-  consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
+  await consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
+  // Remove the unnecessary plugin from vaadin-charts-flow-demo module
+  if(`${mod}` == 'vaadin-charts-flow-parent'){
+    removePlugin(`${mod}/${name}-flow-demo/pom.xml`, 'maven-bundle-plugin')
+  }
 }
 async function consolidatePomIT() {
   consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
