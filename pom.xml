@@ -133,7 +133,6 @@
       <modules>
         <module>integration-tests</module>
       </modules>
-
       <build>
         <pluginManagement>
           <plugins>
