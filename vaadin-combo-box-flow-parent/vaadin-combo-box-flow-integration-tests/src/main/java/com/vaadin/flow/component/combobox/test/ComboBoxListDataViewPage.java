@@ -43,6 +43,8 @@ public class ComboBoxListDataViewPage extends Div {
     public static final String SHOW_ITEM_DATA = "showItemData";
     public static final String SHOW_NEXT_DATA = "showNextData";
     public static final String SHOW_PREVIOUS_DATA = "showPreviousData";
+    public static final String SHOW_ITEM_COUNT = "showItemCount";
+    public static final String SHOW_ITEMS = "showItems";
     public static final String AGE_FILTER = "ageFilter";
     public static final String REMOVE_ITEM = "removeItem";
     public static final String REVERSE_SORTING = "reverseSorting";
@@ -92,6 +94,17 @@ public class ComboBoxListDataViewPage extends Div {
                 event -> itemData.setText("Item: " + dataView
                         .getItem(itemSelect.getValue()).getFirstName()));
         showItemData.setId(SHOW_ITEM_DATA);
+
+        NativeButton showItemCount = new NativeButton("Show Item Count",
+                click -> count
+                        .setText(String.valueOf(dataView.getItemCount())));
+        showItemCount.setId(SHOW_ITEM_COUNT);
+
+        NativeButton showItems = new NativeButton("Show Items",
+                click -> itemData
+                        .setText(dataView.getItems().map(Person::toString)
+                                .collect(Collectors.joining(","))));
+        showItems.setId(SHOW_ITEMS);
 
         // Navigation
         NativeButton showNextData = new NativeButton("Next person",
@@ -158,7 +171,8 @@ public class ComboBoxListDataViewPage extends Div {
 
         add(comboBox, itemSelect, filterByAge, reverseSorting,
                 selectItemOnIndex, showItemData, showNextData, showPreviousData,
-                removePerson, count, itemData, secondComboBox);
+                removePerson, count, itemData, showItemCount,
+                showItems, secondComboBox);
     }
 
     private List<Person> generatePersonItems() {

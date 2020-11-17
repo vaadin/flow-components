@@ -113,7 +113,6 @@ public class FilteringPage extends Div {
     }
 
     private void createComboBoxWithMultiplePagesAndSourceSwitchers() {
-        // addTitle("Callback data provider with custom page size 42");
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("combo-box-with-filtered-items");
 

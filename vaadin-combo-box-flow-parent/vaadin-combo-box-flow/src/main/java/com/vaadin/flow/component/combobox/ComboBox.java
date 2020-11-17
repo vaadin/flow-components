@@ -248,6 +248,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private DataCommunicator<T> dataCommunicator;
     private Registration lazyOpenRegistration;
+    private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
 
@@ -876,12 +877,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         convertOrNull.apply(getFilterString()), false);
 
         filterSlot = filter -> {
-            if (!Objects.equals(filter, lastFilter) ||
-                    // Since the data communicator erases the combo box
-                    // non-empty filter after each request, the filter needs
-                    // to be set again to data communicator even if the same
-                    // as last sent.
-                    !filter.isEmpty()) {
+            if (!Objects.equals(filter, lastFilter)) {
                 DataCommunicator.Filter<C> objectFilter =
                         new DataCommunicator.Filter<C>(
                                 convertOrNull.apply(filter), filter.isEmpty());
@@ -902,6 +898,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             // data provider when the dropdown opens.
             lazyOpenRegistration = getElement().addPropertyChangeListener(
                     "opened", this::executeRegistration);
+        }
+    }
+
+    private void clearFilterOnClose(PropertyChangeEvent event) {
+        if (event.getValue().equals(Boolean.FALSE)) {
+            if (lastFilter != null && !lastFilter.isEmpty()) {
+                clearClientSideFilterAndUpdateInMemoryFilter();
+            }
         }
     }
 
@@ -941,6 +945,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataProvider != null && dataProviderListener == null) {
             setupDataProviderListener(dataProvider);
         }
+
+        clearFilterOnCloseRegistration = getElement()
+                .addPropertyChangeListener("opened", this::clearFilterOnClose);
     }
 
     @Override
@@ -950,6 +957,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataProviderListener = null;
         }
         removeLazyOpenRegistration();
+
+        if (clearFilterOnCloseRegistration != null) {
+            clearFilterOnCloseRegistration.remove();
+            clearFilterOnCloseRegistration = null;
+        }
         super.onDetach(detachEvent);
     }
 
@@ -1679,8 +1691,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             SerializablePredicate<T> filter,
             SerializableComparator<T> sortComparator) {
         dataCommunicator.setInMemorySorting(sortComparator);
-        // Erase the current filter to ensure the execution of
-        // filter consumer
+        clearClientSideFilterAndUpdateInMemoryFilter();
+    }
+
+    private void clearClientSideFilterAndUpdateInMemoryFilter() {
         lastFilter = null;
         filterSlot.accept("");
         reset();
