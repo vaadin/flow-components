@@ -31,6 +31,7 @@
             </activation>
             <modules>
                 <module>component-flow-integration-tests</module>
+                <module>component-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
