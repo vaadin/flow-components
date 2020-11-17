@@ -18,11 +18,13 @@ package com.vaadin.flow.component.upload.receivers;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 
 /**
  * FileOutputStream with a reference to the output file.
  */
-public class UploadOutputStream extends FileOutputStream {
+public class UploadOutputStream extends FileOutputStream implements
+    Serializable {
     private final File file;
 
     /**
