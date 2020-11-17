@@ -21,6 +21,7 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.F
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_COUNT;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_SELECT;
+import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.NEW_PERSON_NAME;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REMOVE_ITEM;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REVERSE_SORTING;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SECOND_COMBO_BOX_ID;
@@ -156,9 +157,11 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
     @Test
     public void addItemCountChangeListener_newItemAdded_itemCountChanged() {
         // Add custom value
-        firstComboBox.sendKeys("Person NEW", Keys.ENTER);
+        firstComboBox.sendKeys(NEW_PERSON_NAME, Keys.ENTER);
         verifyNotifiedItemCount(
                 "Expected item count = 251 after adding a new item", 251);
+        // Erase input field's text, because it can be treated as a filter
+        firstComboBox.selectByText("");
 
         firstComboBox.openPopup();
         verifyNotifiedItemCount(
@@ -170,7 +173,7 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 251, getItems(secondComboBox).size());
 
         // Remove recently added item
-        selectItem(250);
+        firstComboBox.selectByText(NEW_PERSON_NAME);
         removeItem();
 
         firstComboBox.openPopup();

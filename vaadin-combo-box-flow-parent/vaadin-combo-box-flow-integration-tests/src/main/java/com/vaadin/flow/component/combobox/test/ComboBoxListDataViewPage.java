@@ -49,6 +49,8 @@ public class ComboBoxListDataViewPage extends Div {
     public static final String REMOVE_ITEM = "removeItem";
     public static final String REVERSE_SORTING = "reverseSorting";
 
+    public static final String NEW_PERSON_NAME = "Person NEW";
+
     public ComboBoxListDataViewPage() {
         List<Person> personList = generatePersonItems();
         final ListDataProvider<Person> dataProvider = DataProvider
