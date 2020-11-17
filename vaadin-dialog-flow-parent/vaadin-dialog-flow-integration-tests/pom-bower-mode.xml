@@ -7,7 +7,6 @@
     <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-dialog-integration-tests-bower-mode</artifactId>
-  <version>${vaadin.dialog.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Dialog Integration Tests in Bower Mode</name>
   <properties>
@@ -30,7 +29,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-flow</artifactId>
-      <version>${vaadin.dialog.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -39,7 +38,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${vaadin.combo.box.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -48,12 +47,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-flow</artifactId>
-      <version>${vaadin.button.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-ordered-layout-flow</artifactId>
-      <version>${vaadin.ordered.layout.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -66,7 +65,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dialog-testbench</artifactId>
-      <version>${vaadin.dialog.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -83,7 +82,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -121,10 +120,6 @@
         <configuration>
           <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-install-plugin</artifactId>
