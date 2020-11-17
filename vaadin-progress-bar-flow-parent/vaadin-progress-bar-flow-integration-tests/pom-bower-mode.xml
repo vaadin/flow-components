@@ -7,7 +7,6 @@
     <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-progress-bar-integration-tests-bower-mode</artifactId>
-  <version>${vaadin.progress.bar.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Progress Bar Integration Tests in Bower Mode</name>
   <properties>
@@ -23,12 +22,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-progress-bar-testbench</artifactId>
-      <version>${vaadin.progress.bar.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-progress-bar-flow</artifactId>
-      <version>${vaadin.progress.bar.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -48,7 +47,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-progress-bar-flow-demo</artifactId>
-      <version>${vaadin.progress.bar.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -58,7 +57,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -96,10 +95,6 @@
         <configuration>
           <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-install-plugin</artifactId>

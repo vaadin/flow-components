@@ -7,7 +7,6 @@
     <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-board-integration-tests-bower-mode</artifactId>
-  <version>${vaadin.board.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Board Integration Tests in Bower Mode</name>
   <properties>
@@ -34,7 +33,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-board-flow</artifactId>
-      <version>${vaadin.board.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -45,7 +44,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-board-testbench</artifactId>
-      <version>${vaadin.board.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -57,7 +56,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -95,10 +94,6 @@
         <configuration>
           <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-install-plugin</artifactId>

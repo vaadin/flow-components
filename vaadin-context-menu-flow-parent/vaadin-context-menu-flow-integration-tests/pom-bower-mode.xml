@@ -7,7 +7,6 @@
     <version>14.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-context-menu-integration-tests-bower-mode</artifactId>
-  <version>${vaadin.context.menu.version}</version>
   <packaging>war</packaging>
   <name>Vaadin Context Menu Integration Tests in Bower Mode</name>
   <properties>
@@ -30,12 +29,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-flow-demo</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -53,7 +52,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-context-menu-testbench</artifactId>
-      <version>${vaadin.context.menu.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -65,7 +64,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-flow-components-shared</artifactId>
-      <version>${vaadin.flow.components.shared.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -103,10 +102,6 @@
         <configuration>
           <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-install-plugin</artifactId>
