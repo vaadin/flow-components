@@ -41,7 +41,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
-@TestPath("combobox-list-data-view-page")
+@TestPath("vaadin-combo-box/combobox-list-data-view-page")
 public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
     private ComboBoxElement firstComboBox;
@@ -263,6 +263,11 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 && "Person 222".equals(getItemLabel(items, 0)));
 
         clickButton(SHOW_ITEMS);
+
+        // Checks the filter has been cleared after closing the drop down
+        // ComboBox clears the cache after closing, so the item's values are
+        // not checked here
+        waitForItems(firstComboBox, items -> items.size() == 250);
 
         Assert.assertTrue("The client filter shouldn't impact the items",
                 getItemData().startsWith("Person 0 lastName,Person 1 lastName")

@@ -28,9 +28,9 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxLazyDataViewPage.C
 import static com.vaadin.flow.component.combobox.test.ComboBoxLazyDataViewPage.GET_ITEMS_BUTTON_ID;
 import static com.vaadin.flow.component.combobox.test.ComboBoxLazyDataViewPage.GET_ITEM_BUTTON_ID;
 import static com.vaadin.flow.component.combobox.test.ComboBoxLazyDataViewPage.ITEMS_LIST_ID;
-import static com.vaadin.flow.component.combobox.test.ComboBoxLazyDataViewPage.SWITCH_BUTTON_ID;
+import static com.vaadin.flow.component.combobox.test.ComboBoxLazyDataViewPage.SWITCH_TO_UNKNOWN_COUNT_BUTTON_ID;
 
-@TestPath("combobox-lazy-data-view-page")
+@TestPath("vaadin-combo-box/combobox-lazy-data-view-page")
 public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
 
     private ComboBoxElement comboBox;
@@ -54,6 +54,11 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
 
         clickButton(GET_ITEM_BUTTON_ID);
 
+        // Checks the filter has been cleared after closing the drop down.
+        // ComboBox clears the cache after closing, so the item's values are
+        // not checked here
+        waitForItems(comboBox, items -> items.size() == 1000);
+
         Assert.assertEquals("The client filter shouldn't impact the items",
                 "Item 0", itemsList.getText());
 
@@ -70,13 +75,18 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
 
     @Test
     public void getItem_withUnknownItemCountAndClientSideFilter_returnsItemFromNotFilteredSet() {
-        clickButton(SWITCH_BUTTON_ID);
+        clickButton(SWITCH_TO_UNKNOWN_COUNT_BUTTON_ID);
         comboBox.setFilter("777");
 
         waitForItems(comboBox, items -> items.size() == 1
                 && "Item 777".equals(getItemLabel(items, 0)));
 
         clickButton(GET_ITEM_BUTTON_ID);
+
+        // Checks the filter has been cleared after closing the drop down
+        // ComboBox clears the cache after closing, so the item's values are
+        // not checked here
+        waitForItems(comboBox, items -> items.size() == 200);
 
         Assert.assertEquals("The client filter shouldn't impact the items",
                 "Item 0", itemsList.getText());
@@ -94,13 +104,18 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
 
     @Test
     public void getItems_withUnknownItemCountAndClientSideFilter_returnsNotFilteredItems() {
-        clickButton(SWITCH_BUTTON_ID);
+        clickButton(SWITCH_TO_UNKNOWN_COUNT_BUTTON_ID);
         comboBox.setFilter("777");
 
         waitForItems(comboBox, items -> items.size() == 1
                 && "Item 777".equals(getItemLabel(items, 0)));
 
         clickButton(GET_ITEMS_BUTTON_ID);
+
+        // Checks the filter has been cleared after closing the drop down
+        // ComboBox clears the cache after closing, so the item's values are
+        // not checked here
+        waitForItems(comboBox, items -> items.size() == 200);
 
         Assert.assertTrue("The client filter shouldn't impact the items",
                 itemsList.getText().startsWith("Item 0,Item 1,Item 2")
@@ -130,6 +145,11 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
                         && "Item 777".equals(getItemLabel(items, 0)));
 
         clickButton(GET_ITEMS_BUTTON_ID);
+
+        // Checks the filter has been cleared after closing the drop down
+        // ComboBox clears the cache after closing, so the item's values are
+        // not checked here
+        waitForItems(comboBox, items -> items.size() == 1000);
 
         Assert.assertTrue("The client filter shouldn't impact the items",
                 itemsList.getText().startsWith("Item 0,Item 1,Item 2")

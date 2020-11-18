@@ -26,14 +26,14 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
-@Route("combobox-lazy-data-view-page")
+@Route("vaadin-combo-box/combobox-lazy-data-view-page")
 public class ComboBoxLazyDataViewPage extends Div {
 
-    public static final String COMBO_BOX_ID = "combo-box-get-items-page";
-    public static final String ITEMS_LIST_ID = "items-list";
-    public static final String GET_ITEMS_BUTTON_ID = "get-items-button";
-    public static final String GET_ITEM_BUTTON_ID = "get-item-button";
-    public static final String SWITCH_BUTTON_ID = "switch-to-unknown-button";
+    static final String COMBO_BOX_ID = "combo-box-get-items-page";
+    static final String ITEMS_LIST_ID = "items-list";
+    static final String GET_ITEMS_BUTTON_ID = "get-items-button";
+    static final String GET_ITEM_BUTTON_ID = "get-item-button";
+    static final String SWITCH_TO_UNKNOWN_COUNT_BUTTON_ID = "switch-to-unknown-button";
 
     public ComboBoxLazyDataViewPage() {
 
@@ -68,7 +68,7 @@ public class ComboBoxLazyDataViewPage extends Div {
         NativeButton switchToUnknown = new NativeButton(
                 "Switch To Unknown Item Count",
                 click -> dataView.setItemCountUnknown());
-        switchToUnknown.setId(SWITCH_BUTTON_ID);
+        switchToUnknown.setId(SWITCH_TO_UNKNOWN_COUNT_BUTTON_ID);
 
         add(comboBox, switchToUnknown, getItemButton, getItemsButton,
                 itemsList);

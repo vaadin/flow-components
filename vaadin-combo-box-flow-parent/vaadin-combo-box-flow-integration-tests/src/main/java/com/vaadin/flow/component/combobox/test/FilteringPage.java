@@ -31,6 +31,10 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-combo-box/filtering")
 public class FilteringPage extends Div {
 
+    static final String SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID = "switch-to-unknown-item-count";
+    static final String SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID = "switch-to-in-memory-items";
+    static final String COMBOBOX_WITH_FILTERED_ITEMS_ID = "combo-box-with-filtered-items";
+
     private Div message = new Div();
 
     public FilteringPage() {
@@ -114,7 +118,7 @@ public class FilteringPage extends Div {
 
     private void createComboBoxWithMultiplePagesAndSourceSwitchers() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setId("combo-box-with-filtered-items");
+        comboBox.setId(COMBOBOX_WITH_FILTERED_ITEMS_ID);
 
         List<String> items = LazyLoadingPage.generateStrings(500);
 
@@ -133,11 +137,11 @@ public class FilteringPage extends Div {
         NativeButton switchToUnknown = new NativeButton(
                 "Switch To Unknown Item Count",
                 click -> dataView.setItemCountUnknown());
-        switchToUnknown.setId("switch-to-unknown-item-count");
+        switchToUnknown.setId(SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID);
 
         NativeButton switchToInMemory = new NativeButton(
                 "Switch To In-memory Items", click -> comboBox.setItems(items));
-        switchToInMemory.setId("switch-to-in-memory-items");
+        switchToInMemory.setId(SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID);
 
         add(new Div(), comboBox, switchToUnknown, switchToInMemory);
     }
