@@ -62,6 +62,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         dataView = component.setItems(items);
 
         ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        // Close combo box drop down to trigger the filter erase
+        component.setOpened(false);
         ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
         Stream<String> filteredItems = dataView.getItems();
@@ -96,6 +98,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         dataView = component.setItems(items);
 
         ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        // Close combo box drop down to trigger the filter erase
+        component.setOpened(false);
         ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
         int itemCount = dataView.getItemCount();
