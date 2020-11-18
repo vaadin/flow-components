@@ -32,20 +32,24 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 
-@Route("combobox-list-data-view-page")
+@Route("vaadin-combo-box/combobox-list-data-view-page")
 public class ComboBoxListDataViewPage extends Div {
 
-    public static final String FIRST_COMBO_BOX_ID = "first-combo-box";
-    public static final String SECOND_COMBO_BOX_ID = "second-combo-box";
-    public static final String ITEM_COUNT = "itemCount";
-    public static final String ITEM_DATA = "itemData";
-    public static final String ITEM_SELECT = "itemSelect";
-    public static final String SHOW_ITEM_DATA = "showItemData";
-    public static final String SHOW_NEXT_DATA = "showNextData";
-    public static final String SHOW_PREVIOUS_DATA = "showPreviousData";
-    public static final String AGE_FILTER = "ageFilter";
-    public static final String REMOVE_ITEM = "removeItem";
-    public static final String REVERSE_SORTING = "reverseSorting";
+    static final String FIRST_COMBO_BOX_ID = "first-combo-box";
+    static final String SECOND_COMBO_BOX_ID = "second-combo-box";
+    static final String ITEM_COUNT = "itemCount";
+    static final String ITEM_DATA = "itemData";
+    static final String ITEM_SELECT = "itemSelect";
+    static final String SHOW_ITEM_DATA = "showItemData";
+    static final String SHOW_NEXT_DATA = "showNextData";
+    static final String SHOW_PREVIOUS_DATA = "showPreviousData";
+    static final String SHOW_ITEM_COUNT = "showItemCount";
+    static final String SHOW_ITEMS = "showItems";
+    static final String AGE_FILTER = "ageFilter";
+    static final String REMOVE_ITEM = "removeItem";
+    static final String REVERSE_SORTING = "reverseSorting";
+
+    static final String NEW_PERSON_NAME = "Person NEW";
 
     public ComboBoxListDataViewPage() {
         List<Person> personList = generatePersonItems();
@@ -92,6 +96,17 @@ public class ComboBoxListDataViewPage extends Div {
                 event -> itemData.setText("Item: " + dataView
                         .getItem(itemSelect.getValue()).getFirstName()));
         showItemData.setId(SHOW_ITEM_DATA);
+
+        NativeButton showItemCount = new NativeButton("Show Item Count",
+                click -> count
+                        .setText(String.valueOf(dataView.getItemCount())));
+        showItemCount.setId(SHOW_ITEM_COUNT);
+
+        NativeButton showItems = new NativeButton("Show Items",
+                click -> itemData
+                        .setText(dataView.getItems().map(Person::toString)
+                                .collect(Collectors.joining(","))));
+        showItems.setId(SHOW_ITEMS);
 
         // Navigation
         NativeButton showNextData = new NativeButton("Next person",
@@ -158,7 +173,8 @@ public class ComboBoxListDataViewPage extends Div {
 
         add(comboBox, itemSelect, filterByAge, reverseSorting,
                 selectItemOnIndex, showItemData, showNextData, showPreviousData,
-                removePerson, count, itemData, secondComboBox);
+                removePerson, count, itemData, showItemCount,
+                showItems, secondComboBox);
     }
 
     private List<Person> generatePersonItems() {

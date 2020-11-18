@@ -21,9 +21,12 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.F
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_COUNT;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.ITEM_SELECT;
+import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.NEW_PERSON_NAME;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REMOVE_ITEM;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REVERSE_SORTING;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SECOND_COMBO_BOX_ID;
+import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEMS;
+import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEM_COUNT;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEM_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_NEXT_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_PREVIOUS_DATA;
@@ -38,7 +41,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
-@TestPath("combobox-list-data-view-page")
+@TestPath("vaadin-combo-box/combobox-list-data-view-page")
 public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
     private ComboBoxElement firstComboBox;
@@ -154,9 +157,11 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
     @Test
     public void addItemCountChangeListener_newItemAdded_itemCountChanged() {
         // Add custom value
-        firstComboBox.sendKeys("Person NEW", Keys.ENTER);
+        firstComboBox.sendKeys(NEW_PERSON_NAME, Keys.ENTER);
         verifyNotifiedItemCount(
                 "Expected item count = 251 after adding a new item", 251);
+        // Erase input field's text, because it can be treated as a filter
+        firstComboBox.selectByText("");
 
         firstComboBox.openPopup();
         verifyNotifiedItemCount(
@@ -168,7 +173,7 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 251, getItems(secondComboBox).size());
 
         // Remove recently added item
-        selectItem(250);
+        firstComboBox.selectByText(NEW_PERSON_NAME);
         removeItem();
 
         firstComboBox.openPopup();
@@ -195,6 +200,93 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
         assertItem(getItems(secondComboBox), 0, "Person 0 lastName");
     }
 
+    @Test
+    public void getItemCount_withClientSideFilter_returnsItemFromNotFilteredSet() {
+        firstComboBox.setFilter("222");
+
+        waitForItems(firstComboBox, items -> items.size() == 1
+                && "Person 222".equals(getItemLabel(items, 0)));
+
+        clickButton(SHOW_ITEM_COUNT);
+        Assert.assertEquals(
+                "The client filter shouldn't impact the item count", "250",
+                getItemCount());
+
+        firstComboBox.openPopup();
+
+        waitForItems(firstComboBox,
+                items -> items.size() == 250
+                        && "Person 0".equals(getItemLabel(items, 0))
+                        && "Person 49".equals(getItemLabel(items, 49)));
+
+        clickButton(SHOW_ITEM_COUNT);
+        Assert.assertEquals("The client filter shouldn't impact the item count",
+                "250", getItemCount());
+    }
+
+    @Test
+    public void getItem_withClientSideFilter_returnsItemFromNotFilteredSet() {
+        firstComboBox.setFilter("222");
+
+        waitForItems(firstComboBox, items -> items.size() == 1
+                && "Person 222".equals(getItemLabel(items, 0)));
+
+        selectItem(0);
+        showSelectedPerson();
+        verifySelectedPerson(0);
+
+        selectItem(249);
+        showSelectedPerson();
+        verifySelectedPerson(249);
+
+        firstComboBox.openPopup();
+
+        waitForItems(firstComboBox,
+                items -> items.size() == 250
+                        && "Person 0".equals(getItemLabel(items, 0))
+                        && "Person 49".equals(getItemLabel(items, 49)));
+
+        selectItem(0);
+        showSelectedPerson();
+        verifySelectedPerson(0);
+
+        selectItem(249);
+        showSelectedPerson();
+        verifySelectedPerson(249);
+    }
+
+    @Test
+    public void getItems_withClientSideFilter_returnsNotFilteredItems() {
+        firstComboBox.setFilter("222");
+
+        waitForItems(firstComboBox, items -> items.size() == 1
+                && "Person 222".equals(getItemLabel(items, 0)));
+
+        clickButton(SHOW_ITEMS);
+
+        // Checks the filter has been cleared after closing the drop down
+        // ComboBox clears the cache after closing, so the item's values are
+        // not checked here
+        waitForItems(firstComboBox, items -> items.size() == 250);
+
+        Assert.assertTrue("The client filter shouldn't impact the items",
+                getItemData().startsWith("Person 0 lastName,Person 1 lastName")
+                        && getItemData().endsWith("Person 249 lastName"));
+
+        firstComboBox.openPopup();
+
+        waitForItems(firstComboBox,
+                items -> items.size() == 250
+                        && "Person 0".equals(getItemLabel(items, 0))
+                        && "Person 49".equals(getItemLabel(items, 49)));
+
+        clickButton(SHOW_ITEMS);
+
+        Assert.assertTrue("The client filter shouldn't impact the items",
+                getItemData().startsWith("Person 0 lastName,Person 1 lastName")
+                        && getItemData().endsWith("Person 249 lastName"));
+    }
+
     private void showSelectedPerson() {
         clickButton(SHOW_ITEM_DATA);
     }
@@ -217,7 +309,15 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
     private void verifySelectedPerson(int personIndex) {
         Assert.assertEquals("Item: Person " + personIndex,
-                $("span").id(ITEM_DATA).getText());
+                getItemData());
+    }
+
+    private String getItemData() {
+        return $("span").id(ITEM_DATA).getText();
+    }
+
+    private String getItemCount() {
+        return $("span").id(ITEM_COUNT).getText();
     }
 
     private void setTextFilter(ComboBoxElement comboBox, String filter) {
