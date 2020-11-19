@@ -26,10 +26,15 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 
+import static com.vaadin.flow.component.combobox.test.FilteringPage.COMBOBOX_WITH_FILTERED_ITEMS_ID;
+import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID;
+import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID;
+
 @TestPath("vaadin-combo-box/filtering")
 public class FilteringIT extends AbstractComboBoxIT {
 
     private ComboBoxElement box;
+    private ComboBoxElement comboBoxWithFilteredItems;
 
     @Before
     public void init() {
@@ -37,6 +42,9 @@ public class FilteringIT extends AbstractComboBoxIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         box = $(ComboBoxElement.class).first();
+
+        comboBoxWithFilteredItems = $(ComboBoxElement.class)
+                .id(COMBOBOX_WITH_FILTERED_ITEMS_ID);
     }
 
     @Test
@@ -163,6 +171,61 @@ public class FilteringIT extends AbstractComboBoxIT {
 
         box.setFilter("");
         assertItemsNotLoaded();
+    }
+
+    @Test
+    public void unknownItemCountLazyLoadingFiltering_applyFilter_allPagesContainFilteredItems() {
+        clickButton(SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID);
+        verifyFilteredItems(comboBoxWithFilteredItems);
+    }
+
+    @Test
+    public void inMemoryItemsFiltering_applyFilter_allPagesContainFilteredItems() {
+        clickButton(SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID);
+        verifyFilteredItems(comboBoxWithFilteredItems);
+    }
+
+    @Test
+    public void definedItemCountLazyLoadingFiltering_applyFilter_allPagesContainFilteredItems() {
+        verifyFilteredItems(comboBoxWithFilteredItems);
+    }
+
+    private void verifyFilteredItems(ComboBoxElement comboBoxElement) {
+        comboBoxElement.openPopup();
+        comboBoxElement.setFilter("1");
+
+        // Verify items on page 1
+        waitForItems(comboBoxElement,
+                items -> "Item 1".equals(getItemLabel(items, 0))
+                        && "Item 10".equals(getItemLabel(items, 1))
+                        && "Item 130".equals(getItemLabel(items, 49)));
+
+        scrollToItem(comboBoxElement, 49);
+
+        // Verify items on page 2
+        waitForItems(comboBoxElement,
+                items -> "Item 131".equals(getItemLabel(items, 50))
+                        && "Item 180".equals(getItemLabel(items, 99)));
+
+        scrollToItem(comboBoxElement, 99);
+
+        // Verify items on page 3
+        waitForItems(comboBoxElement,
+                items -> "Item 181".equals(getItemLabel(items, 100))
+                        && "Item 321".equals(getItemLabel(items, 149)));
+
+        scrollToItem(comboBoxElement, 175);
+
+        // Verify items on page 4
+        waitForItems(comboBoxElement,
+                items -> "Item 331".equals(getItemLabel(items, 150))
+                        && "Item 491".equals(getItemLabel(items, 175)));
+
+        // filtered items: 1, 10, 11, .. 19, 21, 31, .. 91, 100, 101, .. 199,
+        // 201, 210, .. 291, 301, .. 391, 401, .. 491. Total count = 176
+        assertLoadedItemsCount(
+                "Unexpected items count after applying filter = '1'", 176,
+                comboBoxElement);
     }
 
     private void assertItemsNotLoaded() {
