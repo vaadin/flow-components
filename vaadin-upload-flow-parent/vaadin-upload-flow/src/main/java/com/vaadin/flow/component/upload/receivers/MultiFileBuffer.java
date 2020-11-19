@@ -102,9 +102,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
     public InputStream getInputStream(String fileName) {
         if (files.containsKey(fileName)) {
             try {
-                return new FileInputStream(
-                        ((FileOutputStream) files.get(fileName)
-                                .getOutputBuffer()).getFD());
+                return new FileInputStream(files.get(fileName).getFile());
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
                         "Failed to create InputStream for: '" + fileName + "'",

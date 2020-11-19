@@ -62,7 +62,7 @@ public abstract class AbstractFileBuffer implements Serializable {
      */
     protected FileOutputStream createFileOutputStream(String fileName) {
         try {
-            return new FileOutputStream(factory.createFile(fileName));
+            return new UploadOutputStream(factory.createFile(fileName));
         } catch (IOException e) {
             getLogger().log(Level.SEVERE,
                     "Failed to create file output stream for: '" + fileName
