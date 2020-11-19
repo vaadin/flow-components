@@ -34,11 +34,8 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route("vaadin-grid/grid-list-data-view-page")
-@Theme(Lumo.class)
 public class GridListDataViewPage extends Div {
 
     public static final String ITEM_COUNT = "itemCount";

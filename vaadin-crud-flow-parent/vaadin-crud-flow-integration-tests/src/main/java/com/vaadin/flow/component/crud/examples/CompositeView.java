@@ -16,11 +16,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route(value = "vaadin-crud/composite")
-@Theme(Lumo.class)
 public class CompositeView extends Div {
 
     public CompositeView() {
