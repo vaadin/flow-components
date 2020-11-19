@@ -12,14 +12,11 @@ import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 
 @Route(value = "vaadin-crud")
-@Theme(Lumo.class)
 public class MainView extends VerticalLayout {
 
     final VerticalLayout eventsPanel;
