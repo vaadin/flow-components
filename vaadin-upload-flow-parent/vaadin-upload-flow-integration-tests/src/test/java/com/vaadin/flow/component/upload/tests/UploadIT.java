@@ -15,10 +15,7 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -28,12 +25,8 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.internal.WrapsElement;
 import org.openqa.selenium.logging.LogEntry;
-import org.openqa.selenium.remote.LocalFileDetector;
-import org.openqa.selenium.remote.RemoteWebElement;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertThat;
@@ -42,7 +35,7 @@ import static org.junit.Assert.assertThat;
  * Upload component test class.
  */
 @TestPath("vaadin-upload")
-public class UploadIT extends AbstractComponentIT {
+public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadAnyFile() throws Exception {
@@ -135,30 +128,10 @@ public class UploadIT extends AbstractComponentIT {
         Assert.assertEquals("Перетащите файл сюда...", dropLabel.getText());
     }
 
-    /**
-     * @return The generated temp file handle
-     * @throws IOException
-     */
-    private File createTempFile() throws IOException {
-        File tempFile = File.createTempFile("TestFileUpload", ".txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-        writer.write(getTempFileContents());
-        writer.close();
-        tempFile.deleteOnExit();
-        return tempFile;
-    }
-
-    private String getTempFileContents() {
-        return "This is a test file! Row 2 Row3";
-    }
 
     private void fillPathToUploadInput(String... tempFileNames)
             throws Exception {
-        // create a valid path in upload input element. Instead of selecting a
-        // file by some file browsing dialog, we use the local path directly.
-        WebElement input = getInput();
-        setLocalFileDetector(input);
-        input.sendKeys(String.join(System.lineSeparator(), tempFileNames));
+        fillPathToUploadInput(getInput(),tempFileNames);
     }
 
     private WebElement getUpload() {
@@ -172,24 +145,8 @@ public class UploadIT extends AbstractComponentIT {
      * @return actual upload button
      */
     private WebElement getInput() {
-        return getInShadowRoot(getUpload(), By.id("fileInput"));
+        return getInput(getUpload());
     }
 
-    private void setLocalFileDetector(WebElement element) throws Exception {
-        if (getRunLocallyBrowser() != null) {
-            return;
-        }
 
-        if (element instanceof WrapsElement) {
-            element = ((WrapsElement) element).getWrappedElement();
-        }
-        if (element instanceof RemoteWebElement) {
-            ((RemoteWebElement) element)
-                    .setFileDetector(new LocalFileDetector());
-        } else {
-            throw new IllegalArgumentException(
-                    "Expected argument of type RemoteWebElement, received "
-                            + element.getClass().getName());
-        }
-    }
 }
