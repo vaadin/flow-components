@@ -34,7 +34,7 @@ public class EditOnClickIT extends AbstractParallelTest {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+    @org.junit.Ignore("Does not pass in mono-repo - 100% failure")
     public void editButtonsAreHiddenIfEditOnClickIsEnabled() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());

@@ -46,12 +46,14 @@ public class ItemClickListenerPage extends Div {
 
         grid.addItemClickListener(event -> {
             clickMsg.add(event.getItem());
-            columnClickMsg.add(event.getColumn().getKey());
+            String key = event.getColumn().getKey();
+            columnClickMsg.add(key == null ? "" : key);
         });
 
         grid.addItemDoubleClickListener(event -> {
             dblClickMsg.add(String.valueOf(event.getClientY()));
-            columnDblClickMsg.add(event.getColumn().getKey());
+            String key = event.getColumn().getKey();
+            columnDblClickMsg.add(key == null ? "" : key);
         });
 
         grid.setItemDetailsRenderer(new ComponentRenderer<>((SerializableFunction<String, Span>) ItemClickListenerPage::getDetailsComponent));

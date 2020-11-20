@@ -65,6 +65,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
 import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
@@ -91,6 +92,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -135,7 +137,7 @@ import java.util.stream.Stream;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.4")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.6")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -147,6 +149,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
         HasDataView<T, Void, GridDataView<T>>,
         HasLazyDataView<T, Void, GridLazyDataView<T>> {
+
+    /**
+     * behavior when parsing nested properties which may contain
+     * <code>null</code> values in the property chain
+     */
+    public enum NestedNullBehavior {
+        /**
+         * throw a NullPointerException if there is a nested
+         * <code>null</code> value
+         */
+        THROW,
+        /**
+         * silently ignore any exceptions caused by nested <code>null</code>
+         * values
+         */
+        ALLOW_NULLS
+    }
+
+    private NestedNullBehavior nestedNullBehavior = NestedNullBehavior.THROW;
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
@@ -1144,6 +1165,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
 
+    // This callback is only used by GridListDataView when the data filtering
+    // is being changed through its API
+    private SerializableConsumer<?> filterSlot;
+
     private Class<T> beanType;
     private PropertySet<T> propertySet;
 
@@ -1473,12 +1498,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         String columnId = createColumnId(false);
 
         C column = addColumn(new ColumnPathRenderer<T>(columnId,
-                value -> formatValueToSendToTheClient(
-                        valueProvider.apply(value))),
+                item -> formatValueToSendToTheClient(
+                        applyValueProvider(valueProvider, item))),
                 columnFactory);
         ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
-                valueProvider.apply(a), valueProvider.apply(b)));
+                applyValueProvider(valueProvider,a), applyValueProvider(valueProvider,b)));
         return column;
+    }
+
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider, T item) {
+        Object value;
+        try {
+            value = valueProvider.apply(item);
+        } catch (NullPointerException npe) {
+            value = null;
+            if (NestedNullBehavior.THROW == nestedNullBehavior) {
+                throw npe;
+            }
+        }
+        return value;
     }
 
     private String formatValueToSendToTheClient(Object value) {
@@ -2330,7 +2368,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @deprecated use instead one of the {@code setItems} methods which provide
      *             access to either {@link GridListDataView} or
      *             {@link GridLazyDataView}
@@ -2341,7 +2379,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         handleDataProviderChange(dataProvider);
 
         deselectAll();
-        getDataCommunicator().setDataProvider(dataProvider, null);
+        filterSlot = getDataCommunicator().setDataProvider(dataProvider, null);
 
         /*
          * The visibility of the selectAll checkbox depends on whether the
@@ -2441,7 +2479,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     @Override
     public GridListDataView<T> getListDataView() {
-        return new GridListDataView<>(getDataCommunicator(), this);
+        return new GridListDataView<>(getDataCommunicator(), this,
+                this::onInMemoryFilterOrSortingChange);
     }
 
     // Overridden for now to delegate to setDataProvider for setup
@@ -2462,7 +2501,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * </ul>
      * If the items are not fetched lazily an exception is thrown. When the
      * items are in-memory, use {@link #getListDataView()} instead.
-     * 
+     *
      * @return the lazy data view that provides access to the data bound to the
      *         grid
      */
@@ -2655,7 +2694,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * model.
      *
      * @param item
-     *            the item to select
+     *            the item to select, not null
      *
      * @see #getSelectionModel()
      * @see GridSelectionModel
@@ -2669,7 +2708,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * model.
      *
      * @param item
-     *            the item to deselect
+     *            the item to deselect, not null
      *
      * @see #getSelectionModel()
      * @see GridSelectionModel
@@ -2858,7 +2897,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
-     * 
+     *
      * @param internalId
      *            the internal identifier of the column to get
      * @return the column corresponding to the given column identifier, or
@@ -3185,6 +3224,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         super.onDetach(detachEvent);
     }
 
+    /**
+     * Sets the sort orders of the Grid and updates data communicator's
+     * in-memory and backend sorting accordingly.
+     * <p>
+     * Notifies sort listeners with updated sort orders and whether the sorting
+     * updated originated from user.
+     * 
+     * @param order
+     *            sort order to be set to Grid.
+     * @param userOriginated
+     *            <code>true</code> if the sorting changes as a result of user
+     *            interaction, <code>false</code> if changed by Grid API call.
+     */
     private void setSortOrder(List<GridSortOrder<T>> order,
             boolean userOriginated) {
         Objects.requireNonNull(order, "Sort order list cannot be null");
@@ -3199,15 +3251,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         sortOrder.clear();
         if (order.isEmpty()) {
-            // Grid is not sorted anymore.
+            // Grid's sorting is being reset by Grid's sort API or by clicking
+            // on a Grid's sortable column header, but the sorting, which was
+            // set through the GridListDataView API, is being preserved.
             getDataCommunicator().setBackEndSorting(Collections.emptyList());
-            getDataCommunicator().setInMemorySorting(null);
+            getDataCommunicator().setInMemorySorting(
+                    (SerializableComparator<T>) DataViewUtils
+                            .getComponentSortComparator(this).orElse(null));
             fireEvent(new SortEvent<>(this, new ArrayList<>(sortOrder),
                     userOriginated));
             return;
         }
         sortOrder.addAll(order);
-        sort(userOriginated);
+        updateSorting(userOriginated);
     }
 
     /**
@@ -3249,10 +3305,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 directions);
     }
 
-    private void sort(boolean userOriginated) {
+    /**
+     * Updates an in-memory and backend sortings in Grid's data communicator
+     * taking into account Grid's sort orders and in-memory comparator.
+     * <p>
+     * Notifies sort listeners with updated sort orders and whether the sorting
+     * updated originated from user.
+     * 
+     * @param userOriginated
+     *            <code>true</code> if the sorting changes as a result of user
+     *            interaction, <code>false</code> if changed by Grid API call.
+     */
+    private void updateSorting(boolean userOriginated) {
         // Set sort orders
         // In-memory comparator
-        getDataCommunicator().setInMemorySorting(createSortingComparator());
+        updateInMemorySorting((SerializableComparator<T>) DataViewUtils
+                .getComponentSortComparator(this).orElse(null));
 
         // Back-end sort properties
         List<QuerySortOrder> sortProperties = new ArrayList<>();
@@ -3353,7 +3421,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(valueProvider);
 
         return addDataGenerator((item, data) -> data.put(property,
-                JsonSerializer.toJson(valueProvider.apply(item))));
+                JsonSerializer.toJson(applyValueProvider(valueProvider,item))));
     }
 
     @Override
@@ -4067,4 +4135,83 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
+    /**
+     * Set the behavior when facing nested <code>null</code> values. By default the value
+     * is <code>NestedNullBehavior.THROW</code>.
+     *
+     * @param nestedNullBehavior the behavior when facing nested <code>null</code> values.
+     */
+    public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
+    	this.nestedNullBehavior = nestedNullBehavior;
+    }
+
+    /**
+     * Get the behavior when facing nested <code>null</code> values.
+     *
+     * @return The current behavior when facing nested <code>null</code> values.
+     */
+    public NestedNullBehavior getNestedNullBehavior() {
+    	return nestedNullBehavior;
+    }
+
+    private void onInMemoryFilterOrSortingChange(
+            SerializablePredicate<T> filter,
+            SerializableComparator<T> sortComparator) {
+        updateInMemorySorting(sortComparator);
+        updateInMemoryFiltering(filter);
+
+        dataCommunicator.reset();
+    }
+
+    private void updateInMemoryFiltering(
+            SerializablePredicate<T> componentInMemoryFilter) {
+        assert filterSlot != null : "Filter Slot is supposed not to be empty when set the filter";
+        // As long as the Grid currently contains only in-memory filter
+        // and only list data view has a filter setup API, we can safely cast
+        // the filter slot type into in-memory filter (predicate).
+        @SuppressWarnings("unchecked")
+        SerializableConsumer<SerializablePredicate<T>> inMemoryFilter = (SerializableConsumer<SerializablePredicate<T>>) filterSlot;
+        inMemoryFilter
+                .accept(componentInMemoryFilter);
+    }
+
+    /**
+     * Updates an in-memory sorting in Grid's data communicator, taking into
+     * account an internal sort orders of the Grid and a sort comparator,
+     * handled by GridListDataView API.
+     * 
+     * @param componentSorting
+     *            Grid's in-memory sort comparator which is handled by
+     *            GridListDataView API
+     */
+    private void updateInMemorySorting(
+            SerializableComparator<T> componentSorting) {
+        final SerializableComparator<T> currentClientSorting = createSortingComparator();
+        if (componentSorting != null) {
+            if (currentClientSorting != null) {
+                getDataCommunicator().setInMemorySorting(
+                        combineSortings(currentClientSorting,
+                                componentSorting));
+            } else {
+                getDataCommunicator().setInMemorySorting(
+                        componentSorting);
+            }
+        } else {
+            getDataCommunicator().setInMemorySorting(currentClientSorting);
+        }
+    }
+
+    private SerializableComparator<T> combineSortings(
+            SerializableComparator<T> originalSorting,
+            SerializableComparator<T> addedSorting) {
+        Objects.requireNonNull(originalSorting);
+        Objects.requireNonNull(addedSorting);
+        return (c1, c2) -> {
+            int result = originalSorting.compare(c1, c2);
+            if (result == 0) {
+                result = addedSorting.compare(c1, c2);
+            }
+            return result;
+        };
+    }
 }

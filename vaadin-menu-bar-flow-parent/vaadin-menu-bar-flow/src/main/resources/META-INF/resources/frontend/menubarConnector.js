@@ -16,7 +16,7 @@
 
 (function () {
   const tryCatchWrapper = function (callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Menu Bar', 'vaadin-menu-bar-flow');
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Menu Bar', 'vaadin-menu-bar');
   };
 
   window.Vaadin.Flow.menubarConnector = {

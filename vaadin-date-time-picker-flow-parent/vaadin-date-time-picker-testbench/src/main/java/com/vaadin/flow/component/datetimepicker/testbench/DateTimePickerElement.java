@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -29,7 +30,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-time-picker")
 public class DateTimePickerElement extends TestBenchElement
-        implements HasLabel {
+        implements HasLabel, HasHelper {
 
     private static final String VALUE_PROPERTY = "value";
 
@@ -229,6 +230,15 @@ public class DateTimePickerElement extends TestBenchElement
     public String getTimePresentation() {
         return getTimePicker().getPropertyString("__inputElement",
                 VALUE_PROPERTY);
+    }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getPropertyBoolean("autoOpenDisabled");
     }
 
     private TestBenchElement getDatePicker() {

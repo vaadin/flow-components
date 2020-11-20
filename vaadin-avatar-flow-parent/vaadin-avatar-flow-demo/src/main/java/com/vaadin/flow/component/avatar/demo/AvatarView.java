@@ -64,8 +64,9 @@ public class AvatarView extends DemoView {
         avatarWithImgUrl.setImage("https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG");
 
         Avatar avatarWithImageResource = new Avatar();
+
         StreamResource avatarResource = new StreamResource("user+.png",
-                () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/user.png"));
         avatarWithImageResource.setImageResource(avatarResource);
 
         add(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);

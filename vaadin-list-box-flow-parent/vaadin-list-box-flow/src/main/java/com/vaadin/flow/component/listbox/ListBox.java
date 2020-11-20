@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.listbox;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.data.selection.SingleSelect;
@@ -41,7 +42,7 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
     }
 
     private static <T> T presentationToModel(ListBox<T> listBox,
-            Integer selectedIndex) {
+                                             Integer selectedIndex) {
         if (selectedIndex == null || selectedIndex.intValue() == -1) {
             return null;
         }
@@ -51,16 +52,41 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
     }
 
     private static <T> Integer modelToPresentation(ListBox<T> listBox,
-            T selectedItem) {
+                                                   T selectedItem) {
         if (selectedItem == null) {
-            return Integer.valueOf(-1);
+            return -1;
         }
 
         List<VaadinItem<T>> itemComponents = listBox.getItemComponents();
-        int itemIndex = IntStream.range(0, itemComponents.size()).filter(
-                i -> selectedItem.equals(itemComponents.get(i).getItem()))
+        return IntStream.range(0, itemComponents.size()).filter(
+                idx -> listBox.getItemId(selectedItem)
+                        .equals(listBox.getItemId(itemComponents.get(idx)
+                                .getItem())))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException(
                         "Could not find given value from the item set"));
-        return Integer.valueOf(itemIndex);
+    }
+
+    /**
+     * Compares two value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first instance
+     * @param value2
+     *            the second instance
+     * @return <code>true</code> if the instances are equal; otherwise
+     *         <code>false</code>
+     */
+    @Override
+    protected boolean valueEquals(T value1, T value2) {
+        if (value1 == null && value2 == null)
+            return true;
+        if (value1 == null || value2 == null)
+            return false;
+        return getItemId(value1).equals(getItemId(value2));
     }
 }

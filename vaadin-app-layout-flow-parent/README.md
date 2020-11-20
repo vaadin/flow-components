@@ -3,10 +3,6 @@
 ### Overview
 Vaadin App Layout is a component providing a quick and easy way to get a common application layout structure done.
 
-### License & Author
-
-Apache License 2.0
-
 ### Installing
 Add App Layout to your project:
 ```
@@ -24,7 +20,6 @@ Add App Layout to your project:
 ```java
 @Viewport("width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes, viewport-fit=cover")
 @BodySize
-@Theme(Lumo.class)
 public class AppRouterLayout extends AppLayout {
 
      {
@@ -47,3 +42,7 @@ public class AboutView extends Div {
 }
 
 ```
+
+### License
+
+Apache License 2.0

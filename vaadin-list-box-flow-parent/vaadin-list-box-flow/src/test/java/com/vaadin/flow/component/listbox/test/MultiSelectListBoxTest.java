@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -31,7 +32,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
@@ -45,6 +49,7 @@ public class MultiSelectListBoxTest {
 
     private List<Item> items;
     private ListDataProvider<Item> dataProvider;
+    private ListBoxListDataView<Item> dataView;
 
     private List<Set<Item>> eventValues;
 
@@ -64,7 +69,7 @@ public class MultiSelectListBoxTest {
         items.add(foo);
         items.add(bar);
         dataProvider = new ListDataProvider<>(items);
-        listBox.setDataProvider(dataProvider);
+        dataView = listBox.setItems(dataProvider);
 
         eventValues = new ArrayList<>();
         listBox.addValueChangeListener(e -> eventValues.add(e.getValue()));
@@ -134,7 +139,8 @@ public class MultiSelectListBoxTest {
     public void changeData_refreshAll_itemComponentsUpdated() {
         foo.setName("foo updated");
         bar.setName("bar updated");
-        dataProvider.refreshAll();
+        dataView.refreshItem(foo);
+        dataView.refreshItem(bar);
         assertItemContents("foo updated", "bar updated");
     }
 
@@ -142,7 +148,7 @@ public class MultiSelectListBoxTest {
     public void changeData_refreshItem_itemComponentUpdated() {
         foo.setName("foo updated");
         bar.setName("bar updated");
-        dataProvider.refreshItem(foo);
+        dataView.refreshItem(foo);
         assertItemContents("foo updated", "bar");
     }
 
@@ -180,6 +186,156 @@ public class MultiSelectListBoxTest {
     @Test(expected = UnsupportedOperationException.class)
     public void getSelectedItems_modifySet_throws() {
         listBox.getSelectedItems().add(new Item("baz"));
+    }
+
+    @Test
+    public void dataViewForFaultyDataProvider_throwsException() {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage(
+                "ListBoxListDataView only supports 'ListDataProvider' " +
+                        "or it's subclasses, but was given a " +
+                        "'AbstractBackEndDataProvider'");
+
+        MultiSelectListBox<String> multiSelectListBox = new MultiSelectListBox<>();
+        final ListBoxListDataView<String> dataView = multiSelectListBox
+                .setItems(Arrays.asList("one", "two"));
+
+        DataProvider<String, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> Stream.of("one"),
+                        query -> 1);
+
+        multiSelectListBox.setItems(dataProvider);
+
+        multiSelectListBox.getListDataView();
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemsWithIdentifierOnly_shouldSelectCorrectItem() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        MultiSelectListBox<CustomItem> multiSelectListBox =
+                new MultiSelectListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        multiSelectListBox.setValue(createSet(new CustomItem(1L)));
+
+        long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId)
+                .toArray();
+        Assert.assertArrayEquals(new long[] {1L}, selectedIds);
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        multiSelectListBox.setValue(Collections.singleton(new CustomItem(2L)));
+
+        selectedIds = multiSelectListBox.getSelectedItems()
+                .stream()
+                .mapToLong(CustomItem::getId)
+                .toArray();
+        Assert.assertArrayEquals(new long[] {2L}, selectedIds);
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        MultiSelectListBox<CustomItem> multiSelectListBox =
+                new MultiSelectListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        multiSelectListBox.setValue(createSet(new CustomItem(1L)));
+
+        long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId)
+                .toArray();
+        Assert.assertArrayEquals(new long[] {1L}, selectedIds);
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        multiSelectListBox.setValue(Collections.singleton(
+                new CustomItem(3L, "Second")));
+
+        selectedIds = multiSelectListBox.getSelectedItems()
+                .stream()
+                .mapToLong(CustomItem::getId)
+                .toArray();
+        Assert.assertArrayEquals(new long[] {3L}, selectedIds);
+    }
+
+    @Test
+    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        MultiSelectListBox<CustomItem> multiSelectListBox =
+                new MultiSelectListBox<>();
+        ListBoxListDataView<CustomItem> listDataView =
+                multiSelectListBox.setItems(items);
+
+        multiSelectListBox.setValue(Collections.singleton(
+                new CustomItem( null,"Second")));
+
+        Assert.assertNotNull(multiSelectListBox.getValue());
+
+        long[] selectedIds =  multiSelectListBox.getSelectedItems().stream()
+                                .mapToLong(CustomItem::getId)
+                                .toArray();
+
+        Assert.assertArrayEquals(new long[] {2L}, selectedIds);
+    }
+
+    @Test
+    public void setIdentifierProviderOnId_setItemWithNullId_shouldThrowException() {
+
+        thrown.expect(NullPointerException.class);
+
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        ListBox<CustomItem> multiSelectListBox = new ListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        multiSelectListBox.setValue(new CustomItem(null, "First"));
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
@@ -244,5 +400,4 @@ public class MultiSelectListBoxTest {
             return name;
         }
     }
-
 }

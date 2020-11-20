@@ -27,6 +27,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -40,6 +41,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -75,7 +77,7 @@ import com.vaadin.flow.shared.Registration;
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasDataView<T, Void, SelectDataView<T>> {
+        HasDataView<T, Void, SelectDataView<T>>, HasHelper {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -95,6 +97,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
+
     private boolean resetPending = true;
 
     private boolean emptySelectionAllowed;
@@ -448,6 +451,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -506,7 +510,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public SelectDataView<T> getGenericDataView() {
-        return new SelectDataView<>(this::getDataProvider, this);
+        return new SelectDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     /**
@@ -524,7 +529,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public SelectListDataView<T> getListDataView() {
-        return new SelectListDataView<>(this::getDataProvider, this);
+        return new SelectListDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     @Override
@@ -742,6 +748,32 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         initConnector();
     }
 
+    /**
+     * Compares two value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first instance
+     * @param value2
+     *            the second instance
+     * @return <code>true</code> if the instances are equal; otherwise
+     *         <code>false</code>
+     */
+    @Override
+    protected boolean valueEquals(T value1, T value2) {
+        if (value1 == null && value2 == null) {
+            return true;
+        }
+        if (value1 == null || value2 == null) {
+            return false;
+        }
+        return getItemId(value1).equals(getItemId(value2));
+    }
+
     private void initConnector() {
         runBeforeClientResponse(ui -> {
             ui.getPage().executeJs(
@@ -811,6 +843,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
                 .map(child -> (VaadinItem<T>) child);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
         listBox.removeAll();
@@ -823,9 +856,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createItem)
+            getDataProvider().fetch(DataViewUtils.getQuery(this)).map(item -> createItem((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -956,4 +989,13 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             return identifierProviderObject;
         }
     }
+
+    private Object getItemId(T item) {
+        return getIdentifierProvider().apply(item);
+    }
+
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+        keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
 }

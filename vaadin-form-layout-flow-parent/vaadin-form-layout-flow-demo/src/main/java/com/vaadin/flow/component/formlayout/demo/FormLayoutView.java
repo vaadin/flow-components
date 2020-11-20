@@ -181,9 +181,9 @@ public class FormLayoutView extends DemoView {
         // the browser horizontally, you can notice that the number of the
         // columns in the FormLayout changes.
         nameLayout.setResponsiveSteps(
-                new ResponsiveStep("25em", 1),
-                new ResponsiveStep("32em", 2),
-                new ResponsiveStep("40em", 3));
+                new ResponsiveStep("1px", 1),
+                new ResponsiveStep("600px", 2),
+                new ResponsiveStep("700px", 3));
         // end-source-example
         // @formatter:on
 

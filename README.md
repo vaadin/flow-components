@@ -4,13 +4,21 @@ This is a maven multi-module project including all vaadin flow components.
 
 `master` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
 
-## Compiling all the components and their modules including ITs
+## Quick start
 
-- `mvn clean compile -DskipTests -T C2`
+It's provided a script that facilitates running most common tasks for running or testing components.
+
+Execute `./scripts/run.sh` and select the appropriate menu options.
+
+NOTE: a valid unix terminal with a regular shell is needed for running the utility.
 
 ## Compiling all modules but excluding ITs
 
-- `mvn clean compile -DskipTests -Drelease -T C2`
+- `mvn clean compile -Drelease -T C2`
+
+## Compiling all the components and their modules including ITs
+
+- `mvn clean test-compile -DskipFrontend -T C2`
 
 ## Installing all modules
 
@@ -22,7 +30,7 @@ This is a maven multi-module project including all vaadin flow components.
 
 Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
 
-## Running the ITs of one component
+## Running ITs of one component
 
 - `mvn -am -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-integration-tests verify`
 
@@ -39,7 +47,7 @@ It does substitutions in sources so as routes do no conflict, and also adjust po
 
 - `./scripts/mergeITs.js`
 
-By default it merges all modules, but it's also possible to merge certain modules by passing arguments
+NOTE: By default it merges all modules, but it's also possible to merge certain modules by passing arguments
 
 - `./scripts/mergeITs.js button text-field crud`
 
@@ -47,10 +55,9 @@ By default it merges all modules, but it's also possible to merge certain module
 
 It should take around 15-20 minutes depending on the computer capabilities.
 
-- `mvn verify -Drun-it -Dfailsafe.forkCount=5 -Dcom.vaadin.testbench.Parameters.testsInParallel=1 -pl integration-tests`
+- `mvn verify -Drun-it -pl integration-tests`
 
-NOTE: that we need to activate the module with the `-Drun-it` property, and to speed up tests we enable parallel execution of classes by setting `-Dfailsafe.forkCount=5`, in addition `-Dcom.vaadin.testbench.Parameters.testsInParallel=1` makes TB to reuse browser instances.
-
+NOTE: that we need to activate the module with the `-Drun-it` property. By default it runs 4 tests in parallel but you can change it by setting `-Dfailsafe.forkCount=5`.
 
 ## Running in Sauce Labs
 
@@ -60,20 +67,24 @@ To select which browsers to test, set the `TESTBENCH_GRID_BROWSERS` environment 
 ```
 TESTBENCH_GRID_BROWSERS=edge,safari-13,firefox
 ```
+
+
+
 Then run the following command, replacing the `***` with your Sauce Labs credentials.
-- `mvn verify -P saucelabs -Dtest.use.hub=true -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Dcom.vaadin.tests.SharedBrowser.reuseBrowser=false -Drun-it -Dfailsafe.forkCount=5 -Dcom.vaadin.testbench.Parameters.testsInParallel=1 -pl integration-tests`
 
+For testing one component run:
 
-## Updating modules from original master branches
+- `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-integration-tests`
 
-By running `./scripts/updateFromMaster.sh` all components are replaced with their origin master branches.
-It also aligns component poms and folder naming.
+For running all merged components execute:
+
+- `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
 
 ## Build script
 
-The `./build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
+The `./scripts/build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
 It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
-Optionally it's possible to run just a bunch of modules e.g. `./build.sh grid combo-box`
+Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
 
 ## Update package version for `@NpmPackage` in all files
 There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
@@ -98,9 +109,9 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
 - Wait for response from one of Vaadin Flow team members
 
+## Bug and enhancement tickets
+- Bug tickets and enhancement requests that are specific to a certain Vaadin component should be posted in the component's Web Component repostory (e.g. https://github.com/vaadin/vaadin-button for Button).
+- Issues that are not component-specific (e.g. requests for new components) or encompass multiple components should be posted in this repository.
+
 ## LICENSE
-SPDX-License-Identifier: Apache-2.0 OR Commercial Vaadin Add-on License version 3
-
-This project is dual-licensed under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0) and [Commercial Vaadin Add-on License version 3](https://vaadin.com/license/cval-3.0) (CVALv3). 
-
 For specific module(s), check the LICENSE file under the parent module.

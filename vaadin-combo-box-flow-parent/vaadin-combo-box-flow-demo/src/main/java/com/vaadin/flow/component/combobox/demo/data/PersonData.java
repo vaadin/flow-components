@@ -57,9 +57,19 @@ public class PersonData {
 
     private final List<Person> people = new ArrayList<>();
 
+    private final int personsCount;
+
+    public PersonData() {
+        this(100);
+    }
+
+    public PersonData(int personsCount) {
+        this.personsCount = personsCount;
+    }
+
     public List<Person> getPersons() {
         if (people.isEmpty()) {
-            for (int i = 91; i <= 199; i++) {
+            for (int i = 0; i <= personsCount; i++) {
                 people.add(new Person(i, names[i % names.length], surnames[i % surnames.length],
                         ages[i % ages.length],
                         new Person.Address(numbers[i % numbers.length], cities[i % cities.length]),

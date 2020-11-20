@@ -5,7 +5,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
 (function () {
   const tryCatchWrapper = function (callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid-flow');
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid');
   };
 
   let isItemCacheInitialized = false;
@@ -33,6 +33,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           if (!this.itemCaches[scaledIndex]) {
             this.grid.$connector.beforeEnsureSubCacheForScaledIndex(this, scaledIndex);
           }
+        });
+
+        ItemCache.prototype.isLoading = tryCatchWrapper(function() {
+          return Boolean(ensureSubCacheQueue.length || Object.keys(this.pendingRequests).length || Object.keys(this.itemCaches).filter(index => {
+            return this.itemCaches[index].isLoading();
+          })[0]);
         });
 
         ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {

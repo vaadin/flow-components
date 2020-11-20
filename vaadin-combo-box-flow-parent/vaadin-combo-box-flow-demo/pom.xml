@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-combo-box-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>19.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-combo-box-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -37,6 +37,21 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-text-field-flow</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-button-flow</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-notification-flow</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.25</version>
@@ -63,9 +78,11 @@
   </build>
   <profiles>
     <profile>
-      <id>default</id>
+      <id>jar</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!war</name>
+        </property>
       </activation>
       <properties>
         <packaging.type>jar</packaging.type>

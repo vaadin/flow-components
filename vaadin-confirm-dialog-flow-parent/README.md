@@ -6,7 +6,7 @@
 ### Overview
 Vaadin Confirm Dialog is an easy to use web component to ask the user to confirm a choice.
 
-### License & Author
+### License
 
 This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 

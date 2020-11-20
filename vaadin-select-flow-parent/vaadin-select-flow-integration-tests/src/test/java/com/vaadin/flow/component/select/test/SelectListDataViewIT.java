@@ -4,23 +4,33 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.select.examples.SelectListDataViewPage;
 import com.vaadin.flow.component.select.testbench.SelectElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
 @TestPath("vaadin-select-list-data-view")
 public class SelectListDataViewIT extends AbstractComponentIT {
 
-    @Test
-    public void selectListDataView_dataViewApiRequested_dataAvailable() {
+    private SelectElement select;
+    private SelectElement otherSelect;
+
+    @Before
+    public void init() {
         open();
 
-        SelectElement select = $(SelectElement.class)
+        select = $(SelectElement.class)
                 .id(SelectListDataViewPage.SELECT);
 
+        otherSelect = $(SelectElement.class)
+                .id(SelectListDataViewPage.OTHER_SELECT);
+    }
+
+    @Test
+    public void getItems_showsCheckboxContent() {
         // Select items size
         Assert.assertEquals("Unexpected select size", 3,
                 select.getItems().size());
@@ -32,7 +42,10 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         // Item present
         Assert.assertEquals("Person 'John' is expected to be present", "true",
                 $("span").id(SelectListDataViewPage.ITEM_PRESENT).getText());
+    }
 
+    @Test
+    public void navigateBetweenItems_showCorrectItems() {
         // Item on index
         Assert.assertEquals("Person 'John' is expected on index 0", "John",
                 $("span").id(SelectListDataViewPage.ITEM_ON_INDEX).getText());
@@ -56,34 +69,75 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         // Previous item
         Assert.assertEquals("Unexpected previous item", "Paul",
                 $("span").id(SelectListDataViewPage.CURRENT_ITEM).getText());
+    }
 
-        // Add item
+    @Test
+    public void addItem_itemAddedAndShownInBothComponents() {
         findElement(By.id(SelectListDataViewPage.ADD_ITEM)).click();
-        Assert.assertEquals("Wrong name for added person", "Peter",
+
+        Assert.assertEquals("Unexpected item count after adding a new item in"
+                + " first select", 4, select.getItems().size());
+        Assert.assertEquals("Wrong name for added person in first select",
+                "Peter",
                 select.getItems().get(3).getText());
 
-        // Update item
+        Assert.assertEquals("Unexpected item count after adding a new item in"
+                + " second select", 4, otherSelect.getItems().size());
+        Assert.assertEquals("Wrong name for added person in second select",
+                "Peter", otherSelect.getItems().get(3).getText());
+    }
+
+    @Test
+    public void updateItem_itemAddedAndShownInBothComponents() {
         findElement(By.id(SelectListDataViewPage.UPDATE_ITEM)).click();
-        Assert.assertEquals("Wrong name for updated person", "Jack",
-                select.getItems().get(3).getText());
 
-        // Delete item
+        Assert.assertEquals("Wrong name for updated person", "Jack",
+                select.getItems().get(0).getText());
+
+        Assert.assertEquals("Wrong name for updated person", "Jack",
+                otherSelect.getItems().get(0).getText());
+    }
+
+    @Test
+    public void deleteItem_itemAddedAndShownInBothComponents() {
         findElement(By.id(SelectListDataViewPage.DELETE_ITEM)).click();
-        Assert.assertEquals("Item count not expected", 3,
+
+        Assert.assertEquals("Item count not expected", 2,
                 select.getItems().size());
 
-        // Sort order
+        Assert.assertEquals("Item count not expected", 2,
+                otherSelect.getItems().size());
+    }
+
+    @Test
+    public void sorting_itemsSortedOnlyInOneComponent() {
         findElement(By.id(SelectListDataViewPage.SORT_BUTTON)).click();
+
         Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
-                select.getItems().stream().map(TestBenchElement::getText)
+                select.$("vaadin-item").all().stream()
+                        .map(TestBenchElement::getText)
                         .collect(Collectors.joining(",")));
 
+        Assert.assertEquals("Unexpected sort order", "John,Paul,Mike",
+                otherSelect.$("vaadin-item").all().stream()
+                        .map(TestBenchElement::getText)
+                        .collect(Collectors.joining(",")));
+    }
+
+    @Test
+    public void filtering_itemsFilteredOnlyInOneComponent() {
         findElement(By.id(SelectListDataViewPage.FILTER_BUTTON)).click();
 
-        // Filtering
-        Assert.assertEquals("Unexpected filtered checkbox count", 1,
-                select.getItems().size());
-        Assert.assertEquals("Unexpected filtered checkbox item", "Paul",
-                select.getItems().get(0).getText());
+        Assert.assertEquals("Unexpected filtered items count", 1,
+                select.$("vaadin-item").all().size());
+        Assert.assertEquals("Unexpected filtered item", "Paul",
+                select.$("vaadin-item").all().get(0).getText());
+
+        Assert.assertEquals("No filter expected", 3,
+                otherSelect.$("vaadin-item").all().size());
+        Assert.assertArrayEquals("No filter expected",
+                new String[] { "John", "Paul", "Mike" },
+                otherSelect.$("vaadin-item").all().stream()
+                        .map(TestBenchElement::getText).toArray());
     }
 }

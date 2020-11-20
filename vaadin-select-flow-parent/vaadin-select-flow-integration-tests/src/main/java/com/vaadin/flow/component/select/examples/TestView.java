@@ -39,6 +39,7 @@ public class TestView extends Div implements HasUrlParameter<String> {
     private Checkbox enabled;
     private Checkbox readOnly;
     private Checkbox visible;
+    private Checkbox helperText;
 
     private ComponentRenderer<Div, Item> componentRenderer = new ComponentRenderer<>(
             this::createItemComponent);
@@ -176,7 +177,16 @@ public class TestView extends Div implements HasUrlParameter<String> {
         visible.addValueChangeListener(
                 event -> select.setVisible(event.getValue()));
 
-        options.add(enabled, readOnly, visible);
+        helperText = new Checkbox("HelperText");
+        helperText.setValue(false);
+        helperText.addValueChangeListener(event -> {
+            if (event.getValue())
+                select.setHelperText("Helper text");
+            else
+                select.setHelperText(null);
+        });
+
+        options.add(enabled, readOnly, visible, helperText);
 
         add(options);
     }
