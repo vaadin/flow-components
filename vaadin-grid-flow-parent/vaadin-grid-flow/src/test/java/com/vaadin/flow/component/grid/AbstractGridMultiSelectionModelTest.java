@@ -20,19 +20,25 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import org.mockito.Mockito;
 
 public class AbstractGridMultiSelectionModelTest {
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
+    private DataCommunicatorTest.MockUI ui;
 
     @Before
     public void init() {
@@ -55,6 +61,8 @@ public class AbstractGridMultiSelectionModelTest {
                 return true;
             }
         };
+        ui = new DataCommunicatorTest.MockUI();
+        ui.add(grid);
     }
 
     @Test
@@ -108,5 +116,229 @@ public class AbstractGridMultiSelectionModelTest {
         grid.getSelectionModel().selectFromClient("foo");
 
         Assert.assertEquals(1, grid.getSelectedItems().size());
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndDefaultVisibilityMode_visible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, true,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndDefaultVisibilityMode_notVisible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(false, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndDefaultVisibilityMode_notVisible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(false, true, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndVisibleMode_visible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, true,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndVisibleMode_visible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(false, false, true,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndVisibleMode_notVisible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(false, true, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndHiddenMode_notVisible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndHiddenMode_notVisible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(false, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+    }
+
+    @Test
+    public void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndHiddenMode_notVisible() {
+        verifySelectAllCheckboxVisibilityInMultiSelectMode(false, true, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+    }
+
+    @Test
+    public void selectFromClient_inMemoryDataProviderWithDefaultVisibility_updatesCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                true, false, true, true,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+    }
+
+    @Test
+    public void selectFromClient_lazyDefinedSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                false, false, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+
+    }
+
+    @Test
+    public void selectFromClient_lazyUnknownSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                false, true, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+
+    }
+
+    @Test
+    public void selectFromClient_inMemoryDataProviderWithVisible_updatesCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                true, false, true, true,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+    }
+
+    @Test
+    public void selectFromClient_lazyDefinedSizeDataProviderWithVisible_updatesCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                false, false, false, true,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+    }
+
+    @Test
+    public void selectFromClient_lazyUnknownSizeDataProviderWithVisible_skipsUpdateCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                false, true, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+    }
+
+    @Test
+    public void selectFromClient_inMemoryDataProviderWithHidden_skipsUpdateCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                true, false, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+    }
+
+    @Test
+    public void selectFromClient_lazyDefinedSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                false, false, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+
+    }
+
+    @Test
+    public void selectFromClient_lazyUnknownSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
+        verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+                false, true, false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+
+    }
+
+    private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
+            boolean inMemory, boolean unknownItemCount,
+            boolean expectedVisibility,
+            GridMultiSelectionModel.SelectAllCheckboxVisibility visibility) {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        GridMultiSelectionModel<String> selectionModel = (GridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.setSelectAllCheckboxVisibility(visibility);
+
+        DataProvider<String, ?> dataProvider;
+
+        if (inMemory) {
+            dataProvider = getInMemoryDataProvider();
+        } else if (unknownItemCount) {
+            dataProvider = getUnknownItemCountLazyDataProvider();
+        } else {
+            dataProvider = getDefinedSizeLazyDataProvider();
+        }
+
+        grid.setDataProvider(dataProvider);
+        grid.getDataCommunicator().setDefinedSize(!unknownItemCount);
+
+        boolean selectAllCheckboxVisible = selectionModel
+                .isSelectAllCheckboxVisible();
+
+        Assert.assertEquals(
+                "Unexpected select all checkbox visibility in multi-select mode",
+                expectedVisibility, selectAllCheckboxVisible);
+    }
+
+    private void verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
+            boolean inMemory, boolean unknownItemCount,
+            boolean expectedSizeQuery, boolean expectedCheckboxStateUpdate,
+            GridMultiSelectionModel.SelectAllCheckboxVisibility visibility) {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        GridMultiSelectionModel<String> selectionModel = (GridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.setSelectAllCheckboxVisibility(visibility);
+
+        DataProvider<String, ?> dataProvider;
+
+        if (inMemory) {
+            dataProvider = getInMemoryDataProvider();
+        } else if (unknownItemCount) {
+            dataProvider = getUnknownItemCountLazyDataProvider();
+        } else {
+            dataProvider = getDefinedSizeLazyDataProvider();
+        }
+
+        dataProvider = Mockito.spy(dataProvider);
+        grid.setDataProvider(dataProvider);
+        grid.getDataCommunicator().setDefinedSize(!unknownItemCount);
+
+        fakeClientCommunication();
+
+        Mockito.reset(dataProvider);
+
+        Mockito.when(dataProvider.isInMemory()).thenReturn(inMemory);
+
+        grid.getSelectionModel().selectFromClient("foo");
+
+        Mockito.verify(dataProvider, Mockito.times(expectedSizeQuery ? 1 : 0))
+                .size(Mockito.any(Query.class));
+
+        grid.getSelectionModel().selectFromClient("bar");
+
+        Mockito.verify(dataProvider, Mockito.times(expectedSizeQuery ? 2 : 0))
+                .size(Mockito.any(Query.class));
+
+        Assert.assertEquals(expectedCheckboxStateUpdate ? "true" : "false",
+                grid.getElement().getChild(0).getProperty("selectAll"));
+    }
+
+    private DataProvider<String, Void> getDefinedSizeLazyDataProvider() {
+        return DataProvider.fromCallbacks(
+                query -> Stream.of("foo", "bar").skip(query.getOffset())
+                        .limit(query.getLimit()),
+                query -> (int) Stream.of("foo", "bar").skip(query.getOffset())
+                        .limit(query.getLimit()).count());
+    }
+
+    private DataProvider<String, Void> getUnknownItemCountLazyDataProvider() {
+        return DataProvider.fromCallbacks(query -> Stream.of("foo", "bar")
+                .skip(query.getOffset()).limit(query.getLimit()), query -> {
+                    Assert.fail("Unexpected size query call");
+                    return 0;
+                });
+    }
+
+    private DataProvider<String, ?> getInMemoryDataProvider() {
+        return DataProvider.ofItems("foo", "bar");
+    }
+
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }

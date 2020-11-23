@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -26,18 +27,33 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-grid/grid-multi-selection-column")
 public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
+    private static final String SELECT_ALL_CHECKBOX_ID = "selectAllCheckbox";
+
     @Test
     public void selectAllCheckbox() {
         open();
-        WebElement lazyGrid = findElement(By.id("lazy-grid"));
+        WebElement definedItemCountLazyGrid = findElement(By.id(
+                GridMultiSelectionColumnPage.DEFINED_ITEM_COUNT_LAZY_GRID_ID));
         Assert.assertEquals(
-                "lazy grid selectAllCheckbox should be hidden by default",
-                "true", lazyGrid.findElement(By.id("selectAllCheckbox"))
+                "Defined Item Count Lazy grid selectAllCheckbox should be hidden by default",
+                "true",
+                definedItemCountLazyGrid
+                        .findElement(By.id(SELECT_ALL_CHECKBOX_ID))
                         .getAttribute("hidden"));
 
-        WebElement grid = findElement(By.id("in-memory-grid"));
+        WebElement unknownItemCountLazyGrid = findElement(By.id(
+                GridMultiSelectionColumnPage.UNKNOWN_ITEM_COUNT_LAZY_GRID_ID));
+        Assert.assertEquals(
+                "Unknown Item Count Lazy grid selectAllCheckbox should be hidden by default",
+                "true",
+                unknownItemCountLazyGrid
+                        .findElement(By.id(SELECT_ALL_CHECKBOX_ID))
+                        .getAttribute("hidden"));
+
+        WebElement grid = findElement(
+                By.id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID));
         WebElement selectAllCheckbox = grid
-                .findElement(By.id("selectAllCheckbox"));
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
         Assert.assertNull(
                 "in-memory grid selectAllCheckbox should be visible by default",
                 selectAllCheckbox.getAttribute("hidden"));
@@ -73,7 +89,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         // Test switch selection mode from single to multi mode before adding the grid to DOM
         WebElement gridSelectionMode = findElement(By.id("in-testing-multi-selection-mode-grid"));
         WebElement selectAllCheckbox_selectionMode = gridSelectionMode
-                .findElement(By.id("selectAllCheckbox"));
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
         WebElement message_selectionMode = findElement(By.id("selected-item-count"));
         Assert.assertEquals(true, selectAllCheckbox_selectionMode.isDisplayed());
         selectAllCheckbox_selectionMode.click();
@@ -96,7 +112,8 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     @Test
     public void noSelectOnRowItemClick() {
         open();
-        WebElement grid = findElement(By.id("in-memory-grid"));
+        WebElement grid = findElement(
+                By.id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID));
         // click the first row's cell that corresponds to the text column
         grid.findElements(By.tagName("vaadin-grid-cell-content")).stream()
                 .filter(element -> "0".equals(element.getText())).findFirst()
@@ -116,7 +133,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
         WebElement grid = findElement(By.id("swapped-grid"));
         WebElement selectAllCheckbox = grid
-                .findElement(By.id("selectAllCheckbox"));
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
 
         Assert.assertEquals("The selectAllCheckbox should be hidden by default",
                 "true", selectAllCheckbox.getAttribute("hidden"));
@@ -142,7 +159,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
         WebElement grid = findElement(By.id("swapped-grid"));
         WebElement selectAllCheckbox = grid
-                .findElement(By.id("selectAllCheckbox"));
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
 
         executeScript("arguments[0].selectAllHidden = false",
                 selectAllCheckbox);
@@ -163,5 +180,17 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         WebElement gridSelectionMode = grid.findElement(By.tagName("vaadin-grid-flow-selection-column"));
         String autoWidth = gridSelectionMode.getAttribute("autoWidth");
         Assert.assertTrue("autoWidth should be true", Boolean.parseBoolean(autoWidth));
+    }
+
+    @Test // https://github.com/vaadin/vaadin-flow-components/issues/411
+    public void selectRow_gridWithUnknownItemCount_noExceptionThrown() {
+        open();
+        GridElement grid = $(GridElement.class).id(
+                GridMultiSelectionColumnPage.UNKNOWN_ITEM_COUNT_LAZY_GRID_ID);
+        // Select any row
+        grid.findElements(By.tagName("vaadin-checkbox")).get(0).click();
+
+        // Check that the count callback not invoked -> no exception thrown
+        checkLogsForErrors();
     }
 }

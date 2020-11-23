@@ -41,13 +41,17 @@ public interface GridMultiSelectionModel<T>
      * only visible if an in-memory data provider is used
      * {@link DataProvider#isInMemory()}.
      */
-    public enum SelectAllCheckboxVisibility {
+    enum SelectAllCheckboxVisibility {
 
         /**
-         * Shows the select all checkbox, regardless of data provider used.
+         * Shows the select all checkbox, if the in-memory or defined size lazy
+         * data provider is used.
          * <p>
-         * <b>For a lazy data provider, selecting all will result in to all rows
-         * being fetched from backend to application memory!</b>
+         * <b>For a defined size lazy data provider, selecting all will result
+         * in to all rows being fetched from backend to application memory!</b>
+         * <p>
+         * For unknown size lazy data provider, i.e. no items count query
+         * provided, the select all checkbox will never be shown.
          */
         VISIBLE,
 
@@ -58,7 +62,7 @@ public interface GridMultiSelectionModel<T>
         HIDDEN,
 
         /**
-         * By default select all checkbox depends on the grid's dataprovider.
+         * By default, select all checkbox depends on the grid's data provider.
          * <ul>
          * <li>Visible, if the data provider is in-memory</li>
          * <li>Hidden, if the data provider is NOT in-memory (lazy)</li>
@@ -93,7 +97,12 @@ public interface GridMultiSelectionModel<T>
      * <p>
      * The default value is {@link SelectAllCheckboxVisibility#DEFAULT}, which
      * means that the checkbox is only visible if the grid's data provider is
-     * in- memory.
+     * in-memory.
+     * <p>
+     * The select all checkbox will never be shown if the Grid uses lazy loading
+     * with unknown item count, i.e. no items count query provided to it, and
+     * even setting {@link SelectAllCheckboxVisibility#VISIBLE} won't make it
+     * visible.
      *
      * @param selectAllCheckBoxVisibility
      *            the visiblity mode to use
@@ -115,6 +124,9 @@ public interface GridMultiSelectionModel<T>
      * Returns whether the select all checkbox will be visible with the current
      * setting of
      * {@link #setSelectAllCheckboxVisibility(SelectAllCheckboxVisibility)}.
+     * <p>
+     * The select all checkbox will never be shown if the Grid uses lazy loading
+     * with unknown item count, i.e. no items count query provided to it.
      *
      * @return {@code true} if the checkbox will be visible with the current
      *         settings
