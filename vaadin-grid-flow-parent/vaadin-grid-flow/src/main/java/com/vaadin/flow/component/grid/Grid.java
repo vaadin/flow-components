@@ -138,7 +138,7 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.6")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.7")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -4158,7 +4158,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Updates an in-memory sorting in Grid's data communicator, taking into
      * account an internal sort orders of the Grid and a sort comparator,
      * handled by GridListDataView API.
-     * 
+     *
      * @param componentSorting
      *            Grid's in-memory sort comparator which is handled by
      *            GridListDataView API
