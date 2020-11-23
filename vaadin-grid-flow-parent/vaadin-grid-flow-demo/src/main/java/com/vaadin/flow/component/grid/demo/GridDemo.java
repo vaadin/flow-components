@@ -1938,7 +1938,7 @@ public class GridDemo extends DemoView {
         grid.addColumn(Task::getName).setHeader("Task Name");
         grid.addColumn(Task::getDueDate).setHeader("Due Date");
         GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
-        contextMenu.setDynamicContentHandler(task -> {
+        contextMenu.setDynamicContentHandler((task, column) -> {
             if (task == null) {
                 // do not show the context menu when a row is not clicked
                 return false;
@@ -1946,6 +1946,7 @@ public class GridDemo extends DemoView {
             contextMenu.removeAll();
             contextMenu.addItem("Name: " + task.getName());
             contextMenu.addItem("Due date: " + task.getDueDate());
+            contextMenu.addItem("Column: " + (column != null ? column.getKey() : "no column"));
             return true; // show the context menu
         });
         // end-source-example

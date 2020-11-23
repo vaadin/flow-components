@@ -39,7 +39,7 @@ public class DynamicContextMenuGridPage extends Div {
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
 
-        contextMenu.setDynamicContentHandler(person -> {
+        contextMenu.setDynamicContentHandler((person, column) -> {
             if (person == null || person.getAge() < 30) {
                 // do not open the context menu
                 return false;
@@ -47,6 +47,7 @@ public class DynamicContextMenuGridPage extends Div {
 
             contextMenu.removeAll();
             contextMenu.addItem(person.getFirstName());
+            contextMenu.addItem(column != null ? column.getKey() : "-no column-");
             return true;
         });
 
