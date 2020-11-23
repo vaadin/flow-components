@@ -942,7 +942,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       grid.getContextMenuBeforeOpenDetail = tryCatchWrapper(function(event) {
         const eventContext = grid.getEventContext(event);
         return {
-          key: (eventContext.item && eventContext.item.key) || ""
+          key: (eventContext.item && eventContext.item.key) || "",
+          columnId: (eventContext.column && eventContext.column.id) || ""
         };
       });
 
