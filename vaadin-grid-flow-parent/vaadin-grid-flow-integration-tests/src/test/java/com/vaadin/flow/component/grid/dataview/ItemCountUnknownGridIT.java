@@ -76,7 +76,7 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
 
         verifyRows(DEFAULT_DATA_PROVIDER_SIZE);
         // new rows are added to end due to size increase
-        Assert.assertEquals(301, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(299, grid.getLastVisibleRowIndex());
 
         grid.scrollToRow(500);
 
@@ -96,7 +96,7 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
         // size has been increased again by default size
         doScroll(1000, 1200, 6, 950, 1100);
 
-        Assert.assertEquals(1001, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(999, grid.getLastVisibleRowIndex());
     }
 
     // @Test TODO
