@@ -14,7 +14,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Route(value = "vaadin-accordion/accordionintemplate")
 @Tag("accordion-app")
 @JsModule("./accordion-in-template.js")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.2")
 public class AccordionInTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id
