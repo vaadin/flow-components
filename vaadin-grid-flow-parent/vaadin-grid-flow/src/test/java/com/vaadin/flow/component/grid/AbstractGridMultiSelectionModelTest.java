@@ -22,16 +22,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.Query;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import org.mockito.Mockito;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 
 public class AbstractGridMultiSelectionModelTest {
 
@@ -245,27 +245,11 @@ public class AbstractGridMultiSelectionModelTest {
             boolean inMemory, boolean unknownItemCount,
             boolean expectedVisibility,
             GridMultiSelectionModel.SelectAllCheckboxVisibility visibility) {
-        grid.setSelectionMode(SelectionMode.MULTI);
+        customiseMultiSelectGridAndDataProvider(inMemory, unknownItemCount,
+                visibility, false);
 
-        GridMultiSelectionModel<String> selectionModel = (GridMultiSelectionModel<String>) grid
-                .getSelectionModel();
-        selectionModel.setSelectAllCheckboxVisibility(visibility);
-
-        DataProvider<String, ?> dataProvider;
-
-        if (inMemory) {
-            dataProvider = getInMemoryDataProvider();
-        } else if (unknownItemCount) {
-            dataProvider = getUnknownItemCountLazyDataProvider();
-        } else {
-            dataProvider = getDefinedSizeLazyDataProvider();
-        }
-
-        grid.setDataProvider(dataProvider);
-        grid.getDataCommunicator().setDefinedSize(!unknownItemCount);
-
-        boolean selectAllCheckboxVisible = selectionModel
-                .isSelectAllCheckboxVisible();
+        boolean selectAllCheckboxVisible = ((GridMultiSelectionModel<String>) grid
+                .getSelectionModel()).isSelectAllCheckboxVisible();
 
         Assert.assertEquals(
                 "Unexpected select all checkbox visibility in multi-select mode",
@@ -276,25 +260,8 @@ public class AbstractGridMultiSelectionModelTest {
             boolean inMemory, boolean unknownItemCount,
             boolean expectedSizeQuery, boolean expectedCheckboxStateUpdate,
             GridMultiSelectionModel.SelectAllCheckboxVisibility visibility) {
-        grid.setSelectionMode(SelectionMode.MULTI);
-
-        GridMultiSelectionModel<String> selectionModel = (GridMultiSelectionModel<String>) grid
-                .getSelectionModel();
-        selectionModel.setSelectAllCheckboxVisibility(visibility);
-
-        DataProvider<String, ?> dataProvider;
-
-        if (inMemory) {
-            dataProvider = getInMemoryDataProvider();
-        } else if (unknownItemCount) {
-            dataProvider = getUnknownItemCountLazyDataProvider();
-        } else {
-            dataProvider = getDefinedSizeLazyDataProvider();
-        }
-
-        dataProvider = Mockito.spy(dataProvider);
-        grid.setDataProvider(dataProvider);
-        grid.getDataCommunicator().setDefinedSize(!unknownItemCount);
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                inMemory, unknownItemCount, visibility, true);
 
         fakeClientCommunication();
 
@@ -314,6 +281,35 @@ public class AbstractGridMultiSelectionModelTest {
 
         Assert.assertEquals(expectedCheckboxStateUpdate ? "true" : "false",
                 grid.getElement().getChild(0).getProperty("selectAll"));
+    }
+
+    private DataProvider<String, ?> customiseMultiSelectGridAndDataProvider(
+            boolean inMemory, boolean unknownItemCount,
+            GridMultiSelectionModel.SelectAllCheckboxVisibility visibility,
+            boolean mockDataProvider) {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        GridMultiSelectionModel<String> selectionModel = (GridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.setSelectAllCheckboxVisibility(visibility);
+
+        DataProvider<String, ?> dataProvider;
+
+        if (inMemory) {
+            dataProvider = getInMemoryDataProvider();
+        } else if (unknownItemCount) {
+            dataProvider = getUnknownItemCountLazyDataProvider();
+        } else {
+            dataProvider = getDefinedSizeLazyDataProvider();
+        }
+
+        if (mockDataProvider) {
+            dataProvider = Mockito.spy(dataProvider);
+        }
+
+        grid.setDataProvider(dataProvider);
+        grid.getDataCommunicator().setDefinedSize(!unknownItemCount);
+        return dataProvider;
     }
 
     private DataProvider<String, Void> getDefinedSizeLazyDataProvider() {

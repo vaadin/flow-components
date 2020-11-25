@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-multi-selection-column")
 public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
@@ -187,8 +187,28 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         open();
         GridElement grid = $(GridElement.class).id(
                 GridMultiSelectionColumnPage.UNKNOWN_ITEM_COUNT_LAZY_GRID_ID);
+
+        WebElement firstRowSelector = grid
+                .findElements(By.tagName("vaadin-checkbox")).get(0);
+
         // Select any row
-        grid.findElements(By.tagName("vaadin-checkbox")).get(0).click();
+        firstRowSelector.click();
+
+        // Un-select that row
+        firstRowSelector.click();
+
+        // Scroll to a random row outside the initial requested range [0..200]
+        grid.scrollToRow(199);
+        grid.scrollToRow(299);
+
+        // Select the first visible row checkbox
+        WebElement outsideRangeRowSelector = grid
+                .findElements(By.tagName("vaadin-checkbox")).get(0);
+
+        // Select that row
+        outsideRangeRowSelector.click();
+        // Un-select that row
+        outsideRangeRowSelector.click();
 
         // Check that the count callback not invoked -> no exception thrown
         checkLogsForErrors();
