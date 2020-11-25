@@ -1,30 +1,22 @@
-# Cookie Consent for Vaadin Flow
+# CookieConsent component for Vaadin Flow
 
-### Overview
-Vaadin Cookie Consent is a web component used for showing a cookie consent banner the first time a user visits the application.
+This project is the Component wrapper implementation of [`<vaadin-cookie-consent>`](https://github.com/vaadin/vaadin-cookie-consent)
+element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-### License
+## Using the component in a Flow application
+
+To use the component in an application using maven,
+add the following dependency to your `pom.xml`:
+```
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-cookie-consent-flow</artifactId>
+    <version>${component.version}</version>
+</dependency>
+```
+
+## License
 
 This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 
 To purchase a license, visit http://vaadin.com/pricing
-
-### Installing
-Add Cookie Consent to your project:
-
-```xml
-<dependencies>
-  <dependency>
-    <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-cookie-consent-flow</artifactId>
-    <version>1.0.0</version>
-  </dependency>
-</dependencies>
-```
-
-### Basic Use
-
-```java
-CookieConsent cookieConsent = new CookieConsent();
-add(cookieConsent);
-```
