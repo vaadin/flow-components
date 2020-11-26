@@ -49,7 +49,11 @@ latestVersion() {
 
 # Extract versions from @NpmPackage annotations in the project.
 declare -A packages
-for item in $(grep @NpmPackage $(find . -name \*.java) | sed -e 's/.*"\([^"]\+\)".*"\([^"]\+\)".*/\1:\2/g')
+annotations=$(grep -r @NpmPackage ./vaadin*parent/*/src/*/java | perl -pe 's,.*value *= *"([^"]+)".*version *= *"([^"]+)".*,$1:$2,g' | sort -u)
+log "Found Annotations:"
+log "$annotations"
+log "---"
+for item in $annotations
 do
     NAME="$(echo $item | cut -d: -f1)"
     VERSION="$(echo $item | cut -d: -f2)"
@@ -71,6 +75,7 @@ log "Versions found in NpmPackage annotations:"
 for K in "${!packages[@]}"; do log $K --- ${packages[$K]}; done
 log "---"
 
+
 log "Comparing versions in $VERSIONS_FILE"
 declare -A packagesForUpdate
 
@@ -84,6 +89,11 @@ jq_select_version() {
         | join("\n")' "$1"
 }
 
+items=$(jq_select_version "$VERSIONS_FILE" )
+log "Items found in $VERSIONS_FILE"
+log "$items"
+log "---"
+exit
 for item in $(jq_select_version "$VERSIONS_FILE" )
 do
     NAME="$(echo $item | cut -d: -f1)"
