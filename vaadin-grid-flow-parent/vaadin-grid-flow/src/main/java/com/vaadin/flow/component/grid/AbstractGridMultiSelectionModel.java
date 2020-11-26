@@ -32,6 +32,7 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
+import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
@@ -115,13 +116,27 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
             long size = 0;
 
-            final DataProvider<T, ?> dataProvider = getGrid()
-                    .getDataCommunicator().getDataProvider();
+            if (!isSelectAllCheckboxVisible()) {
+                // Skip changing the state of Select All checkbox if it was
+                // meant to be hidden
+                return;
+            }
+
+            final DataCommunicator<T> dataCommunicator = getGrid()
+                    .getDataCommunicator();
+
+            final DataProvider<T, ?> dataProvider = dataCommunicator
+                    .getDataProvider();
 
             // Avoid throwing an IllegalArgumentException in case of
             // HierarchicalDataProvider
             if (!(dataProvider instanceof HierarchicalDataProvider)) {
-                size = dataProvider.size(new Query<>());
+                if (dataProvider.isInMemory()) {
+                    size = dataProvider.size(new Query<>());
+                } else if (dataCommunicator.isDefinedSize()) {
+                    // Use a cached value of items count for defined size
+                    size = dataCommunicator.getItemCount();
+                }
             }
 
             selectionColumn.setSelectAllCheckboxState(size == selected.size());
@@ -300,7 +315,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
         case HIDDEN:
             return false;
         case VISIBLE:
-            return true;
+            // Don't show the Select All Checkbox for undefined size, even if
+            // the visible property is chosen. Select All Checkbox's state
+            // changing requires a size query, which is not expected for
+            // undefined size
+            return getGrid().getDataCommunicator().isDefinedSize();
         default:
             throw new IllegalStateException(String.format(
                     "Select all checkbox visibility is set to an unsupported value: %s",
