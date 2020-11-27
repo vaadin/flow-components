@@ -228,7 +228,6 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
