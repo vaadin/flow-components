@@ -38,33 +38,35 @@ public interface GridMultiSelectionModel<T>
      * row for the selection column.
      * <p>
      * Default value is {@link #DEFAULT}, which means that the select all is
-     * only visible if an in-memory data provider is used
-     * {@link DataProvider#isInMemory()}.
+     * only visible if an in-memory data is used.
      */
     public enum SelectAllCheckboxVisibility {
 
         /**
-         * Shows the select all checkbox, regardless of data provider used.
+         * Shows the select all checkbox, if in-memory data is used.
          * <p>
-         * <b>For a lazy data provider, selecting all will result in to all rows
-         * being fetched from backend to application memory!</b>
+         * For lazy data, the checkbox is only shown when a count callback has
+         * been provided. For lazy data with unknown count, the checkbox will
+         * never be shown.
+         * <p>
+         * <b>For lazy data, selecting all will result in to all rows being
+         * fetched from backend to application memory!</b>
          */
         VISIBLE,
 
         /**
-         * Never shows the select all checkbox, regardless of data provider
-         * used.
+         * Never shows the select all checkbox, regardless of data is in-memory
+         * or not (lazy).
          */
         HIDDEN,
 
         /**
-         * By default select all checkbox depends on the grid's dataprovider.
+         * By default, the visibility of the select all checkbox depends on how
+         * the Grid's items are fetched:
          * <ul>
-         * <li>Visible, if the data provider is in-memory</li>
-         * <li>Hidden, if the data provider is NOT in-memory (lazy)</li>
+         * <li>Visible, if the data is in-memory</li>
+         * <li>Hidden, if the data is NOT in-memory (lazy)</li>
          * </ul>
-         *
-         * @see DataProvider#isInMemory()
          */
         DEFAULT;
     }
@@ -93,7 +95,12 @@ public interface GridMultiSelectionModel<T>
      * <p>
      * The default value is {@link SelectAllCheckboxVisibility#DEFAULT}, which
      * means that the checkbox is only visible if the grid's data provider is
-     * in- memory.
+     * in-memory.
+     * <p>
+     * The select all checkbox will never be shown if the Grid uses lazy loading
+     * with unknown item count, i.e. no items count query provided to it, and
+     * even setting {@link SelectAllCheckboxVisibility#VISIBLE} won't make it
+     * visible.
      *
      * @param selectAllCheckBoxVisibility
      *            the visiblity mode to use
@@ -114,7 +121,12 @@ public interface GridMultiSelectionModel<T>
     /**
      * Returns whether the select all checkbox will be visible with the current
      * setting of
-     * {@link #setSelectAllCheckboxVisibility(SelectAllCheckboxVisibility)}.
+     * {@link #setSelectAllCheckboxVisibility(SelectAllCheckboxVisibility)} and
+     * the type of data set to the Grid (in-memory or lazy).
+     * <p>
+     * The select all checkbox will never be shown if the Grid uses lazy loading
+     * with unknown item count, meaning that no count callback has been
+     * provided.
      *
      * @return {@code true} if the checkbox will be visible with the current
      *         settings
