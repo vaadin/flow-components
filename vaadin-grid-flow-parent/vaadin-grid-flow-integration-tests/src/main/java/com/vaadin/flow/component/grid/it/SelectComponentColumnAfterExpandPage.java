@@ -22,8 +22,11 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid/select-component-column-after-expand")
+@Route(SelectComponentColumnAfterExpandPage.VIEW)
 public class SelectComponentColumnAfterExpandPage extends Div {
+
+    public static final String VIEW = "vaadin-grid/select-component-column-after-expand";
+
     public SelectComponentColumnAfterExpandPage() {
         TreeGrid<String> grid = new TreeGrid<>();
         grid.addHierarchyColumn(String::toString).setHeader("HierarchyColumn");
@@ -46,15 +49,17 @@ public class SelectComponentColumnAfterExpandPage extends Div {
         Button collapse = new Button("Collapse All", e -> {
             grid.collapseRecursively(grid.getTreeData().getRootItems(), 100);
         });
+        collapse.setId("collapse-button");
 
         Button expand = new Button("Expand All", e -> {
             grid.expandRecursively(grid.getTreeData().getRootItems(), 100);
         });
+        expand.setId("expand-button");
 
         Button select = new Button("Select 'child'", e -> {
             grid.select(child);
         });
-
+        select.setId("select-button");
         add(grid, collapse, expand, select);
     }
 }
