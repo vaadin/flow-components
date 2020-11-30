@@ -36,8 +36,13 @@ import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
 @Route("vaadin-avatar-group")
 public class AvatarGroupView extends DemoView {
 
+    StreamResource localAvatarResource;
+
     @Override
     public void initView() {
+        localAvatarResource = new StreamResource("avatar+.png",
+            () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/avatar.png"));
+
         createBasicAvatarGroup();
         createMaxAvatarGroup();
         createLocalizedAvatarGroup();
@@ -63,12 +68,17 @@ public class AvatarGroupView extends DemoView {
         items.add(avatarWithImageResource);
 
         items.add(new AvatarGroupItem("Jens Jansson"));
-        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG"));
+        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/avatars/avatar.png"));
 
         avatarGroup.setItems(items);
 
         add(avatarGroup);
         // end-source-example
+
+        // Not using external image urls
+        items.get(4).setImage(null);
+        items.get(4).setImageResource(localAvatarResource);
+        avatarGroup.setItems(items);
 
         addCard("Avatar Group", avatarGroup);
     }
@@ -109,7 +119,7 @@ public class AvatarGroupView extends DemoView {
 
         items.add(new AvatarGroupItem());
         items.add(new AvatarGroupItem("Jens Jansson"));
-        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG"));
+        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/avatars/avatar.png"));
         avatarGroup.setItems(items);
         add(avatarGroup);
 
@@ -119,6 +129,11 @@ public class AvatarGroupView extends DemoView {
                         .setManyActiveUsers("{count} aktiivista käyttäjää"));
 
         // end-source-example
+
+        // Not using external image urls
+        items.get(2).setImage(null);
+        items.get(2).setImageResource(localAvatarResource);
+        avatarGroup.setItems(items);
 
         addCard("Localized Avatar Group", avatarGroup);
     }
