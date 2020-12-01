@@ -140,6 +140,15 @@ public class RemoveSortableColumnPage extends VerticalLayout {
 
         add(grid);
         grid.redraw();
+
+        Button sort = new Button("Sort");
+        sort.setId("sort");
+        sort.addClickListener(event -> {
+            GridSortOrderBuilder<Person> sortOrderBuilder = new GridSortOrderBuilder<>();
+            sortOrderBuilder.thenAsc(grid.getColumns().get(0));
+            grid.sort(sortOrderBuilder.build());
+        });
+        add(sort);      
     }
 
 }
