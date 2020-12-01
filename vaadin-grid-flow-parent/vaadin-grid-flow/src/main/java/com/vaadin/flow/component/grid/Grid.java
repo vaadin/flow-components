@@ -2932,7 +2932,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(column, "column should not be null");
 
         ensureOwner(column);
-        column.setSortable(false);
+        List<GridSortOrder<T>> order = new ArrayList<>();
+        setSortOrder(order, false);
         removeColumnAndColumnGroupsIfNeeded(column);
         column.destroyDataGenerators();
         keyToColumnMap.remove(column.getKey());
