@@ -112,12 +112,16 @@ public class RemoveSortableColumnPage extends VerticalLayout {
         return columnIndex -> selects[columnIndex];
     }
 
-    public RemoveSortableColumnPage() {
-        UI.getCurrent().getSession().setErrorHandler(handler -> {
+    @Override
+    public void onAttach(AttachEvent attachEvent) {
+        attachEvent.getUI().getSession().setErrorHandler(handler -> {
             Span text = new Span("Error");
             text.setId("error");
             add(text);
         });
+    }
+
+    public RemoveSortableColumnPage() {
         selects = new Select[5];
         for (int i = 0; i < 5; ++i) {
             Select<String> select = new Select<>();
