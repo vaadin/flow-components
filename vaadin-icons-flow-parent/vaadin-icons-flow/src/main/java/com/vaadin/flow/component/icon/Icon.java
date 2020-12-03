@@ -33,7 +33,7 @@ import com.vaadin.flow.dom.ElementConstants;
  * @see VaadinIcon
  */
 @Tag("iron-icon")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "4.3.1")
+@NpmPackage(value = "@vaadin/vaadin-icons", version = "4.3.2")
 @JsModule("@vaadin/vaadin-icons/vaadin-icons.js")
 @HtmlImport("frontend://bower_components/vaadin-icons/vaadin-icons.html")
 public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
