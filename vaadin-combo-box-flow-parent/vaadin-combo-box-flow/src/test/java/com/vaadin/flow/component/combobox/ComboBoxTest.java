@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +45,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
+import static org.junit.Assert.assertEquals;
 
 public class ComboBoxTest {
 
@@ -305,6 +304,16 @@ public class ComboBoxTest {
                 "Cannot set a value for a ComboBox without items.");
         ComboBox<String> combo = new ComboBox<>();
         combo.setValue("foo");
+    }
+
+    // https://github.com/vaadin/vaadin-flow-components/issues/391
+    @Test
+    public void setValueWithLazyItems_doesntThrow() {
+        final ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems(query -> Stream.of("foo", "bar"));
+        comboBox.setValue("foo");
+
+        Assert.assertEquals("foo", comboBox.getValue());
     }
 
     @Test
