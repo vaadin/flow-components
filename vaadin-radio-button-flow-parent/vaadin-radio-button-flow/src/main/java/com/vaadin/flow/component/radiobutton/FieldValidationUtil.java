@@ -15,34 +15,28 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 
 class FieldValidationUtil {
     private FieldValidationUtil() {
 
     }
 
-    static void disableClientValidation(Component component) {
+    static <T> void disableClientValidation(RadioButtonGroup<T> component) {
         // if the component was already attached override the validate()
-        overrideClientValidation(component);
 
         component.addAttachListener(e -> overrideClientValidation(component));
     }
 
-    private static void overrideClientValidation(Component component) {
-        PendingJavaScriptResult javaScriptResult =
-                component.getElement()
+    private static <T> void overrideClientValidation(RadioButtonGroup<T> component) {
+        component.getElement()
                         .executeJs("this.validate = function () {" +
                             "return this.checkValidity();};");
 
-        javaScriptResult.then(result -> {
-            if (component instanceof HasValidation && ((HasValidation) component).isInvalid()) {
+        component.getUI().ifPresent(ui -> ui.beforeClientResponse(component, (e) -> {
+            if (component.isInvalid()) {
                 // By default, the invalid flag is always false when a component is created.
                 // However, if the component is populated and validated in the same HTTP request,
                 // the server side state may have changed before the JavaScript disabling client
-                // side validation was properly executed. This can sometimes lead to a situation
                 // side validation was properly executed. This can sometimes lead to a situation
                 // where the client side thinks the value is valid (before client side validation
                 // was disabled) and the server side thinks the value is invalid. This will lead to
@@ -50,6 +44,6 @@ class FieldValidationUtil {
                 // explicitly change the client side value if the server side is invalid.
                 component.getElement().executeJs("this.invalid = true");
             }
-        });
+        }));
     }
 }
