@@ -534,9 +534,9 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           let parentCache = grid.$connector.getCacheByKey(parentKey);
           if(parentCache && parentCache.itemkeyCaches) {
             let _cache = parentCache.itemkeyCaches[parentKey];
-            _updateGridCache(page, items,
-              treePageCallbacks[parentKey][page],
-              _cache);
+            const callbacksForParentKey = treePageCallbacks[parentKey];
+            const callback = callbacksForParentKey && callbacksForParentKey[page];
+            _updateGridCache(page, items, callback, _cache);
           }
 
         } else {
