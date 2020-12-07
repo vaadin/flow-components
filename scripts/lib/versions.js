@@ -1,6 +1,12 @@
 const https = require("https");
 const xml2js = require('xml2js');
 const fs = require('fs');
+const exec = require('util').promisify(require('child_process').exec);
+
+async function run(cmd) {
+  const { stdout, stderr } = await exec(cmd);
+  return stdout;
+}
 
 async function checkBranch(branch) {
   return new Promise(resolve => {
@@ -12,6 +18,19 @@ async function checkBranch(branch) {
       resolve(r.statusCode === 200);
     }).end();
   });
+}
+
+async function checkoutPlatorm(dir) {
+  console.log(`Checking out platform into ${dir} ...`);
+  await run(`git clone https://github.com/vaadin/platform.git ${dir}`);
+}
+
+async function currentBranch() {
+  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
+  const version = parentJs.project.version[0];
+  const branch = version.replace(/^(\d+\.\d+).*$/, '$1');
+  const isMaster = !await checkBranch(branch);
+  return isMaster ? 'master' : branch;
 }
 
 async function getPlatformVersions(branch) {
@@ -32,12 +51,8 @@ async function getPlatformVersions(branch) {
 }
 
 async function getVersions() {
-  const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
-  const version = parentJs.project.version[0];
-  const branch = version.replace(/^(\d+\.\d+).*$/, '$1');
-  const isMaster = !await checkBranch(branch);
-
-  return getPlatformVersions(isMaster ? 'master' : branch).then(json => {
+  const branch = currentBranch();
+  return getPlatformVersions(branch).then(json => {
     return ['core', 'vaadin'].reduce((prev, k) => {
       return prev.concat(Object.keys(json[k]).filter(pkg => json[k][pkg].npmName || json[k][pkg].javaVersion).map(pkg => {
         const version = json[k][pkg].javaVersion;
@@ -66,8 +81,46 @@ async function getVersionsJson() {
     }, {});
 }
 
+async function getAnnotations(){
+  const cmd = 'grep -r @NpmPackage ./vaadin*parent/*/src/*/java';
+  const output = await run(cmd);
+  const lines = output.split('\n').filter(Boolean);
+  return lines.map(line => {
+    const r = /(.*(vaadin-.*)-parent.*):(.*value *= *"([^"]+).*version *= *"((\d+)\.(\d+)[^"]*).*)/.exec(line);
+    return {
+      path: r[1],
+      name: r[2],
+      annotation: r[3],
+      package: r[4],
+      version: r[5],
+      major: r[6],
+      minor: r[7],
+      updatedVersion: ''
+    };
+  });
+}
+
+async function getLatestNpmVersion(package, version, major, minor) {
+  cmd = `npm view ${package} versions --json`;
+  const json = await JSON.parse(await run(cmd))
+  const versions = json.filter(version => version.startsWith(`${major}.${minor}`));
+  const next =  versions.pop();
+  console.log(`Checking next version for ${package} ${version} ${next}`);
+  return next;
+}
+
+async function computeVertionToUpdate(data) {
+  return (data['updatedVersion'] = getLatestNpmVersion(data.package, data.version, data.major, data.minor));
+}
+
 module.exports = {
   getVersions,
   getVersionsCsv,
-  getVersionsJson
+  getVersionsJson,
+  computeVertionToUpdate,
+  getLatestNpmVersion,
+  getAnnotations,
+  checkoutPlatorm,
+  currentBranch,
+  run
 };
