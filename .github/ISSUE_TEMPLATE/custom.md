@@ -1,6 +1,6 @@
 ---
-name: Custom issue template
-about: Instruct users to report component issues in the component repositories
+name: Repository issue
+about: An issue related to the vaadin-flow-components repository
 title: ''
 labels: ''
 assignees: ''
