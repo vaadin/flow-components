@@ -5,7 +5,7 @@ package com.vaadin.flow.component.crud.testbench;
  * #%L
  * Vaadin Crud Testbench API
  * %%
- * Copyright (C) 2018 Vaadin Ltd
+ * Copyright (C) 2018 - 2020 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).

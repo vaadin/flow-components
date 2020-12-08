@@ -7,7 +7,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 Vaadin Ltd
+ * Copyright (C) 2014 - 2020 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
