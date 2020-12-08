@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
  * Update the versions.json file in the appropriate branch of platform.
- * 
+ *
  * Branch is computed from the version property in the pom.xml.
- * 
+ *
  * It expects GITHUB_TOKEN with the credentials for creating the PR.
  * Provide the PATH_TO_PLATFORM with the folder with platform, otherwise it will
  * checkout the project in the `./tmp/platform` directory.
- * 
+ *
  * Example
  *   ./scripts/updatePlatorm.js
  */
 
 const fs = require('fs');
 const https = require('https');
-const {checkoutPlatorm, currentBranch, run, getLatestNpmVersion, getAnnotations} = require('./lib/versions.js');
+const {checkoutPlatorm, currentBranch, run, getLatestBowerVersion, getLatestNpmVersion, getAnnotations} = require('./lib/versions.js');
 
 async function computeNextVersions(byName) {
   const names = Object.keys(byName);
@@ -23,9 +23,16 @@ async function computeNextVersions(byName) {
     if (pkg.org.npmName) {
       let o = pkg.currentVersion = {version: pkg.org.npmVersion || pkg.org.jsVersion};
       [o.major, o.minor, o.patch, o.extra] = o.version.split(/[\.\-]+/);
-      const nextVersion = await getLatestNpmVersion(pkg.org.npmName, o.version, o.major, o.minor);
+
+      let nextVersion = await getLatestNpmVersion(pkg.org.npmName, o.version, o.major, o.minor);
       o = pkg.nextVersion = {version: nextVersion };
       [o.major, o.minor, o.patch, o.extra] = nextVersion.split(/[\.\-]+/);
+
+      if (pkg.org.jsVersion && pkg.org.npmVersion) {
+        o = pkg.bowerVersion = {version: pkg.org.jsVersion};
+        [o.major, o.minor, o.patch, o.extra] = o.version.split(/[\.\-]+/);
+        o.nextVersion = await getLatestBowerVersion(names[i], o.version, o.major, o.minor);
+      }
     }
   }
 }
@@ -38,8 +45,12 @@ async function updateNextVersions(byName) {
     if (pkg.nextVersion && pkg.nextVersion.version !== pkg.currentVersion.version) {
       modified = true;
       console.log(`Bumping ${names[i]} from ${pkg.currentVersion.version} to ${pkg.nextVersion.version}`);
-      pkg.org.npmVersion && (pkg.org.npmVersion = pkg.nextVersion.version);
-      pkg.org.jsVersion && (pkg.org.jsVersion = pkg.nextVersion.version);
+      pkg.org.npmVersion && (pkg.org.npmVersion = pkg.nextVersion.version) || (pkg.org.jsVersion = pkg.nextVersion.version);
+    }
+    if (pkg.bowerVersion && pkg.bowerVersion.version != pkg.bowerVersion.nextVersion) {
+      modified = true;
+      console.log(`Bumping ${names[i]} (bower) from ${pkg.org.jsVersion} to ${pkg.bowerVersion.nextVersion}`);
+      pkg.org.jsVersion = pkg.bowerVersion.nextVersion;
     }
   }
   return modified;
@@ -106,7 +117,8 @@ async function main() {
   process.chdir(platformDir);
   console.log(`Using ${branch} platform branch`);
   await run(`git checkout ${branch}`);
-  
+  await run(`git pull origin ${branch}`);
+
   const json = JSON.parse(fs.readFileSync('./versions.json', 'utf-8'));
   const byName = await ['core', 'vaadin'].reduce(async (prev, k) => {
     await Object.keys(json[k]).filter(async pkg => await json[k][pkg].npmName || json[k][pkg].javaVersion).map(async pkg => {
@@ -124,7 +136,7 @@ async function main() {
   await computeNextVersions(byName);
   if (await updateNextVersions(byName)) {
     fs.writeFileSync('versions.json', JSON.stringify(json, null, 4), 'utf-8');
-    const msg = `chore: update versions.json in ${branch}`;
+    const msg = `chore: update versions.json in ${branch} with latest WC`;
     const prBranch = await commitChanges(branch, msg);
     const pr = createPR('vaadin/platform', msg, prBranch, branch);
   }

@@ -63,7 +63,7 @@ async function getVersions() {
         return json[k][pkg];
       }));
     }, []);
-  });  
+  });
 }
 
 async function getVersionsCsv() {
@@ -75,7 +75,7 @@ async function getVersionsCsv() {
 async function getVersionsJson() {
   return (await getVersions())
     .filter(pkg => pkg.npmName)
-    .reduce((o, pkg) => { 
+    .reduce((o, pkg) => {
       o[pkg.name] = pkg.branch;
       return o;
     }, {});
@@ -109,6 +109,15 @@ async function getLatestNpmVersion(package, version, major, minor) {
   return next;
 }
 
+async function getLatestBowerVersion(package, version, major, minor) {
+  cmd = `bower info ${package} --json`;
+  const json = await JSON.parse(await run(cmd));
+  const versions = json.versions.filter(version => version.startsWith(`${major}.${minor}`));
+  const next =  versions[0]
+  console.log(`Checking next version for ${package} ${version} ${next}`);
+  return next;
+}
+
 async function computeVertionToUpdate(data) {
   return (data['updatedVersion'] = getLatestNpmVersion(data.package, data.version, data.major, data.minor));
 }
@@ -122,5 +131,6 @@ module.exports = {
   getAnnotations,
   checkoutPlatorm,
   currentBranch,
+  getLatestBowerVersion,
   run
 };
