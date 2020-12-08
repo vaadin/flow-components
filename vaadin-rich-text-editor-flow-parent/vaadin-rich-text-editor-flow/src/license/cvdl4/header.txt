@@ -1,6 +1,6 @@
 Copyright (C) ${year} Vaadin Ltd
 
-This program is available under Commercial Vaadin Developer License 
+This program is available under Commercial Vaadin Developer License
 4.0 (CVDLv4).
 
 
