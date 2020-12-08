@@ -16,34 +16,46 @@
 package com.vaadin.flow.component.radiobutton;
 
 
+import com.vaadin.flow.internal.StateNode;
+
 class FieldValidationUtil {
     private FieldValidationUtil() {
 
     }
 
     static <T> void disableClientValidation(RadioButtonGroup<T> component) {
-        // if the component was already attached override the validate()
-
-        component.addAttachListener(e -> overrideClientValidation(component));
+        // Since this method should be called for every time when the component
+        // is attached to the UI, lets check that it is actually so
+        if (!component.isAttached()) {
+            throw new IllegalStateException(String.format(
+                    "Component %s is not attached. Client side validation "
+                            + "should be disabled when the component is "
+                            + "attached, thus this method needs to be called "
+                            + "from the onAttach method of the component.",
+                    component.toString()));
+        }
+        // Wait until the response is being written as the validation state
+        // should not change after that
+        final StateNode componentNode = component.getElement().getNode();
+        componentNode.runWhenAttached(ui -> ui.getInternals().getStateTree()
+                .beforeClientResponse(componentNode,
+                        executionContext -> overrideClientValidation(
+                                component)));
     }
 
     private static <T> void overrideClientValidation(RadioButtonGroup<T> component) {
-        component.getElement()
-                        .executeJs("this.validate = function () {" +
-                            "return this.checkValidity();};");
+        StringBuilder expression = new StringBuilder(
+                "this.validate = function () {return this.checkValidity();};");
 
-        component.getUI().ifPresent(ui -> ui.beforeClientResponse(component, (e) -> {
-            if (component.isInvalid()) {
-                // By default, the invalid flag is always false when a component is created.
-                // However, if the component is populated and validated in the same HTTP request,
-                // the server side state may have changed before the JavaScript disabling client
-                // side validation was properly executed. This can sometimes lead to a situation
-                // where the client side thinks the value is valid (before client side validation
-                // was disabled) and the server side thinks the value is invalid. This will lead to
-                // strange behavior until the two states are synchronized again. To avoid this, we will
-                // explicitly change the client side value if the server side is invalid.
-                component.getElement().executeJs("this.invalid = true");
-            }
-        }));
+        if (component.isInvalid()) {
+            /*
+             * By default the invalid flag is set to false. Workaround the case
+             * where the client side validation overrides the invalid state
+             * before the validation function itself is overridden above.
+             */
+            expression.append("this.invalid = true;");
+            expression.append("this.validate();");
+        }
+        component.getElement().executeJs(expression.toString());
     }
 }

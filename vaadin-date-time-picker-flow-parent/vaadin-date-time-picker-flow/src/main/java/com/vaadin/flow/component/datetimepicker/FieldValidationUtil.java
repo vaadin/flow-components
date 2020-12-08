@@ -15,9 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.internal.StateNode;
 
 /**
  * Utility class for date time picker component to disable client side
@@ -31,36 +29,41 @@ final class FieldValidationUtil {
         // utility class should not be instantiated
     }
 
-    static void disableClientValidation(Component component) {
-        // if the component was already attached override the validate()
-        overrideClientValidation(component);
-
-        component.addAttachListener(e -> overrideClientValidation(component));
+    static void disableClientValidation(DateTimePicker component) {
+        // Since this method should be called for every time when the component
+        // is attached to the UI, lets check that it is actually so
+        if (!component.isAttached()) {
+            throw new IllegalStateException(String.format(
+                    "Component %s is not attached. Client side "
+                            + "validation can only be disabled for a component "
+                            + "when it has been attached to the UI and because "
+                            + "it should be called again once the component is "
+                            + "removed/added, you should call this method from "
+                            + "the onAttach() method of the component.",
+                    component.toString()));
+        }
+        // Wait until the response is being written as the validation state
+        // should not change after that
+        final StateNode componentNode = component.getElement().getNode();
+        componentNode.runWhenAttached(ui -> ui.getInternals().getStateTree()
+                .beforeClientResponse(componentNode,
+                        executionContext -> overrideClientValidation(
+                                component)));
     }
 
-    private static void overrideClientValidation(Component component) {
-        PendingJavaScriptResult javaScriptResult = component.getElement()
-                .executeJs(
-                        "this.validate = function () {return this.checkValidity();}");
+    private static void overrideClientValidation(DateTimePicker component) {
+        StringBuilder expression = new StringBuilder(
+                "this.validate = function () {return this.checkValidity();};");
 
-        javaScriptResult.then(result -> {
-            if (component instanceof HasValidation
-                    && ((HasValidation) component).isInvalid()) {
-                /*
-                 * By default, the invalid flag is always false when a component
-                 * is created. However, if the component is populated and
-                 * validated in the same HTTP request, the server side state may
-                 * have changed before the JavaScript disabling client side
-                 * validation was properly executed. This can sometimes lead to
-                 * a situation where the client side thinks the value is valid
-                 * (before client side validation was disabled) and the server
-                 * side thinks the value is invalid. This will lead to strange
-                 * behavior until the two states are synchronized again. To
-                 * avoid this, we will explicitly change the client side value
-                 * if the server side is invalid.
-                 */
-                component.getElement().executeJs("this.invalid = true");
-            }
-        });
+        if (component.isInvalid()) {
+            /*
+             * By default the invalid flag is set to false. Workaround the case
+             * where the client side validation overrides the invalid state
+             * before the validation function itself is overridden above.
+             */
+            expression.append("this.invalid = true;");
+            expression.append("this.validate();");
+        }
+        component.getElement().executeJs(expression.toString());
     }
 }
