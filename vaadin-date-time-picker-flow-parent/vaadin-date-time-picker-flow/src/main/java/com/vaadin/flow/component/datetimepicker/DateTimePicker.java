@@ -548,7 +548,7 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      */
     @Override
     public String getErrorMessage() {
-        return getElement().getProperty("error-message");
+        return getElement().getProperty("errorMessage");
     }
 
     /**
