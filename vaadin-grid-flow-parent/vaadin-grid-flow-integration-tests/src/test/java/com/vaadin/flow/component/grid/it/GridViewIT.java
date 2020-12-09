@@ -1548,7 +1548,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         assertNotBufferedEditorClosed(grid);
 
         // restore the previous state
-        row.doubleClick();
+        subscriberCell.doubleClick();
 
         checkbox = subscriberCell.$("vaadin-checkbox").first();
         checkbox.click();
