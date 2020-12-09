@@ -381,4 +381,12 @@ public class RadioButtonGroupTest {
         radioButtonGroup.setValue(new CustomItem(null, "First"));
         Assert.assertNull(radioButtonGroup.getValue().getId());
     }
+
+    @Test
+    public void addNullOption_setValue() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("enabled", "disabled", null);
+        group.setValue(null);
+        Assert.assertEquals(group.getValue(), null);
+    }
 }
