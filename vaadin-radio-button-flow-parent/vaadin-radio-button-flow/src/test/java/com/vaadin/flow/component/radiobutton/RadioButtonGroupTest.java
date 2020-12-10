@@ -191,4 +191,12 @@ public class RadioButtonGroupTest {
         Assert.assertEquals(String.format(OUTER_HTML, "foo"), radioFoo.getElement().getOuterHTML());
         Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
     }
+
+    @Test
+    public void addNullOption_setValue() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("enabled", "disabled", null);
+        group.setValue(null);
+        Assert.assertEquals(group.getValue(), null);
+    }
 }
