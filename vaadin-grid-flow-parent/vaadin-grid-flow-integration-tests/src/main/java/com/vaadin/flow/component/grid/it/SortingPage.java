@@ -74,6 +74,8 @@ public class SortingPage extends Div {
         Column<Person> ageColumn = grid.addColumn(Person::getAge)
                 .setHeader("Age");
 
+        // Needed to check that sorter is rendered in component header after
+        // adding new header row
         grid.appendHeaderRow();
 
         List<GridSortOrder<Person>> sortByName = new GridSortOrderBuilder<Person>()
