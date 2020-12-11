@@ -85,6 +85,13 @@ public class DateTimePickerTest {
     }
 
     @Test
+    public void setErrorMessage() {
+        DateTimePicker picker = new DateTimePicker();
+        picker.setErrorMessage("error message");
+        assertEquals("error message", picker.getErrorMessage());
+    }
+
+    @Test
     public void setI18n() {
         DateTimePicker picker = new DateTimePicker();
 
