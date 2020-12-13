@@ -31,7 +31,7 @@ import com.vaadin.flow.dom.ElementConstants;
  * @author Vaadin Ltd
  */
 @Tag("iron-icon")
-@NpmPackage(value = "@polymer/iron-icon", version = "3.0.1")
+@NpmPackage(value = "@polymer/iron-icon", version = "[object Promise]")
 @JsModule("@polymer/iron-icon/iron-icon.js")
 public class IronIcon extends Component
         implements HasStyle, ClickNotifier<IronIcon> {

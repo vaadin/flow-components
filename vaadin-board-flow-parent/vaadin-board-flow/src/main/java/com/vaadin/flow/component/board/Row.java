@@ -53,7 +53,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </pre>
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "2.2.0")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "[object Promise]")
 @JsModule("@vaadin/vaadin-board/vaadin-board-row.js")
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {
