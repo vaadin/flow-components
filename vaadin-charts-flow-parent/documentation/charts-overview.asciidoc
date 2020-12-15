@@ -19,7 +19,7 @@ image::img/charts-overview.png[]
 [[charts.overview.licensing]]
 == Licensing
 
-Vaadin Charts is a commercial product licensed under the CVAL License (Commercial Vaadin Add-On License).
+Vaadin Charts is a commercial product licensed under the CVDLv4 License (Commercial Vaadin Developer License).
 You need to install a license key in order to develop your application with Vaadin Charts.
 
 You can purchase Vaadin Charts or obtain a free trial key from the license section in Vaadin website.
