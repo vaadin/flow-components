@@ -11,8 +11,8 @@
   <name>Vaadin Crud Parent</name>
   <licenses>
     <license>
-      <name>cval3</name>
-      <url>https://vaadin.com/license/cval-3</url>
+      <name>Commercial Vaadin Developer License version 4.0</name>
+      <url>https://vaadin.com/license/cvdl-4.0</url>
     </license>
   </licenses>
   <modules>

@@ -17,6 +17,6 @@ add the following dependency to your `pom.xml`:
 
 ## License
 
-This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
+This add-on is distributed under [Commercial Vaadin Developer License 4.0](https://vaadin.com/license/cvdl-4.0) (CVDLv4).
 
 To purchase a license, visit http://vaadin.com/pricing
