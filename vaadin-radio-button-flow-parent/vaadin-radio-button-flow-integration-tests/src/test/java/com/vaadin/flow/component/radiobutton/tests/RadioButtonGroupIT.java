@@ -314,30 +314,6 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
     }
 
     @Test
-    public void groupHasLabelAndErrorMessage_setInvalidShowEM_setValueRemoveEM() {
-        TestBenchElement group = $(TestBenchElement.class)
-                .id("group-with-label-and-error-message");
-
-        Assert.assertEquals("Label Attribute should present with correct text",
-                group.getAttribute("label"), "Group label");
-
-        TestBenchElement errorMessage = group.$(TestBenchElement.class)
-                .attribute("part", "error-message").first();
-        verifyGroupValid(group, errorMessage);
-
-        layout.findElement(By.id("group-with-label-button")).click();
-        verifyGroupInvalid(group, errorMessage);
-
-        Assert.assertEquals(
-                "Correct error message should be shown after the button clicks",
-                "Field has been set to invalid from server side",
-                errorMessage.getText());
-
-        executeScript("arguments[0].value=2;", group);
-        verifyGroupValid(group, errorMessage);
-    }
-
-    @Test
     public void verifyHelper() {
         RadioButtonGroupElement groupWithHelperText = $(RadioButtonGroupElement.class)
                 .id("group-with-helper-text");
