@@ -36,7 +36,7 @@ public class SortingIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).first();
+        grid = $(GridElement.class).id("sorting-grid");
     }
 
     @Test
@@ -58,6 +58,14 @@ public class SortingIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setInitialSortOrderGridHidden_showGrid_dataPresentAndSorted() {
+        findElement(By.id("sort-hidden-by-age")).click();
+        findElement(By.id("show-hidden-grid")).click();
+        Assert.assertEquals("B", $(GridElement.class).id("hidden-grid").getCell(0, 0).getText());
+        Assert.assertEquals("A", $(GridElement.class).id("hidden-grid").getCell(1, 0).getText());
+    }
+
+    @Test
     public void setInitialSortOrder_changeOrderFromServer_sortIndicatorsUpdated() {
         findElement(By.id("sort-by-age")).click();
         assertAscendingSorter("Age");
@@ -67,7 +75,7 @@ public class SortingIT extends AbstractComponentIT {
     public void indicatorsSortStateNumbersAndDirectionsAndContentOfRow() {
         WebElement btnAttach = findElement(By.id("btn-attach"));
         WebElement btnRemove = findElement(By.id("btn-detach"));
-        GridElement sortingGridElement = $(GridElement.class).first();
+        GridElement sortingGridElement = $(GridElement.class).id("sorting-grid");
         findElement(By.id("sort-by-age")).click();
         findElements(By.tagName("vaadin-grid-sorter"))
                 .get(0).click();
@@ -86,7 +94,7 @@ public class SortingIT extends AbstractComponentIT {
         // Reattach
         btnAttach.click();
 
-        sortingGridElement = $(GridElement.class).first();
+        sortingGridElement = $(GridElement.class).id("sorting-grid");
 
         Assert.assertEquals("asc", findElements(By.tagName("vaadin-grid-sorter"))
                 .get(0).getAttribute("direction"));
