@@ -62,7 +62,6 @@ final class FieldValidationUtil {
              * before the validation function itself is overridden above.
              */
             expression.append("this.invalid = true;");
-            expression.append("this.validate();");
         }
         component.getElement().executeJs(expression.toString());
     }
