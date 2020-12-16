@@ -25,8 +25,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.annotations.RunLocally;
-import com.vaadin.testbench.parallel.Browser;
 
 @TestPath("vaadin-grid/scroll-over-100k")
 public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
@@ -51,7 +49,7 @@ public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
         allCellContents.forEach(vgcc -> {
             String slotName = vgcc.getAttribute("slot")
                     .replace("vaadin-grid-cell-content-", "");
-            if (Integer.parseInt(slotName) <= 180) {
+            if (Integer.parseInt(slotName) < 7 || Integer.parseInt(slotName) > 20) {
                 Assert.assertTrue(
                         "A grid cell was expected to have text content but had none.",
                         StringUtils.isNotBlank(vgcc.getText()));
