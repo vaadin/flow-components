@@ -17,7 +17,9 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -49,6 +51,15 @@ public class GridTest {
         grid.setDataProvider(dataProvider);
 
         grid.getListDataView();
+    }
+
+    @Test
+    public void selectItem_lazyDataSet_selectionWorks() {
+        final Grid<String> grid = new Grid<>();
+        grid.setItems(query -> Stream.of("foo", "bar"));
+        grid.select("foo");
+        Assert.assertEquals(1, grid.getSelectedItems().size());
+        Assert.assertTrue(grid.getSelectedItems().contains("foo"));
     }
 
 }

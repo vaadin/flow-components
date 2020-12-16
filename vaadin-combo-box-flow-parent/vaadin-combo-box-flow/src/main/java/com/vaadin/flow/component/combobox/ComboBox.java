@@ -364,7 +364,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setValue(T value) {
-        if (dataCommunicator == null || dataCommunicator.getItemCount() == 0) {
+        if (dataCommunicator == null || dataCommunicator
+                .getDataProvider() instanceof DataCommunicator.EmptyDataProvider) {
             if (value == null) {
                 return;
             } else {
