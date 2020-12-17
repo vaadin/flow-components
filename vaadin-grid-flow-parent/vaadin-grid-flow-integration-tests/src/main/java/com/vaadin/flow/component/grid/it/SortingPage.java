@@ -23,6 +23,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridSortOrderBuilder;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
@@ -69,9 +70,13 @@ public class SortingPage extends Div {
         grid.setItems(new Person("B", 20), new Person("A", 30));
 
         Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
-                .setHeader("Name");
+                .setHeader(new Span("Name"));
         Column<Person> ageColumn = grid.addColumn(Person::getAge)
                 .setHeader("Age");
+
+        // Needed to check that sorter is rendered in component header after
+        // adding new header row
+        grid.appendHeaderRow();
 
         List<GridSortOrder<Person>> sortByName = new GridSortOrderBuilder<Person>()
                 .thenAsc(nameColumn).build();
