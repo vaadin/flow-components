@@ -23,6 +23,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridSortOrderBuilder;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
@@ -38,7 +39,7 @@ public class SortingPage extends Div {
         grid.setId("sorting-grid");
         grid.setItems(new Person("B", 20), new Person("A", 30));
         Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
-                .setHeader("Name");
+                .setHeader(new Span("Name"));
         Column<Person> ageColumn = grid.addColumn(Person::getAge)
                 .setHeader("Age");
         NativeButton btRm = new NativeButton("detach", evt -> remove(grid));
@@ -47,6 +48,10 @@ public class SortingPage extends Div {
                 evt -> add(grid));
         btattach.setId("btn-attach");
         add(btRm, btattach, grid);
+
+        // Needed to check that sorter is rendered in component header after
+        // adding new header row
+        grid.appendHeaderRow();
 
         List<GridSortOrder<Person>> sortByName = new GridSortOrderBuilder<Person>()
                 .thenAsc(nameColumn).build();
