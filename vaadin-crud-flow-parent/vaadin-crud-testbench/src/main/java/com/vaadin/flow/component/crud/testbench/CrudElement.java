@@ -20,6 +20,7 @@ package com.vaadin.flow.component.crud.testbench;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
@@ -83,8 +84,9 @@ public class CrudElement extends TestBenchElement {
         if (isEditOnClick()) {
             this.getGrid().getCell(row, 0).click();
         } else {
+            GridTRElement editedRow = getGrid().getRow(row);
             GridTHTDElement editCell = getGrid().getAllColumns().stream()
-                    .map(column -> getGrid().getRow(row).getCell(column))
+                    .map(column -> editedRow.getCell(column))
                     .filter(cell -> cell.getInnerHTML()
                             .contains("vaadin-crud-edit"))
                     .collect(Collectors.toList()).get(0);
