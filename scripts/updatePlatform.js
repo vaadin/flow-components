@@ -135,7 +135,7 @@ async function main() {
 
   await computeNextVersions(byName);
   if (await updateNextVersions(byName)) {
-    fs.writeFileSync('versions.json', JSON.stringify(json, null, 4), 'utf-8');
+    fs.writeFileSync('versions.json', JSON.stringify(json, null, 4).concat('\n'), 'utf-8');
     const msg = `chore: update versions.json in ${branch} with latest WC`;
     const prBranch = await commitChanges(branch, msg);
     const pr = createPR('vaadin/platform', msg, prBranch, branch);
