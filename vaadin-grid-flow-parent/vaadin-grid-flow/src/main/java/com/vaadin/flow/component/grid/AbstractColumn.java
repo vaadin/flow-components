@@ -175,10 +175,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected void setHeaderComponent(Component component) {
-        /*
-         * Uses the special renderer to take care of the vaadin-grid-sorter.
-         */
-        setHeaderRenderer(new GridSorterComponentRenderer<>(this, component));
+        setHeaderRenderer(new ComponentRenderer<>(() -> component));
     }
 
     protected void setFooterComponent(Component component) {
