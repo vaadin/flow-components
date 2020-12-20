@@ -23,6 +23,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridSortOrderBuilder;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
@@ -30,14 +31,13 @@ import com.vaadin.flow.router.Route;
 public class SortingPage extends Div {
 
     public SortingPage() {
-        Grid<Person> grid = new Grid<>();
-        grid.setMultiSort(true);
-        grid.setId("sorting-grid");
-        grid.setItems(new Person("B", 20), new Person("A", 30));
-        Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
-                .setHeader("Name");
-        Column<Person> ageColumn = grid.addColumn(Person::getAge)
-                .setHeader("Age");
+        createSortingGrid();
+        createInitiallyHiddenGrid();
+    }
+
+    private void createSortingGrid() {
+        Grid<Person> grid = createGrid("sorting-grid", "sort-by-age");
+
         NativeButton btRm = new NativeButton("detach", evt -> remove(grid));
         btRm.setId("btn-detach");
         NativeButton btattach = new NativeButton("attach",
@@ -45,18 +45,53 @@ public class SortingPage extends Div {
         btattach.setId("btn-attach");
         add(btRm, btattach, grid);
 
+    }
+
+    private void createInitiallyHiddenGrid() {
+        Grid<Person> grid = createGrid("hidden-grid", "sort-hidden-by-age");
+
+        grid.setMaxHeight("0px");
+        grid.getStyle().set("display", "none");
+
+        NativeButton showGridBtn = new NativeButton("Show grid", e -> {
+            grid.getStyle().set("display", "block");
+            grid.getStyle().remove("max-height");
+            grid.getElement().executeJs("$0.notifyResize();");
+        });
+        showGridBtn.setId("show-hidden-grid");
+
+        add(grid, showGridBtn);
+    }
+
+    private Grid createGrid(String gridId, String sortBtnId) {
+        Grid<Person> grid = new Grid<>();
+        grid.setMultiSort(true);
+        grid.setId(gridId);
+        grid.setItems(new Person("B", 20), new Person("A", 30));
+
+        Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader(new Span("Name"));
+        Column<Person> ageColumn = grid.addColumn(Person::getAge)
+                .setHeader("Age");
+
+        // Needed to check that sorter is rendered in component header after
+        // adding new header row
+        grid.appendHeaderRow();
+
         List<GridSortOrder<Person>> sortByName = new GridSortOrderBuilder<Person>()
                 .thenAsc(nameColumn).build();
         grid.sort(sortByName);
 
-        NativeButton button = new NativeButton("Sort by age", e -> {
+        NativeButton button = new NativeButton(sortBtnId.equals("sort-hidden-by-age") ? "Sort hidden by age" : "Sort by age", e -> {
             List<GridSortOrder<Person>> sortByAge = new GridSortOrderBuilder<Person>()
                     .thenAsc(ageColumn).build();
             grid.sort(sortByAge);
         });
-        button.setId("sort-by-age");
+        button.setId(sortBtnId);
 
         add(button);
+
+        return grid;
     }
 }
 
