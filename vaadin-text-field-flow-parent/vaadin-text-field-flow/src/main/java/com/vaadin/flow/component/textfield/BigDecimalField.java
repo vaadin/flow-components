@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -97,8 +98,6 @@ public class BigDecimalField
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -448,5 +447,11 @@ public class BigDecimalField
     private char getDecimalSeparator() {
         String prop = getElement().getProperty("_decimalSeparator");
         return prop == null || prop.isEmpty() ? '.' : getElement().getProperty("_decimalSeparator").charAt(0);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        FieldValidationUtil.disableClientValidation(this);
     }
 }

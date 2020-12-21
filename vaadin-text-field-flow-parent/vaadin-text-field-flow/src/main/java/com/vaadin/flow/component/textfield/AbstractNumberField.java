@@ -19,6 +19,7 @@ package com.vaadin.flow.component.textfield;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -105,8 +106,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -426,5 +425,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         this.required = requiredIndicatorVisible;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        FieldValidationUtil.disableClientValidation(this);
     }
 }
