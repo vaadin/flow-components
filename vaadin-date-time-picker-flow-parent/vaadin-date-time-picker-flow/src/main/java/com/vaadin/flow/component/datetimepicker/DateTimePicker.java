@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
@@ -147,8 +148,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
 
         getElement().addEventListener("value-changed", e -> this.updateValue());
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -701,4 +700,10 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        FieldValidationUtil.disableClientValidation(this);
+
+    }
 }
