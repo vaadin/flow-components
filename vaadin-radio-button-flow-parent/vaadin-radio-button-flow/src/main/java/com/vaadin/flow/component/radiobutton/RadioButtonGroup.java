@@ -93,7 +93,6 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation);
 
         registerValidation();
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     @Override
@@ -137,6 +136,7 @@ public class RadioButtonGroup<T>
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     @Override
