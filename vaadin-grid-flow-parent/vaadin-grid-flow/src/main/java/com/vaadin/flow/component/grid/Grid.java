@@ -3142,21 +3142,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         for (int i = 0; i < sorters.length(); ++i) {
             JsonObject sorter = sorters.getObject(i);
             Column<T> column = idToColumnMap.get(sorter.getString("path"));
-            if (column == null) {
-                throw new IllegalArgumentException(
-                        "Received a sorters changed call from the client for a non-existent column");
-            }
-            if (sorter.hasKey("direction")) {
-                switch (sorter.getString("direction")) {
-                case "asc":
-                    sortOrderBuilder.thenAsc(column);
-                    break;
-                case "desc":
-                    sortOrderBuilder.thenDesc(column);
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                            "Received a sorters changed call from the client containing an invalid sorting direction");
+            if (column != null) {
+                if (sorter.hasKey("direction")) {
+                    switch (sorter.getString("direction")) {
+                        case "asc":
+                            sortOrderBuilder.thenAsc(column);
+                            break;
+                        case "desc":
+                            sortOrderBuilder.thenDesc(column);
+                            break;
+                        default:
+                            throw new IllegalArgumentException(
+                                    "Received a sorters changed call from the client containing an invalid sorting direction");
+                    }
                 }
             }
         }
@@ -3209,7 +3207,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param order
      *            sort order to be set to Grid.
      * @param userOriginated
@@ -3290,7 +3288,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param userOriginated
      *            <code>true</code> if the sorting changes as a result of user
      *            interaction, <code>false</code> if changed by Grid API call.
