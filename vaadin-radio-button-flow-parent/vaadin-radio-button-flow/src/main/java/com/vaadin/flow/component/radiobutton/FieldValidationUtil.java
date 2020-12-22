@@ -26,7 +26,7 @@ class FieldValidationUtil {
     static <T> void disableClientValidation(RadioButtonGroup<T> component) {
         // Since this method should be called for every time when the component
         // is attached to the UI, lets check that it is actually so
-        if (!component.isAttached()) {
+        if (!component.getElement().getNode().isAttached()) {
             throw new IllegalStateException(String.format(
                     "Component %s is not attached. Client side validation "
                             + "should be disabled when the component is "
