@@ -367,11 +367,6 @@
         }
       })
 
-      // Need to flush FlattenedNodesObserver in order to update `grid._columnTree`
-      // before `_dataProviderChanged` is called. Otherwise, the first page won't
-      // be correctly loaded because of `_canPopulate` returns incorrect result.
-      grid._observer.flush();
-
       grid.dataProvider = tryCatchWrapper(function(params, callback) {
         if (params.pageSize != grid.pageSize) {
           throw 'Invalid pageSize';
