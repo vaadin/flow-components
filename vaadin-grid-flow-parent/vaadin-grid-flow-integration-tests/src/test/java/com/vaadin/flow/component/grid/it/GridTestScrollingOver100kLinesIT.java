@@ -49,7 +49,7 @@ public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
         allCellContents.forEach(vgcc -> {
             String slotName = vgcc.getAttribute("slot")
                     .replace("vaadin-grid-cell-content-", "");
-            if (Integer.parseInt(slotName) < 7 || Integer.parseInt(slotName) > 20) {
+            if (Integer.parseInt(slotName) <= 180) {
                 Assert.assertTrue(
                         "A grid cell was expected to have text content but had none.",
                         StringUtils.isNotBlank(vgcc.getText()));
