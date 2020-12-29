@@ -113,8 +113,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -334,6 +332,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         if (i18n != null) {
             setI18nWithJS();
         }
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     private void initConnector() {
@@ -632,6 +631,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
     }
+
 
     /**
      * When auto open is enabled, the dropdown will open when the field is clicked.
