@@ -102,8 +102,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -344,6 +342,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             setLocale(attachEvent.getUI().getLocale());
         }
         initConnector();
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     private void initConnector() {

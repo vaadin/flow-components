@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -71,8 +72,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -443,5 +442,11 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     protected void validate() {
         setInvalid(getValidationSupport().isInvalid(getValue()));
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        FieldValidationUtil.disableClientValidation(this);
     }
 }
