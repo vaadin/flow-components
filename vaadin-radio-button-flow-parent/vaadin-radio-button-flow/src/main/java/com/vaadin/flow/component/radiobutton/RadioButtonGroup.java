@@ -27,6 +27,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -36,6 +37,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -65,12 +67,12 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.4.1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.5.1")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation {
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation, HasHelper {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -175,7 +177,8 @@ public class RadioButtonGroup<T>
      */
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
-        return new RadioButtonGroupListDataView<>(this::getDataProvider, this);
+        return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     /**
@@ -188,7 +191,8 @@ public class RadioButtonGroup<T>
      */
     @Override
     public RadioButtonGroupDataView<T> getGenericDataView() {
-        return new RadioButtonGroupDataView<>(this::getDataProvider, this);
+        return new RadioButtonGroupDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
 
@@ -208,6 +212,7 @@ public class RadioButtonGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         setupDataProviderListener(dataProvider);
@@ -230,11 +235,18 @@ public class RadioButtonGroup<T>
     }
 
     @Override
+    public void setValue(T value) {
+        super.setValue(value);
+        getRadioButtons().forEach(rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+    }
+
+    @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         if (getDataProvider() != null && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     @Override
@@ -397,15 +409,23 @@ public class RadioButtonGroup<T>
         super.setInvalid(invalid);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
+        // Cache helper component before removal
+        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
         removeAll();
         clear();
+
+        // reinsert helper component
+        setHelperComponent(helperComponent);
+
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
+            getDataProvider().fetch(DataViewUtils.getQuery(this))
+                    .map(item -> createRadioButton((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -506,6 +526,32 @@ public class RadioButtonGroup<T>
         }
     }
 
+    /**
+     * Compares two value instances to each other to determine whether they are
+     * equal. Equality is used to determine whether to update internal state and
+     * fire an event when {@link #setValue(Object)} or
+     * {@link #setModelValue(Object, boolean)} is called. Subclasses can
+     * override this method to define an alternative comparison method instead
+     * of {@link Objects#equals(Object)}.
+     *
+     * @param value1
+     *            the first instance
+     * @param value2
+     *            the second instance
+     * @return <code>true</code> if the instances are equal; otherwise
+     *         <code>false</code>
+     */
+    @Override
+    protected boolean valueEquals(T value1, T value2) {
+        if (value1 == null && value2 == null) {
+            return true;
+        }
+        if (value1 == null || value2 == null) {
+            return false;
+        }
+        return getItemId(value1).equals(getItemId(value2));
+    }
+
     private void updateEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
@@ -535,4 +581,9 @@ public class RadioButtonGroup<T>
         validationRegistration = getElement().addPropertyChangeListener("value",
                 validationListener);
     }
+
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+        keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
 }

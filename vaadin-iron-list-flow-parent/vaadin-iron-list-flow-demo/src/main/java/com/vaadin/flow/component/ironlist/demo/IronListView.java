@@ -44,8 +44,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
-// FIXME remove once https://github.com/vaadin/flow/pull/5660 is available 
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "1.5.0")
 @Route("iron-list")
 public class IronListView extends DemoView {
 
@@ -445,7 +443,7 @@ public class IronListView extends DemoView {
             person.setFirstName(faker.name().firstName());
             person.setLastName(faker.name().lastName());
             person.setEmail(faker.internet().safeEmailAddress());
-            person.setPicture(faker.internet().avatar());
+            person.setPicture("data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7");
             people.add(person);
         }
 

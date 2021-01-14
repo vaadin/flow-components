@@ -4,16 +4,11 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-checkbox-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>19.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-checkbox-integration-tests</artifactId>
   <packaging>war</packaging>
   <name>Vaadin Checkbox Integration Tests</name>
-  <properties>
-    <failOnMissingWebXml>false</failOnMissingWebXml>
-    <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-    <ci-sauce.version>1.138</ci-sauce.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
@@ -149,7 +144,7 @@
       <id>run-jetty</id>
       <activation>
         <property>
-          <name>!skipTests</name>
+          <name>!skipJetty</name>
         </property>
       </activation>
       <build>
@@ -166,69 +161,11 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.saucelabs</groupId>
-          <artifactId>ci-sauce</artifactId>
-          <version>${ci-sauce.version}</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>2.20</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <systemPropertyVariables>
-                <sauce.user>${sauce.user}</sauce.user>
-                <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
-                <sauce.options>${sauce.options}</sauce.options>
-              </systemPropertyVariables>
-              <trimStackTrace>false</trimStackTrace>
-            </configuration>
-          </plugin>
-          <plugin>
             <groupId>com.saucelabs.maven.plugin</groupId>
             <artifactId>sauce-connect-plugin</artifactId>
-            <version>2.1.25</version>
-            <configuration>
-              <sauceUsername>${sauce.user}</sauceUsername>
-              <sauceAccessKey>${sauce.sauceAccessKey}</sauceAccessKey>
-              <options>${sauce.options}</options>
-            </configuration>
-            <dependencies>
-              <dependency>
-                <groupId>com.saucelabs</groupId>
-                <artifactId>ci-sauce</artifactId>
-                <version>${ci-sauce.version}</version>
-              </dependency>
-            </dependencies>
-            <executions>
-              <execution>
-                <id>start-sauceconnect</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>start-sauceconnect</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>stop-sauceconnect</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>stop-sauceconnect</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>
@@ -240,6 +177,9 @@
           <name>!test.use.hub</name>
         </property>
       </activation>
+      <properties>
+        <useLocalWebDriver>true</useLocalWebDriver>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -249,10 +189,6 @@
           <plugin>
             <groupId>com.lazerycode.selenium</groupId>
             <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
           </plugin>
         </plugins>
       </build>

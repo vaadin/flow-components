@@ -5,21 +5,22 @@ package com.vaadin.flow.component.crud.testbench;
  * #%L
  * Vaadin Crud Testbench API
  * %%
- * Copyright (C) 2018 Vaadin Ltd
+ * Copyright (C) 2018 - 2020 Vaadin Ltd
  * %%
- * This program is available under Commercial Vaadin Add-On License 3.0
- * (CVALv3).
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  *
  * See the file license.html distributed with this software for more
  * information about licensing.
  *
- * You should have received a copy of the CVALv3 along with this program.
- * If not, see <http://vaadin.com/license/cval-3>.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
@@ -27,6 +28,7 @@ import com.vaadin.testbench.elementsbase.Element;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * TestBench element for the vaadin-crud element
@@ -82,7 +84,13 @@ public class CrudElement extends TestBenchElement {
         if (isEditOnClick()) {
             this.getGrid().getCell(row, 0).click();
         } else {
-            this.$("vaadin-crud-edit").all().get(row).click();
+            GridTRElement editedRow = getGrid().getRow(row);
+            GridTHTDElement editCell = getGrid().getAllColumns().stream()
+                    .map(column -> editedRow.getCell(column))
+                    .filter(cell -> cell.getInnerHTML()
+                            .contains("vaadin-crud-edit"))
+                    .collect(Collectors.toList()).get(0);
+            editCell.$("vaadin-crud-edit").get(0).click();
         }
     }
 

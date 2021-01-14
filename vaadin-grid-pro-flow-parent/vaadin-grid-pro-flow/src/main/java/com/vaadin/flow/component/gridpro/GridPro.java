@@ -4,16 +4,15 @@ package com.vaadin.flow.component.gridpro;
  * #%L
  * Vaadin GridPro
  * %%
- * Copyright (C) 2018 - 2019 Vaadin Ltd
+ * Copyright (C) 2018 - 2020 Vaadin Ltd
  * %%
- * This program is available under Commercial Vaadin Add-On License 3.0
- * (CVALv3).
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  * 
  * See the file license.html distributed with this software for more
  * information about licensing.
  * 
- * You should have received a copy of the CVALv3 along with this program.
- * If not, see <http://vaadin.com/license/cval-3>.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
 
@@ -49,7 +48,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.2.2")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "3.0.0-alpha1")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -398,6 +397,31 @@ public class GridPro<E> extends Grid<E> {
     @Synchronize("single-cell-edit-changed")
     public boolean getSingleCellEdit() {
         return getElement().getProperty("singleCellEdit", false);
+    }
+
+    /**
+     * Sets the value of the webcomponent's property editOnClick. Default values is false.
+     * When true, cell edit mode gets activated on a single click instead of the default 
+     * double click.
+     *
+     * @param editOnClick
+     *            when <code>true</code>, cell edit mode gets activated on a single
+ *                click instead of the default double click
+     */
+    public void setEditOnClick(boolean editOnClick) {
+        getElement().setProperty("editOnClick", editOnClick);
+    }
+
+    /**
+     * Gets the value of the webcomponent's property editOnClick. Default values is false.
+     * When true, cell edit mode gets activated on a single click instead of the default 
+     * double click.
+     *
+     * @return editOnClick value
+     */
+    @Synchronize("edit-on-click-changed")
+    public boolean getEditOnClick() {
+        return getElement().getProperty("editOnClick", false);
     }
 
     /**

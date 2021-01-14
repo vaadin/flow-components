@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-date-picker-flow-parent</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>19.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-date-picker-flow-demo</artifactId>
   <packaging>${packaging.type}</packaging>
@@ -62,9 +62,11 @@
   </build>
   <profiles>
     <profile>
-      <id>default</id>
+      <id>jar</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!war</name>
+        </property>
       </activation>
       <properties>
         <packaging.type>jar</packaging.type>

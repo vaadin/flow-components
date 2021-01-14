@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -36,7 +37,7 @@ public class SortingIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).first();
+        grid = $(GridElement.class).id("sorting-grid");
     }
 
     @Test
@@ -58,6 +59,15 @@ public class SortingIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore("Fix reverted for https://github.com/vaadin/vaadin-flow-components/issues/427")
+    public void setInitialSortOrderGridHidden_showGrid_dataPresentAndSorted() {
+        findElement(By.id("sort-hidden-by-age")).click();
+        findElement(By.id("show-hidden-grid")).click();
+        Assert.assertEquals("B", $(GridElement.class).id("hidden-grid").getCell(0, 0).getText());
+        Assert.assertEquals("A", $(GridElement.class).id("hidden-grid").getCell(1, 0).getText());
+    }
+
+    @Test
     public void setInitialSortOrder_changeOrderFromServer_sortIndicatorsUpdated() {
         findElement(By.id("sort-by-age")).click();
         assertAscendingSorter("Age");
@@ -67,38 +77,38 @@ public class SortingIT extends AbstractComponentIT {
     public void indicatorsSortStateNumbersAndDirectionsAndContentOfRow() {
         WebElement btnAttach = findElement(By.id("btn-attach"));
         WebElement btnRemove = findElement(By.id("btn-detach"));
-        GridElement sortingGridElement = $(GridElement.class).first();
+        GridElement sortingGridElement = $(GridElement.class).id("sorting-grid");
         findElement(By.id("sort-by-age")).click();
-        findElements(By.tagName("vaadin-grid-sorter"))
+        sortingGridElement.findElements(By.tagName("vaadin-grid-sorter"))
                 .get(0).click();
 
         String textAgeColumnBeforeReattch = sortingGridElement.getCell(0, 1).getText();
-        Assert.assertEquals("asc", findElements(By.tagName("vaadin-grid-sorter"))
+        Assert.assertEquals("asc", sortingGridElement.findElements(By.tagName("vaadin-grid-sorter"))
                 .get(0).getAttribute("direction"));
         String sortStateNumberNameColumn
-                = findElements(By.tagName("vaadin-grid-sorter")).get(0).getAttribute("_order");
-        Assert.assertEquals("asc", findElements(By.tagName("vaadin-grid-sorter"))
+                = sortingGridElement.findElements(By.tagName("vaadin-grid-sorter")).get(0).getAttribute("_order");
+        Assert.assertEquals("asc", sortingGridElement.findElements(By.tagName("vaadin-grid-sorter"))
                 .get(1).getAttribute("direction"));
         String sortStateNumberAgeColumn
-                = findElements(By.tagName("vaadin-grid-sorter")).get(1).getAttribute("_order");
+                = sortingGridElement.findElements(By.tagName("vaadin-grid-sorter")).get(1).getAttribute("_order");
         // Detach
         btnRemove.click();
         // Reattach
         btnAttach.click();
 
-        sortingGridElement = $(GridElement.class).first();
+        sortingGridElement = $(GridElement.class).id("sorting-grid");
 
-        Assert.assertEquals("asc", findElements(By.tagName("vaadin-grid-sorter"))
+        Assert.assertEquals("asc", sortingGridElement.findElements(By.tagName("vaadin-grid-sorter"))
                 .get(0).getAttribute("direction"));
 
-        Assert.assertEquals("asc", findElements(By.tagName("vaadin-grid-sorter"))
+        Assert.assertEquals("asc", sortingGridElement.findElements(By.tagName("vaadin-grid-sorter"))
                 .get(1).getAttribute("direction"));
 
         String sortStateNumberAgeColumnAfterDetach
-                = findElements(By.tagName("vaadin-grid-sorter")).get(1).getAttribute("_order");
+                = sortingGridElement.findElements(By.tagName("vaadin-grid-sorter")).get(1).getAttribute("_order");
 
         String sortStateNumberNameColumnAfterDetach
-                = findElements(By.tagName("vaadin-grid-sorter")).get(0).getAttribute("_order");
+                = sortingGridElement.findElements(By.tagName("vaadin-grid-sorter")).get(0).getAttribute("_order");
         String textAgeColumnAfterReattch = sortingGridElement.getCell(0, 1).getText();
         Assert.assertEquals(textAgeColumnBeforeReattch, textAgeColumnAfterReattch);
         Assert.assertEquals(sortStateNumberAgeColumn, sortStateNumberAgeColumnAfterDetach);

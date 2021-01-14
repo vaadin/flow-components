@@ -1,73 +1,20 @@
-# Vaadin CustomField for Flow
+# CustomField component for Vaadin Flow
 
-Vaadin CustomField for Flow is a UI component add-on for Vaadin. 
-It is a field whose UI content can be constructed by the user, enabling 
-the creation of e.g. form fields by composing Vaadin components.
-Customization of both the visual presentation and the logic of the field is
-possible.
-## License & Author
+This project is the Component wrapper implementation of [`<vaadin-custom-field>`](https://github.com/vaadin/vaadin-custom-field)
+element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-Apache License 2.0
+## Using the component in a Flow application
 
-Vaadin CustomField is written by Vaadin Ltd.
-
-### Installing
-Add CustomField to your project
-```xml
-<dependencies>
-  <dependency>
+To use the component in an application using maven,
+add the following dependency to your `pom.xml`:
+```
+<dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-custom-field-flow</artifactId>
-    <version>${vaadin.customfield.version}</version>
-  </dependency>
-</dependencies>
+    <version>${component.version}</version>
+</dependency>
 ```
 
-### Using Vaadin CustomField
+## License
 
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-custom-field/master/screenshot.gif" width="700" alt="Screenshot of vaadin-custom-field">](https://vaadin.com/components/vaadin-custom-field)
-
-#### Basic use
-```java
-    public class SingleElementWrapping extends CustomField<String> {
-        private final TextField wrappedField = new TextField();
-
-        SingleElementWrapping() {
-            setLabel("Name");
-            add(wrappedField);
-        }
-
-        @Override
-        protected String generateModelValue() {
-            return wrappedField.getValue();
-        }
-
-        @Override
-        protected void setPresentationValue(String newPresentationValue) {
-            wrappedField.setValue(newPresentationValue);
-        }
-    }
-```
-
-## Setting up for development
-
-Clone the project in GitHub (or fork it if you plan on contributing)
-
-```
-git clone git@github.com:vaadin/vaadin-custom-field-flow.git
-```
-
-To build and install the project into the local repository run
-
-```mvn install -DskipITs```
-
-in the root directory. `-DskipITs` will skip the integration tests, which require a TestBench license. If you want to run all tests as part of the build, run
-
-```mvn install```
-
-To compile and run demos locally execute
-
-```
-mvn compile
-mvn -pl vaadin-custom-field-flow-demo -Pwar jetty:run
-```
+Apache License 2.0

@@ -5,7 +5,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
 (function () {
   const tryCatchWrapper = function (callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid-flow');
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid');
   };
 
   let isItemCacheInitialized = false;
@@ -33,6 +33,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           if (!this.itemCaches[scaledIndex]) {
             this.grid.$connector.beforeEnsureSubCacheForScaledIndex(this, scaledIndex);
           }
+        });
+
+        ItemCache.prototype.isLoading = tryCatchWrapper(function() {
+          return Boolean(ensureSubCacheQueue.length || Object.keys(this.pendingRequests).length || Object.keys(this.itemCaches).filter(index => {
+            return this.itemCaches[index].isLoading();
+          })[0]);
         });
 
         ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function(scaledIndex) {
@@ -528,9 +534,9 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           let parentCache = grid.$connector.getCacheByKey(parentKey);
           if(parentCache && parentCache.itemkeyCaches) {
             let _cache = parentCache.itemkeyCaches[parentKey];
-            _updateGridCache(page, items,
-              treePageCallbacks[parentKey][page],
-              _cache);
+            const callbacksForParentKey = treePageCallbacks[parentKey];
+            const callback = callbacksForParentKey && callbacksForParentKey[page];
+            _updateGridCache(page, items, callback, _cache);
           }
 
         } else {

@@ -6,11 +6,8 @@ import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route(value = "vaadin-crud/customgrid")
-@Theme(Lumo.class)
 public class CustomGridView extends VerticalLayout {
 
     boolean hasBorder = true;

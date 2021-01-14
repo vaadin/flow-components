@@ -171,7 +171,7 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.TextFieldElement#2.3.0-alpha8",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.7.1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "3.0.0-alpha1")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -1099,7 +1099,7 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            a function that converts a string value to a model value
      * @param modelToPresentation
      *            a function that converts a model value to a string value
-     * 
+     *
      * @param isInitialValueOptional
      *            if {@code isInitialValueOptional} is {@code true} then the
      *            initial value is used only if element has no {@code "value"}
@@ -1200,7 +1200,7 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * If {@code isInitialValueOptional} is {@code true} then the initial value
      * is used only if element has no {@code "value"} property value, otherwise
      * element {@code "value"} property is ignored and the initial value is set.
-     * 
+     *
      *
      * @param initialValue
      *            the initial value to set to the value

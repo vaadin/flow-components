@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -372,7 +373,7 @@ public class CheckboxGroupTest {
         Assert.assertEquals(1, propertyValue.length());
         Assert.assertEquals("foo", propertyValue.getString(0));
     }
-  
+
     @Test
     public void dataViewForFaultyDataProvider_throwsException() {
         thrown.expect(IllegalStateException.class);
@@ -392,6 +393,133 @@ public class CheckboxGroupTest {
         checkboxGroup.setDataProvider(dataProvider);
 
         checkboxGroup.getListDataView();
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemsWithIdentifierOnly_shouldSelectCorrectItem() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
+
+        CheckboxGroup<CustomItem> checkboxGroup = new CheckboxGroup<>();
+        CheckboxGroupListDataView<CustomItem> listDataView = checkboxGroup
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        checkboxGroup.setValue(Collections.singleton(new CustomItem(1L)));
+
+        Assert.assertNotNull(
+                checkboxGroup.getSelectedItems().stream().findFirst().get());
+        Assert.assertEquals("First", checkboxGroup.getSelectedItems().stream()
+                .map(CustomItem::getName).findFirst().get());
+        long[] selectedIds = checkboxGroup.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        checkboxGroup.setValue(Collections.singleton(new CustomItem(2L)));
+
+        selectedIds = checkboxGroup.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
+
+        CheckboxGroup<CustomItem> checkboxGroup = new CheckboxGroup<>();
+        CheckboxGroupListDataView<CustomItem> listDataView = checkboxGroup
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        checkboxGroup.setValue(Collections.singleton(new CustomItem(1L)));
+
+        Assert.assertNotNull(
+                checkboxGroup.getSelectedItems().stream().findFirst().get());
+        Assert.assertEquals("First", checkboxGroup.getSelectedItems().stream()
+                .map(CustomItem::getName).findFirst().get());
+        long[] selectedIds = checkboxGroup.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        checkboxGroup
+                .setValue(Collections.singleton(new CustomItem(3L, "Second")));
+
+        selectedIds = checkboxGroup.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 3L }, selectedIds);
+    }
+
+    @Test
+    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
+
+        CheckboxGroup<CustomItem> checkboxGroup = new CheckboxGroup<>();
+        CheckboxGroupListDataView<CustomItem> listDataView = checkboxGroup
+                .setItems(items);
+
+        checkboxGroup.setValue(
+                Collections.singleton(new CustomItem(null, "Second")));
+
+        Assert.assertNotNull(checkboxGroup.getValue());
+
+        long[] selectedIds = checkboxGroup.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+
+        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
+    }
+
+    @Test
+    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
+
+        CheckboxGroup<CustomItem> checkboxGroup = new CheckboxGroup<>();
+        CheckboxGroupListDataView<CustomItem> listDataView = checkboxGroup
+                .setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        checkboxGroup
+                .setValue(Collections.singleton(new CustomItem(null, "First")));
+        Assert.assertNull(checkboxGroup.getSelectedItems()
+                .stream().findFirst().get().getId());
     }
 
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(
@@ -485,6 +613,45 @@ public class CheckboxGroupTest {
         @Override
         public Object getId(Wrapper wrapper) {
             return wrapper.getId();
+        }
+    }
+
+    private class CustomItem {
+        private Long id;
+        private String name;
+
+        public CustomItem(Long id) {
+            this(id, null);
+        }
+
+        public CustomItem(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CustomItem)) return false;
+            CustomItem that = (CustomItem) o;
+            return Objects.equals(getName(), that.getName());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getName());
         }
     }
 }

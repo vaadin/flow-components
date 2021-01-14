@@ -17,6 +17,7 @@ package com.vaadin.flow.component.timepicker.testbench;
 
 import java.util.Objects;
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
@@ -30,7 +31,7 @@ import org.openqa.selenium.Keys;
  */
 @Element("vaadin-time-picker")
 public class TimePickerElement extends TestBenchElement
-        implements HasStringValueProperty, HasSelectByText {
+        implements HasStringValueProperty, HasSelectByText, HasHelper {
 
     /**
      * A TestBench element representing
@@ -232,4 +233,14 @@ public class TimePickerElement extends TestBenchElement
     public String getSelectedText() {
         return getTimePickerTextFieldElement().getValue();
     }
+
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpen() {
+        return !getPropertyBoolean("autoOpenDisabled");
+    }
+
 }

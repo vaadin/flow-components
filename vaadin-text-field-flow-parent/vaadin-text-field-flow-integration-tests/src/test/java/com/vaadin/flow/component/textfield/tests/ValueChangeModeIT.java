@@ -24,6 +24,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.tests.AbstractComponentIT;
+
+import static org.junit.Assert.assertTrue;
+
 import com.vaadin.flow.testutil.TestPath;
 
 /**
@@ -59,47 +62,47 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForTextField() throws InterruptedException {
         testValueChangeModes(textField, "textfield");
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForTextArea() throws InterruptedException {
         testValueChangeModes(textArea, "textarea");
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForPasswordField()
             throws InterruptedException {
         testValueChangeModes(passwordField, "passwordfield");
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForEmailField()
             throws InterruptedException {
         testValueChangeModes(emailField, "emailfield");
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForNumberField()
             throws InterruptedException {
         testValueChangeModes(numberField, "numberfield");
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForIntegerField()
             throws InterruptedException {
         testValueChangeModes(integerField, "integerfield");
     }
 
     @Test
-    @org.junit.Ignore("Unstable test when migrated to mono-repo")
+
     public void testValueChangeModesForBigDecimalField()
             throws InterruptedException {
         testValueChangeModes(bigDecimalField, "bigdecimalfield");
@@ -107,6 +110,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
     private void testValueChangeModes(WebElement field, String componentName)
             throws InterruptedException {
+
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
@@ -115,15 +119,14 @@ public class ValueChangeModeIT extends AbstractComponentIT {
             // Clicking enter on TextArea makes a line-break instead of
             // "committing" the change and firing a change-event.
             field.sendKeys(Keys.ENTER);
-            assertMessageUpdated(
-                    "By default the value change events should be sent when clicking enter (ValueChangeMode should be ON_CHANGE)");
+            waitUntilMessageUpdated();
         }
 
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
         blur();
-        assertMessageUpdated("The value change events should be sent on blur");
+        waitUntilMessageUpdated();
 
         clickButton(componentName + "-on-blur");
 
@@ -136,14 +139,13 @@ public class ValueChangeModeIT extends AbstractComponentIT {
                 "The value change events should not be sent with enter key when using ValueChangeMode.ON_BLUR");
 
         blur();
-        assertMessageUpdated(
-                "The value change events should be sent on blur when using ValueChangeMode.ON_BLUR");
+        waitUntilMessageUpdated();
 
         clickButton(componentName + "-eager");
-
         field.sendKeys("1");
-        assertMessageUpdated(
-                "The value change events should be sent on every key stroke when using ValueChangeMode.EAGER");
+
+        waitUntilMessageUpdated();
+
         blur();
         assertMessageNotUpdated(
                 "The value change event should not be sent again on blur, because it was already sent eagerly when typing");
@@ -152,37 +154,37 @@ public class ValueChangeModeIT extends AbstractComponentIT {
                 By.id(componentName + "-set-change-timeout"));
         changeTimeoutField.sendKeys("1000");
         blur();
+
         testValueChangeTimeout(field, componentName);
     }
 
     private void testValueChangeTimeout(WebElement field, String componentName)
             throws InterruptedException {
+        long last = System.currentTimeMillis();
+
         clickButton(componentName + "-lazy");
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "The value change event should not be sent on first key stroke when using ValueChangeMode.LAZY");
+        waitUntilMessageUpdated();
+        assertTrue(-last + (last = System.currentTimeMillis()) > 1000);
 
         for (int i = 0; i < 2; i++) {
             field.sendKeys("1");
-            Thread.sleep(600);
             assertMessageNotUpdated(
                     "The value change event should not be sent until timeout elapsed since last keystroke when using ValueChangeMode.LAZY");
         }
 
-        waitUntilMessageUpdated(400,
-                "The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY");
+        waitUntilMessageUpdated();
+        assertTrue("The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY",
+                  -last + (last = System.currentTimeMillis()) > 1000);
 
         clickButton(componentName + "-timeout");
         field.sendKeys("1");
-        assertMessageUpdated(
-                "The value change event should be sent on first key stroke when using ValueChangeMode.TIMEOUT");
+        waitUntilMessageUpdated();
 
         field.sendKeys("1");
-        Thread.sleep(600);
         assertMessageNotUpdated(
-                "The value change event should not be sent until timeout elapsed since last event when using ValueChangeMode.TIMEOUT");
-
-        waitUntilMessageUpdated(400,
                 "The value change event should be sent when timeout elapsed since last event when using ValueChangeMode.TIMEOUT");
     }
 
@@ -203,6 +205,10 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         boolean isUpdated = !message.getText().equals(lastMessageText);
         lastMessageText = messageText;
         return isUpdated;
+    }
+
+    private void waitUntilMessageUpdated() {
+        waitUntilMessageUpdated(2000, "It took more than 2000ms to change the message, probably CI performance problems");
     }
 
     private void waitUntilMessageUpdated(long timeout, String failMessage) {

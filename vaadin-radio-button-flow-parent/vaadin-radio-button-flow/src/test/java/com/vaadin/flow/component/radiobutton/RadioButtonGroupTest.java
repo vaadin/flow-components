@@ -27,8 +27,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -50,9 +48,9 @@ public class RadioButtonGroupTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private class RadioButtunWithInitialValue extends
-            GeneratedVaadinRadioGroup<RadioButtunWithInitialValue, String> {
-        RadioButtunWithInitialValue() {
+    private class RadioButtonWithInitialValue extends
+            GeneratedVaadinRadioGroup<RadioButtonWithInitialValue, String> {
+        RadioButtonWithInitialValue() {
             super("", null, String.class, (group, value) -> value,
                     (group, value) -> value, true);
         }
@@ -249,10 +247,10 @@ public class RadioButtonGroupTest {
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
         Mockito.when(
-                instantiator.createComponent(RadioButtunWithInitialValue.class))
-                .thenAnswer(invocation -> new RadioButtunWithInitialValue());
-        RadioButtunWithInitialValue field = Component.from(element,
-                RadioButtunWithInitialValue.class);
+                instantiator.createComponent(RadioButtonWithInitialValue.class))
+                .thenAnswer(invocation -> new RadioButtonWithInitialValue());
+        RadioButtonWithInitialValue field = Component.from(element,
+                RadioButtonWithInitialValue.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
@@ -275,5 +273,120 @@ public class RadioButtonGroupTest {
         radioButtonGroup.setItems(dataProvider);
 
         radioButtonGroup.getListDataView();
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> listDataView =
+                radioButtonGroup.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        radioButtonGroup.setValue(new CustomItem(1L));
+
+        Assert.assertNotNull(radioButtonGroup.getValue());
+        Assert.assertEquals(radioButtonGroup.getValue().getName(), "First");
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item not with the reference of existing item, but instead
+        // with just the Id:
+        radioButtonGroup.setValue(new CustomItem(2L));
+
+        Assert.assertNotNull(radioButtonGroup.getValue());
+        Assert.assertEquals(Long.valueOf(2L), radioButtonGroup.getValue().getId());
+    }
+
+    @Test
+    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> listDataView =
+                radioButtonGroup.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        radioButtonGroup.setValue(new CustomItem(1L));
+
+        Assert.assertNotNull(radioButtonGroup.getValue());
+        Assert.assertEquals("First", radioButtonGroup.getValue().getName());
+
+        // Make the names similar to the name of not selected one to mess
+        // with the <equals> implementation in CustomItem:
+        first.setName("Second");
+        listDataView.refreshItem(first);
+        third.setName("Second");
+        listDataView.refreshItem(third);
+
+        // Select the item with an Id and the name that can be wrongly equals to
+        // another items, should verify that <equals> method is not in use:
+        radioButtonGroup.setValue(new CustomItem(3L, "Second"));
+
+        Assert.assertNotNull(radioButtonGroup.getValue());
+        Assert.assertEquals(Long.valueOf(3L), radioButtonGroup.getValue().getId());
+    }
+
+    @Test
+    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> listDataView =
+                radioButtonGroup.setItems(items);
+
+        radioButtonGroup.setValue(new CustomItem(null, "Second"));
+
+        Assert.assertNotNull(radioButtonGroup.getValue());
+        Assert.assertEquals(Long.valueOf(2L), radioButtonGroup.getValue().getId());
+    }
+
+    @Test
+    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
+
+        RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> listDataView =
+                radioButtonGroup.setItems(items);
+        // Setting the following Identifier Provider makes the component
+        // independent from the CustomItem's equals method implementation:
+        listDataView.setIdentifierProvider(CustomItem::getId);
+
+        radioButtonGroup.setValue(new CustomItem(null, "First"));
+        Assert.assertNull(radioButtonGroup.getValue().getId());
+    }
+
+    @Test
+    public void addNullOption_setValue() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("enabled", "disabled", null);
+        group.setValue(null);
+        Assert.assertEquals(group.getValue(), null);
     }
 }

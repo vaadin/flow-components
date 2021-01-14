@@ -2,14 +2,13 @@ package com.vaadin.flow.component.radiobutton.tests;
 
 import java.util.List;
 
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.CURRENT_ITEM_SPAN;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.DATA_VIEW_UPDATE_BUTTON;
@@ -24,12 +23,19 @@ import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataVi
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.LIST_DATA_VIEW_SET_FILTER_BUTTON;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.LIST_DATA_VIEW_SORT_BUTTON;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.LIST_DATA_VIEW_UPDATE_BUTTON;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.OTHER_RADIO_GROUP_FOR_ADD_TO_DATA_VIEW;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.OTHER_RADIO_GROUP_FOR_FILTER_DATA_VIEW;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.OTHER_RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.OTHER_RADIO_GROUP_FOR_SORT_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_ADD_TO_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_FILTER_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_LIST_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW;
 import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_FOR_SORT_DATA_VIEW;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_SELECTED_ID_SPAN;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON;
+import static com.vaadin.flow.component.radiobutton.tests.RadioButtonGroupDataViewPage.RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON;
 
 @TestPath("vaadin-radio-button/radio-Button-group-data-view")
 public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
@@ -106,6 +112,12 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
 
         Assert.assertEquals("Second RadioButton should have the text", SECOND,
                 buttons.get(1).getText());
+
+        group = findElement(By.id(OTHER_RADIO_GROUP_FOR_ADD_TO_DATA_VIEW));
+        buttons = group.findElements(By.tagName(VAADIN_RADIO_BUTTON));
+
+        Assert.assertEquals("Unexpected item count after adding a new one", 2,
+                buttons.size());
     }
 
     @Test
@@ -129,6 +141,12 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
 
         Assert.assertEquals("First RadioButton should have the text", FIRST,
                 buttons.get(0).getText());
+
+        group = findElement(By.id(OTHER_RADIO_GROUP_FOR_REMOVE_FROM_DATA_VIEW));
+        buttons = group.findElements(By.tagName(VAADIN_RADIO_BUTTON));
+
+        Assert.assertEquals("Unexpected item count after removing an item", 1,
+                buttons.size());
     }
 
     @Test
@@ -147,6 +165,13 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
         buttons = group.findElements(By.tagName(VAADIN_RADIO_BUTTON));
 
         Assert.assertEquals("Group should have buttons", 5, buttons.size());
+
+        group = findElement(By.id(OTHER_RADIO_GROUP_FOR_FILTER_DATA_VIEW));
+        buttons = group.findElements(By.tagName(VAADIN_RADIO_BUTTON));
+
+        Assert.assertEquals(
+                "Filtering is not expected for second radio " + "button group",
+                10, buttons.size());
 
         findElement(By.id(LIST_DATA_VIEW_ADD_FILTER_BUTTON)).click();
         waitForElementPresent(By.tagName(VAADIN_RADIO_BUTTON));
@@ -231,6 +256,36 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
                 "second", buttons.get(1).getText());
         Assert.assertEquals("third rendered radio button's text should be",
                 "third", buttons.get(2).getText());
+
+        group = findElement(By.id(OTHER_RADIO_GROUP_FOR_SORT_DATA_VIEW));
+        buttons = group.findElements(By.tagName(VAADIN_RADIO_BUTTON));
+
+        Assert.assertArrayEquals(
+                "Sorting is not expected for second radio button group",
+                new String[] { "third", "first", "second" },
+                buttons.stream().map(WebElement::getText).toArray());
     }
 
+    @Test
+    public void setIdentifierProvider_setItem_shouldSelectCorrectItemBasedOnIdentifier() {
+        WebElement selectedIdsSpan = findElement(
+                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        Assert.assertEquals("Selected item id should be", "3",
+                selectedIdsSpan.getText());
+
+        findElement(By.id(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON)).click();
+
+        selectedIdsSpan = findElement(
+                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        Assert.assertEquals("Selected item ids should be", "2",
+                selectedIdsSpan.getText());
+
+        findElement(By.id(RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON))
+                .click();
+
+        selectedIdsSpan = findElement(
+                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        Assert.assertEquals("Selected item ids should be", "3",
+                selectedIdsSpan.getText());
+    }
 }

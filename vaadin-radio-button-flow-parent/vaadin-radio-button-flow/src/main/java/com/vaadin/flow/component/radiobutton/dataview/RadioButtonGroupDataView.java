@@ -18,7 +18,9 @@ package com.vaadin.flow.component.radiobutton.dataview;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableSupplier;
 
 /**
@@ -29,6 +31,8 @@ import com.vaadin.flow.function.SerializableSupplier;
  * @since
  */
 public class RadioButtonGroupDataView<T> extends AbstractDataView<T> {
+
+    private SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback;
 
     /**
      * Constructs a new DataView.
@@ -42,6 +46,25 @@ public class RadioButtonGroupDataView<T> extends AbstractDataView<T> {
             SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
             RadioButtonGroup radioButtonGroup) {
         super(dataProviderSupplier, radioButtonGroup);
+    }
+
+    /**
+     * Constructs a new DataView.
+     *
+     * @param dataProviderSupplier
+     *            data provider supplier
+     * @param radioButtonGroup
+     *            radioButton group instance for this DataView
+     * @param identifierChangedCallback
+     *            callback method which should be called when identifierProvider
+     *            is changed
+     */
+    public RadioButtonGroupDataView(
+            SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
+            RadioButtonGroup radioButtonGroup,
+            SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback) {
+        super(dataProviderSupplier, radioButtonGroup);
+        this.identifierChangedCallback = identifierChangedCallback;
     }
 
     @Override
@@ -62,5 +85,15 @@ public class RadioButtonGroupDataView<T> extends AbstractDataView<T> {
                     index, dataSize - 1));
         }
         return getItems().skip(index).findFirst().orElse(null);
+    }
+
+    @Override
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
+        super.setIdentifierProvider(identifierProvider);
+
+        if (identifierChangedCallback != null) {
+            identifierChangedCallback.accept(identifierProvider);
+        }
     }
 }

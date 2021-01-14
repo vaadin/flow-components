@@ -56,6 +56,21 @@ public class TimePickerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void selectTimeOnAutoOpenDisabledTimePicker() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("autoopendisabled-picker");
+        TestBenchElement message = $("div")
+                .id("autoopendisabled-picker-message");
+
+        picker.setValue("10:08");
+        waitUntil(driver -> message.getText().contains("Hour: 10\nMinute: 8"));
+
+        picker.setValue("");
+        waitUntil(driver -> "No time is selected".equals(message.getText()));
+        Assert.assertFalse(picker.isAutoOpen());
+    }
+
+    @Test
     public void selectTimeOnDisabledTimePicker() {
         TimePickerElement picker = $(TimePickerElement.class)
                 .id("disabled-picker");
@@ -103,6 +118,27 @@ public class TimePickerIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "The last item in the dropdown should be the max value",
                 "6:00 PM", picker.getLastItemText());
+    }
+
+    @Test
+    public void timePickerHelperText() {
+        TimePickerElement picker = $(TimePickerElement.class)
+              .id("time-picker-helper-text");
+        Assert.assertEquals("Helper text", picker.getHelperText());
+
+        $("button").id("button-clear-helper-text").click();
+        Assert.assertEquals("", picker.getHelperText());
+    }
+
+    @Test
+    public void timePickerHelperComponent() {
+        TimePickerElement picker = $(TimePickerElement.class)
+              .id("time-picker-helper-component");
+        Assert.assertEquals("helper-component",
+              picker.getHelperComponent().getAttribute("id"));
+
+        $("button").id("button-clear-helper-component").click();
+        Assert.assertNull(picker.getHelperComponent());
     }
 
     private void selectStep(String step) {

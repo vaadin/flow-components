@@ -1,55 +1,20 @@
-# Vaadin Login for Flow
+# Login component for Vaadin Flow
 
-Vaadin Login for Flow is a UI component add-on for Vaadin.
+This project is the Component wrapper implementation of [`<vaadin-login>`](https://github.com/vaadin/vaadin-login)
+element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-## License & Author
+## Using the component in a Flow application
 
-Apache License 2.0
-
-Vaadin Login is written by Vaadin Ltd.
-
-To purchase a license, visit http://vaadin.com/pricing
-
-### Installing
-Add Login to your project
-```xml
-<dependencies>
-  <dependency>
+To use the component in an application using maven,
+add the following dependency to your `pom.xml`:
+```
+<dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-login-flow</artifactId>
-    <version>${vaadin.login.version}</version>
-  </dependency>
-</dependencies>
+    <version>${component.version}</version>
+</dependency>
 ```
 
-### Using Vaadin Login
+## License
 
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-login/master/screenshot.png" width="700" alt="Screenshot of vaadin-login">](https://vaadin.com/components/vaadin-login)
-
-#### Basic use
-```java
-LoginOverlay component = new LoginOverlay();
-```
-
-## Setting up for development
-
-Clone the project in GitHub (or fork it if you plan on contributing)
-
-```
-git clone git@github.com:vaadin/vaadin-login-flow.git
-```
-
-To build and install the project into the local repository run
-
-```mvn install -DskipITs```
-
-in the root directory. `-DskipITs` will skip the integration tests, which require a TestBench license. If you want to run all tests as part of the build, run
-
-```mvn install```
-
-To compile and run demos locally execute
-
-```
-mvn compile
-mvn -pl vaadin-login-flow-demo -Pwar jetty:run
-```
+Apache License 2.0

@@ -22,6 +22,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -93,7 +94,7 @@ public class ListBoxViewDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Using item renderer and disabling items
         ListBox<Item> listBox = new ListBox<>();
-        listBox.setItems(getItems());
+        ListBoxListDataView<Item> listDataView = listBox.setItems(getItems());
 
         listBox.setRenderer(new ComponentRenderer<>(item -> {
             Label name = new Label("Item: " + item.getName());
@@ -101,7 +102,7 @@ public class ListBoxViewDemoPage extends DemoView {
 
             NativeButton button = new NativeButton("Buy", event -> {
                 item.setStock(item.getStock() - 1);
-                listBox.getDataProvider().refreshItem(item);
+                listDataView.refreshItem(item);
             });
 
             Div labels = new Div(name, stock);

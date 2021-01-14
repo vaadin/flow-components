@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -43,7 +44,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled {
+        implements HasSize, HasValidation, HasEnabled, HasHelper {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -56,6 +57,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     private static final long MILLISECONDS_IN_A_DAY = 86400000L;
     private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
     private transient DateTimeFormatter dateTimeFormatter;
@@ -100,8 +102,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -342,6 +342,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             setLocale(attachEvent.getUI().getLocale());
         }
         initConnector();
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     private void initConnector() {
@@ -552,6 +553,28 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    /**
+     * Enables or disables the dropdown opening automatically. If {@code false}
+     * the dropdown is only opened when clicking the toggle button or pressing
+     * Up or Down arrow keys.
+     * 
+     * @param autoOpen
+     *            {@code false} to prevent the dropdown from opening
+     *            automatically
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+    }
+
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

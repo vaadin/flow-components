@@ -39,8 +39,13 @@ import java.util.Collections;
 @Route("vaadin-avatar")
 public class AvatarView extends DemoView {
 
+    StreamResource localAvatarResource;
+
     @Override
     public void initView() {
+        localAvatarResource = new StreamResource("avatar+.png",
+            () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/avatar.png"));
+
         createBasicAvatar();
         createAvatarWithCombinedProperties();
         createLocalizedAvatar();
@@ -61,15 +66,20 @@ public class AvatarView extends DemoView {
         avatarWithName.setName("Yuriy Yevstihnyeyev");
 
         Avatar avatarWithImgUrl = new Avatar();
-        avatarWithImgUrl.setImage("https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG");
+        avatarWithImgUrl.setImage("https://vaadin.com/avatars/avatar.png");
 
         Avatar avatarWithImageResource = new Avatar();
+
         StreamResource avatarResource = new StreamResource("user+.png",
-                () -> getFileStream("../vaadin-avatar-flow-demo/src/main/resources/META-INF/resources/frontend/images/user.png"));
+                () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/user.png"));
         avatarWithImageResource.setImageResource(avatarResource);
 
         add(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);
         // end-source-example
+
+        // Not using external image urls
+        avatarWithImgUrl.setImageResource(localAvatarResource);
+
         Div container = new Div(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);
 
         addCard("Basic usage", container);
@@ -79,24 +89,26 @@ public class AvatarView extends DemoView {
         // begin-source-example
         // source-example-heading: Combined properties
         Avatar avatar = new Avatar();
-        avatar.setImage("https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG");
+        avatar.setImage("https://vaadin.com/avatars/user.png");
 
         add(avatar);
         // end-source-example
 
+        avatar.setImageResource(localAvatarResource);
+
         CheckboxGroup checkboxGroup = new CheckboxGroup();
         checkboxGroup.setLabel("Set avatar's properties");
-        checkboxGroup.setItems("setImage(\"photos/Yuriy-Yevstihnyeyev.JPG\")", "setName(\"Serhii Kulykov\")", "setAbbreviation(\"YY\")");
-        checkboxGroup.setValue(Collections.singleton("setImage(\"photos/Yuriy-Yevstihnyeyev.JPG\")"));
+        checkboxGroup.setItems("setImage(\"avatars/avatar.png\")", "setName(\"Serhii Kulykov\")", "setAbbreviation(\"YY\")");
+        checkboxGroup.setValue(Collections.singleton("setImage(\"avatars/avatar.png\")"));
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
         checkboxGroup.addValueChangeListener(e -> {
             String valueString = e.getValue().toString();
 
             if (valueString.contains("setImage")) {
-                avatar.setImage("https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG");
+                avatar.setImageResource(localAvatarResource);
             } else {
-                avatar.setImage(null);
+                avatar.setImageResource(null);
             }
 
             if (valueString.contains("setName")) {

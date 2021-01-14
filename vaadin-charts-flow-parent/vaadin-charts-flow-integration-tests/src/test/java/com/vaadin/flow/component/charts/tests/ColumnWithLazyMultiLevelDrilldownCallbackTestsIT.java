@@ -24,6 +24,8 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
     @Test
     public void test() throws AssertionError {
         ChartElement chart = $(ChartElement.class).first();
+        waitUntil(e -> getElementFromShadowRoot(chart,
+                By.cssSelector(".highcharts-drilldown-point")) != null);
         clickDrilldownPoint(chart, 0);
         // Can't drilldown with null callback
         assertEquals(0, getLogMessages().size());
