@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -41,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-details")
 @NpmPackage(value = "@vaadin/vaadin-details", version = "1.2.0")
 @JsModule("@vaadin/vaadin-details/src/vaadin-details.js")
-public class Details extends Component implements HasEnabled, HasTheme {
+public class Details extends Component implements HasEnabled, HasTheme, HasStyle {
 
     private Component summary;
     private final Div contentContainer;
