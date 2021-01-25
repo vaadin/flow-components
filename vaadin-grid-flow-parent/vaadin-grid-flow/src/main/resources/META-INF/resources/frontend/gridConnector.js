@@ -720,21 +720,16 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         const generateRange = size => [...Array(size).keys()];
 
         function findDescendants(pkey,pages) {
-          const result = [];
           const parentCache = cache[pkey];
 
-          if(!parentCache) return result;
+          if(!parentCache) return [];
 
           pages = pages ? pages:generateRange(parentCache.length);
-          for(const currentPage of pages) {
-            const items = parentCache[currentPage];
-            if (items) {
-              result.push(...items);
-              const descendants = items.flatMap(item => findDescendants(item.key));
-              result.push(...descendants);
-            }
-          }
-          return result;
+
+          return pages.flatMap(currentPage => {
+            const items = parentCache[currentPage] || [];
+            return items.concat(items.flatMap(item => findDescendants(item.key)));
+          });
         }
 
         const {cache:gridCache, scaledIndex} = grid._cache.getCacheAndIndexByKey(pkey);
