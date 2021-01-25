@@ -732,19 +732,24 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           });
         }
 
-        const {cache:gridCache, scaledIndex} = grid._cache.getCacheAndIndexByKey(pkey);
-
-        const firstPage = Math.floor(index / grid.pageSize);
         const updatedPageCount = Math.ceil(length / grid.pageSize);
-
+        const firstPage = Math.floor(index / grid.pageSize);
         const pages = generateRange(updatedPageCount).map(i => firstPage + i);
-        const affectedItems = findDescendants(pkey,pages);
-        grid.$connector.doDeselection(affectedItems.filter(item => selectedKeys[item.key]));
         for(const page of pages) {
           delete cache[pkey][page];
         }
 
+        // Use grid.clearCache if clearing the root cache.
+        if(!parentKey) {
+          grid.clearCache();
+          return;
+        }
+
+        const affectedItems = findDescendants(pkey,pages);
+        grid.$connector.doDeselection(affectedItems.filter(item => selectedKeys[item.key]));
+
         const keys = affectedItems.map(item => item.key);
+        const {cache:gridCache, scaledIndex} = grid._cache.getCacheAndIndexByKey(pkey);
         clearSubcache(gridCache,scaledIndex,keys);
       });
 
