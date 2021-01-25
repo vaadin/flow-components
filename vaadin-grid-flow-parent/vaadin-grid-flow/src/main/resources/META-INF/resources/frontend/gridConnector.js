@@ -718,24 +718,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         }
         // Generates an array of integers from 0 to size-1
         const generateRange = size => [...Array(size).keys()];
-        function clearSubcache(cache,scaledIndex,childKeys,page) {
-          const keySet = new Set(keys);
-          Array.from(grid.$.items.children)
-            .flatMap((row) => Array.from(row.children))
-            .forEach((cell) => {
-              const item = cell._instance && cell._instance.item
-              if(item && keySet.has(item.key)) {
-                // Force data system to pick up subproperty changes
-                cell._instance && cell._instance._setPendingProperty('item', {}, false);
-              }
-            });
 
-          delete cache.itemCaches[scaledIndex];
-          delete cache.items[scaledIndex];
-          delete cache.itemkeyCaches[scaledIndex];
-          cache.updateSize();
-        }
-        function findItems(pkey,pages) {
+        function findDescendants(pkey,pages) {
           const result = [];
           const parentCache = cache[pkey];
 
@@ -746,7 +730,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
             const items = parentCache[currentPage];
             if (items) {
               result.push(...items);
-              const descendants = items.flatMap(item => findItems(item.key));
+              const descendants = items.flatMap(item => findDescendants(item.key));
               result.push(...descendants);
             }
           }
@@ -759,17 +743,37 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         const updatedPageCount = Math.ceil(length / grid.pageSize);
 
         const pages = generateRange(updatedPageCount).map(i => firstPage + i);
-        const affectedItems = findItems(pkey,pages);
+        const affectedItems = findDescendants(pkey,pages);
         grid.$connector.doDeselection(affectedItems.filter(item => selectedKeys[item.key]));
         for(const page of pages) {
           delete cache[pkey][page];
         }
 
-        // Child keys should come from grid cache
         const keys = affectedItems.map(item => item.key);
         clearSubcache(gridCache,scaledIndex,keys);
-        //grid._loadPage(page, parent);
       });
+
+      /*
+       * Clears the cache and disassociates the child items in the cells.
+       * Based on grid.clearCache().
+       */
+      function clearSubcache(cache,scaledIndex,childKeys) {
+        const keySet = new Set(childKeys);
+        Array.from(grid.$.items.children)
+            .flatMap((row) => Array.from(row.children))
+            .forEach((cell) => {
+              const item = cell._instance && cell._instance.item
+              if(item && keySet.has(item.key)) {
+                // Force data system to pick up subproperty changes
+                cell._instance && cell._instance._setPendingProperty('item', {}, false);
+              }
+            });
+
+        delete cache.itemCaches[scaledIndex];
+        delete cache.items[scaledIndex];
+        delete cache.itemkeyCaches[scaledIndex];
+        cache.updateSize();
+      }
 
       const isSelectedOnGrid = function(item) {
         const selectedItems = grid.selectedItems;
