@@ -46,7 +46,7 @@ async function getAllCommits(){
     data = res.data;
     data = data.filter(da => da.labels.length > 0);
     
-    if (data.length > 0) {
+    if (data.length === 0) {
       console.log("No commits needs to be picked.");
       process.exit(0);
     }
