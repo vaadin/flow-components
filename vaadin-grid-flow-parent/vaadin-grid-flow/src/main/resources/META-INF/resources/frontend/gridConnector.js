@@ -750,14 +750,14 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
         const keys = affectedItems.map(item => item.key);
         const {cache:gridCache, scaledIndex} = grid._cache.getCacheAndIndexByKey(pkey);
-        clearSubcache(gridCache,scaledIndex,keys);
+        clearSubcache(gridCache,scaledIndex,keys, index, length);
       });
 
       /*
        * Clears the cache and disassociates the child items in the cells.
        * Based on grid.clearCache().
        */
-      function clearSubcache(cache,scaledIndex,childKeys) {
+      function clearSubcache(cache,scaledIndex,childKeys, index, length) {
         const keySet = new Set(childKeys);
         Array.from(grid.$.items.children)
             .flatMap((row) => Array.from(row.children))
@@ -769,9 +769,18 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
               }
             });
 
-        delete cache.itemCaches[scaledIndex];
-        delete cache.items[scaledIndex];
-        delete cache.itemkeyCaches[scaledIndex];
+        //delete cache.itemCaches[scaledIndex];
+        const end = length + index;
+        const childCache = cache.itemCaches[scaledIndex];
+        for(let itemIndex = index; itemIndex < end; itemIndex++) {
+          //delete cache.items[itemIndex];
+          const key = childCache.items[itemIndex];
+          delete childCache.items[itemIndex];
+          delete childCache.itemCaches[itemIndex];
+          delete childCache.itemkeyCaches[key];
+        }
+        //delete cache.items[scaledIndex];
+        //delete cache.itemkeyCaches[scaledIndex];
         cache.updateSize();
       }
 
