@@ -735,6 +735,10 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         const updatedPageCount = Math.ceil(length / grid.pageSize);
         const firstPage = Math.floor(index / grid.pageSize);
         const pages = generateRange(updatedPageCount).map(i => firstPage + i);
+
+        // Uses cache, so needs to run before deleting
+        const affectedItems = findDescendants(pkey,pages);
+
         for(const page of pages) {
           delete cache[pkey][page];
         }
@@ -745,42 +749,25 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           return;
         }
 
-        const affectedItems = findDescendants(pkey,pages);
         grid.$connector.doDeselection(affectedItems.filter(item => selectedKeys[item.key]));
 
-        const keys = affectedItems.map(item => item.key);
         const {cache:gridCache, scaledIndex} = grid._cache.getCacheAndIndexByKey(pkey);
-        clearSubcache(gridCache,scaledIndex,keys, index, length);
+        clearSubcache(gridCache,scaledIndex, index, length);
       });
 
       /*
-       * Clears the cache and disassociates the child items in the cells.
-       * Based on grid.clearCache().
+       * Deletes items from grid cache, including the descendants of the affected
+       * items.
        */
-      function clearSubcache(cache,scaledIndex,childKeys, index, length) {
-        const keySet = new Set(childKeys);
-        Array.from(grid.$.items.children)
-            .flatMap((row) => Array.from(row.children))
-            .forEach((cell) => {
-              const item = cell._instance && cell._instance.item
-              if(item && keySet.has(item.key)) {
-                // Force data system to pick up subproperty changes
-                cell._instance && cell._instance._setPendingProperty('item', {}, false);
-              }
-            });
-
-        //delete cache.itemCaches[scaledIndex];
+      function clearSubcache(cache,scaledIndex, index, length) {
         const end = length + index;
         const childCache = cache.itemCaches[scaledIndex];
         for(let itemIndex = index; itemIndex < end; itemIndex++) {
-          //delete cache.items[itemIndex];
           const key = childCache.items[itemIndex];
           delete childCache.items[itemIndex];
           delete childCache.itemCaches[itemIndex];
           delete childCache.itemkeyCaches[key];
         }
-        //delete cache.items[scaledIndex];
-        //delete cache.itemkeyCaches[scaledIndex];
         cache.updateSize();
       }
 
