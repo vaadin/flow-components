@@ -763,10 +763,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         const end = length + index;
         const childCache = cache.itemCaches[scaledIndex];
         for(let itemIndex = index; itemIndex < end; itemIndex++) {
-          const key = childCache.items[itemIndex];
           delete childCache.items[itemIndex];
           delete childCache.itemCaches[itemIndex];
-          delete childCache.itemkeyCaches[key];
         }
         cache.updateSize();
       }
