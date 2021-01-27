@@ -726,10 +726,10 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
           pages = pages ? pages:generateRange(parentCache.length);
 
-          return pages.flatMap(currentPage => {
+          return pages.map(currentPage => {
             const items = parentCache[currentPage] || [];
             return items.concat(items.flatMap(item => findDescendants(item.key)));
-          });
+          }).reduce((current, value) => current.concat(value));
         }
 
         const updatedPageCount = Math.ceil(length / grid.pageSize);
@@ -739,9 +739,9 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         // Uses cache, so needs to run before deleting
         const affectedItems = findDescendants(pkey,pages);
 
-        for(const page of pages) {
+        pages.forEach(page => {
           delete cache[pkey][page];
-        }
+        });
 
         // Use grid.clearCache if clearing the root cache.
         if(!parentKey) {
