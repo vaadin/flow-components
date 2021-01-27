@@ -45,7 +45,7 @@ public class TreeGridChildRemovalIT extends AbstractTreeGridIT {
         assertCellTexts(0, 0,
             new String[] { "Root", "child2", "Sub-child2", "child3" });
 
-        // Remove child and refresh "Root" recursively
+        // Remove child2 and refresh "Root" recursively
         $("button").id("remove2").click();
         // Expected result: "child2" and "Sub-child2" are removed. Others unchanged
         assertCellTexts(0, 0, new String[] { "Root", "child3" });
