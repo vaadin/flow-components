@@ -716,46 +716,23 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         if (index % grid.pageSize != 0) {
           throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
         }
-        // Generates an array of integers from 0 to size-1
-        const generateRange = size => [...Array(size).keys()];
 
-        function findDescendants(pkey,pages) {
-          const parentCache = cache[pkey];
+        let firstPage = Math.floor(index / grid.pageSize);
+        let updatedPageCount = Math.ceil(length / grid.pageSize);
 
-          if(!parentCache) return [];
-
-          if(!pages) {
-            // When calling recursively, use all available pages
-            pages = generateRange(parentCache.length);
-          }
-
-          return pages.map(currentPage => {
-            const items = parentCache[currentPage] || [];
-            return items.concat(items.flatMap(item => findDescendants(item.key)));
-          }).reduce((current, value) => current.concat(value));
-        }
-
-        const updatedPageCount = Math.ceil(length / grid.pageSize);
-        const firstPage = Math.floor(index / grid.pageSize);
-        const pages = generateRange(updatedPageCount).map(i => firstPage + i);
-
-        // Uses cache, so needs to run before deleting
-        const affectedItems = findDescendants(pkey,pages);
-
-        pages.forEach(page => {
+        for (let i = 0; i < updatedPageCount; i++) {
+          let page = firstPage + i;
+          let items = cache[pkey][page];
+          grid.$connector.doDeselection(items.filter(item => selectedKeys[item.key]));
           delete cache[pkey][page];
-        });
-
-        // Use grid.clearCache if clearing the root cache.
-        if(!parentKey) {
-          grid.clearCache();
-          return;
+          const updatedItems = updateGridCache(page, parentKey);
+          if (updatedItems) {
+            itemsUpdated(updatedItems);
+          }
+          updateGridItemsInDomBasedOnCache(items);
         }
-
-        grid.$connector.doDeselection(affectedItems.filter(item => selectedKeys[item.key]));
-
-        const {cache:gridCache, scaledIndex} = grid._cache.getCacheAndIndexByKey(pkey);
-        clearSubcache(gridCache,scaledIndex, index, length);
+        const cacheAndIndex = grid._cache.getCacheAndIndexByKey(pkey);
+        clearSubcache(cacheAndIndex.cache, cacheAndIndex.scaledIndex, index, length);
       });
 
       /*
