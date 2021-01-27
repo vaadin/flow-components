@@ -724,7 +724,10 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
           if(!parentCache) return [];
 
-          pages = pages ? pages:generateRange(parentCache.length);
+          if(!pages) {
+            // When calling recursively, use all available pages
+            pages = generateRange(parentCache.length);
+          }
 
           return pages.map(currentPage => {
             const items = parentCache[currentPage] || [];
