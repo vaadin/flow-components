@@ -29,25 +29,16 @@ public class TreeGridChildRemoval extends VerticalLayout {
         td.addItem(root, child3);
         grid.expand(root, child, subChild, child2);
 
-        NativeButton button = new NativeButton("Remove first child", e -> {
-            td.removeItem(child);
-            grid.getDataProvider().refreshItem(root);
-        });
-
-        NativeButton button2 = new NativeButton("Remove 2nd child", e -> {
-            td.removeItem(child2);
-            grid.getDataProvider().refreshItem(root);
-        });
-
         NativeButton buttonR = new NativeButton("Remove recur first child", e -> {
             td.removeItem(child);
             grid.getDataProvider().refreshItem(root, true);
         });
-
+        buttonR.setId("remove1");
         NativeButton buttonR2 = new NativeButton("Remove recur 2nd child", e -> {
             td.removeItem(child2);
             grid.getDataProvider().refreshItem(root, true);
         });
-        add(grid, button, button2, buttonR, buttonR2);
+        buttonR2.setId("remove2");
+        add(grid, buttonR, buttonR2);
     }
 }
