@@ -731,6 +731,22 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           }
           updateGridItemsInDomBasedOnCache(items);
         }
+        let cacheToClear = grid._cache;
+        if(parentKey)  {
+          const cacheAndIndex = grid._cache.getCacheAndIndexByKey(pkey);
+          cacheToClear = cacheAndIndex.cache.itemCaches[cacheAndIndex.scaledIndex];
+        }
+        const endIndex = index + updatedPageCount * grid.pageSize;
+        for(let itemIndex = index; itemIndex < endIndex; itemIndex++) {
+          delete cacheToClear.items[itemIndex];
+          const subcacheToClear = cacheToClear.itemCaches[itemIndex];
+          delete cacheToClear.itemCaches[itemIndex];
+          const itemKeyToRemove = subcacheToClear && subcacheToClear.parentItem.key;
+          if(itemKeyToRemove) {
+            delete cacheToClear.itemkeyCaches[itemKeyToRemove];
+          }
+        }
+        grid._cache.updateSize();
       });
 
       const isSelectedOnGrid = function(item) {
