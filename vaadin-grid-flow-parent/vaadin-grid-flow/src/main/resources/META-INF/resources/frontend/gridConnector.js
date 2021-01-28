@@ -731,23 +731,23 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           }
           updateGridItemsInDomBasedOnCache(items);
         }
-        const cacheAndIndex = parentKey ? grid._cache.getCacheAndIndexByKey(pkey): grid._cache;
-        clearSubcache(cacheAndIndex.cache, cacheAndIndex.scaledIndex, index, length);
-      });
-
-      /*
-       * Deletes items from grid cache, including the descendants of the affected
-       * items.
-       */
-      function clearSubcache(cache,scaledIndex, index, length) {
-        const end = length + index;
-        const childCache = cache.itemCaches[scaledIndex];
-        for(let itemIndex = index; itemIndex < end; itemIndex++) {
-          delete childCache.items[itemIndex];
-          delete childCache.itemCaches[itemIndex];
+        let cacheToClear = grid._cache;
+        if(parentKey)  {
+          const cacheAndIndex = grid._cache.getCacheAndIndexByKey(pkey);
+          cacheToClear = cacheAndIndex.cache.itemCaches[cacheAndIndex.scaledIndex];
         }
-        cache.updateSize();
-      }
+        const endIndex = index + updatedPageCount * grid.pageSize;
+        for(let itemIndex = index; itemIndex < endIndex; itemIndex++) {
+          delete cacheToClear.items[itemIndex];
+          const subcacheToClear = cacheToClear.itemCaches[itemIndex];
+          delete cacheToClear.itemCaches[itemIndex];
+          const itemKeyToRemove = subcacheToClear && subcacheToClear.parentItem.key;
+          if(itemKeyToRemove) {
+            delete cacheToClear.itemkeyCaches[itemKeyToRemove];
+          }
+        }
+        grid._cache.updateSize();
+      });
 
       const isSelectedOnGrid = function(item) {
         const selectedItems = grid.selectedItems;
