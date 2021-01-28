@@ -86,7 +86,7 @@ function filterCommits(commits){
 }
 
 async function cherryPickCommits(){
-  for(let i=arrPR.length-1; i>0; i--){
+  for(let i=arrPR.length-1; i>=0; i--){
     let branchName = `cherry-pick-${arrPR[i]}-to-${arrBranch[i]}-${Date.now()}`;
     
     await exec('git checkout master');
