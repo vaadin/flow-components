@@ -731,7 +731,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           }
           updateGridItemsInDomBasedOnCache(items);
         }
-        const cacheAndIndex = grid._cache.getCacheAndIndexByKey(pkey);
+        const cacheAndIndex = parentKey ? grid._cache.getCacheAndIndexByKey(pkey): grid._cache;
         clearSubcache(cacheAndIndex.cache, cacheAndIndex.scaledIndex, index, length);
       });
 
