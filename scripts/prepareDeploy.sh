@@ -84,7 +84,7 @@ for i in $modules
     ## allow setting modules to build from command line or via env var
     [ -n "$modified" ] || modified=$*
     ## otherwise utilise git history to figure out modified modules
-    [ -n "$modified" ] || modified=`git log $lastTag..HEAD --name-only | egrep '\-flow/|-testbench/|parent/pom.xml' | sed -e 's,-flow-parent.*,,g' | sort -u`
+    [ -n "$modified" ] || modified=`git log $lastTag..HEAD --name-only | egrep '\-flow/|-testbench/|parent/pom.xml' | grep -v 'pull|issue' | sed -e 's,-flow-parent.*,,g' | sort -u`
     modules="$modified"
     echo "Increasing version of the modified modules since last release $lastTag"
     for i in $modules
