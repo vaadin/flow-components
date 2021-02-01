@@ -343,7 +343,7 @@ function logByComponent(commits) {
 // Output the release notes for the set of commits
 function generateReleaseNotes(commits) {
   console.log(`
-## Vaadin ${product} V${version}
+## Vaadin ${product} ${version}
 This is a release of the Java integration for [Vaadin Components](https://github.com/vaadin/vaadin) to be used from the Java server side with [Vaadin Flow](https://vaadin.com/flow).
   `)
 
