@@ -22,7 +22,6 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
-      <version>${flow.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -39,7 +38,6 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-test-generic</artifactId>
-      <version>${flow.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
