@@ -1248,7 +1248,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Grid(Class<T> beanType, boolean autoCreateColumns) {
         this();
-        setBeanType(beanType, autoCreateColumns);
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -3446,14 +3446,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
      */
-    public void setBeanType(Class<T> beanType, boolean autoCreateColumns) {
+    public void configureBeanType(Class<T> beanType, boolean autoCreateColumns) {
         Objects.requireNonNull(beanType, "Bean type can't be null");
         
         if (this.beanType != null) {
-            throw new IllegalStateException("setBeanType can only be called for a Grid without a beanType set");
+            throw new IllegalStateException("configureBeanType can only be called for a Grid without a beanType set");
         }
         if (!this.getColumns().isEmpty()) {
-            throw new IllegalStateException("setBeanType can only be called for a Grid without any columns");
+            throw new IllegalStateException("configureBeanType can only be called for a Grid without any columns");
         }
         this.beanType = beanType;
         propertySet = BeanPropertySet.get(beanType);
