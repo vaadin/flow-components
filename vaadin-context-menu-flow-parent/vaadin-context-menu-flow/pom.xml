@@ -12,21 +12,17 @@
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>flow</artifactId>
-      <version>${flow.version}</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-data</artifactId>
-      <version>${flow.version}</version>
+      <artifactId>flow-server</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-test-generic</artifactId>
-      <version>${flow.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-html-components</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
