@@ -68,8 +68,6 @@ To select which browsers to test, set the `TESTBENCH_GRID_BROWSERS` environment 
 TESTBENCH_GRID_BROWSERS=edge,safari-13,firefox
 ```
 
-
-
 Then run the following command, replacing the `***` with your Sauce Labs credentials.
 
 For testing one component run:
