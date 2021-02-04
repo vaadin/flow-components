@@ -19,6 +19,9 @@
     </properties>
     <dependencies>
     </dependencies>
+    <build>
+        <plugins></plugins>
+    </build>
     <profiles>
         <profile>
             <id>attach-docs</id>
@@ -58,7 +61,7 @@
                                 </manifestEntries>
                             </archive>
                         </configuration>
-                    </plugin>                    
+                    </plugin>
                 </plugins>
             </build>
         </profile>
