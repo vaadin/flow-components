@@ -71,7 +71,26 @@
     </dependency>
   </dependencies>
   <build>
-    <plugins/>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <configuration>
+          <enableGeneration>true</enableGeneration>
+          <includeProjectArtifact>true</includeProjectArtifact>
+        </configuration>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>generate-features-file</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>features-generate-descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
   <profiles>
     <profile>
