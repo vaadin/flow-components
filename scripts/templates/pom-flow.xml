@@ -18,8 +18,7 @@
     <dependencies>
     </dependencies>
     <build>
-        <plugins>
-        </plugins>
+        <plugins></plugins>
     </build>
     <profiles>
         <profile>
@@ -60,7 +59,7 @@
                                 </manifestEntries>
                             </archive>
                         </configuration>
-                    </plugin>                    
+                    </plugin>
                 </plugins>
             </build>
         </profile>
