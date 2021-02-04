@@ -46,6 +46,9 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins/>
+  </build>
   <profiles>
     <profile>
       <id>attach-docs</id>
