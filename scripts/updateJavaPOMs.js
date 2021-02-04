@@ -47,14 +47,21 @@ function setDependenciesVersion(dependencies) {
   return dependencies;
 }
 
+function mergePlugins(build1, build2) {
+  return [
+    ... (build1 && build1[0] && build1[0].plugins && build1[0].plugins[0] && build1[0].plugins[0].plugin || []),
+    ... (build2 && build2[0] && build2[0].plugins && build2[0].plugins[0] && build2[0].plugins[0].plugin || [])
+  ]
+}
+
 async function consolidate(template, pom, cb) {
   const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/${template}`, 'utf8'));
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   await renameBase(tplJs);
-
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
-  cb && cb(tplJs);
+
+  cb && cb(tplJs, pomJs);
 
   const xml = new xml2js.Builder().buildObject(tplJs);
   console.log(`writing ${pom}`);
@@ -71,7 +78,9 @@ async function consolidatePomParent() {
 
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
-  consolidate(template, `${mod}/${name}-flow/pom.xml`);
+  consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
+    tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
+  });
 }
 async function consolidatePomTB() {
   consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
