@@ -119,7 +119,7 @@ async function getLatestBowerVersion(package, version, major, minor) {
 }
 
 async function computeVertionToUpdate(data) {
-  return (data['updatedVersion'] = getLatestNpmVersion(data.package, data.version, data.major, data.minor));
+  return (data['updatedVersion'] = await getLatestNpmVersion(data.package, data.version, data.major, data.minor));
 }
 
 module.exports = {
