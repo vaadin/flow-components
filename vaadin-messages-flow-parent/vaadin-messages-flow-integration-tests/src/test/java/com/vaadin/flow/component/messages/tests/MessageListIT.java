@@ -23,7 +23,7 @@ import com.vaadin.flow.component.messages.testbench.MessageListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-message-list")
+@TestPath("vaadin-messages/message-list-test")
 public class MessageListIT extends AbstractComponentIT {
 
     @Before

@@ -19,7 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-message-list")
+@Route("vaadin-messages/message-list-test")
 public class MessageListPage extends Div {
 
     public MessageListPage() {

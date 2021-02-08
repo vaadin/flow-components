@@ -14,16 +14,7 @@
  * the License.
  *
  */
-
 package com.vaadin.flow.component.messages.tests;
 
-import org.junit.Test;
-
 public class MessageListTest {
-
-    @Test
-    public void test() {
-
-    }
-
 }
