@@ -12,6 +12,7 @@ const exec = util.promisify(require('child_process').exec);
 const replace = require('replace-in-file');
 const {getAnnotations, computeVertionToUpdate} = require('./lib/versions.js');
 
+let exclude=[];
 
 async function updateFiles(moduleData){
   if(moduleData.annotation.length>0){
