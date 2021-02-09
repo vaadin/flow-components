@@ -16,5 +16,44 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
+import java.util.Arrays;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
+
 public class MessageListTest {
+
+    private MessageList messageList;
+    private MessageListItem item1;
+    private MessageListItem item2;
+
+    @Before
+    public void setup() {
+        messageList = new MessageList();
+        item1 = new MessageListItem();
+        item2 = new MessageListItem();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getItems_returnsUnmodifiableList() {
+        messageList.getItems().add(new MessageListItem());
+    }
+
+    @Test
+    public void setItemsCollection_getItems() {
+        messageList.setItems(Arrays.asList(item1, item2));
+        Assert.assertEquals(Arrays.asList(item1, item2),
+                messageList.getItems());
+    }
+
+    @Test
+    public void setItemsVarArgs_getItems() {
+        messageList.setItems(item1, item2);
+        Assert.assertEquals(Arrays.asList(item1, item2),
+                messageList.getItems());
+    }
 }
