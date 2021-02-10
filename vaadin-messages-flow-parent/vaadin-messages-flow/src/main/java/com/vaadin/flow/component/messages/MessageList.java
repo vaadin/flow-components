@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -81,9 +82,15 @@ public class MessageList extends Component implements HasStyle, HasSize {
      * Sets the items that will be rendered as messages in this message list.
      *
      * @param items
-     *            the items to set
+     *            the items to set, not {@code null} and not containing any
+     *            {@code null} items
      */
     public void setItems(Collection<MessageListItem> items) {
+        Objects.requireNonNull(items,
+                "Can't set null item collection to MessageList.");
+        items.forEach(item -> Objects.requireNonNull(item,
+                "Can't include null items in MessageList."));
+
         this.items.forEach(item -> item.setHost(null));
 
         this.items = new ArrayList<>(items);
@@ -95,7 +102,7 @@ public class MessageList extends Component implements HasStyle, HasSize {
      * Sets the items that will be rendered as messages in this message list.
      *
      * @param items
-     *            the items to set
+     *            the items to set, none of which can be {@code null}
      */
     public void setItems(MessageListItem... items) {
         setItems(Arrays.asList(items));

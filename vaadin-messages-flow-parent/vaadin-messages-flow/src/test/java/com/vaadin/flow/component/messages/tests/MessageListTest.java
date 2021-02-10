@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.messages.tests;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,5 +56,15 @@ public class MessageListTest {
         messageList.setItems(item1, item2);
         Assert.assertEquals(Arrays.asList(item1, item2),
                 messageList.getItems());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setItems_nullCollection_throws() {
+        messageList.setItems((Collection<MessageListItem>) null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setItems_containsNullItem_throws() {
+        messageList.setItems(item1, null, item2);
     }
 }
