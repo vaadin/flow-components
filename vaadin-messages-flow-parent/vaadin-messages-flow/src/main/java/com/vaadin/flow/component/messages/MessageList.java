@@ -28,6 +28,8 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JsonUtils;
 
 import elemental.json.JsonArray;
@@ -40,9 +42,10 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-list")
+@JsModule("./messageListConnector.js")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-list.js")
 @NpmPackage(value = "@vaadin/vaadin-messages", version = "1.0.0-alpha1")
-public class MessageList extends Component implements HasStyle, HasSize {
+public class MessageList extends Component implements HasStyle, HasSize, LocaleChangeObserver {
 
     private List<MessageListItem> items = Collections.emptyList();
     private boolean pendingUpdate = false;
@@ -124,9 +127,15 @@ public class MessageList extends Component implements HasStyle, HasSize {
             getElement().getNode().runWhenAttached(
                     ui -> ui.beforeClientResponse(this, ctx -> {
                         JsonArray itemsJson = JsonUtils.listToJson(items);
-                        getElement().setPropertyJson("items", itemsJson);
+                        getElement().executeJs("window.Vaadin.Flow.messageListConnector.setItems(this, $0, $1)",
+                                itemsJson, ui.getLocale().toLanguageTag());
                         pendingUpdate = false;
                     }));
         }
+    }
+
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        scheduleItemsUpdate();
     }
 }
