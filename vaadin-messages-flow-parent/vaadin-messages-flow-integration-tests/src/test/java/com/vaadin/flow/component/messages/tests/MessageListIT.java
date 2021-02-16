@@ -44,7 +44,7 @@ public class MessageListIT extends AbstractComponentIT {
 
         MessageElement msg = messages.get(0);
         Assert.assertEquals("Unexpected text content", "foo", msg.getText());
-        Assert.assertEquals("Unexpected time prop", "2021-01-01T00:00:00Z",
+        Assert.assertEquals("Unexpected time prop", "1 Jan 2021, 01:00",
                 msg.getTime());
         Assert.assertEquals("Unexpected userName prop", "sender",
                 msg.getUserName());
@@ -72,7 +72,7 @@ public class MessageListIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected text content", "foo2", msg.getText());
 
         clickElementWithJs("setTime");
-        Assert.assertEquals("Unexpected time prop", "2000-02-02T02:02:02Z",
+        Assert.assertEquals("Unexpected time prop", "2 Feb 2000, 03:02",
                 msg.getTime());
 
         clickElementWithJs("setUserName");
