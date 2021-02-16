@@ -23,8 +23,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.server.VaadinSession;
+
+import elemental.json.JsonArray;
+import static org.mockito.Mockito.*;
 
 public class MessageListTest {
 
@@ -66,5 +73,32 @@ public class MessageListTest {
     @Test(expected = NullPointerException.class)
     public void setItems_containsNullItem_throws() {
         messageList.setItems(item1, null, item2);
+    }
+
+    @Test
+    public void localeChanged_schedulesItemsUpdate() {
+        SpyMessageList spyMessageList = new SpyMessageList();
+        UI ui = new UI();
+        ui.getInternals().setSession(mock(VaadinSession.class));
+        LocaleChangeEvent localeChangeEvent = new LocaleChangeEvent(ui, ui.getLocale());
+        spyMessageList.localeChange(localeChangeEvent);
+        ui.add(spyMessageList);
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        Element spyElement = spyMessageList.getElement();
+        verify(spyElement).executeJs(eq("window.Vaadin.Flow.messageListConnector.setItems(this, $0, $1)"), any(JsonArray.class), eq(ui.getLocale().toLanguageTag()));
+    }
+
+    static class SpyMessageList extends MessageList {
+
+        private final Element spyElement;
+
+        public SpyMessageList() {
+            spyElement = spy(super.getElement());
+        }
+
+        @Override
+        public Element getElement() {
+            return spyElement;
+        }
     }
 }
