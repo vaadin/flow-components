@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-time-picker/time-picker-it")
@@ -34,6 +35,7 @@ public class TimePickerPage extends Div {
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
+        createTimePickerFromRenderer();
         createHelperText();
         createHelperComponent();
     }
@@ -111,6 +113,16 @@ public class TimePickerPage extends Div {
 
         timePicker.setId("time-picker-min-max");
         add(timePicker, message);
+    }
+
+    private void createTimePickerFromRenderer() {
+        ComponentRenderer<TimePicker, TimePickerPage> renderer = new ComponentRenderer<>(
+            () -> {
+                TimePicker timePicker = new TimePicker();
+                timePicker.setValue(LocalTime.now());
+                return timePicker;
+            });
+        renderer.render(getElement(), null);
     }
 
     private void createHelperText() {
