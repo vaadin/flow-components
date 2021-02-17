@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,10 @@
 
     window.Vaadin.Flow.messageListConnector = {
         setItems: tryCatchWrapper(function (list, items, locale) {
-            const formatter = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short'});
+            const formatter = new Intl.DateTimeFormat(locale, {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: 'numeric', minute: 'numeric'
+            });
             list.items = items.map(item => item.time ? Object.assign(item, {
                 time: formatter.format(new Date(item.time))
             }) : item);
