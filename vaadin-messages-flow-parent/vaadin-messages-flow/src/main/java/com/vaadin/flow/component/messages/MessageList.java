@@ -128,7 +128,9 @@ public class MessageList extends Component
             getElement().getNode().runWhenAttached(
                     ui -> ui.beforeClientResponse(this, ctx -> {
                         JsonArray itemsJson = JsonUtils.listToJson(items);
-                        getElement().executeJs("window.Vaadin.Flow.messageListConnector.setItems(this, $0, $1)",
+                        getElement().executeJs(
+                                "window.Vaadin.Flow.messageListConnector"
+                                        + ".setItems(this, $0, $1)",
                                 itemsJson, ui.getLocale().toLanguageTag());
                         pendingUpdate = false;
                     }));
