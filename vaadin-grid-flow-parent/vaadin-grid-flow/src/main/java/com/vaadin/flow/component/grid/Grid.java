@@ -3100,18 +3100,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable
     private void select(String key) {
-        getSelectionModel().selectFromClient(findByKey(key));
+        T item = findByKey(key);
+        if (item != null) {
+            getSelectionModel().selectFromClient(item);
+        }
     }
 
     @ClientCallable
     private void deselect(String key) {
-        getSelectionModel().deselectFromClient(findByKey(key));
+        T item = findByKey(key);
+        if (item != null) {
+            getSelectionModel().deselectFromClient(item);
+        }
     }
 
     private T findByKey(String key) {
         T item = getDataCommunicator().getKeyMapper().get(String.valueOf(key));
         if (item == null) {
-            throw new IllegalStateException("Unknown key: " + key);
+            LoggerFactory.getLogger(Grid.class)
+                    .warn("Cannot select or deselect with key: " + key
+                            + ". Can be ignored, if this happened due user action while changing dataprovider.");
         }
         return item;
     }
