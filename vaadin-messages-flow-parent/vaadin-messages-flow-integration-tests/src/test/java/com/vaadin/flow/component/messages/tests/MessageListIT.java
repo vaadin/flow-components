@@ -117,4 +117,14 @@ public class MessageListIT extends AbstractComponentIT {
         Assert.assertTrue("Unexpected time prop",
                 msg.getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
     }
+
+    @Test
+    public void reattachElement_messagesRendered() {
+        clickElementWithJs("detachList");
+        clickElementWithJs("attachList");
+
+        List<MessageElement> messages = $(MessageListElement.class).first()
+                .getMessageElements();
+        Assert.assertEquals("Unexpected items count", 2, messages.size());
+    }
 }

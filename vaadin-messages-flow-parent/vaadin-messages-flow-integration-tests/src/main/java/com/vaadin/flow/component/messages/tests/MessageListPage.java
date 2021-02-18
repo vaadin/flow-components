@@ -55,6 +55,9 @@ public class MessageListPage extends Div {
                 .setItems(new MessageListItem(null, null, "sender3")));
 
         addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
+
+        addButton("detachList", () -> remove(messageList));
+        addButton("attachList", () -> addComponentAsFirst(messageList));
     }
 
     private void addButton(String id, Command action) {
