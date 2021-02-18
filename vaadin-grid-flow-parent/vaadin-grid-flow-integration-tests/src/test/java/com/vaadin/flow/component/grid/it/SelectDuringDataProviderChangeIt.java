@@ -22,8 +22,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class SelectDuringDataProviderChangeIt extends AbstractComponentIt {
+public class SelectDuringDataProviderChangeIt extends AbstractComponentIT {
 
     @Test(expected = NoSuchElementException.class)
     public void removeSortableColumn() {
@@ -31,10 +32,12 @@ public class SelectDuringDataProviderChangeIt extends AbstractComponentIt {
         GridElement grid = $(GridElement.class).first();
         ButtonElement button = $(ButtonElement.class).first();
         // Trigger data provider change
+        testBench().disableWaitForVaadin();
         button.click();
         // Click the second row
         grid.getRow(1).click();
         // This is not found as selection event wont be triggered
+        testBench().enableWaitForVaadin();
         findElement(By.id("ready"));
     }
 }
