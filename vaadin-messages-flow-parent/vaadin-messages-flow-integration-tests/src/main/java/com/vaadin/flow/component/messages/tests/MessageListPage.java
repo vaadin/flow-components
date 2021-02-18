@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.messages.tests;
 
 import java.time.Instant;
+import java.util.Locale;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageList;
@@ -28,9 +30,10 @@ import com.vaadin.flow.server.Command;
 public class MessageListPage extends Div {
 
     public MessageListPage() {
+        UI.getCurrent().setLocale(Locale.ENGLISH);
 
         MessageListItem foo = new MessageListItem("foo",
-                Instant.parse("2021-01-01T00:00:00.00Z"), "sender",
+                Instant.parse("2021-01-01T12:00:00.00Z"), "sender",
                 "/test.jpg");
         foo.setUserAbbreviation("AB");
         foo.setUserColorIndex(1);
@@ -42,7 +45,7 @@ public class MessageListPage extends Div {
 
         addButton("setText", () -> foo.setText("foo2"));
         addButton("setTime",
-                () -> foo.setTime(Instant.parse("2000-02-02T02:02:02.00Z")));
+                () -> foo.setTime(Instant.parse("2000-02-02T12:00:00.00Z")));
         addButton("setUserName", () -> foo.setUserName("sender2"));
         addButton("setUserImage", () -> foo.setUserImage("/test2.jpg"));
         addButton("setAbbreviation", () -> foo.setUserAbbreviation("CD"));
@@ -50,6 +53,11 @@ public class MessageListPage extends Div {
 
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));
+
+        addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
+
+        addButton("detachList", () -> remove(messageList));
+        addButton("attachList", () -> addComponentAsFirst(messageList));
     }
 
     private void addButton(String id, Command action) {
