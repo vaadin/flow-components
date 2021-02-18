@@ -44,8 +44,8 @@ public class MessageListIT extends AbstractComponentIT {
 
         MessageElement msg = messages.get(0);
         Assert.assertEquals("Unexpected text content", "foo", msg.getText());
-        Assert.assertEquals("Unexpected time prop", "2021-01-01T00:00:00Z",
-                msg.getTime());
+        Assert.assertTrue("Unexpected time prop",
+                msg.getTime().matches("Jan 1, 2021, [0-9]+:[0-9]+ [A|P]M"));
         Assert.assertEquals("Unexpected userName prop", "sender",
                 msg.getUserName());
         Assert.assertEquals("Unexpected userImage prop", "/test.jpg",
@@ -72,8 +72,8 @@ public class MessageListIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected text content", "foo2", msg.getText());
 
         clickElementWithJs("setTime");
-        Assert.assertEquals("Unexpected time prop", "2000-02-02T02:02:02Z",
-                msg.getTime());
+        Assert.assertTrue("Unexpected time prop",
+                msg.getTime().matches("Feb 2, 2000, [0-9]+:[0-9]+ [A|P]M"));
 
         clickElementWithJs("setUserName");
         Assert.assertEquals("Unexpected userName prop", "sender2",
@@ -107,4 +107,24 @@ public class MessageListIT extends AbstractComponentIT {
                 msg.getUserName());
     }
 
+    @Test
+    public void changeLocale_timeFormatted() {
+        clickElementWithJs("setLocale");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        MessageElement msg = messages.get(0);
+
+        Assert.assertTrue("Unexpected time prop",
+                msg.getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
+    }
+
+    @Test
+    public void reattachElement_messagesRendered() {
+        clickElementWithJs("detachList");
+        clickElementWithJs("attachList");
+
+        List<MessageElement> messages = $(MessageListElement.class).first()
+                .getMessageElements();
+        Assert.assertEquals("Unexpected items count", 2, messages.size());
+    }
 }
