@@ -28,12 +28,13 @@ import com.vaadin.testbench.elementsbase.Element;
 public class MessageInputElement extends TestBenchElement {
 
     /**
-     * Gets the {@code value} property of this element.
+     * Submits a message.
      *
-     * @return the {@code value} property
+     * @param message
+     *            the message
      */
-    public String getValue() {
-        return getPropertyString("value");
+    public void submit(String message) {
+        setProperty("value", message);
+        $("vaadin-button").first().click();
     }
-
 }

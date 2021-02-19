@@ -20,6 +20,8 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -34,10 +36,11 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-input.js")
 @NpmPackage(value = "@vaadin/vaadin-messages", version = "v2.0.0-alpha1")
-public class MessageInput extends Component {
+public class MessageInput extends Component implements HasSize, HasStyle {
 
     /**
-     * The {@code submit} event which is fired by the component.
+     * The {@code submit} event which is fired by {@link MessageInput}
+     * component.
      */
     @DomEvent("submit")
     public static class SubmitEvent extends ComponentEvent<MessageInput> {
@@ -47,9 +50,12 @@ public class MessageInput extends Component {
         /**
          * Creates the event.
          *
-         * @param source     the source component
-         * @param fromClient true if the event comes from the client
-         * @param value      the value of the input
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            true if the event comes from the client
+         * @param value
+         *            the value of the input
          */
         public SubmitEvent(MessageInput source, boolean fromClient,
                 @EventData("event.detail.value") String value) {
@@ -58,9 +64,9 @@ public class MessageInput extends Component {
         }
 
         /**
-         * Gets the value of the input.
+         * Gets the submitted value.
          *
-         * @return the value of the input
+         * @return the submitted value
          */
         public String getValue() {
             return value;
@@ -68,28 +74,14 @@ public class MessageInput extends Component {
     }
 
     /**
-     * Gets the current content of the input field.
-     *
-     * @return the value of the input field
-     */
-    public String getValue() {
-        return getElement().getProperty("value");
-    }
-
-    /**
-     * Sets the value on the input field.
-     *
-     * @param value the value to set on the input field
-     */
-    public void setValue(String value) {
-        getElement().setProperty("value", value);
-    }
-
-    /**
      * Adds a listener that is called when the user submits the value of the
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
+     * <p>
+     * The event is fired when clicking the Send button or pressing the Enter
+     * key.
      *
-     * @param listener the listener
+     * @param listener
+     *            the listener
      * @return registration for removal of the listener
      */
     public Registration addSubmitListener(

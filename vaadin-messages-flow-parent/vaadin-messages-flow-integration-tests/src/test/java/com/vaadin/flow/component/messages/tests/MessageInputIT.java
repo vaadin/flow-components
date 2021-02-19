@@ -18,7 +18,6 @@ package com.vaadin.flow.component.messages.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.html.testbench.InputTextElement;
 import com.vaadin.flow.component.messages.testbench.MessageInputElement;
@@ -38,9 +37,7 @@ public class MessageInputIT extends AbstractComponentIT {
 
     @Test
     public void submitValue_eventHasCorrectValue() {
-        getInShadowRoot(messageInput, By.tagName("vaadin-text-area"))
-                .sendKeys("foo");
-        getInShadowRoot(messageInput, By.tagName("vaadin-button")).click();
+        messageInput.submit("foo");
         Assert.assertEquals("foo",
                 $(InputTextElement.class).id("verify-field").getValue());
     }
