@@ -32,7 +32,7 @@ if (!token) {
 }
 
 async function getAllCommits(){
-  let url = `https://api.github.com/repos/${repo}/pulls?state=closed&per_page=100`;
+  let url = `https://api.github.com/repos/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100`;
   try {
     const options = {
       headers:
@@ -109,7 +109,7 @@ async function cherryPickCommits(){
       await exec(`git cherry-pick --abort`);
       await exec(`git checkout master`);
       await exec(`git branch -D ${branchName}`);
-      await labelCommit(arrURL[i], `need to pick manually`);
+      await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
       await postComment(arrURL[i], arrUser[i], arrBranch[i]);
       console.error(`Cannot Pick the Commit:${arrSHA[i]}, error :${err}`);
       continue;
