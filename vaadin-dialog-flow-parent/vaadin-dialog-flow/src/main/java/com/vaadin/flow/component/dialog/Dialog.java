@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -30,6 +31,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -45,7 +47,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./flow-component-renderer.js")
 @HtmlImport("flow-component-renderer.html")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize {
+        implements HasComponents, HasSize, HasTheme {
 
     private Element template;
     private Element container;
@@ -109,7 +111,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * `resize` event is sent when the user finishes resizing the overlay.
      */
-    @DomEvent("resize") 
+    @DomEvent("resize")
     public static class DialogResizeEvent
             extends ComponentEvent<Dialog> {
 
@@ -427,8 +429,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * means for it to be closed (eg. a button that calls {@link Dialog#close()}).
      * The reason being that a modeless dialog allows user to interact with the
      * interface under it and won't be closed by clicking outside or the ESC key.
-     * 
-     * @param modal 
+     *
+     * @param modal
      *          {@code false} to enable dialog to open as modeless modal,
      *          {@code true} otherwise.
      */
@@ -438,7 +440,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Gets whether component is set as modal or modeless dialog.
-     * 
+     *
      * @return  {@code true} if modal dialog (default),
      *          {@code false} otherwise.
      */
@@ -458,8 +460,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * last position in the case the user closes and opens it again.
      * Reason being that a self attached dialog is removed from the DOM
      * when it's closed and position is not synched.
-     * 
-     * @param draggable 
+     *
+     * @param draggable
      *          {@code true} to enable dragging of the dialog,
      *          {@code false} otherwise
      */
@@ -469,8 +471,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Gets whether dialog is enabled to be dragged or not.
-     * 
-     * @return 
+     *
+     * @return
      *      {@code true} if dragging is enabled,
      *      {@code false} otherwise (default).
      */
@@ -480,10 +482,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Sets whether dialog can be resized by user or not.
-     * 
-     * @param resizable 
+     *
+     * @param resizable
      *          {@code true} to enabled resizing of the dialog,
-     *          {@code false} otherwise. 
+     *          {@code false} otherwise.
      */
     public void setResizable(boolean resizable) {
         getElement().setProperty("resizable", resizable);
@@ -491,7 +493,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Gets whether dialog is enabled to be resized or not.
-     * 
+     *
      * @return
      *      {@code true} if resizing is enabled,
      *      {@code falsoe} otherwiser (default).
@@ -621,6 +623,33 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     public Registration addDetachListener(
             ComponentEventListener<DetachEvent> listener) {
         return super.addDetachListener(listener);
+    }
+
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(DialogVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants)
+                        .map(DialogVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(DialogVariant... variants) {
+        getThemeNames()
+                .removeAll(Stream.of(variants)
+                        .map(DialogVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     private void setDimension(String dimension, String value) {
