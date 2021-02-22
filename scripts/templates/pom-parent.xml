@@ -17,7 +17,6 @@
     <modules>
         <module>component-flow</module>
         <module>component-testbench</module>
-        <module>component-flow-demo</module>
     </modules>
 
     <profiles>
