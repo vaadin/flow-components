@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.webjars.bowergithub.vaadin</groupId>
       <artifactId>vaadin-grid</artifactId>
-      <version>5.7.8</version>
+      <version>5.7.9</version>
     </dependency>
     <dependency>
       <groupId>org.webjars.bowergithub.vaadin</groupId>
