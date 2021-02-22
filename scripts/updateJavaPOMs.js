@@ -86,7 +86,8 @@ async function consolidatePomTB() {
   consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
 }
 async function consolidatePomDemo() {
-  await consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
+  const demoPom = `${mod}/${name}-flow-demo/pom.xml`;
+  fs.existsSync(demoPom) && consolidate('pom-demo.xml', demoPom);
 }
 async function consolidatePomIT() {
   consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
