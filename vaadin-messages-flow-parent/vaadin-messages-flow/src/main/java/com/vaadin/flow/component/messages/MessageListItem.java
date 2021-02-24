@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -266,6 +267,7 @@ public class MessageListItem implements Serializable {
         this.host = host;
     }
 
+    @JsonIgnore
     MessageList getHost() {
         return host;
     }
