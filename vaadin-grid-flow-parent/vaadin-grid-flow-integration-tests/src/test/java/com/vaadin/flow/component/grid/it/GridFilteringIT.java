@@ -21,8 +21,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
+import static com.vaadin.flow.component.grid.it.GridFilteringPage.GRID_FILTER_ID;
+import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABLE_GRID_ID;
 
 @TestPath("vaadin-grid/grid-filtering")
 public class GridFilteringIT extends AbstractComponentIT {
@@ -52,5 +57,45 @@ public class GridFilteringIT extends AbstractComponentIT {
                 .toString().equals("3"));
 
         waitUntil(driver -> "false".equals(grid.getAttribute("loading")));
+    }
+
+    @Test // for https://github.com/vaadin/flow/issues/9988
+    public void lazyLoadingFiltering_filterAppliedAfterScrolling_gridItemsFilteredAndRenderedProperly() {
+        open();
+
+        // wait for grid to be loaded
+        waitUntil(driver -> $(GridElement.class).id(LAZY_FILTERABLE_GRID_ID)
+                .getRowCount() > 0);
+
+        GridElement gridElement = $(GridElement.class)
+                .id(LAZY_FILTERABLE_GRID_ID);
+
+        // Scroll down and trigger the next backend call
+        gridElement.scrollToRow(125);
+
+        TextFieldElement filter = $(TextFieldElement.class).id(GRID_FILTER_ID);
+
+        // Apply external filter to reduce items count
+        filter.sendKeys("123", Keys.ENTER);
+
+        // Verify the grid contains only a filtered item
+        waitUntil(driver -> gridElement.getRowCount() == 1
+                && gridElement.getRow(0).getCell(gridElement.getColumn("Items"))
+                        .getInnerHTML().equals("Item 123"));
+
+        // No errors in browser logs
+        checkLogsForErrors();
+
+        // Remove the filter
+        filter.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE,
+                Keys.ENTER);
+
+        // Verify that the filter has been removed in the grid
+        waitUntil(driver -> gridElement.getRowCount() > 1
+                && gridElement.getRow(0).getCell(gridElement.getColumn("Items"))
+                        .getInnerHTML().equals("Item 0"));
+
+        // No errors in browser logs after filter removal
+        checkLogsForErrors();
     }
 }

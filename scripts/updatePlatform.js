@@ -120,8 +120,8 @@ async function main() {
   await run(`git pull origin ${branch}`);
 
   const json = JSON.parse(fs.readFileSync('./versions.json', 'utf-8'));
-  const byName = await ['core', 'vaadin'].reduce(async (prev, k) => {
-    await Object.keys(json[k]).filter(async pkg => await json[k][pkg].npmName || json[k][pkg].javaVersion).map(async pkg => {
+  const byName = ['core', 'vaadin'].reduce((prev, k) => {
+      Object.keys(json[k]).filter(pkg => (json[k][pkg].npmName || json[k][pkg].javaVersion) && pkg !== 'vaadin-core' ).map(pkg => {
       const version = json[k][pkg].javaVersion;
       const branch = version && version.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
       prev[pkg] = prev[pkg] || {};

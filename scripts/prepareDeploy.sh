@@ -13,8 +13,10 @@ getLatest() {
 
    stable=`echo "$releases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | tail -1`
    [ -n "$stable" ] && echo $stable && return
-   pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | grep 'alpha|beta|rc'`
-   [ -n "$pre" ] && echo $pre || echo "$2"
+   pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | egrep 'alpha|beta|rc' | tail -1`
+   [ -z "$pre" ] && pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | egrep 'alpha|beta|rc' | tail -1`
+   [ -z "$pre" ] && pre="$2"
+   expr "$pre" : ".*SNAPSHOT" >/dev/null && echo "Releases cannot depend on SNAPSHOT: $1 - $pre" && exit 1 || echo $pre
 }
 
 getPlatformVersion() {
@@ -50,7 +52,7 @@ pomBase=`getBaseVersion $pomVersion`
 
 ### Load versions file for this platform release
 branch=$versionBase
-[ $branch = "19.0" ] && branch=master
+[ $branch = "20.0" ] && branch=master
 versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 [ $? != 0 ] && branch=master && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
@@ -103,7 +105,9 @@ echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile
 build=.,vaadin-flow-components-shared
 for i in $modules
 do
-  [ -d "$i" -o -d "$i-flow-parent" ] && build=$build,$i-flow-parent,$i-flow-parent/$i-flow,$i-flow-parent/$i-testbench,$i-flow-parent/$i-flow-demo
+  [ -d "$i" -o -d "$i-flow-parent" ] \
+    && build=$build,$i-flow-parent,$i-flow-parent/$i-flow,$i-flow-parent/$i-testbench \
+    && [ -d "$i-flow-parent/$i-flow-demo" ] && build=$build,$i-flow-parent/$i-flow-demo
 done
 
 ## Inform TC about computed parameters

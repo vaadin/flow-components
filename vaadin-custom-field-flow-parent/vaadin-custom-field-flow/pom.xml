@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-custom-field-flow-parent</artifactId>
-    <version>19.0-SNAPSHOT</version>
+    <version>20.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-custom-field-flow</artifactId>
   <packaging>jar</packaging>
@@ -18,18 +18,6 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-html-components</artifactId>
-      <version>${flow.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-data</artifactId>
-      <version>${flow.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -55,8 +43,7 @@
     </dependency>
   </dependencies>
   <build>
-    <plugins>
-        </plugins>
+    <plugins/>
   </build>
   <profiles>
     <profile>
