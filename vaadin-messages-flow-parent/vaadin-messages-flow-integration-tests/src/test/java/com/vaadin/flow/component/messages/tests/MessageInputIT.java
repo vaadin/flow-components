@@ -41,4 +41,22 @@ public class MessageInputIT extends AbstractComponentIT {
         Assert.assertEquals("foo",
                 $(InputTextElement.class).id("verify-field").getValue());
     }
+
+    @Test
+    public void setEnabledFalse_elementHasDisabledAttribute() {
+        clickElementWithJs("toggle-enabled");
+        Assert.assertTrue(messageInput.hasAttribute("disabled"));
+    }
+
+    @Test
+    public void setEnabledFalse_removeDisabledAtClientSide_submit_ignoredAtServerSide() {
+        clickElementWithJs("toggle-enabled");
+
+        messageInput.setProperty("disabled", false);
+
+        messageInput.submit("foo");
+        Assert.assertEquals(
+                "The event shouldn't have fired on a disabled component", "",
+                $(InputTextElement.class).id("verify-field").getValue());
+    }
 }
