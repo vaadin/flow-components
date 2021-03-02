@@ -15,28 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -124,11 +102,31 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Server-side component for the {@code <vaadin-grid>} element.
@@ -3102,26 +3100,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable
     private void select(String key) {
-        T item = findByKey(key);
-        if (item != null) {
-            getSelectionModel().selectFromClient(item);
-        }
+        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::selectFromClient);
     }
 
     @ClientCallable
     private void deselect(String key) {
-        T item = findByKey(key);
-        if (item != null) {
-            getSelectionModel().deselectFromClient(item);
-        }
+        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::deselectFromClient);
     }
 
-    private T findByKey(String key) {
-        T item = getDataCommunicator().getKeyMapper().get(String.valueOf(key));
-        if (item == null) {
+    private Optional<T> findByKey(String key) {
+        Objects.requireNonNull(key);
+        Optional<T> item = Optional.ofNullable(getDataCommunicator().getKeyMapper().get(key));
+        if (!item.isPresent()) {
             LoggerFactory.getLogger(Grid.class)
-                    .warn("Cannot select or deselect with key: " + key
-                            + ". Can be ignored, if this happened due user action while changing dataprovider.");
+                    .debug("Key not found: %s. "
+                            + "This can happen due to user action while changing"
+                            + " the data provider.", key);
+            //TODO Remove
+            throw new IllegalStateException("Unknown key: " + key);
         }
         return item;
     }
@@ -3141,8 +3137,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (key == null) {
             detailsManager.setDetailsVisibleFromClient(Collections.emptySet());
         } else {
-            detailsManager.setDetailsVisibleFromClient(Collections
-                    .singleton(getDataCommunicator().getKeyMapper().get(key)));
+            findByKey(key)
+                .map(Collections::singleton)
+                .ifPresent(detailsManager::setDetailsVisibleFromClient);
         }
     }
 
@@ -3219,7 +3216,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param order
      *            sort order to be set to Grid.
      * @param userOriginated
@@ -3300,7 +3297,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param userOriginated
      *            <code>true</code> if the sorting changes as a result of user
      *            interaction, <code>false</code> if changed by Grid API call.

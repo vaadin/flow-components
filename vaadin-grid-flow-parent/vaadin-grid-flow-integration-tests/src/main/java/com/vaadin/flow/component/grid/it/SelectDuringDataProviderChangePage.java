@@ -19,9 +19,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("select-during-data-provider-change")
+@Route("vaadin-grid/select-during-data-provider-change")
 public class SelectDuringDataProviderChangePage extends VerticalLayout {
     private final Grid<Item> grid = new Grid<>();
     private final Button btn = new Button("Set items");
@@ -36,21 +37,22 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
         grid.addSelectionListener(event -> {
             Span span = new Span("selected: "+grid.getSelectedItems().size());
             span.setId("ready");
-            add(span);            
+            add(span);
         });
-
+        grid.setItemDetailsRenderer(
+            TemplateRenderer.<Item>of("<div></div>").withProperty("id",i->1));
         add(grid, btn);
     }
 
     private void setItems() {
+        grid.setItems(new Item("TEST1"), new Item("TEST2"));
         try {
             // Simulate heavy work
             Thread.sleep(3000);
         } catch (final InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
-        grid.setItems(new Item("TEST1"), new Item("TEST2"));
     }
 
     public class Item {
