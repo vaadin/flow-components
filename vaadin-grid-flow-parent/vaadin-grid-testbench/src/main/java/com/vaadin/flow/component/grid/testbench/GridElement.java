@@ -15,16 +15,15 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid&gt;</code> element.
@@ -280,7 +279,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Finds the vaadin-grid-cell-content element for the given row and column
      * in header.
-     * 
+     *
      * @param rowIndex
      *            the index of the row in the header
      * @param columnIndex
@@ -371,7 +370,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Deselects the row with the given index.
      *
-     * @param rowIndex
+     * @param row
      *            the row to deselect
      */
     void deselect(GridTRElement row) {
@@ -388,7 +387,10 @@ public class GridElement extends TestBenchElement {
     }
 
     private void removeActiveItem(GridTRElement row) {
-        executeScript("if(arguments[0].activeItem == arguments[1]._item) { arguments[0].activeItem=null;}", this, row);
+        final String JS_DEACTIVATE_IF_ACTIVE =
+            "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
+                + "arguments[1]._item)) { arguments[0].activeItem=null;}";
+        executeScript(JS_DEACTIVATE_IF_ACTIVE, this, row);
     }
 
     /**
