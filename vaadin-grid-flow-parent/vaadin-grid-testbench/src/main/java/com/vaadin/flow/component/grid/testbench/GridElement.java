@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid&gt;</code> element.
@@ -279,7 +280,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Finds the vaadin-grid-cell-content element for the given row and column
      * in header.
-     *
+     * 
      * @param rowIndex
      *            the index of the row in the header
      * @param columnIndex
