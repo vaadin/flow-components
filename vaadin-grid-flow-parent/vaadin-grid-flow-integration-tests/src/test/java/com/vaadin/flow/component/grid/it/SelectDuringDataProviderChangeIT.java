@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 @TestPath("vaadin-grid/select-during-data-provider-change")
 public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
 
-    //TODO @Test
+    @Test
     public void selectionDuringDataProviderChangeShouldNotCauseException()
         throws InterruptedException {
         open();
@@ -43,27 +43,19 @@ public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
         open();
         GridElement grid = $(GridElement.class).first();
         GridTRElement row = grid.getRow(1);
-        row.getCell(grid.getAllColumns().get(0)).click();
-        verifySelectionChangeDoesNotCauseError(()->
-            getCommandExecutor().executeScript("arguments[0].deselectItem(arguments[0].activeItem)",grid, row));
+        row.select();
+        verifySelectionChangeDoesNotCauseError(row::deselect);
     }
 
     private void verifySelectionChangeDoesNotCauseError(Runnable changeSelection)
         throws InterruptedException {
         ButtonElement button = $(ButtonElement.class).first();
-        // Trigger data provider change
         testBench().disableWaitForVaadin();
+        // Trigger data provider change
         button.click();
-        // Click the second row
+        // Change row selection
         changeSelection.run();
-        getCommandExecutor().executeScript("console.log('Grid.activeItem',document.querySelector('vaadin-grid').activeItem)");
-        GridElement grid = $(GridElement.class).first();
-        GridTRElement row = grid.getRow(1);
-        getCommandExecutor().executeScript("arguments[0].deselectItem(arguments[0].activeItem)",grid, row);
-        getCommandExecutor().executeScript("console.log('Grid.activeItem',arguments[0].activeItem,arguments[1]._item,arguments[0].activeItem == arguments[1]._item)",grid, row);
-        // This is not found as selection event wont be triggered
         testBench().enableWaitForVaadin();
         checkLogsForErrors();
-
     }
 }
