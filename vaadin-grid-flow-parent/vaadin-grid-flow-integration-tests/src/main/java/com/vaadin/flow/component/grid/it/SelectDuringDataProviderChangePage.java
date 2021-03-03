@@ -44,7 +44,7 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
             // Simulate heavy work
             Thread.sleep(3000);
         } catch (final InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); //NOSONAR
         }
 
     }
