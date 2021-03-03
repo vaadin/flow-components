@@ -25,6 +25,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.StreamResource;
 
 @Route("vaadin-messages/message-list-test")
 public class MessageListPage extends Div {
@@ -58,6 +59,14 @@ public class MessageListPage extends Div {
 
         addButton("detachList", () -> remove(messageList));
         addButton("attachList", () -> addComponentAsFirst(messageList));
+
+        addButton("setImageAsStreamResource", () -> {
+            StreamResource resource = new StreamResource("message-list-img",
+                    () -> getClass().getResourceAsStream(
+                            "/META-INF/resources/frontend/images/avatar.png"));
+            foo.setUserImageResource(resource);
+        });
+
     }
 
     private void addButton(String id, Command action) {
