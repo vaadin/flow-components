@@ -371,7 +371,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Deselects the row with the given index.
      *
-     * @param rowIndex
+     * @param row
      *            the row to deselect
      */
     void deselect(GridTRElement row) {
@@ -388,7 +388,10 @@ public class GridElement extends TestBenchElement {
     }
 
     private void removeActiveItem(GridTRElement row) {
-        executeScript("if(arguments[0].activeItem == arguments[1]._item) { arguments[0].activeItem=null;}", this, row);
+        final String JS_DEACTIVATE_IF_ACTIVE =
+            "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
+                + "arguments[1]._item)) { arguments[0].activeItem=null;}";
+        executeScript(JS_DEACTIVATE_IF_ACTIVE, this, row);
     }
 
     /**
