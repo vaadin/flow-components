@@ -15,22 +15,18 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.flow.testutil.TestPath;
-import org.junit.Test;
-
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import java.util.function.Consumer;
+import org.junit.Test;
 
 @TestPath("vaadin-grid/select-during-data-provider-change")
 public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
 
     @Test
-    public void selectionDuringDataProviderChangeShouldNotCauseException()
-        throws InterruptedException {
+    public void selectionDuringDataProviderChangeShouldNotCauseException() {
         open();
         GridElement grid = $(GridElement.class).first();
         GridTRElement row = grid.getRow(1);
@@ -38,8 +34,7 @@ public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
     }
 
     @Test
-    public void deselectionDuringDataProviderChangeShouldNotCauseException()
-        throws InterruptedException {
+    public void deselectionDuringDataProviderChangeShouldNotCauseException() {
         open();
         GridElement grid = $(GridElement.class).first();
         GridTRElement row = grid.getRow(1);
@@ -47,8 +42,8 @@ public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
         verifySelectionChangeDoesNotCauseError(row::deselect);
     }
 
-    private void verifySelectionChangeDoesNotCauseError(Runnable changeSelection)
-        throws InterruptedException {
+    private void verifySelectionChangeDoesNotCauseError(
+        Runnable changeSelection) {
         ButtonElement button = $(ButtonElement.class).first();
         testBench().disableWaitForVaadin();
         // Trigger data provider change
