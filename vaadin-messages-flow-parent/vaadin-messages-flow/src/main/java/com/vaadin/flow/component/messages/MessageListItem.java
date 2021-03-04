@@ -16,13 +16,24 @@
 package com.vaadin.flow.component.messages;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
+import com.vaadin.flow.internal.NodeOwner;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Item to render as a message component inside a {@link MessageList}.
@@ -41,6 +52,11 @@ public class MessageListItem implements Serializable {
     private String userAbbreviation;
     private String userImage;
     private Integer userColorIndex;
+
+    private StreamRegistration resourceRegistration;
+    private Registration pendingRegistration;
+    private Command pendingHandle;
+    private AbstractStreamResource imageResource;
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -210,6 +226,10 @@ public class MessageListItem implements Serializable {
 
     /**
      * Gets the URL to the message sender's image.
+     * <p>
+     * If the image is set as a stream resource with
+     * {@link MessageListItem#setUserImageResource(AbstractStreamResource)},
+     * this method will return a URL that is generated for that resource.
      *
      * @return the URL to the message sender's image, or {@code null} if none is
      *         set
@@ -222,12 +242,17 @@ public class MessageListItem implements Serializable {
     /**
      * Sets the URL to the message sender's image. The image be displayed in an
      * avatar in the message component.
+     * <p>
+     * Setting the image with this method resets the image resource provided
+     * with {@link MessageListItem#setUserImageResource(AbstractStreamResource)}
      *
      * @param userImage
      *            the URL to the message sender's image, or {@code null} to
      *            remove the image
+     * @see MessageListItem#setUserImageResource(AbstractStreamResource)
      */
     public void setUserImage(String userImage) {
+        unsetResource();
         this.userImage = userImage;
         propsChanged();
     }
@@ -257,6 +282,136 @@ public class MessageListItem implements Serializable {
         propsChanged();
     }
 
+    /**
+     * Gets the image resource of the message sender's avatar.
+     *
+     * @return the image resource value, or {@code null} if the image has not
+     *         been set, or if the image is set with a URL by using
+     *         {@link MessageListItem#setUserImage(String)}
+     */
+    @JsonIgnore
+    public AbstractStreamResource getUserImageResource() {
+        return imageResource;
+    }
+
+    /**
+     * Sets the image for the message sender's avatar.
+     * <p>
+     * Setting the image as a resource with this method overrides the image URL
+     * set with {@link MessageListItem#setUserImage(String)}.
+     *
+     * @param resource
+     *            the image resource, or {@code null} to remove the resource
+     * @see MessageListItem#setUserImage(String)
+     */
+    public void setUserImageResource(AbstractStreamResource resource) {
+        imageResource = resource;
+
+        if (resource == null) {
+            unsetResource();
+            return;
+        }
+
+        // The following is the copy of functionality from the
+        // ElementAttributeMap and AvatarGroupItem.
+        doSetResource(resource);
+        if (getHost() != null
+                && getHost().getElement().getNode().isAttached()) {
+            registerResource(resource);
+        } else {
+            deferRegistration(resource);
+        }
+        propsChanged();
+    }
+
+    private void doSetResource(AbstractStreamResource resource) {
+        final URI targetUri;
+        if (VaadinSession.getCurrent() != null) {
+            final StreamResourceRegistry resourceRegistry = VaadinSession
+                    .getCurrent().getResourceRegistry();
+            targetUri = resourceRegistry.getTargetURI(resource);
+        } else {
+            targetUri = StreamResourceRegistry.getURI(resource);
+        }
+        this.userImage = targetUri.toASCIIString();
+    }
+
+    private void unregisterResource() {
+        StreamRegistration registration = resourceRegistration;
+        Registration handle = pendingRegistration;
+        if (handle != null) {
+            handle.remove();
+        }
+        if (registration != null) {
+            registration.unregister();
+        }
+        this.userImage = null;
+    }
+
+    private void deferRegistration(AbstractStreamResource resource) {
+        if (pendingRegistration != null) {
+            return;
+        }
+
+        pendingHandle = () -> {
+            doSetResource(resource);
+            registerResource(resource);
+        };
+
+        if (getHost() != null) {
+            attachPendingRegistration(pendingHandle);
+            pendingHandle = null;
+        }
+    }
+
+    private void attachPendingRegistration(Command pendingHandle) {
+        if (getHost().getElement().getNode().isAttached()) {
+            pendingHandle.execute();
+            return;
+        }
+        Registration handle = getHost().getElement().getNode()
+                // Do not convert to lambda
+                .addAttachListener(pendingHandle);
+        pendingRegistration = handle;
+    }
+
+    private void registerResource(AbstractStreamResource resource) {
+        assert resourceRegistration == null;
+        StreamRegistration registration = getSession().getResourceRegistry()
+                .registerResource(resource);
+        resourceRegistration = registration;
+        Registration handle = pendingRegistration;
+        if (handle != null) {
+            handle.remove();
+        }
+        pendingRegistration = getHost().getElement().getNode()
+                .addDetachListener(
+                        // Do not convert to lambda
+                        new Command() {
+                            @Override
+                            public void execute() {
+                                MessageListItem.this.unsetResource();
+                            }
+                        });
+    }
+
+    private void unsetResource() {
+        imageResource = null;
+        StreamRegistration registration = resourceRegistration;
+        Optional<AbstractStreamResource> resource = Optional.empty();
+        if (registration != null) {
+            resource = Optional.ofNullable(registration.getResource());
+        }
+        unregisterResource();
+        resource.ifPresent(this::deferRegistration);
+    }
+
+    private VaadinSession getSession() {
+        NodeOwner owner = getHost().getElement().getNode().getOwner();
+        assert owner instanceof StateTree;
+        return ((StateTree) owner).getUI().getSession();
+    }
+
     private void propsChanged() {
         if (getHost() != null) {
             getHost().scheduleItemsUpdate();
@@ -265,6 +420,10 @@ public class MessageListItem implements Serializable {
 
     void setHost(MessageList host) {
         this.host = host;
+        if (pendingHandle != null) {
+            attachPendingRegistration(pendingHandle);
+            pendingHandle = null;
+        }
     }
 
     @JsonIgnore
