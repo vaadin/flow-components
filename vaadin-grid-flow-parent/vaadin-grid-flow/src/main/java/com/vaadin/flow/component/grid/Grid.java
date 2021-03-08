@@ -115,6 +115,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server-side component for the {@code <vaadin-grid>} element.
@@ -2955,18 +2956,22 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     @ClientCallable
     private void select(String key) {
-        getSelectionModel().selectFromClient(findByKey(key));
+        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::selectFromClient);
     }
 
     @ClientCallable
     private void deselect(String key) {
-        getSelectionModel().deselectFromClient(findByKey(key));
+        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::deselectFromClient);
     }
 
-    private T findByKey(String key) {
-        T item = getDataCommunicator().getKeyMapper().get(String.valueOf(key));
-        if (item == null) {
-            throw new IllegalStateException("Unknown key: " + key);
+    private Optional<T> findByKey(String key) {
+        Objects.requireNonNull(key);
+        Optional<T> item = Optional.ofNullable(getDataCommunicator().getKeyMapper().get(key));
+        if (!item.isPresent()) {
+            LoggerFactory.getLogger(Grid.class)
+                    .debug("Key not found: %s. "
+                            + "This can happen due to user action while changing"
+                            + " the data provider.", key);
         }
         return item;
     }
@@ -2986,8 +2991,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (key == null) {
             detailsManager.setDetailsVisibleFromClient(Collections.emptySet());
         } else {
-            detailsManager.setDetailsVisibleFromClient(Collections
-                    .singleton(getDataCommunicator().getKeyMapper().get(key)));
+            findByKey(key)
+                .map(Collections::singleton)
+                .ifPresent(detailsManager::setDetailsVisibleFromClient);
         }
     }
 
