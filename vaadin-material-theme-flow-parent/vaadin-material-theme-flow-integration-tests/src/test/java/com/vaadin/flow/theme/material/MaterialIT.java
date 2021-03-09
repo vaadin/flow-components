@@ -1,4 +1,4 @@
 package com.vaadin.flow.theme.material;
-public class MateriallIT {
+public class MaterialIT {
   
 }
