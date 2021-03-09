@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-notification-flow-parent</artifactId>
-    <version>19.0-SNAPSHOT</version>
+    <version>20.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-notification-flow</artifactId>
   <packaging>jar</packaging>
@@ -18,21 +18,17 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>flow</artifactId>
-      <version>${flow.version}</version>
-      <type>pom</type>
+      <artifactId>flow-server</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-test-generic</artifactId>
-      <version>${flow.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-test-util</artifactId>
-      <version>${flow.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -42,8 +38,7 @@
     </dependency>
   </dependencies>
   <build>
-    <plugins>
-        </plugins>
+    <plugins/>
   </build>
   <profiles>
     <profile>

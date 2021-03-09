@@ -61,10 +61,16 @@ async function createPom() {
     const id = name.replace('-flow-parent', '');
     // Add component-flow and component-testbench dependencies
     const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
-    addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
-    addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
-    // Read original IT dependencies in master and add them
-    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'))
+
+    if (fs.existsSync(`${name}/${id}-flow/pom.xml`)) {
+      const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow/pom.xml`, 'utf8'));
+      addDependency(prev, 'com.vaadin', js.project.artifactId[0], `${componentVersion}`);
+    }
+    if (fs.existsSync(`${name}/${id}-testbench/pom.xml`)) {
+      addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
+    }
+    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'));
+    // Read original IT dependencies of module
     js.project.dependencies[0].dependency.forEach(dep => {
       addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0]);
     });

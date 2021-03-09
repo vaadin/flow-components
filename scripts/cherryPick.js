@@ -22,6 +22,7 @@ let arrTitle = [];
 let arrURL = [];
 let arrSHA = [];
 let arrBranch = [];
+let arrUser = [];
 
 const repo = "vaadin/vaadin-flow-components";
 const token = process.env['GITHUB_TOKEN'];
@@ -31,7 +32,7 @@ if (!token) {
 }
 
 async function getAllCommits(){
-  let url = `https://api.github.com/repos/${repo}/pulls?state=closed&per_page=100`;
+  let url = `https://api.github.com/repos/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100`;
   try {
     const options = {
       headers:
@@ -65,7 +66,7 @@ function filterCommits(commits){
       if(label.name.includes("target/")){
         target = true;
       }
-      if(label.name.includes("cherry-picked")){
+      if(label.name.includes("cherry-picked") || label.name.includes("need to pick manually")){
         picked = true;
       }
     }
@@ -73,12 +74,13 @@ function filterCommits(commits){
       commit.labels.forEach(label => {
         let branch = /target\/(.*)/.exec(label.name);
         if (branch){
-          console.log(commit.number, commit.url, commit.merge_commit_sha, branch[1]);
+          console.log(commit.number, commit.user.login, commit.url, commit.merge_commit_sha, branch[1]);
           arrPR.push(commit.number);
           arrSHA.push(commit.merge_commit_sha);
           arrURL.push(commit.url);
           arrBranch.push(branch[1]);
           arrTitle.push(`${commit.title} (#${commit.number}) (CP: ${branch[1]})`);
+          arrUser.push(`@${commit.user.login}`);
         }
       })
     }
@@ -86,7 +88,7 @@ function filterCommits(commits){
 }
 
 async function cherryPickCommits(){
-  for(let i=0; i<arrPR.length; i++){
+  for(let i=arrPR.length-1; i>=0; i--){
     let branchName = `cherry-pick-${arrPR[i]}-to-${arrBranch[i]}-${Date.now()}`;
     
     await exec('git checkout master');
@@ -104,12 +106,13 @@ async function cherryPickCommits(){
     try{
       let {stdout, stderr} = await exec(`git cherry-pick ${arrSHA[i]}`);
     } catch (err) {
-      await exec(`git reset`);
+      await exec(`git cherry-pick --abort`);
       await exec(`git checkout master`);
       await exec(`git branch -D ${branchName}`);
-      await labelCommit(arrURL[i], `need to pick manually`);
+      await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
+      await postComment(arrURL[i], arrUser[i], arrBranch[i]);
       console.error(`Cannot Pick the Commit:${arrSHA[i]}, error :${err}`);
-      process.exit(1);
+      continue;
     }
     await exec(`git push origin HEAD:${branchName}`);
     
@@ -130,6 +133,18 @@ async function labelCommit(url, label){
   };
   
   await axios.post(issueURL, {"labels":[label]}, options);
+}
+
+async function postComment(url, userName, branch){
+  let issueURL = url.replace("pulls", "issues") + "/comments";
+  const options = {
+    headers:{
+      'User-Agent': 'Vaadin Cherry Pick',
+      'Authorization': `token ${token}`,
+    }
+  };
+
+  await axios.post(issueURL, {"body":`Hi ${userName} , this commit cannot be picked to ${branch} by this bot, can you take a look and pick it manually?`}, options);
 }
 
 async function createPR(title, head, base){

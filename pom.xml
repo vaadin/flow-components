@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>vaadin-flow-components</artifactId>
-  <version>19.0-SNAPSHOT</version>
+  <version>20.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Vaadin Flow Components Root Project</name>
   <parent>
@@ -32,7 +32,7 @@
     <failIfNoTests>false</failIfNoTests>
     <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
     <powermock.version>1.7.1</powermock.version>
-    <jackson.version>2.9.10.4</jackson.version>
+    <jackson.version>2.11.2</jackson.version>
     <sauce-connect.version>2.1.25</sauce-connect.version>
     <ci-sauce.version>1.149</ci-sauce.version>
     <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
@@ -49,6 +49,8 @@
     <osgi.vaadin.package.version>1</osgi.vaadin.package.version>
   </properties>
   <modules>
+    <module>vaadin-lumo-theme-flow-parent</module>
+    <module>vaadin-material-theme-flow-parent</module>
     <module>vaadin-flow-components-shared</module>
     <module>vaadin-accordion-flow-parent</module>
     <module>vaadin-avatar-flow-parent</module>
@@ -69,6 +71,7 @@
     <module>vaadin-list-box-flow-parent</module>
     <module>vaadin-login-flow-parent</module>
     <module>vaadin-menu-bar-flow-parent</module>
+    <module>vaadin-messages-flow-parent</module>
     <module>vaadin-notification-flow-parent</module>
     <module>vaadin-ordered-layout-flow-parent</module>
     <module>vaadin-progress-bar-flow-parent</module>
@@ -616,7 +619,7 @@
       <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-lumo-theme</artifactId>
-        <version>${flow.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.vaadin</groupId>

@@ -63,8 +63,6 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
                 RangeLog.of(13, 450, 500));
     }
 
-    @Ignore("Unexpected fetch after setCountCallback() " +
-            "https://github.com/vaadin/vaadin-flow-components/issues/224")
     @Test
     public void undefinedItemCount_switchesToDefinedItemCount_itemCountChanges() {
         int actualItemCount = 300;
@@ -86,18 +84,17 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // -> new count updated and more items fetched
         setCountCallback();
 
-        // We do not expect DataProvider::fetch() because setCountCallback()
-        // only updates the item count
-
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
 
-        // Dropdown opened, since requested first page
-        verifyFetchForUndefinedItemCountCallback(RangeLog.of(6, 0, 50));
+        // Web component requests first page (dropdown opened) + last active
+        // range
+        verifyFetchForUndefinedItemCountCallback(RangeLog.of(6, 300, 350),
+                RangeLog.of(7, 0, 50));
 
         // Check that combo box is scrolled over 'actualItemCount' after
         // switching to defined items count
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
-                RangeLog.of(7, 450, 500), RangeLog.of(8, 500, 550));
+                RangeLog.of(8, 450, 500), RangeLog.of(9, 500, 550));
 
         // switching back to undefined items count, nothing changes
         setUnknownCount();
@@ -105,16 +102,16 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
 
         // Dropdown opened, since requested first page
-        verifyFetchForUndefinedItemCountCallback(RangeLog.of(9, 0, 50));
+        verifyFetchForUndefinedItemCountCallback(RangeLog.of(10, 0, 50));
 
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
-                RangeLog.of(10, 450, 500), RangeLog.of(11, 500, 550));
+                RangeLog.of(11, 450, 500), RangeLog.of(12, 500, 550));
 
         // increase backend item count and scroll to current end
         setUnknownCountBackendItemsCount(2000);
         // count has been increased again by default increase value
-        doScroll(1000, 1200, "Callback Item 999", RangeLog.of(12, 0, 50),
-                RangeLog.of(13, 950, 1000));
+        doScroll(1000, 1200, "Callback Item 999", RangeLog.of(13, 0, 50),
+                RangeLog.of(14, 950, 1000));
     }
 
     @Test
