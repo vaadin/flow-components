@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -36,7 +37,8 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-input.js")
 @NpmPackage(value = "@vaadin/vaadin-messages", version = "v2.0.0-alpha1")
-public class MessageInput extends Component implements HasSize, HasStyle {
+public class MessageInput extends Component
+        implements HasSize, HasStyle, HasEnabled {
 
     /**
      * The {@code submit} event which is fired by {@link MessageInput}
