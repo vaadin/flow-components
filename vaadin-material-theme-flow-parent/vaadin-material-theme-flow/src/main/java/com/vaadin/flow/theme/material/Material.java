@@ -27,8 +27,6 @@ import com.vaadin.flow.theme.AbstractTheme;
 
 /**
  * Material component theme class implementation.
- *
- * @since 1.2
  */
 @NpmPackage(value = "@vaadin/vaadin-material-styles", version = "1.3.2")
 @JsModule("@vaadin/vaadin-material-styles/color.js")

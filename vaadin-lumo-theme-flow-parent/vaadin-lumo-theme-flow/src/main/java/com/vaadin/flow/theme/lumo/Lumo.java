@@ -28,8 +28,6 @@ import com.vaadin.flow.theme.AbstractTheme;
 
 /**
  * Lumo component theme class implementation.
- *
- * @since 1.0
  */
 @NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "1.6.1")
 @JsModule("@vaadin/vaadin-lumo-styles/color.js")
