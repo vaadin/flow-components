@@ -59,6 +59,7 @@ async function consolidate(template, pom, cb) {
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   await renameBase(tplJs);
+  tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
 
   cb && cb(tplJs, pomJs);
@@ -72,6 +73,9 @@ async function consolidatePomParent() {
   const template = proComponents.includes(componentName) ? 'pom-parent-pro.xml' : 'pom-parent.xml';
   consolidate(template, `${mod}/pom.xml`, js => {
     renameComponent(js.project.modules[0].module, name);
+    if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
+      js.project.modules[0].module.push(`${name}-testbench`);
+    }
     if (fs.existsSync(`${mod}/${name}-flow-demo/pom.xml`)) {
       js.project.modules[0].module.push(`${name}-flow-demo`);
     }
@@ -86,11 +90,12 @@ async function consolidatePomFlow() {
   });
 }
 async function consolidatePomTB() {
-  consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
+  const tbPom = `${mod}/${name}-testbench/pom.xml`;
+  fs.existsSync(tbPom) && await consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
 }
 async function consolidatePomDemo() {
   const demoPom = `${mod}/${name}-flow-demo/pom.xml`;
-  fs.existsSync(demoPom) && consolidate('pom-demo.xml', demoPom);
+  fs.existsSync(demoPom) && await consolidate('pom-demo.xml', demoPom);
 }
 async function consolidatePomIT() {
   consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
