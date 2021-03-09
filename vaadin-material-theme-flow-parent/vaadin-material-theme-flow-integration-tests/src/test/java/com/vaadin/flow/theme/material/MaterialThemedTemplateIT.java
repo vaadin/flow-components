@@ -35,15 +35,31 @@ public class MaterialThemedTemplateIT extends AbstractComponentIT {
 
         TestBenchElement div = template.$("div").first();
 
-        Assert.assertEquals("Material themed Template", div.getText());
+        // From here we test whether Material or Lumo is used.
+        // The reason is that theme is unique per application, then
+        // when merging all modules in one application during CI
+        // lumo is used and material removed.
+        Assert.assertTrue("Should be Lumo or Material themed",
+            div.getText().matches("(Material|Lumo) themed Template"));
 
-        // this is silly, but a concrete way to test that the material files are
+        // this is silly, but a concrete way to test that the theme files are
         // imported by verifying that the material css variables introduced in the
         // files work
-        Assert.assertEquals("color variable not applied", "rgba(176, 0, 32, 1)",
-                div.getCssValue("color"));
-        Assert.assertEquals("typography variable not applied","16px", div.getCssValue("font-size"));
 
+        // Material css property values
+        // rgba(176, 0, 32, 1)
+        // 16px
+        // Lumo css property values
+        // rgba(246, 84, 76, 1)
+        // 40px
+
+        String color = div.getCssValue("color");
+        Assert.assertTrue("Should set correct color but it was " + color,
+            color.matches("rgba\\((176, 0, 32, 1|246, 84, 76, 1)\\)"));
+
+        String font = div.getCssValue("font-size");
+        Assert.assertTrue("Should set correct font size but it was " + font,
+            font.matches("(16|40)px"));
     }
 
 }
