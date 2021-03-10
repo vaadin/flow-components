@@ -19,8 +19,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Tag("explicit-lumo-themed-template")
 @JsModule("./src/LumoThemedTemplate.js")
