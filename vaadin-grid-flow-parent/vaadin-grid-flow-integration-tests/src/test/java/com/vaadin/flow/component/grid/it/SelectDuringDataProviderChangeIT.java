@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Test;
 
@@ -44,7 +44,7 @@ public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
 
     private void verifySelectionChangeDoesNotCauseError(
         Runnable changeSelection) {
-        ButtonElement button = $(ButtonElement.class).first();
+        TestBenchElement button = $("vaadin-button").first();
         testBench().disableWaitForVaadin();
         // Trigger data provider change
         button.click();
