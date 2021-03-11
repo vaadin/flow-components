@@ -126,7 +126,7 @@ function copyFileSync(source, target, replaceCall) {
     content = content.replace('\r', '');
   }
   [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
-  fs.writeFileSync(targetFile, content, 'utf8');
+  targetFile && content && fs.writeFileSync(targetFile, content, 'utf8');
 }
 
 // copy recursively a folder without failing, and reusing already created folders in target
@@ -201,7 +201,9 @@ async function copySources() {
     // copy frontend sources
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/frontend`, `${itFolder}`);
     // copy java sources
-    copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`);
+    copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`, (source, target, content) => {
+      return /\n\s*@Theme.*Material/.test(content) ? []: [target, content];
+    });
   });
 }
 
