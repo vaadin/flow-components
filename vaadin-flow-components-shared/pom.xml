@@ -24,6 +24,16 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-component-demo-helpers</artifactId>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>vaadin-lumo-theme</artifactId>
+          <groupId>com.vaadin</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>vaadin-material-theme</artifactId>
+          <groupId>com.vaadin</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>    
   </dependencies>
 </project>
