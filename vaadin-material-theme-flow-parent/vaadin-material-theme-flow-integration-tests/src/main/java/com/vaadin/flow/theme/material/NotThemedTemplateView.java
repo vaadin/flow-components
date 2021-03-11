@@ -15,15 +15,14 @@
  */
 package com.vaadin.flow.theme.material;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Tag("not-themed-template")
 @JsModule("./src/NotThemedTemplate.js")
 @Route(value = "vaadin-material-theme/material-not-themed-template-view")
-public class NotThemedTemplateView extends PolymerTemplate<TemplateModel> {
+public class NotThemedTemplateView extends Component {
 
 }
