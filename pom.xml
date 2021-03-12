@@ -11,7 +11,7 @@
     <version>2.0.2</version>
   </parent>
   <properties>
-    <flow.version>6.0-SNAPSHOT</flow.version>
+    <flow.version>7.0-SNAPSHOT</flow.version>
     <testbench.version>6.4.0</testbench.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -49,6 +49,8 @@
     <osgi.vaadin.package.version>1</osgi.vaadin.package.version>
   </properties>
   <modules>
+    <module>vaadin-lumo-theme-flow-parent</module>
+    <module>vaadin-material-theme-flow-parent</module>
     <module>vaadin-flow-components-shared</module>
     <module>vaadin-accordion-flow-parent</module>
     <module>vaadin-avatar-flow-parent</module>
@@ -617,7 +619,7 @@
       <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-lumo-theme</artifactId>
-        <version>${flow.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.vaadin</groupId>
