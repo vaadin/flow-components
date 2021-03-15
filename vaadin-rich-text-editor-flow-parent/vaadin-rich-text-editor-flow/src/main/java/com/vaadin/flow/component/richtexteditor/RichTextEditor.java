@@ -1,23 +1,5 @@
 package com.vaadin.flow.component.richtexteditor;
 
-import java.io.Serializable;
-import java.util.Objects;
-
-/*
- * #%L
- * Vaadin Rich Text Editor for Vaadin 10
- * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * See the file license.html distributed with this software for more
- * information about licensing.
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasSize;
@@ -26,15 +8,16 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.JsonObject;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
@@ -60,6 +43,7 @@ public class RichTextEditor
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
     private AsHtml asHtml;
+    private HtmlSetRequest htmlSetRequest;
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -204,13 +188,12 @@ public class RichTextEditor
      * @param htmlValueString
      *            the HTML string
      */
-    private PendingJavaScriptResult setHtmlValueAsynchronously(
-            String htmlValueString) {
-        if (htmlValueString != null) {
-            htmlValueString = sanitize(htmlValueString);
+    private void setHtmlValueAsynchronously(
+        String htmlValueString) {
+        if (htmlSetRequest == null) {
+            htmlSetRequest = new HtmlSetRequest();
         }
-        return getElement().callJsFunction("dangerouslySetHtmlValue",
-                htmlValueString);
+        htmlSetRequest.requestUpdate(htmlValueString);
     }
 
     @ClientCallable
@@ -266,6 +249,34 @@ public class RichTextEditor
                                 "title", "width")
                         .addAttributes(":all", "style")
                         .addProtocols("img", "src", "data"));
+    }
+
+    private class HtmlSetRequest implements Serializable {
+        private String html;
+        private boolean requested;
+
+        void requestUpdate(String htmlValueString) {
+            this.html =
+                htmlValueString != null ? sanitize(htmlValueString) : null;
+            if (!requested) {
+                runBeforeClientResponse(ui -> this.execute());
+                requested = true;
+            }
+        }
+
+        void execute() {
+            if (getValueChangeMode() != ValueChangeMode.EAGER) {
+                // Add a one-time listener if we are not in eager mode.
+                final String JS = "var listener = e => {"
+                    + "  this.$server.updateValue(e.detail.value);"
+                    + "  this.removeEventListener('value-changed', listener);"
+                    + "  listener = null; };"
+                    + "this.addEventListener('value-changed', listener);";
+                getElement().executeJs(JS);
+            }
+            getElement().callJsFunction("dangerouslySetHtmlValue", this.html);
+            requested = false;
+        }
     }
 
     /**
@@ -777,11 +788,6 @@ public class RichTextEditor
         AsHtml(RichTextEditor rte) {
             this.rte = rte;
             this.value = getHtmlValue();
-            rte.addValueChangeListener(event -> {
-                if (event.isFromClient()) {
-                    setValue(getHtmlValue(), false);
-                }
-            });
         }
 
         /**
@@ -803,20 +809,7 @@ public class RichTextEditor
         public void setValue(String value) {
             this.oldValue = getValue();
             this.value = value;
-            setHtmlValueAsynchronously(value).then(result -> {
-                if (oldValue != null && !oldValue.equals(value)) {
-                    fireEvent(createValueChange(oldValue, false));
-                }
-            });
-        }
-
-        private void setValue(String value, boolean fireEvent) {
-            if (fireEvent) {
-                setValue(value);
-            } else {
-                this.oldValue = getValue();
-                this.value = value;
-            }
+            setHtmlValueAsynchronously(value);
         }
 
         private ComponentValueChangeEvent<RichTextEditor, String> createValueChange(
