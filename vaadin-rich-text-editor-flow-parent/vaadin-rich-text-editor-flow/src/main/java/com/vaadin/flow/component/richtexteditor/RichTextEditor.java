@@ -192,26 +192,6 @@ public class RichTextEditor
         super.setValue(value);
     }
 
-    /**
-     * Sets content represented by sanitized HTML string into the editor. The
-     * HTML string is interpreted by
-     * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-     * Clipboard matchers</a> on the client side, which may not produce the
-     * exactly input HTML.
-     * <p>
-     * Note: The value will be set asynchronously with client-server roundtrip.
-     *
-     * @param htmlValueString
-     *            the HTML string
-     */
-    private void setHtmlValueAsynchronously(
-        String htmlValueString) {
-        if (htmlSetRequest == null) {
-            htmlSetRequest = new HtmlSetRequest();
-        }
-        htmlSetRequest.requestUpdate(htmlValueString);
-    }
-
     @ClientCallable
     private void updateValue(String value) {
         setValue(value);
@@ -828,11 +808,26 @@ public class RichTextEditor
             setHtmlValueAsynchronously(value);
         }
 
-        private ComponentValueChangeEvent<RichTextEditor, String> createValueChange(
-                String oldValue, boolean fromClient) {
-            return new ComponentValueChangeEvent<>(rte, this, oldValue,
-                    fromClient);
+        /**
+         * Sets content represented by sanitized HTML string into the editor. The
+         * HTML string is interpreted by
+         * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
+         * Clipboard matchers</a> on the client side, which may not produce the
+         * exactly input HTML.
+         * <p>
+         * Note: The value will be set asynchronously with client-server roundtrip.
+         *
+         * @param htmlValueString
+         *            the HTML string
+         */
+        private void setHtmlValueAsynchronously(
+            String htmlValueString) {
+            if (htmlSetRequest == null) {
+                htmlSetRequest = new HtmlSetRequest();
+            }
+            htmlSetRequest.requestUpdate(htmlValueString);
         }
+
 
         /**
          * Gets the value of the editor presented as an HTML string.
