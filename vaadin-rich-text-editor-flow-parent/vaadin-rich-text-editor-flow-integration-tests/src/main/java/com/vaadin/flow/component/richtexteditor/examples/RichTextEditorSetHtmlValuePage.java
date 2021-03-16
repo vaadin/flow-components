@@ -2,7 +2,6 @@ package com.vaadin.flow.component.richtexteditor.examples;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.richtexteditor.RichTextEditor;
 import com.vaadin.flow.router.Route;
 
