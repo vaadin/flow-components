@@ -59,4 +59,18 @@ public class MessageInputIT extends AbstractComponentIT {
                 "The event shouldn't have fired on a disabled component", "",
                 $(InputTextElement.class).id("verify-field").getValue());
     }
+
+    @Test
+    public void setI18n_textTranslated() {
+        clickElementWithJs("set-i18n");
+
+        String inputPlaceholder = messageInput
+                .$("vaadin-message-input-text-area").first()
+                .getPropertyString("placeholder");
+        Assert.assertEquals("Viesti", inputPlaceholder);
+
+        String buttonText = messageInput.$("vaadin-message-input-button")
+                .first().getText();
+        Assert.assertEquals("Lähetä", buttonText);
+    }
 }
