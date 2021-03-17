@@ -32,7 +32,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.JsonObject;
 
 /**
@@ -195,6 +194,9 @@ public class RichTextEditor
     @ClientCallable
     private void updateValue(String value) {
         setValue(value);
+        if(this.asHtml != null) {
+            this.asHtml.value.clear();
+        }
     }
 
     /**
@@ -767,7 +769,7 @@ public class RichTextEditor
      */
     public HasValue<ValueChangeEvent<String>, String> asHtml() {
         if (asHtml == null) {
-            asHtml = new AsHtml(this);
+            asHtml = new AsHtml();
         }
         return asHtml;
     }
@@ -778,12 +780,11 @@ public class RichTextEditor
     private class AsHtml implements HasValue<ValueChangeEvent<String>, String> {
 
         private String oldValue;
-        private String value;
-        private RichTextEditor rte;
+        private final HtmlValue value;
 
-        AsHtml(RichTextEditor rte) {
-            this.rte = rte;
-            this.value = getHtmlValue();
+        AsHtml() {
+            this.value = new HtmlValue();
+            RichTextEditor.this.addValueChangeListener(e -> this.value.clear());
         }
 
         /**
@@ -804,7 +805,7 @@ public class RichTextEditor
         @Override
         public void setValue(String value) {
             this.oldValue = getValue();
-            this.value = value;
+            this.value.setValue(value);
             setHtmlValueAsynchronously(value);
         }
 
@@ -848,7 +849,7 @@ public class RichTextEditor
          */
         @Override
         public String getValue() {
-            return value;
+            return value.getValue();
         }
 
         /**
@@ -863,7 +864,7 @@ public class RichTextEditor
         @Override
         public Registration addValueChangeListener(
                 ValueChangeListener listener) {
-            return rte.addValueChangeListener(originalEvent -> {
+            return RichTextEditor.this.addValueChangeListener(originalEvent -> {
                 ValueChangeEvent event = new ValueChangeEvent<String>() {
                     @Override
                     public HasValue<ValueChangeEvent<String>, String> getHasValue() {
@@ -898,7 +899,7 @@ public class RichTextEditor
          */
         @Override
         public void setReadOnly(boolean readOnly) {
-            rte.setReadOnly(readOnly);
+            RichTextEditor.this.setReadOnly(readOnly);
         }
 
         /**
@@ -909,7 +910,7 @@ public class RichTextEditor
          */
         @Override
         public boolean isReadOnly() {
-            return rte.isReadOnly();
+            return RichTextEditor.this.isReadOnly();
         }
 
         /**
@@ -922,7 +923,7 @@ public class RichTextEditor
         @Override
         public void setRequiredIndicatorVisible(
                 boolean requiredIndicatorVisible) {
-            rte.setRequiredIndicatorVisible(requiredIndicatorVisible);
+            RichTextEditor.this.setRequiredIndicatorVisible(requiredIndicatorVisible);
         }
 
         /**
@@ -933,7 +934,39 @@ public class RichTextEditor
          */
         @Override
         public boolean isRequiredIndicatorVisible() {
-            return rte.isRequiredIndicatorVisible();
+            return RichTextEditor.this.isRequiredIndicatorVisible();
+        }
+
+        private class HtmlValue implements Serializable {
+            private String value;
+            private boolean present;
+
+            private String getValue() {
+                if (!present) {
+                    this.value = generateHtmlValue();
+                    this.present = true;
+                }
+                return value;
+            }
+
+            private void setValue(String value) {
+                this.value = value;
+                this.present = true;
+            }
+
+            private void clear() {
+                this.value = null;
+                this.present = false;
+            }
+
+            private String generateHtmlValue() {
+                if (RichTextEditor.this.isEmpty()) {
+                    return null;
+                } else {
+                    return RichTextEditor.this.getHtmlValue();
+                }
+            }
         }
     }
+
 }
