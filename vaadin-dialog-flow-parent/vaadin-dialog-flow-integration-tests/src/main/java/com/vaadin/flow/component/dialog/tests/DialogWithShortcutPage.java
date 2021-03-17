@@ -104,19 +104,6 @@ String.join("", SHORTCUT_KEY.getKeys());
         return dialog;
     }
 
-    private void closeDialog(ClickEvent<NativeButton> buttonClickEvent) {
-        Component parent = buttonClickEvent.getSource().getParent()
-                .orElse(null);
-        while (parent != null) {
-            if (parent instanceof Dialog) {
-                ((Dialog) parent).close();
-                break;
-            } else {
-                parent = parent.getParent().orElse(null);
-            }
-        }
-    }
-
     private void onEvent(EventObject event) {
         final Div div = new Div();
         final int index = eventCounter++;
