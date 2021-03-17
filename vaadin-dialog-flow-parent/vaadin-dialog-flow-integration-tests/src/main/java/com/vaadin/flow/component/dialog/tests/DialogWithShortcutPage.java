@@ -20,18 +20,17 @@ import com.vaadin.flow.router.Route;
 public class DialogWithShortcutPage extends VerticalLayout {
 
     public static final Key SHORTCUT_KEY = Key.KEY_X;
-    public static final String SHORTCUT = SHORTCUT_KEY.getKeys().stream()
-            .collect(Collectors.joining());
+String.join("", SHORTCUT_KEY.getKeys());
     public static final String EVENT_LOG = "event-log";
     public static final String UI_BUTTON = "ui-button";
     public static final String MODELESS_SHORTCUT_ON_UI = "modeless-shortcut-on-ui";
-    public static final String MODELESS_SHORTCUT_LISTEN_ON_DIALOG = "modeless-shorcut-listen-on-dialog";
+    public static final String MODELESS_SHORTCUT_LISTEN_ON_DIALOG = "modeless-shortcur-listen-on-dialog";
     public static final String LISTEN_ON_DIALOG = "listen-on-dialog";
     public static final String SHORTCUT_ON_UI = "shortcut-on-ui";
     public static final String DIALOG_ID = "dialog";
     public static final String REUSABLE_DIALOG = "reusable-dialog";
     public static final String UI_ID = "ui-id";
-    public final String DIALOG_BUTTON_MESSAGE_ID = "dialog-button-message";
+    public static final String DIALOG_BUTTON_MESSAGE_ID = "dialog-button-message";
     private int eventCounter;
     private int dialogCounter;
 
@@ -91,7 +90,9 @@ public class DialogWithShortcutPage extends VerticalLayout {
         myDialogButton.setId(dialogId + "-button");
         Dialog dialog = new Dialog(
                 new Div(new Div(new Text("" + index)), myDialogButton,
-                        new Input(), new NativeButton("Close", this::closeDialog)));
+                        new Input()));
+        NativeButton closeButton = new NativeButton("Close", buttonClickEvent -> dialog.close());
+        dialog.add(closeButton);
         dialog.setDraggable(true);
         dialog.open();
         dialog.setId(dialogId);
