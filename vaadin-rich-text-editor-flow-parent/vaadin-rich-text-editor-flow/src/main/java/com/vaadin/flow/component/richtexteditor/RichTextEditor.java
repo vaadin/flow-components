@@ -863,31 +863,35 @@ public class RichTextEditor
          */
         @Override
         public Registration addValueChangeListener(
-                ValueChangeListener listener) {
-            return RichTextEditor.this.addValueChangeListener(originalEvent -> {
-                ValueChangeEvent event = new ValueChangeEvent<String>() {
-                    @Override
-                    public HasValue<ValueChangeEvent<String>, String> getHasValue() {
-                        return AsHtml.this;
-                    }
+            ValueChangeListener listener) {
+            return RichTextEditor.this.addValueChangeListener(
+                originalEvent -> listener
+                    .valueChanged(this.createNewEvent(originalEvent)));
+        }
 
-                    @Override
-                    public boolean isFromClient() {
-                        return originalEvent.isFromClient();
-                    }
+        private ValueChangeEvent createNewEvent(
+            ValueChangeEvent<String> originalEvent) {
+            return new ValueChangeEvent<String>() {
+                @Override
+                public HasValue<ValueChangeEvent<String>, String> getHasValue() {
+                    return AsHtml.this;
+                }
 
-                    @Override
-                    public String getOldValue() {
-                        return oldValue;
-                    }
+                @Override
+                public boolean isFromClient() {
+                    return originalEvent.isFromClient();
+                }
 
-                    @Override
-                    public String getValue() {
-                        return AsHtml.this.getValue();
-                    }
-                };
-                listener.valueChanged(event);
-            });
+                @Override
+                public String getOldValue() {
+                    return oldValue;
+                }
+
+                @Override
+                public String getValue() {
+                    return AsHtml.this.getValue();
+                }
+            };
         }
 
         /**
