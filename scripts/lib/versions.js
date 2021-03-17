@@ -87,6 +87,11 @@ async function getAnnotations(){
   const lines = output.split('\n').filter(Boolean);
   return lines.map(line => {
     const r = /(.*(vaadin-.*)-parent.*):(.*value *= *"([^"]+).*version *= *"((\d+)\.(\d+)[^"]*).*)/.exec(line);
+    if (!r){
+      const errorPackage = /(.*(vaadin-.*)-parent.*)*/.exec(line); 
+      console.log(`versions.js::getAnnotations : cannot get the annotation properly for ${errorPackage[2]} in ${errorPackage[1]}`);
+      process.exit(1);
+    }
     return {
       path: r[1],
       name: r[2],
