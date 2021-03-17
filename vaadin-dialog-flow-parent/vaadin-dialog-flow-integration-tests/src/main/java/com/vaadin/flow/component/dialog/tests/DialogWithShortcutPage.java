@@ -1,10 +1,8 @@
 package com.vaadin.flow.component.dialog.tests;
 
 import java.util.EventObject;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.ShortcutRegistration;
@@ -20,7 +18,7 @@ import com.vaadin.flow.router.Route;
 public class DialogWithShortcutPage extends VerticalLayout {
 
     public static final Key SHORTCUT_KEY = Key.KEY_X;
-String.join("", SHORTCUT_KEY.getKeys());
+    public static final String SHORTCUT = String.join("", SHORTCUT_KEY.getKeys());
     public static final String EVENT_LOG = "event-log";
     public static final String UI_BUTTON = "ui-button";
     public static final String MODELESS_SHORTCUT_ON_UI = "modeless-shortcut-on-ui";
