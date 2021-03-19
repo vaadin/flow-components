@@ -63,7 +63,13 @@ public class GridProTest {
     @Test
     public void setSingleCellEdit_getSingleCellEdit() {
         grid.setSingleCellEdit(true);
-        Assert.assertEquals(grid.getSingleCellEdit(), true);
+        Assert.assertTrue(grid.getSingleCellEdit());
+    }
+
+    @Test
+    public void setEditOnClick_getEditOnClick() {
+        grid.setEditOnClick(true);
+        Assert.assertTrue(grid.getEditOnClick());
     }
 
     @Test

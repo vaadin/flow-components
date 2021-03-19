@@ -25,6 +25,7 @@ public class GridProView extends DemoView {
         customEditorType();
         enterNextRow();
         singleCellEdit();
+        editOnClick();
     }
 
     private void basicGridPro() {
@@ -213,6 +214,36 @@ public class GridProView extends DemoView {
         // end-source-example
 
         addCard("Single Cell Edit", grid);
+    }
+
+    private void editOnClick() {
+        // begin-source-example
+        // source-example-heading: Single Cell Edit
+        GridPro<Person> grid = new GridPro<>();
+        grid.setItems(createItems());
+
+        /*
+         * It is possible to discard edit mode when moving to the next cell by using grid pro method setSingleCellEdit.
+         */
+        grid.setEditOnClick(true);
+
+        grid.addEditColumn(Person::getName)
+                .text((item, newValue) ->
+                        item.setName(newValue))
+                .setHeader("Name (editable)");
+
+        grid.addEditColumn(Person::getEmail)
+                .text((item, newValue) ->
+                        item.setEmail(newValue))
+                .setHeader("Email (editable)");
+
+        grid.addEditColumn(Person::isSubscriber)
+                .checkbox((item, newValue) ->
+                        item.setSubscriber(newValue))
+                .setHeader("Subscriber (editable)");
+        // end-source-example
+
+        addCard("Edit on Click", grid);
     }
 
     private static List<Person> createItems() {

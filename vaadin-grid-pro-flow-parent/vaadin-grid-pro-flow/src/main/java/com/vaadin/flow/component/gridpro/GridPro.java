@@ -51,7 +51,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.2.2")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.3.0-alpha1")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("@vaadin/flow-frontend/gridProConnector.js")
@@ -404,6 +404,31 @@ public class GridPro<E> extends Grid<E> {
     @Synchronize("single-cell-edit-changed")
     public boolean getSingleCellEdit() {
         return getElement().getProperty("singleCellEdit", false);
+    }
+
+    /**
+     * Sets the value of the webcomponent's property editOnClick. Default values is false.
+     * When true, cell edit mode gets activated on a single click instead of the default 
+     * double click.
+     *
+     * @param editOnClick
+     *            when <code>true</code>, cell edit mode gets activated on a single
+ *                click instead of the default double click
+     */
+    public void setEditOnClick(boolean editOnClick) {
+        getElement().setProperty("editOnClick", editOnClick);
+    }
+
+    /**
+     * Gets the value of the webcomponent's property editOnClick. Default values is false.
+     * When true, cell edit mode gets activated on a single click instead of the default 
+     * double click.
+     *
+     * @return editOnClick value
+     */
+    @Synchronize("edit-on-click-changed")
+    public boolean getEditOnClick() {
+        return getElement().getProperty("editOnClick", false);
     }
 
     /**
