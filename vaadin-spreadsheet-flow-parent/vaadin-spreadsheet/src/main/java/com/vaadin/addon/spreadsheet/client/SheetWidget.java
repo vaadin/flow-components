@@ -2841,7 +2841,8 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private void resetCellContents() {
+    //spreadsheet
+    public void resetCellContents() {
         clearListOfCells(topLeftCells);
         for (ArrayList<Cell> row : topRightRows) {
             clearListOfCells(row);

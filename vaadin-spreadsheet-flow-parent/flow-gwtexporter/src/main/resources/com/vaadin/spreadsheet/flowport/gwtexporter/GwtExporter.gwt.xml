@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='GwtAddonExporter'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User' />
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+  <inherits name='com.google.gwt.user.theme.standard.Standard' />
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+  <!-- Other module inherits                                      -->
+
+  <inherits name="com.vaadin.addon.spreadsheet.Widgetset" />
+  <stylesheet src="addons/spreadsheet/spreadsheet.css"/>
+
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='com.vaadin.spreadsheet.flowport.gwtexporter.client.FakeEntryPoint' />
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client' />
+  <source path='shared' />
+
+
+  <generate-with
+          class="com.vaadin.spreadsheet.flowport.gwtexporter.ConnectorBundleLoaderFactory">
+    <when-type-assignable
+            class="com.vaadin.client.metadata.ConnectorBundleLoader" />
+  </generate-with>
+
+
+  <!-- Use custom single script linker without document.write, doens't work with SDM and GWT unit tests -->
+  <define-linker name="humlinker" class="com.vaadin.spreadsheet.flowport.gwtexporter.ClientEngineLinker" />
+  <add-linker name="humlinker" />
+
+</module>
