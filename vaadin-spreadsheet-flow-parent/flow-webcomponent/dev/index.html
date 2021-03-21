@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>&lt;my-element> Demo</title>
+
+    <script type="module" src="vaadin-spreadsheet.js"></script>
+    <style>
+      p {
+        border: solid 1px blue;
+        padding: 8px;
+      }
+    </style>
+
+
+  </head>
+  <body>
+
+  <div id="otroslot"></div>
+
+    <vaadin-spreadsheet id="zz">
+    </vaadin-spreadsheet>
+
+  <script>
+
+    document.getElementById("zz").addEventListener("my-event", e => console.log('received at javascript', e));
+
+  </script>
+
+  </body>
+</html>
