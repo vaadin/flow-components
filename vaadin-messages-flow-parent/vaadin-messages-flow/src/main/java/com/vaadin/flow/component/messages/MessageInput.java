@@ -76,6 +76,24 @@ public class MessageInput extends Component
     }
 
     /**
+     * Creates a new message input component.
+     */
+    public MessageInput() {
+    }
+
+    /**
+     * Creates a new message input component with the provided listener that
+     * gets invoked when the user submits a new message.
+     *
+     * @param listener
+     *            the submit event listener
+     * @see #addSubmitListener(ComponentEventListener)
+     */
+    public MessageInput(ComponentEventListener<SubmitEvent> listener) {
+        addSubmitListener(listener);
+    }
+
+    /**
      * Adds a listener that is called when the user submits the value of the
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
      * <p>
