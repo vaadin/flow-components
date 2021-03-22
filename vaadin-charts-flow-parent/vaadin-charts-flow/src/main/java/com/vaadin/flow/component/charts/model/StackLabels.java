@@ -14,7 +14,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
@@ -23,7 +22,6 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * columns. In case of an inverted column chart or a bar chart the label is
  * placed to the right of positive bars and to the left of negative bars.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class StackLabels extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;
