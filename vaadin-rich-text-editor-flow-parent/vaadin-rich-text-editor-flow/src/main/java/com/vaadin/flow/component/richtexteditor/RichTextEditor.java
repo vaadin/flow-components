@@ -251,14 +251,14 @@ public class RichTextEditor
 
     private class HtmlSetRequest implements Serializable {
         private String html;
-        private boolean requested;
+        private boolean pending;
 
         void requestUpdate(String htmlValueString) {
             this.html =
                 htmlValueString != null ? sanitize(htmlValueString) : null;
-            if (!requested) {
+            if (!pending) {
                 runBeforeClientResponse(ui -> this.execute());
-                requested = true;
+                pending = true;
             }
         }
 
@@ -273,7 +273,7 @@ public class RichTextEditor
                 getElement().executeJs(JS);
             }
             getElement().callJsFunction("dangerouslySetHtmlValue", this.html);
-            requested = false;
+            pending = false;
         }
     }
 
