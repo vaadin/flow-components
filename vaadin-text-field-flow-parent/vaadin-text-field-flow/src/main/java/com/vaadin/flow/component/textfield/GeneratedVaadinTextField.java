@@ -18,8 +18,6 @@ package com.vaadin.flow.component.textfield;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -167,9 +165,6 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.TextFieldElement#2.3.0-alpha8",
-        "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-field")
 @NpmPackage(value = "@vaadin/vaadin-text-field", version = "20.0.0-alpha1")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-field.js")

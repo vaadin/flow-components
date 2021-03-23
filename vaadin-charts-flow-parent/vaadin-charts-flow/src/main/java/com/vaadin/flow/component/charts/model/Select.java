@@ -14,14 +14,12 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * The appearance of the point marker when selected. In order to allow a point
  * to be selected, set the <code>series.allowPointSelect</code> option to true.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Select extends AbstractConfigurationObject {
 
 	private Boolean enabled;

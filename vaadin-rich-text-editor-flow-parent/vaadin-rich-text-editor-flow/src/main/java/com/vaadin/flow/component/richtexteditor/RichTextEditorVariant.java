@@ -16,15 +16,10 @@ package com.vaadin.flow.component.richtexteditor;
  * #L%
  */
 
-import javax.annotation.Generated;
-
 /**
  * Set of theme variants applicable for {@code vaadin-rich-text-editor}
  * component.
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
-        "WebComponent: Vaadin.RichTextEditorElement#1.0.0-alpha3",
-        "Flow#1.2-SNAPSHOT" })
 public enum RichTextEditorVariant {
     LUMO_NO_BORDER("no-border"), LUMO_COMPACT("compact"), MATERIAL_NO_BORDER(
             "no-border");

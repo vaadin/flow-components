@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
-import javax.annotation.Generated;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -188,8 +187,6 @@ import com.vaadin.flow.shared.Registration;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.SplitLayoutElement#4.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-split-layout")
 @JsModule("@vaadin/vaadin-split-layout/src/vaadin-split-layout.js")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
