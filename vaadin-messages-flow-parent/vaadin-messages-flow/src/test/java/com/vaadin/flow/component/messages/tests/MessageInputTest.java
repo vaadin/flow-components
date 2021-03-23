@@ -16,10 +16,13 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 
@@ -56,4 +59,12 @@ public class MessageInputTest {
         Assert.assertSame(i18n, i18n.setSend("bar"));
     }
 
+    @Test
+    public void constructWithSubmitListener_fireEvent_listenerCalled() {
+        AtomicReference<SubmitEvent> eventRef = new AtomicReference<>();
+        MessageInput messageInput = new MessageInput(eventRef::set);
+        SubmitEvent event = new SubmitEvent(messageInput, false, "foo");
+        ComponentUtil.fireEvent(messageInput, event);
+        Assert.assertSame(event, eventRef.get());
+    }
 }
