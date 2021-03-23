@@ -19,8 +19,6 @@ package com.vaadin.flow.component.richtexteditor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -188,9 +186,6 @@ import elemental.json.JsonArray;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
-        "WebComponent: Vaadin.RichTextEditorElement#1.0.0-alpha3",
-        "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-rich-text-editor")
 @NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "2.0.0")
 @JsModule("@vaadin/vaadin-rich-text-editor/src/vaadin-rich-text-editor.js")

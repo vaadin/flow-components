@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -291,8 +289,6 @@ import elemental.json.JsonObject;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
-        "WebComponent: Vaadin.ComboBoxElement#5.0.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-combo-box")
 @NpmPackage(value = "@vaadin/vaadin-combo-box", version = "6.0.1")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
