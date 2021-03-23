@@ -18,8 +18,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
-
 /**
  * <p>
  * Configure a crosshair that follows either the mouse pointer or the hovered
@@ -35,7 +33,6 @@ import javax.annotation.Generated;
  * or <code>.highcharts-xaxis-category</code> classes.
  * </p>
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Crosshair extends AbstractConfigurationObject {
 
 	private String className;

@@ -23,8 +23,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
-import javax.annotation.Generated;
-
 /**
  * <p>
  * Description copied from corresponding location in WebComponent:
@@ -83,9 +81,6 @@ import javax.annotation.Generated;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.PasswordFieldElement#2.3.0-alpha8",
-        "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-password-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-password-field.html")
 @NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.8.4")

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -255,9 +253,6 @@ import elemental.json.JsonObject;
  * is propagated to the internal themable components listed above.
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#2.0-SNAPSHOT",
-        "WebComponent: Vaadin.DatePickerElement#4.0.0",
-        "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
 @NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.4.1")
