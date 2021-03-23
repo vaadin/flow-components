@@ -15,8 +15,11 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
+import static org.hamcrest.CoreMatchers.startsWith;
+
 import java.util.List;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -126,5 +129,13 @@ public class MessageListIT extends AbstractComponentIT {
         List<MessageElement> messages = $(MessageListElement.class).first()
                 .getMessageElements();
         Assert.assertEquals("Unexpected items count", 2, messages.size());
+    }
+
+    @Test
+    public void setImageAsStreamResource_imageLoaded() {
+        clickElementWithJs("setImageAsStreamResource");
+        String imageUrl = messageList.getMessageElements().get(0).getUserImg();
+        MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 }

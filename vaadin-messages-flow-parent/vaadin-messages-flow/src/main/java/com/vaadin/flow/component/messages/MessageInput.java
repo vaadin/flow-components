@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -35,8 +36,9 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "v2.0.0-alpha1")
-public class MessageInput extends Component implements HasSize, HasStyle {
+@NpmPackage(value = "@vaadin/vaadin-messages", version = "20.0.0-alpha1")
+public class MessageInput extends Component
+        implements HasSize, HasStyle, HasEnabled {
 
     /**
      * The {@code submit} event which is fired by {@link MessageInput}
@@ -71,6 +73,24 @@ public class MessageInput extends Component implements HasSize, HasStyle {
         public String getValue() {
             return value;
         }
+    }
+
+    /**
+     * Creates a new message input component.
+     */
+    public MessageInput() {
+    }
+
+    /**
+     * Creates a new message input component with the provided listener that
+     * gets invoked when the user submits a new message.
+     *
+     * @param listener
+     *            the submit event listener
+     * @see #addSubmitListener(ComponentEventListener)
+     */
+    public MessageInput(ComponentEventListener<SubmitEvent> listener) {
+        addSubmitListener(listener);
     }
 
     /**

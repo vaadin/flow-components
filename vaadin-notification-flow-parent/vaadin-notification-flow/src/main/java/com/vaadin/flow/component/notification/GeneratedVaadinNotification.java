@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.notification;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -88,10 +86,8 @@ Your work has been saved
  * is propagated to the internal {@code <vaadin-notification-card>}.
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
-        "WebComponent: Vaadin.NotificationElement#1.3.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "1.6.1")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "20.0.0-alpha1")
 @JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {

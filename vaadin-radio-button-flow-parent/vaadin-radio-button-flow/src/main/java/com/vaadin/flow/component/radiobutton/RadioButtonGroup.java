@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -67,12 +68,12 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.5.1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "20.0.0-alpha1")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation, HasHelper {
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation, HasHelper, HasSize {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.upload;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -115,10 +113,8 @@ import elemental.json.JsonObject;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.UploadElement#4.2.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "5.0.0")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "20.0.0-alpha1")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {

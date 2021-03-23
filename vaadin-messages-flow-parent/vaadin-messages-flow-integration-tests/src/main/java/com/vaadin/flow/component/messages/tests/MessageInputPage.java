@@ -17,6 +17,7 @@ package com.vaadin.flow.component.messages.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.router.Route;
 
@@ -34,5 +35,10 @@ public class MessageInputPage extends Div {
 
         messageInput.addSubmitListener(
                 submitEvent -> input.setValue(submitEvent.getValue()));
+
+        NativeButton toggleEnabledButton = new NativeButton("toggle-enabled",
+                e -> messageInput.setEnabled(!messageInput.isEnabled()));
+        toggleEnabledButton.setId("toggle-enabled");
+        add(toggleEnabledButton);
     }
 }
