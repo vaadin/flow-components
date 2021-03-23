@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.tabs;
 
-import javax.annotation.Generated;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -91,8 +90,6 @@ Tab 1
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.TabElement#2.1.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tab")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tab.html")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tab.js")

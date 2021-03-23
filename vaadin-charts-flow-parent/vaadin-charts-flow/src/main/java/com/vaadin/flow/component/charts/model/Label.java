@@ -18,12 +18,9 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
-
 /**
  * Text labels for the plot bands
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Label extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;

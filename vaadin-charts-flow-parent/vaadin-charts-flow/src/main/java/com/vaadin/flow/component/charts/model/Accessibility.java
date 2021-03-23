@@ -18,8 +18,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
-
 /**
  * <p>
  * Options for configuring accessibility for the chart. Requires the <a
@@ -30,7 +28,6 @@ import javax.annotation.Generated;
  * Accessibility</a>.
  * </p>
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Accessibility extends AbstractConfigurationObject {
 
 	private Boolean describeSingleSeries;

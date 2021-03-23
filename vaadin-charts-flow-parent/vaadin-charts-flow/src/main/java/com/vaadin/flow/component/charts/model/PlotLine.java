@@ -18,8 +18,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
-
 /**
  * <p>
  * An array of lines stretching across the plot area, marking a specific value
@@ -34,7 +32,6 @@ import javax.annotation.Generated;
  * <code>className</code> option.
  * </p>
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotLine extends AbstractConfigurationObject {
 
 	private String className;
