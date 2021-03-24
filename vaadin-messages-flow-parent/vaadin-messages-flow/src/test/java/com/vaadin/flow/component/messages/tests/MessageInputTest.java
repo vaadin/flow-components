@@ -61,9 +61,10 @@ public class MessageInputTest {
 
     @Test
     public void constructWithSubmitListener_fireEvent_listenerCalled() {
-        AtomicReference<SubmitEvent> eventRef = new AtomicReference<>();
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
         MessageInput messageInput = new MessageInput(eventRef::set);
-        SubmitEvent event = new SubmitEvent(messageInput, false, "foo");
+        MessageInput.SubmitEvent event = new MessageInput.SubmitEvent(
+                messageInput, false, "foo");
         ComponentUtil.fireEvent(messageInput, event);
         Assert.assertSame(event, eventRef.get());
     }
