@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -100,8 +98,6 @@ import com.vaadin.flow.shared.Registration;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.RadioButtonElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-button")
 @HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-button.html")
 @JsModule("@vaadin/vaadin-radio-button/src/vaadin-radio-button.js")

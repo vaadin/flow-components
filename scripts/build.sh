@@ -49,7 +49,7 @@ tcLog() {
 # log in TC
 tcStatus() {
   [ "$1" = "0" ] && status=SUCCESS || status=FAILURE
-  [ "$1" = "0" ] && text="$3" || status="$2"
+  [ "$1" = "0" ] && text="$3" || text="$2"
   tcMsg "buildStatus status='$status' text='$text'"
   exit $1
 }

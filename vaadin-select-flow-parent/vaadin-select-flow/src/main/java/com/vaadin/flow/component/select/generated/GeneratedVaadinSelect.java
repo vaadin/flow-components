@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.select.generated;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -187,8 +185,6 @@ import com.vaadin.flow.shared.Registration;
  * propagated to the internal themable components listed above.
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.SelectElement#2.0.2", "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-select")
 @HtmlImport("frontend://bower_components/vaadin-select/src/vaadin-select.html")
 @NpmPackage(value = "@vaadin/vaadin-select", version = "2.4.0")

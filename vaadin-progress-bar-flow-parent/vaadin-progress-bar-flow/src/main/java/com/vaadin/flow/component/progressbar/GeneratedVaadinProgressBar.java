@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.progressbar;
 
-import javax.annotation.Generated;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,8 +99,6 @@ import com.vaadin.flow.component.dependency.JsModule;
  * </tbody>
  * </table>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.ProgressBarElement#1.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-progress-bar")
 @HtmlImport("frontend://bower_components/vaadin-progress-bar/src/vaadin-progress-bar.html")
 @JsModule("@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js")

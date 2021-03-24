@@ -18,7 +18,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -31,7 +30,6 @@ import com.vaadin.flow.component.charts.util.Util;
  * horizontal bars, set <a href="#chart.inverted">chart.inverted</a> to
  * <code>true</code>.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotOptionsColumnrange extends ColumnOptions {
 
 	private Boolean allowPointSelect;

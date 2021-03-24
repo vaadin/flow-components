@@ -23,8 +23,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
-import javax.annotation.Generated;
-
 /**
  * <p>
  * Description copied from corresponding location in WebComponent:
@@ -38,9 +36,6 @@ import javax.annotation.Generated;
  * &lt;/vaadin-number-field&gt;
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.NumberFieldElement#2.3.0-alpha8",
-        "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-number-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-number-field.html")
 @NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.8.4")

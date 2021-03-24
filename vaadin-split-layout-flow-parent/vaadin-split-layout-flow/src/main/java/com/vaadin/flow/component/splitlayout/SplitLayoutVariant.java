@@ -15,13 +15,9 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
-import javax.annotation.Generated;
-
 /**
  * Set of theme variants applicable for {@code vaadin-split-layout} component.
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.SplitLayoutElement#4.1.0", "Flow#1.1-SNAPSHOT" })
 public enum SplitLayoutVariant {
     LUMO_SMALL("small"), LUMO_MINIMAL("minimal");
 
