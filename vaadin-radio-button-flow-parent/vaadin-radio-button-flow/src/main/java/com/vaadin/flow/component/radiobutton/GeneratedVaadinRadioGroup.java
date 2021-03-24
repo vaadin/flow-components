@@ -18,8 +18,6 @@ package com.vaadin.flow.component.radiobutton;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -115,8 +113,6 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.RadioGroupElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-group")
 @JsModule("@vaadin/vaadin-radio-button/src/vaadin-radio-group.js")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R, T>, T>

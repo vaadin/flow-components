@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -24,7 +23,6 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * to each point value. Technically it is the same as a reversed funnel chart
  * without a neck.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotOptionsPyramid extends PyramidOptions {
 
 	private Boolean allowPointSelect;

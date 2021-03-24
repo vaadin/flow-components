@@ -13,14 +13,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import javax.annotation.Generated;
-
 /**
  * These settings affect how datetime axes are laid out, how tooltips are
  * formatted, how series pointIntervalUnit works and how the Highstock range
  * selector handles time.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Time extends AbstractConfigurationObject {
 
     private Number timezoneOffset;
