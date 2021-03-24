@@ -18,13 +18,10 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
-
 /**
  * Options regarding the chart area and plot area as well as general chart
  * options.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class ChartModel extends AbstractConfigurationObject {
 
 	private Boolean alignTicks;

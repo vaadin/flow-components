@@ -15,14 +15,9 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import javax.annotation.Generated;
-
 /**
  * Set of theme variants applicable for {@code vaadin-checkbox-group} component.
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.CheckboxGroupElement#2.2.2",
-        "Flow#1.1-SNAPSHOT" })
 public enum CheckboxGroupVariant {
     LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD(
           "helper-above-field"), MATERIAL_VERTICAL("vertical");

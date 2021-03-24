@@ -18,7 +18,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -31,7 +30,6 @@ import com.vaadin.flow.component.charts.util.Util;
  * quartile (Q1), median (Q2), upper quartile (Q3), and largest observation
  * (sample maximum).
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
 	private Boolean allowPointSelect;

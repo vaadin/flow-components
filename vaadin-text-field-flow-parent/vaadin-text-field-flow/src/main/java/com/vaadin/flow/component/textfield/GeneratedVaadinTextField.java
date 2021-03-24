@@ -34,7 +34,6 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
-import javax.annotation.Generated;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -168,9 +167,6 @@ import java.util.stream.Stream;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.TextFieldElement#2.3.0-alpha8",
-        "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-field.html")
 @NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.8.4")
