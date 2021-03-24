@@ -63,10 +63,10 @@ function filterCommits(commits){
     let target = false;
     let picked = false;
     for (let label of commit.labels){
-      if(label.name.includes("target/") || label.name.includes("need to pick manually")){
+      if(label.name.includes("target/")){
         target = true;
       }
-      if(label.name.includes("cherry-picked")){
+      if(label.name.includes("cherry-picked") || label.name.includes("need to pick manually")){
         picked = true;
       }
     }
