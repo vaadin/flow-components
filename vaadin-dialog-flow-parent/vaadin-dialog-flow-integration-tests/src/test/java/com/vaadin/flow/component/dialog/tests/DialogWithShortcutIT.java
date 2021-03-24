@@ -1,6 +1,12 @@
 package com.vaadin.flow.component.dialog.tests;
 
+import com.vaadin.flow.component.dialog.testbench.DialogElement;
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.html.testbench.InputTextElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,12 +14,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import com.vaadin.flow.component.dialog.testbench.DialogElement;
-import com.vaadin.flow.component.html.testbench.DivElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/shortcuts")
 public class DialogWithShortcutIT extends AbstractComponentIT {
@@ -121,6 +121,42 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
         validateLatestShortcutEventOnDialog(4, 1);
     }
 
+    // vaadin/vaadin-flow#10362
+    @Test
+    public void dialogWithShortcut_containsInput_shortcutDoesNotBlockInput() {
+        openDialogButton = $(NativeButtonElement.class)
+                .id(DialogWithShortcutPage.LISTEN_ON_DIALOG);
+
+        openNewDialog();
+        final InputTextElement dialogInput = getFirstDialogInput();
+        dialogInput.focus();
+        dialogInput.sendKeys("foo" + DialogWithShortcutPage.SHORTCUT + "bar");
+
+        validateLatestShortcutEventOnDialog(0, 0);
+
+        // by default the shortcut does preventDefault
+        Assert.assertEquals("Shortcut did not update input value", "foobar",
+                getFirstDialogInput().getValue());
+    }
+
+    // vaadin/vaadin-flow#10362
+    @Test
+    public void dialogWithShortcutAndAllowBrowserDefault_containsInput_shortcutDoesNotBlockInput() {
+        openDialogButton = $(NativeButtonElement.class)
+                .id(DialogWithShortcutPage.LISTEN_ON_DIALOG_ALLOW_DEFAULT);
+
+        openNewDialog();
+        final InputTextElement dialogInput = getFirstDialogInput();
+        dialogInput.focus();
+        dialogInput.sendKeys("foo" + DialogWithShortcutPage.SHORTCUT + "bar");
+
+        validateLatestShortcutEventOnDialog(0, 0);
+
+        // shortcut key is registered
+        Assert.assertEquals("Shortcut did not update input value", "foo" + DialogWithShortcutPage.SHORTCUT + "bar",
+                getFirstDialogInput().getValue());
+    }
+
     private void openNewDialog() {
         openDialogButton.click();
     }
@@ -129,14 +165,14 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
     }
 
-    private TestBenchElement getFirstDialogInput() {
+    private InputTextElement getFirstDialogInput() {
         return getDialogInput(0);
     }
 
-    private TestBenchElement getDialogInput(int dialogIndex) {
+    private InputTextElement getDialogInput(int dialogIndex) {
         return $(DialogElement.class)
-                .id(DialogWithShortcutPage.DIALOG_ID + dialogIndex).$("input")
-                .first();
+                .id(DialogWithShortcutPage.DIALOG_ID + dialogIndex)
+                .$(InputTextElement.class).first();
     }
 
     private void pressShortcutKey(TestBenchElement elementToFocus) {
