@@ -32,7 +32,7 @@ public class ComboBoxElement extends TestBenchElement
         implements HasLabel, HasSelectByText, HasHelper {
 
     /**
-     * Clears the value of the date picker.
+     * Clears the value of the combobox.
      */
     @Override
     public void clear() {
