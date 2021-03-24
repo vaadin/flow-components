@@ -27,5 +27,6 @@ public class ComboBoxClearPage extends VerticalLayout {
         comboBox.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
                 "Eight", "Nine", "Ten");
         comboBox.setValue("Eight");
+        add(comboBox);
     }
 }
