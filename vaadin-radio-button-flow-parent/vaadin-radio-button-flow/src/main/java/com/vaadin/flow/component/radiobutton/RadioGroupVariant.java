@@ -15,13 +15,9 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import javax.annotation.Generated;
-
 /**
  * Set of theme variants applicable for {@code vaadin-radio-group} component.
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.RadioGroupElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 public enum RadioGroupVariant {
     LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD(
         "helper-above-field"), MATERIAL_VERTICAL("vertical");
