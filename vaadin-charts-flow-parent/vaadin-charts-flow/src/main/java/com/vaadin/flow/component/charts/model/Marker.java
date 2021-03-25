@@ -14,7 +14,6 @@ package com.vaadin.flow.component.charts.model;
  */
 
 
-import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
@@ -22,7 +21,6 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * series. For settings on the hover state of the individual point, see <a
  * href="#plotOptions.series.marker.states.hover">marker.states.hover</a>.
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Marker extends AbstractConfigurationObject {
 
 	private Boolean enabled;

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -82,11 +80,8 @@ import com.vaadin.flow.function.SerializableFunction;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.PasswordFieldElement#2.3.0-alpha8",
-        "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "3.0.1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "20.0.0-alpha1")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-password-field.js")
 public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPasswordField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
