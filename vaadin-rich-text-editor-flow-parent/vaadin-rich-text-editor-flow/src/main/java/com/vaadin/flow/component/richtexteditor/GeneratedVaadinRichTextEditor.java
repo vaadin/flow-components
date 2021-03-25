@@ -8,10 +8,10 @@ package com.vaadin.flow.component.richtexteditor;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -195,7 +195,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -207,7 +207,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -227,7 +227,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is synchronized automatically from client side when a
      * 'html-value-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code htmlValue} property from the webcomponent
      */
     @Synchronize(property = "htmlValue", value = "html-value-changed")
@@ -245,7 +245,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -259,7 +259,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * <p>
      * When true, the user can not modify, nor copy the editor content.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -277,7 +277,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code readonly} property from the webcomponent
      */
     protected boolean isReadonlyBoolean() {
@@ -291,7 +291,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * <p>
      * When true, the user can not modify the editor content, but can copy it.
      * </p>
-     * 
+     *
      * @param readonly
      *            the boolean value to set
      */
@@ -310,7 +310,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code i18n} property from the webcomponent
      */
     protected JsonArray getI18nJsonArray() {
@@ -325,7 +325,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * An object used to localize this component. The properties are used e.g.
      * as the tooltips for the editor toolbar buttons.
      * </p>
-     * 
+     *
      * @param i18n
      *            the JsonArray value to set
      */
@@ -343,7 +343,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
 
     /**
      * Adds a listener for {@code change} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -358,7 +358,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -386,7 +386,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -411,7 +411,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
