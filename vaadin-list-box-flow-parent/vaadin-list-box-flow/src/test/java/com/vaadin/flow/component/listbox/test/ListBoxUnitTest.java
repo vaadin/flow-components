@@ -10,10 +10,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class ListBoxUnitTest {
 
@@ -173,24 +171,5 @@ public class ListBoxUnitTest {
             Assert.assertNull(listBox.getElement().getChild(index)
                     .getAttribute("disabled"));
         }
-    }
-
-    @Test
-    public void listBoxRetainValueWhenRemovedAndAdded() {
-        VerticalLayout layout = new VerticalLayout();
-        final List<String> listBoxItems = Arrays.asList("1", "2", "3", "4");
-        final ListBox<String> listBox = new ListBox<>();
-        listBox.setItems(listBoxItems);
-        listBox.setValue("2");
-
-        layout.add(listBox);
-        Assert.assertTrue(listBox.getValue().equals("2"));
-        layout.remove(listBox);
-        // Mock onDetach
-        DetachEvent event = new DetachEvent(listBox);
-        listBox.onDetach(event);
-
-        layout.add(listBox);
-        Assert.assertTrue(listBox.getValue().equals("2"));        
     }
 }
