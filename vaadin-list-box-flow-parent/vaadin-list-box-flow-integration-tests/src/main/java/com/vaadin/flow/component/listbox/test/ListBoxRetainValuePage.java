@@ -34,6 +34,7 @@ public class ListBoxRetainValuePage extends VerticalLayout {
         listBox.setItems(listBoxItems);
         listBox.setValue("2");
         Button addButton = new Button("add");
+        addButton.setId("button");
         Div value = new Div();
         value.setId("value");
         add(value, addButton, listBox);
