@@ -11,13 +11,15 @@ import com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetServerRpcIm
 public class RpcProxy {
 
     static native void consoleLog(String message) /*-{
-      console.log( "me:" + message );
+      console.log( "rpcproxy", message );
   }-*/;
 
     public RpcProxy() {
     }
 
     public static <T extends ServerRpc> T create(Class<T> rpcInterface, ServerConnector connector) {
+
+        consoleLog("asking for " + rpcInterface.getName());
 
 
         if (SpreadsheetServerRpc.class.equals(rpcInterface)) {

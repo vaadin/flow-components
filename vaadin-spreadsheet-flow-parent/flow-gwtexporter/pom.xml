@@ -110,6 +110,9 @@
           <generateJsInteropExports>true</generateJsInteropExports>
           <style>pretty</style>
           <extraJvmArgs>-Xmx1g -Xms1g -XX:MaxPermSize=512m</extraJvmArgs>
+          <!--
+          <draftCompile>true</draftCompile>
+          -->
         </configuration>
       </plugin>
 

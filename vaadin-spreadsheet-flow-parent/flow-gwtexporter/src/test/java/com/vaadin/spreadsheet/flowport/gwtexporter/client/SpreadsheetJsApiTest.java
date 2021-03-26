@@ -122,6 +122,7 @@ public class SpreadsheetJsApiTest {
         assertEquals(100, sharedState.cols);
     }
 
+    /*
     @Test
     public void should_updateState_when_setColGroupingData_isCalled() {
         List<GroupingData> value = new ArrayList<>();
@@ -135,6 +136,8 @@ public class SpreadsheetJsApiTest {
         api.setRowGroupingData(value);
         assertEquals(value, sharedState.rowGroupingData);
     }
+
+     */
 
     @Test
     public void should_updateState_when_setColGroupingMax_isCalled() {
@@ -198,6 +201,7 @@ public class SpreadsheetJsApiTest {
         assertEquals(100, sharedState.sheetIndex);
     }
 
+    /*
     @Test
     public void should_updateState_when_setSheetNames_isCalled() {
         String[] value = new String[0];
@@ -225,6 +229,7 @@ public class SpreadsheetJsApiTest {
         api.setColumnIndexToStyleIndex(value);
         assertEquals(value, sharedState.columnIndexToStyleIndex);
     }
+
 
     @Test
     public void should_updateState_when_setLockedColumnIndexes_isCalled() {
@@ -282,12 +287,14 @@ public class SpreadsheetJsApiTest {
         assertEquals(value, sharedState.horizontalScrollPositions);
     }
 
+     */
     @Test
     public void should_updateState_when_setSheetProtected_isCalled() {
         api.setSheetProtected(true);
         assertEquals(true, sharedState.sheetProtected);
     }
 
+    /*
     @Test
     public void should_updateState_when_setWorkbookProtected_isCalled() {
         api.setWorkbookProtected(true);
@@ -321,7 +328,6 @@ public class SpreadsheetJsApiTest {
         api.setCellComments(value);
         assertEquals(value, sharedState.cellComments);
     }
-
     @Test
     public void should_updateState_when_setCellCommentAuthors_isCalled() {
         HashMap<String, String> value = new HashMap<>();
@@ -342,6 +348,7 @@ public class SpreadsheetJsApiTest {
         api.setInvalidFormulaCells(value);
         assertEquals(value, sharedState.invalidFormulaCells);
     }
+*/
 
     @Test
     public void should_updateState_when_setHasActions_isCalled() {
@@ -349,6 +356,7 @@ public class SpreadsheetJsApiTest {
         assertEquals(true, sharedState.hasActions);
     }
 
+    /*
     @Test
     public void should_updateState_when_setOverlays_isCalled() {
         HashMap<String, OverlayInfo> value = new HashMap<>();
@@ -362,6 +370,8 @@ public class SpreadsheetJsApiTest {
         api.setMergedRegions(value);
         assertEquals(value, sharedState.mergedRegions);
     }
+
+     */
 
     @Test
     public void should_updateState_when_setDisplayGridlines_isCalled() {
@@ -417,6 +427,7 @@ public class SpreadsheetJsApiTest {
         assertEquals(true, sharedState.lockFormatRows);
     }
 
+    /*
     @Test
     public void should_updateState_when_setNamedRanges_isCalled() {
         List<String> value = new ArrayList<>();
@@ -440,6 +451,7 @@ public class SpreadsheetJsApiTest {
         verify(clientRpc, times(1)).updateTopLeftCellValues(value);
     }
 
+
     @Test
     public void should_callClientRpc_when_updateTopRightCellValues_isCalled() {
         ArrayList<CellData> value = new ArrayList<>();
@@ -453,6 +465,7 @@ public class SpreadsheetJsApiTest {
         api.updateBottomLeftCellValues(value);
         verify(clientRpc, times(1)).updateBottomLeftCellValues(value);
     }
+    */
 
     @Test
     public void should_callClientRpc_when_updateFormulaBar_isCalled() {
@@ -473,6 +486,7 @@ public class SpreadsheetJsApiTest {
         verify(clientRpc, times(1)).showSelectedCell("a", 1, 2, "b", true, true, true);
     }
 
+    /*
     @Test
     public void should_callClientRpc_when_showActions_isCalled() {
         ArrayList<SpreadsheetActionDetails> value = new ArrayList<>();
@@ -480,18 +494,23 @@ public class SpreadsheetJsApiTest {
         verify(clientRpc, times(1)).showActions(value);
     }
 
+     */
+
     @Test
     public void should_callClientRpc_when_setSelectedCellAndRange_isCalled() {
         api.setSelectedCellAndRange("a", 1, 2, 3, 4, 5, 6, true);
         verify(clientRpc, times(1)).setSelectedCellAndRange("a", 1, 2, 3, 4, 5, 6, true);
     }
 
+    /*
     @Test
     public void should_callClientRpc_when_cellsUpdated_isCalled() {
         ArrayList<CellData> value = new ArrayList<>();
         api.cellsUpdated(value);
         verify(clientRpc, times(1)).cellsUpdated(value);
     }
+
+     */
 
     @Test
     public void should_callClientRpc_when_refreshCellStyles_isCalled() {
@@ -506,7 +525,7 @@ public class SpreadsheetJsApiTest {
     }
 
     //SERVER RPC METHOD CALLBACKS
-
+/*
     @Test
     public void should_callServerRpcCallback_when_groupingCollapsed_isCalled() {
         GroupingCollapsedCallback callback = mock(GroupingCollapsedCallback.class);
@@ -530,7 +549,6 @@ public class SpreadsheetJsApiTest {
         api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onSheetScroll(1, 2, 3, 4);
         verify(callback, times(1)).apply(1, 2, 3, 4);
     }
-
     @Test
     public void should_callServerRpcCallback_when_sheetAddressChanged_isCalled() {
         SheetAddressChangedCallback callback = mock(SheetAddressChangedCallback.class);
@@ -821,5 +839,6 @@ public class SpreadsheetJsApiTest {
         api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).actionOnColumnHeader("a");
         verify(callback, times(1)).apply("a");
     }
+*/
 
 }

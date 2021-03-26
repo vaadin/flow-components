@@ -44,182 +44,157 @@ export class VaadinSpreadsheet extends LitElement {
 
   static get properties() {
     return {
-      /**
-       * The name to say "Hello" to.
-       */
-      name: {type: String},
 
       api: {type: Object},
 
-      received: {type: String},
-      /**
-       * The number of times the button has been clicked.
+      /*
+      SHARED STATE
        */
-      count: {type: Number},
-
-
 
       rowBufferSize: {type: Number},
 
-    columnBufferSize: {type: Number},
+      columnBufferSize: {type: Number},
 
-    rows: {type: Number},
+      rows: {type: Number},
 
-    cols: {type: Number},
+      cols: {type: Number},
 
-    //public void setColGroupingData(List<GroupingData> colGroupingData) {
+      //public void setColGroupingData(List<GroupingData> colGroupingData) {
       colGroupingData: {type: Object},
 
-    //public void setRowGroupingData(List<GroupingData> rowGroupingData) {
+      //public void setRowGroupingData(List<GroupingData> rowGroupingData) {
       rowGroupingData: {type: Object},
 
-    colGroupingMax: {type: Number},
+      colGroupingMax: {type: Number},
 
-    rowGroupingMax: {type: Number},
+      rowGroupingMax: {type: Number},
 
-    colGroupingInversed: {type: Boolean},
+      colGroupingInversed: {type: Boolean},
 
-    rowGroupingInversed: {type: Boolean},
+      rowGroupingInversed: {type: Boolean},
 
-    defRowH: {type: Number},
+      defRowH: {type: Number},
 
-    defColW: {type: Number},
+      defColW: {type: Number},
 
-    //public void setRowH(float[] rowH) {
+      //public void setRowH(float[] rowH) {
       rowH: {type: Object},
 
-    //public void setColW(int[] colW) {
+      //public void setColW(int[] colW) {
       colW: {type: Object},
 
-    reload: {type: Boolean},
+      reload: {type: Boolean},
 
-    sheetIndex: {type: Number},
+      sheetIndex: {type: Number},
 
-    //public void setSheetNames(String[] sheetNames) {
+      //public void setSheetNames(String[] sheetNames) {
       sheetNames: {type: Object},
 
-    //public void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
+      //public void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
       cellStyleToCSSStyle: {type: Object},
 
-    //public void setRowIndexToStyleIndex(HashMap<Integer, Integer> rowIndexToStyleIndex) {
+      //public void setRowIndexToStyleIndex(HashMap<Integer, Integer> rowIndexToStyleIndex) {
       rowIndexToStyleIndex: {type: Object},
 
-    //public void setColumnIndexToStyleIndex(HashMap<Integer, Integer> columnIndexToStyleIndex) {
+      //public void setColumnIndexToStyleIndex(HashMap<Integer, Integer> columnIndexToStyleIndex) {
       columnIndexToStyleIndex: {type: Object},
 
-    //public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
+      //public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
       lockedColumnIndexes: {type: Object},
 
-    //public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
+      //public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
       lockedRowIndexes: {type: Object},
 
-    //public void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
+      //public void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
       shiftedCellBorderStyles: {type: Object},
 
-    //public void setConditionalFormattingStyles(HashMap<Integer, String> conditionalFormattingStyles) {
+      //public void setConditionalFormattingStyles(HashMap<Integer, String> conditionalFormattingStyles) {
       conditionalFormattingStyles: {type: Object},
 
-    //public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
+      //public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
       hiddenColumnIndexes: {type: Object},
 
-    //public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
+      //public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
       hiddenRowIndexes: {type: Object},
 
-    //public void setVerticalScrollPositions(int[] verticalScrollPositions) {
+      //public void setVerticalScrollPositions(int[] verticalScrollPositions) {
       verticalScrollPositions: {type: Object},
 
-    //public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
+      //public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
       horizontalScrollPositions: {type: Object},
 
-    sheetProtected: {type: Boolean},
+      sheetProtected: {type: Boolean},
 
-    workbookProtected: {type: Boolean},
+      workbookProtected: {type: Boolean},
 
-    //public void setCellKeysToEditorIdMap(HashMap<String, String> cellKeysToEditorIdMap) {
+      //public void setCellKeysToEditorIdMap(HashMap<String, String> cellKeysToEditorIdMap) {
       cellKeysToEditorIdMap: {type: Object},
 
-    //public void setComponentIDtoCellKeysMap(HashMap<String, String> componentIDtoCellKeysMap) {
+      //public void setComponentIDtoCellKeysMap(HashMap<String, String> componentIDtoCellKeysMap) {
       componentIDtoCellKeysMap: {type: Object},
 
-    //public void setHyperlinksTooltips(HashMap<String, String> hyperlinksTooltips) {
+      //public void setHyperlinksTooltips(HashMap<String, String> hyperlinksTooltips) {
       hyperlinksTooltips: {type: Object},
 
-    //public void setCellComments(HashMap<String, String> cellComments) {
+      //public void setCellComments(HashMap<String, String> cellComments) {
       cellComments: {type: Object},
 
-    //public void setCellCommentAuthors(HashMap<String, String> cellCommentAuthors) {
+      //public void setCellCommentAuthors(HashMap<String, String> cellCommentAuthors) {
       cellCommentAuthors: {type: Object},
 
-    //public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
+      //public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
       visibleCellComments: {type: Object},
 
-    //public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
+      //public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
       invalidFormulaCells: {type: Object},
 
-    hasActions: {type: Boolean},
+      hasActions: {type: Boolean},
 
-    //public void setOverlays(HashMap<String, OverlayInfo> overlays) {
+      //public void setOverlays(HashMap<String, OverlayInfo> overlays) {
       overlays: {type: Object},
 
-    //public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
+      //public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
       mergedRegions: {type: Object},
 
-    displayGridlines: {type: Boolean},
+      displayGridlines: {type: Boolean},
 
-    displayRowColHeadings: {type: Boolean},
+      displayRowColHeadings: {type: Boolean},
 
-    verticalSplitPosition: {type: Number},
+      verticalSplitPosition: {type: Number},
 
-    horizontalSplitPosition: {type: Number},
+      horizontalSplitPosition: {type: Number},
 
-    infoLabelValue: {type: String},
+      infoLabelValue: {type: String},
 
-    workbookChangeToggle: {type: Boolean},
+      workbookChangeToggle: {type: Boolean},
 
-    invalidFormulaErrorMessage: {type: String},
+      invalidFormulaErrorMessage: {type: String},
 
-    lockFormatColumns: {type: Boolean},
+      lockFormatColumns: {type: Boolean},
 
-    lockFormatRows: {type: Boolean},
+      lockFormatRows: {type: Boolean},
 
-    //public void setNamedRanges(List<String> namedRanges) {
+      //public void setNamedRanges(List<String> namedRanges) {
       namedRanges: {type: String},
     };
   }
 
-  updateSharedState(newVal) {
-    this.api.setState(newVal);
-  }
-
-  alert(newVal) {
-    this.api.alert(newVal);
-  }
-
   constructor() {
     super();
-    this.name = 'World';
-    this.count = 0;
-    this.received = '';
   }
 
-/*
-  createRenderRoot() {
-    // Do not use a shadow root
-    return this;
-  }
-*/
+  /*
+    createRenderRoot() {
+      // Do not use a shadow root
+      return this;
+    }
+  */
 
   render() {
     return html`
       <h1>This is a web component</h1>
       <slot></slot>
     `;
-  }
-
-  _onClick() {
-    this.count++;
-    this.api.setState(this.name + ' - ' + this.count);
-    console.log('Estado fijado a ' + this.name)
   }
 
   connectedCallback() {
@@ -233,12 +208,12 @@ export class VaadinSpreadsheet extends LitElement {
     document.head.append(style);
   }
 
+
   updated(_changedProperties) {
     super.updated(_changedProperties);
     console.log(this.shadowRoot.querySelector('#mislot'));
     //console.log(this.querySelector('#mislot'));
     if (!this.api) {
-
       this.addStyle(css_gwt);
       this.addStyle(css_valo);
 
@@ -248,25 +223,115 @@ export class VaadinSpreadsheet extends LitElement {
       this.append(div);
 
       this.api = new Spreadsheet(div);
-      //this.api = new Spreadsheet(this.querySelector('#mislot'));
-      this.api.registerClicked(e => {
-        this.received = '' + e;
-        let event = new CustomEvent('my-event', {
-          detail: {
-            message: '' + e
-          }
-        });
-        this.dispatchEvent(event);
-      }); //this.api.alert('webcomponent callback called for ' + e));
-      this.api.alert('Hello from web component');
       console.log('updated')
+      this.createCallbacks();
+      console.log('callbacks created')
+      console.log('callback for selected cell is ', this.api.getCellSelectedCallback())
     }
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
     console.log('attribute change: ', name, newVal);
-    if ('name' == name) {
-      this.api.setState(newVal);
+    if ('rowBufferSize' == name) {
+      this.api.setRowBufferSize(newVal);
+    } else if ('columnBufferSize' == name) {
+      this.api.setColumnBufferSize(newVal);
+    } else if ('rows' == name) {
+      this.api.setRows(newVal);
+    } else if ('cols' == name) {
+      this.api.setCols(newVal);
+    } else if ('colGroupingData' == name) {
+      this.api.setColGroupingData(newVal);
+    } else if ('rowGroupingData' == name) {
+      this.api.setRowGroupingData(newVal);
+    } else if ('colGroupingMax' == name) {
+      this.api.setColGroupingMax(newVal);
+    } else if ('rowGroupingMax' == name) {
+      this.api.setRowGroupingMax(newVal);
+    } else if ('colGroupingInversed' == name) {
+      this.api.setColGroupingInversed(newVal);
+    } else if ('rowGroupingInversed' == name) {
+      this.api.setRowGroupingInversed(newVal);
+    } else if ('defRowH' == name) {
+      this.api.setDefRowH(newVal);
+    } else if ('defColW' == name) {
+      this.api.setDefColW(newVal);
+    } else if ('rowH' == name) {
+      this.api.setRowH(newVal);
+    } else if ('colW' == name) {
+      this.api.setColW(newVal);
+    } else if ('reload' == name) {
+      this.api.setReload(newVal);
+    } else if ('' == name) {
+      this.api.setSheetIndex(newVal);
+    } else if ('sheetNames' == name) {
+      this.api.setSheetNames(newVal);
+    } else if ('cellStyleToCSSStyle' == name) {
+      this.api.setCellStyleToCSSStyle(newVal);
+    } else if ('rowIndexToStyleIndex' == name) {
+      this.api.setRowIndexToStyleIndex(newVal);
+    } else if ('columnIndexToStyleIndex' == name) {
+      this.api.setColumnIndexToStyleIndex(newVal);
+    } else if ('lockedColumnIndexes' == name) {
+      this.api.setLockedColumnIndexes(newVal);
+    } else if ('lockedRowIndexes' == name) {
+      this.api.setLockedRowIndexes(newVal);
+    } else if ('shiftedCellBorderStyles' == name) {
+      this.api.setShiftedCellBorderStyles(newVal);
+    } else if ('conditionalFormattingStyles' == name) {
+      this.api.setConditionalFormattingStyles(newVal);
+    } else if ('hiddenColumnIndexes' == name) {
+      this.api.setHiddenColumnIndexes(newVal);
+    } else if ('hiddenRowIndexes' == name) {
+      this.api.setHiddenRowIndexes(newVal);
+    } else if ('verticalScrollPositions' == name) {
+      this.api.setVerticalScrollPositions(newVal);
+    } else if ('horizontalScrollPositions' == name) {
+      this.api.setHorizontalScrollPositions(newVal);
+    } else if ('sheetProtected' == name) {
+      this.api.setSheetProtected(newVal);
+    } else if ('workbookProtected' == name) {
+      this.api.setWorkbookProtected(newVal);
+    } else if ('cellKeysToEditorIdMap' == name) {
+      this.api.setCellKeysToEditorIdMap(newVal);
+    } else if ('componentIDtoCellKeysMap' == name) {
+      this.api.setComponentIDtoCellKeysMap(newVal);
+    } else if ('hyperlinksTooltips' == name) {
+      this.api.setHyperlinksTooltips(newVal);
+    } else if ('cellComments' == name) {
+      this.api.setCellComments(newVal);
+    } else if ('cellCommentAuthors' == name) {
+      this.api.setCellCommentAuthors(newVal);
+    } else if ('visibleCellComments' == name) {
+      this.api.setVisibleCellComments(newVal);
+    } else if ('invalidFormulaCells' == name) {
+      this.api.setInvalidFormulaCells(newVal);
+    } else if ('hasActions' == name) {
+      this.api.setHasActions(newVal);
+    } else if ('overlays' == name) {
+      this.api.setOverlays(newVal);
+    } else if ('mergedRegions' == name) {
+      this.api.setMergedRegions(newVal);
+    } else if ('displayGridlines' == name) {
+      this.api.setDisplayGridlines(newVal);
+    } else if ('displayRowColHeadings' == name) {
+      this.api.setDisplayRowColHeadings(newVal);
+    } else if ('verticalSplitPosition' == name) {
+      this.api.setVerticalSplitPosition(newVal);
+    } else if ('horizontalSplitPosition' == name) {
+      this.api.setHorizontalSplitPosition(newVal);
+    } else if ('infoLabelValue' == name) {
+      this.api.setInfoLabelValue(newVal);
+    } else if ('workbookChangeToggle' == name) {
+      this.api.setWorkbookChangeToggle(newVal);
+    } else if ('invalidFormulaErrorMessage' == name) {
+      this.api.setInvalidFormulaErrorMessage(newVal);
+    } else if ('lockFormatColumns' == name) {
+      this.api.setLockFormatColumns(newVal);
+    } else if ('lockFormatRows' == name) {
+      this.api.setLockFormatRows(newVal);
+    } else if ('namedRanges' == name) {
+      this.api.setNamedRanges(newVal);
     }
     super.attributeChangedCallback(name, oldVal, newVal);
   }
@@ -299,7 +364,7 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   invalidCellAddress() {
-  this.api.invalidCellAddress();
+    this.api.invalidCellAddress();
   }
 
   showSelectedCell(name, col, row, cellValue, _function, locked, initialSelection) { // String name, int col, int row, String cellValue, boolean function, boolean locked, boolean initialSelection
@@ -336,161 +401,176 @@ export class VaadinSpreadsheet extends LitElement {
 SERVER RPC METHOD CALLBACKS
  */
 
-  setGroupingCollapsedCallback(callback) {
-    this.api.setGroupingCollapsedCallback(callback);
+  createCallbacks() {
+
+    this.api.setGroupingCollapsedCallback(e => {
+      this.dispatchEvent(this.createEvent('groupingCollapsed', e));
+    });
+
+    this.api.setLevelHeaderClickedCallback(e => {
+      this.dispatchEvent(this.createEvent('levelHeaderClicked', e));
+    });
+
+    this.api.setOnSheetScrollCallback(e => {
+      this.dispatchEvent(this.createEvent('onSheetScroll', e));
+    });
+
+    this.api.setSheetAddressChangedCallback(e => {
+      this.dispatchEvent(this.createEvent('sheetAddressChanged', e));
+    });
+
+    this.api.setCellSelectedCallback(e => {
+      this.dispatchEvent(this.createEvent('cellSelected', e));
+    });
+
+    this.api.setCellRangeSelectedCallback(e => {
+      this.dispatchEvent(this.createEvent('cellRangeSelected', e));
+    });
+
+    this.api.setCellAddedToSelectionAndSelectedCallback(e => {
+      this.dispatchEvent(this.createEvent('cellAddedToSelectionAndSelected', e));
+    });
+
+    this.api.setCellsAddedToRangeSelectionCallback(e => {
+      this.dispatchEvent(this.createEvent('cellsAddedToRangeSelection', e));
+    });
+
+    this.api.setRowSelectedCallback(e => {
+      this.dispatchEvent(this.createEvent('rowSelected', e));
+    });
+
+    this.api.setRowAddedToRangeSelectionCallback(e => {
+      this.dispatchEvent(this.createEvent('rowAddedToRangeSelection', e));
+    });
+
+    this.api.setColumnSelectedCallback(e => {
+      this.dispatchEvent(this.createEvent('columnSelected', e));
+    });
+
+    this.api.setColumnAddedToSelectionCallback(e => {
+      this.dispatchEvent(this.createEvent('columnAddedToSelection', e));
+    });
+
+    this.api.setSelectionIncreasePaintedCallback(e => {
+      this.dispatchEvent(this.createEvent('selectionIncreasePainted', e));
+    });
+
+    this.api.setSelectionDecreasePaintedCallback(e => {
+      this.dispatchEvent(this.createEvent('selectionDecreasePainted', e));
+    });
+
+    this.api.setCellValueEditedCallback(e => {
+      this.dispatchEvent(this.createEvent('cellValueEdited', e));
+    });
+
+    this.api.setSheetSelectedCallback(e => {
+      this.dispatchEvent(this.createEvent('sheetSelected', e));
+    });
+
+    this.api.setSheetRenamedCallback(e => {
+      this.dispatchEvent(this.createEvent('sheetRenamed', e));
+    });
+
+    this.api.setSheetCreatedCallback(e => {
+      this.dispatchEvent(this.createEvent('sheetCreated', e));
+    });
+
+    this.api.setCellRangePaintedCallback(e => {
+      this.dispatchEvent(this.createEvent('cellRangePainted', e));
+    });
+
+    this.api.setDeleteSelectedCellsCallback(e => {
+      this.dispatchEvent(this.createEvent('deleteSelectedCells', e));
+    });
+
+    this.api.setLinkCellClickedCallback(e => {
+      this.dispatchEvent(this.createEvent('linkCellClicked', e));
+    });
+
+    this.api.setRowsResizedCallback(e => {
+      this.dispatchEvent(this.createEvent('rowsResized', e));
+    });
+
+    this.api.setColumnResizedCallback(e => {
+      this.dispatchEvent(this.createEvent('columnResized', e));
+    });
+
+    this.api.setOnRowAutofitCallback(e => {
+      this.dispatchEvent(this.createEvent('onRowAutofit', e));
+    });
+
+    this.api.setOnColumnAutofitCallback(e => {
+      this.dispatchEvent(this.createEvent('onColumnAutofit', e));
+    });
+
+    this.api.setOnUndoCallback(e => {
+      this.dispatchEvent(this.createEvent('onUndo', e));
+    });
+
+    this.api.setOnRedoCallback(e => {
+      this.dispatchEvent(this.createEvent('onRedo', e));
+    });
+
+    this.api.setSetCellStyleWidthRatiosCallback(e => {
+      this.dispatchEvent(this.createEvent('setCellStyleWidthRatios', e));
+    });
+
+    this.api.setProtectedCellWriteAttemptedCallback(e => {
+      this.dispatchEvent(this.createEvent('protectedCellWriteAttempted', e));
+    });
+
+    this.api.setOnPasteCallback(e => {
+      this.dispatchEvent(this.createEvent('onPaste', e));
+    });
+
+    this.api.setClearSelectedCellsOnCutCallback(e => {
+      this.dispatchEvent(this.createEvent('clearSelectedCellsOnCut', e));
+    });
+
+    this.api.setUpdateCellCommentCallback(e => {
+      this.dispatchEvent(this.createEvent('updateCellComment', e));
+    });
+
+    this.api.setOnConnectorInitCallback(e => {
+      this.dispatchEvent(this.createEvent('onConnectorInit', e));
+    });
+
+    this.api.setContextMenuOpenOnSelectionCallback(e => {
+      this.dispatchEvent(this.createEvent('contextMenuOpenOnSelection', e));
+    });
+
+    this.api.setActionOnCurrentSelectionCallback(e => {
+      this.dispatchEvent(this.createEvent('actionOnCurrentSelection', e));
+    });
+
+    this.api.setRowHeaderContextMenuOpenCallback(e => {
+      this.dispatchEvent(this.createEvent('rowHeaderContextMenuOpen', e));
+    });
+
+    this.api.setActionOnRowHeaderCallback(e => {
+      this.dispatchEvent(this.createEvent('actionOnRowHeader', e));
+    });
+
+    this.api.setColumnHeaderContextMenuOpenCallback(e => {
+      this.dispatchEvent(this.createEvent('columnHeaderContextMenuOpen', e));
+    });
+
+    this.api.setActionOnColumnHeaderCallback(e => {
+      this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
+    });
+
+    console.log('vaadin-spreadsheet', 'triggering onConnectorInit');
+    this.dispatchEvent(this.createEvent('onConnectorInit', ""));
+
   }
 
-  setLevelHeaderClickedCallback(callback) {
-    this.api.setLevelHeaderClickedCallback(callback);
-  }
-
-  setOnSheetScrollCallback(callback) {
-    this.api.setOnSheetScrollCallback(callback);
-  }
-
-  setSheetAddressChangedCallback(callback) {
-    this.api.setSheetAddressChangedCallback(callback);
-  }
-
-  setCellSelectedCallback(callback) {
-    this.api.setCellSelectedCallback(callback);
-  }
-
-  setCellRangeSelectedCallback(callback) {
-    this.api.setCellRangeSelectedCallback(callback);
-  }
-
-  setCellAddedToSelectionAndSelectedCallback(callback) {
-    this.api.setCellAddedToSelectionAndSelectedCallback(callback);
-  }
-
-  setCellsAddedToRangeSelectionCallback(callback) {
-    this.api.setCellsAddedToRangeSelectionCallback(callback);
-  }
-
-  setRowSelectedCallback(callback) {
-    this.api.setRowSelectedCallback(callback);
-  }
-
-  setRowAddedToRangeSelectionCallback(callback) {
-    this.api.setRowAddedToRangeSelectionCallback(callback);
-  }
-
-  setColumnSelectedCallback(callback) {
-    this.api.setColumnSelectedCallback(callback);
-  }
-
-  setColumnAddedToSelectionCallback(callback) {
-    this.api.setColumnAddedToSelectionCallback(callback);
-  }
-
-  setSelectionIncreasePaintedCallback(callback) {
-    this.api.setSelectionIncreasePaintedCallback(callback);
-  }
-
-
-  setSelectionDecreasePaintedCallback(callback) {
-    this.api.setSelectionDecreasePaintedCallback(callback);
-  }
-
-  setCellValueEditedCallback(callback) {
-    this.api.setCellValueEditedCallback(callback);
-  }
-
-  setSheetSelectedCallback(callback) {
-    this.api.setSheetSelectedCallback(callback);
-  }
-
-  setSheetRenamedCallback(callback) {
-    this.api.setSheetRenamedCallback(callback);
-  }
-
-  setSheetCreatedCallback(callback) {
-    this.api.setSheetCreatedCallback(callback);
-  }
-
-  setCellRangePaintedCallback(callback) {
-    this.api.setCellRangePaintedCallback(callback);
-  }
-
-  setDeleteSelectedCellsCallback(callback) {
-    this.api.setDeleteSelectedCellsCallback(callback);
-  }
-
-  setLinkCellClickedCallback(callback) {
-    this.api.setLinkCellClickedCallback(callback);
-  }
-
-  setRowsResizedCallback(callback) {
-    this.api.setRowsResizedCallback(callback);
-  }
-
-  setColumnResizedCallback(callback) {
-    this.api.setColumnResizedCallback(callback);
-  }
-
-  setOnRowAutofitCallback(callback) {
-    this.api.setOnRowAutofitCallback(callback);
-  }
-
-  setOnColumnAutofitCallback(callback) {
-    this.api.setOnColumnAutofitCallback(callback);
-  }
-
-  setOnUndoCallback(callback) {
-    this.api.setOnUndoCallback(callback);
-  }
-
-  setOnRedoCallback(callback) {
-    this.api.setOnRedoCallback(callback);
-  }
-
-  setSetCellStyleWidthRatiosCallback(callback) {
-    this.api.setSetCellStyleWidthRatiosCallback(callback);
-  }
-
-  setProtectedCellWriteAttemptedCallback(callback) {
-    this.api.setProtectedCellWriteAttemptedCallback(callback);
-  }
-
-  setOnPasteCallback(callback) {
-    this.api.setOnPasteCallback(callback);
-  }
-
-  setClearSelectedCellsOnCutCallback(callback) {
-    this.api.setClearSelectedCellsOnCutCallback(callback);
-  }
-
-  setUpdateCellCommentCallback(callback) {
-    this.api.setUpdateCellCommentCallback(callback);
-  }
-
-  setOnConnectorInitCallback(callback) {
-    this.api.setOnConnectorInitCallback(callback);
-  }
-
-  setContextMenuOpenOnSelectionCallback(callback) {
-    this.api.setContextMenuOpenOnSelectionCallback(callback);
-  }
-
-  setActionOnCurrentSelectionCallback(callback) {
-    this.api.setActionOnCurrentSelectionCallback(callback);
-  }
-
-  setRowHeaderContextMenuOpenCallback(callback) {
-    this.api.setRowHeaderContextMenuOpenCallback(callback);
-  }
-
-  setActionOnRowHeaderCallback(callback) {
-    this.api.setActionOnRowHeaderCallback(callback);
-  }
-
-  setColumnHeaderContextMenuOpenCallback(callback) {
-    this.api.setColumnHeaderContextMenuOpenCallback(callback);
-  }
-
-  setActionOnColumnHeaderCallback(callback) {
-    this.api.setActionOnColumnHeaderCallback(callback);
+  createEvent(msg, e) {
+    return new CustomEvent('spreadsheet-event', {
+      detail: {
+        message: msg,
+        payload: '' + e
+      }
+    });
   }
 
 }

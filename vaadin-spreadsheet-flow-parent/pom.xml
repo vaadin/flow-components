@@ -22,6 +22,8 @@
         <module>vaadin-spreadsheet-testbench-api</module>
         <module>vaadin-spreadsheet-charts</module>
         <module>flow-gwtexporter</module>
+        <module>flow-component</module>
+        <module>flow-demo</module>
     </modules>
 
     <organization>

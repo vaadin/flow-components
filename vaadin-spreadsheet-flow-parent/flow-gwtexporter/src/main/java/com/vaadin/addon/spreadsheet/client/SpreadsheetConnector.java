@@ -52,6 +52,7 @@ import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.communication.SharedState;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
+import com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetServerRpcImpl;
 
 @SuppressWarnings("serial")
 @Connect(value = Spreadsheet.class, loadStyle = LoadStyle.DEFERRED)
@@ -62,6 +63,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
+            consoleLog("updateFormulaBar(" + possibleName + "," + col + "," + row + ")");
             getWidget().updateFormulaBar(possibleName, col, row);
         }
 
@@ -134,6 +136,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void updateBottomRightCellValues(ArrayList<CellData> cellData) {
+            consoleLog("updateBottomRightCellValues(" + cellData + ")");
             getWidget().updateBottomRightCellValues(cellData);
         }
 
@@ -187,10 +190,16 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private Set<String> currentOverlays = new HashSet<String>();
 
     private HandlerRegistration contextMenuHandler;
+    private SpreadsheetServerRpcImpl serverRPC;
 
     //spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
-        return super.getRpcProxy(rpcInterface);
+        return getRpcProxy(rpcInterface);
+    }
+
+    @Override
+    protected <T extends ServerRpc> T getRpcProxy(Class<T> rpcInterface) {
+        return (T) serverRPC;
     }
 
     @Override
@@ -206,6 +215,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             }
         });
 
+        serverRPC = new SpreadsheetServerRpcImpl();
         getWidget().setSpreadsheetHandler(
                 getRpcProxy(SpreadsheetServerRpc.class));
         getWidget().setSheetContextMenuHandler(new SheetContextMenuHandler() {
@@ -277,13 +287,19 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    native void consoleLog(String message) /*-{
+      console.log( "connector", message );
+  }-*/;
+
     @Override
     protected Widget createWidget() {
+        consoleLog("createWidget()");
         return GWT.create(SpreadsheetWidget.class);
     }
 
     @Override
     public SpreadsheetWidget getWidget() {
+        consoleLog("getWidget()");
         return (SpreadsheetWidget) super.getWidget();
     }
 
