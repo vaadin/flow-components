@@ -45,7 +45,7 @@ export class VaadinSpreadsheet extends LitElement {
   static get properties() {
     return {
 
-      api: {type: Object},
+      //api: {type: Object},
 
       /*
       SHARED STATE
@@ -211,8 +211,11 @@ export class VaadinSpreadsheet extends LitElement {
 
   updated(_changedProperties) {
     super.updated(_changedProperties);
-    console.log(this.shadowRoot.querySelector('#mislot'));
+    console.log('vaadin-spreadsheet', 'AAAAAAAAAAAAAAAAAAAAAA');
+    console.log('vaadin-spreadsheet', '_changedProperties', _changedProperties)
+    //console.log(this.shadowRoot.querySelector('#mislot'));
     //console.log(this.querySelector('#mislot'));
+    let initial = false;
     if (!this.api) {
       this.addStyle(css_gwt);
       this.addStyle(css_valo);
@@ -226,12 +229,124 @@ export class VaadinSpreadsheet extends LitElement {
       console.log('updated')
       this.createCallbacks();
       console.log('callbacks created')
-      console.log('callback for selected cell is ', this.api.getCellSelectedCallback())
+      initial = true;
     }
+    console.log('vaadin-spreadsheet', '_changedProperties after', _changedProperties)
+    _changedProperties.forEach((oldValue, name) => {
+      console.log(`${name} changed from oldValue: ${oldValue}`, this[name]);
+      //this.setAttribute(propName, oldValue, this[propName]);
+      let newVal = this[name];
+      let notify = !initial;
+      if ('rowBufferSize' == name) {
+        this.api.setRowBufferSize(newVal, notify);
+      } else if ('columnBufferSize' == name) {
+        this.api.setColumnBufferSize(newVal, notify);
+      } else if ('rows' == name) {
+        this.api.setRows(newVal, notify);
+      } else if ('cols' == name) {
+        this.api.setCols(newVal, notify);
+      } else if ('colGroupingData' == name) {
+        this.api.setColGroupingData(newVal, notify);
+      } else if ('rowGroupingData' == name) {
+        this.api.setRowGroupingData(newVal, notify);
+      } else if ('colGroupingMax' == name) {
+        this.api.setColGroupingMax(newVal, notify);
+      } else if ('rowGroupingMax' == name) {
+        this.api.setRowGroupingMax(newVal, notify);
+      } else if ('colGroupingInversed' == name) {
+        this.api.setColGroupingInversed(newVal, notify);
+      } else if ('rowGroupingInversed' == name) {
+        this.api.setRowGroupingInversed(newVal, notify);
+      } else if ('defRowH' == name) {
+        this.api.setDefRowH(newVal, notify);
+      } else if ('defColW' == name) {
+        this.api.setDefColW(newVal, notify);
+      } else if ('rowH' == name) {
+        this.api.setRowH(newVal, notify);
+      } else if ('colW' == name) {
+        this.api.setColW(newVal, notify);
+      } else if ('reload' == name) {
+        this.api.setReload(newVal, notify);
+      } else if ('' == name) {
+        this.api.setSheetIndex(newVal, notify);
+      } else if ('sheetNames' == name) {
+        this.api.setSheetNames(newVal, notify);
+      } else if ('cellStyleToCSSStyle' == name) {
+        this.api.setCellStyleToCSSStyle(newVal, notify);
+      } else if ('rowIndexToStyleIndex' == name) {
+        this.api.setRowIndexToStyleIndex(newVal, notify);
+      } else if ('columnIndexToStyleIndex' == name) {
+        this.api.setColumnIndexToStyleIndex(newVal, notify);
+      } else if ('lockedColumnIndexes' == name) {
+        this.api.setLockedColumnIndexes(newVal, notify);
+      } else if ('lockedRowIndexes' == name) {
+        this.api.setLockedRowIndexes(newVal, notify);
+      } else if ('shiftedCellBorderStyles' == name) {
+        this.api.setShiftedCellBorderStyles(newVal, notify);
+      } else if ('conditionalFormattingStyles' == name) {
+        this.api.setConditionalFormattingStyles(newVal, notify);
+      } else if ('hiddenColumnIndexes' == name) {
+        this.api.setHiddenColumnIndexes(newVal, notify);
+      } else if ('hiddenRowIndexes' == name) {
+        this.api.setHiddenRowIndexes(newVal, notify);
+      } else if ('verticalScrollPositions' == name) {
+        this.api.setVerticalScrollPositions(newVal, notify);
+      } else if ('horizontalScrollPositions' == name) {
+        this.api.setHorizontalScrollPositions(newVal, notify);
+      } else if ('sheetProtected' == name) {
+        this.api.setSheetProtected(newVal, notify);
+      } else if ('workbookProtected' == name) {
+        this.api.setWorkbookProtected(newVal, notify);
+      } else if ('cellKeysToEditorIdMap' == name) {
+        this.api.setCellKeysToEditorIdMap(newVal, notify);
+      } else if ('componentIDtoCellKeysMap' == name) {
+        this.api.setComponentIDtoCellKeysMap(newVal, notify);
+      } else if ('hyperlinksTooltips' == name) {
+        this.api.setHyperlinksTooltips(newVal, notify);
+      } else if ('cellComments' == name) {
+        this.api.setCellComments(newVal, notify);
+      } else if ('cellCommentAuthors' == name) {
+        this.api.setCellCommentAuthors(newVal, notify);
+      } else if ('visibleCellComments' == name) {
+        this.api.setVisibleCellComments(newVal, notify);
+      } else if ('invalidFormulaCells' == name) {
+        this.api.setInvalidFormulaCells(newVal, notify);
+      } else if ('hasActions' == name) {
+        this.api.setHasActions(newVal, notify);
+      } else if ('overlays' == name) {
+        this.api.setOverlays(newVal, notify);
+      } else if ('mergedRegions' == name) {
+        this.api.setMergedRegions(newVal, notify);
+      } else if ('displayGridlines' == name) {
+        this.api.setDisplayGridlines(newVal, notify);
+      } else if ('displayRowColHeadings' == name) {
+        this.api.setDisplayRowColHeadings(newVal, notify);
+      } else if ('verticalSplitPosition' == name) {
+        this.api.setVerticalSplitPosition(newVal, notify);
+      } else if ('horizontalSplitPosition' == name) {
+        this.api.setHorizontalSplitPosition(newVal, notify);
+      } else if ('infoLabelValue' == name) {
+        this.api.setInfoLabelValue(newVal, notify);
+      } else if ('workbookChangeToggle' == name) {
+        this.api.setWorkbookChangeToggle(newVal, notify);
+      } else if ('invalidFormulaErrorMessage' == name) {
+        this.api.setInvalidFormulaErrorMessage(newVal, notify);
+      } else if ('lockFormatColumns' == name) {
+        this.api.setLockFormatColumns(newVal, notify);
+      } else if ('lockFormatRows' == name) {
+        this.api.setLockFormatRows(newVal, notify);
+      } else if ('namedRanges' == name) {
+        this.api.setNamedRanges(newVal, notify);
+      } else {
+        console.log('unsupported property ' + name)
+      }
+    });
+    if (initial) this.api.updateFromState();
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
     console.log('attribute change: ', name, newVal);
+    /*
     if ('rowBufferSize' == name) {
       this.api.setRowBufferSize(newVal);
     } else if ('columnBufferSize' == name) {
@@ -333,6 +448,8 @@ export class VaadinSpreadsheet extends LitElement {
     } else if ('namedRanges' == name) {
       this.api.setNamedRanges(newVal);
     }
+
+     */
     super.attributeChangedCallback(name, oldVal, newVal);
   }
 

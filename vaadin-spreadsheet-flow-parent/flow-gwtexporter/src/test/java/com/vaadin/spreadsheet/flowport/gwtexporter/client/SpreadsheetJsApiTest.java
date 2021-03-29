@@ -100,25 +100,25 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setRowBufferSize_isCalled() {
-        api.setRowBufferSize(100);
+        api.setRowBufferSize(100, false);
         assertEquals(100, sharedState.rowBufferSize);
     }
 
     @Test
     public void should_updateState_when_setColumnBufferSize_isCalled() {
-        api.setColumnBufferSize(100);
+        api.setColumnBufferSize(100, false);
         assertEquals(100, sharedState.columnBufferSize);
     }
 
     @Test
     public void should_updateState_when_setRows_isCalled() {
-        api.setRows(100);
+        api.setRows(100, false);
         assertEquals(100, sharedState.rows);
     }
 
     @Test
     public void should_updateState_when_setCols_isCalled() {
-        api.setCols(100);
+        api.setCols(100, false);
         assertEquals(100, sharedState.cols);
     }
 
@@ -141,63 +141,63 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setColGroupingMax_isCalled() {
-        api.setColGroupingMax(100);
+        api.setColGroupingMax(100, false);
         assertEquals(100, sharedState.colGroupingMax);
     }
 
     @Test
     public void should_updateState_when_setRowGroupingMax_isCalled() {
-        api.setRowGroupingMax(100);
+        api.setRowGroupingMax(100, false);
         assertEquals(100, sharedState.rowGroupingMax);
     }
 
     @Test
     public void should_updateState_when_setColGroupingInversed_isCalled() {
-        api.setColGroupingInversed(true);
+        api.setColGroupingInversed(true, false);
         assertEquals(true, sharedState.colGroupingInversed);
     }
 
     @Test
     public void should_updateState_when_setRowGroupingInversed_isCalled() {
-        api.setRowGroupingInversed(true);
+        api.setRowGroupingInversed(true, false);
         assertEquals(true, sharedState.rowGroupingInversed);
     }
 
     @Test
     public void should_updateState_when_setDefRowH_isCalled() {
-        api.setDefRowH(100);
+        api.setDefRowH(100, false);
         assertEquals(100f, sharedState.defRowH, 0);
     }
 
     @Test
     public void should_updateState_when_setDefColW_isCalled() {
-        api.setDefColW(100);
+        api.setDefColW(100, false);
         assertEquals(100f, sharedState.defColW, 0);
     }
 
     @Test
     public void should_updateState_when_setRowH_isCalled() {
         float[] value = new float[0];
-        api.setRowH(value);
+        api.setRowH(value, false);
         assertEquals(value, sharedState.rowH);
     }
 
     @Test
     public void should_updateState_when_setColW_isCalled() {
         int[] value = new int[0];
-        api.setColW(value);
+        api.setColW(value, false);
         assertEquals(value, sharedState.colW);
     }
 
     @Test
     public void should_updateState_when_setReload_isCalled() {
-        api.setReload(true);
+        api.setReload(true, false);
         assertEquals(true, sharedState.reload);
     }
 
     @Test
     public void should_updateState_when_setSheetIndex_isCalled() {
-        api.setSheetIndex(100);
+        api.setSheetIndex(100, false);
         assertEquals(100, sharedState.sheetIndex);
     }
 
@@ -290,7 +290,7 @@ public class SpreadsheetJsApiTest {
      */
     @Test
     public void should_updateState_when_setSheetProtected_isCalled() {
-        api.setSheetProtected(true);
+        api.setSheetProtected(true, false);
         assertEquals(true, sharedState.sheetProtected);
     }
 
@@ -352,7 +352,7 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setHasActions_isCalled() {
-        api.setHasActions(true);
+        api.setHasActions(true, false);
         assertEquals(true, sharedState.hasActions);
     }
 
@@ -375,55 +375,55 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setDisplayGridlines_isCalled() {
-        api.setDisplayGridlines(true);
+        api.setDisplayGridlines(true, false);
         assertEquals(true, sharedState.displayGridlines);
     }
 
     @Test
     public void should_updateState_when_setDisplayRowColHeadings_isCalled() {
-        api.setDisplayRowColHeadings(true);
+        api.setDisplayRowColHeadings(true, false);
         assertEquals(true, sharedState.displayRowColHeadings);
     }
 
     @Test
     public void should_updateState_when_setVerticalSplitPosition_isCalled() {
-        api.setVerticalSplitPosition(100);
+        api.setVerticalSplitPosition(100, false);
         assertEquals(100, sharedState.verticalSplitPosition);
     }
 
     @Test
     public void should_updateState_when_setHorizontalSplitPosition_isCalled() {
-        api.setHorizontalSplitPosition(100);
+        api.setHorizontalSplitPosition(100, false);
         assertEquals(100, sharedState.horizontalSplitPosition);
     }
 
     @Test
     public void should_updateState_when_setInfoLabelValue_isCalled() {
-        api.setInfoLabelValue("a");
+        api.setInfoLabelValue("a", false);
         assertEquals("a", sharedState.infoLabelValue);
     }
 
     @Test
     public void should_updateState_when_setWorkbookChangeToggle_isCalled() {
-        api.setWorkbookChangeToggle(true);
+        api.setWorkbookChangeToggle(true, false);
         assertEquals(true, sharedState.workbookChangeToggle);
     }
 
     @Test
     public void should_updateState_when_setInvalidFormulaErrorMessage_isCalled() {
-        api.setInvalidFormulaErrorMessage("a");
+        api.setInvalidFormulaErrorMessage("a", false);
         assertEquals("a", sharedState.invalidFormulaErrorMessage);
     }
 
     @Test
     public void should_updateState_when_setLockFormatColumns_isCalled() {
-        api.setLockFormatColumns(true);
+        api.setLockFormatColumns(true, false);
         assertEquals(true, sharedState.lockFormatColumns);
     }
 
     @Test
     public void should_updateState_when_setLockFormatRows_isCalled() {
-        api.setLockFormatRows(true);
+        api.setLockFormatRows(true, false);
         assertEquals(true, sharedState.lockFormatRows);
     }
 

@@ -49,15 +49,22 @@ public class Serializer {
                     } else return v.toString();
                 }).collect(Collectors.joining(",")));
             } else if (value instanceof float[]) {
-                rs.append(Arrays.stream((double[]) value).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+                String s = "";
+                for (float v : (float[]) value) {
+                    if (!"".equals(s)) s += ",";
+                    s += v;
+                }
+                rs.append(s);
             } else if (value instanceof int[]) {
                 rs.append(Arrays.stream((int[]) value).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+            } else if (value instanceof String[]) {
+                rs.append(Arrays.stream((String[]) value).map(s -> "\"" + s.replaceAll("\"", "\\\"") + "\"").collect(Collectors.joining(",")));
             } else if (Map.class.isAssignableFrom(value.getClass())) {
                 ((Map)value).forEach((k, v) -> {
                     if (!"".equals(rs.toString())) rs.append(",");
                     rs.append(k instanceof String?"\"" + ((String)k).replaceAll("\"", "\\\"") + "\"":k);
                     rs.append("@");
-                    rs.append(v);
+                    rs.append(v instanceof String?"\"" + ((String)v).replaceAll("\"", "\\\"") + "\"":v);
                 });
             }
         }

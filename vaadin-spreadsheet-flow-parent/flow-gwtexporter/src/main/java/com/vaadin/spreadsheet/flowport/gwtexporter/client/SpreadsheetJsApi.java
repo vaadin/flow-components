@@ -291,304 +291,309 @@ public class SpreadsheetJsApi {
     @NoLayout
     public Set<String> registeredEventListeners;
 
-    public void setRowBufferSize(int rowBufferSize) {
+    public void updateFromState() {
+        StateChangeEvent event = new StateChangeEvent(spreadsheetConnector, Json.createObject(), true);
+        spreadsheetConnector.onStateChanged(event);
+    }
+
+    public void setRowBufferSize(int rowBufferSize, boolean notify) {
         consoleLog("setRowBufferSize(" + rowBufferSize + ")");
         getState().rowBufferSize = rowBufferSize;
-        notifyStateChange("rowBufferSize");
+        if (notify) notifyStateChange("rowBufferSize");
     }
 
-    public void setColumnBufferSize(int columnBufferSize) {
+    public void setColumnBufferSize(int columnBufferSize, boolean notify) {
         consoleLog("setColumnBufferSize(" + columnBufferSize + ")");
         getState().columnBufferSize = columnBufferSize;
-        notifyStateChange("columnBufferSize");
+        if (notify) notifyStateChange("columnBufferSize");
     }
 
-    public void setRows(int rows) {
+    public void setRows(int rows, boolean notify) {
         consoleLog("setRows(" + rows + ")");
         getState().rows = rows;
-        notifyStateChange("rows");
+        if (notify) notifyStateChange("rows");
     }
 
-    public void setCols(int cols) {
+    public void setCols(int cols, boolean notify) {
         consoleLog("setCols(" + cols + ")");
         getState().cols = cols;
-        notifyStateChange("cols");
+        if (notify) notifyStateChange("cols");
     }
 
-    public void setColGroupingData(String colGroupingData) {
+    public void setColGroupingData(String colGroupingData, boolean notify) {
         consoleLog("setColGroupingData(" + colGroupingData + ")");
         getState().colGroupingData = Parser.parseListOfGroupingData(colGroupingData);
-        notifyStateChange("colGroupingData");
+        if (notify) notifyStateChange("colGroupingData");
     }
 
-    public void setRowGroupingData(String rowGroupingData) {
+    public void setRowGroupingData(String rowGroupingData, boolean notify) {
         consoleLog("setRowGroupingData(" + rowGroupingData + ")");
         getState().rowGroupingData = Parser.parseListOfGroupingData(rowGroupingData);
-        notifyStateChange("rowGroupingData");
+        if (notify) notifyStateChange("rowGroupingData");
     }
 
-    public void setColGroupingMax(int colGroupingMax) {
+    public void setColGroupingMax(int colGroupingMax, boolean notify) {
         consoleLog("setColGroupingMax(" + colGroupingMax + ")");
         getState().colGroupingMax = colGroupingMax;
-        notifyStateChange("colGroupingMax");
+        if (notify) notifyStateChange("colGroupingMax");
     }
 
-    public void setRowGroupingMax(int rowGroupingMax) {
+    public void setRowGroupingMax(int rowGroupingMax, boolean notify) {
         consoleLog("setRowGroupingMax(" + rowGroupingMax + ")");
         getState().rowGroupingMax = rowGroupingMax;
-        notifyStateChange("rowGroupingMax");
+        if (notify) notifyStateChange("rowGroupingMax");
     }
 
-    public void setColGroupingInversed(boolean colGroupingInversed) {
+    public void setColGroupingInversed(boolean colGroupingInversed, boolean notify) {
         consoleLog("setColGroupingInversed(" + colGroupingInversed + ")");
         getState().colGroupingInversed = colGroupingInversed;
-        notifyStateChange("colGroupingInversed");
+        if (notify) notifyStateChange("colGroupingInversed");
     }
 
-    public void setRowGroupingInversed(boolean rowGroupingInversed) {
+    public void setRowGroupingInversed(boolean rowGroupingInversed, boolean notify) {
         consoleLog("setRowGroupingInversed(" + rowGroupingInversed + ")");
         getState().rowGroupingInversed = rowGroupingInversed;
-        notifyStateChange("rowGroupingInversed");
+        if (notify) notifyStateChange("rowGroupingInversed");
     }
 
-    public void setDefRowH(float defRowH) {
+    public void setDefRowH(float defRowH, boolean notify) {
         consoleLog("setDefRowH(" + defRowH + ")");
         getState().defRowH = defRowH;
-        notifyStateChange("defRowH");
+        if (notify) notifyStateChange("defRowH");
     }
 
-    public void setDefColW(int defColW) {
+    public void setDefColW(int defColW, boolean notify) {
         consoleLog("setDefColW(" + defColW + ")");
         getState().defColW = defColW;
-        notifyStateChange("defColW");
+        if (notify) notifyStateChange("defColW");
     }
 
-    public void setRowH(float[] rowH) {
+    public void setRowH(float[] rowH, boolean notify) {
         consoleLog("setRowH(" + rowH + ")");
         getState().rowH = rowH;
-        notifyStateChange("rowH");
+        if (notify) notifyStateChange("rowH");
     }
 
-    public void setColW(int[] colW) {
+    public void setColW(int[] colW, boolean notify) {
         consoleLog("setColW(" + colW + ")");
         getState().colW = colW;
-        notifyStateChange("colW");
+        if (notify) notifyStateChange("colW");
     }
 
-    public void setReload(boolean reload) {
+    public void setReload(boolean reload, boolean notify) {
         consoleLog("setReload(" + reload + ")");
         getState().reload = reload;
-        notifyStateChange("reload");
+        if (notify) notifyStateChange("reload");
     }
 
-    public void setSheetIndex(int sheetIndex) {
+    public void setSheetIndex(int sheetIndex, boolean notify) {
         consoleLog("setSheetIndex(" + sheetIndex + ")");
         getState().sheetIndex = sheetIndex;
-        notifyStateChange("sheetIndex");
+        if (notify) notifyStateChange("sheetIndex");
     }
 
-    public void setSheetNames(String sheetNames) {
+    public void setSheetNames(String sheetNames, boolean notify) {
         consoleLog("setSheetNames(" + sheetNames + ")");
         getState().sheetNames = Parser.parseArrayOfStrings(sheetNames);
-        notifyStateChange("sheetNames");
+        if (notify) notifyStateChange("sheetNames");
     }
 
-    public void setCellStyleToCSSStyle(String cellStyleToCSSStyle) {
+    public void setCellStyleToCSSStyle(String cellStyleToCSSStyle, boolean notify) {
         consoleLog("setCellStyleToCSSStyle(" + cellStyleToCSSStyle + ")");
         getState().cellStyleToCSSStyle = Parser.parseMapIntegerString(cellStyleToCSSStyle);
-        notifyStateChange("cellStyleToCSSStyle");
+        if (notify) notifyStateChange("cellStyleToCSSStyle");
     }
 
-    public void setRowIndexToStyleIndex(String rowIndexToStyleIndex) {
+    public void setRowIndexToStyleIndex(String rowIndexToStyleIndex, boolean notify) {
         consoleLog("setRowIndexToStyleIndex(" + rowIndexToStyleIndex + ")");
         getState().rowIndexToStyleIndex = Parser.parseMapIntegerInteger(rowIndexToStyleIndex);
-        notifyStateChange("rowIndexToStyleIndex");
+        if (notify) notifyStateChange("rowIndexToStyleIndex");
     }
 
-    public void setColumnIndexToStyleIndex(String columnIndexToStyleIndex) {
+    public void setColumnIndexToStyleIndex(String columnIndexToStyleIndex, boolean notify) {
         consoleLog("setColumnIndexToStyleIndex(" + columnIndexToStyleIndex + ")");
         getState().columnIndexToStyleIndex = Parser.parseMapIntegerInteger(columnIndexToStyleIndex);
-        notifyStateChange("columnIndexToStyleIndex");
+        if (notify) notifyStateChange("columnIndexToStyleIndex");
     }
 
-    public void setLockedColumnIndexes(String lockedColumnIndexes) {
+    public void setLockedColumnIndexes(String lockedColumnIndexes, boolean notify) {
         consoleLog("setLockedColumnIndexes(" + lockedColumnIndexes + ")");
         getState().lockedColumnIndexes = Parser.parseSetInteger(lockedColumnIndexes);
-        notifyStateChange("lockedColumnIndexes");
+        if (notify) notifyStateChange("lockedColumnIndexes");
     }
 
-    public void setLockedRowIndexes(String lockedRowIndexes) {
+    public void setLockedRowIndexes(String lockedRowIndexes, boolean notify) {
         consoleLog("setLockedRowIndexes(" + lockedRowIndexes + ")");
         getState().lockedRowIndexes = Parser.parseSetInteger(lockedRowIndexes);
-        notifyStateChange("lockedRowIndexes");
+        if (notify) notifyStateChange("lockedRowIndexes");
     }
 
-    public void setShiftedCellBorderStyles(String shiftedCellBorderStyles) {
+    public void setShiftedCellBorderStyles(String shiftedCellBorderStyles, boolean notify) {
         consoleLog("setShiftedCellBorderStyles(" + shiftedCellBorderStyles + ")");
         getState().shiftedCellBorderStyles = Parser.parseArraylistString(shiftedCellBorderStyles);
-        notifyStateChange("shiftedCellBorderStyles");
+        if (notify) notifyStateChange("shiftedCellBorderStyles");
     }
 
-    public void setConditionalFormattingStyles(String conditionalFormattingStyles) {
+    public void setConditionalFormattingStyles(String conditionalFormattingStyles, boolean notify) {
         consoleLog("setConditionalFormattingStyles(" + conditionalFormattingStyles + ")");
         getState().conditionalFormattingStyles = Parser.parseMapIntegerString(conditionalFormattingStyles);
-        notifyStateChange("conditionalFormattingStyles");
+        if (notify) notifyStateChange("conditionalFormattingStyles");
     }
 
-    public void setHiddenColumnIndexes(String hiddenColumnIndexes) {
+    public void setHiddenColumnIndexes(String hiddenColumnIndexes, boolean notify) {
         consoleLog("setHiddenColumnIndexes(" + hiddenColumnIndexes + ")");
         getState().hiddenColumnIndexes = Parser.parseArraylistInteger(hiddenColumnIndexes);
-        notifyStateChange("hiddenColumnIndexes");
+        if (notify) notifyStateChange("hiddenColumnIndexes");
     }
 
-    public void setHiddenRowIndexes(String hiddenRowIndexes) {
+    public void setHiddenRowIndexes(String hiddenRowIndexes, boolean notify) {
         consoleLog("setHiddenRowIndexes(" + hiddenRowIndexes + ")");
         getState().hiddenRowIndexes = Parser.parseArraylistInteger(hiddenRowIndexes);
-        notifyStateChange("hiddenRowIndexes");
+        if (notify) notifyStateChange("hiddenRowIndexes");
     }
 
-    public void setVerticalScrollPositions(String verticalScrollPositions) {
+    public void setVerticalScrollPositions(String verticalScrollPositions, boolean notify) {
         consoleLog("setVerticalScrollPositions(" + verticalScrollPositions + ")");
         getState().verticalScrollPositions = Parser.parseArrayInt(verticalScrollPositions);
-        notifyStateChange("verticalScrollPositions");
+        if (notify) notifyStateChange("verticalScrollPositions");
     }
 
-    public void setHorizontalScrollPositions(String horizontalScrollPositions) {
+    public void setHorizontalScrollPositions(String horizontalScrollPositions, boolean notify) {
         consoleLog("setHorizontalScrollPositions(" + horizontalScrollPositions + ")");
         getState().horizontalScrollPositions = Parser.parseArrayInt(horizontalScrollPositions);
-        notifyStateChange("horizontalScrollPositions");
+        if (notify) notifyStateChange("horizontalScrollPositions");
     }
 
-    public void setSheetProtected(boolean sheetProtected) {
+    public void setSheetProtected(boolean sheetProtected, boolean notify) {
         consoleLog("setSheetProtected(" + sheetProtected + ")");
         getState().sheetProtected = sheetProtected;
-        notifyStateChange("sheetProtected");
+        if (notify) notifyStateChange("sheetProtected");
     }
 
-    public void setWorkbookProtected(boolean workbookProtected) {
+    public void setWorkbookProtected(boolean workbookProtected, boolean notify) {
         consoleLog("setWorkbookProtected(" + workbookProtected + ")");
         getState().workbookProtected = workbookProtected;
-        notifyStateChange("workbookProtected");
+        if (notify) notifyStateChange("workbookProtected");
     }
 
-    public void setCellKeysToEditorIdMap(String cellKeysToEditorIdMap) {
+    public void setCellKeysToEditorIdMap(String cellKeysToEditorIdMap, boolean notify) {
         consoleLog("setCellKeysToEditorIdMap(" + cellKeysToEditorIdMap + ")");
         getState().cellKeysToEditorIdMap = Parser.parseMapStringString(cellKeysToEditorIdMap);
-        notifyStateChange("cellKeysToEditorIdMap");
+        if (notify) notifyStateChange("cellKeysToEditorIdMap");
     }
 
-    public void setComponentIDtoCellKeysMap(String componentIDtoCellKeysMap) {
+    public void setComponentIDtoCellKeysMap(String componentIDtoCellKeysMap, boolean notify) {
         consoleLog("setComponentIDtoCellKeysMap(" + componentIDtoCellKeysMap + ")");
         getState().componentIDtoCellKeysMap = Parser.parseMapStringString(componentIDtoCellKeysMap);
-        notifyStateChange("componentIDtoCellKeysMap");
+        if (notify) notifyStateChange("componentIDtoCellKeysMap");
     }
 
-    public void setHyperlinksTooltips(String hyperlinksTooltips) {
+    public void setHyperlinksTooltips(String hyperlinksTooltips, boolean notify) {
         consoleLog("setHyperlinksTooltips(" + hyperlinksTooltips + ")");
         getState().hyperlinksTooltips = Parser.parseMapStringString(hyperlinksTooltips);
-        notifyStateChange("hyperlinksTooltips");
+        if (notify) notifyStateChange("hyperlinksTooltips");
     }
 
-    public void setCellComments(String cellComments) {
+    public void setCellComments(String cellComments, boolean notify) {
         consoleLog("setCellComments(" + cellComments + ")");
         getState().cellComments = Parser.parseMapStringString(cellComments);
-        notifyStateChange("cellComments");
+        if (notify) notifyStateChange("cellComments");
     }
 
-    public void setCellCommentAuthors(String cellCommentAuthors) {
+    public void setCellCommentAuthors(String cellCommentAuthors, boolean notify) {
         consoleLog("setCellCommentAuthors(" + cellCommentAuthors + ")");
         getState().cellCommentAuthors = Parser.parseMapStringString(cellCommentAuthors);
-        notifyStateChange("cellCommentAuthors");
+        if (notify) notifyStateChange("cellCommentAuthors");
     }
 
-    public void setVisibleCellComments(String visibleCellComments) {
+    public void setVisibleCellComments(String visibleCellComments, boolean notify) {
         consoleLog("setVisibleCellComments(" + visibleCellComments + ")");
         getState().visibleCellComments = Parser.parseArraylistString(visibleCellComments);
-        notifyStateChange("visibleCellComments");
+        if (notify) notifyStateChange("visibleCellComments");
     }
 
-    public void setInvalidFormulaCells(String invalidFormulaCells) {
+    public void setInvalidFormulaCells(String invalidFormulaCells, boolean notify) {
         consoleLog("setInvalidFormulaCells(" + invalidFormulaCells + ")");
         getState().invalidFormulaCells = Parser.parseSetString(invalidFormulaCells);
-        notifyStateChange("invalidFormulaCells");
+        if (notify) notifyStateChange("invalidFormulaCells");
     }
 
-    public void setHasActions(boolean hasActions) {
+    public void setHasActions(boolean hasActions, boolean notify) {
         consoleLog("setHasActions(" + hasActions + ")");
         getState().hasActions = hasActions;
-        notifyStateChange("hasActions");
+        if (notify) notifyStateChange("hasActions");
     }
 
-    public void setOverlays(String overlays) {
+    public void setOverlays(String overlays, boolean notify) {
         consoleLog("setOverlays(" + overlays + ")");
         getState().overlays = Parser.parseMapStringOverlayInfo(overlays);
-        notifyStateChange("overlays");
+        if (notify) notifyStateChange("overlays");
     }
 
-    public void setMergedRegions(String mergedRegions) {
+    public void setMergedRegions(String mergedRegions, boolean notify) {
         consoleLog("setMergedRegions(" + mergedRegions + ")");
         getState().mergedRegions = Parser.parseArrayMergedRegion(mergedRegions);
-        notifyStateChange("mergedRegions");
+        if (notify) notifyStateChange("mergedRegions");
     }
 
-    public void setDisplayGridlines(boolean displayGridlines) {
+    public void setDisplayGridlines(boolean displayGridlines, boolean notify) {
         consoleLog("setDisplayGridlines(" + displayGridlines + ")");
         getState().displayGridlines = displayGridlines;
-        notifyStateChange("displayGridlines");
+        if (notify) notifyStateChange("displayGridlines");
     }
 
-    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
+    public void setDisplayRowColHeadings(boolean displayRowColHeadings, boolean notify) {
         consoleLog("setDisplayRowColHeadings(" + displayRowColHeadings + ")");
         getState().displayRowColHeadings = displayRowColHeadings;
-        notifyStateChange("displayRowColHeadings");
+        if (notify) notifyStateChange("displayRowColHeadings");
     }
 
-    public void setVerticalSplitPosition(int verticalSplitPosition) {
+    public void setVerticalSplitPosition(int verticalSplitPosition, boolean notify) {
         consoleLog("setVerticalSplitPosition(" + verticalSplitPosition + ")");
         getState().verticalSplitPosition = verticalSplitPosition;
-        notifyStateChange("verticalSplitPosition");
+        if (notify) notifyStateChange("verticalSplitPosition");
     }
 
-    public void setHorizontalSplitPosition(int horizontalSplitPosition) {
+    public void setHorizontalSplitPosition(int horizontalSplitPosition, boolean notify) {
         consoleLog("setHorizontalSplitPosition(" + horizontalSplitPosition + ")");
         getState().horizontalSplitPosition = horizontalSplitPosition;
-        notifyStateChange("horizontalSplitPosition");
+        if (notify) notifyStateChange("horizontalSplitPosition");
     }
 
-    public void setInfoLabelValue(String infoLabelValue) {
+    public void setInfoLabelValue(String infoLabelValue, boolean notify) {
         consoleLog("setInfoLabelValue(" + infoLabelValue + ")");
         getState().infoLabelValue = infoLabelValue;
-        notifyStateChange("infoLabelValue");
+        if (notify) notifyStateChange("infoLabelValue");
     }
 
-    public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
+    public void setWorkbookChangeToggle(boolean workbookChangeToggle, boolean notify) {
         consoleLog("setWorkbookChangeToggle(" + workbookChangeToggle + ")");
         getState().workbookChangeToggle = workbookChangeToggle;
-        notifyStateChange("workbookChangeToggle");
+        if (notify) notifyStateChange("workbookChangeToggle");
     }
 
-    public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
+    public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage, boolean notify) {
         consoleLog("setInvalidFormulaErrorMessage(" + invalidFormulaErrorMessage + ")");
         getState().invalidFormulaErrorMessage = invalidFormulaErrorMessage;
-        notifyStateChange("invalidFormulaErrorMessage");
+        if (notify) notifyStateChange("invalidFormulaErrorMessage");
     }
 
-    public void setLockFormatColumns(boolean lockFormatColumns) {
+    public void setLockFormatColumns(boolean lockFormatColumns, boolean notify) {
         consoleLog("setLockFormatColumns(" + lockFormatColumns + ")");
         getState().lockFormatColumns = lockFormatColumns;
-        notifyStateChange("lockFormatColumns");
+        if (notify) notifyStateChange("lockFormatColumns");
     }
 
-    public void setLockFormatRows(boolean lockFormatRows) {
+    public void setLockFormatRows(boolean lockFormatRows, boolean notify) {
         consoleLog("setLockFormatRows(" + lockFormatRows + ")");
         getState().lockFormatRows = lockFormatRows;
-        notifyStateChange("lockFormatRows");
+        if (notify) notifyStateChange("lockFormatRows");
     }
 
-    public void setNamedRanges(String namedRanges) {
+    public void setNamedRanges(String namedRanges, boolean notify) {
         consoleLog("setNamedRanges(" + namedRanges + ")");
         getState().namedRanges = Parser.parseArraylistString(namedRanges);
-        notifyStateChange("namedRanges");
+        if (notify) notifyStateChange("namedRanges");
     }
 
     public void notifyStateChange(String propName) {
@@ -667,198 +672,159 @@ public class SpreadsheetJsApi {
     SERVER RPC METHOD CALLBACKS
      */
     public void setGroupingCollapsedCallback(SerializedCallback callback) {
-        consoleLog("setGroupingCollapsedCallback(" + callback + ")");
         getServerRpcInstance().setGroupingCollapsedCallback(callback);
     }
 
     public void setLevelHeaderClickedCallback(SerializedCallback callback) {
-        consoleLog("setLevelHeaderClickedCallback(" + callback + ")");
         getServerRpcInstance().setLevelHeaderClickedCallback(callback);
     }
 
     public void setOnSheetScrollCallback(SerializedCallback callback) {
-        consoleLog("setOnSheetScrollCallback(" + callback + ")");
         getServerRpcInstance().setOnSheetScrollCallback(callback);
     }
 
     public void setSheetAddressChangedCallback(StringCallback callback) {
-        consoleLog("setSheetAddressChangedCallback(" + callback + ")");
         getServerRpcInstance().setSheetAddressChangedCallback(callback);
     }
 
     public void setCellSelectedCallback(SerializedCallback callback) {
-        consoleLog("setCellSelectedCallback(" + callback + ")");
         getServerRpcInstance().setCellSelectedCallback(callback);
     }
 
     public void setCellRangeSelectedCallback(SerializedCallback callback) {
-        consoleLog("setCellRangeSelectedCallback(" + callback + ")");
         getServerRpcInstance().setCellRangeSelectedCallback(callback);
     }
 
     public void setCellAddedToSelectionAndSelectedCallback(SerializedCallback callback) {
-        consoleLog("setCellAddedToSelectionAndSelectedCallback(" + callback + ")");
         getServerRpcInstance().setCellAddedToSelectionAndSelectedCallback(callback);
     }
 
     public void setCellsAddedToRangeSelectionCallback(SerializedCallback callback) {
-        consoleLog("setCellsAddedToRangeSelectionCallback(" + callback + ")");
         getServerRpcInstance().setCellsAddedToRangeSelectionCallback(callback);
     }
 
     public void setRowSelectedCallback(SerializedCallback callback) {
-        consoleLog("setRowSelectedCallback(" + callback + ")");
         getServerRpcInstance().setRowSelectedCallback(callback);
     }
 
     public void setRowAddedToRangeSelectionCallback(SerializedCallback callback) {
-        consoleLog("setRowAddedToRangeSelectionCallback(" + callback + ")");
         getServerRpcInstance().setRowAddedToRangeSelectionCallback(callback);
     }
 
     public void setColumnSelectedCallback(SerializedCallback callback) {
-        consoleLog("setColumnSelectedCallback(" + callback + ")");
         getServerRpcInstance().setColumnSelectedCallback(callback);
     }
 
     public void setColumnAddedToSelectionCallback(SerializedCallback callback) {
-        consoleLog("setColumnAddedToSelectionCallback(" + callback + ")");
         getServerRpcInstance().setColumnAddedToSelectionCallback(callback);
     }
 
     public void setSelectionIncreasePaintedCallback(SerializedCallback callback) {
-        consoleLog("setSelectionIncreasePaintedCallback(" + callback + ")");
         getServerRpcInstance().setSelectionIncreasePaintedCallback(callback);
     }
 
 
     public void setSelectionDecreasePaintedCallback(SerializedCallback callback) {
-        consoleLog("setSelectionDecreasePaintedCallback(" + callback + ")");
         getServerRpcInstance().setSelectionDecreasePaintedCallback(callback);
     }
 
     public void setCellValueEditedCallback(SerializedCallback callback) {
-        consoleLog("setCellValueEditedCallback(" + callback + ")");
         getServerRpcInstance().setCellValueEditedCallback(callback);
     }
 
     public void setSheetSelectedCallback(SerializedCallback callback) {
-        consoleLog("setSheetSelectedCallback(" + callback + ")");
         getServerRpcInstance().setSheetSelectedCallback(callback);
     }
 
     public void setSheetRenamedCallback(SerializedCallback callback) {
-        consoleLog("setSheetRenamedCallback(" + callback + ")");
         getServerRpcInstance().setSheetRenamedCallback(callback);
     }
 
     public void setSheetCreatedCallback(SerializedCallback callback) {
-        consoleLog("setSheetCreatedCallback(" + callback + ")");
         getServerRpcInstance().setSheetCreatedCallback(callback);
     }
 
     public void setCellRangePaintedCallback(SerializedCallback callback) {
-        consoleLog("setCellRangePaintedCallback(" + callback + ")");
         getServerRpcInstance().setCellRangePaintedCallback(callback);
     }
 
     public void setDeleteSelectedCellsCallback(SerializedCallback callback) {
-        consoleLog("setDeleteSelectedCellsCallback(" + callback + ")");
         getServerRpcInstance().setDeleteSelectedCellsCallback(callback);
     }
 
     public void setLinkCellClickedCallback(SerializedCallback callback) {
-        consoleLog("setLinkCellClickedCallback(" + callback + ")");
         getServerRpcInstance().setLinkCellClickedCallback(callback);
     }
 
     public void setRowsResizedCallback(SerializedCallback callback) {
-        consoleLog("setRowsResizedCallback(" + callback + ")");
         getServerRpcInstance().setRowsResizedCallback(callback);
     }
 
     public void setColumnResizedCallback(SerializedCallback callback) {
-        consoleLog("setColumnResizedCallback(" + callback + ")");
         getServerRpcInstance().setColumnResizedCallback(callback);
     }
 
     public void setOnRowAutofitCallback(IntCallback callback) {
-        consoleLog("setOnRowAutofitCallback(" + callback + ")");
         getServerRpcInstance().setOnRowAutofitCallback(callback);
     }
 
     public void setOnColumnAutofitCallback(IntCallback callback) {
-        consoleLog("setOnColumnAutofitCallback(" + callback + ")");
         getServerRpcInstance().setOnColumnAutofitCallback(callback);
     }
 
     public void setOnUndoCallback(VoidCallback callback) {
-        consoleLog("setOnUndoCallback(" + callback + ")");
         getServerRpcInstance().setOnUndoCallback(callback);
     }
 
     public void setOnRedoCallback(VoidCallback callback) {
-        consoleLog("setOnRedoCallback(" + callback + ")");
         getServerRpcInstance().setOnRedoCallback(callback);
     }
 
     public void setSetCellStyleWidthRatiosCallback(SerializedCallback callback) {
-        consoleLog("setSetCellStyleWidthRatiosCallback(" + callback + ")");
         getServerRpcInstance().setSetCellStyleWidthRatiosCallback(callback);
     }
 
     public void setProtectedCellWriteAttemptedCallback(VoidCallback callback) {
-        consoleLog("setProtectedCellWriteAttemptedCallback(" + callback + ")");
         getServerRpcInstance().setProtectedCellWriteAttemptedCallback(callback);
     }
 
     public void setOnPasteCallback(StringCallback callback) {
-        consoleLog("setOnPasteCallback(" + callback + ")");
         getServerRpcInstance().setOnPasteCallback(callback);
     }
 
     public void setClearSelectedCellsOnCutCallback(VoidCallback callback) {
-        consoleLog("setClearSelectedCellsOnCutCallback(" + callback + ")");
         getServerRpcInstance().setClearSelectedCellsOnCutCallback(callback);
     }
 
     public void setUpdateCellCommentCallback(SerializedCallback callback) {
-        consoleLog("setUpdateCellCommentCallback(" + callback + ")");
         getServerRpcInstance().setUpdateCellCommentCallback(callback);
     }
 
     public void setOnConnectorInitCallback(VoidCallback callback) {
-        consoleLog("setOnConnectorInitCallback(" + callback + ")");
         getServerRpcInstance().setOnConnectorInitCallback(callback);
     }
 
     public void setContextMenuOpenOnSelectionCallback(SerializedCallback callback) {
-        consoleLog("setContextMenuOpenOnSelectionCallback(" + callback + ")");
         getServerRpcInstance().setContextMenuOpenOnSelectionCallback(callback);
     }
 
     public void setActionOnCurrentSelectionCallback(StringCallback callback) {
-        consoleLog("setActionOnCurrentSelectionCallback(" + callback + ")");
         getServerRpcInstance().setActionOnCurrentSelectionCallback(callback);
     }
 
     public void setRowHeaderContextMenuOpenCallback(IntCallback callback) {
-        consoleLog("setRowHeaderContextMenuOpenCallback(" + callback + ")");
         getServerRpcInstance().setRowHeaderContextMenuOpenCallback(callback);
     }
 
     public void setActionOnRowHeaderCallback(StringCallback callback) {
-        consoleLog("setActionOnRowHeaderCallback(" + callback + ")");
         getServerRpcInstance().setActionOnRowHeaderCallback(callback);
     }
 
     public void setColumnHeaderContextMenuOpenCallback(IntCallback callback) {
-        consoleLog("setColumnHeaderContextMenuOpenCallback(" + callback + ")");
         getServerRpcInstance().setColumnHeaderContextMenuOpenCallback(callback);
     }
 
     public void setActionOnColumnHeaderCallback(StringCallback callback) {
-        consoleLog("setActionOnColumnHeaderCallback(" + callback + ")");
         getServerRpcInstance().setActionOnColumnHeaderCallback(callback);
     }
 

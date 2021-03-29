@@ -124,34 +124,39 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
     }
 
     private List<String> parse(String payload) {
-        List<String> tokens = new ArrayList<>();
+        return parse(payload, ',');
+    }
+
+    private List<String> parse(String payload, char separator) {
+        ArrayList<String> tokens = new ArrayList<>();
         if (payload != null) {
             int pos = 0;
             int start = 0;
+            boolean hasNonString = false;
             boolean insideString = false;
             boolean escaped = false;
             while (pos < payload.length()) {
-                if (',' == payload.charAt(pos) && !insideString) {
-                    if (pos > start) tokens.add(payload.substring(start, pos));
+                if (separator == payload.charAt(pos) && !insideString) {
+                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
                     else tokens.add("");
                     start = pos + 1;
+                    hasNonString = false;
                 } else if ('"' == payload.charAt(pos)) {
                     if (!escaped) {
                         if (insideString) { // end of string
-                            tokens.add(payload.substring(start, pos));
+                            insideString = false;
                         } else { // start of string
                             insideString = true;
-                            start = pos + 1;
                         }
                     } else {
                         escaped = false;
                     }
                 } else if ('\\' == payload.charAt(pos)) {
                     escaped = true;
-                }
+                } else if (!insideString) hasNonString = true;
                 pos++;
             }
-            if (pos > start) tokens.add(payload.substring(start, pos));
+            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
         }
         return tokens;
     }

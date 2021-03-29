@@ -95,9 +95,12 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand;
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
+import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
+import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.component.spreadsheet.shared.SpreadsheetState;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
+import com.vaadin.flow.component.spreadsheet.shared.URLReference;
 
 /**
  * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
@@ -108,7 +111,7 @@ import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.32")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.44")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
@@ -124,251 +127,665 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     SHARED STATE PROPERTIES
      */
 
+    // from TabIndexState
+
+    public int tabIndex = 0;
+
+    // from AbstractComponentState
+
+    private String height = "";
+    private String width = "";
+    private String description = "";
+    private ContentMode descriptionContentMode = ContentMode.PREFORMATTED;
+    // Note: for the caption, there is a difference between null and an empty
+    // string!
+    private String caption = null;
+    private List<String> styles = null;
+    private String id = null;
+    private String primaryStyleName = null;
+
+    /** HTML formatted error message for the component. */
+    private String errorMessage = null;
+
+    /**
+     * Level of error.
+     *
+     * @since 8.2
+     */
+    private ErrorLevel errorLevel = null;
+
+    private boolean captionAsHtml = false;
+
+    // from SaredState
+
+    private Map<String, URLReference> resources = new HashMap<>();
+
+    private boolean enabled = true;
+
+    /**
+     * A set of event identifiers with registered listeners.
+     */
+    private Set<String> registeredEventListeners;
+
+    // spreadsheetState
+
+    // @DelegateToWidget
+    private int rowBufferSize = 200;
+
+    // @DelegateToWidget
+    private int columnBufferSize = 200;
+
+    // @DelegateToWidget
+    private int rows;
+
+    // @DelegateToWidget
+    private int cols;
+
+    // @DelegateToWidget
+    private List<GroupingData> colGroupingData;
+    // @DelegateToWidget
+    private List<GroupingData> rowGroupingData;
+
+    // @DelegateToWidget
+    private int colGroupingMax;
+    // @DelegateToWidget
+    private int rowGroupingMax;
+
+    // @DelegateToWidget
+    private boolean colGroupingInversed;
+    // @DelegateToWidget
+    private boolean rowGroupingInversed;
+
+    // @DelegateToWidget
+    private float defRowH;
+    // @DelegateToWidget
+    private int defColW;
+
+    // @DelegateToWidget
+    private float[] rowH;
+    // @DelegateToWidget
+    private int[] colW;
+
+    /** should the sheet be reloaded on client side */
+    private boolean reload;
+
+    /** 1-based */
+    private int sheetIndex = 1;
+
+    private String[] sheetNames = null;
+
+    // @DelegateToWidget
+    private HashMap<Integer, String> cellStyleToCSSStyle = null;
+    // @DelegateToWidget
+    private HashMap<Integer, Integer> rowIndexToStyleIndex = null;
+    // @DelegateToWidget
+    private HashMap<Integer, Integer> columnIndexToStyleIndex = null;
+    // @DelegateToWidget
+    private Set<Integer> lockedColumnIndexes = null;
+    // @DelegateToWidget
+    private Set<Integer> lockedRowIndexes = null;
+
+    // @DelegateToWidget
+    private ArrayList<String> shiftedCellBorderStyles = null;
+
+    /**
+     * All conditional formatting styles for this sheet.
+     */
+    // @DelegateToWidget
+    private HashMap<Integer, String> conditionalFormattingStyles = null;
+
+    /** 1-based */
+    // @DelegateToWidget
+    private ArrayList<Integer> hiddenColumnIndexes = null;
+
+    /** 1-based */
+    // @DelegateToWidget
+    private ArrayList<Integer> hiddenRowIndexes = null;
+
+    // @DelegateToWidget
+    private int[] verticalScrollPositions;
+
+    // @DelegateToWidget
+    private int[] horizontalScrollPositions;
+
+    private boolean sheetProtected;
+
+    // @DelegateToWidget
+    private boolean workbookProtected;
+
+    private HashMap<String, String> cellKeysToEditorIdMap;
+
+    private HashMap<String, String> componentIDtoCellKeysMap;
+
+    // Cell CSS key to link tooltip (usually same as address)
+    // @DelegateToWidget
+    private HashMap<String, String> hyperlinksTooltips;
+
+    private HashMap<String, String> cellComments;
+    private HashMap<String, String> cellCommentAuthors;
+
+    private ArrayList<String> visibleCellComments;
+
+    private Set<String> invalidFormulaCells;
+
+    private boolean hasActions;
+
+    private HashMap<String, OverlayInfo> overlays;
+
+    private ArrayList<MergedRegion> mergedRegions;
+
+    // @DelegateToWidget
+    private boolean displayGridlines = true;
+
+    // @DelegateToWidget
+    private boolean displayRowColHeadings = true;
+
+    // @DelegateToWidget
+    private int verticalSplitPosition = 0;
+    // @DelegateToWidget
+    private int horizontalSplitPosition = 0;
+
+    // @DelegateToWidget
+    private String infoLabelValue;
+
+    private boolean workbookChangeToggle;
+
+    // @DelegateToWidget
+    private String invalidFormulaErrorMessage = "Invalid formula";
+
+    // @DelegateToWidget
+    private boolean lockFormatColumns = true;
+
+    // @DelegateToWidget
+    private boolean lockFormatRows = true;
+
+    // @DelegateToWidget
+    private List<String> namedRanges;
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public ContentMode getDescriptionContentMode() {
+        return descriptionContentMode;
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
+    public List<String> getStyles() {
+        return styles;
+    }
+
+    public String getPrimaryStyleName() {
+        return primaryStyleName;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public ErrorLevel getErrorLevel() {
+        return errorLevel;
+    }
+
+    public boolean isCaptionAsHtml() {
+        return captionAsHtml;
+    }
+
+    public Map<String, URLReference> getResources() {
+        return resources;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public Set<String> getRegisteredEventListeners() {
+        return registeredEventListeners;
+    }
+
+    public int getColumnBufferSize() {
+        return columnBufferSize;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public List<GroupingData> getColGroupingData() {
+        return colGroupingData;
+    }
+
+    public List<GroupingData> getRowGroupingData() {
+        return rowGroupingData;
+    }
+
+    public int getColGroupingMax() {
+        return colGroupingMax;
+    }
+
+    public int getRowGroupingMax() {
+        return rowGroupingMax;
+    }
+
+    public boolean isColGroupingInversed() {
+        return colGroupingInversed;
+    }
+
+    public boolean isRowGroupingInversed() {
+        return rowGroupingInversed;
+    }
+
+    public float getDefRowH() {
+        return defRowH;
+    }
+
+    public int getDefColW() {
+        return defColW;
+    }
+
+    public float[] getRowH() {
+        return rowH;
+    }
+
+    public int[] getColW() {
+        return colW;
+    }
+
+    public boolean isReload() {
+        return reload;
+    }
+
+    public int getSheetIndex() {
+        return sheetIndex;
+    }
+
+    public String[] getSheetNames() {
+        return sheetNames;
+    }
+
+    public HashMap<Integer, String> getCellStyleToCSSStyle() {
+        return cellStyleToCSSStyle;
+    }
+
+    public HashMap<Integer, Integer> getRowIndexToStyleIndex() {
+        return rowIndexToStyleIndex;
+    }
+
+    public HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
+        return columnIndexToStyleIndex;
+    }
+
+    public Set<Integer> getLockedColumnIndexes() {
+        return lockedColumnIndexes;
+    }
+
+    public Set<Integer> getLockedRowIndexes() {
+        return lockedRowIndexes;
+    }
+
+    public ArrayList<String> getShiftedCellBorderStyles() {
+        return shiftedCellBorderStyles;
+    }
+
+    public HashMap<Integer, String> getConditionalFormattingStyles() {
+        return conditionalFormattingStyles;
+    }
+
+    public ArrayList<Integer> getHiddenColumnIndexes() {
+        return hiddenColumnIndexes;
+    }
+
+    public ArrayList<Integer> getHiddenRowIndexes() {
+        return hiddenRowIndexes;
+    }
+
+    public int[] getVerticalScrollPositions() {
+        return verticalScrollPositions;
+    }
+
+    public int[] getHorizontalScrollPositions() {
+        return horizontalScrollPositions;
+    }
+
+    public boolean isSheetProtected() {
+        return sheetProtected;
+    }
+
+    public boolean isWorkbookProtected() {
+        return workbookProtected;
+    }
+
+    public HashMap<String, String> getCellKeysToEditorIdMap() {
+        return cellKeysToEditorIdMap;
+    }
+
+    public HashMap<String, String> getComponentIDtoCellKeysMap() {
+        return componentIDtoCellKeysMap;
+    }
+
+    public HashMap<String, String> getHyperlinksTooltips() {
+        return hyperlinksTooltips;
+    }
+
+    public HashMap<String, String> getCellComments() {
+        return cellComments;
+    }
+
+    public HashMap<String, String> getCellCommentAuthors() {
+        return cellCommentAuthors;
+    }
+
+    public ArrayList<String> getVisibleCellComments() {
+        return visibleCellComments;
+    }
+
+    public Set<String> getInvalidFormulaCells() {
+        return invalidFormulaCells;
+    }
+
+    public boolean isHasActions() {
+        return hasActions;
+    }
+
+    public HashMap<String, OverlayInfo> getOverlays() {
+        return overlays;
+    }
+
+    public ArrayList<MergedRegion> getMergedRegions() {
+        return mergedRegions;
+    }
+
+    public boolean isDisplayGridlines() {
+        return displayGridlines;
+    }
+
+    public boolean isDisplayRowColHeadings() {
+        return displayRowColHeadings;
+    }
+
+    public int getVerticalSplitPosition() {
+        return verticalSplitPosition;
+    }
+
+    public int getHorizontalSplitPosition() {
+        return horizontalSplitPosition;
+    }
+
+    public String getInfoLabelValue() {
+        return infoLabelValue;
+    }
+
+    public boolean isWorkbookChangeToggle() {
+        return workbookChangeToggle;
+    }
+
+    public String getInvalidFormulaErrorMessage() {
+        return invalidFormulaErrorMessage;
+    }
+
+    public boolean isLockFormatColumns() {
+        return lockFormatColumns;
+    }
+
+    public boolean isLockFormatRows() {
+        return lockFormatRows;
+    }
+
+    public List<String> getNamedRanges() {
+        return namedRanges;
+    }
+
     public void _setRowBufferSize(int rowBufferSize) {
         setRowBufferSize(rowBufferSize);
     }
 
     public void setColumnBufferSize(int columnBufferSize) {
-        getState().columnBufferSize = columnBufferSize;
+        this.columnBufferSize = columnBufferSize;
         getElement().setProperty("columnBufferSize", columnBufferSize);
     }
 
     public void setRows(int rows) {
-        getState().rows = rows;
+        this.rows = rows;
         getElement().setProperty("rows", rows);
     }
 
     public void setCols(int cols) {
-        getState().cols = cols;
+        this.cols = cols;
         getElement().setProperty("cols", cols);
     }
 
     public void setColGroupingData(List<GroupingData> colGroupingData) {
-        getState().colGroupingData = colGroupingData;
+        this.colGroupingData = colGroupingData;
         getElement().setProperty("colGroupingData", Serializer.serialize(colGroupingData));
     }
 
     public void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        getState().rowGroupingData = rowGroupingData;
+        this.rowGroupingData = rowGroupingData;
         getElement().setProperty("rowGroupingData", Serializer.serialize(rowGroupingData));
     }
 
     public void setColGroupingMax(int colGroupingMax) {
-        getState().colGroupingMax = colGroupingMax;
+        this.colGroupingMax = colGroupingMax;
         getElement().setProperty("colGroupingMax", colGroupingMax);
     }
 
     public void setRowGroupingMax(int rowGroupingMax) {
-        getState().rowGroupingMax = rowGroupingMax;
+        this.rowGroupingMax = rowGroupingMax;
         getElement().setProperty("rowGroupingMax", rowGroupingMax);
     }
 
     public void setColGroupingInversed(boolean colGroupingInversed) {
-        getState().colGroupingInversed = colGroupingInversed;
+        this.colGroupingInversed = colGroupingInversed;
         getElement().setProperty("colGroupingInversed", colGroupingInversed);
     }
 
     public void setRowGroupingInversed(boolean rowGroupingInversed) {
-        getState().rowGroupingInversed = rowGroupingInversed;
+        this.rowGroupingInversed = rowGroupingInversed;
         getElement().setProperty("rowGroupingInversed", rowGroupingInversed);
     }
 
     public void setDefRowH(float defRowH) {
-        getState().defRowH = defRowH;
+        this.defRowH = defRowH;
         getElement().setProperty("defRowH", defRowH);
     }
 
     public void setDefColW(int defColW) {
-        getState().defColW = defColW;
+        this.defColW = defColW;
         getElement().setProperty("defColW", defColW);
     }
 
     public void setRowH(float[] rowH) {
-        getState().rowH = rowH;
+        this.rowH = rowH;
         getElement().setProperty("rowH", Serializer.serialize(rowH));
     }
 
     public void setColW(int[] colW) {
-        getState().colW = colW;
+        this.colW = colW;
         getElement().setProperty("colW", Serializer.serialize(colW));
     }
 
     public void setReload(boolean reload) {
-        getState().reload = reload;
+        this.reload = reload;
         getElement().setProperty("reload", reload);
     }
 
     public void setSheetIndex(int sheetIndex) {
-        getState().sheetIndex = sheetIndex;
+        this.sheetIndex = sheetIndex;
         getElement().setProperty("sheetIndex", sheetIndex);
     }
 
     public void setSheetNames(String[] sheetNames) {
-        getState().sheetNames = sheetNames;
+        this.sheetNames = sheetNames;
         getElement().setProperty("sheetNames", Serializer.serialize(sheetNames));
     }
 
     public void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
-        getState().cellStyleToCSSStyle = cellStyleToCSSStyle;
+        this.cellStyleToCSSStyle = cellStyleToCSSStyle;
         getElement().setProperty("cellStyleToCSSStyle", Serializer.serialize(cellStyleToCSSStyle));
     }
 
     public void setRowIndexToStyleIndex(HashMap<Integer, Integer> rowIndexToStyleIndex) {
-        getState().rowIndexToStyleIndex = rowIndexToStyleIndex;
+        this.rowIndexToStyleIndex = rowIndexToStyleIndex;
         getElement().setProperty("rowIndexToStyleIndex", Serializer.serialize(rowIndexToStyleIndex));
     }
 
     public void setColumnIndexToStyleIndex(HashMap<Integer, Integer> columnIndexToStyleIndex) {
-        getState().columnIndexToStyleIndex = columnIndexToStyleIndex;
+        this.columnIndexToStyleIndex = columnIndexToStyleIndex;
         getElement().setProperty("columnIndexToStyleIndex", Serializer.serialize(columnIndexToStyleIndex));
     }
 
     public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
-        getState().lockedColumnIndexes = lockedColumnIndexes;
+        this.lockedColumnIndexes = lockedColumnIndexes;
         getElement().setProperty("lockedColumnIndexes", Serializer.serialize(lockedColumnIndexes));
     }
 
     public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
-        getState().lockedRowIndexes = lockedRowIndexes;
+        this.lockedRowIndexes = lockedRowIndexes;
         getElement().setProperty("lockedRowIndexes", Serializer.serialize(lockedRowIndexes));
     }
 
     public void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
-        getState().shiftedCellBorderStyles = shiftedCellBorderStyles;
+        this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         getElement().setProperty("shiftedCellBorderStyles", Serializer.serialize(shiftedCellBorderStyles));
     }
 
     public void setConditionalFormattingStyles(HashMap<Integer, String> conditionalFormattingStyles) {
-        getState().conditionalFormattingStyles = conditionalFormattingStyles;
+        this.conditionalFormattingStyles = conditionalFormattingStyles;
         getElement().setProperty("conditionalFormattingStyles", Serializer.serialize(conditionalFormattingStyles));
     }
 
     public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
-        getState().hiddenColumnIndexes = hiddenColumnIndexes;
+        this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes", Serializer.serialize(hiddenColumnIndexes));
     }
 
     public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
-        getState().hiddenRowIndexes = hiddenRowIndexes;
+        this.hiddenRowIndexes = hiddenRowIndexes;
         getElement().setProperty("hiddenRowIndexes", Serializer.serialize(hiddenRowIndexes));
     }
 
     public void setVerticalScrollPositions(int[] verticalScrollPositions) {
-        getState().verticalScrollPositions = verticalScrollPositions;
+        this.verticalScrollPositions = verticalScrollPositions;
         getElement().setProperty("verticalScrollPositions", Serializer.serialize(verticalScrollPositions));
     }
 
     public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
-        getState().horizontalScrollPositions = horizontalScrollPositions;
+        this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions", Serializer.serialize(horizontalScrollPositions));
     }
 
     public void setSheetProtected(boolean sheetProtected) {
-        getState().sheetProtected = sheetProtected;
+        this.sheetProtected = sheetProtected;
         getElement().setProperty("sheetProtected", sheetProtected);
     }
 
     public void setWorkbookProtected(boolean workbookProtected) {
-        getState().workbookProtected = workbookProtected;
+        this.workbookProtected = workbookProtected;
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
     public void setCellKeysToEditorIdMap(HashMap<String, String> cellKeysToEditorIdMap) {
-        getState().cellKeysToEditorIdMap = cellKeysToEditorIdMap;
+        this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
         getElement().setProperty("cellKeysToEditorIdMap", Serializer.serialize(cellKeysToEditorIdMap));
     }
 
     public void setComponentIDtoCellKeysMap(HashMap<String, String> componentIDtoCellKeysMap) {
-        getState().componentIDtoCellKeysMap = componentIDtoCellKeysMap;
+        this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
         getElement().setProperty("componentIDtoCellKeysMap", Serializer.serialize(componentIDtoCellKeysMap));
     }
 
     public void setHyperlinksTooltips(HashMap<String, String> hyperlinksTooltips) {
-        getState().hyperlinksTooltips = hyperlinksTooltips;
+        this.hyperlinksTooltips = hyperlinksTooltips;
         getElement().setProperty("hyperlinksTooltips", Serializer.serialize(hyperlinksTooltips));
     }
 
     public void setCellComments(HashMap<String, String> cellComments) {
-        getState().cellComments = cellComments;
+        this.cellComments = cellComments;
         getElement().setProperty("cellComments", Serializer.serialize(cellComments));
     }
 
     public void setCellCommentAuthors(HashMap<String, String> cellCommentAuthors) {
-        getState().cellCommentAuthors = cellCommentAuthors;
+        this.cellCommentAuthors = cellCommentAuthors;
         getElement().setProperty("cellCommentAuthors", Serializer.serialize(cellCommentAuthors));
     }
 
     public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
-        getState().visibleCellComments = visibleCellComments;
+        this.visibleCellComments = visibleCellComments;
         getElement().setProperty("visibleCellComments", Serializer.serialize(visibleCellComments));
     }
 
     public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
-        getState().invalidFormulaCells = invalidFormulaCells;
+        this.invalidFormulaCells = invalidFormulaCells;
         getElement().setProperty("invalidFormulaCells", Serializer.serialize(invalidFormulaCells));
     }
 
     public void setHasActions(boolean hasActions) {
-        getState().hasActions = hasActions;
+        this.hasActions = hasActions;
         getElement().setProperty("hasActions", hasActions);
     }
 
     public void setOverlays(HashMap<String, OverlayInfo> overlays) {
-        getState().overlays = overlays;
+        this.overlays = overlays;
         getElement().setProperty("overlays", Serializer.serialize(overlays));
     }
 
     public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
-        getState().mergedRegions = mergedRegions;
+        this.mergedRegions = mergedRegions;
         getElement().setProperty("mergedRegions", Serializer.serialize(mergedRegions));
     }
 
     public void setDisplayGridlines(boolean displayGridlines) {
-        getState().displayGridlines = displayGridlines;
+        this.displayGridlines = displayGridlines;
         getElement().setProperty("displayGridlines", displayGridlines);
     }
 
     public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        getState().displayRowColHeadings = displayRowColHeadings;
+        this.displayRowColHeadings = displayRowColHeadings;
         getElement().setProperty("displayRowColHeadings", displayRowColHeadings);
     }
 
     public void setVerticalSplitPosition(int verticalSplitPosition) {
-        getState().verticalSplitPosition = verticalSplitPosition;
+        this.verticalSplitPosition = verticalSplitPosition;
         getElement().setProperty("verticalSplitPosition", verticalSplitPosition);
     }
 
     public void setHorizontalSplitPosition(int horizontalSplitPosition) {
-        getState().horizontalSplitPosition = horizontalSplitPosition;
+        this.horizontalSplitPosition = horizontalSplitPosition;
         getElement().setProperty("horizontalSplitPosition", horizontalSplitPosition);
     }
 
     public void setInfoLabelValue(String infoLabelValue) {
-        getState().infoLabelValue = infoLabelValue;
+        this.infoLabelValue = infoLabelValue;
         getElement().setProperty("infoLabelValue", infoLabelValue);
     }
 
     public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
-        getState().workbookChangeToggle = workbookChangeToggle;
+        this.workbookChangeToggle = workbookChangeToggle;
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
     public void _setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
+        this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         setInvalidFormulaErrorMessage(invalidFormulaErrorMessage);
     }
 
     public void setLockFormatColumns(boolean lockFormatColumns) {
-        getState().lockFormatColumns = lockFormatColumns;
+        this.lockFormatColumns = lockFormatColumns;
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
     public void setLockFormatRows(boolean lockFormatRows) {
-        getState().lockFormatRows = lockFormatRows;
+        this.lockFormatRows = lockFormatRows;
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
     public void setNamedRanges(List<String> namedRanges) {
-        getState().namedRanges = namedRanges;
+        this.namedRanges = namedRanges;
         getElement().setProperty("namedRanges", Serializer.serialize(namedRanges));
     }
 
@@ -515,7 +932,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             getElement().callJsFunction("editCellComment", col, row);
         }
     };
-    private SpreadsheetState state = new SpreadsheetState();
     private Locale locale;
 
     /**
@@ -715,7 +1131,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     private Workbook workbook;
 
     /** true if the component sheet should be reloaded on client side. */
-    private boolean reload;
+    //todo: already defined in shared state. Check!
+    //private boolean reload;
 
     /** are tables for currently active sheet loaded */
     private boolean tablesLoaded;
@@ -763,7 +1180,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
          */
         @Override
         public MergedRegion getMergedRegionStartingFrom(int column, int row) {
-            List<MergedRegion> mergedRegions = getState(false).mergedRegions;
+            List<MergedRegion> mergedRegions = getMergedRegions();
             if (mergedRegions != null) {
                 for (MergedRegion region : mergedRegions) {
                     if (region.col1 == column && region.row1 == row) {
@@ -782,7 +1199,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
          */
         @Override
         public MergedRegion getMergedRegion(int column, int row) {
-            List<MergedRegion> mergedRegions = getState(false).mergedRegions;
+            List<MergedRegion> mergedRegions = getMergedRegions();
             if (mergedRegions != null) {
                 for (MergedRegion region : mergedRegions) {
                     if (region.col1 <= column && region.row1 <= row
@@ -937,7 +1354,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     @Override
     public void addActionHandler(Action.Handler actionHandler) {
         contextMenuManager.addActionHandler(actionHandler);
-        getState().hasActions = contextMenuManager.hasActionHandlers();
+        setHasActions(contextMenuManager.hasActionHandlers());
     }
 
     /**
@@ -958,7 +1375,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     @Override
     public void removeActionHandler(Action.Handler actionHandler) {
         contextMenuManager.removeActionHandler(actionHandler);
-        getState().hasActions = contextMenuManager.hasActionHandlers();
+        setHasActions(contextMenuManager.hasActionHandlers());
     }
 
     /**
@@ -1132,7 +1549,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Last frozen row or 0 if none
      */
     public int getLastFrozenRow() {
-        return getState(false).verticalSplitPosition;
+        return getVerticalSplitPosition();
     }
 
     /**
@@ -1142,7 +1559,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Last frozen column or 0 if none
      */
     public int getLastFrozenColumn() {
-        return getState(false).horizontalSplitPosition;
+        return getHorizontalSplitPosition();
     }
 
     /**
@@ -1286,17 +1703,17 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         int r2 = cr1.getRow() > cr2.getRow() ? cr1.getRow() : cr2.getRow();
         int c1 = cr1.getCol() > cr2.getCol() ? cr2.getCol() : cr1.getCol();
         int c2 = cr1.getCol() > cr2.getCol() ? cr1.getCol() : cr2.getCol();
-        if (r1 >= getState().rows) {
-            r1 = getState().rows - 1;
+        if (r1 >= getRows()) {
+            r1 = getRows() - 1;
         }
-        if (r2 >= getState().rows) {
-            r2 = getState().rows - 1;
+        if (r2 >= getRows()) {
+            r2 = getRows() - 1;
         }
-        if (c1 >= getState().cols) {
-            c1 = getState().cols - 1;
+        if (c1 >= getCols()) {
+            c1 = getCols() - 1;
         }
-        if (c2 >= getState().cols) {
-            c2 = getState().cols - 1;
+        if (c2 >= getCols()) {
+            c2 = getCols() - 1;
         }
         return new CellRangeAddress(r1, r2, c1, c2);
     }
@@ -1323,41 +1740,21 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         int r2 = row1 > row2 ? row1 : row2;
         int c1 = col1 > col2 ? col2 : col1;
         int c2 = col1 > col2 ? col1 : col2;
-        if (r1 >= getState().rows) {
-            r1 = getState().rows;
+        if (r1 >= getRows()) {
+            r1 = getRows();
         }
-        if (r2 >= getState().rows) {
-            r2 = getState().rows;
+        if (r2 >= getRows()) {
+            r2 = getRows();
         }
-        if (c1 >= getState().cols) {
-            c1 = getState().cols;
+        if (c1 >= getCols()) {
+            c1 = getCols();
         }
-        if (c2 >= getState().cols) {
-            c2 = getState().cols;
+        if (c2 >= getCols()) {
+            c2 = getCols();
         }
         return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#getState()
-     */
-    //@Override
-    protected SpreadsheetState getState() {
-        return state;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#getState(boolean)
-     */
-    protected SpreadsheetState getState(boolean markAsDirty) {
-        //todo: ver que hacemos con esto
-        //state.markAsDirty(markAsDirty);
-        return state;
-    }
 
     /*
      * (non-Javadoc)
@@ -1416,9 +1813,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                     && !(isHidden || isVeryHidden)) ) {
             if (sheetPOIIndex != activeSheetIndex) {
                 reloadSheetNames();
-                getState().sheetIndex = getSpreadsheetSheetIndex(activeSheetIndex) + 1;
+                setSheetIndex(getSpreadsheetSheetIndex(activeSheetIndex) + 1);
             } else { // the active sheet can be only set as hidden
-                int oldVisibleSheetIndex = getState().sheetIndex - 1;
+                int oldVisibleSheetIndex = getSheetIndex() - 1;
                 if (visibility != SheetVisibility.VISIBLE
                         && activeSheetIndex == (workbook.getNumberOfSheets() - 1)) {
                     // hiding the active sheet, and it was the last sheet
@@ -1467,7 +1864,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Names of the currently visible sheets.
      */
     public String[] getVisibleSheetNames() {
-        final String[] names = getState(false).sheetNames;
+        final String[] names = getSheetNames();
         return Arrays.copyOf(names, names.length);
     }
 
@@ -1485,7 +1882,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     public void setSheetName(int sheetIndex, String sheetName)
             throws IllegalArgumentException {
-        if (sheetIndex < 0 || sheetIndex >= getState().sheetNames.length) {
+        if (sheetIndex < 0 || sheetIndex >= getSheetNames().length) {
             throw new IllegalArgumentException("Invalid Sheet index given.");
         }
         int poiSheetIndex = getVisibleSheetPOIIndex(sheetIndex);
@@ -1522,7 +1919,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         if (!workbook.isSheetVeryHidden(sheetIndex)
                 && !workbook.isSheetHidden(sheetIndex)) {
             int ourIndex = getSpreadsheetSheetIndex(sheetIndex);
-            getState().sheetNames[ourIndex] = sheetName;
+            //todo: comprobar si esto es así
+            String[] _sheetNames = Arrays.copyOf(getSheetNames(), getSheetNames().length);
+            _sheetNames[ourIndex] = sheetName;
+            setSheetNames(_sheetNames);
         }
     }
 
@@ -1541,7 +1941,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             throw new IllegalArgumentException("Invalid POI Sheet index given.");
         }
         workbook.getSheetAt(sheetPOIIndex).protectSheet(password);
-        getState().sheetProtected = getActiveSheet().getProtect();
+        setSheetProtected(getActiveSheet().getProtect());
         // if the currently active sheet was protected, the protection for the
         // currently selected cell might have changed
         if (sheetPOIIndex == workbook.getActiveSheetIndex()) {
@@ -1621,7 +2021,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         workbook.removeSheetAt(poiSheetIndex);
 
         // POI doesn't seem to shift the active sheet index ...
-        int oldIndex = getState().sheetIndex - 1;
+        int oldIndex = getSheetIndex() - 1;
         if (removedVisibleIndex <= oldIndex) { // removed before current
             if (oldIndex == (getNumberOfVisibleSheets())) {
                 // need to shift index backwards if the current sheet is last
@@ -1663,8 +2063,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Number of visible sheets.
      */
     public int getNumberOfVisibleSheets() {
-        if (getState().sheetNames != null) {
-            return getState().sheetNames.length;
+        if (getSheetNames() != null) {
+            return getSheetNames().length;
         } else {
             return 0;
         }
@@ -1696,7 +2096,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Index of the active sheet, 0-based
      */
     public int getActiveSheetIndex() {
-        return getState(false).sheetIndex - 1;
+        return getSheetIndex() - 1;
     }
 
     /**
@@ -1706,7 +2106,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return POI model index of the active sheet, 0-based
      */
     public int getActiveSheetPOIIndex() {
-        return getVisibleSheetPOIIndex(getState(false).sheetIndex - 1);
+        return getVisibleSheetPOIIndex(getSheetIndex() - 1);
     }
 
     /**
@@ -1719,7 +2119,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     public void setActiveSheetIndex(int sheetIndex)
             throws IllegalArgumentException {
-        if (sheetIndex < 0 || sheetIndex >= getState().sheetNames.length) {
+        if (sheetIndex < 0 || sheetIndex >= getSheetNames().length) {
             throw new IllegalArgumentException("Invalid Sheet index given.");
         }
         int POISheetIndex = getVisibleSheetPOIIndex(sheetIndex);
@@ -1775,9 +2175,13 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     protected void onSheetSelected(int tabIndex, int scrollLeft, int scrollTop) {
         // this is for the very rare occasion when the sheet has been
         // selected and the selected sheet value is still negative
-        int oldIndex = Math.abs(getState().sheetIndex) - 1;
-        getState().verticalScrollPositions[oldIndex] = scrollTop;
-        getState().horizontalScrollPositions[oldIndex] = scrollLeft;
+        int oldIndex = Math.abs(getSheetIndex()) - 1;
+        int[] _verticalScrollPositions = Arrays.copyOf(getVerticalScrollPositions(), getVerticalScrollPositions().length);
+        _verticalScrollPositions[oldIndex] = scrollTop;
+        setVerticalScrollPositions(_verticalScrollPositions);
+        int[] _horizontalScrollPositions = Arrays.copyOf(getHorizontalScrollPositions(), getHorizontalScrollPositions().length);
+        _horizontalScrollPositions[oldIndex] = scrollLeft;
+        setHorizontalScrollPositions(_horizontalScrollPositions);
         Sheet oldSheet = getActiveSheet();
         setActiveSheetIndex(tabIndex);
         Sheet newSheet = getActiveSheet();
@@ -1794,8 +2198,12 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            Current vertical scroll position
      */
     protected void onNewSheetCreated(int scrollLeft, int scrollTop) {
-        getState().verticalScrollPositions[getState().sheetIndex - 1] = scrollTop;
-        getState().horizontalScrollPositions[getState().sheetIndex - 1] = scrollLeft;
+        int[] _verticalScrollPositions = Arrays.copyOf(getVerticalScrollPositions(), getVerticalScrollPositions().length);
+        _verticalScrollPositions[getSheetIndex() - 1] = scrollTop;
+        setVerticalScrollPositions(_verticalScrollPositions);
+        int[] _horizontalScrollPositions = Arrays.copyOf(getHorizontalScrollPositions(), getHorizontalScrollPositions().length);
+        _horizontalScrollPositions[getSheetIndex() - 1] = scrollLeft;
+        setHorizontalScrollPositions(_horizontalScrollPositions);
         createNewSheet(null, defaultNewSheetRows, defaultNewSheetColumns);
     }
 
@@ -1821,7 +2229,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Number of visible columns.
      */
     public int getColumns() {
-        return getState().cols;
+        return getCols();
     }
 
     /**
@@ -1833,7 +2241,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Number of visible rows.
      */
     public int getRows() {
-        return getState().rows;
+        return rows;
     }
 
     /**
@@ -2208,8 +2616,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            New maximum column count.
      */
     public void setMaxColumns(int cols) {
-        if (getState().cols != cols) {
-            getState().cols = cols;
+        if (getCols() != cols) {
+            setCols(cols);
         }
     }
 
@@ -2225,8 +2633,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            New maximum row count.
      */
     public void setMaxRows(int rows) {
-        if (getState().rows != rows) {
-            getState().rows = rows;
+        if (getRows() != rows) {
+            setRows(rows);
         }
     }
 
@@ -2240,8 +2648,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            Maximum column count
      */
     public void setSheetMaxSize(int rows, int cols) {
-        getState().cols = cols;
-        getState().rows = rows;
+        setCols(cols);
+        setRows(rows);
     }
 
     /**
@@ -2252,7 +2660,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return The default column width in PX
      */
     public int getDefaultColumnWidth() {
-        return getState().defColW;
+        return getDefColW();
     }
 
     /**
@@ -2269,7 +2677,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                     "Default column width must be over 0, given value: "
                             + widthPX);
         }
-        getState().defColW = widthPX;
+        setDefColW(widthPX);
         defaultColWidthSet = true;
     }
 
@@ -2281,7 +2689,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Default row height for the currently active sheet, in points.
      */
     public float getDefaultRowHeight() {
-        return getState().defRowH;
+        return getDefRowH();
     }
 
     /**
@@ -2298,7 +2706,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                             + heightPT);
         }
         getActiveSheet().setDefaultRowHeightInPoints(heightPT);
-        getState().defRowH = heightPT;
+        setDefRowH(heightPT);
         defaultRowHeightSet = true;
     }
 
@@ -2366,7 +2774,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         int columnPixelWidth = getColumnAutofitPixelWidth(columnIndex, AbstractExcelUtils
             .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex)));
 
-        getState().colW[columnIndex] = columnPixelWidth;
+        int[] _colW = Arrays.copyOf(getColW(), getColW().length);
+        _colW[columnIndex] = columnPixelWidth;
+        setColW(_colW);
+
         getCellValueManager().clearCacheForColumn(columnIndex + 1);
         getCellValueManager().loadCellData(firstRow, columnIndex + 1, lastRow,
                 columnIndex + 1);
@@ -2438,23 +2849,25 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         int lastAffectedRow = n < 0 ? endRow : endRow + n;
         if (copyRowHeight || resetOriginalRowHeight) {
             // might need to increase the size of the row heights array
-            int oldLength = getState(false).rowH.length;
+            int oldLength = getRowH().length;
             int neededLength = endRow + n + 1;
+            float[] _rowH = Arrays.copyOf(getRowH(), getRowH().length);
             if (n > 0 && oldLength < neededLength) {
-                getState().rowH = Arrays.copyOf(getState().rowH, neededLength);
+                _rowH = Arrays.copyOf(_rowH, neededLength);
             }
             for (int i = firstAffectedRow; i <= lastAffectedRow; i++) {
                 Row row = sheet.getRow(i);
                 if (row != null) {
                     if (row.getZeroHeight()) {
-                        getState().rowH[i] = 0f;
+                        _rowH[i] = 0f;
                     } else {
-                        getState().rowH[i] = row.getHeightInPoints();
+                        _rowH[i] = row.getHeightInPoints();
                     }
                 } else {
-                    getState().rowH[i] = sheet.getDefaultRowHeightInPoints();
+                    _rowH[i] = sheet.getDefaultRowHeightInPoints();
                 }
             }
+            setRowH(_rowH);
         }
 
         if (hasSheetOverlays()) {
@@ -2469,21 +2882,22 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             }
             Row row = sheet.getRow(r);
             final Integer rowIndex = new Integer(r + 1);
+            ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(getHiddenRowIndexes());
             if (row == null) {
                 valueManager.updateDeletedRowsInClientCache(rowIndex, rowIndex);
-                if (getState(false).hiddenRowIndexes.contains(rowIndex)) {
-                    getState().hiddenRowIndexes.remove(rowIndex);
+                if (_hiddenRowIndexes.contains(rowIndex)) {
+                    _hiddenRowIndexes.remove(rowIndex);
                 }
-                for (int c = 0; c < getState().cols; c++) {
+                for (int c = 0; c < getCols(); c++) {
                     styler.clearCellStyle(r, c);
                 }
             } else {
                 if (row.getZeroHeight()) {
-                    getState().hiddenRowIndexes.add(rowIndex);
-                } else if (getState(false).hiddenRowIndexes.contains(rowIndex)) {
-                    getState().hiddenRowIndexes.remove(rowIndex);
+                    _hiddenRowIndexes.add(rowIndex);
+                } else if (_hiddenRowIndexes.contains(rowIndex)) {
+                    _hiddenRowIndexes.remove(rowIndex);
                 }
-                for (int c = 0; c < getState().cols; c++) {
+                for (int c = 0; c < getCols(); c++) {
                     Cell cell = row.getCell(c);
                     if (cell == null) {
                         styler.clearCellStyle(r, c);
@@ -2498,6 +2912,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                     }
                 }
             }
+            setHiddenRowIndexes(_hiddenRowIndexes);
         }
         rowsMoved(firstAffectedRow, lastAffectedRow, n);
 
@@ -2673,7 +3088,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     private void updateMergedRegions() {
         int regions = getActiveSheet().getNumMergedRegions();
         if (regions > 0) {
-            getState().mergedRegions = new ArrayList<MergedRegion>();
+            ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>();
             for (int i = 0; i < regions; i++) {
                 final CellRangeAddress region = getActiveSheet()
                         .getMergedRegion(i);
@@ -2684,17 +3099,18 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                     mergedRegion.row1 = region.getFirstRow() + 1;
                     mergedRegion.row2 = region.getLastRow() + 1;
                     mergedRegion.id = mergedRegionCounter++;
-                    getState().mergedRegions.add(i, mergedRegion);
+                    _mergedRegions.add(i, mergedRegion);
                 } catch (IndexOutOfBoundsException ioobe) {
                     createMergedRegionIntoSheet(region);
                 }
             }
-            while (regions < getState(false).mergedRegions.size()) {
-                getState().mergedRegions.remove(getState(false).mergedRegions
+            while (regions < _mergedRegions.size()) {
+                _mergedRegions.remove(_mergedRegions
                         .size() - 1);
             }
+            setMergedRegions(_mergedRegions);
         } else {
-            getState().mergedRegions = null;
+            setMergedRegions(null);
         }
     }
 
@@ -2718,9 +3134,11 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 getActiveSheet().removeRow(row);
             }
         }
+        float[] _rowH = Arrays.copyOf(getRowH(), getRowH().length);
         for (int i = startRow; i <= endRow; i++) {
-            getState(false).rowH[i] = sheet.getDefaultRowHeightInPoints();
+            _rowH[i] = sheet.getDefaultRowHeightInPoints();
         }
+        setRowH(_rowH);
         updateMergedRegions();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
 
@@ -2820,10 +3238,12 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         mergedRegion.row1 = region.getFirstRow() + 1;
         mergedRegion.row2 = region.getLastRow() + 1;
         mergedRegion.id = mergedRegionCounter++;
-        if (getState().mergedRegions == null) {
-            getState().mergedRegions = new ArrayList<MergedRegion>();
-        }
-        getState().mergedRegions.add(addMergedRegionIndex - 1, mergedRegion);
+        ArrayList<MergedRegion> _mergedRegions = getMergedRegions() != null?
+                new ArrayList<>(getMergedRegions()):
+                new ArrayList<MergedRegion>();
+
+        _mergedRegions.add(addMergedRegionIndex - 1, mergedRegion);
+        setMergedRegions(_mergedRegions);
         // update the style & data for the region cells, effects region + 1
         // FIXME POI doesn't seem to care that the other cells inside the merged
         // region should be removed; the values those cells have are still used
@@ -2876,7 +3296,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     private void deleteMergedRegion(int index) {
         final Sheet sheet = getActiveSheet();
         sheet.removeMergedRegion(index);
-        MergedRegion mergedRegion = getState().mergedRegions.remove(index);
+        ArrayList<MergedRegion> _mergedRegions = new ArrayList<>(getMergedRegions());
+        MergedRegion mergedRegion = _mergedRegions.remove(index);
         // update the style for the region cells, effects region + 1 row&col
         for (int r = mergedRegion.row1; r <= (mergedRegion.row2 + 1); r++) {
             Row row = sheet.getRow(r - 1);
@@ -2892,6 +3313,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 }
             }
         }
+        setMergedRegions(_mergedRegions);
         styler.loadCustomBorderStylesToState();
     }
 
@@ -2928,21 +3350,25 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     public void setColumnHidden(int columnIndex, boolean hidden) {
         getActiveSheet().setColumnHidden(columnIndex, hidden);
-        if (hidden && !getState().hiddenColumnIndexes.contains(columnIndex + 1)) {
-            getState().hiddenColumnIndexes.add(columnIndex + 1);
-            getState().colW[columnIndex] = 0;
+        ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(getHiddenColumnIndexes());
+        int[] _colW = Arrays.copyOf(getColW(), getColW().length);
+        if (hidden && !_hiddenColumnIndexes.contains(columnIndex + 1)) {
+            _hiddenColumnIndexes.add(columnIndex + 1);
+            _colW[columnIndex] = 0;
         } else if (!hidden
-                && getState().hiddenColumnIndexes.contains(columnIndex + 1)) {
-            getState().hiddenColumnIndexes
-                    .remove(getState().hiddenColumnIndexes
+                && _hiddenColumnIndexes.contains(columnIndex + 1)) {
+            _hiddenColumnIndexes
+                    .remove(_hiddenColumnIndexes
                             .indexOf(columnIndex + 1));
-            getState().colW[columnIndex] = AbstractExcelUtils
+            _colW[columnIndex] = AbstractExcelUtils
                     .getColumnWidthInPx(getActiveSheet().getColumnWidth(
                             columnIndex));
             getCellValueManager().clearCacheForColumn(columnIndex + 1);
             getCellValueManager().loadCellData(firstRow, columnIndex + 1,
                     lastRow, columnIndex + 1);
         }
+        setHiddenColumnIndexes(_hiddenColumnIndexes);
+        setColW(_colW);
 
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
@@ -3074,7 +3500,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return The current row buffer size
      */
     public int getRowBufferSize() {
-        return getState().rowBufferSize;
+        return rowBufferSize;
     }
 
     /**
@@ -3089,7 +3515,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            bottom edges of the visible area.
      */
     public void setRowBufferSize(int rowBufferInPixels) {
-        getState().rowBufferSize = rowBufferInPixels;
+        this.rowBufferSize = rowBufferInPixels;
         getElement().setProperty("rowBufferSize", rowBufferInPixels);
     }
 
@@ -3103,7 +3529,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return The current column buffer size
      */
     public int getColBufferSize() {
-        return getState().columnBufferSize;
+        return columnBufferSize;
     }
 
     /**
@@ -3119,7 +3545,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            right edges of the visible area.
      */
     public void setColBufferSize(int colBufferInPixels) {
-        getState().columnBufferSize = colBufferInPixels;
+        columnBufferSize = colBufferInPixels;
+        getElement().setProperty("columnBufferSize", columnBufferSize);
     }
 
     /**
@@ -3221,21 +3648,21 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
 
         reloadActiveSheetData();
         if (workbook instanceof HSSFWorkbook) {
-            getState().workbookProtected = ((HSSFWorkbook) workbook)
-                    .isWriteProtected();
+            setWorkbookProtected(((HSSFWorkbook) workbook)
+                    .isWriteProtected());
         } else if (workbook instanceof XSSFWorkbook) {
-            getState().workbookProtected = ((XSSFWorkbook) workbook)
-                    .isStructureLocked();
+            setWorkbookProtected(((XSSFWorkbook) workbook)
+                    .isStructureLocked());
         }
         // clear all tables from memory
         tables.clear();
 
-        getState().verticalScrollPositions = new int[getState().sheetNames.length];
-        getState().horizontalScrollPositions = new int[getState().sheetNames.length];
+        setVerticalScrollPositions(new int[getSheetNames().length]);
+        setHorizontalScrollPositions(new int[getSheetNames().length]);
 
         conditionalFormatter = createConditionalFormatter();
 
-        getState().workbookChangeToggle = !getState().workbookChangeToggle;
+        setWorkbookChangeToggle(!isWorkbookChangeToggle());
     }
 
     /**
@@ -3271,18 +3698,18 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         topLeftCellCommentsLoaded = false;
 
         reload = true;
-        getState().sheetIndex = getSpreadsheetSheetIndex(workbook
-                .getActiveSheetIndex()) + 1;
-        getState().sheetProtected = getActiveSheet().getProtect();
-        getState().cellKeysToEditorIdMap = null;
-        getState().hyperlinksTooltips = null;
-        getState().componentIDtoCellKeysMap = null;
-        getState().overlays = null;
-        getState().mergedRegions = null;
-        getState().cellComments = null;
-        getState().cellCommentAuthors = null;
-        getState().visibleCellComments = null;
-        getState().invalidFormulaCells = null;
+        setSheetIndex(getSpreadsheetSheetIndex(workbook
+                .getActiveSheetIndex()) + 1);
+        setSheetProtected(getActiveSheet().getProtect());
+        setCellKeysToEditorIdMap(null);
+        setHyperlinksTooltips(null);
+        setComponentIDtoCellKeysMap(null);
+        setOverlays(null);
+        setMergedRegions(null);
+        setCellComments(null);
+        setCellCommentAuthors(null);
+        setVisibleCellComments(null);
+        setInvalidFormulaCells(null);
 
         for (Component c : customComponents) {
             unRegisterCustomComponent(c);
@@ -3304,9 +3731,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         reloadSheetNames();
         updateMergedRegions();
         styler.reloadActiveSheetColumnRowStyles();
-        getState().displayGridlines = getActiveSheet().isDisplayGridlines();
-        getState().displayRowColHeadings = getActiveSheet()
-                .isDisplayRowColHeadings();
+        setDisplayGridlines(getActiveSheet().isDisplayGridlines());
+        setDisplayRowColHeadings(getActiveSheet()
+                .isDisplayRowColHeadings());
 
         markAsDirty();
     }
@@ -3327,11 +3754,11 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             final short col = selectedCellReference.getCol();
             final int row = selectedCellReference.getRow();
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            Map<String, String> cellKeysToEditorIdMap = getState(false).cellKeysToEditorIdMap;
+            HashMap<String, String> cellKeysToEditorIdMap = new HashMap<>(getCellKeysToEditorIdMap());
             if (cellKeysToEditorIdMap != null
                     && cellKeysToEditorIdMap.containsKey(key)
                     && customComponents != null) {
-                String componentId = getState(false).cellKeysToEditorIdMap
+                String componentId = cellKeysToEditorIdMap
                         .get(key);
                 for (Component c : customComponents) {
                     //todo: ver que hacemos con esto
@@ -3344,6 +3771,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                     }
                 }
             }
+            setCellKeysToEditorIdMap(cellKeysToEditorIdMap);
         }
     }
 
@@ -3355,8 +3783,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 sheetNamesList.add(workbook.getSheetName(i));
             }
         }
-        getState().sheetNames = sheetNamesList
-                .toArray(new String[sheetNamesList.size()]);
+        setSheetNames(sheetNamesList
+                .toArray(new String[sheetNamesList.size()]));
     }
 
     /**
@@ -3416,7 +3844,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return true if the current {@link Sheet} is protected, false otherwise.
      */
     public boolean isActiveSheetProtected() {
-        return getState().sheetProtected;
+        return isSheetProtected();
     }
 
     /**
@@ -3443,9 +3871,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 if (cell.getCellStyle().getIndex() != 0) {
                     return cell.getCellStyle().getLocked();
                 } else {
-                    return getState(false).lockedColumnIndexes.contains(cell
+                    return getLockedColumnIndexes().contains(cell
                             .getColumnIndex() + 1)
-                            && getState(false).lockedRowIndexes.contains(cell
+                            && getLockedRowIndexes().contains(cell
                                     .getRowIndex() + 1);
                 }
             } else {
@@ -3476,7 +3904,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         //super.beforeClientResponse(initial);
         if (reload) {
             reload = false;
-            getState().reload = true;
+            setReload(true);
             if (initialSheetSelection == null) {
                 if (sheetState.getSelectedCellsOnSheet(getActiveSheet()) == null) {
                     initialSheetSelection = "A1";
@@ -3486,7 +3914,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 }
             }
         } else {
-            getState().reload = false;
+            setReload(false);
         }
     }
 
@@ -3624,9 +4052,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             setRowHidden(index, true);
         } else {
             Row row = getActiveSheet().getRow(index);
-            if (getState().hiddenRowIndexes
+            ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(getHiddenRowIndexes());
+            if (_hiddenRowIndexes
                     .contains(Integer.valueOf(index + 1))) {
-                getState().hiddenRowIndexes.remove(Integer.valueOf(index + 1));
+                _hiddenRowIndexes.remove(Integer.valueOf(index + 1));
                 if (row != null && row.getZeroHeight()) {
                     row.setZeroHeight(false);
                 }
@@ -3635,6 +4064,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 row = getActiveSheet().createRow(index);
             }
             row.setHeightInPoints(height);
+            setHiddenRowIndexes(_hiddenRowIndexes);
             // can't assume the state already had room for the row in its 
             // arrays, it may have been created above.  This avoids 
             // ArrayIndexOutOfBoundsException
@@ -3673,15 +4103,19 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         if (width == 0) {
             setColumnHidden(index, true);
         } else {
-            if (getState().hiddenColumnIndexes.contains(Integer
+            ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(getHiddenColumnIndexes());
+            int[] _colW = Arrays.copyOf(getColW(), getColW().length);
+            if (_hiddenColumnIndexes.contains(Integer
                     .valueOf(index + 1))) {
-                getState().hiddenColumnIndexes.remove(Integer
+                _hiddenColumnIndexes.remove(Integer
                         .valueOf(index + 1));
             }
             if (getActiveSheet().isColumnHidden(index)) {
                 getActiveSheet().setColumnHidden(index, false);
             }
-            getState().colW[index] = width;
+            _colW[index] = width;
+            setColW(_colW);
+            setHiddenColumnIndexes(_hiddenColumnIndexes);
             getActiveSheet().setColumnWidth(index,
                     SpreadsheetUtil.pixel2WidthUnits(width));
 
@@ -3696,11 +4130,13 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     void loadHyperLinks() {
-        if (getState(false).hyperlinksTooltips == null) {
-            getState(false).hyperlinksTooltips = new HashMap<String, String>();
+        HashMap<String, String> _hyperlinksTooltips = getHyperlinksTooltips() != null ? new HashMap<>(getHyperlinksTooltips()) : null;
+        if (_hyperlinksTooltips == null) {
+            _hyperlinksTooltips = new HashMap<String, String>();
         } else {
-            getState().hyperlinksTooltips.clear();
+            _hyperlinksTooltips.clear();
         }
+        setHyperlinksTooltips(_hyperlinksTooltips);
         // removed && !topLeftCellHyperlinksLoaded as it was always false
         if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0) {
             loadHyperLinks(1, 1, getLastFrozenRow(), getLastFrozenColumn());
@@ -3715,6 +4151,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     private void loadHyperLinks(int r1, int c1, int r2, int c2) {
+        HashMap<String, String> _hyperlinksTooltips = getHyperlinksTooltips();
         for (int r = r1 - 1; r < r2; r++) {
             final Row row = getActiveSheet().getRow(r);
             if (row != null) {
@@ -3733,11 +4170,11 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                                     if (tooltip == null) {
                                         tooltip = link.getAddress();
                                     }
-                                    getState().hyperlinksTooltips
+                                    _hyperlinksTooltips
                                             .put(SpreadsheetUtil.toKey(c + 1,
                                                     r + 1), tooltip);
                                 } else {
-                                    getState().hyperlinksTooltips
+                                    _hyperlinksTooltips
                                             .put(SpreadsheetUtil.toKey(c + 1,
                                                     r + 1), link.getAddress());
                                 }
@@ -3746,7 +4183,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                                 if (DefaultHyperlinkCellClickHandler
                                         .isHyperlinkFormulaCell(cell)
                                         && hyperlinkCellClickHandler != null) {
-                                    getState().hyperlinksTooltips
+                                    _hyperlinksTooltips
                                             .put(SpreadsheetUtil.toKey(c + 1,
                                                     r + 1),
                                                     hyperlinkCellClickHandler
@@ -3760,6 +4197,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 }
             }
         }
+        setHyperlinksTooltips(_hyperlinksTooltips);
     }
 
     private void loadOrUpdateOverlays() {
@@ -3810,12 +4248,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         }
 
         if (overlay.getId() != null) {
-            if (getState().overlays == null) {
-                getState().overlays = new HashMap<String, OverlayInfo>();
-            }
-
-            getState().overlays
+            HashMap<String, OverlayInfo> _overlays = getOverlays() != null ? new HashMap<>(getOverlays()) : new HashMap<>();
+            _overlays
                     .put(overlay.getId(), createOverlayInfo(overlay));
+            setOverlays(_overlays);
 
             overlay.setOverlayChangeListener(new OverlayChangeListener() {
                 @Override
@@ -3831,8 +4267,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     private void removeOverlayData(final SheetOverlayWrapper overlay) {
         if (overlay.getId() != null) {
-            if (getState().overlays != null) {
-                getState().overlays.remove(overlay.getId());
+            if (getOverlays() != null) {
+                HashMap<String, OverlayInfo> _overlays = getOverlays();
+                _overlays.remove(overlay.getId());
+                setOverlays(_overlays);
             }
             setResource(overlay.getId(), null);
         }
@@ -3931,9 +4369,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         info.col = col + 1; // 1-based
         info.row = row + 1; // 1-based
 
-        info.height = overlayWrapper.getHeight(sheet, getState(false).rowH);
-        info.width = overlayWrapper.getWidth(sheet, getState(false).colW,
-                getState(false).defColW);
+        info.height = overlayWrapper.getHeight(sheet, getRowH());
+        info.width = overlayWrapper.getWidth(sheet, getColW(),
+                getDefColW());
 
         // FIXME: height and width can be -1, it is never handled anywhere
 
@@ -3956,26 +4394,37 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             return;
         }
 
-        if (getState(false).cellComments == null) {
-            getState(false).cellComments = new HashMap<String, String>();
+        HashMap<String, String> _cellComments = getCellComments() != null?new HashMap<>(getCellComments()):null;
+        if (_cellComments == null) {
+            _cellComments = new HashMap<>();
         } else {
-            getState().cellComments.clear();
+            _cellComments.clear();
         }
-        if (getState(false).cellCommentAuthors == null) {
-            getState(false).cellCommentAuthors = new HashMap<String, String>();
+        setCellComments(_cellComments);
+
+        HashMap<String, String> _cellCommentAuthors = getCellCommentAuthors() != null?new HashMap<>(getCellCommentAuthors()):null;
+        if (_cellCommentAuthors == null) {
+            _cellCommentAuthors = new HashMap<String, String>();
         } else {
-            getState().cellCommentAuthors.clear();
+            _cellCommentAuthors.clear();
         }
-        if (getState(false).visibleCellComments == null) {
-            getState(false).visibleCellComments = new ArrayList<String>();
+        setCellCommentAuthors(_cellCommentAuthors);
+
+        ArrayList<String> _visibleCellComments = getVisibleCellComments() != null?new ArrayList<>(getVisibleCellComments()):null;
+        if (_visibleCellComments == null) {
+            _visibleCellComments = new ArrayList<String>();
         } else {
-            getState().visibleCellComments.clear();
+            _visibleCellComments.clear();
         }
-        if (getState(false).invalidFormulaCells == null) {
-            getState(false).invalidFormulaCells = new HashSet<String>();
+        setVisibleCellComments(_visibleCellComments);
+
+        Set<String> _invalidFormulaCells = getInvalidFormulaCells() != null?new HashSet<>(getInvalidFormulaCells()):null;
+        if (_invalidFormulaCells == null) {
+            _invalidFormulaCells = new HashSet<String>();
         } else {
-            getState().invalidFormulaCells.clear();
+            _invalidFormulaCells.clear();
         }
+        setInvalidFormulaCells(_invalidFormulaCells);
 
         if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0
                 && !topLeftCellCommentsLoaded) {
@@ -3992,6 +4441,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
 
     private void loadCellComments(int r1, int c1, int r2, int c2) {
         Sheet sheet = getActiveSheet();
+        HashMap<String, String> _cellComments = new HashMap<>(getCellComments());
+        HashMap<String, String> _cellCommentAuthors = new HashMap<>(getCellCommentAuthors());
+        ArrayList<String> _visibleCellComments = new ArrayList<>(getVisibleCellComments());
+        Set<String> _invalidFormulaCells = new HashSet<>(getInvalidFormulaCells());
         for (int r = r1 - 1; r < r2; r++) {
             Row row = sheet.getRow(r);
             if (row != null && row.getZeroHeight()) {
@@ -4021,16 +4474,16 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                         // triangle on the cell's top right corner. the comment
                         // position is calculated so that it is completely
                         // visible.
-                        getState().cellComments.put(key, comment.getString()
+                        _cellComments.put(key, comment.getString()
                                 .getString());
-                        getState().cellCommentAuthors.put(key,
+                        _cellCommentAuthors.put(key,
                                 comment.getAuthor());
                         if (comment.isVisible()) {
-                            getState().visibleCellComments.add(key);
+                            _visibleCellComments.add(key);
                         }
                     }
                     if (isMarkedAsInvalidFormula(c_one_based, row_one_based)) {
-                        getState().invalidFormulaCells.add(key);
+                        _invalidFormulaCells.add(key);
                     }
 
                 } else {
@@ -4038,6 +4491,10 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 }
             }
         }
+        setCellComments(_cellComments);
+        setCellCommentAuthors(_cellCommentAuthors);
+        setVisibleCellComments(_visibleCellComments);
+        setInvalidFormulaCells(_invalidFormulaCells);
     }
 
     /**
@@ -4046,16 +4503,20 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     private void loadCustomComponents() {
         if (customComponentFactory != null) {
-            if (getState().cellKeysToEditorIdMap == null) {
-                getState().cellKeysToEditorIdMap = new HashMap<String, String>();
+            HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null ? new HashMap<>(getCellKeysToEditorIdMap()) : null;
+            if (_cellKeysToEditorIdMap == null) {
+                _cellKeysToEditorIdMap = new HashMap<String, String>();
             } else {
-                getState().cellKeysToEditorIdMap.clear();
+                _cellKeysToEditorIdMap.clear();
             }
-            if (getState().componentIDtoCellKeysMap == null) {
-                getState().componentIDtoCellKeysMap = new HashMap<String, String>();
+            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
+            HashMap<String, String> _componentIDtoCellKeysMap = getComponentIDtoCellKeysMap() != null?new HashMap<>(getComponentIDtoCellKeysMap()):null;
+            if (_componentIDtoCellKeysMap == null) {
+                _componentIDtoCellKeysMap = new HashMap<String, String>();
             } else {
-                getState().componentIDtoCellKeysMap.clear();
+                _componentIDtoCellKeysMap.clear();
             }
+            setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
             if (customComponents == null) {
                 customComponents = new HashSet<Component>();
             }
@@ -4097,8 +4558,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             }
 
         } else {
-            getState().cellKeysToEditorIdMap = null;
-            getState().componentIDtoCellKeysMap = null;
+            setCellKeysToEditorIdMap(null);
+            setComponentIDtoCellKeysMap(null);
             if (customComponents != null && !customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     unRegisterCustomComponent(c);
@@ -4112,6 +4573,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     void loadRangeComponents(HashSet<Component> newCustomComponents,
             Set<Integer> rowsWithComponents, int row1, int col1, int row2,
             int col2) {
+        HashMap<String, String> _componentIDtoCellKeysMap = getComponentIDtoCellKeysMap();
+        HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap();
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {
@@ -4133,7 +4596,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        getState().componentIDtoCellKeysMap.put(
+                        _componentIDtoCellKeysMap.put(
                                 //todo: revisar
                                 customComponent.getId().get(),
                                 //customComponent.getConnectorId(),
@@ -4153,7 +4616,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                                     && !customComponents.contains(customEditor)) {
                                 registerCustomComponent(customEditor);
                             }
-                            getState().cellKeysToEditorIdMap.put(key,
+                            _cellKeysToEditorIdMap.put(key,
                                     //todo: revisar
                                     customEditor.getId().get()
                                     //customEditor.getConnectorId()
@@ -4168,17 +4631,20 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 }
             }
         }
+        setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
+        setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
     }
 
     private void handleRowSizes(Set<Integer> rowsWithComponents) {
         // Set larger height for new rows with components
+        float[] _rowH = Arrays.copyOf(getRowH(), getRowH().length);
         for (Integer row : rowsWithComponents) {
             if (isRowHidden(row)) {
                 continue;
             }
-            float currentHeight = getState(false).rowH[row];
+            float currentHeight = _rowH[row];
             if (currentHeight < getMinimumRowHeightForComponents()) {
-                getState().rowH[row] = getMinimumRowHeightForComponents();
+                _rowH[row] = getMinimumRowHeightForComponents();
             }
         }
         // Reset row height for rows which no longer have components
@@ -4187,19 +4653,20 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             for (Integer row : this.rowsWithComponents) {
                 if (!rowsWithComponents.contains(row)) {
                     if (isRowHidden(row)) {
-                        getState().rowH[row] = 0;
+                        _rowH[row] = 0;
                     } else {
                         Row r = activeSheet.getRow(row);
                         if (r == null) {
-                            getState().rowH[row] = activeSheet
+                            _rowH[row] = activeSheet
                                     .getDefaultRowHeightInPoints();
                         } else {
-                            getState().rowH[row] = r.getHeightInPoints();
+                            _rowH[row] = r.getHeightInPoints();
                         }
                     }
                 }
             }
         }
+        setRowH(_rowH);
 
         this.rowsWithComponents = rowsWithComponents;
     }
@@ -4261,7 +4728,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             loadCustomComponents();
             loadCustomEditorOnSelectedCell();
         } else {
-            getState().cellKeysToEditorIdMap = null;
+            setCellKeysToEditorIdMap(null);
             if (customComponents != null && !customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     unRegisterCustomComponent(c);
@@ -4547,7 +5014,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             throw new NullPointerException("no active sheet");
         }
         getActiveSheet().setDisplayGridlines(visible);
-        getState().displayGridlines = visible;
+        setDisplayGridlines(visible);
     }
 
     /**
@@ -4573,7 +5040,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             throw new NullPointerException("no active sheet");
         }
         getActiveSheet().setDisplayRowColHeadings(visible);
-        getState().displayRowColHeadings = visible;
+        setDisplayRowColHeadings(visible);
     }
 
     /**
@@ -5118,7 +5585,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            The new content. Can not be HTML.
      */
     public void setStatusLabelValue(String value) {
-        getState().infoLabelValue = value;
+        setInfoLabelValue(value);
     }
 
     /**
@@ -5127,7 +5594,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * @return Current content of the status label.
      */
     public String getStatusLabelValue() {
-        return getState().infoLabelValue;
+        return getInfoLabelValue();
     }
 
     /**
@@ -5506,7 +5973,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
-        getState().invalidFormulaErrorMessage = invalidFormulaErrorMessage;
+        this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         getElement().setProperty("invalidFormulaErrorMessage", invalidFormulaErrorMessage);
     }
 
@@ -5517,7 +5984,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     @Override
     public int getTabIndex() {
-        return getState(false).tabIndex;
+        return this.tabIndex;
     }
 
     /*
@@ -5527,7 +5994,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     @Override
     public void setTabIndex(int tabIndex) {
-        getState().tabIndex = tabIndex;
+        this.tabIndex = tabIndex;
+        getElement().setProperty("tabIndex", tabIndex);
     }
 
     /*
@@ -5589,7 +6057,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             return;
         }
         int endIndex = -1;
-        for (GroupingData data : getState().colGroupingData) {
+        for (GroupingData data : getColGroupingData()) {
             if (data.level == expandLevel && data.startIndex <= columnIndex && columnIndex <= data.endIndex) {
                 endIndex = data.endIndex;
                 break;
@@ -5705,7 +6173,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     void markInvalidFormula(int col, int row) {
         int activeSheetIndex = workbook.getActiveSheetIndex();
         if (!invalidFormulas.containsKey(activeSheetIndex)) {
-            invalidFormulas.put(activeSheetIndex, new HashSet<String>());
+            invalidFormulas.put(activeSheetIndex, new HashSet<>());
         }
         invalidFormulas.get(activeSheetIndex).add(
                 SpreadsheetUtil.toKey(col, row));

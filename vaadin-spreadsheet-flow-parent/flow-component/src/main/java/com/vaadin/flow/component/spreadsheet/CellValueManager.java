@@ -460,13 +460,13 @@ public class CellValueManager implements Serializable {
                 int w = 0;
                 for (int c = range.getFirstColumn(); c <= range
                         .getLastColumn(); c++) {
-                    w += spreadsheet.getState(false).colW[c];
+                    w += spreadsheet.getColW()[c];
                 }
                 return w;
             }
         }
         // if we get here, cell is not in a merged region
-        return spreadsheet.getState(false).colW[cell.getColumnIndex()];
+        return spreadsheet.getColW()[cell.getColumnIndex()];
     }
 
     /**
@@ -1121,8 +1121,7 @@ public class CellValueManager implements Serializable {
         Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook.getSheetAt(workbook
                 .getActiveSheetIndex());
-        Map<String, String> componentIDtoCellKeysMap = spreadsheet
-                .getState(false).componentIDtoCellKeysMap;
+        Map<String, String> componentIDtoCellKeysMap = spreadsheet.getComponentIDtoCellKeysMap();
         @SuppressWarnings("unchecked")
         final Collection<String> customComponentCells = (Collection<String>) (componentIDtoCellKeysMap == null ? Collections
                 .emptyList() : componentIDtoCellKeysMap.values());

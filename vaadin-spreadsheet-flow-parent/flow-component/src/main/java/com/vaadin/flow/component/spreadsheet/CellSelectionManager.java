@@ -288,11 +288,11 @@ public class CellSelectionManager implements Serializable {
      */
     void handleCellAddressChange(int rowIndex, int colIndex,
             boolean initialSelection, String name) {
-        if (rowIndex >= spreadsheet.getState().rows) {
-            rowIndex = spreadsheet.getState().rows;
+        if (rowIndex >= spreadsheet.getRows()) {
+            rowIndex = spreadsheet.getRows();
         }
-        if (colIndex >= spreadsheet.getState().cols) {
-            colIndex = spreadsheet.getState().cols;
+        if (colIndex >= spreadsheet.getCols()) {
+            colIndex = spreadsheet.getCols();
         }
         MergedRegion region = MergedRegionUtil.findIncreasingSelection(
                 spreadsheet.getMergedRegionContainer(), rowIndex, rowIndex,

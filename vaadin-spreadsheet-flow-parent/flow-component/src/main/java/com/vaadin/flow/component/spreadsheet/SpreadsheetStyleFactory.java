@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -182,11 +183,12 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     public void reloadWorkbookStyles() {
         final Workbook workbook = spreadsheet.getWorkbook();
-        if (spreadsheet.getState().cellStyleToCSSStyle == null) {
-            spreadsheet.getState().cellStyleToCSSStyle = new HashMap<Integer, String>(
+        HashMap<Integer, String> _cellStyleToCSSStyle = spreadsheet.getCellStyleToCSSStyle();
+        if (_cellStyleToCSSStyle == null) {
+            _cellStyleToCSSStyle = new HashMap<Integer, String>(
                     workbook.getNumCellStyles());
         } else {
-            spreadsheet.getState().cellStyleToCSSStyle.clear();
+            _cellStyleToCSSStyle.clear();
         }
         shiftedBorderLeftStyles.clear();
         shiftedBorderTopStyles.clear();
@@ -202,7 +204,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         borderStyles(sb, cellStyle);
         defaultFontStyle(cellStyle, sb);
         colorConverter.defaultColorStyles(cellStyle, sb);
-        spreadsheet.getState().cellStyleToCSSStyle.put(
+        _cellStyleToCSSStyle.put(
                 (int) cellStyle.getIndex(), sb.toString());
 
         // 0 is default style, create all styles indexed from 1 and upwards
@@ -210,33 +212,38 @@ public class SpreadsheetStyleFactory implements Serializable {
             cellStyle = workbook.getCellStyleAt(i);
             addCellStyleCSS(cellStyle);
         }
+        spreadsheet.setCellStyleToCSSStyle(_cellStyleToCSSStyle);
         reloadActiveSheetColumnRowStyles();
     }
 
     public void reloadActiveSheetColumnRowStyles() {
         final Workbook workbook = spreadsheet.getWorkbook();
 
-        if (spreadsheet.getState().rowIndexToStyleIndex == null) {
-            spreadsheet.getState().rowIndexToStyleIndex = new HashMap<Integer, Integer>(
+        HashMap<Integer, Integer> _rowIndexToStyleIndex = spreadsheet.getRowIndexToStyleIndex();
+        if (_rowIndexToStyleIndex == null) {
+            _rowIndexToStyleIndex = new HashMap<Integer, Integer>(
                     workbook.getNumCellStyles());
         } else {
-            spreadsheet.getState().rowIndexToStyleIndex.clear();
+            _rowIndexToStyleIndex.clear();
         }
-        if (spreadsheet.getState().columnIndexToStyleIndex == null) {
-            spreadsheet.getState().columnIndexToStyleIndex = new HashMap<Integer, Integer>(
+        HashMap<Integer, Integer> _columnIndexToStyleIndex = spreadsheet.getColumnIndexToStyleIndex();
+        if (_columnIndexToStyleIndex == null) {
+            _columnIndexToStyleIndex = new HashMap<Integer, Integer>(
                     workbook.getNumCellStyles());
         } else {
-            spreadsheet.getState().columnIndexToStyleIndex.clear();
+            _columnIndexToStyleIndex.clear();
         }
-        if (spreadsheet.getState().lockedColumnIndexes == null) {
-            spreadsheet.getState().lockedColumnIndexes = new HashSet<Integer>();
+        Set<Integer> _lockedColumnIndexes = spreadsheet.getLockedColumnIndexes();
+        if (_lockedColumnIndexes == null) {
+            _lockedColumnIndexes = new HashSet<Integer>();
         } else {
-            spreadsheet.getState().lockedColumnIndexes.clear();
+            _lockedColumnIndexes.clear();
         }
-        if (spreadsheet.getState().lockedRowIndexes == null) {
-            spreadsheet.getState().lockedRowIndexes = new HashSet<Integer>();
+        Set<Integer> _lockedRowIndexes = spreadsheet.getLockedRowIndexes();
+        if (_lockedRowIndexes == null) {
+            _lockedRowIndexes = new HashSet<Integer>();
         } else {
-            spreadsheet.getState().lockedRowIndexes.clear();
+            _lockedRowIndexes.clear();
         }
 
         Sheet activeSheet = spreadsheet.getActiveSheet();
@@ -244,14 +251,14 @@ public class SpreadsheetStyleFactory implements Serializable {
             Row row = activeSheet.getRow(i);
             if (row != null && row.getRowStyle() != null) {
                 int styleIndex = row.getRowStyle().getIndex();
-                spreadsheet.getState().rowIndexToStyleIndex.put(i + 1,
+                _rowIndexToStyleIndex.put(i + 1,
                         styleIndex);
                 if (row.getRowStyle().getLocked()) {
-                    spreadsheet.getState().lockedRowIndexes.add(i + 1);
+                    _lockedRowIndexes.add(i + 1);
                 }
             } else {
                 if (spreadsheet.isActiveSheetProtected()) {
-                    spreadsheet.getState().lockedRowIndexes.add(i + 1);
+                    _lockedRowIndexes.add(i + 1);
                 }
             }
         }
@@ -259,13 +266,18 @@ public class SpreadsheetStyleFactory implements Serializable {
         for (int i = 0; i < spreadsheet.getColumns(); i++) {
             if (activeSheet.getColumnStyle(i) != null) {
                 int styleIndex = activeSheet.getColumnStyle(i).getIndex();
-                spreadsheet.getState().columnIndexToStyleIndex.put(i + 1,
+                _columnIndexToStyleIndex.put(i + 1,
                         styleIndex);
                 if (activeSheet.getColumnStyle(i).getLocked()) {
-                    spreadsheet.getState().lockedColumnIndexes.add(i + 1);
+                    _lockedColumnIndexes.add(i + 1);
                 }
             }
         }
+
+        spreadsheet.setLockedRowIndexes(_lockedRowIndexes);
+        spreadsheet.setLockedColumnIndexes(_lockedColumnIndexes);
+        spreadsheet.setColumnIndexToStyleIndex(_columnIndexToStyleIndex);
+        spreadsheet.setRowIndexToStyleIndex(_rowIndexToStyleIndex);
     }
 
     /**
@@ -300,7 +312,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         // remove/modify all possible old custom styles that the cell had (can
         // be found from state)
         ArrayList<String> add = new ArrayList<String>();
-        Iterator<String> iterator = spreadsheet.getState().shiftedCellBorderStyles
+        ArrayList<String> _shiftedCellBorderStyles = spreadsheet.getShiftedCellBorderStyles();
+        Iterator<String> iterator = _shiftedCellBorderStyles
                 .iterator();
         while (iterator.hasNext()) {
             String style = iterator.next();
@@ -325,7 +338,7 @@ public class SpreadsheetStyleFactory implements Serializable {
             }
         }
         for (String s : add) {
-            spreadsheet.getState().shiftedCellBorderStyles.add(s);
+            _shiftedCellBorderStyles.add(s);
         }
 
         HashMap<Integer, String> add2 = new HashMap<Integer, String>();
@@ -376,9 +389,10 @@ public class SpreadsheetStyleFactory implements Serializable {
 
         if (mergedCellBorders.containsKey(cssSelector)) {
             String rules = mergedCellBorders.remove(cssSelector);
-            spreadsheet.getState().shiftedCellBorderStyles
+            _shiftedCellBorderStyles
                     .remove(buildMergedCellBorderCSS(cssSelector, rules));
         }
+        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
     }
 
     /**
@@ -397,7 +411,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         // remove/modify all possible old custom styles that the cell had (can
         // be found from state)
         ArrayList<String> add = new ArrayList<String>();
-        Iterator<String> iterator = spreadsheet.getState().shiftedCellBorderStyles
+        ArrayList<String> _shiftedCellBorderStyles = spreadsheet.getShiftedCellBorderStyles();
+        Iterator<String> iterator = _shiftedCellBorderStyles
                 .iterator();
         while (iterator.hasNext()) {
             String style = iterator.next();
@@ -421,23 +436,24 @@ public class SpreadsheetStyleFactory implements Serializable {
                 }
             }
         }
+
         for (String s : add) {
-            spreadsheet.getState().shiftedCellBorderStyles.add(s);
+            _shiftedCellBorderStyles.add(s);
         }
         // remove the cell's new custom styles from state (will be added again
         // as this cell is styled)
         if (shiftedBorderLeftStyles.containsKey(key)) {
             final String style = shiftedBorderLeftStyles.get(key);
-            spreadsheet.getState().shiftedCellBorderStyles.remove(style);
+            _shiftedCellBorderStyles.remove(style);
         }
         if (shiftedBorderTopStyles.containsKey(key)) {
             final String style = shiftedBorderTopStyles.get(key);
-            spreadsheet.getState().shiftedCellBorderStyles.remove(style);
+            _shiftedCellBorderStyles.remove(style);
         }
         if (mergedCellBorders.containsKey(cssSelector)) {
             final String style = buildMergedCellBorderCSS(cssSelector,
                     mergedCellBorders.remove(cssSelector));
-            spreadsheet.getState().shiftedCellBorderStyles.remove(style);
+            _shiftedCellBorderStyles.remove(style);
         }
 
         // TODO May need optimizing since the client side might already have
@@ -454,18 +470,19 @@ public class SpreadsheetStyleFactory implements Serializable {
         if (updateCustomBorders) {
             if (shiftedBorderLeftStyles.containsKey(key)) {
                 final String style = shiftedBorderLeftStyles.get(key);
-                spreadsheet.getState().shiftedCellBorderStyles.add(style);
+                _shiftedCellBorderStyles.add(style);
             }
             if (shiftedBorderTopStyles.containsKey(key)) {
                 final String style = shiftedBorderTopStyles.get(key);
-                spreadsheet.getState().shiftedCellBorderStyles.add(style);
+                _shiftedCellBorderStyles.add(style);
             }
             if (mergedCellBorders.containsKey(cssSelector)) {
-                spreadsheet.getState().shiftedCellBorderStyles
+                _shiftedCellBorderStyles
                         .add(buildMergedCellBorderCSS(cssSelector,
                                 mergedCellBorders.get(cssSelector)));
             }
         }
+        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
     }
 
     /**
@@ -473,27 +490,29 @@ public class SpreadsheetStyleFactory implements Serializable {
      * client side.
      */
     public void loadCustomBorderStylesToState() {
-        if (spreadsheet.getState().shiftedCellBorderStyles != null) {
-            spreadsheet.getState().shiftedCellBorderStyles.clear();
+        ArrayList<String> _shiftedCellBorderStyles = spreadsheet.getShiftedCellBorderStyles();
+        if (_shiftedCellBorderStyles != null) {
+            _shiftedCellBorderStyles.clear();
         } else {
-            spreadsheet.getState().shiftedCellBorderStyles = new ArrayList<String>();
+            _shiftedCellBorderStyles = new ArrayList<String>();
         }
         for (String value : shiftedBorderLeftStyles.values()) {
             if (value.startsWith(".col")) {
-                spreadsheet.getState().shiftedCellBorderStyles.add(value);
+                _shiftedCellBorderStyles.add(value);
             }
         }
         for (String value : shiftedBorderTopStyles.values()) {
             if (value.startsWith(".col")) {
-                spreadsheet.getState().shiftedCellBorderStyles.add(value);
+                _shiftedCellBorderStyles.add(value);
             }
         }
         for (Entry<String, String> entry : mergedCellBorders.entrySet()) {
-            spreadsheet.getState().shiftedCellBorderStyles
+            _shiftedCellBorderStyles
                     .add(buildMergedCellBorderCSS(entry.getKey(),
                             entry.getValue()));
 
         }
+        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
     }
 
     /**
@@ -518,10 +537,11 @@ public class SpreadsheetStyleFactory implements Serializable {
         }
         mergedCellBorders.clear();
 
-        if (spreadsheet.getState().shiftedCellBorderStyles == null) {
-            spreadsheet.getState().shiftedCellBorderStyles = new ArrayList<String>();
+        ArrayList<String> _shiftedCellBorderStyles = spreadsheet.getShiftedCellBorderStyles();
+        if (_shiftedCellBorderStyles == null) {
+            _shiftedCellBorderStyles = new ArrayList<String>();
         } else {
-            spreadsheet.getState().shiftedCellBorderStyles.clear();
+            _shiftedCellBorderStyles.clear();
         }
 
         shiftedBorderTopStylesMap.clear();
@@ -537,16 +557,16 @@ public class SpreadsheetStyleFactory implements Serializable {
 
         for (String value : shiftedBorderLeftStyles.values()) {
             if (value.startsWith(".col")) {
-                spreadsheet.getState().shiftedCellBorderStyles.add(value);
+                _shiftedCellBorderStyles.add(value);
             }
         }
         for (String value : shiftedBorderTopStyles.values()) {
             if (value.startsWith(".col")) {
-                spreadsheet.getState().shiftedCellBorderStyles.add(value);
+                _shiftedCellBorderStyles.add(value);
             }
         }
         for (Entry<String, String> entry : mergedCellBorders.entrySet()) {
-            spreadsheet.getState().shiftedCellBorderStyles
+            _shiftedCellBorderStyles
                     .add(buildMergedCellBorderCSS(entry.getKey(),
                             entry.getValue()));
 
@@ -555,6 +575,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         // conditional formatting
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
 
+        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -600,8 +621,10 @@ public class SpreadsheetStyleFactory implements Serializable {
             sb.append("padding-left: " + cellStyle.getIndention() + "em;");
         }
 
-        spreadsheet.getState().cellStyleToCSSStyle.put(
+        HashMap<Integer, String> _cellStyleToCSSStyle = spreadsheet.getCellStyleToCSSStyle();
+        _cellStyleToCSSStyle.put(
                 (int) cellStyle.getIndex(), sb.toString());
+        spreadsheet.setCellStyleToCSSStyle(_cellStyleToCSSStyle);
     }
 
     private String buildMergedCellBorderCSS(String selector, String rules) {

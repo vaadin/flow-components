@@ -41,6 +41,8 @@ public class Parser {
 
     public static HashMap<Integer, String> parseMapIntegerString(String cellStyleToCSSStyle) {
         List<String> tokens = parse(cellStyleToCSSStyle);
+        consoleLog("received: " + cellStyleToCSSStyle);
+        tokens.forEach(s -> consoleLog("-->" + s));
         HashMap<Integer, String> l = new HashMap<>();
         for (String token : tokens) {
             List<String> ts = parse(token, '@');
@@ -194,32 +196,62 @@ public class Parser {
         if (payload != null) {
             int pos = 0;
             int start = 0;
+            boolean hasNonString = false;
             boolean insideString = false;
             boolean escaped = false;
             while (pos < payload.length()) {
                 if (separator == payload.charAt(pos) && !insideString) {
-                    if (pos > start) tokens.add(payload.substring(start, pos));
+                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
                     else tokens.add("");
                     start = pos + 1;
+                    hasNonString = false;
                 } else if ('"' == payload.charAt(pos)) {
                     if (!escaped) {
                         if (insideString) { // end of string
-                            tokens.add(payload.substring(start, pos));
+                            insideString = false;
                         } else { // start of string
                             insideString = true;
-                            start = pos + 1;
                         }
                     } else {
                         escaped = false;
                     }
                 } else if ('\\' == payload.charAt(pos)) {
                     escaped = true;
-                }
+                } else if (!insideString) hasNonString = true;
                 pos++;
             }
-            if (pos > start) tokens.add(payload.substring(start, pos));
+            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
         }
         return tokens;
+    }
+
+    public static void main(String[] args) {
+        String s = "";
+        ArrayList<String> l = parse(s, ',');
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
+
+
+        s = "\"\"";
+        l = parse(s, ',');
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
+
+        s = "swsw\"\"";
+        l = parse(s, ',');
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
+
+        s = "swsw\"\",33,\"aaa\"";
+        l = parse(s, ',');
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
+
+
+        s = "swsw\"\",33,\"aa,a\"";
+        l = parse(s, ',');
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
     }
 
 }

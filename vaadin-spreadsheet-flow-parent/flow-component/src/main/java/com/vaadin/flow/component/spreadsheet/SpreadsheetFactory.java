@@ -204,13 +204,12 @@ public class SpreadsheetFactory implements Serializable {
         workbook.setActiveSheet(sheetIndex);
         spreadsheet.reloadActiveSheetData();
         spreadsheet.reloadActiveSheetStyles();
-        final SpreadsheetState state = spreadsheet.getState();
         int[] verticalScrollPositions = Arrays.copyOf(
-                state.verticalScrollPositions, state.sheetNames.length);
+                spreadsheet.getVerticalScrollPositions(), spreadsheet.getSheetNames().length);
         int[] horizontalScrollPositions = Arrays.copyOf(
-                state.horizontalScrollPositions, state.sheetNames.length);
-        state.verticalScrollPositions = verticalScrollPositions;
-        state.horizontalScrollPositions = horizontalScrollPositions;
+                spreadsheet.getHorizontalScrollPositions(), spreadsheet.getSheetNames().length);
+        spreadsheet.setVerticalScrollPositions(verticalScrollPositions);
+        spreadsheet.setHorizontalScrollPositions(horizontalScrollPositions);
         generateNewSpreadsheet(spreadsheet, sheet, rows, columns);
     }
 
@@ -428,7 +427,7 @@ public class SpreadsheetFactory implements Serializable {
             }
         }
 
-        spreadsheet.getState().namedRanges = names;
+        spreadsheet.setNamedRanges(names);
     }
 
     private static boolean isNameSelectable(Name name) {
@@ -507,7 +506,7 @@ public class SpreadsheetFactory implements Serializable {
         if (rows < spreadsheet.getDefaultRowCount()) {
             rows = spreadsheet.getDefaultRowCount();
         }
-        spreadsheet.getState().rows = rows;
+        spreadsheet.setRows(rows);
 
         final float[] rowHeights = new float[rows];
         int cols = 0;
@@ -517,7 +516,7 @@ public class SpreadsheetFactory implements Serializable {
             int rIndex = row.getRowNum();
             // set the empty rows to have the default row width
             while (++tempRowIndex != rIndex) {
-                rowHeights[tempRowIndex] = spreadsheet.getState().defRowH;
+                rowHeights[tempRowIndex] = spreadsheet.getDefRowH();
             }
             if (row.getZeroHeight()) {
                 rowHeights[rIndex] = 0.0F;
@@ -546,14 +545,14 @@ public class SpreadsheetFactory implements Serializable {
                 rowHeights[i] = defaultRowHeightInPoints;
             }
         }
-        spreadsheet.getState().hiddenRowIndexes = hiddenRowIndexes;
-        spreadsheet.getState().rowH = rowHeights;
+        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+        spreadsheet.setRowH(rowHeights);
 
         // Always have at least the default amount of columns
         if (cols < spreadsheet.getDefaultColumnCount()) {
             cols = spreadsheet.getDefaultColumnCount();
         }
-        spreadsheet.getState().cols = cols;
+        spreadsheet.setCols(cols);
 
         final int[] colWidths = new int[cols];
         final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
@@ -566,8 +565,8 @@ public class SpreadsheetFactory implements Serializable {
                         .getColumnWidth(i));
             }
         }
-        spreadsheet.getState().hiddenColumnIndexes = hiddenColumnIndexes;
-        spreadsheet.getState().colW = colWidths;
+        spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
+        spreadsheet.setColW(colWidths);
     }
 
     /**
@@ -585,25 +584,25 @@ public class SpreadsheetFactory implements Serializable {
                 .getCTWorksheet();
         CTSheetProtection sheetProtection = ctWorksheet.getSheetProtection();
         if (sheetProtection != null) {
-            spreadsheet.getState().lockFormatColumns = sheetProtection
-                    .getFormatColumns();
-            spreadsheet.getState().lockFormatRows = sheetProtection
-                    .getFormatRows();
+            spreadsheet.setLockFormatColumns(sheetProtection
+                    .getFormatColumns());
+            spreadsheet.setLockFormatRows(sheetProtection
+                    .getFormatRows());
         }
 
-        spreadsheet.getState().colGroupingMax = 0;
-        spreadsheet.getState().rowGroupingMax = 0;
+        spreadsheet.setColGroupingMax(0);
+        spreadsheet.setRowGroupingMax(0);
 
         if (ctWorksheet.getSheetPr() != null
                 && ctWorksheet.getSheetPr().getOutlinePr() != null) {
             CTOutlinePr outlinePr = ctWorksheet.getSheetPr().getOutlinePr();
-            spreadsheet.getState().colGroupingInversed = !outlinePr
-                    .getSummaryRight();
-            spreadsheet.getState().rowGroupingInversed = !outlinePr
-                    .getSummaryBelow();
+            spreadsheet.setColGroupingInversed(!outlinePr
+                    .getSummaryRight());
+            spreadsheet.setRowGroupingInversed(!outlinePr
+                    .getSummaryBelow());
         } else {
-            spreadsheet.getState().colGroupingInversed = false;
-            spreadsheet.getState().rowGroupingInversed = false;
+            spreadsheet.setColGroupingInversed(false);
+            spreadsheet.setRowGroupingInversed(false);
         }
 
         // COLS
@@ -640,8 +639,8 @@ public class SpreadsheetFactory implements Serializable {
                 while (lastlevel != col.getOutlineLevel()) {
 
                     lastlevel++;
-                    if (spreadsheet.getState(false).colGroupingMax < lastlevel) {
-                        spreadsheet.getState().colGroupingMax = lastlevel;
+                    if (spreadsheet.getColGroupingMax() < lastlevel) {
+                        spreadsheet.setColGroupingMax(lastlevel);
                     }
 
                     // do not add children of collapsed groups
@@ -692,7 +691,7 @@ public class SpreadsheetFactory implements Serializable {
                 GroupingData d1 = data.get(i);
                 GroupingData d2 = data.get(j);
 
-                if (spreadsheet.getState().colGroupingInversed) {
+                if (spreadsheet.isColGroupingInversed()) {
                     if (d1.startIndex == d2.startIndex) {
                         toRemove.add(d2);
                     }
@@ -706,7 +705,7 @@ public class SpreadsheetFactory implements Serializable {
 
         data.removeAll(toRemove);
 
-        spreadsheet.getState().colGroupingData = data;
+        spreadsheet.setColGroupingData(data);
 
         // ROWS
 
@@ -745,7 +744,7 @@ public class SpreadsheetFactory implements Serializable {
                     lastlevel--;
 
                     boolean collapsed = false;
-                    if (spreadsheet.getState().rowGroupingInversed) {
+                    if (spreadsheet.isRowGroupingInversed()) {
                         // marker is before group
                         XSSFRow r = (XSSFRow) spreadsheet.getActiveSheet()
                                 .getRow(g.startIndex - 1);
@@ -796,8 +795,8 @@ public class SpreadsheetFactory implements Serializable {
 
                     rows.push(d);
 
-                    if (spreadsheet.getState(false).rowGroupingMax < d.level) {
-                        spreadsheet.getState().rowGroupingMax = d.level;
+                    if (spreadsheet.getRowGroupingMax() < d.level) {
+                        spreadsheet.setRowGroupingMax(d.level);
                     }
 
                 }
@@ -815,7 +814,7 @@ public class SpreadsheetFactory implements Serializable {
                 GroupingData d1 = data.get(i);
                 GroupingData d2 = data.get(j);
 
-                if (spreadsheet.getState().rowGroupingInversed) {
+                if (spreadsheet.isRowGroupingInversed()) {
                     if (d1.startIndex == d2.startIndex) {
                         toRemove.add(d2);
                     }
@@ -829,7 +828,7 @@ public class SpreadsheetFactory implements Serializable {
 
         data.removeAll(toRemove);
 
-        spreadsheet.getState().rowGroupingData = data;
+        spreadsheet.setRowGroupingData(data);
     }
 
     /**
@@ -1005,11 +1004,11 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void loadMergedRegions(Spreadsheet spreadsheet) {
         final Sheet sheet = spreadsheet.getActiveSheet();
-        spreadsheet.getState().mergedRegions = null;
+        spreadsheet.setMergedRegions(null);
         spreadsheet.mergedRegionCounter = 0;
         int numMergedRegions = sheet.getNumMergedRegions();
         if (numMergedRegions > 0) {
-            spreadsheet.getState().mergedRegions = new ArrayList<MergedRegion>(
+            ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>(
                     numMergedRegions);
             for (int i = 0; i < numMergedRegions; i++) {
                 CellRangeAddress cra = sheet.getMergedRegion(i);
@@ -1019,8 +1018,9 @@ public class SpreadsheetFactory implements Serializable {
                 mergedRegion.row1 = cra.getFirstRow() + 1;
                 mergedRegion.row2 = cra.getLastRow() + 1;
                 mergedRegion.id = spreadsheet.mergedRegionCounter++;
-                spreadsheet.getState().mergedRegions.add(mergedRegion);
+                _mergedRegions.add(mergedRegion);
             }
+            spreadsheet.setMergedRegions(_mergedRegions);
         }
     }
 
@@ -1043,11 +1043,11 @@ public class SpreadsheetFactory implements Serializable {
              *
              * In Spreadsheet the meaning is the opposite.
              */
-            spreadsheet.getState().horizontalSplitPosition = paneInformation
-                .getVerticalSplitPosition() + sheet.getLeftCol();
+            spreadsheet.setHorizontalSplitPosition(paneInformation
+                .getVerticalSplitPosition() + sheet.getLeftCol());
 
-            spreadsheet.getState().verticalSplitPosition = paneInformation
-                .getHorizontalSplitPosition() + sheet.getTopRow();
+            spreadsheet.setVerticalSplitPosition(paneInformation
+                .getHorizontalSplitPosition() + sheet.getTopRow());
 
             /*
              * If the view was scrolled down / right when panes were frozen, the
@@ -1061,8 +1061,8 @@ public class SpreadsheetFactory implements Serializable {
                 spreadsheet.setRowHidden(row, true);
             }
         } else {
-            spreadsheet.getState().verticalSplitPosition = 0;
-            spreadsheet.getState().horizontalSplitPosition = 0;
+            spreadsheet.setVerticalSplitPosition(0);
+            spreadsheet.setHorizontalSplitPosition(0);
         }
     }
 
@@ -1081,9 +1081,9 @@ public class SpreadsheetFactory implements Serializable {
         float defaultRowHeightInPoints = sheet.getDefaultRowHeightInPoints();
         if (defaultRowHeightInPoints <= 0) {
             sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
-            spreadsheet.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
+            spreadsheet.setDefRowH(DEFAULT_ROW_HEIGHT_POINTS);
         } else {
-            spreadsheet.getState().defRowH = defaultRowHeightInPoints;
+            spreadsheet.setDefRowH(defaultRowHeightInPoints);
         }
     }
 
@@ -1092,10 +1092,10 @@ public class SpreadsheetFactory implements Serializable {
         int charactersToPixels = ExcelToHtmlUtils.getColumnWidthInPx(sheet
                 .getDefaultColumnWidth() * 256);
         if (charactersToPixels > 0) {
-            spreadsheet.getState().defColW = charactersToPixels;
+            spreadsheet.setDefColW(charactersToPixels);
         } else {
-            spreadsheet.getState().defColW = SpreadsheetUtil
-                    .getDefaultColumnWidthInPx();
+            spreadsheet.setDefColW(SpreadsheetUtil
+                    .getDefaultColumnWidthInPx());
             sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
         }
     }

@@ -160,7 +160,7 @@ public class ConditionalFormatter implements Serializable {
         cellToIndex.clear();
         topBorders.clear();
         leftBorders.clear();
-        spreadsheet.getState().conditionalFormattingStyles = new HashMap<Integer, String>();
+        HashMap<Integer, String> _conditionalFormattingStyles = new HashMap<Integer, String>();
 
         SheetConditionalFormatting cfs = spreadsheet.getActiveSheet()
                 .getSheetConditionalFormatting();
@@ -249,7 +249,7 @@ public class ConditionalFormatter implements Serializable {
 
                 cssIndex = addBorderFormatting(cf, rule, css, cssIndex);
 
-                spreadsheet.getState().conditionalFormattingStyles.put(
+                _conditionalFormattingStyles.put(
                         cssIndex, css.toString());
 
                 // check actual cells
@@ -262,6 +262,7 @@ public class ConditionalFormatter implements Serializable {
             }
 
         }
+        spreadsheet.setConditionalFormattingStyles(_conditionalFormattingStyles);
     }
 
     /**
@@ -372,6 +373,7 @@ public class ConditionalFormatter implements Serializable {
 
             // top and left borders might be applied to another cell, so store
             // them with a different index
+            HashMap<Integer, String> _conditionalFormattingStyles = spreadsheet.getConditionalFormattingStyles();
             if (isTopSet) {
                 // bottom border for cell above
                 final StringBuilder sb2 = new StringBuilder("border-bottom:");
@@ -380,7 +382,7 @@ public class ConditionalFormatter implements Serializable {
                     sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
                             "border-bottom-color", borderFormatting));
 
-                    spreadsheet.getState().conditionalFormattingStyles.put(
+                    _conditionalFormattingStyles.put(
                             cssIndex, sb2.toString());
                     topBorders.put(cf, cssIndex++);
                 } else {
@@ -397,13 +399,14 @@ public class ConditionalFormatter implements Serializable {
                             BorderSide.LEFT, "border-right-color",
                             borderFormatting));
 
-                    spreadsheet.getState().conditionalFormattingStyles.put(
+                    _conditionalFormattingStyles.put(
                             cssIndex, sb2.toString());
                     leftBorders.put(cf, cssIndex++);
                 } else {
                     css.append(BORDER_STYLE_DEFAULT);
                 }
             }
+            spreadsheet.setConditionalFormattingStyles(_conditionalFormattingStyles);
         }
 
         return cssIndex;

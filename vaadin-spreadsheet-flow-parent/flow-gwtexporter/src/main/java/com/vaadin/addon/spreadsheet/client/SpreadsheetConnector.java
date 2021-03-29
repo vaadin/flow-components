@@ -299,7 +299,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     @Override
     public SpreadsheetWidget getWidget() {
-        consoleLog("getWidget()");
         return (SpreadsheetWidget) super.getWidget();
     }
 
@@ -364,7 +363,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    native void debugger() /*-{
+      debugger;
+  }-*/;
+
+
     private void loadInitialStateDataToWidget(StateChangeEvent stateChangeEvent) {
+        debugger();
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();
@@ -377,6 +382,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     }
 
     private void loadStateChangeDataToWidget(StateChangeEvent stateChangeEvent) {
+        consoleLog("loadStateChangeDataToWidget(" + stateChangeEvent + ")");
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
         if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
