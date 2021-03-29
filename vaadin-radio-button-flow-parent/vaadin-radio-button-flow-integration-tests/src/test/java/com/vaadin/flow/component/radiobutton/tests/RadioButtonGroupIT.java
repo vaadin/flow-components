@@ -161,7 +161,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
     }
 
     @Test
-    public void disabledItemsAfterEnablingButtonGroup() {
+    public void keepDisabledItemsDisabledAfterEnablingButtonGroup() {
         WebElement group = layout.findElement(By.id("button-group-disabled-with-item-enabled-provider"));
         WebElement enableButton = layout.findElement(By.id("enable-button-for-button-group-disabled-with-item-enabled-provider"));
         // make sure the group is disabled
