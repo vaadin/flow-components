@@ -17,12 +17,12 @@ package com.vaadin.flow.component.grid;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 
 /**
@@ -82,7 +82,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
      */
     public HeaderCell join(Column<?>... columnsToMerge) {
         return join(Arrays.stream(columnsToMerge).map(this::getCell)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     /**
