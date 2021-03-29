@@ -161,29 +161,6 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
     }
 
     @Test
-    public void keepDisabledItemsDisabledAfterEnablingButtonGroup() {
-        WebElement group = layout.findElement(By.id("button-group-disabled-with-item-enabled-provider"));
-        WebElement enableButton = layout.findElement(By.id("enable-button-for-button-group-disabled-with-item-enabled-provider"));
-        // make sure the group is disabled
-        Assert.assertFalse(group.isEnabled());
-
-        List<WebElement> buttons = group
-                .findElements(By.tagName("vaadin-radio-button"));
-        // make sure all buttons in the group are disabled
-        buttons.forEach(btn -> Assert.assertFalse(btn.isEnabled()));
-
-        // enable the group
-        new Actions(getDriver()).moveToElement(enableButton).click().build().perform();
-
-        // the group should be enabled
-        Assert.assertTrue(group.isEnabled());
-        // the first button should be enabled
-        Assert.assertTrue(buttons.get(0).isEnabled());
-        // the second button should stay disabled
-        Assert.assertFalse("Second button should've stayed disabled", buttons.get(1).isEnabled());
-    }
-
-    @Test
     public void readOnlyGroup() {
         WebElement group = layout.findElement(By.id("button-group-read-only"));
 

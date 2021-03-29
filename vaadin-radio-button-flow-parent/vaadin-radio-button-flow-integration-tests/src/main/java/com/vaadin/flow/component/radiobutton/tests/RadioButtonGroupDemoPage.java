@@ -17,7 +17,6 @@
 
 package com.vaadin.flow.component.radiobutton.tests;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -81,7 +80,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
         addItemIconGenerator();
         addDisabled();
         addDisabledItems();
-        addDisabledGroupWithItemEnabledProvider();
         addComponentAfterItems();
         addReadOnlyGroup();
         insertComponentsBetweenItems();
@@ -285,26 +283,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
 
         addCard("Radio button group with item enabled provider", group,
                 valueInfo);
-    }
-
-    private void addDisabledGroupWithItemEnabledProvider() {
-        // begin-source-example
-        // source-example-heading: Disabled items with item enabled provider
-        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
-        radioButtonGroup.setId("button-group-disabled-with-item-enabled-provider");
-        radioButtonGroup.setItems("First", "Second");
-        radioButtonGroup.setItemEnabledProvider("First"::equals);
-        radioButtonGroup.setEnabled(false);
-
-        Button enableButton = new Button("Enable");
-        enableButton.setId("enable-button-for-button-group-disabled-with-item-enabled-provider");
-        enableButton.addClickListener(event -> radioButtonGroup.setEnabled(true));
-        // end-source-example
-
-        Div container = new Div(enableButton, radioButtonGroup);
-        container.setId("radio-button-group-disabled-items-with-item-enabled-provider");
-
-        addCard("Disabled items with item enabled provider", container);
     }
 
     private String getName(Person person) {
