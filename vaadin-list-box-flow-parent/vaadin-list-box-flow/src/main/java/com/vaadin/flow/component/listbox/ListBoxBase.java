@@ -63,7 +63,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "20.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "20.0.0-alpha3")
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
