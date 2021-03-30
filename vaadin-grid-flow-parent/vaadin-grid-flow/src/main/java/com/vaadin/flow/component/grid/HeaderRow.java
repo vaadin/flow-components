@@ -23,25 +23,26 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 
 /**
  * One row of {@link HeaderCell}s in a Grid.
- * 
+ *
  * @author Vaadin Ltd.
  */
 public class HeaderRow extends AbstractRow<HeaderCell> {
 
     /**
      * A header cell in a Grid.
-     * 
+     *
      * @author Vaadin Ltd.
      */
     public static class HeaderCell extends AbstractCell {
 
         /**
          * Creates a new HeaderCell which wraps the given column element.
-         * 
+         *
          * @param column
          */
         HeaderCell(AbstractColumn<?> column) {
@@ -65,7 +66,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
 
     /**
      * Creates a new header row from the layer of column elements.
-     * 
+     *
      * @param layer
      */
     HeaderRow(ColumnLayer layer) {
@@ -74,7 +75,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
 
     /**
      * Joins the cells corresponding the given columns in the row.
-     * 
+     *
      * @param columnsToMerge
      *            the columns of the cells that should be merged
      * @return the merged cell
@@ -91,7 +92,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
      * <p>
      * The cells to join must be adjacent cells in this row, and this row must
      * be the out-most row.
-     * 
+     *
      * @param cells
      *            the cells to join
      * @return the merged cell
