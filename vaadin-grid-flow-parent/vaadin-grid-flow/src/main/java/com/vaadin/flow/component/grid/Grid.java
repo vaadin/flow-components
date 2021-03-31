@@ -3543,10 +3543,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Sets the function that is used for generating CSS class names for rows in
-     * this grid. Returning {@code null} from the generator results in no custom
-     * class name being set. Multiple class names can be returned from the
-     * generator as space-separated.
+     * Sets the function that is used for generating CSS class names for all the
+     * cells in the rows in this grid. Returning {@code null} from the generator
+     * results in no custom class name being set. Multiple class names can be
+     * returned from the generator as space-separated.
      * <p>
      * If {@link Column#setClassNameGenerator(SerializableFunction)} is used
      * together with this method, resulting class names from both methods will
