@@ -7,8 +7,8 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid/join-columns")
-public class JoinColumnsIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/joined-headers")
+public class JoinedHeadersIT extends AbstractComponentIT {
 
     @Before
     public void init() {

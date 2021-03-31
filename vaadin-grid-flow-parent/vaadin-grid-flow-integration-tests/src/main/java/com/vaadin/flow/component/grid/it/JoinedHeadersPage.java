@@ -10,10 +10,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid/join-columns")
-public class JoinColumnsPage extends Div {
+@Route("vaadin-grid/joined-headers")
+public class JoinedHeadersPage extends Div {
 
-    public JoinColumnsPage() {
+    public JoinedHeadersPage() {
         add(createGrid());
         add(createGrid2());
     }
