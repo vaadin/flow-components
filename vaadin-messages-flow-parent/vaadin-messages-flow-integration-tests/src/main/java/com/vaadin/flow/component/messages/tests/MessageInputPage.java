@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageInput;
+import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-messages/message-input-test")
@@ -40,5 +41,11 @@ public class MessageInputPage extends Div {
                 e -> messageInput.setEnabled(!messageInput.isEnabled()));
         toggleEnabledButton.setId("toggle-enabled");
         add(toggleEnabledButton);
+
+        NativeButton setI18nButton = new NativeButton("set-i18n",
+                e -> messageInput.setI18n(new MessageInputI18n()
+                        .setMessage("Viesti").setSend("Lähetä")));
+        setI18nButton.setId("set-i18n");
+        add(setI18nButton);
     }
 }
