@@ -53,7 +53,7 @@ public class JoinColumnsPage extends Div {
                 .setKey("secondColumn").setHeader("Second");
         Grid.Column<String> thirdColumn = grid.addColumn(str -> str)
                 .setKey("thirdColumn").setHeader("Third");
-        Grid.Column<String> fourthColumn = grid.addComponentColumn(str -> new Span(str))
+        Grid.Column<String> fourthColumn = grid.addComponentColumn(Span::new)
                 .setKey("fourthColumn").setHeader("Forth");
         return Arrays.asList(firstColumn, secondColumn, thirdColumn,
                 fourthColumn);
