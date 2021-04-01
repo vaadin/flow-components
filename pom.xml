@@ -177,37 +177,31 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <version>4.1.0</version>
-          <extensions>true</extensions>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-maven-plugin</artifactId>
+          <version>5.3.0</version>
+          <configuration>
+            <bnd><![CDATA[
+            Bundle-Name: ${osgi.bundle.name}
+            Bundle-SymbolicName: ${osgi.bundle.symbolic.name}
+            Import-Package: ${osgi.bundle.import.package}
+            Export-Package: ${osgi.bundle.export.package}
+            Private-Package: ${osgi.bundle.package.private}
+            Bundle-Activator: ${osgi.bundle.bundle.activator}
+            Bundle-License: ${osgi.bundle.license}
+            Bundle-Description: ${osgi.bundle.description}
+            Implementation-Title: ${osgi.bundle.title}
+            Vaadin-Package-Version: ${osgi.vaadin.package.version}
+            -includeresource.resources: -src/main/resources
+            ]]></bnd>
+          </configuration>
           <executions>
             <execution>
-              <id>bundle-manifest</id>
-              <phase>process-classes</phase>
               <goals>
-                <goal>manifest</goal>
+                <goal>bnd-process</goal>
               </goals>
             </execution>
           </executions>
-          <configuration>
-            <exportScr>true</exportScr>
-            <instructions>
-              <Bundle-Name>${osgi.bundle.name}</Bundle-Name>
-              <Bundle-SymbolicName>${osgi.bundle.symbolic.name}</Bundle-SymbolicName>
-              <Import-Package>${osgi.bundle.import.package}</Import-Package>
-              <Export-Package>${osgi.bundle.export.package}</Export-Package>
-              <Private-Package>${osgi.bundle.package.private}</Private-Package>
-              <Bundle-Activator>${osgi.bundle.bundle.activator}</Bundle-Activator>
-              <Bundle-License>${osgi.bundle.license}</Bundle-License>
-              <Bundle-Description>${osgi.bundle.description}</Bundle-Description>
-              <Implementation-Title>${osgi.bundle.title}</Implementation-Title>
-              <Vaadin-Package-Version>${osgi.vaadin.package.version}</Vaadin-Package-Version>
-              <_removeheaders>Built-By</_removeheaders>
-              <_dsannotations>*</_dsannotations>
-              <_metatypeannotations>*</_metatypeannotations>
-            </instructions>
-          </configuration>
         </plugin>
         <plugin>
           <groupId>com.googlecode.maven-download-plugin</groupId>
