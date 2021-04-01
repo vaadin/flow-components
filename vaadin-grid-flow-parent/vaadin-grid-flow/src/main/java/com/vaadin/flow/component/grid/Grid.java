@@ -3215,7 +3215,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param order
      *            sort order to be set to Grid.
      * @param userOriginated
@@ -3296,7 +3296,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param userOriginated
      *            <code>true</code> if the sorting changes as a result of user
      *            interaction, <code>false</code> if changed by Grid API call.
