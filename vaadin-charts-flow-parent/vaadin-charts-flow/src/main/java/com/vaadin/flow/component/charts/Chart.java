@@ -207,7 +207,7 @@ public class Chart extends Component implements HasStyle, HasSize {
      * <p>
      * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
      * {@link PlotOptionsTimeline}.
-     * 
+     *
      * @param timeline
      *            true for timeline chart
      */
