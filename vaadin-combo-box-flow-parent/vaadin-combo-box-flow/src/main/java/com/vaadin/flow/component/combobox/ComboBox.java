@@ -923,7 +923,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (Boolean.TRUE.equals(event.getValue())) {
             removeLazyOpenRegistration();
             dataCommunicator.setFetchEnabled(true);
-            setRequestedRange(0, getPageSize(), this.getFilterString());
+            if (!isAutoOpen()) {
+                setRequestedRange(0, getPageSize(), this.getFilterString());
+            }
         }
     }
 
