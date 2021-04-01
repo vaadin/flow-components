@@ -8,10 +8,10 @@ package com.vaadin.flow.component.cookieconsent;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -42,7 +42,7 @@ public class CookieConsent extends Component {
 
     /**
      * Creates a banner with the specified data
-     * 
+     *
      * @param message
      *            The message to show in the banner.
      * @param dismissLabel
