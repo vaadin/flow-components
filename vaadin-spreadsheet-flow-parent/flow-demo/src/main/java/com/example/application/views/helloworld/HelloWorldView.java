@@ -50,8 +50,6 @@ public class HelloWorldView extends VerticalLayout {
         spreadsheet.setWorkbook(wb);
         spreadsheet.setHeight("150px");
 
-        add(new H1("-"));
-
         add(new H1("These are usual flow server side components"));
 
         HorizontalLayout l;

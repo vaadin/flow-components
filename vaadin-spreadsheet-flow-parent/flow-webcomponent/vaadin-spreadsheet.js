@@ -209,7 +209,7 @@ export class VaadinSpreadsheet extends LitElement {
     const style = document.createElement('style');
     style.textContent = styleString;
     document.head.append(style);
-  }
+    }
 
 
   updated(_changedProperties) {
@@ -221,6 +221,7 @@ export class VaadinSpreadsheet extends LitElement {
     if (!this.api) {
       this.addStyle(css_gwt);
       this.addStyle(css_valo);
+      this.addFontAwesome();
 
       const div = document.createElement('div');
       div.setAttribute('class', 'spreadsheetport');
@@ -647,6 +648,12 @@ SERVER RPC METHOD CALLBACKS
     });
   }
 
+  addFontAwesome() {
+    const style = document.createElement('link');
+    style.setAttribute('href', 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+    style.setAttribute('rel', 'stylesheet')
+    document.head.append(style);
+    }
 }
 
 window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);

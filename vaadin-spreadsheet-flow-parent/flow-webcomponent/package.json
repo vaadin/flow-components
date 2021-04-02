@@ -1,6 +1,6 @@
 {
   "name": "spreadsheet-lit-element",
-  "version": "0.0.84",
+  "version": "0.0.85",
   "description": "A simple web component",
   "main": "vaadin-spreadsheet.js",
   "module": "vaadin-spreadsheet.js",
