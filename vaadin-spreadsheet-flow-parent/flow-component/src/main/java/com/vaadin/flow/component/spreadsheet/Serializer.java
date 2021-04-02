@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.spreadsheet.client.CellData;
+import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 
@@ -23,6 +24,13 @@ public class Serializer {
                     } else if (v instanceof String) {
                         String s = (String) v;
                         return "\"" + s.replaceAll("\"", "\\\"") + "\"";
+                    } else if (v instanceof MergedRegion) {
+                        MergedRegion o = (MergedRegion) v;
+                        return "" + o.id
+                                + "#" + o.col1
+                                + "#" + o.col2
+                                + "#" + o.row1
+                                + "#" + o.row2;
                     } else if (v instanceof GroupingData) {
                         GroupingData o = (GroupingData) v;
                         return "" + o.startIndex
@@ -67,7 +75,7 @@ public class Serializer {
                     rs.append(v instanceof String?"\"" + ((String)v).replaceAll("\"", "\\\"") + "\"":v);
                 });
             }
-        }
+        } else rs.append("null");
         return rs.toString();
     }
 

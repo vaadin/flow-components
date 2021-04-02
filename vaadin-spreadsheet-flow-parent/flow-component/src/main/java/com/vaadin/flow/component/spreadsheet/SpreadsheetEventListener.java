@@ -84,7 +84,7 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
         } else if ("onRedo".equals(event.getMessage())) {
             handler.onRedo();
         } else if ("setCellStyleWidthRatios".equals(event.getMessage())) {
-            handler.setCellStyleWidthRatios(parseMapIntegerFloat(tokens.get(0)));
+            handler.setCellStyleWidthRatios(tokens.size() > 0?parseMapIntegerFloat(tokens.get(0)):new HashMap<>());
         } else if ("protectedCellWriteAttempted".equals(event.getMessage())) {
             handler.protectedCellWriteAttempted();
         } else if ("onPaste".equals(event.getMessage())) {

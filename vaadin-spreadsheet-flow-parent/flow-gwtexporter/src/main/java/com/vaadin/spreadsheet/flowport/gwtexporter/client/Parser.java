@@ -14,9 +14,10 @@ import com.vaadin.addon.spreadsheet.shared.GroupingData;
 
 public class Parser {
 
-    public static List<GroupingData> parseListOfGroupingData(String colGroupingData) {
+    public static List<GroupingData> parseListOfGroupingData(String raw) {
+        if ("null".equals(raw)) return null;
         List<GroupingData> l = new ArrayList<>();
-        List<String> tokens = parse(colGroupingData);
+        List<String> tokens = parse(raw);
         for (String token : tokens) {
             String[] ts = token.split("#");
             l.add(new GroupingData(
@@ -30,8 +31,9 @@ public class Parser {
         return l;
     }
 
-    public static String[] parseArrayOfStrings(String sheetNames) {
-        List<String> tokens = parse(sheetNames);
+    public static String[] parseArrayOfStrings(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         String[] l = new String[tokens.size()];
         for (int i = 0; i < tokens.size(); i++) {
             l[i] = tokens.get(i);
@@ -39,9 +41,10 @@ public class Parser {
         return l;
     }
 
-    public static HashMap<Integer, String> parseMapIntegerString(String cellStyleToCSSStyle) {
-        List<String> tokens = parse(cellStyleToCSSStyle);
-        consoleLog("received: " + cellStyleToCSSStyle);
+    public static HashMap<Integer, String> parseMapIntegerString(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
+        consoleLog("received: " + raw);
         tokens.forEach(s -> consoleLog("-->" + s));
         HashMap<Integer, String> l = new HashMap<>();
         for (String token : tokens) {
@@ -51,8 +54,9 @@ public class Parser {
         return l;
     }
 
-    public static HashMap<Integer, Integer> parseMapIntegerInteger(String rowIndexToStyleIndex) {
-        List<String> tokens = parse(rowIndexToStyleIndex);
+    public static HashMap<Integer, Integer> parseMapIntegerInteger(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         HashMap<Integer, Integer> l = new HashMap<>();
         for (String token : tokens) {
             String[] ts = token.split("@");
@@ -61,8 +65,9 @@ public class Parser {
         return l;
     }
 
-    public static Set<Integer> parseSetInteger(String lockedColumnIndexes) {
-        List<String> tokens = parse(lockedColumnIndexes);
+    public static Set<Integer> parseSetInteger(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         Set<Integer> l = new HashSet<>();
         for (String token : tokens) {
             l.add(Integer.parseInt(token));
@@ -70,13 +75,15 @@ public class Parser {
         return l;
     }
 
-    public static ArrayList<String> parseArraylistString(String shiftedCellBorderStyles) {
-        ArrayList<String> tokens = parse(shiftedCellBorderStyles);
+    public static ArrayList<String> parseArraylistString(String raw) {
+        if ("null".equals(raw)) return null;
+        ArrayList<String> tokens = parse(raw);
         return tokens;
     }
 
-    public static ArrayList<Integer> parseArraylistInteger(String hiddenColumnIndexes) {
-        List<String> tokens = parse(hiddenColumnIndexes);
+    public static ArrayList<Integer> parseArraylistInteger(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         ArrayList<Integer> l = new ArrayList<>();
         for (String token : tokens) {
             l.add(Integer.parseInt(token));
@@ -84,8 +91,9 @@ public class Parser {
         return l;
     }
 
-    public static int[] parseArrayInt(String verticalScrollPositions) {
-        List<String> tokens = parse(verticalScrollPositions);
+    public static int[] parseArrayInt(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         int[] l = new int[tokens.size()];
         for (int i = 0; i < tokens.size(); i++) {
             l[i] = Integer.parseInt(tokens.get(i));
@@ -93,8 +101,19 @@ public class Parser {
         return l;
     }
 
-    public static HashMap<String, String> parseMapStringString(String cellKeysToEditorIdMap) {
-        List<String> tokens = parse(cellKeysToEditorIdMap);
+    public static float[] parseArrayFloat(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
+        float[] l = new float[tokens.size()];
+        for (int i = 0; i < tokens.size(); i++) {
+            l[i] = Float.parseFloat(tokens.get(i));
+        }
+        return l;
+    }
+
+    public static HashMap<String, String> parseMapStringString(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         HashMap<String, String> l = new HashMap<>();
         for (String token : tokens) {
             List<String> ts = parse(token, '@');
@@ -103,8 +122,9 @@ public class Parser {
         return l;
     }
 
-    public static Set<String> parseSetString(String invalidFormulaCells) {
-        List<String> tokens = parse(invalidFormulaCells);
+    public static Set<String> parseSetString(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         Set<String> l = new HashSet<>();
         for (String token : tokens) {
             l.add(token);
@@ -112,8 +132,9 @@ public class Parser {
         return l;
     }
 
-    public static HashMap<String, OverlayInfo> parseMapStringOverlayInfo(String overlays) {
-        List<String> tokens = parse(overlays);
+    public static HashMap<String, OverlayInfo> parseMapStringOverlayInfo(String raw) {
+        if ("null".equals(raw)) return null;
+        List<String> tokens = parse(raw);
         HashMap<String, OverlayInfo> l = new HashMap<>();
         for (String token : tokens) {
             List<String> ts = parse(token, '@');
@@ -131,9 +152,10 @@ public class Parser {
         return l;
     }
 
-    public static ArrayList<MergedRegion> parseArrayMergedRegion(String mergedRegions) {
+    public static ArrayList<MergedRegion> parseArrayMergedRegion(String raw) {
+        if ("null".equals(raw)) return null;
         ArrayList<MergedRegion> l = new ArrayList<>();
-        List<String> tokens = parse(mergedRegions);
+        List<String> tokens = parse(raw);
         for (String token : tokens) {
             String[] ts = token.split("#");
             MergedRegion data = new MergedRegion();
@@ -151,10 +173,11 @@ public class Parser {
       console.log("parser", message );
   }-*/;
 
-    public static ArrayList<CellData> parseArraylistOfCellData(String cellData) {
+    public static ArrayList<CellData> parseArraylistOfCellData(String raw) {
+        if ("null".equals(raw)) return null;
         ArrayList<CellData> l = new ArrayList<>();
-        consoleLog("received " + cellData);
-        List<String> tokens = parse(cellData);
+        consoleLog("received " + raw);
+        List<String> tokens = parse(raw);
         tokens.forEach(s -> consoleLog("-->" + s));
         for (String token : tokens) {
             String[] ts = token.split("#");
@@ -173,9 +196,10 @@ public class Parser {
         return l;
     }
 
-    public static ArrayList<SpreadsheetActionDetails> parseArraylistSpreadsheetActionDetails(String actionDetails) {
+    public static ArrayList<SpreadsheetActionDetails> parseArraylistSpreadsheetActionDetails(String raw) {
+        if ("null".equals(raw)) return null;
         ArrayList<SpreadsheetActionDetails> l = new ArrayList<>();
-        List<String> tokens = parse(actionDetails);
+        List<String> tokens = parse(raw);
         for (String token : tokens) {
             String[] ts = token.split("#");
             SpreadsheetActionDetails details = new SpreadsheetActionDetails();

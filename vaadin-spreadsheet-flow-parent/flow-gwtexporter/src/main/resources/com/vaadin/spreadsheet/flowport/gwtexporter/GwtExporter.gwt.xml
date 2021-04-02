@@ -25,7 +25,7 @@
 
 
   <generate-with
-          class="com.vaadin.spreadsheet.flowport.gwtexporter.ConnectorBundleLoaderFactory">
+          class="com.vaadin.spreadsheet.flowport.gwtexporter.OptimizedConnectorBundleLoaderFactory">
     <when-type-assignable
             class="com.vaadin.client.metadata.ConnectorBundleLoader" />
   </generate-with>

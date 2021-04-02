@@ -334,6 +334,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             });
         } else if (state.reload) {
             loadInitialStateDataToWidget(stateChangeEvent);
+            state.reload = false; //miguel
         } else {
             if (stateChangeEvent.hasPropertyChanged("sheetNames")
                     || stateChangeEvent.hasPropertyChanged("sheetIndex")) {
@@ -369,7 +370,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
 
     private void loadInitialStateDataToWidget(StateChangeEvent stateChangeEvent) {
-        debugger();
+        //debugger();
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();

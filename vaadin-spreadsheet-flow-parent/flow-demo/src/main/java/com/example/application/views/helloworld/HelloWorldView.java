@@ -48,6 +48,7 @@ public class HelloWorldView extends VerticalLayout {
         Cell cell = row.createCell(0);
         cell.setCellValue("Hola!");
         spreadsheet.setWorkbook(wb);
+        spreadsheet.setHeight("150px");
 
         add(new H1("-"));
 

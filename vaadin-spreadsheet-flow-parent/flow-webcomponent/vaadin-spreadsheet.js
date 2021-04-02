@@ -51,6 +51,9 @@ export class VaadinSpreadsheet extends LitElement {
       SHARED STATE
        */
 
+      dirty: {type: Number},
+
+
       rowBufferSize: {type: Number},
 
       columnBufferSize: {type: Number},
@@ -211,8 +214,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   updated(_changedProperties) {
     super.updated(_changedProperties);
-    console.log('vaadin-spreadsheet', 'AAAAAAAAAAAAAAAAAAAAAA');
-    console.log('vaadin-spreadsheet', '_changedProperties', _changedProperties)
+    //console.log('vaadin-spreadsheet', '_changedProperties', _changedProperties)
     //console.log(this.shadowRoot.querySelector('#mislot'));
     //console.log(this.querySelector('#mislot'));
     let initial = false;
@@ -222,7 +224,7 @@ export class VaadinSpreadsheet extends LitElement {
 
       const div = document.createElement('div');
       div.setAttribute('class', 'spreadsheetport');
-      div.setAttribute('style', 'height: 300px;');
+      div.setAttribute('style', 'min-height: 120px;padding-bottom: 88px;');
       this.append(div);
 
       this.api = new Spreadsheet(div);
@@ -231,230 +233,185 @@ export class VaadinSpreadsheet extends LitElement {
       console.log('callbacks created')
       initial = true;
     }
-    console.log('vaadin-spreadsheet', '_changedProperties after', _changedProperties)
+    let propNames = [];
+    let dirty = false;
     _changedProperties.forEach((oldValue, name) => {
-      console.log(`${name} changed from oldValue: ${oldValue}`, this[name]);
+      console.log(`${name} changed from oldValue: ${oldValue} to:`, this[name]);
       //this.setAttribute(propName, oldValue, this[propName]);
       let newVal = this[name];
-      let notify = !initial;
-      if ('rowBufferSize' == name) {
-        this.api.setRowBufferSize(newVal, notify);
+
+      if ('dirty' == name) {
+        dirty = true;
+      } else if ('rowBufferSize' == name) {
+        this.api.setRowBufferSize(newVal);
       } else if ('columnBufferSize' == name) {
-        this.api.setColumnBufferSize(newVal, notify);
+        this.api.setColumnBufferSize(newVal);
       } else if ('rows' == name) {
-        this.api.setRows(newVal, notify);
+        this.api.setRows(newVal);
       } else if ('cols' == name) {
-        this.api.setCols(newVal, notify);
+        this.api.setCols(newVal);
       } else if ('colGroupingData' == name) {
-        this.api.setColGroupingData(newVal, notify);
+        this.api.setColGroupingData(newVal);
       } else if ('rowGroupingData' == name) {
-        this.api.setRowGroupingData(newVal, notify);
+        this.api.setRowGroupingData(newVal);
       } else if ('colGroupingMax' == name) {
-        this.api.setColGroupingMax(newVal, notify);
+        this.api.setColGroupingMax(newVal);
       } else if ('rowGroupingMax' == name) {
-        this.api.setRowGroupingMax(newVal, notify);
+        this.api.setRowGroupingMax(newVal);
       } else if ('colGroupingInversed' == name) {
-        this.api.setColGroupingInversed(newVal, notify);
+        this.api.setColGroupingInversed(newVal);
       } else if ('rowGroupingInversed' == name) {
-        this.api.setRowGroupingInversed(newVal, notify);
+        this.api.setRowGroupingInversed(newVal);
       } else if ('defRowH' == name) {
-        this.api.setDefRowH(newVal, notify);
+        this.api.setDefRowH(newVal);
       } else if ('defColW' == name) {
-        this.api.setDefColW(newVal, notify);
+        this.api.setDefColW(newVal);
       } else if ('rowH' == name) {
-        this.api.setRowH(newVal, notify);
+        this.api.setRowH(newVal);
       } else if ('colW' == name) {
-        this.api.setColW(newVal, notify);
+        this.api.setColW(newVal);
       } else if ('reload' == name) {
-        this.api.setReload(newVal, notify);
-      } else if ('' == name) {
-        this.api.setSheetIndex(newVal, notify);
+        this.api.setReload(newVal);
+      } else if ('sheetIndex' == name) {
+        this.api.setSheetIndex(newVal);
       } else if ('sheetNames' == name) {
-        this.api.setSheetNames(newVal, notify);
+        this.api.setSheetNames(newVal);
       } else if ('cellStyleToCSSStyle' == name) {
-        this.api.setCellStyleToCSSStyle(newVal, notify);
+        this.api.setCellStyleToCSSStyle(newVal);
       } else if ('rowIndexToStyleIndex' == name) {
-        this.api.setRowIndexToStyleIndex(newVal, notify);
+        this.api.setRowIndexToStyleIndex(newVal);
       } else if ('columnIndexToStyleIndex' == name) {
-        this.api.setColumnIndexToStyleIndex(newVal, notify);
+        this.api.setColumnIndexToStyleIndex(newVal);
       } else if ('lockedColumnIndexes' == name) {
-        this.api.setLockedColumnIndexes(newVal, notify);
+        this.api.setLockedColumnIndexes(newVal);
       } else if ('lockedRowIndexes' == name) {
-        this.api.setLockedRowIndexes(newVal, notify);
+        this.api.setLockedRowIndexes(newVal);
       } else if ('shiftedCellBorderStyles' == name) {
-        this.api.setShiftedCellBorderStyles(newVal, notify);
+        this.api.setShiftedCellBorderStyles(newVal);
       } else if ('conditionalFormattingStyles' == name) {
-        this.api.setConditionalFormattingStyles(newVal, notify);
+        this.api.setConditionalFormattingStyles(newVal);
       } else if ('hiddenColumnIndexes' == name) {
-        this.api.setHiddenColumnIndexes(newVal, notify);
+        this.api.setHiddenColumnIndexes(newVal);
       } else if ('hiddenRowIndexes' == name) {
-        this.api.setHiddenRowIndexes(newVal, notify);
+        this.api.setHiddenRowIndexes(newVal);
       } else if ('verticalScrollPositions' == name) {
-        this.api.setVerticalScrollPositions(newVal, notify);
+        this.api.setVerticalScrollPositions(newVal);
       } else if ('horizontalScrollPositions' == name) {
-        this.api.setHorizontalScrollPositions(newVal, notify);
+        this.api.setHorizontalScrollPositions(newVal);
       } else if ('sheetProtected' == name) {
-        this.api.setSheetProtected(newVal, notify);
+        this.api.setSheetProtected(newVal);
       } else if ('workbookProtected' == name) {
-        this.api.setWorkbookProtected(newVal, notify);
+        this.api.setWorkbookProtected(newVal);
       } else if ('cellKeysToEditorIdMap' == name) {
-        this.api.setCellKeysToEditorIdMap(newVal, notify);
+        this.api.setCellKeysToEditorIdMap(newVal);
       } else if ('componentIDtoCellKeysMap' == name) {
-        this.api.setComponentIDtoCellKeysMap(newVal, notify);
+        this.api.setComponentIDtoCellKeysMap(newVal);
       } else if ('hyperlinksTooltips' == name) {
-        this.api.setHyperlinksTooltips(newVal, notify);
+        this.api.setHyperlinksTooltips(newVal);
       } else if ('cellComments' == name) {
-        this.api.setCellComments(newVal, notify);
+        this.api.setCellComments(newVal);
       } else if ('cellCommentAuthors' == name) {
-        this.api.setCellCommentAuthors(newVal, notify);
+        this.api.setCellCommentAuthors(newVal);
       } else if ('visibleCellComments' == name) {
-        this.api.setVisibleCellComments(newVal, notify);
+        this.api.setVisibleCellComments(newVal);
       } else if ('invalidFormulaCells' == name) {
-        this.api.setInvalidFormulaCells(newVal, notify);
+        this.api.setInvalidFormulaCells(newVal);
       } else if ('hasActions' == name) {
-        this.api.setHasActions(newVal, notify);
+        this.api.setHasActions(newVal);
       } else if ('overlays' == name) {
-        this.api.setOverlays(newVal, notify);
+        this.api.setOverlays(newVal);
       } else if ('mergedRegions' == name) {
-        this.api.setMergedRegions(newVal, notify);
+        this.api.setMergedRegions(newVal);
       } else if ('displayGridlines' == name) {
-        this.api.setDisplayGridlines(newVal, notify);
+        this.api.setDisplayGridlines(newVal);
       } else if ('displayRowColHeadings' == name) {
-        this.api.setDisplayRowColHeadings(newVal, notify);
+        this.api.setDisplayRowColHeadings(newVal);
       } else if ('verticalSplitPosition' == name) {
-        this.api.setVerticalSplitPosition(newVal, notify);
+        this.api.setVerticalSplitPosition(newVal);
       } else if ('horizontalSplitPosition' == name) {
-        this.api.setHorizontalSplitPosition(newVal, notify);
+        this.api.setHorizontalSplitPosition(newVal);
       } else if ('infoLabelValue' == name) {
-        this.api.setInfoLabelValue(newVal, notify);
+        this.api.setInfoLabelValue(newVal);
       } else if ('workbookChangeToggle' == name) {
-        this.api.setWorkbookChangeToggle(newVal, notify);
+        this.api.setWorkbookChangeToggle(newVal);
       } else if ('invalidFormulaErrorMessage' == name) {
-        this.api.setInvalidFormulaErrorMessage(newVal, notify);
+        this.api.setInvalidFormulaErrorMessage(newVal);
       } else if ('lockFormatColumns' == name) {
-        this.api.setLockFormatColumns(newVal, notify);
+        this.api.setLockFormatColumns(newVal);
       } else if ('lockFormatRows' == name) {
-        this.api.setLockFormatRows(newVal, notify);
+        this.api.setLockFormatRows(newVal);
       } else if ('namedRanges' == name) {
-        this.api.setNamedRanges(newVal, notify);
+        this.api.setNamedRanges(newVal);
+      } else if ('width' == name) {
+        this.api.setWidth(newVal);
+      } else if ('height' == name) {
+        this.api.setHeight(newVal);
       } else {
         console.log('unsupported property ' + name)
       }
+      propNames.push(name);
     });
-    if (initial) this.api.updateFromState();
-  }
-
-  attributeChangedCallback(name, oldVal, newVal) {
-    console.log('attribute change: ', name, newVal);
-    /*
-    if ('rowBufferSize' == name) {
-      this.api.setRowBufferSize(newVal);
-    } else if ('columnBufferSize' == name) {
-      this.api.setColumnBufferSize(newVal);
-    } else if ('rows' == name) {
-      this.api.setRows(newVal);
-    } else if ('cols' == name) {
-      this.api.setCols(newVal);
-    } else if ('colGroupingData' == name) {
-      this.api.setColGroupingData(newVal);
-    } else if ('rowGroupingData' == name) {
-      this.api.setRowGroupingData(newVal);
-    } else if ('colGroupingMax' == name) {
-      this.api.setColGroupingMax(newVal);
-    } else if ('rowGroupingMax' == name) {
-      this.api.setRowGroupingMax(newVal);
-    } else if ('colGroupingInversed' == name) {
-      this.api.setColGroupingInversed(newVal);
-    } else if ('rowGroupingInversed' == name) {
-      this.api.setRowGroupingInversed(newVal);
-    } else if ('defRowH' == name) {
-      this.api.setDefRowH(newVal);
-    } else if ('defColW' == name) {
-      this.api.setDefColW(newVal);
-    } else if ('rowH' == name) {
-      this.api.setRowH(newVal);
-    } else if ('colW' == name) {
-      this.api.setColW(newVal);
-    } else if ('reload' == name) {
-      this.api.setReload(newVal);
-    } else if ('' == name) {
-      this.api.setSheetIndex(newVal);
-    } else if ('sheetNames' == name) {
-      this.api.setSheetNames(newVal);
-    } else if ('cellStyleToCSSStyle' == name) {
-      this.api.setCellStyleToCSSStyle(newVal);
-    } else if ('rowIndexToStyleIndex' == name) {
-      this.api.setRowIndexToStyleIndex(newVal);
-    } else if ('columnIndexToStyleIndex' == name) {
-      this.api.setColumnIndexToStyleIndex(newVal);
-    } else if ('lockedColumnIndexes' == name) {
-      this.api.setLockedColumnIndexes(newVal);
-    } else if ('lockedRowIndexes' == name) {
-      this.api.setLockedRowIndexes(newVal);
-    } else if ('shiftedCellBorderStyles' == name) {
-      this.api.setShiftedCellBorderStyles(newVal);
-    } else if ('conditionalFormattingStyles' == name) {
-      this.api.setConditionalFormattingStyles(newVal);
-    } else if ('hiddenColumnIndexes' == name) {
-      this.api.setHiddenColumnIndexes(newVal);
-    } else if ('hiddenRowIndexes' == name) {
-      this.api.setHiddenRowIndexes(newVal);
-    } else if ('verticalScrollPositions' == name) {
-      this.api.setVerticalScrollPositions(newVal);
-    } else if ('horizontalScrollPositions' == name) {
-      this.api.setHorizontalScrollPositions(newVal);
-    } else if ('sheetProtected' == name) {
-      this.api.setSheetProtected(newVal);
-    } else if ('workbookProtected' == name) {
-      this.api.setWorkbookProtected(newVal);
-    } else if ('cellKeysToEditorIdMap' == name) {
-      this.api.setCellKeysToEditorIdMap(newVal);
-    } else if ('componentIDtoCellKeysMap' == name) {
-      this.api.setComponentIDtoCellKeysMap(newVal);
-    } else if ('hyperlinksTooltips' == name) {
-      this.api.setHyperlinksTooltips(newVal);
-    } else if ('cellComments' == name) {
-      this.api.setCellComments(newVal);
-    } else if ('cellCommentAuthors' == name) {
-      this.api.setCellCommentAuthors(newVal);
-    } else if ('visibleCellComments' == name) {
-      this.api.setVisibleCellComments(newVal);
-    } else if ('invalidFormulaCells' == name) {
-      this.api.setInvalidFormulaCells(newVal);
-    } else if ('hasActions' == name) {
-      this.api.setHasActions(newVal);
-    } else if ('overlays' == name) {
-      this.api.setOverlays(newVal);
-    } else if ('mergedRegions' == name) {
-      this.api.setMergedRegions(newVal);
-    } else if ('displayGridlines' == name) {
-      this.api.setDisplayGridlines(newVal);
-    } else if ('displayRowColHeadings' == name) {
-      this.api.setDisplayRowColHeadings(newVal);
-    } else if ('verticalSplitPosition' == name) {
-      this.api.setVerticalSplitPosition(newVal);
-    } else if ('horizontalSplitPosition' == name) {
-      this.api.setHorizontalSplitPosition(newVal);
-    } else if ('infoLabelValue' == name) {
-      this.api.setInfoLabelValue(newVal);
-    } else if ('workbookChangeToggle' == name) {
-      this.api.setWorkbookChangeToggle(newVal);
-    } else if ('invalidFormulaErrorMessage' == name) {
-      this.api.setInvalidFormulaErrorMessage(newVal);
-    } else if ('lockFormatColumns' == name) {
-      this.api.setLockFormatColumns(newVal);
-    } else if ('lockFormatRows' == name) {
-      this.api.setLockFormatRows(newVal);
-    } else if ('namedRanges' == name) {
-      this.api.setNamedRanges(newVal);
+    if (dirty) {
+      propNames = [
+        'rowBufferSize'
+        , 'columnBufferSize'
+          , 'rows'
+          ,'cols'
+          ,'colGroupingData'
+          ,'rowGroupingData'
+          ,'colGroupingMax'
+          ,'rowGroupingMax'
+          ,'colGroupingInversed'
+          ,'rowGroupingInversed'
+          ,'defRowH'
+          ,'defColW'
+          ,'rowH'
+          ,'colW'
+          ,'reload'
+          ,'sheetIndex'
+          ,'sheetNames'
+          ,'cellStyleToCSSStyle'
+          ,'rowIndexToStyleIndex'
+          ,'columnIndexToStyleIndex'
+          ,'lockedColumnIndexes'
+          ,'lockedRowIndexes'
+          ,'shiftedCellBorderStyles'
+          ,'conditionalFormattingStyles'
+          ,'hiddenColumnIndexes'
+          ,'hiddenRowIndexes'
+          ,'verticalScrollPositions'
+          ,'horizontalScrollPositions'
+          ,'sheetProtected'
+          ,'workbookProtected'
+          ,'cellKeysToEditorIdMap'
+          ,'componentIDtoCellKeysMap'
+          ,'hyperlinksTooltips'
+          ,'cellComments'
+          ,'cellCommentAuthors'
+          ,'visibleCellComments'
+          ,'invalidFormulaCells'
+          ,'hasActions'
+          ,'overlays'
+          ,'mergedRegions'
+          ,'displayGridlines'
+          ,'displayRowColHeadings'
+          ,'verticalSplitPosition'
+          ,'horizontalSplitPosition'
+          ,'infoLabelValue'
+          ,'workbookChangeToggle'
+          ,'invalidFormulaErrorMessage'
+          ,'lockFormatColumns'
+          ,'lockFormatRows'
+          ,'namedRanges'
+          ,'width'
+          ,'height'
+      ]
     }
-
-     */
-    super.attributeChangedCallback(name, oldVal, newVal);
+    this.api.notifyStateChanges(propNames, initial);
+    if (initial) {
+      this.api.relayout();
+    }
   }
-
-
-
 
   /*
   CLIENT SIDE RPC METHODS

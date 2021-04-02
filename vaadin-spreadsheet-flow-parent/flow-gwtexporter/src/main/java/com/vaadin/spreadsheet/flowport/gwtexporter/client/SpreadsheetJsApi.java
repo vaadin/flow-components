@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 
 import jsinterop.annotations.JsType;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -21,7 +23,13 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetHandler;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
+import com.vaadin.client.ApplicationConfiguration;
 import com.vaadin.client.ApplicationConnection;
+import com.vaadin.client.ConnectorMap;
+import com.vaadin.client.Profiler;
+import com.vaadin.client.ValueMap;
+import com.vaadin.client.WidgetSet;
+import com.vaadin.client.communication.MessageHandler;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.metadata.ConnectorBundleLoader;
 import com.vaadin.client.metadata.TypeDataStore;
@@ -29,10 +37,6 @@ import com.vaadin.shared.annotations.NoLayout;
 import com.vaadin.shared.communication.URLReference;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.spreadsheet.flowport.gwtexporter.client.callbacks.IntCallback;
-import com.vaadin.spreadsheet.flowport.gwtexporter.client.callbacks.SerializedCallback;
-import com.vaadin.spreadsheet.flowport.gwtexporter.client.callbacks.StringCallback;
-import com.vaadin.spreadsheet.flowport.gwtexporter.client.callbacks.VoidCallback;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -55,6 +59,10 @@ public class SpreadsheetJsApi {
       console.log("spreadsheetapi", message );
   }-*/;
 
+    native void debugger() /*-{
+      debugger;
+  }-*/;
+
     /**
      * receives the element where the widget mut be embedded into, and publishes
      * the methods which can be used from js
@@ -67,25 +75,49 @@ public class SpreadsheetJsApi {
         }
     }
 
+    /*
+     * Takes in a JSON String and evals it.
+     * @param JSON String that you trust
+     * @return JavaScriptObject that you can cast to an Overlay Type
+     */
+    public static <T extends JavaScriptObject> T parseJson(String jsonStr)
+    {
+        return JsonUtils.safeEval(jsonStr);
+    }
+
     private void init(Element element) {
         // Only support eager connectors for now
         ConnectorBundleLoader.get()
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
 
-        spreadsheetConnector = new SpreadsheetConnector();
         applicationConnection = new ApplicationConnection();
-        spreadsheetConnector.doInit("1", applicationConnection);
+        spreadsheetConnector = new SpreadsheetConnector();
+        spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
-        spreadsheetWidget.setHeight("100%");
 
+        //initState(spreadsheetConnector.getState());
+        /*
+        ApplicationConfiguration conf = ApplicationConfiguration.getConfigFromJson("1", json0, element);
+        // must be initialized after conf
+        Profiler.initialize();
+        applicationConnection.init(new WidgetSet(), conf);
+
+        RootPanel.getForElement(element).add(applicationConnection.getUIConnector().getWidget());
+        consoleLog("widget appended !");
+
+        Scheduler.get().scheduleDeferred(() -> {
+            String[] jsons = {json1, json2};
+            for (String json : jsons) {
+                applicationConnection.getMessageHandler().handleMessage(MessageHandler.parseWrappedJson(json));
+            }
+            //spreadsheetConnector = (SpreadsheetConnector) ConnectorMap.get(applicationConnection).getConnector("0");
+            //spreadsheetWidget = spreadsheetConnector.getWidget();
+            //spreadsheetWidget.setHeight("100%");
+        });
+*/
+
+        // esto es para evitar el bundle
         TypeDataStore.get().setClass(spreadsheetConnector.getClass().getName(), SpreadsheetConnector.class);
-
-        initState(spreadsheetConnector.getState());
-
-        delegateToWidget(spreadsheetConnector, new StateChangeEvent(spreadsheetConnector, Json.createObject(), true));
-
-
-        consoleLog("" + spreadsheetConnector.getState());
 
         popupButtonConnector = new PopupButtonConnector();
         popupButtonWidget = popupButtonConnector.getWidget();
@@ -93,22 +125,6 @@ public class SpreadsheetJsApi {
 
         RootPanel.getForElement(element).add(spreadsheetWidget);
         consoleLog("widget appended !");
-        spreadsheetWidget.load();
-        consoleLog("widget loaded !");
-        Scheduler.get().scheduleDeferred(() -> {
-            //spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
-            consoleLog("deferred relayout!");
-            spreadsheetWidget.relayoutSheet();
-        });
-        /*
-        Map<Integer, Integer> newSizes = new HashMap<>();
-        newSizes.put(1, 70);
-        spreadsheetWidget.onColumnsResized(newSizes);
-
-         */
-
-        //spreadsheetConnector.getLayoutManager().layoutNow();
-        //spreadsheetWidget.relayoutSheet();
     }
 
     private void delegateToWidget(SpreadsheetConnector connector, StateChangeEvent sce) {
@@ -148,7 +164,20 @@ public class SpreadsheetJsApi {
         "invalidFormulaErrorMessage",
         "lockFormatColumns",
         "lockFormatRows",
-                "namedRanges"
+                "namedRanges",
+
+            "height",
+                "width",
+                "description",
+                "descriptionContentMode",
+                "caption",
+                "styles",
+                "id",
+                "primaryStyleName",
+                "errorMessage",
+                "captionAsHtml",
+                "tabIndex",
+                "enabled"
         }) {
             if (sce.isInitialStateChange() || sce.hasPropertyChanged(propertyName)) {
                 SpreadsheetWidget w = connector.getWidget();
@@ -189,9 +218,29 @@ public class SpreadsheetJsApi {
                 if ("lockFormatColumns".equals(propertyName)) w.setLockFormatColumns(s.lockFormatColumns);
                 if ("lockFormatRows".equals(propertyName)) w.setLockFormatRows(s.lockFormatRows);
                 if ("namedRanges".equals(propertyName)) w.setNamedRanges(s.namedRanges);
+
+                if ("height".equals(propertyName)) w.setHeight(s.height);
+                if ("width".equals(propertyName)) w.setWidth(s.width);
+                if ("id".equals(propertyName)) w.setId(s.id);
             }
         }
     }
+
+    public void layout() {
+        spreadsheetConnector.getLayoutManager().layoutNow();
+        spreadsheetWidget.relayoutSheet();
+        spreadsheetConnector.postLayout();
+    }
+
+    public void relayout() {
+        Scheduler.get().scheduleDeferred(() -> {
+            //spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
+            consoleLog("deferred relayout!");
+
+            spreadsheetWidget.relayoutSheet();
+        });
+    }
+
 
     private void initState(SpreadsheetState state) {
         state.rows = 50;
@@ -243,366 +292,283 @@ public class SpreadsheetJsApi {
         return spreadsheetConnector.getState();
     }
 
-    /**
-     * The <i>tabulator index</i> of the field.
-     */
-    @NoLayout
-    public int tabIndex = 0;
 
-    public String height = "";
-    public String width = "";
-    @NoLayout
-    public String description = "";
-    @NoLayout
-    public ContentMode descriptionContentMode = ContentMode.PREFORMATTED;
-    // Note: for the caption, there is a difference between null and an empty
-    // string!
-    public String caption = null;
-    public List<String> styles = null;
-    public String id = null;
-    public String primaryStyleName = null;
 
-    /** HTML formatted error message for the component. */
-    public String errorMessage = null;
 
-    /**
-     * Level of error.
-     *
-     * @since 8.2
-     */
-    public ErrorLevel errorLevel = null;
 
-    public boolean captionAsHtml = false;
-
-    /**
-     * The automatically managed resources used by the connector.q
-     *
-     * @see com.vaadin.server.AbstractClientConnector#setResource(String,
-     *      com.vaadin.server.Resource)
-     * @see com.vaadin.client.ui.AbstractConnector#getResourceUrl(String)
-     */
-    public Map<String, URLReference> resources = new HashMap<>();
-
-    public boolean enabled = true;
-
-    /**
-     * A set of event identifiers with registered listeners.
-     */
-    @NoLayout
-    public Set<String> registeredEventListeners;
-
-    public void updateFromState() {
-        StateChangeEvent event = new StateChangeEvent(spreadsheetConnector, Json.createObject(), true);
-        spreadsheetConnector.onStateChanged(event);
-    }
-
-    public void setRowBufferSize(int rowBufferSize, boolean notify) {
+    public void setRowBufferSize(int rowBufferSize) {
         consoleLog("setRowBufferSize(" + rowBufferSize + ")");
         getState().rowBufferSize = rowBufferSize;
-        if (notify) notifyStateChange("rowBufferSize");
     }
 
-    public void setColumnBufferSize(int columnBufferSize, boolean notify) {
+    public void setColumnBufferSize(int columnBufferSize) {
         consoleLog("setColumnBufferSize(" + columnBufferSize + ")");
         getState().columnBufferSize = columnBufferSize;
-        if (notify) notifyStateChange("columnBufferSize");
     }
 
-    public void setRows(int rows, boolean notify) {
+    public void setRows(int rows) {
         consoleLog("setRows(" + rows + ")");
         getState().rows = rows;
-        if (notify) notifyStateChange("rows");
     }
 
-    public void setCols(int cols, boolean notify) {
+    public void setCols(int cols) {
         consoleLog("setCols(" + cols + ")");
         getState().cols = cols;
-        if (notify) notifyStateChange("cols");
     }
 
-    public void setColGroupingData(String colGroupingData, boolean notify) {
+    public void setColGroupingData(String colGroupingData) {
         consoleLog("setColGroupingData(" + colGroupingData + ")");
         getState().colGroupingData = Parser.parseListOfGroupingData(colGroupingData);
-        if (notify) notifyStateChange("colGroupingData");
     }
 
-    public void setRowGroupingData(String rowGroupingData, boolean notify) {
+    public void setRowGroupingData(String rowGroupingData) {
         consoleLog("setRowGroupingData(" + rowGroupingData + ")");
         getState().rowGroupingData = Parser.parseListOfGroupingData(rowGroupingData);
-        if (notify) notifyStateChange("rowGroupingData");
     }
 
-    public void setColGroupingMax(int colGroupingMax, boolean notify) {
+    public void setColGroupingMax(int colGroupingMax) {
         consoleLog("setColGroupingMax(" + colGroupingMax + ")");
         getState().colGroupingMax = colGroupingMax;
-        if (notify) notifyStateChange("colGroupingMax");
     }
 
-    public void setRowGroupingMax(int rowGroupingMax, boolean notify) {
+    public void setRowGroupingMax(int rowGroupingMax) {
         consoleLog("setRowGroupingMax(" + rowGroupingMax + ")");
         getState().rowGroupingMax = rowGroupingMax;
-        if (notify) notifyStateChange("rowGroupingMax");
     }
 
-    public void setColGroupingInversed(boolean colGroupingInversed, boolean notify) {
+    public void setColGroupingInversed(boolean colGroupingInversed) {
         consoleLog("setColGroupingInversed(" + colGroupingInversed + ")");
         getState().colGroupingInversed = colGroupingInversed;
-        if (notify) notifyStateChange("colGroupingInversed");
     }
 
-    public void setRowGroupingInversed(boolean rowGroupingInversed, boolean notify) {
+    public void setRowGroupingInversed(boolean rowGroupingInversed) {
         consoleLog("setRowGroupingInversed(" + rowGroupingInversed + ")");
         getState().rowGroupingInversed = rowGroupingInversed;
-        if (notify) notifyStateChange("rowGroupingInversed");
     }
 
-    public void setDefRowH(float defRowH, boolean notify) {
+    public void setDefRowH(float defRowH) {
         consoleLog("setDefRowH(" + defRowH + ")");
         getState().defRowH = defRowH;
-        if (notify) notifyStateChange("defRowH");
     }
 
-    public void setDefColW(int defColW, boolean notify) {
+    public void setDefColW(int defColW) {
         consoleLog("setDefColW(" + defColW + ")");
         getState().defColW = defColW;
-        if (notify) notifyStateChange("defColW");
     }
 
-    public void setRowH(float[] rowH, boolean notify) {
+    public void setRowH(String rowH) {
         consoleLog("setRowH(" + rowH + ")");
-        getState().rowH = rowH;
-        if (notify) notifyStateChange("rowH");
+        getState().rowH = Parser.parseArrayFloat(rowH);
     }
 
-    public void setColW(int[] colW, boolean notify) {
+    public void setColW(String colW) {
         consoleLog("setColW(" + colW + ")");
-        getState().colW = colW;
-        if (notify) notifyStateChange("colW");
+        getState().colW = Parser.parseArrayInt(colW);
     }
 
-    public void setReload(boolean reload, boolean notify) {
+    public void setReload(boolean reload) {
         consoleLog("setReload(" + reload + ")");
         getState().reload = reload;
-        if (notify) notifyStateChange("reload");
     }
 
-    public void setSheetIndex(int sheetIndex, boolean notify) {
+    public void setSheetIndex(int sheetIndex) {
         consoleLog("setSheetIndex(" + sheetIndex + ")");
         getState().sheetIndex = sheetIndex;
-        if (notify) notifyStateChange("sheetIndex");
     }
 
-    public void setSheetNames(String sheetNames, boolean notify) {
+    public void setSheetNames(String sheetNames) {
         consoleLog("setSheetNames(" + sheetNames + ")");
         getState().sheetNames = Parser.parseArrayOfStrings(sheetNames);
-        if (notify) notifyStateChange("sheetNames");
     }
 
-    public void setCellStyleToCSSStyle(String cellStyleToCSSStyle, boolean notify) {
+    public void setCellStyleToCSSStyle(String cellStyleToCSSStyle) {
         consoleLog("setCellStyleToCSSStyle(" + cellStyleToCSSStyle + ")");
         getState().cellStyleToCSSStyle = Parser.parseMapIntegerString(cellStyleToCSSStyle);
-        if (notify) notifyStateChange("cellStyleToCSSStyle");
     }
 
-    public void setRowIndexToStyleIndex(String rowIndexToStyleIndex, boolean notify) {
+    public void setRowIndexToStyleIndex(String rowIndexToStyleIndex) {
         consoleLog("setRowIndexToStyleIndex(" + rowIndexToStyleIndex + ")");
         getState().rowIndexToStyleIndex = Parser.parseMapIntegerInteger(rowIndexToStyleIndex);
-        if (notify) notifyStateChange("rowIndexToStyleIndex");
     }
 
-    public void setColumnIndexToStyleIndex(String columnIndexToStyleIndex, boolean notify) {
+    public void setColumnIndexToStyleIndex(String columnIndexToStyleIndex) {
         consoleLog("setColumnIndexToStyleIndex(" + columnIndexToStyleIndex + ")");
         getState().columnIndexToStyleIndex = Parser.parseMapIntegerInteger(columnIndexToStyleIndex);
-        if (notify) notifyStateChange("columnIndexToStyleIndex");
     }
 
-    public void setLockedColumnIndexes(String lockedColumnIndexes, boolean notify) {
+    public void setLockedColumnIndexes(String lockedColumnIndexes) {
         consoleLog("setLockedColumnIndexes(" + lockedColumnIndexes + ")");
         getState().lockedColumnIndexes = Parser.parseSetInteger(lockedColumnIndexes);
-        if (notify) notifyStateChange("lockedColumnIndexes");
     }
 
-    public void setLockedRowIndexes(String lockedRowIndexes, boolean notify) {
+    public void setLockedRowIndexes(String lockedRowIndexes) {
         consoleLog("setLockedRowIndexes(" + lockedRowIndexes + ")");
         getState().lockedRowIndexes = Parser.parseSetInteger(lockedRowIndexes);
-        if (notify) notifyStateChange("lockedRowIndexes");
     }
 
-    public void setShiftedCellBorderStyles(String shiftedCellBorderStyles, boolean notify) {
+    public void setShiftedCellBorderStyles(String shiftedCellBorderStyles) {
         consoleLog("setShiftedCellBorderStyles(" + shiftedCellBorderStyles + ")");
         getState().shiftedCellBorderStyles = Parser.parseArraylistString(shiftedCellBorderStyles);
-        if (notify) notifyStateChange("shiftedCellBorderStyles");
     }
 
-    public void setConditionalFormattingStyles(String conditionalFormattingStyles, boolean notify) {
+    public void setConditionalFormattingStyles(String conditionalFormattingStyles) {
         consoleLog("setConditionalFormattingStyles(" + conditionalFormattingStyles + ")");
         getState().conditionalFormattingStyles = Parser.parseMapIntegerString(conditionalFormattingStyles);
-        if (notify) notifyStateChange("conditionalFormattingStyles");
     }
 
-    public void setHiddenColumnIndexes(String hiddenColumnIndexes, boolean notify) {
+    public void setHiddenColumnIndexes(String hiddenColumnIndexes) {
         consoleLog("setHiddenColumnIndexes(" + hiddenColumnIndexes + ")");
         getState().hiddenColumnIndexes = Parser.parseArraylistInteger(hiddenColumnIndexes);
-        if (notify) notifyStateChange("hiddenColumnIndexes");
     }
 
-    public void setHiddenRowIndexes(String hiddenRowIndexes, boolean notify) {
+    public void setHiddenRowIndexes(String hiddenRowIndexes) {
         consoleLog("setHiddenRowIndexes(" + hiddenRowIndexes + ")");
         getState().hiddenRowIndexes = Parser.parseArraylistInteger(hiddenRowIndexes);
-        if (notify) notifyStateChange("hiddenRowIndexes");
     }
 
-    public void setVerticalScrollPositions(String verticalScrollPositions, boolean notify) {
+    public void setVerticalScrollPositions(String verticalScrollPositions) {
         consoleLog("setVerticalScrollPositions(" + verticalScrollPositions + ")");
         getState().verticalScrollPositions = Parser.parseArrayInt(verticalScrollPositions);
-        if (notify) notifyStateChange("verticalScrollPositions");
     }
 
-    public void setHorizontalScrollPositions(String horizontalScrollPositions, boolean notify) {
+    public void setHorizontalScrollPositions(String horizontalScrollPositions) {
         consoleLog("setHorizontalScrollPositions(" + horizontalScrollPositions + ")");
         getState().horizontalScrollPositions = Parser.parseArrayInt(horizontalScrollPositions);
-        if (notify) notifyStateChange("horizontalScrollPositions");
     }
 
-    public void setSheetProtected(boolean sheetProtected, boolean notify) {
+    public void setSheetProtected(boolean sheetProtected) {
         consoleLog("setSheetProtected(" + sheetProtected + ")");
         getState().sheetProtected = sheetProtected;
-        if (notify) notifyStateChange("sheetProtected");
     }
 
-    public void setWorkbookProtected(boolean workbookProtected, boolean notify) {
+    public void setWorkbookProtected(boolean workbookProtected) {
         consoleLog("setWorkbookProtected(" + workbookProtected + ")");
         getState().workbookProtected = workbookProtected;
-        if (notify) notifyStateChange("workbookProtected");
     }
 
-    public void setCellKeysToEditorIdMap(String cellKeysToEditorIdMap, boolean notify) {
+    public void setCellKeysToEditorIdMap(String cellKeysToEditorIdMap) {
         consoleLog("setCellKeysToEditorIdMap(" + cellKeysToEditorIdMap + ")");
         getState().cellKeysToEditorIdMap = Parser.parseMapStringString(cellKeysToEditorIdMap);
-        if (notify) notifyStateChange("cellKeysToEditorIdMap");
     }
 
-    public void setComponentIDtoCellKeysMap(String componentIDtoCellKeysMap, boolean notify) {
+    public void setComponentIDtoCellKeysMap(String componentIDtoCellKeysMap) {
         consoleLog("setComponentIDtoCellKeysMap(" + componentIDtoCellKeysMap + ")");
         getState().componentIDtoCellKeysMap = Parser.parseMapStringString(componentIDtoCellKeysMap);
-        if (notify) notifyStateChange("componentIDtoCellKeysMap");
     }
 
-    public void setHyperlinksTooltips(String hyperlinksTooltips, boolean notify) {
+    public void setHyperlinksTooltips(String hyperlinksTooltips) {
         consoleLog("setHyperlinksTooltips(" + hyperlinksTooltips + ")");
         getState().hyperlinksTooltips = Parser.parseMapStringString(hyperlinksTooltips);
-        if (notify) notifyStateChange("hyperlinksTooltips");
     }
 
-    public void setCellComments(String cellComments, boolean notify) {
+    public void setCellComments(String cellComments) {
         consoleLog("setCellComments(" + cellComments + ")");
         getState().cellComments = Parser.parseMapStringString(cellComments);
-        if (notify) notifyStateChange("cellComments");
     }
 
-    public void setCellCommentAuthors(String cellCommentAuthors, boolean notify) {
+    public void setCellCommentAuthors(String cellCommentAuthors) {
         consoleLog("setCellCommentAuthors(" + cellCommentAuthors + ")");
         getState().cellCommentAuthors = Parser.parseMapStringString(cellCommentAuthors);
-        if (notify) notifyStateChange("cellCommentAuthors");
     }
 
-    public void setVisibleCellComments(String visibleCellComments, boolean notify) {
+    public void setVisibleCellComments(String visibleCellComments) {
         consoleLog("setVisibleCellComments(" + visibleCellComments + ")");
         getState().visibleCellComments = Parser.parseArraylistString(visibleCellComments);
-        if (notify) notifyStateChange("visibleCellComments");
     }
 
-    public void setInvalidFormulaCells(String invalidFormulaCells, boolean notify) {
+    public void setInvalidFormulaCells(String invalidFormulaCells) {
         consoleLog("setInvalidFormulaCells(" + invalidFormulaCells + ")");
         getState().invalidFormulaCells = Parser.parseSetString(invalidFormulaCells);
-        if (notify) notifyStateChange("invalidFormulaCells");
     }
 
-    public void setHasActions(boolean hasActions, boolean notify) {
+    public void setHasActions(boolean hasActions) {
         consoleLog("setHasActions(" + hasActions + ")");
         getState().hasActions = hasActions;
-        if (notify) notifyStateChange("hasActions");
     }
 
-    public void setOverlays(String overlays, boolean notify) {
+    public void setOverlays(String overlays) {
         consoleLog("setOverlays(" + overlays + ")");
         getState().overlays = Parser.parseMapStringOverlayInfo(overlays);
-        if (notify) notifyStateChange("overlays");
     }
 
-    public void setMergedRegions(String mergedRegions, boolean notify) {
+    public void setMergedRegions(String mergedRegions) {
         consoleLog("setMergedRegions(" + mergedRegions + ")");
         getState().mergedRegions = Parser.parseArrayMergedRegion(mergedRegions);
-        if (notify) notifyStateChange("mergedRegions");
     }
 
-    public void setDisplayGridlines(boolean displayGridlines, boolean notify) {
+    public void setDisplayGridlines(boolean displayGridlines) {
         consoleLog("setDisplayGridlines(" + displayGridlines + ")");
         getState().displayGridlines = displayGridlines;
-        if (notify) notifyStateChange("displayGridlines");
     }
 
-    public void setDisplayRowColHeadings(boolean displayRowColHeadings, boolean notify) {
+    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         consoleLog("setDisplayRowColHeadings(" + displayRowColHeadings + ")");
         getState().displayRowColHeadings = displayRowColHeadings;
-        if (notify) notifyStateChange("displayRowColHeadings");
     }
 
-    public void setVerticalSplitPosition(int verticalSplitPosition, boolean notify) {
+    public void setVerticalSplitPosition(int verticalSplitPosition) {
         consoleLog("setVerticalSplitPosition(" + verticalSplitPosition + ")");
         getState().verticalSplitPosition = verticalSplitPosition;
-        if (notify) notifyStateChange("verticalSplitPosition");
     }
 
-    public void setHorizontalSplitPosition(int horizontalSplitPosition, boolean notify) {
+    public void setHorizontalSplitPosition(int horizontalSplitPosition) {
         consoleLog("setHorizontalSplitPosition(" + horizontalSplitPosition + ")");
         getState().horizontalSplitPosition = horizontalSplitPosition;
-        if (notify) notifyStateChange("horizontalSplitPosition");
     }
 
-    public void setInfoLabelValue(String infoLabelValue, boolean notify) {
+    public void setInfoLabelValue(String infoLabelValue) {
         consoleLog("setInfoLabelValue(" + infoLabelValue + ")");
         getState().infoLabelValue = infoLabelValue;
-        if (notify) notifyStateChange("infoLabelValue");
     }
 
-    public void setWorkbookChangeToggle(boolean workbookChangeToggle, boolean notify) {
+    public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
         consoleLog("setWorkbookChangeToggle(" + workbookChangeToggle + ")");
         getState().workbookChangeToggle = workbookChangeToggle;
-        if (notify) notifyStateChange("workbookChangeToggle");
     }
 
-    public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage, boolean notify) {
+    public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
         consoleLog("setInvalidFormulaErrorMessage(" + invalidFormulaErrorMessage + ")");
         getState().invalidFormulaErrorMessage = invalidFormulaErrorMessage;
-        if (notify) notifyStateChange("invalidFormulaErrorMessage");
     }
 
-    public void setLockFormatColumns(boolean lockFormatColumns, boolean notify) {
+    public void setLockFormatColumns(boolean lockFormatColumns) {
         consoleLog("setLockFormatColumns(" + lockFormatColumns + ")");
         getState().lockFormatColumns = lockFormatColumns;
-        if (notify) notifyStateChange("lockFormatColumns");
     }
 
-    public void setLockFormatRows(boolean lockFormatRows, boolean notify) {
+    public void setLockFormatRows(boolean lockFormatRows) {
         consoleLog("setLockFormatRows(" + lockFormatRows + ")");
         getState().lockFormatRows = lockFormatRows;
-        if (notify) notifyStateChange("lockFormatRows");
     }
 
-    public void setNamedRanges(String namedRanges, boolean notify) {
+    public void setNamedRanges(String namedRanges) {
         consoleLog("setNamedRanges(" + namedRanges + ")");
         getState().namedRanges = Parser.parseArraylistString(namedRanges);
-        if (notify) notifyStateChange("namedRanges");
     }
 
-    public void notifyStateChange(String propName) {
+    public void setHeight(String height) {
+        consoleLog("setHeight(" + height + ")");
+        getState().height = height;
+    }
+
+    public void setWidth(String width) {
+        consoleLog("setWidth(" + width + ")");
+        getState().width = width;
+    }
+
+    public void setId(String id) {
+        consoleLog("setId(" + id + ")");
+        getState().id = id;
+    }
+
+    public void notifyStateChanges(String[] propNames, boolean initial) {
+        consoleLog("notifyStateChanges(" + propNames + "," + initial + ")");
         JsonObject stateJson = Json.createObject();
-        stateJson.put(propName, "");
-        boolean initialStateChange = false;
-        spreadsheetConnector.onStateChanged(new StateChangeEvent(spreadsheetConnector, stateJson, initialStateChange));
+        for (String propName : propNames) stateJson.put(propName, "");
+        StateChangeEvent event = new StateChangeEvent(spreadsheetConnector, stateJson, initial);
+        delegateToWidget(spreadsheetConnector, event);
+        spreadsheetConnector.onStateChanged(event);
     }
-
 
     /*
     CLIENT RPC METHODS
@@ -671,163 +637,248 @@ public class SpreadsheetJsApi {
     /*
     SERVER RPC METHOD CALLBACKS
      */
-    public void setGroupingCollapsedCallback(SerializedCallback callback) {
+    public void setGroupingCollapsedCallback(Consumer<String> callback) {
         getServerRpcInstance().setGroupingCollapsedCallback(callback);
     }
 
-    public void setLevelHeaderClickedCallback(SerializedCallback callback) {
+    public void setLevelHeaderClickedCallback(Consumer<String> callback) {
         getServerRpcInstance().setLevelHeaderClickedCallback(callback);
     }
 
-    public void setOnSheetScrollCallback(SerializedCallback callback) {
+    public void setOnSheetScrollCallback(Consumer<String> callback) {
         getServerRpcInstance().setOnSheetScrollCallback(callback);
     }
 
-    public void setSheetAddressChangedCallback(StringCallback callback) {
+    public void setSheetAddressChangedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSheetAddressChangedCallback(callback);
     }
 
-    public void setCellSelectedCallback(SerializedCallback callback) {
+    public void setCellSelectedCallback(Consumer<String> callback) {
         getServerRpcInstance().setCellSelectedCallback(callback);
     }
 
-    public void setCellRangeSelectedCallback(SerializedCallback callback) {
+    public void setCellRangeSelectedCallback(Consumer<String> callback) {
         getServerRpcInstance().setCellRangeSelectedCallback(callback);
     }
 
-    public void setCellAddedToSelectionAndSelectedCallback(SerializedCallback callback) {
+    public void setCellAddedToSelectionAndSelectedCallback(Consumer<String> callback) {
         getServerRpcInstance().setCellAddedToSelectionAndSelectedCallback(callback);
     }
 
-    public void setCellsAddedToRangeSelectionCallback(SerializedCallback callback) {
+    public void setCellsAddedToRangeSelectionCallback(Consumer<String> callback) {
         getServerRpcInstance().setCellsAddedToRangeSelectionCallback(callback);
     }
 
-    public void setRowSelectedCallback(SerializedCallback callback) {
+    public void setRowSelectedCallback(Consumer<String> callback) {
         getServerRpcInstance().setRowSelectedCallback(callback);
     }
 
-    public void setRowAddedToRangeSelectionCallback(SerializedCallback callback) {
+    public void setRowAddedToRangeSelectionCallback(Consumer<String> callback) {
         getServerRpcInstance().setRowAddedToRangeSelectionCallback(callback);
     }
 
-    public void setColumnSelectedCallback(SerializedCallback callback) {
+    public void setColumnSelectedCallback(Consumer<String> callback) {
         getServerRpcInstance().setColumnSelectedCallback(callback);
     }
 
-    public void setColumnAddedToSelectionCallback(SerializedCallback callback) {
+    public void setColumnAddedToSelectionCallback(Consumer<String> callback) {
         getServerRpcInstance().setColumnAddedToSelectionCallback(callback);
     }
 
-    public void setSelectionIncreasePaintedCallback(SerializedCallback callback) {
+    public void setSelectionIncreasePaintedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSelectionIncreasePaintedCallback(callback);
     }
 
 
-    public void setSelectionDecreasePaintedCallback(SerializedCallback callback) {
+    public void setSelectionDecreasePaintedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSelectionDecreasePaintedCallback(callback);
     }
 
-    public void setCellValueEditedCallback(SerializedCallback callback) {
+    public void setCellValueEditedCallback(Consumer<String> callback) {
         getServerRpcInstance().setCellValueEditedCallback(callback);
     }
 
-    public void setSheetSelectedCallback(SerializedCallback callback) {
+    public void setSheetSelectedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSheetSelectedCallback(callback);
     }
 
-    public void setSheetRenamedCallback(SerializedCallback callback) {
+    public void setSheetRenamedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSheetRenamedCallback(callback);
     }
 
-    public void setSheetCreatedCallback(SerializedCallback callback) {
+    public void setSheetCreatedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSheetCreatedCallback(callback);
     }
 
-    public void setCellRangePaintedCallback(SerializedCallback callback) {
+    public void setCellRangePaintedCallback(Consumer<String> callback) {
         getServerRpcInstance().setCellRangePaintedCallback(callback);
     }
 
-    public void setDeleteSelectedCellsCallback(SerializedCallback callback) {
+    public void setDeleteSelectedCellsCallback(Consumer<String> callback) {
         getServerRpcInstance().setDeleteSelectedCellsCallback(callback);
     }
 
-    public void setLinkCellClickedCallback(SerializedCallback callback) {
+    public void setLinkCellClickedCallback(Consumer<String> callback) {
         getServerRpcInstance().setLinkCellClickedCallback(callback);
     }
 
-    public void setRowsResizedCallback(SerializedCallback callback) {
+    public void setRowsResizedCallback(Consumer<String> callback) {
         getServerRpcInstance().setRowsResizedCallback(callback);
     }
 
-    public void setColumnResizedCallback(SerializedCallback callback) {
+    public void setColumnResizedCallback(Consumer<String> callback) {
         getServerRpcInstance().setColumnResizedCallback(callback);
     }
 
-    public void setOnRowAutofitCallback(IntCallback callback) {
+    public void setOnRowAutofitCallback(Consumer<Integer> callback) {
         getServerRpcInstance().setOnRowAutofitCallback(callback);
     }
 
-    public void setOnColumnAutofitCallback(IntCallback callback) {
+    public void setOnColumnAutofitCallback(Consumer<Integer> callback) {
         getServerRpcInstance().setOnColumnAutofitCallback(callback);
     }
 
-    public void setOnUndoCallback(VoidCallback callback) {
+    public void setOnUndoCallback(Runnable callback) {
         getServerRpcInstance().setOnUndoCallback(callback);
     }
 
-    public void setOnRedoCallback(VoidCallback callback) {
+    public void setOnRedoCallback(Runnable callback) {
         getServerRpcInstance().setOnRedoCallback(callback);
     }
 
-    public void setSetCellStyleWidthRatiosCallback(SerializedCallback callback) {
+    public void setSetCellStyleWidthRatiosCallback(Consumer<String> callback) {
         getServerRpcInstance().setSetCellStyleWidthRatiosCallback(callback);
     }
 
-    public void setProtectedCellWriteAttemptedCallback(VoidCallback callback) {
+    public void setProtectedCellWriteAttemptedCallback(Runnable callback) {
         getServerRpcInstance().setProtectedCellWriteAttemptedCallback(callback);
     }
 
-    public void setOnPasteCallback(StringCallback callback) {
+    public void setOnPasteCallback(Consumer<String> callback) {
         getServerRpcInstance().setOnPasteCallback(callback);
     }
 
-    public void setClearSelectedCellsOnCutCallback(VoidCallback callback) {
+    public void setClearSelectedCellsOnCutCallback(Runnable callback) {
         getServerRpcInstance().setClearSelectedCellsOnCutCallback(callback);
     }
 
-    public void setUpdateCellCommentCallback(SerializedCallback callback) {
+    public void setUpdateCellCommentCallback(Consumer<String> callback) {
         getServerRpcInstance().setUpdateCellCommentCallback(callback);
     }
 
-    public void setOnConnectorInitCallback(VoidCallback callback) {
+    public void setOnConnectorInitCallback(Runnable callback) {
         getServerRpcInstance().setOnConnectorInitCallback(callback);
     }
 
-    public void setContextMenuOpenOnSelectionCallback(SerializedCallback callback) {
+    public void setContextMenuOpenOnSelectionCallback(Consumer<String> callback) {
         getServerRpcInstance().setContextMenuOpenOnSelectionCallback(callback);
     }
 
-    public void setActionOnCurrentSelectionCallback(StringCallback callback) {
+    public void setActionOnCurrentSelectionCallback(Consumer<String> callback) {
         getServerRpcInstance().setActionOnCurrentSelectionCallback(callback);
     }
 
-    public void setRowHeaderContextMenuOpenCallback(IntCallback callback) {
+    public void setRowHeaderContextMenuOpenCallback(Consumer<Integer> callback) {
         getServerRpcInstance().setRowHeaderContextMenuOpenCallback(callback);
     }
 
-    public void setActionOnRowHeaderCallback(StringCallback callback) {
+    public void setActionOnRowHeaderCallback(Consumer<String> callback) {
         getServerRpcInstance().setActionOnRowHeaderCallback(callback);
     }
 
-    public void setColumnHeaderContextMenuOpenCallback(IntCallback callback) {
+    public void setColumnHeaderContextMenuOpenCallback(Consumer<Integer> callback) {
         getServerRpcInstance().setColumnHeaderContextMenuOpenCallback(callback);
     }
 
-    public void setActionOnColumnHeaderCallback(StringCallback callback) {
+    public void setActionOnColumnHeaderCallback(Consumer<String> callback) {
         getServerRpcInstance().setActionOnColumnHeaderCallback(callback);
     }
 
+
+
+
+
+
+
+
+    /*
+{"v-uiId":0,"uidl":"{\"Vaadin-Security-Key\":\"b484bdff-0ede-463f-92ae-5614fa3243ab\",\"syncId\": 0, \"resynchronize\": true, \"clientId\": 0, \"changes\" : [[\"change\",{\"pid\":\"0\"},[\"0\",{\"id\":\"0\"}]]], \"state\":{\"0\":{\"localeServiceState\":{\"localeData\":[{\"name\":\"es_ES\",\"monthNames\":[\"enero\",\"febrero\",\"marzo\",\"abril\",\"mayo\",\"junio\",\"julio\",\"agosto\",\"septiembre\",\"octubre\",\"noviembre\",\"diciembre\"],\"shortMonthNames\":[\"ene\",\"feb\",\"mar\",\"abr\",\"may\",\"jun\",\"jul\",\"ago\",\"sep\",\"oct\",\"nov\",\"dic\"],\"shortDayNames\":[\"dom\",\"lun\",\"mar\",\"mié\",\"jue\",\"vie\",\"sáb\"],\"dayNames\":[\"domingo\",\"lunes\",\"martes\",\"miércoles\",\"jueves\",\"viernes\",\"sábado\"],\"firstDayOfWeek\":1,\"dateFormat\":\"d/MM/yy\",\"twelveHourClock\":false,\"hourMinuteDelimiter\":\":\",\"am\":null,\"pm\":null}]},\"theme\":\"demo\",\"height\":\"100.0%\",\"width\":\"100.0%\"},\"1\":{\"rows\":200,\"cols\":52,\"colGroupingData\":[],\"rowGroupingData\":[],\"defRowH\":15,\"defColW\":56,\"rowH\":[15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15],\"colW\":[56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56],\"reload\":true,\"sheetNames\":[\"Hoja 1\"],\"cellStyleToCSSStyle\":[[0],[\"font-family:Calibri,swiss,Helvetica,arial;font-size:11pt;background-color:rgba(255,255,255,1.0);color:rgba(0, 0, 0, 1.0);\"]],\"rowIndexToStyleIndex\":[],\"columnIndexToStyleIndex\":[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],\"lockedColumnIndexes\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52],\"lockedRowIndexes\":[],\"shiftedCellBorderStyles\":[],\"conditionalFormattingStyles\":[],\"hiddenColumnIndexes\":[],\"hiddenRowIndexes\":[],\"verticalScrollPositions\":[0],\"horizontalScrollPositions\":[0],\"hasActions\":true,\"workbookChangeToggle\":true,\"namedRanges\":[],\"height\":\"100.0%\",\"width\":\"100.0%\"}}, \"types\":{\"0\":\"0\",\"1\":\"1\"}, \"hierarchy\":{\"0\":[\"1\"]}, \"rpc\" : [], \"meta\" : {\"repaintAll\":true}, \"resources\" : {}, \"typeMappings\" : { \"com.vaadin.ui.AbstractComponent\" : 2 , \"com.vaadin.server.AbstractClientConnector\" : 3 , \"com.vaadin.addon.spreadsheet.Spreadsheet\" : 1 , \"com.vaadin.ui.AbstractSingleComponentContainer\" : 4 , \"com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetOnlyUI\" : 0 , \"com.vaadin.ui.UI\" : 5 }, \"typeInheritanceMap\" : { \"2\" : 3 , \"1\" : 2 , \"4\" : 2 , \"0\" : 5 , \"5\" : 4 }, \"timings\":[51, 51]}"}
+
+
+for(;;);[{"syncId": 1, "clientId": 1, "changes" : [], "state":{}, "types":{}, "hierarchy":{}, "rpc" : [], "meta" : {}, "resources" : {}, "timings":[392, 341]}]
+
+
+for(;;);[{"syncId": 2, "clientId": 2, "changes" : [], "state":{"1":{"reload":false,"hyperlinksTooltips":[],"cellComments":[],"cellCommentAuthors":[],"visibleCellComments":[],"invalidFormulaCells":[]}}, "types":{"1":"1"}, "hierarchy":{}, "rpc" : [["1","com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc","updateBottomRightCellValues",[[{"row":1,"col":1,"value":"Hola!","formulaValue":null,"originalValue":"Hola!","cellStyle":"cs0","locked":false,"needsMeasure":false,"isPercentage":false}]]],["1","com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc","showSelectedCell",[null,1,1,"Hola!",false,false,true]]], "meta" : {}, "resources" : {}, "timings":[394, 2]}]
+
+
+  */
+    public void setInitialState() {
+        /*
+        {\"rows\":200,\"cols\":52,\"colGroupingData\":[],\"rowGroupingData\":[],\"defRowH\":15,\"defColW\":56,\"rowH\":[15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15],\"colW\":[56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56],\"reload\":true,\"sheetNames\":[\"Hoja 1\"],\"cellStyleToCSSStyle\":[[0],[\"font-family:Calibri,swiss,Helvetica,arial;font-size:11pt;background-color:rgba(255,255,255,1.0);color:rgba(0, 0, 0, 1.0);\"]],\"rowIndexToStyleIndex\":[],\"columnIndexToStyleIndex\":[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],\"lockedColumnIndexes\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52],\"lockedRowIndexes\":[],\"shiftedCellBorderStyles\":[],\"conditionalFormattingStyles\":[],\"hiddenColumnIndexes\":[],\"hiddenRowIndexes\":[],\"verticalScrollPositions\":[0],\"horizontalScrollPositions\":[0],\"hasActions\":true,\"workbookChangeToggle\":true,\"namedRanges\":[],\"height\":\"100.0%\",\"width\":\"100.0%\"}
+         */
+        setCols(52);
+        setRows(200);
+        setColGroupingData("");
+        setRowGroupingData("");
+        setDefRowH(15);
+        setDefColW(56);
+        setRowH("15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15"
+        );
+        setColW("70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70");
+        setReload(true);
+        setSheetNames("Hoja 1");
+        setCellStyleToCSSStyle("0@\"font-family:Calibri,swiss,Helvetica,arial;font-size:11pt;background-color:rgba(255,255,255,1.0);color:rgba(0, 0, 0, 1.0);\"");
+        setRowIndexToStyleIndex("");
+        setColumnIndexToStyleIndex("");
+        setLockedColumnIndexes("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52");
+        setLockedRowIndexes("");
+        setShiftedCellBorderStyles("");
+        setConditionalFormattingStyles("");
+        setHiddenColumnIndexes("");
+        setHiddenRowIndexes("");
+        setVerticalScrollPositions("0");
+        setHorizontalScrollPositions("0");
+        setHasActions(true);
+        setWorkbookChangeToggle(true);
+        setNamedRanges("");
+        setHeight("100.0%");
+        setWidth("100.0%");
+
+        StateChangeEvent event = new StateChangeEvent(spreadsheetConnector, Json.createObject(), true);
+        delegateToWidget(spreadsheetConnector, event);
+
+        spreadsheetConnector.onStateChanged(event);
+
+    }
+
+    public void load() {
+        spreadsheetWidget.load();
+        consoleLog("widget loaded !");
+    }
+
+    public void relayoutSheet() {
+        spreadsheetWidget.relayoutSheet();
+        consoleLog("sheet relayouted !");
+    }
+
+    public void updateCellsAndRefreshCellStyles() {
+
+
+    }
+
+    public void updateBottomRightCellValuesAndShowSelectedCell() {
+        /*
+        for(;;);[{"syncId": 2, "clientId": 2, "changes" : [], "state":{"1":{"reload":false,"hyperlinksTooltips":[],"cellComments":[],"cellCommentAuthors":[],"visibleCellComments":[],"invalidFormulaCells":[]}}, "types":{"1":"1"}, "hierarchy":{}, "rpc" : [["1","com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc","updateBottomRightCellValues",[[{"row":1,"col":1,"value":"Hola!","formulaValue":null,"originalValue":"Hola!","cellStyle":"cs0","locked":false,"needsMeasure":false,"isPercentage":false}]]],["1","com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc","showSelectedCell",[null,1,1,"Hola!",false,false,true]]], "meta" : {}, "resources" : {}, "timings":[394, 2]}]
+         */
+        setReload(false);
+        setHyperlinksTooltips("");
+        setCellComments("");
+        setCellCommentAuthors("");
+        setInvalidFormulaCells("");
+
+        updateBottomRightCellValues("1#1#\"Hola!\"#null#\"Hola!\"#\"cs0\"#false#false#false");
+        showSelectedCell(null, 1, 1, "Hola!", false, false, true);
+    }
 
 
 }

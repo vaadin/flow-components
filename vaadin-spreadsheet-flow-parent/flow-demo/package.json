@@ -51,7 +51,7 @@
     "lit-element": "2.3.1",
     "open": "^7.2.1",
     "spreadsheet-poc-lit-element": "^0.0.11",
-    "spreadsheet-lit-element": "^0.0.44"
+    "spreadsheet-lit-element": "^0.0.84"
   },
   "devDependencies": {
     "@types/validator": "13.1.0",
@@ -131,7 +131,7 @@
       "lit-element": "2.3.1",
       "open": "^7.2.1",
       "spreadsheet-poc-lit-element": "^0.0.11",
-      "spreadsheet-lit-element": "^0.0.44"
+      "spreadsheet-lit-element": "^0.0.84"
     },
     "devDependencies": {
       "@types/validator": "13.1.0",
@@ -161,6 +161,6 @@
       "workbox-precaching": "5.1.4",
       "workbox-webpack-plugin": "5.1.4"
     },
-    "hash": "8379f1bc8bee1a1cd1a55ff96b36bb62961da3e52e4441d6e43770eea1fe798e"
+    "hash": "1e45f83c60b06dc1c6d249375ab6bf7d35d1df40edc1c17e1ab7956fcb15e8f7"
   }
 }

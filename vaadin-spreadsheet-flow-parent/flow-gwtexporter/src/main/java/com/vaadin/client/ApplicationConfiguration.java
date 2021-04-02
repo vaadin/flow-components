@@ -28,6 +28,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.ScriptInjector;
@@ -431,6 +432,54 @@ public class ApplicationConfiguration implements EntryPoint {
      */
     private void loadFromDOM() {
         JsoConfiguration jsoConfiguration = getJsoConfiguration(id);
+        load(jsoConfiguration);
+    }
+
+    /*
+     * Takes in a JSON String and evals it.
+     * @param JSON String that you trust
+     * @return JavaScriptObject that you can cast to an Overlay Type
+     */
+    public static <T extends JavaScriptObject> T parseJson(String jsonStr)
+    {
+        return JsonUtils.safeEval(jsonStr);
+    }
+
+    private static native JsoConfiguration init(String appId, JsoConfiguration jsoConfiguration, Element rootElement)
+    /*-{
+        if (!$wnd.vaadin) {
+            $wnd.vaadin = {};
+        }
+        if (!$wnd.vaadin.getApp) {
+            $wnd.vaadin.getApp = function() {
+                return jsoConfiguration;
+            }
+        }
+        jsoConfiguration.getConfig = function(name) {
+            return this[name];
+        }
+
+        jsoConfiguration.rootElement = rootElement;
+
+        jsoConfiguration.versionInfo = {
+            vaadinVersion: '8.0.0'
+        };
+
+        jsoConfiguration.theme = 'valo';
+
+        $wnd.vaadin.clients = {};
+
+        $wnd.vaadin.gwtStatsEvents = false;
+     }-*/;
+
+
+    private void loadFromJson(String appId, String json, Element rootElement) {
+        JsoConfiguration jsoConfiguration = parseJson(json);
+        init(appId, jsoConfiguration, rootElement);
+        load(jsoConfiguration);
+    }
+
+    private void load(JsoConfiguration jsoConfiguration) {
         serviceUrl = jsoConfiguration
                 .getConfigString(ApplicationConstants.SERVICE_URL);
         if (serviceUrl == null || serviceUrl.isEmpty()) {
@@ -465,7 +514,8 @@ public class ApplicationConfiguration implements EntryPoint {
         standalone = jsoConfiguration
                 .getConfigBoolean("standalone") == Boolean.TRUE;
 
-        heartbeatInterval = jsoConfiguration
+        //spreadsheet
+        if (false) heartbeatInterval = jsoConfiguration
                 .getConfigInteger("heartbeatInterval");
 
         communicationError = jsoConfiguration.getConfigError("comErrMsg");
@@ -513,10 +563,20 @@ public class ApplicationConfiguration implements EntryPoint {
         return $wnd.vaadin.getApp(appId);
      }-*/;
 
+
+
     public static ApplicationConfiguration getConfigFromDOM(String appId) {
         ApplicationConfiguration conf = new ApplicationConfiguration();
         conf.setAppId(appId);
         conf.loadFromDOM();
+        return conf;
+    }
+
+    //spreadsheet
+    public static ApplicationConfiguration getConfigFromJson(String appId, String json, Element rootElement) {
+        ApplicationConfiguration conf = new ApplicationConfiguration();
+        conf.setAppId(appId);
+        conf.loadFromJson(appId, json, rootElement);
         return conf;
     }
 
