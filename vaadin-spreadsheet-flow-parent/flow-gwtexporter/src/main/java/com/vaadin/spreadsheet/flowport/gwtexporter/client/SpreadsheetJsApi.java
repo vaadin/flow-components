@@ -368,7 +368,7 @@ public class SpreadsheetJsApi {
 
     public void setReload(boolean reload) {
         consoleLog("setReload(" + reload + ")");
-        getState().reload = reload;
+        getState().reload = true;
     }
 
     public void setSheetIndex(int sheetIndex) {

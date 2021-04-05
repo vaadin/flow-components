@@ -112,7 +112,7 @@ import com.vaadin.flow.component.spreadsheet.shared.URLReference;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.85")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.86")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
@@ -611,11 +611,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     public void setReload(boolean reload) {
-        this.reload = reload;
-        getElement().setProperty("reload", reload);
-        UI.getCurrent().beforeClientResponse(this, c -> {
-            beforeClientResponse(c.isClientSideInitialized());
-        });
+        if (reload) getElement().setProperty("reload", System.currentTimeMillis());
     }
 
     public void setSheetIndex(int sheetIndex) {
@@ -3715,8 +3711,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        //miguel: antes: reload = true
         setReload(true);
+
         setSheetIndex(getSpreadsheetSheetIndex(workbook
                 .getActiveSheetIndex()) + 1);
         setSheetProtected(getActiveSheet().getProtect());
@@ -3923,6 +3919,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         //todo: reubicar este código
         //super.beforeClientResponse(initial);
         if (reload) {
+            setReload(reload);
             reload = false;
             if (initialSheetSelection == null) {
                 if (sheetState.getSelectedCellsOnSheet(getActiveSheet()) == null) {
@@ -3932,6 +3929,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                             .getSelectedCellsOnSheet(getActiveSheet());
                 }
             }
+        } else {
+            setReload(reload);
         }
     }
 

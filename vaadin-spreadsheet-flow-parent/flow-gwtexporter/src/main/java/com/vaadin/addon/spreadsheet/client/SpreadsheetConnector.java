@@ -321,6 +321,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         // in case the component client side is just created, but server side
         // has been existing (like when component has been invisible
+        consoleLog("reload = " + state.reload);
         if (!state.reload && stateChangeEvent.isInitialStateChange()) {
             loadInitialStateDataToWidget(stateChangeEvent);
             // this is deferred because the first layout of the spreadsheet is

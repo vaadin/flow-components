@@ -47,7 +47,7 @@ dependencies:
   '@vaadin/vaadin-upload': 5.0.0
   lit-element: 2.3.1
   open: 7.4.2
-  spreadsheet-lit-element: 0.0.85_webpack-dev-server@3.11.0
+  spreadsheet-lit-element: 0.0.86_webpack-dev-server@3.11.0
   spreadsheet-poc-lit-element: 0.0.11_webpack-dev-server@3.11.0
 devDependencies:
   '@types/validator': 13.1.0
@@ -7285,7 +7285,7 @@ packages:
       webpack-dev-server: '*'
     resolution:
       integrity: sha512-fgYe1UrFPJLSPtm6XIsEyZHmu8OoCSIA5J2Fk+gEzfaSiLp9te3/xDyjaMgddbqjFw3VtWyYEo72G+exFxZgww==
-  /spreadsheet-lit-element/0.0.85_webpack-dev-server@3.11.0:
+  /spreadsheet-lit-element/0.0.86_webpack-dev-server@3.11.0:
     dependencies:
       lit-element: 2.3.1
       spreadsheet-export: 0.0.83_webpack-dev-server@3.11.0
@@ -7293,7 +7293,7 @@ packages:
     peerDependencies:
       webpack-dev-server: '*'
     resolution:
-      integrity: sha512-Y+kLe18X1yjqcAIuAP5Z+4SaSrbipAEybxswDsCKKbe/tdrQPYJ2iL3n2ZogFRRc3gd5RNLnAVD5F61WvZvhsg==
+      integrity: sha512-cf5fhaPthF+MwltuPepUroT/FR6UUDvzY6EVUVBmEALTVKOlykfRVolwnT5af9PS6jJ28D/3p5+Rooz4SHj8GA==
   /spreadsheet-poc-lit-element/0.0.11_webpack-dev-server@3.11.0:
     dependencies:
       lit-element: 2.3.1
@@ -8559,7 +8559,7 @@ specifiers:
   lit-html: 1.3.0
   loader-utils: 2.0.0
   open: ^7.2.1
-  spreadsheet-lit-element: ^0.0.85
+  spreadsheet-lit-element: ^0.0.86
   spreadsheet-poc-lit-element: ^0.0.11
   style-loader: ^2.0.0
   ts-loader: 8.0.12

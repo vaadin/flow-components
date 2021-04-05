@@ -86,7 +86,7 @@ export class VaadinSpreadsheet extends LitElement {
       //public void setColW(int[] colW) {
       colW: {type: Object},
 
-      reload: {type: Boolean},
+      reload: {type: Number},
 
       sheetIndex: {type: Number},
 
@@ -272,7 +272,7 @@ export class VaadinSpreadsheet extends LitElement {
       } else if ('colW' == name) {
         this.api.setColW(newVal);
       } else if ('reload' == name) {
-        this.api.setReload(newVal);
+        this.api.setReload(true);
       } else if ('sheetIndex' == name) {
         this.api.setSheetIndex(newVal);
       } else if ('sheetNames' == name) {
@@ -406,6 +406,7 @@ export class VaadinSpreadsheet extends LitElement {
           ,'namedRanges'
           ,'width'
           ,'height'
+          ,'reload'
       ]
     }
     this.api.notifyStateChanges(propNames, initial);
