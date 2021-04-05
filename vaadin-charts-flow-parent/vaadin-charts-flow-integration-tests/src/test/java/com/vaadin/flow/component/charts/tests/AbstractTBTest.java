@@ -22,7 +22,7 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.flow.component.charts.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 import com.vaadin.testbench.parallel.Browser;
