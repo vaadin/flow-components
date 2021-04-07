@@ -30,6 +30,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -47,6 +48,7 @@ import com.vaadin.flow.shared.Registration;
 public class Dialog extends GeneratedVaadinDialog<Dialog>
         implements HasComponents, HasSize {
 
+    private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
     private Element container;
     private boolean autoAddedToTheUi;
@@ -623,9 +625,20 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return super.addDetachListener(listener);
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // vaadin/flow#7799,vaadin/vaadin-dialog#229
+        // as the locator is stored inside component's attributes, no need to
+        // remove the data as it should live as long as the component does
+        Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
+    }
+
     private void setDimension(String dimension, String value) {
         getElement()
-            .executeJs("this.$.overlay.$.overlay.style[$0]=$1", dimension, value);
+                .executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
+                        dimension, value);
     }
 
     private void attachComponentRenderer() {
