@@ -35,7 +35,7 @@ public class LazyComboBoxFilterIT extends AbstractComponentIT {
         comboBox.openPopup();
 		
         WebElement query = findElement(By.id("query"));
-        Assert.assertEquals(query.getText().contains("Filter: 1"));
-        Assert.assertEquals(query.getText().contains("Count: 10"));
+        Assert.assertTrue(query.getText().contains("Filter: 1"));
+        Assert.assertTrue(query.getText().contains("Count: 10"));
     }
 }
