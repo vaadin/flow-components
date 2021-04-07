@@ -8,10 +8,10 @@ package com.vaadin.flow.component.crud;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
  * @param <E> the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "20.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "20.0.0-alpha3")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme {
