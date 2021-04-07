@@ -29,12 +29,12 @@ public class LazyComboBoxFilterIT extends AbstractComponentIT {
 
     @Test
     public void lazyComboBoxFilterFirstQuery() {
-	    open();
+        open();
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
-		comboBox.sendKeys("1");
-		comboBox.openPopup();
+        comboBox.sendKeys("1");
+        comboBox.openPopup();
 		
-		WebElement query = findElement(By.id("query"));
+        WebElement query = findElement(By.id("query"));
         Assert.assertEquals(query.getText().contains("Filter: 1"));
         Assert.assertEquals(query.getText().contains("Count: 10"));
     }
