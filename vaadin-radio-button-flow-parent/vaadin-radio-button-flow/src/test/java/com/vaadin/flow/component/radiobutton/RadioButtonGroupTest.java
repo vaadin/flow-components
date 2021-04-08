@@ -176,6 +176,10 @@ public class RadioButtonGroupTest {
         group.setEnabled(true);
         Assert.assertTrue(children.get(0).isEnabled());
         Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(false);
+        Assert.assertFalse(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
     }
 
     @Test
