@@ -24,7 +24,7 @@ let arrSHA = [];
 let arrBranch = [];
 let arrUser = [];
 
-const repo = "vaadin/vaadin-flow-components";
+const repo = "vaadin/flow-components";
 const token = process.env['GITHUB_TOKEN'];
 if (!token) {
   console.log(`GITHUB_TOKEN is not set, skipping PR creation`);
