@@ -28,7 +28,10 @@ import java.util.StringTokenizer;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -36,6 +39,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.ProtectedEditEvent;
@@ -312,13 +316,14 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                     Double numVal = SpreadsheetUtil.parseNumber(cell,
                             cellContent, spreadsheet.getLocale());
                     if (numVal != null) {
-                        cell.setCellType(CellType.NUMERIC);
+                        //miguel cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(numVal);
                     } else {
                         cell.setCellValue(cellContent);
                     }
                 } else {
-                    cell.setCellType(CellType.BLANK);
+                    //miguel cell.setCellType(CellType.BLANK);
+                    cell.setBlank();
                     spreadsheet.markCellAsDeleted(cell, true);
                 }
 
@@ -450,7 +455,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
         for (Cell targetCell : targetCells) {
-            targetCell.setCellType(CellType.BLANK);
+            //miguel targetCell.setCellType(CellType.BLANK);
+            targetCell.setBlank();
             spreadsheet.markCellAsDeleted(targetCell, true);
         }
 
@@ -462,8 +468,37 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     public void updateCellComment(String text, int col, int row) {
         CreationHelper factory = spreadsheet.getWorkbook().getCreationHelper();
         RichTextString str = factory.createRichTextString(text);
+        Cell cell = getOrCreateCell(spreadsheet.getActiveSheet(), row - 1, col - 1); //poi is 0 based, but spreadsheet is 1 based
+        Comment comment = cell.getCellComment();
+        if (comment == null) {
+            Drawing<?> drawingPatriarch = spreadsheet.getActiveSheet().createDrawingPatriarch();
+            ClientAnchor anchor = factory.createClientAnchor();
+            anchor.setCol1(cell.getColumnIndex());
+            anchor.setCol2(cell.getColumnIndex());
+            anchor.setRow1(cell.getRowIndex());
+            anchor.setRow2(cell.getRowIndex());
+            comment = drawingPatriarch.createCellComment(anchor);
+            cell.setCellComment(comment);
+        }
+        comment.setString(str);
+        /* miguel
         spreadsheet.getActiveSheet().getCellComment(new CellAddress(row - 1, col - 1))
                 .setString(str);
+         */
+    }
+
+    public Cell getOrCreateCell(Sheet sheet, int rowIdx, int colIdx) {
+        Row row = sheet.getRow(rowIdx);
+        if (row == null) {
+            row = sheet.createRow(rowIdx);
+        }
+
+        Cell cell = row.getCell(colIdx);
+        if (cell == null) {
+            cell = row.createCell(colIdx);
+        }
+
+        return cell;
     }
 
     @Override

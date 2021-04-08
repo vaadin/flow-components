@@ -49,7 +49,7 @@ public class Parser {
         HashMap<Integer, String> l = new HashMap<>();
         for (String token : tokens) {
             List<String> ts = parse(token, '@');
-            l.put(Integer.parseInt(ts.get(0)), ts.get(1).substring(1, ts.get(1).length() - 2));
+            l.put(Integer.parseInt(ts.get(0)), ts.get(1));
         }
         return l;
     }
@@ -117,7 +117,7 @@ public class Parser {
         HashMap<String, String> l = new HashMap<>();
         for (String token : tokens) {
             List<String> ts = parse(token, '@');
-            l.put(ts.get(0).substring(1, ts.get(0).length() - 2), ts.get(1).substring(1, ts.get(1).length() - 2));
+            l.put(ts.get(0), ts.get(1));
         }
         return l;
     }

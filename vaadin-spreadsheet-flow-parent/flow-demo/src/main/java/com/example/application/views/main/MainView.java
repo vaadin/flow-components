@@ -8,7 +8,6 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -17,12 +16,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
+import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
-import com.example.application.views.main.MainView;
+
+import com.example.application.views.demo.DemoView;
+import com.example.application.views.demoUI.DemoUIView;
 import com.example.application.views.helloworld.HelloWorldView;
 import com.example.application.views.about.AboutView;
 
@@ -82,12 +82,30 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("Hello World", HelloWorldView.class), createTab("About", AboutView.class)};
+        return new Tab[]{createTab("Hello World", HelloWorldView.class), createTab("About", AboutView.class), createTab("DemoUI", DemoUIView.class)
+                , createTab("Basic functionality", DemoView.class, "basic")
+                , createTab("Collaborative features", DemoView.class, "collaborative")
+                , createTab("Formatting", DemoView.class, "formatting")
+                , createTab("Grouping", DemoView.class, "grouping")
+                , createTab("Report mode", DemoView.class, "reportMode")
+                , createTab("Simple invoice", DemoView.class, "simpleInvoice")
+                , createTab("Upload Excel files", DemoView.class, "upload")
+                , createTab("Use inline components", DemoView.class, "inlineComponents")
+                , createTab("Data binding", DemoView.class, "dataBinding")
+                , createTab("Embedded charts", DemoView.class, "embeddedCharts")
+        };
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget) {
         final Tab tab = new Tab();
         tab.add(new RouterLink(text, navigationTarget));
+        ComponentUtil.setData(tab, Class.class, navigationTarget);
+        return tab;
+    }
+
+    private static Tab createTab(String text, Class<? extends Component> navigationTarget, String parameter) {
+        final Tab tab = new Tab();
+        tab.add(new RouterLink(text, navigationTarget, new RouteParameters("demoID", parameter)));
         ComponentUtil.setData(tab, Class.class, navigationTarget);
         return tab;
     }
@@ -106,6 +124,8 @@ public class MainView extends AppLayout {
 
     private String getCurrentPageTitle() {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
-        return title == null ? "" : title.value();
+        if (title != null) return title.value();
+        else if (getContent() instanceof HasDynamicTitle) return ((HasDynamicTitle)getContent()).getPageTitle();
+        else return "";
     }
 }

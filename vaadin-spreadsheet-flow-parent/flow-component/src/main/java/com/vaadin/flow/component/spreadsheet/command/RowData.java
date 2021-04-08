@@ -219,7 +219,7 @@ class RowData implements Serializable {
             }
             cell.setCellStyle(cellStyle);
 
-            cell.setCellType(cellType);
+            //miguel cell.setCellType(cellType);
 
             switch (cellType) {
                 case _NONE:

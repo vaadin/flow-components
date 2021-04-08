@@ -179,9 +179,10 @@ public class CellSelectionShifter implements Serializable {
         // it from being set to a new type
         if (newCell.getCellType() != CellType.BLANK
                 || shiftedCell.getCellType() == CellType.BLANK) {
-            newCell.setCellType(CellType.BLANK);
+            //miguel newCell.setCellType(CellType.BLANK);
+            newCell.setBlank();
         }
-        newCell.setCellType(shiftedCell.getCellType());
+        //miguel newCell.setCellType(shiftedCell.getCellType());
         newCell.setCellStyle(shiftedCell.getCellStyle());
         spreadsheet.getSpreadsheetStyleFactory()
                 .cellStyleUpdated(newCell, true);

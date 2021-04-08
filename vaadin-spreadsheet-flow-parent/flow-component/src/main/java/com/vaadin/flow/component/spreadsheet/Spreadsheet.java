@@ -112,7 +112,7 @@ import com.vaadin.flow.component.spreadsheet.shared.URLReference;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.86")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.90")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
@@ -2528,7 +2528,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         } else {
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             valueManager.clearCellCache(key);
-            cell.setCellType(CellType.FORMULA);
+            //miguel cell.setCellType(CellType.FORMULA);
         }
         cell.setCellFormula(formula);
         valueManager.cellUpdated(cell);
