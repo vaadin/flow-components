@@ -49,4 +49,25 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
                     Boolean.TRUE.toString(), button.getAttribute("disabled"));
         }
     }
+
+    @Test
+    public void disabled_items_with_item_enabled_provider_should_stay_disabled_after_enabling_group() {
+        open();
+        WebElement group = findElement(By.id("button-group"));
+        // Click button to add items
+        findElement(By.id("add-button")).click();
+        for (WebElement radioButton : group.findElements(By.tagName("vaadin-radio-button"))) {
+            Assert.assertEquals("All buttons should be disabled", Boolean.TRUE.toString(), radioButton.getAttribute("disabled"));
+        }
+
+        // Click button to enable items
+        findElement(By.id("enable-button")).click();
+        List<WebElement> radioButtons = group.findElements(By.tagName("vaadin-radio-button"));
+        WebElement firstButton = radioButtons.get(0);
+        WebElement secondButton = radioButtons.get(1);
+        Assert.assertNull("First button should not be disabled", firstButton.getAttribute("disabled"));
+        Assert.assertEquals("Second button should be disabled", Boolean.TRUE.toString(), secondButton.getAttribute("disabled"));
+    }
+
+
 }

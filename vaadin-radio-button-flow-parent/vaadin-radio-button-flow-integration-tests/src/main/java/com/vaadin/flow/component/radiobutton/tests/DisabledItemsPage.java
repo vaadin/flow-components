@@ -24,14 +24,19 @@ import com.vaadin.flow.router.Route;
 public class DisabledItemsPage extends Div {
 
     public DisabledItemsPage() {
-        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup();
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         radioButtonGroup.setId("button-group");
+        radioButtonGroup.setItemEnabledProvider("one"::equals);
         radioButtonGroup.setEnabled(false);
 
         NativeButton nativeButton = new NativeButton("add",
                 event -> radioButtonGroup.setItems("one", "two"));
         nativeButton.setId("add-button");
 
-        add(radioButtonGroup, nativeButton);
+        NativeButton enableButton = new NativeButton("enable",
+                event -> radioButtonGroup.setEnabled(true));
+        enableButton.setId("enable-button");
+
+        add(radioButtonGroup, nativeButton, enableButton);
     }
 }
