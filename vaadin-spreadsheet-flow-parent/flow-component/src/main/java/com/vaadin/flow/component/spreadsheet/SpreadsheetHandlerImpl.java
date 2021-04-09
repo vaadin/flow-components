@@ -316,14 +316,13 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                     Double numVal = SpreadsheetUtil.parseNumber(cell,
                             cellContent, spreadsheet.getLocale());
                     if (numVal != null) {
-                        //miguel cell.setCellType(CellType.NUMERIC);
+                        cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(numVal);
                     } else {
                         cell.setCellValue(cellContent);
                     }
                 } else {
-                    //miguel cell.setCellType(CellType.BLANK);
-                    cell.setBlank();
+                    cell.setCellType(CellType.BLANK);
                     spreadsheet.markCellAsDeleted(cell, true);
                 }
 
@@ -455,8 +454,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
         for (Cell targetCell : targetCells) {
-            //miguel targetCell.setCellType(CellType.BLANK);
-            targetCell.setBlank();
+            targetCell.setCellType(CellType.BLANK);
             spreadsheet.markCellAsDeleted(targetCell, true);
         }
 

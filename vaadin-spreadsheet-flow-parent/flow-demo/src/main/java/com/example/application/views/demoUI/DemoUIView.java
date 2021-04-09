@@ -73,10 +73,11 @@ import com.vaadin.flow.server.StreamResource;
 @CssImport("./views/demo/demo-view.css")
 @Route(value = "demoui", layout = MainView.class)
 @PageTitle("Demo")
-public class DemoUIView extends Div implements Receiver {
+public class DemoUIView extends VerticalLayout implements Receiver {
 
     private static final Logger LOGGER = Logger
             .getLogger(DemoUIView.class.getName());
+    private final Div spreadsheetContainer;
 
     VerticalLayout layout = new VerticalLayout();
 
@@ -112,15 +113,19 @@ public class DemoUIView extends Div implements Receiver {
 
     public DemoUIView() {
         addClassName("demo-view");
+        setSizeFull();
+
+        spreadsheetContainer = new Div();
+        spreadsheetContainer.addClassName("spreadsheetContainer");
+        spreadsheetContainer.setSizeFull();
 
 
-        add(layout);
-        layout.setMargin(true);
-        layout.setSpacing(false);
-        layout.setSizeFull();
+        layout.addClassName("layout");
 
         options = new HorizontalLayout();
+        options.addClassName("options");
         options.setSpacing(true);
+        add(options);
         rowColHeadings=createRowHeadings();
 
         Button newSpreadsheetButton = createNewButton();
@@ -158,7 +163,9 @@ public class DemoUIView extends Div implements Receiver {
                     updateLocale();
                     spreadsheet
                             .setSpreadsheetComponentFactory(spreadsheetFieldFactory);
-                    layout.add(spreadsheet);
+                    spreadsheetContainer.add(spreadsheet);
+                    spreadsheet.setSizeFull();
+
                     //layout.setExpandRatio(spreadsheet, 1.0F);
                 } else {
                     spreadsheet
@@ -208,7 +215,7 @@ public class DemoUIView extends Div implements Receiver {
         Button closeButton = new Button("Close", event -> {
                 if (spreadsheet != null) {
                     SpreadsheetFactory.logMemoryUsage();
-                    layout.remove(spreadsheet);
+                    spreadsheetContainer.remove(spreadsheet);
                     spreadsheet = null;
                     SpreadsheetFactory.logMemoryUsage();
                 }
@@ -244,7 +251,7 @@ public class DemoUIView extends Div implements Receiver {
         sheetOptions.setSpacing(true);
         sheetOptions.add(save);
         sheetOptions.add(download);
-        layout.add(options);
+
 
         selectedSheetChangeListener = new Spreadsheet.SheetChangeListener() {
             @Override
@@ -307,6 +314,8 @@ public class DemoUIView extends Div implements Receiver {
         options.add(updateUpload);
         options.add(closeDownload);
 
+        add(layout);
+        layout.add(spreadsheetContainer);
     }
 
     private void addWindow(FreezePaneWindow freezePaneWindow) {
@@ -375,7 +384,9 @@ public class DemoUIView extends Div implements Receiver {
                             updateLocale();
                             spreadsheet
                                     .addSheetChangeListener(selectedSheetChangeListener);
-                            layout.add(spreadsheet);
+                            spreadsheetContainer.add(spreadsheet);
+                            spreadsheet.setSizeFull();
+
                             //layout.setExpandRatio(spreadsheet, 1.0f);
                         } else {
                             spreadsheet.reset();
@@ -471,7 +482,8 @@ public class DemoUIView extends Div implements Receiver {
             if (spreadsheet == null) {
                 spreadsheet = new Spreadsheet(file);
                 spreadsheet.addSheetChangeListener(selectedSheetChangeListener);
-                layout.add(spreadsheet);
+                spreadsheetContainer.add(spreadsheet);
+                spreadsheet.setSizeFull();
                 //layout.setExpandRatio(spreadsheet, 1.0f);
             } else {
                 if (previousFile == null
@@ -608,9 +620,9 @@ public class DemoUIView extends Div implements Receiver {
                     Object value = data[i][j];
                     if (i == 0 || j == 0 || j == 4 || j == 5) {
                         // string cells
-                        //miguel cell.setCellType(CellType.STRING);
+                        cell.setCellType(CellType.STRING);
                     } else if (j == 2 || j == 3) {
-                        //miguel cell.setCellType(CellType.NUMERIC);
+                        cell.setCellType(CellType.NUMERIC);
                     }
                     final DataFormat format = getTestWorkbook()
                             .createDataFormat();

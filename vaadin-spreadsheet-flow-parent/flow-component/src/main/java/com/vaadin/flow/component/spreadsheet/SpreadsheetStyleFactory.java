@@ -183,12 +183,12 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     public void reloadWorkbookStyles() {
         final Workbook workbook = spreadsheet.getWorkbook();
-        HashMap<Integer, String> _cellStyleToCSSStyle = spreadsheet.getCellStyleToCSSStyle();
-        if (_cellStyleToCSSStyle == null) {
-            _cellStyleToCSSStyle = new HashMap<Integer, String>(
+        spreadsheet.cellStyleToCSSStyle = spreadsheet.getCellStyleToCSSStyle();
+        if (spreadsheet.cellStyleToCSSStyle == null) {
+            spreadsheet.cellStyleToCSSStyle = new HashMap<Integer, String>(
                     workbook.getNumCellStyles());
         } else {
-            _cellStyleToCSSStyle.clear();
+            spreadsheet.cellStyleToCSSStyle.clear();
         }
         shiftedBorderLeftStyles.clear();
         shiftedBorderTopStyles.clear();
@@ -204,7 +204,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         borderStyles(sb, cellStyle);
         defaultFontStyle(cellStyle, sb);
         colorConverter.defaultColorStyles(cellStyle, sb);
-        _cellStyleToCSSStyle.put(
+        spreadsheet.cellStyleToCSSStyle.put(
                 (int) cellStyle.getIndex(), sb.toString());
 
         // 0 is default style, create all styles indexed from 1 and upwards
@@ -212,7 +212,7 @@ public class SpreadsheetStyleFactory implements Serializable {
             cellStyle = workbook.getCellStyleAt(i);
             addCellStyleCSS(cellStyle);
         }
-        spreadsheet.setCellStyleToCSSStyle(_cellStyleToCSSStyle);
+        spreadsheet.setCellStyleToCSSStyle(spreadsheet.cellStyleToCSSStyle);
         reloadActiveSheetColumnRowStyles();
     }
 

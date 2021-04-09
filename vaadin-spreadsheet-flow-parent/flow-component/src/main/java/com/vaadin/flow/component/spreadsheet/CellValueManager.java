@@ -248,7 +248,7 @@ public class CellValueManager implements Serializable {
                         // Apache POI throws RuntimeExceptions for an invalid
                         // formula from POI model
                         String formulaValue = cell.getCellFormula();
-                        //miguel cell.setCellType(CellType.STRING);
+                        cell.setCellType(CellType.STRING);
                         cell.setCellValue(formulaValue);
                         spreadsheet.markInvalidFormula(
                                 cell.getColumnIndex() + 1,
@@ -660,7 +660,7 @@ public class CellValueManager implements Serializable {
                         formulaChanged =
                             ((cell.getCellType() == CellType.FORMULA)
                                 && !newFormula.equals(cell.getCellFormula()));
-                        //miguel cell.setCellType(CellType.FORMULA);
+                        cell.setCellType(CellType.FORMULA);
                         cell.setCellFormula(newFormula);
                         getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")
@@ -681,7 +681,7 @@ public class CellValueManager implements Serializable {
                         }
                     } else {
                         // it's formula but invalid
-                        //miguel cell.setCellType(CellType.STRING);
+                        cell.setCellType(CellType.STRING);
                         cell.setCellValue(value);
                         spreadsheet.markInvalidFormula(col, row);
                     }
@@ -692,10 +692,9 @@ public class CellValueManager implements Serializable {
                     Double numVal = SpreadsheetUtil.parseNumber(cell, value,
                             spreadsheetLocale);
                     if (value.isEmpty()) {
-                        //miguel cell.setCellType(CellType.BLANK);
-                        cell.setBlank();
+                        cell.setCellType(CellType.BLANK);
                     } else if (percentage != null) {
-                        //miguel cell.setCellType(CellType.NUMERIC);
+                        cell.setCellType(CellType.NUMERIC);
                         CellStyle cs = cell.getCellStyle();
                         // Do not use default cell style (index == 0) for
                         // percentage as it will affect all cells
@@ -715,7 +714,7 @@ public class CellValueManager implements Serializable {
                         }
                         cell.setCellValue(percentage);
                     } else if (numVal != null) {
-                        //miguel cell.setCellType(CellType.NUMERIC);
+                        cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(numVal);
                     } else if (oldCellType == CellType.BOOLEAN) {
                         cell.setCellValue(Boolean.parseBoolean(value));
@@ -741,7 +740,7 @@ public class CellValueManager implements Serializable {
                      * Instead, just store it as the value. Clearing the formula
                      * makes sure the value is displayed as-is.
                      */
-                    //miguel cell.setCellType(CellType.STRING);
+                    cell.setCellType(CellType.STRING);
                     cell.setCellValue(value);
                     spreadsheet.markInvalidFormula(col, row);
                 }

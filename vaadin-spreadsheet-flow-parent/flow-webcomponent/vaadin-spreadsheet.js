@@ -53,6 +53,14 @@ export class VaadinSpreadsheet extends LitElement {
 
       dirty: {type: Number},
 
+      width: {type: String},
+
+      height: {type: String},
+
+      id: {type: String},
+
+      class: {type: String},
+
 
       rowBufferSize: {type: Number},
 
@@ -195,7 +203,6 @@ export class VaadinSpreadsheet extends LitElement {
 
   render() {
     return html`
-      <h1>This is a web component</h1>
       <slot></slot>
     `;
   }
@@ -225,7 +232,7 @@ export class VaadinSpreadsheet extends LitElement {
 
       const div = document.createElement('div');
       div.setAttribute('class', 'spreadsheetport');
-      div.setAttribute('style', 'min-height: 120px;padding-bottom: 88px;');
+      div.setAttribute('style', 'min-height: 300px; min-width: 300px;width: 100%; height: 100%;');
       this.append(div);
 
       this.api = new Spreadsheet(div);
@@ -347,6 +354,10 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setWidth(newVal);
       } else if ('height' == name) {
         this.api.setHeight(newVal);
+      } else if ('id' == name) {
+        this.api.setId(newVal);
+      } else if ('class' == name) {
+        this.api.setClass(newVal);
       } else {
         console.log('unsupported property ' + name)
       }
@@ -407,6 +418,7 @@ export class VaadinSpreadsheet extends LitElement {
           ,'width'
           ,'height'
           ,'reload'
+          ,'id'
       ]
     }
     this.api.notifyStateChanges(propNames, initial);

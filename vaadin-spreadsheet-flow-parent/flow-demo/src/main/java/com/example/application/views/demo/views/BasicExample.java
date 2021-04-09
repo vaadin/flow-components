@@ -8,6 +8,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 public class BasicExample extends Div {
 
     public BasicExample(String fileName) {
+        setSizeFull();
         try {
             add(new Spreadsheet(BasicExample.class.getResourceAsStream("/testsheets/" + fileName)));
         } catch (IOException e) {

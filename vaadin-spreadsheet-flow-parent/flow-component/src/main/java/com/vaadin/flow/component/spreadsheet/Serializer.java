@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
+import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 
@@ -72,7 +73,27 @@ public class Serializer {
                     if (!"".equals(rs.toString())) rs.append(",");
                     rs.append(k instanceof String?"\"" + ((String)k).replaceAll("\"", "\\\"") + "\"":k);
                     rs.append("@");
-                    rs.append(v instanceof String?"\"" + ((String)v).replaceAll("\"", "\\\"") + "\"":v);
+                    if (v instanceof OverlayInfo) {
+                        OverlayInfo i = (OverlayInfo) v;
+                        /*
+                                    info.type = OverlayInfo.Type.valueOf(ts2[0]);
+            info.col = Integer.parseInt(ts2[1]);
+            info.row = Integer.parseInt(ts2[2]);
+            info.width = Float.parseFloat(ts2[3]);
+            info.height = Float.parseFloat(ts2[4]);
+            info.dy = Float.parseFloat(ts2[5]);
+            info.dx = Float.parseFloat(ts2[6]);
+
+                         */
+                        String s = "" + i.type + ""
+                                + "#" + i.col
+                                + "#" + i.row
+                                + "#" + i.width
+                                + "#" + i.height
+                                + "#" + i.dy
+                                + "#" + i.dx;
+                        rs.append(s);
+                    } else rs.append(v instanceof String?"\"" + ((String)v).replaceAll("\"", "\\\"") + "\"":v);
                 });
             }
         } else rs.append("null");
@@ -81,7 +102,7 @@ public class Serializer {
 
     private static String escape(String value) {
         if (value == null) return null;
-        else return value.replaceAll("#", "\\#");
+        else return value.replaceAll("#", "\\\\#").replaceAll(",", "\\\\,");
     }
 
 }

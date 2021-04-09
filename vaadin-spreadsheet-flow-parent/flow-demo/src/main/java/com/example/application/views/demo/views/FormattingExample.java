@@ -17,6 +17,7 @@ public class FormattingExample extends Div implements Spreadsheet.SelectionChang
     private final Spreadsheet spreadsheet;
 
     public FormattingExample() {
+        setSizeFull();
         add(spreadsheet = createSpreadsheet());
     }
 

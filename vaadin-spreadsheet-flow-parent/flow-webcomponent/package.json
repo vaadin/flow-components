@@ -1,6 +1,6 @@
 {
   "name": "spreadsheet-lit-element",
-  "version": "0.0.90",
+  "version": "0.0.100",
   "description": "A simple web component",
   "main": "vaadin-spreadsheet.js",
   "module": "vaadin-spreadsheet.js",
@@ -33,7 +33,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "lit-element": "^2.3.1",
-    "spreadsheet-export": "^0.0.87"
+    "spreadsheet-export": "^0.0.96"
   },
   "devDependencies": {
     "@11ty/eleventy": "^0.10.0",

@@ -134,9 +134,12 @@ public class SpreadsheetTable implements Serializable {
                 CellReference popupButtonCellReference = new CellReference(
                         sheet.getSheetName(), fullTableRegion.getFirstRow(), c,
                         true, true);
+                //todo: miguel - disable popup buttons
+                /*
                 PopupButton popupButton = new PopupButton();
                 popupButtons.put(popupButtonCellReference, popupButton);
                 spreadsheet.setPopup(popupButtonCellReference, popupButton);
+                 */
             }
         }
     }

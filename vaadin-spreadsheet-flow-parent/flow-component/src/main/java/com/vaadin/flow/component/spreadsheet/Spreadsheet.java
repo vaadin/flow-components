@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,6 +72,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
@@ -112,7 +114,7 @@ import com.vaadin.flow.component.spreadsheet.shared.URLReference;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.90")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.100")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
@@ -136,6 +138,25 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
 
     private String height = "100%";
     private String width = "100%";
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+        getElement().setProperty("id", id);
+    }
+
+    @Override
+    public void setHeight(String height) {
+        this.height = height;
+        getElement().setProperty("height", height);
+    }
+
+    @Override
+    public void setWidth(String width) {
+        this.width = width;
+        getElement().setProperty("width", width);
+    }
+
     private String description = "";
     private ContentMode descriptionContentMode = ContentMode.PREFORMATTED;
     // Note: for the caption, there is a difference between null and an empty
@@ -216,7 +237,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     private String[] sheetNames = null;
 
     // @DelegateToWidget
-    private HashMap<Integer, String> cellStyleToCSSStyle = null;
+    protected HashMap<Integer, String> cellStyleToCSSStyle = null;
     // @DelegateToWidget
     private HashMap<Integer, Integer> rowIndexToStyleIndex = null;
     // @DelegateToWidget
@@ -1311,6 +1332,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
+        //miguel
+        setId(UUID.randomUUID().toString());
         customInit();
     }
 
@@ -1779,10 +1802,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         refreshAllCellValues();
     }
 
-    //@Override
-    public void attach() {
-        //todo: ver que hacemos con esto
-        //super.attach();
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
     }
 
@@ -2528,7 +2550,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         } else {
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             valueManager.clearCellCache(key);
-            //miguel cell.setCellType(CellType.FORMULA);
+            cell.setCellType(CellType.FORMULA);
         }
         cell.setCellFormula(formula);
         valueManager.cellUpdated(cell);
@@ -3254,9 +3276,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 new ArrayList<>(getMergedRegions()):
                 new ArrayList<MergedRegion>();
 
-        //miguel: el primer addMergedRegionIndex es 0
-        //_mergedRegions.add(addMergedRegionIndex - 1, mergedRegion);
-        _mergedRegions.add(addMergedRegionIndex, mergedRegion);
+        _mergedRegions.add(addMergedRegionIndex - 1, mergedRegion);
         setMergedRegions(_mergedRegions);
         // update the style & data for the region cells, effects region + 1
         // FIXME POI doesn't seem to care that the other cells inside the merged

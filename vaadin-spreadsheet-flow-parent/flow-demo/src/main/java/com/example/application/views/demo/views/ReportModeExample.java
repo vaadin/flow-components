@@ -14,6 +14,7 @@ public class ReportModeExample extends Div {
     }
 
     private Spreadsheet createSpreadsheet() {
+        setSizeFull();
         Spreadsheet spreadsheet = null;
         File sampleFile = null;
         try {

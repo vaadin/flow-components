@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -22,7 +23,7 @@ public class PoiTester {
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet();
         Cell cell = getOrCreateCell(sheet, 0, 0);
-        cell.setBlank();
+        cell.setCellType(CellType.BLANK);
 
         CreationHelper factory = wb.getCreationHelper();
         RichTextString str = factory.createRichTextString("comentario!");

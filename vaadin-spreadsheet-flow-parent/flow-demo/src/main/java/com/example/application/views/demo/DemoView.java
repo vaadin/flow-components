@@ -61,6 +61,7 @@ public class DemoView extends VerticalLayout implements BeforeEnterObserver, Has
         Div pages = new Div(pageDemo, pageSource);
         pages.setSizeFull();
 
+        pageSource.setVisible(false);
         tabs.addSelectedChangeListener(event -> {
             tabsToPages.values().forEach(page -> page.setVisible(false));
             Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
@@ -75,23 +76,25 @@ public class DemoView extends VerticalLayout implements BeforeEnterObserver, Has
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         String parameter = beforeEnterEvent.getRouteParameters().get("demoID").orElse("");
         title = parameter;
-        Class demoClass = null;
+        Component demoInstance;
         switch (parameter) {
-            case "basic": demoClass = BasicFunctionalityExample.class; break;
-            case "collaborative": demoClass = CollaborativeExample.class; break;
-            case "formatting": demoClass = FormattingExample.class; break;
-            case "grouping": demoClass = GroupingExample.class; break;
-            case "reportMode": demoClass = ReportModeExample.class; break;
-            case "simpleInvoice": demoClass = SimpleInvoiceExample.class; break;
-            case "upload": demoClass = FileUploadExample.class; break;
-            case "inlineComponents": demoClass = InlineComponentsExample.class; break;
-            case "dataBinding": demoClass = DataBindingExample.class; break;
-            case "embeddedCharts": demoClass = EmbeddedChartsExample.class; break;
-            default: break;
+            case "basic": demoInstance = new BasicFunctionalityExample(); break;
+            case "collaborative": demoInstance = new CollaborativeExample(); break;
+            case "formatting": demoInstance = new FormattingExample(); break;
+            case "grouping": demoInstance = new GroupingExample(); break;
+            case "reportMode": demoInstance = new ReportModeExample(); break;
+            case "simpleInvoice": demoInstance = new SimpleInvoiceExample(); break;
+            case "upload": demoInstance = new FileUploadExample(); break;
+            case "inlineComponents": demoInstance = new InlineComponentsExample(); break;
+            case "dataBinding": demoInstance = new DataBindingExample(); break;
+            case "embeddedCharts": demoInstance = new EmbeddedChartsExample(); break;
+            default: demoInstance = new Text("demoID " + parameter + " is not supported"); break;
         }
         try {
-            pageDemo.add(demoClass != null?(Component) demoClass.newInstance():new Text("" + parameter + " not supported"));
-            pre.add(getSource(demoClass));
+            pageDemo.removeAll();
+            pageDemo.add(demoInstance);
+            pre.removeAll();
+            pre.add(getSource(demoInstance.getClass()));
         } catch (Exception e) {
             e.printStackTrace();
             Notification.show("" + e.getClass().getName() + ": " + e.getMessage());

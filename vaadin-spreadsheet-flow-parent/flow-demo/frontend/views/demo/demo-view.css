@@ -1,3 +1,17 @@
 .demo-view {
-  display: block;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
 }
+
+.options
+{
+  min-height: 120px;
+  width: 100%;
+}
+
+.layout {
+  flex-grow: 1;
+}
+
+

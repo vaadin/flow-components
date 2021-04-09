@@ -1,6 +1,7 @@
 package com.vaadin.spreadsheet.flowport.gwtexporter.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,6 +55,7 @@ public class SpreadsheetJsApi {
     protected PopupButtonConnector popupButtonConnector;
     protected PopupButtonWidget popupButtonWidget;
     protected ApplicationConnection applicationConnection;
+    private String originalStyles;
 
     native void consoleLog(String message) /*-{
       console.log("spreadsheetapi", message );
@@ -559,6 +561,22 @@ public class SpreadsheetJsApi {
     public void setId(String id) {
         consoleLog("setId(" + id + ")");
         getState().id = id;
+    }
+
+    public void setClass(String classNames) {
+        consoleLog("setClass(" + classNames + ")");
+        if (originalStyles  == null) {
+            originalStyles = spreadsheetWidget.getStyleName();
+        }
+        List<String> fixedStyles = Arrays.asList(originalStyles != null?originalStyles.split(" "):new String[0]);
+        List<String> oldStyles = Arrays.asList(spreadsheetWidget.getStyleName() != null?spreadsheetWidget.getStyleName().split(" "):new String[0]);
+        List<String> newStyles = Arrays.asList(classNames != null?classNames.split(" "):new String[0]);
+        for (String style : oldStyles) if (!"".equals(style)) {
+            if (!fixedStyles.contains(style) && !newStyles.contains(style)) spreadsheetWidget.removeStyleName(style);
+        }
+        for (String style : newStyles) if (!"".equals(style)) {
+            if (!fixedStyles.contains(style) && !oldStyles.contains(style)) spreadsheetWidget.addStyleName(style);
+        }
     }
 
     public void notifyStateChanges(String[] propNames, boolean initial) {

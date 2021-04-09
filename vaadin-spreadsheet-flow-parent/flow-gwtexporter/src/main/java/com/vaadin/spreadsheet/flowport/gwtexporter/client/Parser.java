@@ -147,7 +147,7 @@ public class Parser {
             info.height = Float.parseFloat(ts2[4]);
             info.dy = Float.parseFloat(ts2[5]);
             info.dx = Float.parseFloat(ts2[6]);
-            l.put(ts.get(0).substring(1, ts.get(0).length() - 2), info);
+            l.put(ts.get(0), info);
         }
         return l;
     }
@@ -224,8 +224,8 @@ public class Parser {
             boolean insideString = false;
             boolean escaped = false;
             while (pos < payload.length()) {
-                if (separator == payload.charAt(pos) && !insideString) {
-                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
+                if (!escaped && separator == payload.charAt(pos) && !insideString) {
+                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1).replaceAll("\\\\", ""));
                     else tokens.add("");
                     start = pos + 1;
                     hasNonString = false;
@@ -241,10 +241,13 @@ public class Parser {
                     }
                 } else if ('\\' == payload.charAt(pos)) {
                     escaped = true;
-                } else if (!insideString) hasNonString = true;
+                } else {
+                    if (escaped) escaped = false;
+                    if (!insideString) hasNonString = true;
+                }
                 pos++;
             }
-            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
+            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1).replaceAll("\\\\", ""));
         }
         return tokens;
     }
@@ -273,6 +276,12 @@ public class Parser {
 
 
         s = "swsw\"\",33,\"aa,a\"";
+        l = parse(s, ',');
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
+
+
+        s = "1#1#Season#null#Season#cs3#false#false#false,1#2#Month#null#Month#cs4#false#false#false,1#3#Temp.#null#Temp.#cs1#false#false#false,2#1#Spring#null#Spring#cs6#false#false#false,2#2#March#null#March#cs1#false#false#false,2#3#-1\\,80#null#-1\\,8#cs7 r#false#false#false,3#1##null##cs6#false#false#false,3#2#April#null#April#cs1#false#false#false,3#3#3\\,40#null#3\\,4#cs7 r#false#false#false,4#1##null##cs6#false#false#false,4#2#May#null#May#cs1#false#false#false,4#3#10\\,00#null#10#cs7 r#false#false#false,5#1#Spring Avg.#null#Spring Avg.#cs5#false#false#false,5#3#3\\,87#SUBTOTAL(1;C2:C4)#SUBTOTAL(1\\,C2:C4)#cs7 r#false#false#false,6#1#Summer#null#Summer#cs6#false#false#false,6#2#June#null#June#cs1#false#false#false,6#3#14\\,70#null#14\\,7#cs7 r#false#false#false,7#1##null##cs6#false#false#false,7#2#July#null#July#cs1#false#false#false,7#3#16\\,90#null#16\\,9#cs7 r#false#false#false,8#1##null##cs6#false#false#false,8#2#August#null#August#cs1#false#false#false,8#3#15\\,50#null#15\\,5#cs7 r#false#false#false,9#1#Summer Avg.#null#Summer Avg.#cs5#false#false#false,9#3#15\\,70#SUBTOTAL(1;C6:C8)#SUBTOTAL(1\\,C6:C8)#cs7 r#false#false#false,10#1#Autumn#null#Autumn#cs6#false#false#false,10#2#September#null#September#cs1#false#false#false,10#3#10\\,30#null#10\\,3#cs7 r#false#false#false,11#1##null##cs6#false#false#false,11#2#October#null#October#cs1#false#false#false,11#3#5\\,50#null#5\\,5#cs7 r#false#false#false,12#1##null##cs6#false#false#false,12#2#November#null#November#cs1#false#false#false,12#3#0\\,70#null#0\\,7#cs7 r#false#false#false,13#1#Autumn Avg.#null#Autumn Avg.#cs5#false#false#false,13#3#5\\,50#SUBTOTAL(1;C10:C12)#SUBTOTAL(1\\,C10:C12)#cs7 r#false#false#false,14#1#Winter#null#Winter#cs6#false#false#false,14#2#December#null#December#cs1#false#false#false,14#3#-2\\,70#null#-2\\,7#cs7 r#false#false#false,15#1##null##cs6#false#false#false,15#2#January#null#January#cs1#false#false#false,15#3#-4\\,50#null#-4\\,5#cs7 r#false#false#false,16#1##null##cs6#false#false#false,16#2#February#null#February#cs1#false#false#false,16#3#-5\\,30#null#-5\\,3#cs7 r#false#false#false,17#1#Winter Avg.#null#Winter Avg.#cs5#false#false#false,17#3#-4\\,17#SUBTOTAL(1;C14:C16)#SUBTOTAL(1\\,C14:C16)#cs7 r#false#false#false,18#1#Average Temp.#null#Average Temp.#cs5#false#false#false,18#3#5\\,23#SUBTOTAL(1;C2:C16)#SUBTOTAL(1\\,C2:C16)#cs7 r#false#false#false";
         l = parse(s, ',');
         System.out.println("input:" + s);
         l.forEach(x -> System.out.println("output:" + x));

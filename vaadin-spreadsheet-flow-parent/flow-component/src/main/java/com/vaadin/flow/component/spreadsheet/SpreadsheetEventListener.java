@@ -93,7 +93,7 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
             handler.clearSelectedCellsOnCut();
         } else if ("updateCellComment".equals(event.getMessage())) {
             handler.updateCellComment(tokens.get(0), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)));
-        } else if ("setGroupingCollapsed".equals(event.getMessage())) {
+        } else if ("groupingCollapsed".equals(event.getMessage())) {
             handler.setGroupingCollapsed(Boolean.parseBoolean(tokens.get(0)), Integer.parseInt(tokens.get(1)), Boolean.parseBoolean(tokens.get(2)));
         } else if ("levelHeaderClicked".equals(event.getMessage())) {
             handler.levelHeaderClicked(Boolean.parseBoolean(tokens.get(0)), Integer.parseInt(tokens.get(1)));
@@ -136,8 +136,8 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
             boolean insideString = false;
             boolean escaped = false;
             while (pos < payload.length()) {
-                if (separator == payload.charAt(pos) && !insideString) {
-                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
+                if (!escaped && separator == payload.charAt(pos) && !insideString) {
+                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1).replaceAll("\\\\", ""));
                     else tokens.add("");
                     start = pos + 1;
                     hasNonString = false;
@@ -153,10 +153,13 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
                     }
                 } else if ('\\' == payload.charAt(pos)) {
                     escaped = true;
-                } else if (!insideString) hasNonString = true;
+                } else {
+                    if (escaped) escaped = false;
+                    if (!insideString) hasNonString = true;
+                }
                 pos++;
             }
-            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1));
+            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1).replaceAll("\\\\", ""));
         }
         return tokens;
     }
