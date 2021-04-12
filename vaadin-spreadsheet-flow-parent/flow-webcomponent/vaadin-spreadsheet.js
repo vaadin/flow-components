@@ -212,6 +212,11 @@ export class VaadinSpreadsheet extends LitElement {
     console.log('connected')
   }
 
+  disconnectedCallback() {
+    this.api.disconnected();
+    console.log('disconnected')
+  }
+
   addStyle(styleString) {
     const style = document.createElement('style');
     style.textContent = styleString;

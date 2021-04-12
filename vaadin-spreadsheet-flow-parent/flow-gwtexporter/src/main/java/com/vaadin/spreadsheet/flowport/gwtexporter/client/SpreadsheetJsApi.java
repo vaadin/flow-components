@@ -129,6 +129,12 @@ public class SpreadsheetJsApi {
         consoleLog("widget appended !");
     }
 
+    public void disconnected() {
+        if (spreadsheetConnector != null) {
+            spreadsheetConnector.onUnregister();
+        }
+    }
+
     private void delegateToWidget(SpreadsheetConnector connector, StateChangeEvent sce) {
         for (String propertyName : new String[] {
         "rowBufferSize",
@@ -238,7 +244,6 @@ public class SpreadsheetJsApi {
         Scheduler.get().scheduleDeferred(() -> {
             //spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
             consoleLog("deferred relayout!");
-
             spreadsheetWidget.relayoutSheet();
         });
     }
