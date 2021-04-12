@@ -555,6 +555,7 @@ public class RadioButtonGroup<T>
     private void updateEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
+        button.setEnabled(!disabled);
         Serializable rawValue = button.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
             // convert the boolean value to a String to force update the
