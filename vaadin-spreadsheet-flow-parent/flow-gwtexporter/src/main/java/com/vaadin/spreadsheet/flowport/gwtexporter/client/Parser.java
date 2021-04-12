@@ -44,12 +44,15 @@ public class Parser {
     public static HashMap<Integer, String> parseMapIntegerString(String raw) {
         if ("null".equals(raw)) return null;
         List<String> tokens = parse(raw);
-        consoleLog("received: " + raw);
-        tokens.forEach(s -> consoleLog("-->" + s));
+        //consoleLog("received: " + raw);
+        //tokens.forEach(s -> consoleLog("-->" + s));
         HashMap<Integer, String> l = new HashMap<>();
         for (String token : tokens) {
             List<String> ts = parse(token, '@');
-            l.put(Integer.parseInt(ts.get(0)), ts.get(1));
+            String v = ts.get(1);
+            if (v == null || "null".equals(v)) v = null;
+            else if (v.startsWith("\"")) v = ts.get(1).substring(1, ts.get(1).length() - 1);
+            l.put(Integer.parseInt(ts.get(0)), v);
         }
         return l;
     }
@@ -176,9 +179,9 @@ public class Parser {
     public static ArrayList<CellData> parseArraylistOfCellData(String raw) {
         if ("null".equals(raw)) return null;
         ArrayList<CellData> l = new ArrayList<>();
-        consoleLog("received " + raw);
+        //consoleLog("received " + raw);
         List<String> tokens = parse(raw);
-        tokens.forEach(s -> consoleLog("-->" + s));
+        //tokens.forEach(s -> consoleLog("-->" + s));
         for (String token : tokens) {
             String[] ts = token.split("#");
             CellData data = new CellData();
@@ -285,6 +288,17 @@ public class Parser {
         l = parse(s, ',');
         System.out.println("input:" + s);
         l.forEach(x -> System.out.println("output:" + x));
+        
+        s = "4#1#analysis_date#null#'analysis_date#cs70#false#false#false,4#2#General#null#'General#cs71#false#false#false,4#3#Analysis Date (current date if new loan)#null#'Analysis Date (current date if new loan)#cs72#false#false#false,5#1#borrower_id#null#'borrower_id#cs70#false#false#false,5#2#General#null#'General#cs71#false#false#false,5#3#Borrower ID (TIN/SSN)#null#'Borrower ID (TIN/SSN)#cs72#false#false#false,6#1#entity_type#null#'entity_type#cs70#false#false#false,6#2#General#null#'General#cs71#false#false#false,6#3#SAE Type#null#'SAE Type#cs72#false#false#false,7#1#approval_date#null#'approval_date#cs70#false#false#false,7#2#General#null#'General#cs71#false#false#false,7#3#Approval Date#null#'Approval Date#cs72#false#false#false,8#1#business_line_desc#null#'business_line_desc#cs70#false#false#false,8#2#General#null#'General#cs71#false#false#false,8#3#Business Line#null#'Business Line#cs72#false#false#false,9#1#transaction_desc#null#'transaction_desc#cs70#false#false#false,9#2#General#null#'General#cs71#false#false#false,9#3#Transaction Type#null#'Transaction Type#cs72#false#false#false,10#1#origination_desc#null#'origination_desc#cs70#false#false#false,10#2#General#null#'General#cs71#false#false#false,10#3#Origination Type#null#'Origination Type#cs72#false#false#false,11#1#entity_type_desc#null#'entity_type_desc#cs79#false#false#false,11#2#Obligor#null#'Obligor#cs80#false#false#false,11#3#Entity Type#null#'Entity Type#cs81#false#false#false,12#1#borrower_name#null#'borrower_name#cs79#false#false#false,12#2#Obligor#null#'Obligor#cs80#false#false#false,12#3#Borrower Name#null#'Borrower Name#cs81#false#false#false,13#1#experience_desc#null#'experience_desc#cs83#false#false#false,13#2#Obligor#null#'Obligor#cs84#false#false#false,13#3#Relevant Experience#null#'Relevant Experience#cs85#false#false#false,14#1#financial_statement_date#null#'financial_statement_date#cs79#false#false#false,14#2#Obligor#null#'Obligor#cs80#false#false#false,14#3#Fin. Statement Date#null#'Fin. Statement Date#cs81#false#false#false,15#1#financial_report_compliance#null#'financial_report_compliance#cs83#false#false#false,15#2#Obligor#null#'Obligor#cs84#false#false#false,15#3#Fin. Reporting Compliance and Quality#null#'Fin. Reporting Compliance and Quality#cs85#false#false#false,16#1#financial_covenant_compliance#null#'financial_covenant_compliance#cs83#false#false#false,16#2#Obligor#null#'Obligor#cs84#false#false#false,16#3#Fin. Covenant Compliance#null#'Fin. Covenant Compliance#cs85#false#false#false,17#1#doc_tenure#null#'doc_tenure#cs83#false#false#false,17#2#Obligor#null#'Obligor#cs84#false#false#false,17#3#Documented Tenure#null#'Documented Tenure#cs85#false#false#false,18#1#cash_flow_history#null#'cash_flow_history#cs83#false#false#false,18#2#Obligor#null#'Obligor#cs84#false#false#false,18#3#Cash Flow History#null#'Cash Flow History#cs85#false#false#false,19#1#external_credit_score#null#'external_credit_score#cs83#false#false#false,19#2#Obligor#null#'Obligor#cs84#false#false#false,19#3#FICO on Principal#null#'FICO on Principal#cs85#false#false#false,20#1#total_assets#null#'total_assets#cs79#false#false#false,20#2#Obligor#null#'Obligor#cs80#false#false#false,20#3#Total Assets#null#'Total Assets#cs81#false#false#false,21#1#total_debt#null#'total_debt#cs79#false#false#false,21#2#Obligor#null#'Obligor#cs80#false#false#false,21#3#Total Debt#null#'Total Debt#cs81#false#false#false,22#1#total_net_worth#null#'total_net_worth#cs79#false#false#false,22#2#Obligor#null#'Obligor#cs80#false#false#false,22#3#Total Net Worth#null#'Total Net Worth#cs81#false#false#false,23#1#minority_interest#null#'minority_interest#cs79#false#false#false,23#2#Obligor#null#'Obligor#cs80#false#false#false,23#3#Minority Interest#null#'Minority Interest#cs81#false#false#false,24#1#debt_to_net_worth#null#'debt_to_net_worth#cs83#false#false#false,24#2#Obligor#null#'Obligor#cs84#false#false#false,24#3#Leverage: Debt / Net Worth#null#'Leverage: Debt / Net Worth#cs85#false#false#false";
+        ArrayList<CellData> d = parseArraylistOfCellData(s);
+        System.out.println("input:" + s);
+        l.forEach(x -> System.out.println("output:" + x));
+
+        s = "0@\"font-family:\"Arial Cyr\",Helvetica,arial;font-size:10pt;background-color:rgba(255,255,255,1.0);color:rgba(0,0,0,1.0);\",1@\"font-family:\"Arial Cyr\",swiss,Helvetica,arial;font-size:11pt;background-color:rgba(204, 255, 204, 1.0);text-align:center;justify-content:center;overflow:hidden;white-space:normal;word-wrap:break-word;\"";
+        HashMap<Integer, String> m = parseMapIntegerString(s);
+        for (int k : m.keySet()) {
+            System.out.println(k + " --> " + m.get(k));
+        }
     }
 
 }

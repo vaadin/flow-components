@@ -114,7 +114,7 @@ import com.vaadin.flow.component.spreadsheet.shared.URLReference;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.100")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.106")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")

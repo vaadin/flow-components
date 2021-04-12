@@ -298,12 +298,17 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return sheetWidget;
     }
 
+    native void debugger() /*-{
+      debugger;
+  }-*/;
+
     public void load() {
         if (loaded) {
             clearSpreadsheet(false);
         } else {
             loaded = true;
         }
+        debugger();
         loadSheet(activeSheetIndex - 1);
     }
 

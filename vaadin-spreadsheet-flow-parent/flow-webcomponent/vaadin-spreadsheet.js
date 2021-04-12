@@ -423,7 +423,6 @@ export class VaadinSpreadsheet extends LitElement {
           ,'width'
           ,'height'
           ,'reload'
-          ,'id'
       ]
     }
     this.api.notifyStateChanges(propNames, initial);
@@ -448,7 +447,7 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.updateTopRightCellValues(cellData);
   }
 
-  updateBottomLeftCellValues(celldata) { //ArrayList<CellData> cellData) {
+  updateBottomLeftCellValues(cellData) { //ArrayList<CellData> cellData) {
     this.api.updateBottomLeftCellValues(cellData);
   }
 

@@ -58,10 +58,12 @@ public class Serializer {
                     } else return v.toString();
                 }).collect(Collectors.joining(",")));
             } else if (value instanceof float[]) {
-                String s = "";
+                StringBuffer s = new StringBuffer();
+                boolean first = true;
                 for (float v : (float[]) value) {
-                    if (!"".equals(s)) s += ",";
-                    s += v;
+                    if (first) first = false;
+                    else s.append(",");
+                    s.append(v);
                 }
                 rs.append(s);
             } else if (value instanceof int[]) {
