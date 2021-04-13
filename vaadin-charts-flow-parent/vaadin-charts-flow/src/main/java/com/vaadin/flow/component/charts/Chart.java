@@ -74,7 +74,7 @@ import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
-@NpmPackage(value="@vaadin/vaadin-charts", version = "20.0.0-alpha2")
+@NpmPackage(value="@vaadin/vaadin-charts", version = "20.0.0-alpha4")
 @JsModule("@vaadin/vaadin-charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize {
 
@@ -207,7 +207,7 @@ public class Chart extends Component implements HasStyle, HasSize {
      * <p>
      * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
      * {@link PlotOptionsTimeline}.
-     * 
+     *
      * @param timeline
      *            true for timeline chart
      */

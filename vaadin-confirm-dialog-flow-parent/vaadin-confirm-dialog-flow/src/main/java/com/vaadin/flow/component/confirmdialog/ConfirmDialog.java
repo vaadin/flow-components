@@ -8,10 +8,10 @@ package com.vaadin.flow.component.confirmdialog;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -34,11 +34,11 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-confirm-dialog>} element.
- * 
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "20.0.0-alpha2")
+@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "20.0.0-alpha4")
 @JsModule("@vaadin/vaadin-confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -139,7 +139,7 @@ public class ConfirmDialog extends Component
     /**
      * Creates a dialog with a Confirm button with its click listener
      * and a given texts
-     * 
+     *
      * @param header
      *            the header text
      * @param text
@@ -162,7 +162,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Creates a two button dialog with Confirm and Cancel buttons
-     * 
+     *
      * @param header
      *            the header text
      * @param text
@@ -190,7 +190,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Creates a three button dialog with Confirm, Reject and Cancel buttons
-     * 
+     *
      * @param header
      *            the header text
      * @param text
@@ -241,7 +241,7 @@ public class ConfirmDialog extends Component
     /**
      * Sets Reject button text and `reject` event listener.
      * Makes Reject button visible
-     * 
+     *
      * @param buttonText
      *            the text inside Reject button
      * @param rejectListener
@@ -257,7 +257,7 @@ public class ConfirmDialog extends Component
     /**
      * Sets Reject button text, `reject` event listener,
      * Reject button theme. Makes Reject button visible
-     * 
+     *
      * @param buttonText
      *            the text inside Reject button
      * @param rejectListener
@@ -274,7 +274,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom Reject button
-     * 
+     *
      * @param component
      *            the component to display instead of default Reject button
      */
@@ -284,7 +284,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom Reject button
-     * 
+     *
      * @param element
      *            the element to display instead of default Reject button
      */
@@ -295,7 +295,7 @@ public class ConfirmDialog extends Component
     /**
      * Sets Cancel button text and `cancel` event listener.
      * Makes Cancel button visible
-     * 
+     *
      * @param buttonText
      *            the text inside Cancel button
      * @param cancelListener
@@ -311,7 +311,7 @@ public class ConfirmDialog extends Component
     /**
      * Sets Cancel button text, `cancel` event listener and
      * Cancel button theme. Makes Cancel button visible
-     * 
+     *
      * @param buttonText
      *            the text inside Cancel button
      * @param cancelListener
@@ -328,7 +328,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom cancel button
-     * 
+     *
      * @param component
      *            the component to display instead of default Cancel button
      */
@@ -338,7 +338,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom cancel button
-     * 
+     *
      * @param element
      *            the element to display instead of default Cancel button
      */
@@ -348,7 +348,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets Confirm button text and `confirm` event listener
-     * 
+     *
      * @param buttonText
      *            the text inside Confirm button
      * @param confirmListener
@@ -363,7 +363,7 @@ public class ConfirmDialog extends Component
     /**
      * Sets Confirm button text, `confirm` event listener and
      * Confirm button theme
-     * 
+     *
      * @param buttonText
      *            the text inside Confirm button
      * @param confirmListener
@@ -380,7 +380,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom confirm button
-     * 
+     *
      * @param component
      *            the element to display instead of default Confirm button
      */
@@ -390,7 +390,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom confirm button
-     * 
+     *
      * @param element
      *            the element to display instead of default Confirm button
      */
@@ -412,9 +412,9 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom confirmation message element
-     * 
+     *
      * @param component
-     *            the component to display instead of default 
+     *            the component to display instead of default
      *            confirmation text node
      */
     public void setText(Component component) {
@@ -423,9 +423,9 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets custom confirmation message element
-     * 
+     *
      * @param element
-     *            the element to display instead of default 
+     *            the element to display instead of default
      *            confirmation text node
      */
     public void setText(Element element) {
@@ -508,7 +508,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets confirmation dialog custom header element
-     * 
+     *
      * @param component
      *            the component to display instead of default header text
      */
@@ -518,7 +518,7 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets confirmation dialog custom header element
-     * 
+     *
      * @param element
      *            the element to display instead of default header text
      */
@@ -556,7 +556,7 @@ public class ConfirmDialog extends Component
      * Opens or closes the dialog.
      * <p>
      * Note: Confirm-dialog will be attached or detached from the DOM automatically,
-     * if it was not added manually. 
+     * if it was not added manually.
      *
      * @param opened
      *            {@code true} to open the confirm-dialog, {@code false} to close it

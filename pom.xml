@@ -12,7 +12,7 @@
   </parent>
   <properties>
     <flow.version>7.0-SNAPSHOT</flow.version>
-    <testbench.version>6.4.0</testbench.version>
+    <testbench.version>7.0.1</testbench.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -513,6 +513,25 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>net.revelc.code.formatter</groupId>
+        <artifactId>formatter-maven-plugin</artifactId>
+        <version>2.11.0</version>
+        <configuration>
+            <configFile>eclipse/VaadinJavaConventions.xml
+            </configFile>
+        </configuration>
+        <dependencies>
+            <dependency>
+                <!-- It brings the config file VaadinJavaConventions.xml  -->
+                <groupId>${project.groupId}</groupId>
+                <artifactId>flow-buildtools</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+        </dependencies>
+    </plugin>
+    </plugins>
   </build>
   <dependencyManagement>
     <dependencies>

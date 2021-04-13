@@ -32,7 +32,7 @@ import com.vaadin.flow.dom.ElementConstants;
  * @see VaadinIcon
  */
 @Tag("iron-icon")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "20.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-icons", version = "20.0.0-alpha4")
 @JsModule("@vaadin/vaadin-icons/vaadin-icons.js")
 public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
 
@@ -67,7 +67,7 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
     public Icon(String icon) {
         this(ICON_COLLECTION_NAME, icon);
     }
-	
+
     /**
      * Creates an Icon component that displays the given {@code icon} from the
      * given {@code collection}.
@@ -76,7 +76,7 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *            the icon collection
      * @param icon
      *            the icon name
-     * @deprecated Use either {@link #Icon(String)} or 
+     * @deprecated Use either {@link #Icon(String)} or
      * {@link IronIcon#IronIcon(String,String) IronIcon(String,String)}
      */
     @Deprecated

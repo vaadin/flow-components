@@ -157,6 +157,32 @@ public class RadioButtonGroupTest {
     }
 
     @Test
+    public void disabledItems_itemEnabledProvider_stayDisabled() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("enabled", "disabled");
+        group.setItemEnabledProvider("enabled"::equals);
+
+        List<RadioButton<String>> children = group.getChildren()
+                .map(child -> (RadioButton<String>) child)
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(false);
+        Assert.assertFalse(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(true);
+        Assert.assertTrue(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(false);
+        Assert.assertFalse(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+    }
+
+    @Test
     public void changeItems_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         radioButtonGroup.setItems("Foo", "Bar");

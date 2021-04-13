@@ -139,7 +139,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha4")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -3215,7 +3215,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param order
      *            sort order to be set to Grid.
      * @param userOriginated
@@ -3296,7 +3296,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * updated originated from user.
-     * 
+     *
      * @param userOriginated
      *            <code>true</code> if the sorting changes as a result of user
      *            interaction, <code>false</code> if changed by Grid API call.
@@ -3543,10 +3543,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Sets the function that is used for generating CSS class names for rows in
-     * this grid. Returning {@code null} from the generator results in no custom
-     * class name being set. Multiple class names can be returned from the
-     * generator as space-separated.
+     * Sets the function that is used for generating CSS class names for all the
+     * cells in the rows in this grid. Returning {@code null} from the generator
+     * results in no custom class name being set. Multiple class names can be
+     * returned from the generator as space-separated.
      * <p>
      * If {@link Column#setClassNameGenerator(SerializableFunction)} is used
      * together with this method, resulting class names from both methods will

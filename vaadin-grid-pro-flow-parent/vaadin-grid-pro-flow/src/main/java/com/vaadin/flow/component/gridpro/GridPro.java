@@ -8,10 +8,10 @@ package com.vaadin.flow.component.gridpro;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -48,7 +48,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "20.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "20.0.0-alpha4")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -268,7 +268,7 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Adds a new edit column to this {@link GridPro} with a value provider 
+     * Adds a new edit column to this {@link GridPro} with a value provider
      * and renderer which is used to display the content when the cell is
      * not in the edit mode.
      *
@@ -401,7 +401,7 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Sets the value of the webcomponent's property editOnClick. Default values is false.
-     * When true, cell edit mode gets activated on a single click instead of the default 
+     * When true, cell edit mode gets activated on a single click instead of the default
      * double click.
      *
      * @param editOnClick
@@ -414,7 +414,7 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Gets the value of the webcomponent's property editOnClick. Default values is false.
-     * When true, cell edit mode gets activated on a single click instead of the default 
+     * When true, cell edit mode gets activated on a single click instead of the default
      * double click.
      *
      * @return editOnClick value
