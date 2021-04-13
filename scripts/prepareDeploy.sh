@@ -51,7 +51,7 @@ versionBase=`getBaseVersion $version`
 pomBase=`getBaseVersion $pomVersion`
 
 ### Get the master branch version for components
-masterPom=`curl -s "https://raw.githubusercontent.com/vaadin/vaadin-flow-components/master/pom.xml"`
+masterPom=`curl -s "https://raw.githubusercontent.com/vaadin/flow-components/master/pom.xml"`
 masterMajorMinor=`echo "$masterPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
