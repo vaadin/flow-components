@@ -101,6 +101,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
+        clear();
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -113,6 +114,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                     if (event instanceof DataRefreshEvent) {
                         refresh(((DataRefreshEvent<ITEM>) event).getItem());
                     } else {
+                        clear();
                         rebuild();
                     }
                 });
@@ -216,7 +218,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     @SuppressWarnings("unchecked")
     private void rebuild() {
-        clear();
         removeAll();
 
         synchronized (dataProvider) {
