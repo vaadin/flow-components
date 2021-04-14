@@ -24,8 +24,6 @@
     <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
     <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-    <driver.binary.downloader.maven.plugin.version>1.0.18
-        </driver.binary.downloader.maven.plugin.version>
     <failsafe.forkCount>4</failsafe.forkCount>
     <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
     <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -210,24 +208,6 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>com.googlecode.maven-download-plugin</groupId>
-          <artifactId>download-maven-plugin</artifactId>
-          <version>1.6.0</version>
-          <executions>
-            <execution>
-              <phase>process-resources</phase>
-              <goals>
-                <goal>wget</goal>
-              </goals>
-              <configuration>
-                <url>https://raw.githubusercontent.com/vaadin/flow/master/drivers.xml</url>
-                <outputFileName>drivers.xml</outputFileName>
-                <outputDirectory>${project.build.directory}</outputDirectory>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>jetty-maven-plugin</artifactId>
           <version>${jetty.version}</version>
@@ -393,25 +373,6 @@
               <id>parse-version</id>
               <goals>
                 <goal>parse-version</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>com.lazerycode.selenium</groupId>
-          <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-          <version>${driver.binary.downloader.maven.plugin.version}</version>
-          <configuration>
-            <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
-            <rootStandaloneServerDirectory>${project.build.directory}/driver</rootStandaloneServerDirectory>
-            <downloadedZipFileDirectory>${project.build.directory}/driver_zips</downloadedZipFileDirectory>
-            <customRepositoryMap>${project.build.directory}/drivers.xml</customRepositoryMap>
-          </configuration>
-          <executions>
-            <execution>
-              <phase>pre-integration-test</phase>
-              <goals>
-                <goal>selenium</goal>
               </goals>
             </execution>
           </executions>
