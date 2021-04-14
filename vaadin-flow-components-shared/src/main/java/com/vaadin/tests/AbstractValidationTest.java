@@ -2,13 +2,20 @@ package com.vaadin.tests;
 
 import java.util.List;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 public abstract class AbstractValidationTest
         extends com.vaadin.flow.testutil.AbstractValidationTest {
 
     private static SharedBrowser browser = new SharedBrowser();
+
+    @BeforeClass
+    public static void setupClass() {
+        WebDriverManager.chromedriver().setup();
+    }
 
     @Override
     public void setup() throws Exception {

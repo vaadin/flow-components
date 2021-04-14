@@ -24,8 +24,6 @@
         <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-        <driver.binary.downloader.maven.plugin.version>1.0.18
-                </driver.binary.downloader.maven.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -203,24 +201,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>com.googlecode.maven-download-plugin</groupId>
-                    <artifactId>download-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                    <executions>
-                        <execution>
-                            <phase>process-resources</phase>
-                            <goals>
-                                <goal>wget</goal>
-                            </goals>
-                            <configuration>
-                                <url>https://raw.githubusercontent.com/vaadin/flow/master/drivers.xml</url>
-                                <outputFileName>drivers.xml</outputFileName>
-                                <outputDirectory>${project.build.directory}</outputDirectory>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
                     <version>${jetty.version}</version>
@@ -282,7 +262,6 @@
                         <reuseForks>true</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
-                            <useLocalWebDriver>${useLocalWebDriver}</useLocalWebDriver>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
                             <com.vaadin.testbench.Parameters.testsInParallel>${com.vaadin.testbench.Parameters.testsInParallel}</com.vaadin.testbench.Parameters.testsInParallel>
@@ -352,20 +331,40 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>com.lazerycode.selenium</groupId>
-                    <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-                    <version>${driver.binary.downloader.maven.plugin.version}</version>
-                    <configuration>
-                        <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
-                        <rootStandaloneServerDirectory>${project.build.directory}/driver</rootStandaloneServerDirectory>
-                        <downloadedZipFileDirectory>${project.build.directory}/driver_zips</downloadedZipFileDirectory>
-                        <customRepositoryMap>${project.build.directory}/drivers.xml</customRepositoryMap>
-                    </configuration>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.0.0</version>
                     <executions>
                         <execution>
-                            <phase>pre-integration-test</phase>
+                            <id>extract-component-name</id>
                             <goals>
-                                <goal>selenium</goal>
+                                <goal>regex-property</goal>
+                            </goals>
+                            <configuration>
+                                <name>component.name</name>
+                                <regex>vaadin-(\w+(-\w+)*)-flow</regex>
+                                <value>${project.artifactId}</value>
+                                <replacement>$1</replacement>
+                                <failIfNoMatch>false</failIfNoMatch>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>extract-component-package-name</id>
+                            <goals>
+                                <goal>regex-property</goal>
+                            </goals>
+                            <configuration>
+                                <name>component.package.name</name>
+                                <regex>-</regex>
+                                <value>${component.name}</value>
+                                <replacement/>
+                                <failIfNoMatch>false</failIfNoMatch>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>parse-version</id>
+                            <goals>
+                                <goal>parse-version</goal>
                             </goals>
                         </execution>
                     </executions>
