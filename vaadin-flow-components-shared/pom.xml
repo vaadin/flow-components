@@ -39,7 +39,7 @@
       <groupId>io.github.bonigarcia</groupId>
       <artifactId>webdrivermanager</artifactId>
       <version>LATEST</version>
-      <scope>test</scope>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
