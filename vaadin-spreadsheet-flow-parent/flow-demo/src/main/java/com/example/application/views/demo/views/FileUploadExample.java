@@ -2,6 +2,9 @@ package com.example.application.views.demo.views;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -30,34 +33,28 @@ import com.vaadin.flow.shared.Registration;
 
 public class FileUploadExample extends Div implements ComponentEventListener, Receiver {
 
-    private VerticalLayout layout;
     private Upload upload;
-    private ProgressBar progressBar;
     private final long maxSize = 1000000;
     private Div spreadsheetPanel;
     private ByteArrayOutputStream baos = null;
 
 
     public FileUploadExample() {
-        layout = new VerticalLayout();
-        layout.setSizeFull();
-        layout.setSpacing(false);
-        layout.setMargin(false);
+        setSizeFull();
+        addClassName("formattingexample");
 
         initSpreadsheetPanel();
-        layout.add(createUploadLayout());
-        layout.add(spreadsheetPanel);
+        add(createUploadLayout());
+        add(spreadsheetPanel);
         //layout.setExpandRatio(spreadsheetPanel, 1);
     }
 
     private HorizontalLayout createUploadLayout() {
         initUpload();
-        initProgressBar();
         HorizontalLayout header = new HorizontalLayout();
         header.setSpacing(false);
-        header.setWidth("100%");
         header.setMargin(true);
-        header.add(upload, progressBar);
+        header.add(upload);
         //header.setComponentAlignment(progressBar, Alignment.MIDDLE_CENTER);
         //header.setExpandRatio(progressBar, 1);
         return header;
@@ -69,12 +66,6 @@ public class FileUploadExample extends Div implements ComponentEventListener, Re
         upload.addProgressListener(this);
         upload.addFinishedListener(this);
         upload.addSucceededListener(this);
-    }
-
-    private void initProgressBar() {
-        progressBar = new ProgressBar();
-        progressBar.setWidth("80%");
-        progressBar.setVisible(false);
     }
 
     private void initSpreadsheetPanel() {
@@ -91,8 +82,6 @@ public class FileUploadExample extends Div implements ComponentEventListener, Re
             cell.setCellStyle(backgroundColorStyle);
         }
 
-        spreadsheet.refreshCells(cell);
-
         spreadsheetPanel = new Div();
         spreadsheetPanel.setSizeFull();
         spreadsheetPanel.add(spreadsheet);
@@ -102,8 +91,6 @@ public class FileUploadExample extends Div implements ComponentEventListener, Re
     @Override
     public void onComponentEvent(ComponentEvent componentEvent) {
         if (componentEvent instanceof StartedEvent) {
-            progressBar.setVisible(true);
-            //layout.getUI().setPollInterval(100);
         } else if (componentEvent instanceof ProgressUpdateEvent) {
             long readBytes = ((ProgressUpdateEvent) componentEvent).getReadBytes();
             long contentLength = ((ProgressUpdateEvent) componentEvent).getContentLength();
@@ -112,10 +99,6 @@ public class FileUploadExample extends Div implements ComponentEventListener, Re
                 Notification.show("File is to big. Maximum filesize: "
                         + maxSize / 1000 + "KB");
             }
-            progressBar.setValue(new Float(readBytes / (float) contentLength));
-        } else if (componentEvent instanceof FinishedEvent) {
-            progressBar.setVisible(false);
-            //layout.getUI().setPollInterval(-1);
         } else if (componentEvent instanceof SucceededEvent) {
             ByteArrayInputStream bais = null;
             try {
@@ -129,11 +112,12 @@ public class FileUploadExample extends Div implements ComponentEventListener, Re
                 baos = null;
                 IOUtils.closeQuietly(bais);
             }
+        } else if (componentEvent instanceof FinishedEvent) {
         }
     }
 
     @Override
-    public OutputStream receiveUpload(String s, String s1) {
-        return null;
+    public OutputStream receiveUpload(final String filename, String mimeType) {
+        return baos = new ByteArrayOutputStream();
     }
 }

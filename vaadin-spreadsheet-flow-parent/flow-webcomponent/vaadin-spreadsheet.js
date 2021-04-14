@@ -61,6 +61,9 @@ export class VaadinSpreadsheet extends LitElement {
 
       class: {type: String},
 
+      resources: {type: String},
+
+      popupbuttons: {type: String},
 
       rowBufferSize: {type: Number},
 
@@ -249,7 +252,7 @@ export class VaadinSpreadsheet extends LitElement {
     let propNames = [];
     let dirty = false;
     _changedProperties.forEach((oldValue, name) => {
-      console.log(`${name} changed from oldValue: ${oldValue} to:`, this[name]);
+      //console.log(`${name} changed from oldValue: ${oldValue} to:`, this[name]);
       //this.setAttribute(propName, oldValue, this[propName]);
       let newVal = this[name];
 
@@ -363,6 +366,10 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setId(newVal);
       } else if ('class' == name) {
         this.api.setClass(newVal);
+      } else if ('resources' == name) {
+        this.api.setResources(this, newVal);
+      } else if ('popupbuttons' == name) {
+        this.api.setPopups(newVal);
       } else {
         console.log('unsupported property ' + name)
       }
@@ -472,11 +479,11 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   cellsUpdated(updatedCellData) { //ArrayList<CellData> updatedCellData) {
-    this.api.cellsUpdated(updatedCellData);
+    if (this.api) this.api.cellsUpdated(updatedCellData);
   }
 
   refreshCellStyles() {
-    this.api.refreshCellStyles();
+    if (this.api) this.api.refreshCellStyles();
   }
 
   editCellComment(col, row) { // int col, int row

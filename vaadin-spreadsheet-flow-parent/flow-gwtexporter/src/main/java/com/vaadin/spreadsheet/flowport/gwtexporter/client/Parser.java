@@ -4,15 +4,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.vaadin.addon.spreadsheet.client.CellData;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 import com.vaadin.addon.spreadsheet.client.OverlayInfo;
+import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.addon.spreadsheet.shared.GroupingData;
 
 public class Parser {
+
+    public static Map<String, PopupButtonState> parseListOfPopupButtons(String raw) {
+        if ("null".equals(raw)) return null;
+        Map<String, PopupButtonState> l = new HashMap<>();
+        List<String> tokens = parse(raw);
+        for (String token : tokens) {
+            String[] ts = token.split("#");
+            PopupButtonState s;
+            l.put(ts[0], s = new PopupButtonState());
+            s.active = Boolean.parseBoolean(ts[1]);
+            s.col = Integer.parseInt(ts[2]);
+            s.row = Integer.parseInt(ts[3]);
+            s.active = Boolean.parseBoolean(ts[4]);
+            s.sheet = ts[5];
+            s.popupWidth = ts[6];
+            s.popupHeight = ts[7];
+        }
+        return l;
+    }
 
     public static List<GroupingData> parseListOfGroupingData(String raw) {
         if ("null".equals(raw)) return null;

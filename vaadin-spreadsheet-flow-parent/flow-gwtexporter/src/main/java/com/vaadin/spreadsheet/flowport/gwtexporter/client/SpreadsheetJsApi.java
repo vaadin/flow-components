@@ -14,9 +14,11 @@ import jsinterop.annotations.JsType;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
+import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
@@ -52,8 +54,9 @@ public class SpreadsheetJsApi {
 
     public SpreadsheetWidget spreadsheetWidget;
     protected SpreadsheetConnector spreadsheetConnector;
-    protected PopupButtonConnector popupButtonConnector;
-    protected PopupButtonWidget popupButtonWidget;
+    Map<String, PopupButtonWidget> popupButtonWidgets = new HashMap<>();
+    Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
+    Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
     protected ApplicationConnection applicationConnection;
     private String originalStyles;
 
@@ -64,6 +67,7 @@ public class SpreadsheetJsApi {
     native void debugger() /*-{
       debugger;
   }-*/;
+
 
     /**
      * receives the element where the widget mut be embedded into, and publishes
@@ -121,12 +125,7 @@ public class SpreadsheetJsApi {
         // esto es para evitar el bundle
         TypeDataStore.get().setClass(spreadsheetConnector.getClass().getName(), SpreadsheetConnector.class);
 
-        popupButtonConnector = new PopupButtonConnector();
-        popupButtonWidget = popupButtonConnector.getWidget();
-
-
         RootPanel.getForElement(element).add(spreadsheetWidget);
-        consoleLog("widget appended !");
     }
 
     public void disconnected() {
@@ -243,7 +242,6 @@ public class SpreadsheetJsApi {
     public void relayout() {
         Scheduler.get().scheduleDeferred(() -> {
             //spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
-            consoleLog("deferred relayout!");
             spreadsheetWidget.relayoutSheet();
         });
     }
@@ -304,272 +302,218 @@ public class SpreadsheetJsApi {
 
 
     public void setRowBufferSize(int rowBufferSize) {
-        consoleLog("setRowBufferSize(" + rowBufferSize + ")");
         getState().rowBufferSize = rowBufferSize;
     }
 
     public void setColumnBufferSize(int columnBufferSize) {
-        consoleLog("setColumnBufferSize(" + columnBufferSize + ")");
         getState().columnBufferSize = columnBufferSize;
     }
 
     public void setRows(int rows) {
-        consoleLog("setRows(" + rows + ")");
         getState().rows = rows;
     }
 
     public void setCols(int cols) {
-        consoleLog("setCols(" + cols + ")");
         getState().cols = cols;
     }
 
     public void setColGroupingData(String colGroupingData) {
-        consoleLog("setColGroupingData(" + colGroupingData + ")");
         getState().colGroupingData = Parser.parseListOfGroupingData(colGroupingData);
     }
 
     public void setRowGroupingData(String rowGroupingData) {
-        consoleLog("setRowGroupingData(" + rowGroupingData + ")");
         getState().rowGroupingData = Parser.parseListOfGroupingData(rowGroupingData);
     }
 
     public void setColGroupingMax(int colGroupingMax) {
-        consoleLog("setColGroupingMax(" + colGroupingMax + ")");
         getState().colGroupingMax = colGroupingMax;
     }
 
     public void setRowGroupingMax(int rowGroupingMax) {
-        consoleLog("setRowGroupingMax(" + rowGroupingMax + ")");
         getState().rowGroupingMax = rowGroupingMax;
     }
 
     public void setColGroupingInversed(boolean colGroupingInversed) {
-        consoleLog("setColGroupingInversed(" + colGroupingInversed + ")");
         getState().colGroupingInversed = colGroupingInversed;
     }
 
     public void setRowGroupingInversed(boolean rowGroupingInversed) {
-        consoleLog("setRowGroupingInversed(" + rowGroupingInversed + ")");
         getState().rowGroupingInversed = rowGroupingInversed;
     }
 
     public void setDefRowH(float defRowH) {
-        consoleLog("setDefRowH(" + defRowH + ")");
         getState().defRowH = defRowH;
     }
 
     public void setDefColW(int defColW) {
-        consoleLog("setDefColW(" + defColW + ")");
         getState().defColW = defColW;
     }
 
     public void setRowH(String rowH) {
-        consoleLog("setRowH(" + rowH + ")");
         getState().rowH = Parser.parseArrayFloat(rowH);
     }
 
     public void setColW(String colW) {
-        consoleLog("setColW(" + colW + ")");
         getState().colW = Parser.parseArrayInt(colW);
     }
 
     public void setReload(boolean reload) {
-        consoleLog("setReload(" + reload + ")");
         getState().reload = true;
     }
 
     public void setSheetIndex(int sheetIndex) {
-        consoleLog("setSheetIndex(" + sheetIndex + ")");
         getState().sheetIndex = sheetIndex;
     }
 
     public void setSheetNames(String sheetNames) {
-        consoleLog("setSheetNames(" + sheetNames + ")");
         getState().sheetNames = Parser.parseArrayOfStrings(sheetNames);
     }
 
     public void setCellStyleToCSSStyle(String cellStyleToCSSStyle) {
-        consoleLog("setCellStyleToCSSStyle(" + cellStyleToCSSStyle + ")");
         getState().cellStyleToCSSStyle = Parser.parseMapIntegerString(cellStyleToCSSStyle);
     }
 
     public void setRowIndexToStyleIndex(String rowIndexToStyleIndex) {
-        consoleLog("setRowIndexToStyleIndex(" + rowIndexToStyleIndex + ")");
         getState().rowIndexToStyleIndex = Parser.parseMapIntegerInteger(rowIndexToStyleIndex);
     }
 
     public void setColumnIndexToStyleIndex(String columnIndexToStyleIndex) {
-        consoleLog("setColumnIndexToStyleIndex(" + columnIndexToStyleIndex + ")");
         getState().columnIndexToStyleIndex = Parser.parseMapIntegerInteger(columnIndexToStyleIndex);
     }
 
     public void setLockedColumnIndexes(String lockedColumnIndexes) {
-        consoleLog("setLockedColumnIndexes(" + lockedColumnIndexes + ")");
         getState().lockedColumnIndexes = Parser.parseSetInteger(lockedColumnIndexes);
     }
 
     public void setLockedRowIndexes(String lockedRowIndexes) {
-        consoleLog("setLockedRowIndexes(" + lockedRowIndexes + ")");
         getState().lockedRowIndexes = Parser.parseSetInteger(lockedRowIndexes);
     }
 
     public void setShiftedCellBorderStyles(String shiftedCellBorderStyles) {
-        consoleLog("setShiftedCellBorderStyles(" + shiftedCellBorderStyles + ")");
         getState().shiftedCellBorderStyles = Parser.parseArraylistString(shiftedCellBorderStyles);
     }
 
     public void setConditionalFormattingStyles(String conditionalFormattingStyles) {
-        consoleLog("setConditionalFormattingStyles(" + conditionalFormattingStyles + ")");
         getState().conditionalFormattingStyles = Parser.parseMapIntegerString(conditionalFormattingStyles);
     }
 
     public void setHiddenColumnIndexes(String hiddenColumnIndexes) {
-        consoleLog("setHiddenColumnIndexes(" + hiddenColumnIndexes + ")");
         getState().hiddenColumnIndexes = Parser.parseArraylistInteger(hiddenColumnIndexes);
     }
 
     public void setHiddenRowIndexes(String hiddenRowIndexes) {
-        consoleLog("setHiddenRowIndexes(" + hiddenRowIndexes + ")");
         getState().hiddenRowIndexes = Parser.parseArraylistInteger(hiddenRowIndexes);
     }
 
     public void setVerticalScrollPositions(String verticalScrollPositions) {
-        consoleLog("setVerticalScrollPositions(" + verticalScrollPositions + ")");
         getState().verticalScrollPositions = Parser.parseArrayInt(verticalScrollPositions);
     }
 
     public void setHorizontalScrollPositions(String horizontalScrollPositions) {
-        consoleLog("setHorizontalScrollPositions(" + horizontalScrollPositions + ")");
         getState().horizontalScrollPositions = Parser.parseArrayInt(horizontalScrollPositions);
     }
 
     public void setSheetProtected(boolean sheetProtected) {
-        consoleLog("setSheetProtected(" + sheetProtected + ")");
         getState().sheetProtected = sheetProtected;
     }
 
     public void setWorkbookProtected(boolean workbookProtected) {
-        consoleLog("setWorkbookProtected(" + workbookProtected + ")");
         getState().workbookProtected = workbookProtected;
     }
 
     public void setCellKeysToEditorIdMap(String cellKeysToEditorIdMap) {
-        consoleLog("setCellKeysToEditorIdMap(" + cellKeysToEditorIdMap + ")");
         getState().cellKeysToEditorIdMap = Parser.parseMapStringString(cellKeysToEditorIdMap);
     }
 
     public void setComponentIDtoCellKeysMap(String componentIDtoCellKeysMap) {
-        consoleLog("setComponentIDtoCellKeysMap(" + componentIDtoCellKeysMap + ")");
         getState().componentIDtoCellKeysMap = Parser.parseMapStringString(componentIDtoCellKeysMap);
     }
 
     public void setHyperlinksTooltips(String hyperlinksTooltips) {
-        consoleLog("setHyperlinksTooltips(" + hyperlinksTooltips + ")");
         getState().hyperlinksTooltips = Parser.parseMapStringString(hyperlinksTooltips);
     }
 
     public void setCellComments(String cellComments) {
-        consoleLog("setCellComments(" + cellComments + ")");
         getState().cellComments = Parser.parseMapStringString(cellComments);
     }
 
     public void setCellCommentAuthors(String cellCommentAuthors) {
-        consoleLog("setCellCommentAuthors(" + cellCommentAuthors + ")");
         getState().cellCommentAuthors = Parser.parseMapStringString(cellCommentAuthors);
     }
 
     public void setVisibleCellComments(String visibleCellComments) {
-        consoleLog("setVisibleCellComments(" + visibleCellComments + ")");
         getState().visibleCellComments = Parser.parseArraylistString(visibleCellComments);
     }
 
     public void setInvalidFormulaCells(String invalidFormulaCells) {
-        consoleLog("setInvalidFormulaCells(" + invalidFormulaCells + ")");
         getState().invalidFormulaCells = Parser.parseSetString(invalidFormulaCells);
     }
 
     public void setHasActions(boolean hasActions) {
-        consoleLog("setHasActions(" + hasActions + ")");
         getState().hasActions = hasActions;
     }
 
     public void setOverlays(String overlays) {
-        consoleLog("setOverlays(" + overlays + ")");
         getState().overlays = Parser.parseMapStringOverlayInfo(overlays);
     }
 
     public void setMergedRegions(String mergedRegions) {
-        consoleLog("setMergedRegions(" + mergedRegions + ")");
         getState().mergedRegions = Parser.parseArrayMergedRegion(mergedRegions);
     }
 
     public void setDisplayGridlines(boolean displayGridlines) {
-        consoleLog("setDisplayGridlines(" + displayGridlines + ")");
         getState().displayGridlines = displayGridlines;
     }
 
     public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        consoleLog("setDisplayRowColHeadings(" + displayRowColHeadings + ")");
         getState().displayRowColHeadings = displayRowColHeadings;
     }
 
     public void setVerticalSplitPosition(int verticalSplitPosition) {
-        consoleLog("setVerticalSplitPosition(" + verticalSplitPosition + ")");
         getState().verticalSplitPosition = verticalSplitPosition;
     }
 
     public void setHorizontalSplitPosition(int horizontalSplitPosition) {
-        consoleLog("setHorizontalSplitPosition(" + horizontalSplitPosition + ")");
         getState().horizontalSplitPosition = horizontalSplitPosition;
     }
 
     public void setInfoLabelValue(String infoLabelValue) {
-        consoleLog("setInfoLabelValue(" + infoLabelValue + ")");
         getState().infoLabelValue = infoLabelValue;
     }
 
     public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
-        consoleLog("setWorkbookChangeToggle(" + workbookChangeToggle + ")");
         getState().workbookChangeToggle = workbookChangeToggle;
     }
 
     public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
-        consoleLog("setInvalidFormulaErrorMessage(" + invalidFormulaErrorMessage + ")");
         getState().invalidFormulaErrorMessage = invalidFormulaErrorMessage;
     }
 
     public void setLockFormatColumns(boolean lockFormatColumns) {
-        consoleLog("setLockFormatColumns(" + lockFormatColumns + ")");
         getState().lockFormatColumns = lockFormatColumns;
     }
 
     public void setLockFormatRows(boolean lockFormatRows) {
-        consoleLog("setLockFormatRows(" + lockFormatRows + ")");
         getState().lockFormatRows = lockFormatRows;
     }
 
     public void setNamedRanges(String namedRanges) {
-        consoleLog("setNamedRanges(" + namedRanges + ")");
         getState().namedRanges = Parser.parseArraylistString(namedRanges);
     }
 
     public void setHeight(String height) {
-        consoleLog("setHeight(" + height + ")");
         getState().height = height;
     }
 
     public void setWidth(String width) {
-        consoleLog("setWidth(" + width + ")");
         getState().width = width;
     }
 
     public void setId(String id) {
-        consoleLog("setId(" + id + ")");
         getState().id = id;
     }
 
     public void setClass(String classNames) {
-        consoleLog("setClass(" + classNames + ")");
         if (originalStyles  == null) {
             originalStyles = spreadsheetWidget.getStyleName();
         }
@@ -584,8 +528,36 @@ public class SpreadsheetJsApi {
         }
     }
 
+    public void setPopups(String raw) {
+        Map<String, PopupButtonState> l = Parser.parseListOfPopupButtons(raw);
+        l.keySet().forEach(k -> {
+            if (popupButtonWidgets.containsKey(k)) {
+                consoleLog("popup already exists");
+            } else {
+                consoleLog("adding popup widget");
+                PopupButtonWidget w;
+                popupButtonWidgets.put(k, w = new PopupButtonWidget());
+                PopupButtonConnector c;
+                popupButtonConnectors.put(k, c = new PopupButtonConnector());
+                PopupButtonState s;
+                popupButtonStates.put(k, s = l.get(k));
+                w.setCol(s.col);
+                w.setRow(s.row);
+                w.setPopupHeaderHidden(s.headerHidden);
+                w.setSheetWidget(spreadsheetWidget.getSheetWidget(), DivElement.as(spreadsheetWidget.getSheetWidget().getElement()));
+                w.setPopupWidth(s.popupWidth);
+                w.setPopupHeight(s.popupHeight);
+                spreadsheetWidget.addPopupButton(w);
+            }
+        });
+    }
+
+    public void setResources(Element element, String resources) {
+        ArrayList<String> l = Parser.parseArraylistString(resources);
+        l.forEach(k -> spreadsheetConnector.getConnection().setResource(k, element.getAttribute("resource-" + k)));
+    }
+
     public void notifyStateChanges(String[] propNames, boolean initial) {
-        consoleLog("notifyStateChanges(" + propNames + "," + initial + ")");
         JsonObject stateJson = Json.createObject();
         for (String propName : propNames) stateJson.put(propName, "");
         StateChangeEvent event = new StateChangeEvent(spreadsheetConnector, stateJson, initial);
@@ -598,62 +570,52 @@ public class SpreadsheetJsApi {
      */
 
     public void updateBottomRightCellValues(String cellData) {
-        consoleLog("updateBottomRightCellValues(" + cellData + ")");
         getClientRpcInstance().updateBottomRightCellValues(Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateTopLeftCellValues(String cellData) {
-        consoleLog("updateTopLeftCellValues(" + cellData + ")");
         getClientRpcInstance().updateTopLeftCellValues(Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateTopRightCellValues(String cellData) {
-        consoleLog("updateTopRightCellValues(" + cellData + ")");
         getClientRpcInstance().updateTopRightCellValues(Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateBottomLeftCellValues(String cellData) {
-        consoleLog("updateBottomLeftCellValues(" + cellData + ")");
         getClientRpcInstance().updateBottomLeftCellValues(Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateFormulaBar(String possibleName, int col, int row) {
-        consoleLog("updateFormulaBar(" + possibleName + "," + col + "," + row + ")");
         getClientRpcInstance().updateFormulaBar(possibleName, col, row);
     }
 
     public void invalidCellAddress() {
-        consoleLog("invalidCellAddress()");
         getClientRpcInstance().invalidCellAddress();
     }
 
     public void showSelectedCell(String name, int col, int row, String cellValue, boolean function, boolean locked, boolean initialSelection) {
-        consoleLog("showSelectedCell(" + name + "," + col + "," + row + "," + cellValue + "," + function + "," + locked + "," + initialSelection + ")");
         getClientRpcInstance().showSelectedCell(name, col, row, cellValue, function, locked, initialSelection);
     }
 
     public void showActions(String actionDetails) {
-        consoleLog("showActions(" + actionDetails + ")");
         getClientRpcInstance().showActions(Parser.parseArraylistSpreadsheetActionDetails(actionDetails));
     }
 
     public void setSelectedCellAndRange(String name, int col, int row, int c1, int c2, int r1, int r2, boolean scroll) {
-        consoleLog("setSelectedCellAndRange(" + name + "," + col + "," + row + "," + c1 + "," + c2 + "," + r1 + "," + r2 + "," + scroll + ")");
         getClientRpcInstance().setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
     }
 
     public void cellsUpdated(String updatedCellData) {
-        consoleLog("cellsUpdated(" + updatedCellData + ")");
         getClientRpcInstance().cellsUpdated(Parser.parseArraylistOfCellData(updatedCellData));
     }
 
     public void refreshCellStyles() {
-        consoleLog("refreshCellStyles()");
-        getClientRpcInstance().refreshCellStyles();
+        Scheduler.get().scheduleDeferred(() -> {
+            getClientRpcInstance().refreshCellStyles();
+        });
     }
 
     public void editCellComment(int col, int row) {
-        consoleLog("editCellComment(" + col + "," + row + ")");
         getClientRpcInstance().editCellComment(col, row);
     }
 
@@ -876,12 +838,10 @@ for(;;);[{"syncId": 2, "clientId": 2, "changes" : [], "state":{"1":{"reload":fal
 
     public void load() {
         spreadsheetWidget.load();
-        consoleLog("widget loaded !");
     }
 
     public void relayoutSheet() {
         spreadsheetWidget.relayoutSheet();
-        consoleLog("sheet relayouted !");
     }
 
     public void updateCellsAndRefreshCellStyles() {

@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.notification.Notification;
@@ -31,9 +32,10 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 
 @Route(value = "demo/:demoID", layout = MainView.class)
-@JavaScript("prettify.js")
+@NpmPackage(value = "code-prettify", version = "0.1.0")
 public class DemoView extends VerticalLayout implements BeforeEnterObserver, HasDynamicTitle {
 
     private final Tab tabDemo;

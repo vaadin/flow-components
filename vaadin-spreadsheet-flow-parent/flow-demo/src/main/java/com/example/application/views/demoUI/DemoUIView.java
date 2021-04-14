@@ -68,10 +68,12 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.StreamResource;
 
 @CssImport("./views/demo/demo-view.css")
 @Route(value = "demoui", layout = MainView.class)
+@RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Demo")
 public class DemoUIView extends VerticalLayout implements Receiver {
 
@@ -358,7 +360,6 @@ public class DemoUIView extends VerticalLayout implements Receiver {
             File file = openTestSheetSelect.getValue();
             if (file != null ) {
                 loadFile(file);
-                Notification.show("Page.getCurrent().setUriFragment(\"file/\" + file.getName(), false);");
             }
         });
         updateButton.setId("update");
@@ -398,8 +399,6 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                         gridlines.setValue(spreadsheet.isGridlinesVisible());
                         rowColHeadings.setValue(spreadsheet
                                 .isRowColHeadingsVisible());
-
-                        Notification.show("Page.getCurrent().setUriFragment(null, false);");
                 });
     }
 

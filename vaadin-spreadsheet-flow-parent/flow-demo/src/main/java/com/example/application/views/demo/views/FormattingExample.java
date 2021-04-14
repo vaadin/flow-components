@@ -1,5 +1,10 @@
 package com.example.application.views.demo.views;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.github.juchar.colorpicker.ColorPickerField;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -9,16 +14,156 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class FormattingExample extends Div implements Spreadsheet.SelectionChangeListener {
 
     private final Spreadsheet spreadsheet;
+    private ColorPickerField backgroundColor;
+    private ColorPickerField fontColor;
 
     public FormattingExample() {
         setSizeFull();
-        add(spreadsheet = createSpreadsheet());
+        addClassName("formattingexample");
+        add(createStyleToolbar());
+        Div spreadsheetContainer = new Div();
+        spreadsheetContainer.setSizeFull();
+        spreadsheetContainer.add(spreadsheet = createSpreadsheet());
+        add(spreadsheetContainer);
+    }
+
+    private HorizontalLayout createStyleToolbar() {
+        HorizontalLayout stylingToolbar = new HorizontalLayout();
+        //stylingToolbar.setSpacing(false);
+        Button boldButton = new Button(new Icon(VaadinIcon.BOLD));
+        boldButton.addClickListener(event -> updateSelectedCellsBold());
+        backgroundColor = new ColorPickerField("Background Color");
+        backgroundColor.addValueChangeListener(e->
+                updateSelectedCellsBackgroundColor(e.getValue())
+        );
+        fontColor = new ColorPickerField("Font Color");
+        fontColor.addValueChangeListener(event->{
+            updateSelectedCellsFontColor(event.getValue());
+        });
+        stylingToolbar.add(boldButton, backgroundColor, fontColor);
+        stylingToolbar.setVerticalComponentAlignment(FlexComponent.Alignment.END, boldButton);
+        return stylingToolbar;
+    }
+
+    private void updateSelectedCellsBold() {
+        if (spreadsheet != null) {
+            List<Cell> cellsToRefresh = new ArrayList<>();
+            for (CellReference cellRef : spreadsheet
+                    .getSelectedCellReferences()) {
+                // Obtain Cell using CellReference
+                Cell cell = getOrCreateCell(cellRef);
+                // Clone Cell CellStyle
+                CellStyle style = cloneStyle(cell);
+                // Clone CellStyle Font
+                Font font = cloneFont(style);
+                // Toggle current bold state
+                font.setBold(!font.getBold());
+                style.setFont(font);
+                cell.setCellStyle(style);
+
+                cellsToRefresh.add(cell);
+            }
+            // Update all edited cells
+            spreadsheet.refreshCells(cellsToRefresh);
+        }
+    }
+
+    private void updateSelectedCellsBackgroundColor(Color newColor) {
+        if (spreadsheet != null && newColor != null) {
+            List<Cell> cellsToRefresh = new ArrayList<>();
+            for (CellReference cellRef : spreadsheet
+                    .getSelectedCellReferences()) {
+                // Obtain Cell using CellReference
+                Cell cell = getOrCreateCell(cellRef);
+                // Clone Cell CellStyle
+                // This cast an only be done when using .xlsx files
+                XSSFCellStyle style = (XSSFCellStyle) cloneStyle(cell);
+                XSSFColor color = new XSSFColor(newColor);
+                // Set new color value
+                style.setFillForegroundColor(color);
+                cell.setCellStyle(style);
+
+                cellsToRefresh.add(cell);
+            }
+            // Update all edited cells
+            spreadsheet.refreshCells(cellsToRefresh);
+        }
+    }
+
+    private void updateSelectedCellsFontColor(Color newColor) {
+        if (spreadsheet != null && newColor != null) {
+            List<Cell> cellsToRefresh = new ArrayList<>();
+            for (CellReference cellRef : spreadsheet
+                    .getSelectedCellReferences()) {
+                Cell cell = getOrCreateCell(cellRef);
+                // Workbook workbook = spreadsheet.getWorkbook();
+                XSSFCellStyle style = (XSSFCellStyle) cloneStyle(cell);
+                XSSFColor color = new XSSFColor(newColor);
+                XSSFFont font = (XSSFFont) cloneFont(style);
+                font.setColor(color);
+                style.setFont(font);
+                cell.setCellStyle(style);
+                cellsToRefresh.add(cell);
+            }
+            // Update all edited cells
+            spreadsheet.refreshCells(cellsToRefresh);
+        }
+    }
+
+    private Color convertColor(XSSFColor foregroundColor) {
+        byte[] argb = foregroundColor.getARGB();
+        return new Color(byteToInt(argb[1]), byteToInt(argb[2]),
+                byteToInt(argb[3]), byteToInt(argb[0]));
+    }
+
+    private int byteToInt(byte byteValue) {
+        return byteValue & 0xFF;
+    }
+
+    private Font cloneFont(CellStyle cellstyle) {
+        Font newFont = spreadsheet.getWorkbook().createFont();
+        Font originalFont = spreadsheet.getWorkbook()
+                .getFontAt(cellstyle.getFontIndex());
+        if (originalFont != null) {
+            newFont.setBold(originalFont.getBold());
+            newFont.setItalic(originalFont.getItalic());
+            newFont.setFontHeight(originalFont.getFontHeight());
+            newFont.setUnderline(originalFont.getUnderline());
+            newFont.setStrikeout(originalFont.getStrikeout());
+            // This cast an only be done when using .xlsx files
+            XSSFFont originalXFont = (XSSFFont) originalFont;
+            XSSFFont newXFont = (XSSFFont) newFont;
+            newXFont.setColor(originalXFont.getXSSFColor());
+        }
+        return newFont;
+    }
+
+
+    private Cell getOrCreateCell(CellReference cellRef) {
+        Cell cell = spreadsheet.getCell(cellRef.getRow(), cellRef.getCol());
+        if (cell == null) {
+            cell = spreadsheet.createCell(cellRef.getRow(), cellRef.getCol(),
+                    "");
+        }
+        return cell;
+    }
+
+    private CellStyle cloneStyle(Cell cell) {
+        CellStyle newStyle = spreadsheet.getWorkbook().createCellStyle();
+        newStyle.cloneStyleFrom(cell.getCellStyle());
+        return newStyle;
     }
 
     private Spreadsheet createSpreadsheet() {
@@ -62,6 +207,7 @@ public class FormattingExample extends Div implements Spreadsheet.SelectionChang
 
         spreadsheet.refreshCells(fontExampleCell, backgroundExampleCell,
                 fontColorExampleCell);
+
         return spreadsheet;
     }
 

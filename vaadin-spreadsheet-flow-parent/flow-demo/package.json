@@ -51,7 +51,10 @@
     "lit-element": "2.3.1",
     "open": "^7.2.1",
     "spreadsheet-poc-lit-element": "^0.0.11",
-    "spreadsheet-lit-element": "^0.0.106"
+    "spreadsheet-lit-element": "^0.0.116",
+    "code-prettify": "0.1.0",
+    "@appreciated/color-picker": "2.0.0-beta.4",
+    "@appreciated/color-picker-field": "2.0.0-beta.5"
   },
   "devDependencies": {
     "@types/validator": "13.1.0",
@@ -131,7 +134,10 @@
       "lit-element": "2.3.1",
       "open": "^7.2.1",
       "spreadsheet-poc-lit-element": "^0.0.11",
-      "spreadsheet-lit-element": "^0.0.106"
+      "spreadsheet-lit-element": "^0.0.116",
+      "code-prettify": "0.1.0",
+      "@appreciated/color-picker": "2.0.0-beta.4",
+      "@appreciated/color-picker-field": "2.0.0-beta.5"
     },
     "devDependencies": {
       "@types/validator": "13.1.0",
@@ -161,6 +167,6 @@
       "workbox-precaching": "5.1.4",
       "workbox-webpack-plugin": "5.1.4"
     },
-    "hash": "f6f920cc0214ab341bf69ea86b8ac08c297985febd2d18d65efc192833b3dc7f"
+    "hash": "4fddb8a2dd9cb03482e20b2c73435f4919b926bf13dcb940cc5110f2c9bbc0f8"
   }
 }

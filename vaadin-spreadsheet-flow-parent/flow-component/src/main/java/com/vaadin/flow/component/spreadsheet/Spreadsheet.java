@@ -104,6 +104,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.component.spreadsheet.shared.SpreadsheetState;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.shared.URLReference;
+import com.vaadin.flow.server.StreamResource;
 
 /**
  * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
@@ -114,7 +115,7 @@ import com.vaadin.flow.component.spreadsheet.shared.URLReference;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.106")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.116")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
@@ -180,7 +181,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
 
     // from SaredState
 
-    private Map<String, URLReference> resources = new HashMap<>();
+    // private Map<String, URLReference> resources = new HashMap<>();
+    private Map<String, String> resources = new HashMap<>();
 
     private boolean enabled = true;
 
@@ -357,7 +359,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         return captionAsHtml;
     }
 
-    public Map<String, URLReference> getResources() {
+    public Map<String, String> getResources() {
         return resources;
     }
 
@@ -3645,7 +3647,20 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * Provides package visibility.
      */
     //@Override
-    protected void setResource(String key, Icon resource) {
+    protected void setResource(String key, StreamResource resource) {
+        //todo: ver que hacemos con esto
+        //super.setResource(key, resource);
+        if (resource == null) {
+            resources.remove(key);
+            getElement().removeAttribute("resource-" + key);
+        } else {
+            resources.put(key, resource.toString());
+            getElement().setProperty("resources", Serializer.serialize(new ArrayList<>(resources.keySet())));
+            getElement().setAttribute("resource-" + key, resource);
+        }
+    }
+
+    protected void setResource(String key, Icon icon) {
         //todo: ver que hacemos con esto
         //super.setResource(key, resource);
     }
@@ -4279,8 +4294,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         }
 
         if (overlay.getId() != null && overlay.getResource() != null) {
-            //todo: resolver esto
-            setResource(overlay.getId(), new Icon(VaadinIcon.ABACUS)); //overlay.getResource());
+            setResource(overlay.getId(), overlay.getResource());
         }
 
         if (overlay.getId() != null) {
@@ -4308,7 +4322,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 _overlays.remove(overlay.getId());
                 setOverlays(_overlays);
             }
-            setResource(overlay.getId(), null);
+            setResource(overlay.getId(), (StreamResource) null);
         }
 
         if (overlay.getComponent(false) != null) {
@@ -4738,11 +4752,19 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         unRegisterCustomComponent(button);
     }
 
+    private void registerCustomComponent(PopupButton component) {
+        getElement().setAttribute("popupbuttons", Serializer.serialize(attachedPopupButtons));
+    }
+
     private void registerCustomComponent(Component component) {
         if (!equals(component.getParent())) {
-            //todo: se puede eliminar esto?
+            //todo: se puede eliminar esto? en v8, setparent provoca que se añada el componente en la jerarquía
             //component.setParent(this);
         }
+    }
+
+    private void unRegisterCustomComponent(PopupButton component) {
+        getElement().setAttribute("popupbuttons", Serializer.serialize(attachedPopupButtons));
     }
 
     private void unRegisterCustomComponent(Component component) {

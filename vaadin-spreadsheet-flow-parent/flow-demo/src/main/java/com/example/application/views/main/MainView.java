@@ -23,8 +23,6 @@ import com.vaadin.flow.router.PageTitle;
 
 import com.example.application.views.demo.DemoView;
 import com.example.application.views.demoUI.DemoUIView;
-import com.example.application.views.helloworld.HelloWorldView;
-import com.example.application.views.about.AboutView;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -82,31 +80,40 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("Hello World", HelloWorldView.class), createTab("About", AboutView.class), createTab("DemoUI", DemoUIView.class)
-                , createTab("Basic functionality", DemoView.class, "basic")
-                , createTab("Collaborative features", DemoView.class, "collaborative")
-                , createTab("Formatting", DemoView.class, "formatting")
-                , createTab("Grouping", DemoView.class, "grouping")
-                , createTab("Report mode", DemoView.class, "reportMode")
-                , createTab("Simple invoice", DemoView.class, "simpleInvoice")
-                , createTab("Upload Excel files", DemoView.class, "upload")
-                , createTab("Use inline components", DemoView.class, "inlineComponents")
-                , createTab("Data binding", DemoView.class, "dataBinding")
-                , createTab("Embedded charts", DemoView.class, "embeddedCharts")
+        return new Tab[]{createTab("DemoUI", DemoUIView.class, "Multiple tests")
+                , createTab("Basic functionality", DemoView.class, "basic", "Edit imported Excel file with "
+                        + "<br>formatting, basic formulas, and a <br>chart. "
+                        + "Updates dynamically when <br> values are edited.")
+                , createTab("Collaborative features", DemoView.class, "collaborative", "Freeze panes, protected cells <br> and add comments")
+                , createTab("Formatting", DemoView.class, "formatting", "Style your spreadsheet")
+                , createTab("Grouping", DemoView.class, "grouping", "Use the Excel feature for <br> grouping rows and colums")
+                , createTab("Report mode", DemoView.class, "reportMode", "Use the read only mode <br> of spreadsheet")
+                , createTab("Simple invoice", DemoView.class, "simpleInvoice", "Use the spreadsheet for invoices")
+                , createTab("Upload Excel files", DemoView.class, "upload", "Upload a .xlsx or .xls file")
+                , createTab("Use inline components", DemoView.class, "inlineComponents", "Use Vaadin components within <br> a spreadsheet", false)
+                , createTab("Data binding", DemoView.class, "dataBinding", "Display spreadsheet data <br> using Vaadin charts", false)
+                , createTab("Embedded charts", DemoView.class, "embeddedCharts", "Display charts from an Excel file <br> in the spreadsheet", false)
         };
     }
 
-    private static Tab createTab(String text, Class<? extends Component> navigationTarget) {
+    private static Tab createTab(String text, Class<? extends Component> navigationTarget, String description) {
         final Tab tab = new Tab();
         tab.add(new RouterLink(text, navigationTarget));
         ComponentUtil.setData(tab, Class.class, navigationTarget);
+        tab.getElement().setAttribute("title", description);
         return tab;
     }
 
-    private static Tab createTab(String text, Class<? extends Component> navigationTarget, String parameter) {
+    private static Tab createTab(String text, Class<? extends Component> navigationTarget, String parameter, String description) {
+        return createTab(text, navigationTarget, parameter, description, true);
+    }
+
+    private static Tab createTab(String text, Class<? extends Component> navigationTarget, String parameter, String description, boolean enabled) {
         final Tab tab = new Tab();
         tab.add(new RouterLink(text, navigationTarget, new RouteParameters("demoID", parameter)));
         ComponentUtil.setData(tab, Class.class, navigationTarget);
+        tab.getElement().setAttribute("title", description);
+        tab.setEnabled(enabled);
         return tab;
     }
 

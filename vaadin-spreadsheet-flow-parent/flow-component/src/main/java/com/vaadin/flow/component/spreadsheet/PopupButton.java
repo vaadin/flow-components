@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.UUID;
 
 import org.apache.poi.ss.util.CellReference;
 
@@ -28,6 +29,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonClientRpc;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
@@ -54,6 +56,7 @@ import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
+@Tag("div")
 public class PopupButton extends Component implements HasComponents {
 
     private PopupButtonServerRpc rpc = new PopupButtonServerRpc() {
@@ -74,12 +77,13 @@ public class PopupButton extends Component implements HasComponents {
     private Component child;
 
     private boolean popupVisible = false;
-    private PopupButtonState state;
+    private PopupButtonState state = new PopupButtonState();
 
     /**
      * Constructs a new PopupButton.
      */
     public PopupButton() {
+        setId(UUID.randomUUID().toString());
         registerRpc(rpc);
     }
 

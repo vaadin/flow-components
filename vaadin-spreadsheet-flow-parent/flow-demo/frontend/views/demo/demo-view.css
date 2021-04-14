@@ -14,4 +14,8 @@
   flex-grow: 1;
 }
 
+.formattingexample {
+  display: flex;
+  flex-flow: column;
+}
 

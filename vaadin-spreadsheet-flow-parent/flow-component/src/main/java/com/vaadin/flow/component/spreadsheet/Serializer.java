@@ -55,6 +55,17 @@ public class Serializer {
                         return "" + escape(o.caption)
                                 + "#" + escape(o.key)
                                 + "#" + o.type;
+                    } else if (v instanceof PopupButton) {
+                        PopupButton b = (PopupButton) v;
+                        return "" + b.getId().orElse("xxxxxxxxxx")
+                                + "#" + b.getState().active
+                                + "#" + b.getState().col
+                                + "#" + b.getState().row
+                                + "#" + b.getState().headerHidden
+                                + "#" + b.getState().sheet
+                                + "#" + b.getState().popupWidth
+                                + "#" + b.getState().popupHeight
+                                ;
                     } else return v.toString();
                 }).collect(Collectors.joining(",")));
             } else if (value instanceof float[]) {
@@ -77,16 +88,6 @@ public class Serializer {
                     rs.append("@");
                     if (v instanceof OverlayInfo) {
                         OverlayInfo i = (OverlayInfo) v;
-                        /*
-                                    info.type = OverlayInfo.Type.valueOf(ts2[0]);
-            info.col = Integer.parseInt(ts2[1]);
-            info.row = Integer.parseInt(ts2[2]);
-            info.width = Float.parseFloat(ts2[3]);
-            info.height = Float.parseFloat(ts2[4]);
-            info.dy = Float.parseFloat(ts2[5]);
-            info.dx = Float.parseFloat(ts2[6]);
-
-                         */
                         String s = "" + i.type + ""
                                 + "#" + i.col
                                 + "#" + i.row

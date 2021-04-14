@@ -461,6 +461,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    @Override
+    public String getResourceUrl(String key) {
+        return getConnection().getResource(key);
+    }
+
     private void removeOldOverlays(Set<String> newOverlayKeys) {
         for (String key : currentOverlays) {
             if (!newOverlayKeys.contains(key)) {
