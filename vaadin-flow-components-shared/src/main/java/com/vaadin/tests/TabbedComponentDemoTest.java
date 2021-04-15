@@ -1,5 +1,6 @@
 package com.vaadin.tests;
 
+import java.io.File;
 import java.util.List;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -15,7 +16,10 @@ public abstract class TabbedComponentDemoTest
 
     @BeforeClass
     public static void setupClass() {
-        WebDriverManager.chromedriver().setup();
+        String driver = System.getProperty("webdriver.chrome.driver");
+        if (driver == null || !new File(driver).exists()) {
+            WebDriverManager.chromedriver().setup();
+        }
     }
 
     @Override

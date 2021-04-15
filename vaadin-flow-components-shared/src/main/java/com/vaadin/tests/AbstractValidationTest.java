@@ -1,6 +1,7 @@
 package com.vaadin.tests;
 
 import java.util.List;
+import java.util.List;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.AfterClass;
@@ -14,7 +15,10 @@ public abstract class AbstractValidationTest
 
     @BeforeClass
     public static void setupClass() {
-        WebDriverManager.chromedriver().setup();
+        String driver = System.getProperty("webdriver.chrome.driver");
+        if (driver == null || !new File(driver).exists()) {
+            WebDriverManager.chromedriver().setup();
+        }
     }
 
     @Override
