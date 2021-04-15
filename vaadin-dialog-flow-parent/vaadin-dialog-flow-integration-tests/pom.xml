@@ -85,6 +85,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-polymer-template</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>LATEST</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
