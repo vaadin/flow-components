@@ -33,10 +33,10 @@ public class ListBoxRetainValuePage extends VerticalLayout {
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems(listBoxItems);
         listBox.setValue("2");
-        NativeButton addButton = new NativeButton("add");
-        addButton.setId("button");
+        Button addButton = new Button("add");
+        addButton.setId("add-button");
         Div value = new Div();
-        value.setId("value");
+        value.setId("list-box-value");
         add(value, addButton, listBox);
         value.setText(listBox.getValue());
         addButton.addClickListener(event -> {
