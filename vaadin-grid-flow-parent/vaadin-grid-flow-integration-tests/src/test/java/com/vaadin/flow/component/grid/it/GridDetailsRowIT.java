@@ -80,7 +80,6 @@ public class GridDetailsRowIT extends AbstractComponentIT {
      * and the item updated then the detail should be updated
      */
     @Test
-
     public void gridUpdateItemUpdateDetails() {
         open();
         GridElement grid = $(GridElement.class).first();
@@ -119,14 +118,38 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         assertElementHasNoButton(detailsElement.get(1));
         // detail on row 3 contains a button
         assertElementHasButton(detailsElement.get(2),"Person 3 - updates 1");
+    }
 
+    @Test
+    public void gridRemoveDetailsOpenedAttributeWhenItemIsDeleted() {
+        open();
+        GridElement grid = $(GridElement.class).first();
 
+        // select row 3 only
+        clickElementWithJs(getRow(grid, 2).findElement(By.tagName("td")));
 
+        assertAmountOfOpenDetails(grid, 1);
+
+        // verify that one row is marked with `details-opened`
+        assertAmountOfRowsMarkedWithDetailsOpened(grid, 1);
+
+        // remove row 3
+        WebElement removeButton = findElement(By.id("remove-button"));
+        removeButton.click();
+
+        waitUntil(driver -> grid.getRowCount() == 3);
+
+        // none of the remaining rows should be marked with `details-opened`
+        assertAmountOfRowsMarkedWithDetailsOpened(grid, 0);
+    }
+
+    private List<WebElement> getRows(WebElement grid) {
+        return getInShadowRoot(grid, By.id("items"))
+                .findElements(By.cssSelector("tr"));
     }
 
     private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+        return getRows(grid).get(row);
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,
@@ -136,6 +159,14 @@ public class GridDetailsRowIT extends AbstractComponentIT {
                         == expectedAmount);
         Assert.assertEquals(expectedAmount,
                 grid.findElements(By.className("row-details")).size());
+    }
+
+    private void assertAmountOfRowsMarkedWithDetailsOpened(WebElement grid,
+            int expected) {
+        int actual = getInShadowRoot(grid, By.id("items"))
+                .findElements(By.cssSelector("tr[details-opened]")).size();
+
+        Assert.assertEquals(expected, actual);
     }
 
     private void assertElementHasButton(WebElement componentRenderer, String content) {
@@ -151,6 +182,5 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         List<WebElement> children = componentRenderer
                 .findElements(By.tagName("vaadin-button"));
         Assert.assertEquals(0, children.size());
-
     }
 }

@@ -47,8 +47,8 @@ public class GridDetailsRowPage extends Div {
         updatePerson3.setId("update-button");
         add(updatePerson3);
 
-        Button removeButton = new Button("remove person 4", e -> {
-            items.remove(person4);
+        Button removeButton = new Button("remove person 3", e -> {
+            items.remove(person3);
             grid.getDataProvider().refreshAll();
         });
         removeButton.setId("remove-button");

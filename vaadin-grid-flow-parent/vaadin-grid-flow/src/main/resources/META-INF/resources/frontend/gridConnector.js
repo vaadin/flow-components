@@ -511,6 +511,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
             updatedSelectedItem = true;
           }
         }
+        detailsOpenedItems = detailsOpenedItems.filter(openedItem => grid._getItemIndexInArray(openedItem, items) >= 0);
         grid.detailsOpenedItems = detailsOpenedItems;
         if (updatedSelectedItem) {
           // IE 11 Object doesn't support method values
