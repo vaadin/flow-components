@@ -19,8 +19,8 @@ package com.vaadin.flow.component.listbox.test;
 import java.util.Arrays;
 import java.util.List;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -33,10 +33,10 @@ public class ListBoxRetainValuePage extends VerticalLayout {
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems(listBoxItems);
         listBox.setValue("2");
-        NativeButton addButton = new NativeButton("add");
-        addButton.setId("button");
+        Button addButton = new Button("add");
+        addButton.setId("add-button");
         Div value = new Div();
-        value.setId("value");
+        value.setId("list-box-value");
         add(value, addButton, listBox);
         value.setText(listBox.getValue());
         addButton.addClickListener(event -> {
