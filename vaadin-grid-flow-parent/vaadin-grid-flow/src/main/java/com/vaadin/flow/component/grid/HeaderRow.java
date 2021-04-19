@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
      */
     public HeaderCell join(Column<?>... columnsToMerge) {
         return join(Arrays.stream(columnsToMerge).map(this::getCell)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     /**

@@ -68,7 +68,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "20.0.0-alpha4")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -556,6 +556,7 @@ public class RadioButtonGroup<T>
     private void updateEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
+        button.setEnabled(!disabled);
         Serializable rawValue = button.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
             // convert the boolean value to a String to force update the
