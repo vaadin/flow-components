@@ -31,20 +31,20 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-combo-box/lazy-combo-box-filter")
 public class LazyComboBoxFilterPage extends VerticalLayout {
 
-    List<Item> allItems;
-    Span query = new Span();
+    private List<Item> allItems;
+    private Span query = new Span();
 
     public LazyComboBoxFilterPage() {
         query.setId("query");
         add(query);
         add(getCombobox());
-        allItems = IntStream.range(1, 100).mapToObj(i -> new Item(i))
+        allItems = IntStream.range(1, 100).mapToObj(Item::new)
                 .collect(Collectors.toList());
     }
 
     private Component getCombobox() {
         ComboBox<Item> cb = new ComboBox<>();
-        cb.setItems(qu -> getItems(qu));
+        cb.setItems(this::getItems);
         cb.setAllowCustomValue(true);
         cb.setAutoOpen(false);
         return cb;
