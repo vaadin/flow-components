@@ -63,7 +63,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "20.0.0-alpha4")
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
@@ -101,6 +101,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set( Objects.requireNonNull(dataProvider) );
         DataViewUtils.removeComponentFilterAndSortComparator(this);
+        clear();
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -112,6 +113,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             if (event instanceof DataRefreshEvent) {
                 refresh(((DataRefreshEvent<ITEM>) event).getItem());
             } else {
+                clear();
                 rebuild();
             }
         });
@@ -214,7 +216,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     @SuppressWarnings("unchecked")
     private void rebuild() {
-        clear();
         removeAll();
 
         synchronized (dataProvider) {
