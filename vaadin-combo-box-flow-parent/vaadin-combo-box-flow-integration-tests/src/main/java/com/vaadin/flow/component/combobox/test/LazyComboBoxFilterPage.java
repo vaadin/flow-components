@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,7 +33,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-combo-box/lazy-combo-box-filter")
 public class LazyComboBoxFilterPage extends VerticalLayout {
 
-    private List<Item> allItems;
+    private ArrayList<Item> allItems;
     private Span query = new Span();
 
     public LazyComboBoxFilterPage() {
@@ -39,7 +41,7 @@ public class LazyComboBoxFilterPage extends VerticalLayout {
         add(query);
         add(getCombobox());
         allItems = IntStream.range(1, 100).mapToObj(Item::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Component getCombobox() {
@@ -64,7 +66,7 @@ public class LazyComboBoxFilterPage extends VerticalLayout {
         return filter.map(f -> i.toString().startsWith(f)).orElse(true);
     }
 
-    private static class Item {
+    private static class Item implements Serializable {
         int i;
 
         Item(int i) {
