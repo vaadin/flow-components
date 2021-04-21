@@ -36,7 +36,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
     private static final String SECTION_HEADER = "header";
     private static final String SECTION_FOOTER = "footer";
 
-    private final T item;
+    private final transient T item;
     private final Grid.Column<T> column;
 
     private final boolean detailsCell;
