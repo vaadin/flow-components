@@ -3500,19 +3500,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Adds a listener to the grid that will be notified, when a cell has been focused.
+     * Adds a listener to the grid that will be notified, when a cell has been
+     * focused.
      * <br><br>
      * The listener will be notified, when
      * <ul>
      *     <li>the navigation focus of a cell gets activated</li>
-     *     <li>the focus is restored to the browser if a cell had navigation focus before the focus was lost</li>
-     *     <li>the navigation focus moves between header/body/footer sections</li>
+     *     <li>the focus is restored to the browser if a cell had navigation
+     *     focus before the focus was lost</li>
+     *     <li>the navigation focus moves between header/body/footer
+     *     sections</li>
      * </ul><br>
      * The listener will <b>not</b> be notified, when
      * <ul>
-     *     <li>the focus changes between focusable elements in the Grid cells ("interaction mode")</li>
+     *     <li>the focus changes between focusable elements in the Grid
+     *     cells ("interaction mode")</li>
      *     <li>on Grid Pro edit mode navigation ("interaction mode")</li>
-     *     <li>the focus changes between focusable elements in the cells in Flow Grid's editor mode ("interaction mode")</li>
+     *     <li>the focus changes between focusable elements in the cells in
+     *     Flow Grid's editor mode ("interaction mode")</li>
      * </ul>
      *
      * @param listener

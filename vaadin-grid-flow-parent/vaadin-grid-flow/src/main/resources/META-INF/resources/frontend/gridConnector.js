@@ -997,8 +997,14 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
         grid.dispatchEvent(new CustomEvent('grid-cell-focus', {
           detail: {
-            itemKey: eventContext.item ? eventContext.item.key : null,
-            internalColumnId: eventContext.column ? eventContext.column._flowId : null,
+            itemKey: eventContext.item
+                ? eventContext.item.key
+                : null,
+
+            internalColumnId: eventContext.column
+                ? eventContext.column._flowId
+                : null,
+
             section: eventContext.section
           }
         }));

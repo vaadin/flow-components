@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
-
-import java.util.Optional;
 
 /**
  * Event fired when a cell in the Grid is focused.
@@ -47,11 +47,13 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
      * Creates a new cell focus event.
      *
      * @param source     the source component
-     * @param fromClient <code>true</code> if the event originated from the client
+     * @param fromClient <code>true</code> if the event originated from the
+     *                   client
      */
     public CellFocusEvent(Grid<T> source, boolean fromClient,
                           @EventData("event.detail.itemKey") String itemKey,
-                          @EventData("event.detail.internalColumnId") String internalColumnId,
+                          @EventData("event.detail.internalColumnId")
+                                  String internalColumnId,
                           @EventData("event.detail.section") String section) {
         super(source, fromClient);
 
@@ -64,7 +66,9 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
     }
 
     /**
-     * Indicates, if the clicked cell is part of the table's details / body section.
+     * Indicates, if the clicked cell is part of the table's details
+     * / body section.
+     *
      * @return is a details cell
      */
     public boolean isDetailsCell() {
@@ -73,6 +77,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Indicates, if the clicked cell is part of the table's header section.
+     *
      * @return is a header cell
      */
     public boolean isHeaderCell() {
@@ -81,6 +86,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Indicates, if the clicked cell is part of the table's footer section.
+     *
      * @return is a footer cell
      */
     public boolean isFooterCell() {
@@ -88,7 +94,9 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
     }
 
     /**
-     * Returns the item represented by the focused cell. Is empty, when the focused cell is not a details cell.
+     * Returns the item represented by the focused cell. Is empty, when the
+     * focused cell is not a details cell.
+     *
      * @return item or empty
      */
     public Optional<T> getItem() {
@@ -96,8 +104,10 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
     }
 
     /**
-     * Returns the column represented by the focused cell. Is empty, when the focused cell is a header group (a
+     * Returns the column represented by the focused cell. Is empty, when the
+     * focused cell is a header group (a
      * cell with a cellspan > 1).
+     *
      * @return column or empty
      */
     public Optional<Grid.Column<T>> getColumn() {
