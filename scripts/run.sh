@@ -93,12 +93,12 @@ case $option in
    2) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-demo -Pwar"; browser=true;;
    3) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -q -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
    4) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
-   5) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   5) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
    6) cmd="mvn clean test-compile -DskipFrontend -B -q -T 1C";;
    7) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
    8) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -q -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $args";;
    9) mergeITs; cmd="mvn jetty:run -am -B -q -DskipTests -Drun-it -pl integration-tests"; browser=true;;
-   10) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -Drun-it $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   10) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -Drun-it $utests $itests $frontend $jetty $args -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
 esac
 
 ## execute mvn command and check error status

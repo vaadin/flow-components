@@ -138,11 +138,11 @@ $cmd || tcStatus 1 "Merging ITs failed"
 
 ## Compute variable to run tests
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
-[ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
+[ -n "$TBHUB" ] && args="$args -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
 if [ -n "$SAUCE_USER" ]
 then
    test -n "$SAUCE_ACCESS_KEY" || { echo "\$SAUCE_ACCESS_KEY needs to be defined to use Saucelabs" >&2 ; exit 1; }
-   args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
+   args="$args -P saucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 
 args="$args -Dfailsafe.rerunFailingTestsCount=2 -B -q"
