@@ -994,6 +994,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
 
       grid.addEventListener('cell-focus', tryCatchWrapper(e => {
         const eventContext = grid.getEventContext(e);
+        const expectedSectionValues = ['header', 'body', 'footer'];
+
+        if(expectedSectionValues.indexOf(eventContext.section) === -1) {
+          throw new Error('Unexpected value for section: ' + eventContext.section);
+        }
+
         grid.dispatchEvent(new CustomEvent('grid-cell-focus', {
           detail: {
             itemKey: eventContext.item

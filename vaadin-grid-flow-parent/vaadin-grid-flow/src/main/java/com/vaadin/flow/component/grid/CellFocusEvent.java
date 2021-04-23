@@ -53,14 +53,13 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
 
         item = source.getDataCommunicator().getKeyMapper().get(itemKey);
         column = source.getColumnByInternalId(internalColumnId);
-
         section = GridSection.ofClientSideName(sectionName);
     }
 
     /**
      * Indicates, if the clicked cell is part of the grid's body section.
      *
-     * @return is a details cell
+     * @return is a body cell
      */
     public boolean isBodyCell() {
         return section == GridSection.BODY;
@@ -85,8 +84,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
     }
 
     /**
-     * Returns the grid section, where this cell is located. Never null, but might
-     * be {@link GridSection#UNKNOWN}.
+     * Returns the grid section, where this cell is located. Never null.
      * @return section
      */
     public GridSection getSection() {
@@ -95,7 +93,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Returns the item represented by the focused cell. Is empty, when the
-     * focused cell is not a details cell.
+     * focused cell is not a body cell.
      *
      * @return item or empty
      */
@@ -119,12 +117,6 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
      */
     public enum GridSection {
         /**
-         * Unknown section. This section should be used as a fallback for missing
-         * or a not yet implemented section sent from the client side.
-         */
-        UNKNOWN(null),
-
-        /**
          * Header section.
          */
         HEADER("header"),
@@ -147,10 +139,10 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
         }
 
         /**
-         * Returns the matching {@link GridSection} for the given client side name. Passing {@code null} will
-         * return {@link #UNKNOWN}. An unknown client side name will lead to an exception.
+         * Returns the matching {@link GridSection} for the given client side name.
+         * An unknown client side name will lead to an exception.
          * @param clientSideName client side name to lookup
-         * @throws IllegalArgumentException on an unknown client side name
+         * @throws IllegalArgumentException on an unknown client side section name
          * @return matching section instance
          */
         public static GridSection ofClientSideName(String clientSideName) {
@@ -160,7 +152,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
                 }
             }
 
-            throw new IllegalArgumentException("Unknown section client side name: " + clientSideName);
+            throw new IllegalArgumentException("Unknown section client side section name: " + clientSideName);
         }
 
         /**
