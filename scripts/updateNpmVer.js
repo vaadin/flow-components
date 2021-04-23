@@ -12,7 +12,7 @@ const fs = require('fs');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const replace = require('replace-in-file');
-const {getAnnotations, computeVertionToUpdate} = require('./lib/versions.js');
+const {getAnnotations, computeVersionToUpdate} = require('./lib/versions.js');
 
 let exclude=[];
 
@@ -48,7 +48,7 @@ async function run(cmd) {
 /**
  * Allow exclude certain component package update, use ',' as separator
  */
-async function excludeComponents() {
+function excludeComponents() {
   for (i = 2;process.argv[i]; i++) {
     switch(process.argv[i]) {
       case '--exclude':
@@ -67,15 +67,16 @@ async function excludeComponents() {
 async function main() {
   console.log("Updating the NpmPackage annotation.")
   const annotations = await getAnnotations();
+
   if (process.argv.length > 2) {
-    exclude = await excludeComponents();
+    exclude = excludeComponents();
   }
 
   for (i = 0; i < annotations.length; i++) {
     if (exclude.includes(annotations[i].package)) {
       console.log('\x1b[33m', "skip updating " + annotations[i].package + " package");
     } else {
-      await computeVertionToUpdate(annotations[i]);
+      await computeVersionToUpdate(annotations[i]);
       await updateFiles(annotations[i]);
     }
   }
