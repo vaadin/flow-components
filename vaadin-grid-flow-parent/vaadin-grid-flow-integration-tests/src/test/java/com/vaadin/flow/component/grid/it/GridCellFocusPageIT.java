@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.grid.CellFocusEvent;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -32,82 +33,78 @@ import com.vaadin.tests.AbstractComponentIT;
 public class GridCellFocusPageIT extends AbstractComponentIT {
 
     @Test
-    public void test_focusFirstCell() {
+    public void focusBodyCell() {
         open();
 
         getGrid().getCell(0, 0).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT, "A");
-
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "A");
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_FIRST_COLUMN);
-
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_DETAILS);
-
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.BODY.getClientSideName());
 
         getGrid().getCell(1, 0).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT, "B");
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "B");
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_FIRST_COLUMN);
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_DETAILS);
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.BODY.getClientSideName());
 
         getGrid().getCell(2, 1).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT, "C");
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "C");
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_SECOND_COLUMN);
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_DETAILS);
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.BODY.getClientSideName());
     }
 
     @Test
-    public void test_focusHeaderCell() {
+    public void focusHeaderCell() {
         open();
 
         getGrid().getHeaderCell(0).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_FIRST_COLUMN);
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_HEADER);
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.HEADER.getClientSideName());
 
         getGrid().getHeaderCell(1).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_SECOND_COLUMN);
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_HEADER);
-
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.HEADER.getClientSideName());
     }
 
     @Test
-    public void test_focusFooterCell() {
+    public void focusFooterCell() {
         open();
 
         getGrid().getFooterCell(0).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_FIRST_COLUMN);
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_FOOTER);
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.FOOTER.getClientSideName());
 
         getGrid().getFooterCell(1).focus();
-        assertItemResult(GridCellFocusPage.ID_ITEM_RESULT,
+        assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
-        assertItemResult(GridCellFocusPage.ID_COLUMN_RESULT,
+        assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_SECOND_COLUMN);
-        assertItemResult(GridCellFocusPage.ID_SECTION_RESULT,
-                GridCellFocusPage.SECTION_FOOTER);
+        assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
+                CellFocusEvent.GridSection.FOOTER.getClientSideName());
     }
 
     private GridElement getGrid() {
         return $(GridElement.class).id(GridCellFocusPage.ID_GRID);
     }
 
-    private void assertItemResult(String resultFieldId, String expectedResult) {
+    private void assertTextResult(String resultFieldId, String expectedResult) {
         String text = $(TestBenchElement.class)
                 .id(resultFieldId)
                 .getText();

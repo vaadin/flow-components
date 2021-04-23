@@ -42,10 +42,6 @@ public class GridCellFocusPage extends Div {
     public static final String NO_COLUMN = "-- no column --";
     public static final String NO_SECTION = "-- no section --";
 
-    public static final String SECTION_HEADER = "header";
-    public static final String SECTION_DETAILS = "details";
-    public static final String SECTION_FOOTER = "footer";
-
     public GridCellFocusPage() {
         setSizeFull();
 
@@ -88,18 +84,9 @@ public class GridCellFocusPage extends Div {
                     .map(Column::getKey)
                     .orElse(NO_COLUMN);
 
-            String section = NO_SECTION;
-            if (event.isHeaderCell()) {
-                section = SECTION_HEADER;
-            } else if (event.isDetailsCell()) {
-                section = SECTION_DETAILS;
-            } else if (event.isFooterCell()) {
-                section = SECTION_FOOTER;
-            }
-
             itemResult.setText(item);
             colResult.setText(column);
-            sectionResult.setText(section);
+            sectionResult.setText(event.getSection().getClientSideName());
         });
     }
 }
