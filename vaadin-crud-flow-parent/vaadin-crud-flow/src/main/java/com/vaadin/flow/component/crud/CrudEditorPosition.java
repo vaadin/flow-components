@@ -51,9 +51,11 @@ public enum CrudEditorPosition {
         return editorPosition;
     }
 
-    static CrudEditorPosition toPosition(String editorPosition, CrudEditorPosition defaultValue) {
-        return Arrays.stream(values()).filter(
-                alignment -> alignment.getEditorPosition().equals(editorPosition))
+    static CrudEditorPosition toPosition(String editorPosition,
+            CrudEditorPosition defaultValue) {
+        return Arrays.stream(values())
+                .filter(alignment -> alignment.getEditorPosition()
+                        .equals(editorPosition))
                 .findFirst().orElse(defaultValue);
     }
 }

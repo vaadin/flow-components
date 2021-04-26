@@ -21,13 +21,18 @@ public class BarChart extends AbstractChartExample {
 
         Configuration configuration = chart.getConfiguration();
         configuration.setTitle("Historic World Population by Region");
-        configuration.setSubTitle("Source: <a href=\"https://en.wikipedia.org/wiki/World_population\">Wikipedia.org</a>");
+        configuration.setSubTitle(
+                "Source: <a href=\"https://en.wikipedia.org/wiki/World_population\">Wikipedia.org</a>");
         chart.getConfiguration().getChart().setType(ChartType.BAR);
 
-        configuration.addSeries(new ListSeries("Year 1800", 107, 31, 635, 203, 2));
-        configuration.addSeries(new ListSeries("Year 1900", 133, 156, 947, 408, 6));
-        configuration.addSeries(new ListSeries("Year 2000", 814, 841, 3714, 727, 31));
-        configuration.addSeries(new ListSeries("Year 2016", 1216, 1001, 4436, 738, 40));
+        configuration
+                .addSeries(new ListSeries("Year 1800", 107, 31, 635, 203, 2));
+        configuration
+                .addSeries(new ListSeries("Year 1900", 133, 156, 947, 408, 6));
+        configuration.addSeries(
+                new ListSeries("Year 2000", 814, 841, 3714, 727, 31));
+        configuration.addSeries(
+                new ListSeries("Year 2016", 1216, 1001, 4436, 738, 40));
 
         XAxis x = new XAxis();
         x.setCategories("Africa", "America", "Asia", "Europe", "Oceania");

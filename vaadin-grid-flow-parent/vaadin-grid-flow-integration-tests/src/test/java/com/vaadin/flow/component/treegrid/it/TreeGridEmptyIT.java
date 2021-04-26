@@ -45,6 +45,7 @@ public class TreeGridEmptyIT extends AbstractComponentIT {
 
         $(ButtonElement.class).id("add-expanded-button").click();
 
-        Assert.assertEquals("Expected only the parent row to be rendered", 1, grid.getRowCount());
+        Assert.assertEquals("Expected only the parent row to be rendered", 1,
+                grid.getRowCount());
     }
 }

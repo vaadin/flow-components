@@ -120,8 +120,9 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
 
     @Override
     public void closeEditor() {
-        if(isOpen() && isBuffered()) {
-            throw new UnsupportedOperationException("Buffered editor should be closed using save() or cancel()");
+        if (isOpen() && isBuffered()) {
+            throw new UnsupportedOperationException(
+                    "Buffered editor should be closed using save() or cancel()");
         }
         close();
     }
@@ -136,8 +137,9 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
                 requestEditItem(it);
                 editItemRequest = null;
             };
-            getGrid().getElement().getNode().runWhenAttached(ui -> ui.getInternals().getStateTree()
-                    .beforeClientResponse(getGrid().getElement().getNode(), editItemRequest));
+            getGrid().getElement().getNode().runWhenAttached(
+                    ui -> ui.getInternals().getStateTree().beforeClientResponse(
+                            getGrid().getElement().getNode(), editItemRequest));
         }
     }
 
@@ -206,8 +208,8 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
         if (getBinder() == null) {
             throw new IllegalStateException(
                     "Editor doesn't have a binder. It's needed to be set explicitly. "
-                        + "An example of setting the Binder: "
-                        + "Binder<Person> binder = new Binder<>(Person.class); grid.setBinder(binder)");
+                            + "An example of setting the Binder: "
+                            + "Binder<Person> binder = new Binder<>(Person.class); grid.setBinder(binder)");
         }
 
         if (isBuffered() && edited != null) {

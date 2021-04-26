@@ -87,8 +87,8 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     }
 
     protected void setEstimate(int estimate) {
-        $(IntegerFieldElement.class).id(
-                AbstractItemCountComboBoxPage.ITEM_COUNT_ESTIMATE_INPUT)
+        $(IntegerFieldElement.class)
+                .id(AbstractItemCountComboBoxPage.ITEM_COUNT_ESTIMATE_INPUT)
                 .setValue(estimate + "");
     }
 

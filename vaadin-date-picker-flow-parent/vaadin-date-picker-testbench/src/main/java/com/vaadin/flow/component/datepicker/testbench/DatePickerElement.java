@@ -27,8 +27,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-date-picker")
-public class DatePickerElement extends TestBenchElement implements HasLabel,
-      HasHelper {
+public class DatePickerElement extends TestBenchElement
+        implements HasLabel, HasHelper {
 
     /**
      * Clears the value of the date picker.
@@ -111,9 +111,11 @@ public class DatePickerElement extends TestBenchElement implements HasLabel,
     }
 
     /**
-     * When auto open is enabled, the dropdown will open when the field is clicked.
+     * When auto open is enabled, the dropdown will open when the field is
+     * clicked.
      *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     * @return {@code true} if auto open is enabled. {@code false} otherwise.
+     *         Default is {@code true}
      */
     public boolean isAutoOpen() {
         return !getPropertyBoolean("autoOpenDisabled");

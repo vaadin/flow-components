@@ -26,10 +26,9 @@ public class BeanGridPage extends Div {
 
     public BeanGridPage() {
         Grid<Person> grid = new Grid<>(Person.class);
-        grid.setItems(new Person("Jorma", 2018),
-            new Person("Jarvi", 33));
-        grid.setItemDetailsRenderer(
-            TemplateRenderer.<Person>of("<div>[[item.name]] [[item.age]]</div>")
+        grid.setItems(new Person("Jorma", 2018), new Person("Jarvi", 33));
+        grid.setItemDetailsRenderer(TemplateRenderer
+                .<Person> of("<div>[[item.name]] [[item.age]]</div>")
                 .withProperty("name", Person::getFirstName)
                 .withProperty("age", Person::getAge));
         add(grid);

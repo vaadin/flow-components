@@ -13,8 +13,6 @@ package com.vaadin.flow.component.charts.model.style;
  * #L%
  */
 
-
-
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 import java.util.Locale;
@@ -119,7 +117,8 @@ public class SolidColor extends AbstractConfigurationObject implements Color {
     public final static SolidColor MEDIUMPURPLE = new SolidColor("#9370DB");
     public final static SolidColor MEDIUMSEAGREEN = new SolidColor("#3CB371");
     public final static SolidColor MEDIUMSLATEBLUE = new SolidColor("#7B68EE");
-    public final static SolidColor MEDIUMSPRINGGREEN = new SolidColor("#00FA9A");
+    public final static SolidColor MEDIUMSPRINGGREEN = new SolidColor(
+            "#00FA9A");
     public final static SolidColor MEDIUMTURQUOISE = new SolidColor("#48D1CC");
     public final static SolidColor MEDIUMVIOLETRED = new SolidColor("#C71585");
     public final static SolidColor MIDNIGHTBLUE = new SolidColor("#191970");
@@ -204,8 +203,8 @@ public class SolidColor extends AbstractConfigurationObject implements Color {
             throw new IllegalArgumentException("Invalid color values given.");
         }
 
-        color = String
-                .format(Locale.ENGLISH, "#%02X%02X%02X", red, green, blue);
+        color = String.format(Locale.ENGLISH, "#%02X%02X%02X", red, green,
+                blue);
     }
 
     /**
@@ -223,14 +222,13 @@ public class SolidColor extends AbstractConfigurationObject implements Color {
     public SolidColor(int red, int green, int blue, double opacity) {
         if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0
                 || blue > 255 || opacity < 0.0 || opacity > 1.0) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Invalid color values given. Red: %s, green: %s blue: %s, opacity: %s",
-                            red, green, blue, opacity));
+            throw new IllegalArgumentException(String.format(
+                    "Invalid color values given. Red: %s, green: %s blue: %s, opacity: %s",
+                    red, green, blue, opacity));
         }
 
-        color = String.format(Locale.ENGLISH, "rgba(%d,%d,%d,%.2f)", red,
-                green, blue, opacity);
+        color = String.format(Locale.ENGLISH, "rgba(%d,%d,%d,%.2f)", red, green,
+                blue, opacity);
     }
 
     @Override

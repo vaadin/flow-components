@@ -18,8 +18,9 @@ public class DateTimePickerHelpersPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertHelperText(){
-        DateTimePickerElement dtp = $(DateTimePickerElement.class).id("dtp-helper-text");
+    public void assertHelperText() {
+        DateTimePickerElement dtp = $(DateTimePickerElement.class)
+                .id("dtp-helper-text");
         Assert.assertEquals("Helper text", dtp.getHelperText());
 
         $("button").id("button-clear-helper-text").click();
@@ -27,9 +28,11 @@ public class DateTimePickerHelpersPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertHelperComponent(){
-        DateTimePickerElement dtp = $(DateTimePickerElement.class).id("dtp-helper-component");
-        Assert.assertEquals("helper-component", dtp.getHelperComponent().getAttribute("id"));
+    public void assertHelperComponent() {
+        DateTimePickerElement dtp = $(DateTimePickerElement.class)
+                .id("dtp-helper-component");
+        Assert.assertEquals("helper-component",
+                dtp.getHelperComponent().getAttribute("id"));
 
         $("button").id("button-clear-helper-component").click();
         Assert.assertNull(dtp.getHelperComponent());

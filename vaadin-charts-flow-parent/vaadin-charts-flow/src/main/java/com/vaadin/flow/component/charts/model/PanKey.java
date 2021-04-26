@@ -13,19 +13,16 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
- * Allows setting a key to switch between zooming and panning. The keys are mapped directly to the key properties
- * of the click event argument (event.altKey, event.ctrlKey, event.metaKey and event.shiftKey).
+ * Allows setting a key to switch between zooming and panning. The keys are
+ * mapped directly to the key properties of the click event argument
+ * (event.altKey, event.ctrlKey, event.metaKey and event.shiftKey).
  *
  * Defaults to undefined.
  */
 public enum PanKey implements ChartEnum {
 
-    ALT("alt"),
-    CTRL("ctrl"),
-    META("meta"),
-    SHIFT("shift");
+    ALT("alt"), CTRL("ctrl"), META("meta"), SHIFT("shift");
 
     private final String key;
 

@@ -11,7 +11,8 @@ public class CompositeIT extends AbstractParallelTest {
 
     @Test
     public void compositeTouchesDirtyState() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/composite";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-crud") + "/composite";
         getDriver().get(url);
 
         final CrudElement crud = $(CrudElement.class).waitForFirst();
@@ -20,27 +21,19 @@ public class CompositeIT extends AbstractParallelTest {
         Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
 
         $("vaadin-dialog-overlay").first().$("div")
-                .attribute("editor-role", "language")
-                .first()
-                .$(ButtonElement.class)
-                .first()
-                .click();
+                .attribute("editor-role", "language").first()
+                .$(ButtonElement.class).first().click();
 
-        $(TextFieldElement.class)
-                .attribute("editor-role", "language-field")
-                .first()
-                .setValue("English");
+        $(TextFieldElement.class).attribute("editor-role", "language-field")
+                .first().setValue("English");
 
         $("vaadin-dialog-overlay").first().$(ButtonElement.class)
-                .attribute("editor-role", "language-confirm")
-                .first()
-                .click();
+                .attribute("editor-role", "language-confirm").first().click();
 
-        $(DialogElement.class)
-                .attribute("editor-role", "composite-dialog")
-                .first()
-                .callFunction("set", "opened", false);
+        $(DialogElement.class).attribute("editor-role", "composite-dialog")
+                .first().callFunction("set", "opened", false);
 
-        Assert.assertTrue($(CrudElement.class).first().getEditorSaveButton().isEnabled());
+        Assert.assertTrue(
+                $(CrudElement.class).first().getEditorSaveButton().isEnabled());
     }
 }

@@ -99,7 +99,8 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
         }
         return getLoginOverlayWrapper().$(TestBenchElement.class)
                 .attribute("part", "brand").first().$("h1").first()
-                // Using textContent, since getText() works unpredictable in Edge
+                // Using textContent, since getText() works unpredictable in
+                // Edge
                 .getPropertyString("textContent");
     }
 
@@ -115,18 +116,20 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      * Checks if anything was set into the title slot
      */
     public boolean hasTitleComponent() {
-        return getLoginOverlayWrapper().$(TestBenchElement.class).attribute("slot", "title").exists();
+        return getLoginOverlayWrapper().$(TestBenchElement.class)
+                .attribute("slot", "title").exists();
     }
 
     /**
-     * Returns the title component which is set into the title slot of the login element.
-     * If was not set returns <code>null</code>
+     * Returns the title component which is set into the title slot of the login
+     * element. If was not set returns <code>null</code>
      */
     public TestBenchElement getTitleComponent() {
         if (!hasTitleComponent()) {
             return null;
         }
-        return getLoginOverlayWrapper().$(TestBenchElement.class).attribute("slot", "title").first();
+        return getLoginOverlayWrapper().$(TestBenchElement.class)
+                .attribute("slot", "title").first();
     }
 
     @Override

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-
 import com.vaadin.flow.internal.StateNode;
 
 class FieldValidationUtil {
@@ -43,7 +42,8 @@ class FieldValidationUtil {
                                 component)));
     }
 
-    private static <T> void overrideClientValidation(RadioButtonGroup<T> component) {
+    private static <T> void overrideClientValidation(
+            RadioButtonGroup<T> component) {
         StringBuilder expression = new StringBuilder(
                 "this.validate = function () {return this.checkValidity();};");
 

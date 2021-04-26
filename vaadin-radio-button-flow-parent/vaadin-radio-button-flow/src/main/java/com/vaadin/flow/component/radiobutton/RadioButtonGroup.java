@@ -73,7 +73,8 @@ public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation, HasHelper, HasSize {
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation,
+        HasHelper, HasSize {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -183,9 +184,9 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Gets the generic data view for the RadioButtonGroup. This data view should
-     * only be used when {@link #getListDataView()} is not applicable for the
-     * underlying data provider.
+     * Gets the generic data view for the RadioButtonGroup. This data view
+     * should only be used when {@link #getListDataView()} is not applicable for
+     * the underlying data provider.
      *
      * @return the generic DataView instance implementing
      *         {@link RadioButtonGroupDataView}
@@ -195,7 +196,6 @@ public class RadioButtonGroup<T>
         return new RadioButtonGroupDataView<>(this::getDataProvider, this,
                 this::identifierProviderChanged);
     }
-
 
     @Override
     protected boolean hasValidValue() {
@@ -238,13 +238,15 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons().forEach(rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        getRadioButtons().forEach(
+                rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
         FieldValidationUtil.disableClientValidation(this);
@@ -253,8 +255,8 @@ public class RadioButtonGroup<T>
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         if (dataProviderListenerRegistration != null) {
-        	dataProviderListenerRegistration.remove();
-        	dataProviderListenerRegistration = null;
+            dataProviderListenerRegistration.remove();
+            dataProviderListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -459,10 +461,10 @@ public class RadioButtonGroup<T>
     }
 
     private void resetRadioButton(T item) {
-        getRadioButtons().filter(radioButton ->
-                getItemId(radioButton.getItem()).equals(getItemId(item)))
-                .findFirst()
-                .ifPresent(this::updateButton);
+        getRadioButtons()
+                .filter(radioButton -> getItemId(radioButton.getItem())
+                        .equals(getItemId(item)))
+                .findFirst().ifPresent(this::updateButton);
     }
 
     private Object getItemId(T item) {
@@ -471,9 +473,8 @@ public class RadioButtonGroup<T>
 
     @SuppressWarnings("unchecked")
     private IdentifierProvider<T> getIdentifierProvider() {
-        IdentifierProvider<T> identifierProviderObject =
-                (IdentifierProvider<T>) ComponentUtil.getData(this,
-                        IdentifierProvider.class);
+        IdentifierProvider<T> identifierProviderObject = (IdentifierProvider<T>) ComponentUtil
+                .getData(this, IdentifierProvider.class);
         if (identifierProviderObject == null) {
             DataProvider<T, ?> dataProvider = getDataProvider();
             if (dataProvider != null) {
@@ -584,7 +585,8 @@ public class RadioButtonGroup<T>
                 validationListener);
     }
 
-    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+    private void identifierProviderChanged(
+            IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 

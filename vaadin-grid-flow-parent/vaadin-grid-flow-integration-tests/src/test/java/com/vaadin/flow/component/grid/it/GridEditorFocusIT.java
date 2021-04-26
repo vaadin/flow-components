@@ -66,7 +66,7 @@ public class GridEditorFocusIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addNewItem(){
+    public void addNewItem() {
         findElement(By.id("add-item")).click();
 
         // Assert that new item added
@@ -78,13 +78,14 @@ public class GridEditorFocusIT extends AbstractComponentIT {
         Assert.assertTrue(nameCell.$("vaadin-text-field").exists());
 
         // Assert editor is focused
-        TestBenchElement editorComponent = nameCell.$("vaadin-text-field").first();
+        TestBenchElement editorComponent = nameCell.$("vaadin-text-field")
+                .first();
         assertElementHasFocus(editorComponent);
 
     }
 
     @Test
-    public void editFirstItem(){
+    public void editFirstItem() {
         findElement(By.id("edit-first-item")).click();
 
         // Assert editor opened on new row
@@ -94,8 +95,9 @@ public class GridEditorFocusIT extends AbstractComponentIT {
 
         // Assert editor is focused
         // Flaky check, focus sometimes is not in place
-//        TestBenchElement editorComponent = nameCell.$("vaadin-text-field").first();
-//        assertElementHasFocus(editorComponent);
+        // TestBenchElement editorComponent =
+        // nameCell.$("vaadin-text-field").first();
+        // assertElementHasFocus(editorComponent);
 
     }
 
