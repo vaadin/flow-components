@@ -80,7 +80,8 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = getInShadowRoot(field,
+                By.cssSelector("[part~='clear-button']"));
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -89,11 +90,14 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void disabledPasswordFieldNotUpdating() {
-        WebElement passwordField = findElement(By.id("disabled-password-field"));
-        WebElement message = findElement(By.id("disabled-password-field-message"));
+        WebElement passwordField = findElement(
+                By.id("disabled-password-field"));
+        WebElement message = findElement(
+                By.id("disabled-password-field-message"));
         Assert.assertEquals("", message.getText());
 
-        executeScript("arguments[0].removeAttribute(\"disabled\");", passwordField);
+        executeScript("arguments[0].removeAttribute(\"disabled\");",
+                passwordField);
         passwordField.sendKeys("abc");
         blur();
 
@@ -103,12 +107,15 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertFocusShortcut() {
-        PasswordFieldElement shortcutField = $(PasswordFieldElement.class).id("shortcut-field");
-        Assert.assertNull("TextField should not be focused before the shortcut event is triggered.",
+        PasswordFieldElement shortcutField = $(PasswordFieldElement.class)
+                .id("shortcut-field");
+        Assert.assertNull(
+                "TextField should not be focused before the shortcut event is triggered.",
                 shortcutField.getAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
-        Assert.assertTrue("TextField should be focused after the shortcut event is triggered.",
+        Assert.assertTrue(
+                "TextField should be focused after the shortcut event is triggered.",
                 shortcutField.getAttribute("focused").equals("true")
                         || shortcutField.getAttribute("focused").equals(""));
     }
@@ -123,26 +130,25 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void valueChangeListenerReportsCorrectValues() {
-        WebElement passwordFieldValueDiv = findElement(By.id("password-field-value"));
+        WebElement passwordFieldValueDiv = findElement(
+                By.id("password-field-value"));
         WebElement passwordField = findElement(
                 By.id("password-field-with-value-change-listener"));
 
         updateValues(passwordFieldValueDiv, passwordField, true);
 
-        $(RadioButtonGroupElement.class).first()
-                .selectByText(EAGER.toString());
+        $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
         updateValues(passwordFieldValueDiv, passwordField, false);
     }
 
     @Test
     public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(),getContext(),$(
-            PasswordFieldElement.class)
-            .id("invalid-test-field"));
+        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
+                $(PasswordFieldElement.class).id("invalid-test-field"));
     }
 
     private void updateValues(WebElement passwordFieldValueDiv,
-                              WebElement passwordField, boolean toggleBlur) {
+            WebElement passwordField, boolean toggleBlur) {
         passwordField.sendKeys("a");
         if (toggleBlur) {
             blur();

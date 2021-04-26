@@ -48,11 +48,15 @@ public class TreeGridHugeTreePage extends Div {
         expand.addClickListener(event -> treeGrid.expand("Granddad 1"));
         NativeButton collapse = new NativeButton("Collapse Granddad 1");
         collapse.addClickListener(event -> treeGrid.collapse("Granddad 1"));
-        NativeButton initLargeDataSet = new NativeButton("Init larger data set");
-        initLargeDataSet.addClickListener(event -> treeGrid.setDataProvider(initializeDataProvider(300)));
+        NativeButton initLargeDataSet = new NativeButton(
+                "Init larger data set");
+        initLargeDataSet.addClickListener(
+                event -> treeGrid.setDataProvider(initializeDataProvider(300)));
         NativeButton expandRecursively = new NativeButton("Expand Recursively");
         expandRecursively.addClickListener(event -> treeGrid.expandRecursively(
-                ((TreeDataProvider<String>) treeGrid.getDataProvider()).getTreeData().getRootItems(), 2));
+                ((TreeDataProvider<String>) treeGrid.getDataProvider())
+                        .getTreeData().getRootItems(),
+                2));
 
         add(treeGrid, expand, collapse, initLargeDataSet, expandRecursively);
     }
@@ -62,10 +66,11 @@ public class TreeGridHugeTreePage extends Div {
 
         final Map<String, String> parentPathMap = new HashMap<>();
 
-        addRootItems("Granddad", 3, data, parentPathMap).forEach(
-                granddad -> addItems("Dad", dadCount, granddad, data, parentPathMap)
-                        .forEach(dad -> addItems("Son", 300, dad, data,
-                                parentPathMap)));
+        addRootItems("Granddad", 3, data, parentPathMap)
+                .forEach(granddad -> addItems("Dad", dadCount, granddad, data,
+                        parentPathMap)
+                                .forEach(dad -> addItems("Son", 300, dad, data,
+                                        parentPathMap)));
 
         return new TreeDataProvider<>(data);
     }
@@ -75,9 +80,8 @@ public class TreeGridHugeTreePage extends Div {
         return addItems(name, numberOfItems, null, data, parentPathMap);
     }
 
-    static List<String> addItems(String name, int numberOfItems,
-            String parent, TreeData<String> data,
-            Map<String, String> parentPathMap) {
+    static List<String> addItems(String name, int numberOfItems, String parent,
+            TreeData<String> data, Map<String, String> parentPathMap) {
         List<String> items = new ArrayList<>();
         IntStream.range(0, numberOfItems).forEach(index -> {
             String parentPath = parentPathMap.get(parent);

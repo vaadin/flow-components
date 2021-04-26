@@ -105,9 +105,7 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
     }
 
     private void assertTextResult(String resultFieldId, String expectedResult) {
-        String text = $(TestBenchElement.class)
-                .id(resultFieldId)
-                .getText();
+        String text = $(TestBenchElement.class).id(resultFieldId).getText();
 
         Assert.assertEquals(expectedResult, text);
     }

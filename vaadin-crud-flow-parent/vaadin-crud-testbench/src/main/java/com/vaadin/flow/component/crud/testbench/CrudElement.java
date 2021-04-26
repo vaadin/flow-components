@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.crud.testbench;
 
-
 /*
  * #%L
  * Vaadin Crud Testbench API
@@ -51,19 +50,21 @@ public class CrudElement extends TestBenchElement {
      * @return the new item button
      */
     public Optional<TestBenchElement> getNewItemButton() {
-        ElementQuery<TestBenchElement> newButtonQuery
-                = this.$(TestBenchElement.class).attribute("new-button", "");
-        return newButtonQuery.exists() ? Optional.of(newButtonQuery.last()) : Optional.empty();
+        ElementQuery<TestBenchElement> newButtonQuery = this
+                .$(TestBenchElement.class).attribute("new-button", "");
+        return newButtonQuery.exists() ? Optional.of(newButtonQuery.last())
+                : Optional.empty();
     }
 
     /**
-     * Gets the filter fields if the Crud built-in Grid is being used with filters enabled
+     * Gets the filter fields if the Crud built-in Grid is being used with
+     * filters enabled
      *
      * @return the filter field for each column
      */
     public List<TextFieldElement> getFilterFields() {
-        return this.$(TextFieldElement.class)
-                .attribute("crud-role", "Search").all();
+        return this.$(TextFieldElement.class).attribute("crud-role", "Search")
+                .all();
     }
 
     /**
@@ -72,13 +73,15 @@ public class CrudElement extends TestBenchElement {
      * @return the toolbar content
      */
     public List<TestBenchElement> getToolbar() {
-        return this.$(TestBenchElement.class).attribute("slot", "toolbar").all();
+        return this.$(TestBenchElement.class).attribute("slot", "toolbar")
+                .all();
     }
 
     /**
      * Opens a grid row for editing using the CRUD edit button on that row
      *
-     * @param row the row to open for editing
+     * @param row
+     *            the row to open for editing
      */
     public void openRowForEditing(int row) {
         if (isEditOnClick()) {
@@ -122,7 +125,8 @@ public class CrudElement extends TestBenchElement {
     }
 
     private ButtonElement getEditorButton(int index) {
-        return getEditor().$(ButtonElement.class).attribute("slot", "footer").get(index);
+        return getEditor().$(ButtonElement.class).attribute("slot", "footer")
+                .get(index);
     }
 
     /**
@@ -133,14 +137,15 @@ public class CrudElement extends TestBenchElement {
      */
     public boolean isEditorOpen() {
         if (getEditorPosition().isEmpty()) {
-            return $("vaadin-dialog-overlay").onPage().attribute("opened", "").exists();
+            return $("vaadin-dialog-overlay").onPage().attribute("opened", "")
+                    .exists();
         }
         return getPropertyBoolean("editorOpened");
     }
 
     /**
-     * Gets the editor position selected for the CRUD
-     * Possible values are "" (default), "bottom" and "aside"
+     * Gets the editor position selected for the CRUD Possible values are ""
+     * (default), "bottom" and "aside"
      *
      * @return a string containing the value defined for the editor position
      */
@@ -164,7 +169,8 @@ public class CrudElement extends TestBenchElement {
      */
     public TestBenchElement getEditor() {
         if (getEditorPosition().isEmpty()) {
-            return $("vaadin-dialog-overlay").onPage().attribute("opened", "").first();
+            return $("vaadin-dialog-overlay").onPage().attribute("opened", "")
+                    .first();
         }
         return this.$("vaadin-dialog-layout").first();
     }

@@ -211,12 +211,10 @@ public class FormLayoutView extends DemoView {
     private void createLayoutHandleColspans() {
         // begin-source-example
         // source-example-heading: Handling columns and colspans in a layout
-    	FormLayout columnLayout = new FormLayout();
-    	// Setting the desired responsive steps for the columns in the layout
-    	columnLayout.setResponsiveSteps(
-                new ResponsiveStep("25em", 1),
-                new ResponsiveStep("32em", 2),
-                new ResponsiveStep("40em", 3));
+        FormLayout columnLayout = new FormLayout();
+        // Setting the desired responsive steps for the columns in the layout
+        columnLayout.setResponsiveSteps(new ResponsiveStep("25em", 1),
+                new ResponsiveStep("32em", 2), new ResponsiveStep("40em", 3));
         TextField firstName = new TextField();
         firstName.setPlaceholder("First Name");
         TextField lastName = new TextField();
@@ -229,13 +227,13 @@ public class FormLayoutView extends DemoView {
         website.setPlaceholder("Link to personal website");
         TextField description = new TextField();
         description.setPlaceholder("Enter a short description about yourself");
-        columnLayout.add(firstName, lastName,  nickname, email, website); 
+        columnLayout.add(firstName, lastName, nickname, email, website);
         // You can set the desired column span for the components individually.
         columnLayout.setColspan(website, 2);
         // Or just set it as you add them.
         columnLayout.add(description, 3);
         // end-source-example
-        
+
         firstName.setId("colspan-first-name");
         lastName.setId("colspan-last-name");
         nickname.setId("colspan-nickname");
@@ -373,6 +371,5 @@ public class FormLayoutView extends DemoView {
 
         addCard("Using form layout inside a composite", layout);
     }
-    
 
 }

@@ -26,18 +26,20 @@ import com.vaadin.flow.router.Route;
 @Route(value = "vaadin-crud/customsearch")
 public class CustomSearchView extends VerticalLayout {
 
-    final private List<Person> data = PersonCrudDataProvider.generatePersonsList();
+    final private List<Person> data = PersonCrudDataProvider
+            .generatePersonsList();
 
     public CustomSearchView() {
         final Grid<Person> grid = new Grid<>(Person.class);
-        final Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
+        final Crud<Person> crud = new Crud<>(Person.class, grid,
+                createPersonEditor());
 
         DataProvider<Person, String> dataProvider = new CallbackDataProvider<>(
-            query -> findAnyMatching(query.getFilter()),
-            query -> countAnyMatching(query.getFilter()));
+                query -> findAnyMatching(query.getFilter()),
+                query -> countAnyMatching(query.getFilter()));
 
-        ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider
-                = dataProvider.withConfigurableFilter();
+        ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider = dataProvider
+                .withConfigurableFilter();
 
         grid.setDataProvider(filterableDataProvider);
         crud.addNewListener(e -> data.add(e.getItem()));
@@ -69,14 +71,16 @@ public class CustomSearchView extends VerticalLayout {
     }
 
     private Stream<Person> findAnyMatching(Optional<String> filter) {
-        if (filter.isPresent() && filter.get() != null && !filter.get().isEmpty()) {
+        if (filter.isPresent() && filter.get() != null
+                && !filter.get().isEmpty()) {
             return filter(filter);
         }
         return data.stream();
     }
 
     private int countAnyMatching(Optional<String> filter) {
-        if (filter.isPresent() && filter.get() != null && !filter.get().isEmpty()) {
+        if (filter.isPresent() && filter.get() != null
+                && !filter.get().isEmpty()) {
             return (int) filter(filter).count();
         }
         return data.size();
@@ -84,10 +88,11 @@ public class CustomSearchView extends VerticalLayout {
 
     private Stream<Person> filter(Optional<String> filter) {
         final String f = filter.get().toLowerCase();
-        return data.stream().filter(p ->
-            (p.getFirstName() != null) && (p.getFirstName().toLowerCase().contains(f))
-                || (p.getLastName() != null) && (p.getLastName().toLowerCase().contains(f))
-                || String.valueOf(p.getId()).contains(f)
-        );
+        return data.stream()
+                .filter(p -> (p.getFirstName() != null)
+                        && (p.getFirstName().toLowerCase().contains(f))
+                        || (p.getLastName() != null)
+                                && (p.getLastName().toLowerCase().contains(f))
+                        || String.valueOf(p.getId()).contains(f));
     }
 }

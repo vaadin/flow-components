@@ -77,7 +77,8 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
                         "Failed to get file descriptor for: '" + getFileName()
-                                + "'", e);
+                                + "'",
+                        e);
             }
         }
         return null;
@@ -96,7 +97,8 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
                         "Failed to create InputStream for: '" + getFileName()
-                                + "'", e);
+                                + "'",
+                        e);
             }
         }
         return new ByteArrayInputStream(new byte[0]);

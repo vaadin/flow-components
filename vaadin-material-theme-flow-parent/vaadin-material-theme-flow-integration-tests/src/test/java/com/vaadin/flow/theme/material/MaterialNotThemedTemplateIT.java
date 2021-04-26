@@ -22,7 +22,6 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-
 @TestPath(value = "vaadin-material-theme/material-not-themed-template-view")
 public class MaterialNotThemedTemplateIT extends AbstractComponentIT {
 

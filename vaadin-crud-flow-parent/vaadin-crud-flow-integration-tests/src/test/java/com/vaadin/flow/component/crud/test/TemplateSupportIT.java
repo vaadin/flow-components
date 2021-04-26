@@ -16,7 +16,8 @@ public class TemplateSupportIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/crudintemplate";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-crud") + "/crudintemplate";
         getDriver().get(url);
     }
 
@@ -39,9 +40,7 @@ public class TemplateSupportIT extends AbstractParallelTest {
         CrudElement crud = getCrud().waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
-        Assert.assertEquals(
-                "New: null",
-                getLastEvent());
+        Assert.assertEquals("New: null", getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
     }
 

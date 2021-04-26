@@ -35,13 +35,13 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * Abstract component for the {@code <vaadin-login-overlay>} and
- * {@code <vaadin-login-form>} components.
- * On {@link LoginForm.LoginEvent} component becomes disabled.
- * Disabled component stops to process login events, however
- * the {@link LoginForm.ForgotPasswordEvent} event is processed anyway.
- * To enable use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
- * Setting error {@link #setError(boolean)} true makes component automatically enabled for
- * the next login attempt.
+ * {@code <vaadin-login-form>} components. On {@link LoginForm.LoginEvent}
+ * component becomes disabled. Disabled component stops to process login events,
+ * however the {@link LoginForm.ForgotPasswordEvent} event is processed anyway.
+ * To enable use the
+ * {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
+ * Setting error {@link #setError(boolean)} true makes component automatically
+ * enabled for the next login attempt.
  *
  * @author Vaadin Ltd
  */
@@ -53,7 +53,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     private static final String PROP_DISABLED = "disabled";
     private static final String PROP_ERROR = "error";
     private static final String PROP_NO_FORGOT_PASSWORD = "noForgotPassword";
-    
+
     private static final PropertyChangeListener NO_OP = event -> {
     };
 
@@ -74,15 +74,17 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     /**
      * Initializes a new AbstractLogin.
      *
-     * @param i18n internationalized messages to be used by this instance.
+     * @param i18n
+     *            internationalized messages to be used by this instance.
      */
     public AbstractLogin(LoginI18n i18n) {
         setI18n(i18n);
     }
 
     /**
-     * Sets the path where to send the form-data when a form is submitted.
-     * Once action is defined a {@link AbstractLogin.LoginEvent} is not fired anymore.
+     * Sets the path where to send the form-data when a form is submitted. Once
+     * action is defined a {@link AbstractLogin.LoginEvent} is not fired
+     * anymore.
      *
      * @see #getAction()
      */
@@ -101,16 +103,16 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     }
 
     /**
-     * Sets whether to show or hide the error message.
-     * The message can be set via {@link #setI18n(LoginI18n)}
+     * Sets whether to show or hide the error message. The message can be set
+     * via {@link #setI18n(LoginI18n)}
      *
      * Calling this method with {@code true} will also enable the component.
      *
      * @see #isError()
      *
      * @param error
-     *            {@code true} to show the error message and enable component for next login attempt,
-     *            {@code false} to hide an error
+     *            {@code true} to show the error message and enable component
+     *            for next login attempt, {@code false} to hide an error
      */
     public void setError(boolean error) {
         if (error) {
@@ -130,15 +132,18 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     }
 
     /**
-     * Sets whether to show or hide the forgot password button.
-     * The button is visible by default
+     * Sets whether to show or hide the forgot password button. The button is
+     * visible by default
      *
      * @see #isForgotPasswordButtonVisible()
      *
-     * @param forgotPasswordButtonVisible whether to display or hide the button
+     * @param forgotPasswordButtonVisible
+     *            whether to display or hide the button
      */
-    public void setForgotPasswordButtonVisible(boolean forgotPasswordButtonVisible) {
-        getElement().setProperty(PROP_NO_FORGOT_PASSWORD, !forgotPasswordButtonVisible);
+    public void setForgotPasswordButtonVisible(
+            boolean forgotPasswordButtonVisible) {
+        getElement().setProperty(PROP_NO_FORGOT_PASSWORD,
+                !forgotPasswordButtonVisible);
     }
 
     /**
@@ -154,7 +159,8 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     /**
      * Sets the internationalized messages to be used by this instance.
      *
-     * @param i18n the internationalized messages
+     * @param i18n
+     *            the internationalized messages
      * @see LoginI18n#createDefault()
      */
     public void setI18n(LoginI18n i18n) {
@@ -164,23 +170,25 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     /**
      * Adds `login` event listener
      */
-    public Registration addLoginListener(ComponentEventListener<LoginEvent> listener) {
+    public Registration addLoginListener(
+            ComponentEventListener<LoginEvent> listener) {
         return ComponentUtil.addListener(this, LoginEvent.class, listener);
     }
 
     /**
-     * Adds `forgotPassword` event listener. Event continues being process even if
-     * the component is not {@link #isEnabled()}.
+     * Adds `forgotPassword` event listener. Event continues being process even
+     * if the component is not {@link #isEnabled()}.
      */
     public Registration addForgotPasswordListener(
             ComponentEventListener<ForgotPasswordEvent> listener) {
-        return ComponentUtil.addListener(this, ForgotPasswordEvent.class, listener,
-                domReg -> domReg.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS));
+        return ComponentUtil.addListener(this, ForgotPasswordEvent.class,
+                listener, domReg -> domReg
+                        .setDisabledUpdateMode(DisabledUpdateMode.ALWAYS));
     }
 
     /**
-     * `login` is fired when the user either clicks Submit button or presses an Enter key.
-     * Event is fired only if client-side validation passed.
+     * `login` is fired when the user either clicks Submit button or presses an
+     * Enter key. Event is fired only if client-side validation passed.
      */
     @DomEvent(LOGIN_EVENT)
     public static class LoginEvent extends ComponentEvent<AbstractLogin> {
@@ -189,8 +197,8 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
         private String password;
 
         public LoginEvent(AbstractLogin source, boolean fromClient,
-                          @EventData("event.detail.username") String username,
-                          @EventData("event.detail.password") String password) {
+                @EventData("event.detail.username") String username,
+                @EventData("event.detail.password") String password) {
             super(source, fromClient);
             this.username = username;
             this.password = password;
@@ -209,7 +217,8 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * `forgot-password` is fired when the user clicks Forgot password button
      */
     @DomEvent("forgot-password")
-    public static class ForgotPasswordEvent extends ComponentEvent<AbstractLogin> {
+    public static class ForgotPasswordEvent
+            extends ComponentEvent<AbstractLogin> {
         public ForgotPasswordEvent(AbstractLogin source, boolean fromClient) {
             super(source, fromClient);
         }

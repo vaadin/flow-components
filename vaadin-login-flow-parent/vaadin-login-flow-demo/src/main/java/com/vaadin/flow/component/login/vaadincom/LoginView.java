@@ -61,10 +61,11 @@ public class LoginView extends DemoView {
         // source-example-heading: Login Form with internationalization
         LoginForm component = new LoginForm();
         Button updateI18nButton = new Button("Switch to Brazilian Portuguese",
-            event -> component.setI18n(createPortugueseI18n()));
+                event -> component.setI18n(createPortugueseI18n()));
         // end-source-example
 
-        addCard("Login Form with internationalization", createLayout(component), updateI18nButton);
+        addCard("Login Form with internationalization", createLayout(component),
+                updateI18nButton);
     }
 
     private void disabledButton() {
@@ -72,21 +73,21 @@ public class LoginView extends DemoView {
         // source-example-heading: Re-enabling login button after submission
         LoginForm component = new LoginForm();
 
-        // The login button is disabled when clicked to prevent multiple submissions.
+        // The login button is disabled when clicked to prevent multiple
+        // submissions.
         // To restore it, call component.setEnabled(true)
         Button restoreLogin = new Button("Restore login button",
-            event -> component.setEnabled(true));
+                event -> component.setEnabled(true));
 
         // Setting error to true also enables the login button.
         Button showError = new Button("Show error",
-            event -> component.setError(true));
+                event -> component.setError(true));
         // end-source-example
-        final String message =
-            "The login button is disabled when clicked to prevent multiple submissions."
+        final String message = "The login button is disabled when clicked to prevent multiple submissions."
                 + " To restore it, call component.setEnabled(true)";
         addCard("Re-enabling login button after submission", new Span(message),
-            createLayout(component),
-            new HorizontalLayout(restoreLogin, showError));
+                createLayout(component),
+                new HorizontalLayout(restoreLogin, showError));
 
     }
 
@@ -96,10 +97,11 @@ public class LoginView extends DemoView {
         LoginOverlay component = new LoginOverlay();
         component.addLoginListener(e -> component.close());
         Button open = new Button("Open login overlay",
-            e -> component.setOpened(true));
+                e -> component.setOpened(true));
 
         LoginI18n i18n = LoginI18n.createDefault();
-        i18n.setAdditionalInformation("To close the login form submit non-empty username and password");
+        i18n.setAdditionalInformation(
+                "To close the login form submit non-empty username and password");
         component.setI18n(i18n);
         // end-source-example
 
@@ -121,7 +123,8 @@ public class LoginView extends DemoView {
         component.addLoginListener(e -> component.close());
 
         LoginI18n i18n = LoginI18n.createDefault();
-        i18n.setAdditionalInformation("To close the login form submit non-empty username and password");
+        i18n.setAdditionalInformation(
+                "To close the login form submit non-empty username and password");
         component.setI18n(i18n);
 
         Button open = new Button("Open login overlay",
@@ -146,7 +149,7 @@ public class LoginView extends DemoView {
 
     // NOTE: heading is an unicode space
     // begin-source-example
-    // source-example-heading:  
+    // source-example-heading:
     private LoginI18n createPortugueseI18n() {
         final LoginI18n i18n = LoginI18n.createDefault();
 
@@ -160,10 +163,10 @@ public class LoginView extends DemoView {
         i18n.getForm().setForgotPassword("Esqueci minha senha");
         i18n.getErrorMessage().setTitle("Usuário/senha inválidos");
         i18n.getErrorMessage()
-            .setMessage("Confira seu usuário e senha e tente novamente.");
+                .setMessage("Confira seu usuário e senha e tente novamente.");
         i18n.setAdditionalInformation(
-            "Caso necessite apresentar alguma informação extra para o usuário"
-                + " (como credenciais padrão), este é o lugar.");
+                "Caso necessite apresentar alguma informação extra para o usuário"
+                        + " (como credenciais padrão), este é o lugar.");
         return i18n;
     }
     // end-source-example

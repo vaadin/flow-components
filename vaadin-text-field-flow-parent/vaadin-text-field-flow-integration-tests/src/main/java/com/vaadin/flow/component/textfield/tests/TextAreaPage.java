@@ -84,10 +84,8 @@ public class TextAreaPage extends Div {
                         event.getOldValue(), event.getValue())));
         textArea.setId("text-area-with-value-change-listener");
         message.setId("text-area-value");
-        add(textArea,
-                new ValueChangeModeButtonProvider(textArea)
-                        .getValueChangeModeRadios(),
-                message);
+        add(textArea, new ValueChangeModeButtonProvider(textArea)
+                .getValueChangeModeRadios(), message);
     }
 
     private void addMaxHeightFeature() {
@@ -122,11 +120,9 @@ public class TextAreaPage extends Div {
         field.setHelperText("Helper text");
         field.setId("helper-text-field");
 
-        NativeButton clearButton = new NativeButton(
-              "Clear helper text");
+        NativeButton clearButton = new NativeButton("Clear helper text");
         clearButton.setId("clear-helper-text-button");
-        clearButton.addClickListener(
-              event -> field.setHelperText(null));
+        clearButton.addClickListener(event -> field.setHelperText(null));
         add(field, clearButton);
     }
 
@@ -138,11 +134,9 @@ public class TextAreaPage extends Div {
         field.setHelperComponent(span);
         field.setId("helper-component-field");
 
-        NativeButton clearButton = new NativeButton(
-              "Clear helper component");
+        NativeButton clearButton = new NativeButton("Clear helper component");
         clearButton.setId("clear-helper-component-button");
-        clearButton.addClickListener(
-              event -> field.setHelperComponent(null));
+        clearButton.addClickListener(event -> field.setHelperComponent(null));
         add(field, clearButton);
     }
 }

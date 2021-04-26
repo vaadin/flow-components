@@ -20,13 +20,14 @@ public class RichTextEditorSetHtmlValuePage extends Div {
         rteHtmlValue.setId("rteHtmlValue");
         final Div rteValueChangeMode = new Div();
         rteValueChangeMode.setId("rteValueChangeMode");
-        final NativeButton button = new NativeButton("Set value",
-            e -> rte.asHtml().setValue(String.format("<h1>Test %d</h1>", ++i)));
+        final NativeButton button = new NativeButton("Set value", e -> rte
+                .asHtml().setValue(String.format("<h1>Test %d</h1>", ++i)));
         button.setId("setValueButton");
         add(rte, rteValue, rteHtmlValue, rteValueChangeMode, button);
-        Stream.of(ValueChangeMode.values()).map(
-            v -> createValueChangeModeSetterButton(v, rte, rteValueChangeMode))
-            .forEach(this::add);
+        Stream.of(ValueChangeMode.values())
+                .map(v -> createValueChangeModeSetterButton(v, rte,
+                        rteValueChangeMode))
+                .forEach(this::add);
         rte.addValueChangeListener(e -> {
             rteValue.setText(rte.getValue());
             rteHtmlValue.setText(rte.getHtmlValue());
@@ -35,14 +36,14 @@ public class RichTextEditorSetHtmlValuePage extends Div {
     }
 
     private static NativeButton createValueChangeModeSetterButton(
-        ValueChangeMode valueChangeMode, RichTextEditor rte,
-        Div rteValueChangeMode) {
+            ValueChangeMode valueChangeMode, RichTextEditor rte,
+            Div rteValueChangeMode) {
         final String text = valueChangeMode.toString();
         final NativeButton button = new NativeButton(
-            String.format("Set change mode to %s", text), e -> {
-            rte.setValueChangeMode(valueChangeMode);
-            rteValueChangeMode.setText(valueChangeMode.toString());
-        });
+                String.format("Set change mode to %s", text), e -> {
+                    rte.setValueChangeMode(valueChangeMode);
+                    rteValueChangeMode.setText(valueChangeMode.toString());
+                });
         button.setId(String.format("setChangeMode_%s", text));
         return button;
     }

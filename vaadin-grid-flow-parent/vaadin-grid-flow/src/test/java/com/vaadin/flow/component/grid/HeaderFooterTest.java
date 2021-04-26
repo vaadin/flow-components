@@ -631,10 +631,8 @@ public class HeaderFooterTest {
     @Test
     public void joinHeaders_joinAlreadyJoinedCells_shouldNotThrowException() {
         grid.appendHeaderRow();
-        grid.prependHeaderRow()
-                .join(firstColumn, secondColumn);
-        grid.prependHeaderRow()
-                .join(firstColumn, secondColumn, thirdColumn);
+        grid.prependHeaderRow().join(firstColumn, secondColumn);
+        grid.prependHeaderRow().join(firstColumn, secondColumn, thirdColumn);
     }
 
     // https://github.com/vaadin/vaadin-grid/issues/1928#issuecomment-659545963
@@ -644,7 +642,7 @@ public class HeaderFooterTest {
         HeaderRow header = grid.prependHeaderRow();
         header.join(header.getCells());
     }
- 
+
     private void assertHeaderRowOrder(HeaderRow... rows) {
         Assert.assertEquals("Grid returned unexpected amount of header rows",
                 rows.length, grid.getHeaderRows().size());

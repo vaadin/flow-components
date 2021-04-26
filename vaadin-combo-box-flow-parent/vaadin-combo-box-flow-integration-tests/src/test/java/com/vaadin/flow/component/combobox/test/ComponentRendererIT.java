@@ -36,7 +36,8 @@ public class ComponentRendererIT extends AbstractComponentIT {
     public void captionsForItemsExistWhenFirstAddingItems() {
         open();
 
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("before-renderer");
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("before-renderer");
 
         testItems(comboBox);
 
@@ -46,7 +47,8 @@ public class ComponentRendererIT extends AbstractComponentIT {
     public void captionsForItemsExistWhenFirstAddingRenderer() {
         open();
 
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("after-renderer");
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("after-renderer");
 
         testItems(comboBox);
     }
@@ -55,7 +57,8 @@ public class ComponentRendererIT extends AbstractComponentIT {
     public void captionsForItemsExistWhenFirstSettingDataProvider() {
         open();
 
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("dp-before-renderer");
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("dp-before-renderer");
 
         testItems(comboBox);
 
@@ -65,19 +68,25 @@ public class ComponentRendererIT extends AbstractComponentIT {
     public void captionsForItemsExistWhenFirstAddingRenderer_thenDataProvider() {
         open();
 
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("dp-after-renderer");
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("dp-after-renderer");
 
         testItems(comboBox);
     }
 
     private void testItems(TestBenchElement comboBox) {
-        executeScript("arguments[0].open(); return true;",comboBox);
-        TestBenchElement overlay = $(TestBenchElement.class).id("overlay").$(TestBenchElement.class).id("content");
-        ElementQuery<TestBenchElement> items = overlay.$("vaadin-combo-box-item");
+        executeScript("arguments[0].open(); return true;", comboBox);
+        TestBenchElement overlay = $(TestBenchElement.class).id("overlay")
+                .$(TestBenchElement.class).id("content");
+        ElementQuery<TestBenchElement> items = overlay
+                .$("vaadin-combo-box-item");
 
-        Assert.assertEquals("ComboBox should always contain 3 items", 3,items.all().size());
+        Assert.assertEquals("ComboBox should always contain 3 items", 3,
+                items.all().size());
 
-        items.all().forEach(item -> Assert.assertTrue("Component renderer not run as we have no VerticalLayout.", item.$(VerticalLayoutElement.class).exists()));
+        items.all().forEach(item -> Assert.assertTrue(
+                "Component renderer not run as we have no VerticalLayout.",
+                item.$(VerticalLayoutElement.class).exists()));
     }
 
     private List<?> getItems(WebElement combo) {

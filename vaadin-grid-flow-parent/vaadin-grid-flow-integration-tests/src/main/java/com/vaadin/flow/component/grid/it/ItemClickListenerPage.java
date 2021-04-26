@@ -56,7 +56,8 @@ public class ItemClickListenerPage extends Div {
             columnDblClickMsg.add(key == null ? "" : key);
         });
 
-        grid.setItemDetailsRenderer(new ComponentRenderer<>((SerializableFunction<String, Span>) ItemClickListenerPage::getDetailsComponent));
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(
+                (SerializableFunction<String, Span>) ItemClickListenerPage::getDetailsComponent));
         grid.setDetailsVisible("foo", false);
         grid.setDetailsVisible("bar", true);
 
@@ -65,7 +66,7 @@ public class ItemClickListenerPage extends Div {
 
     private static Span getDetailsComponent(String s) {
         Span result = new Span(s);
-        result.setId("details-"+s);
+        result.setId("details-" + s);
         return result;
     }
 
