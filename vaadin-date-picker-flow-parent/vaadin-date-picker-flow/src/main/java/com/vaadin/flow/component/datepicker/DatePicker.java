@@ -326,7 +326,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         if (locale == null) {
-            getUI().ifPresent(ui -> setLocale(ui.getLocale()));        	
+            getUI().ifPresent(ui -> setLocale(ui.getLocale()));
         } else if (languageTag != null) {
             setLocaleWithJS();
         }
