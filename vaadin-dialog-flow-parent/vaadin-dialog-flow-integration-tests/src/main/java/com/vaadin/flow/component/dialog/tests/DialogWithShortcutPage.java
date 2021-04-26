@@ -16,7 +16,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-@NpmPackage(value="@vaadin/vaadin-text-field", version = "3.0.2")
 @Route("vaadin-dialog/shortcuts")
 public class DialogWithShortcutPage extends VerticalLayout {
 
