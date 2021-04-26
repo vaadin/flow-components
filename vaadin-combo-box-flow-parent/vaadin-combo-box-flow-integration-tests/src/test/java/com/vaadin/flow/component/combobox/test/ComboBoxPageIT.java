@@ -62,8 +62,8 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
 
     @Test
     public void sizeRequestCount_setListDataProvider_sizeRequestedImmediately() {
-        ComboBoxElement combo =
-                $(ComboBoxElement.class).id("combobox-list-size-request-count");
+        ComboBoxElement combo = $(ComboBoxElement.class)
+                .id("combobox-list-size-request-count");
         WebElement span = findElement(By.id("list-size-request-count-span"));
 
         // check the data provider has been invoked immediately
@@ -79,7 +79,8 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         findElement(By.id("size-request-count-update-provider")).click();
 
         // check that the data provider has been changed
-        waitUntil(driver -> "new item".equals(getItemLabel(getItems(combo), 0)));
+        waitUntil(
+                driver -> "new item".equals(getItemLabel(getItems(combo), 0)));
     }
 
     @Test

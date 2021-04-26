@@ -71,8 +71,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("space-between",
                 vlayout.getCssValue("justify-content"));
 
-        RadioButtonGroupElement rbg = $(
-                RadioButtonGroupElement.class).id("vertical-layout-justify-content-radio-button");
+        RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
+                .id("vertical-layout-justify-content-radio-button");
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.START.name().toLowerCase());
         Assert.assertEquals("flex-start",
@@ -104,8 +104,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
-        RadioButtonGroupElement rbg = $(
-                RadioButtonGroupElement.class).id("vertical-layout-alignment-radio-button");
+        RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
+                .id("vertical-layout-alignment-radio-button");
 
         rbg.selectByText(FlexComponent.Alignment.END.name().toLowerCase());
         waitUntil(driver -> "flex-end"
@@ -167,8 +167,7 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         WebElement vlayout = layout.findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        Assert.assertEquals("center",
-                vlayout.getCssValue("justify-content"));
+        Assert.assertEquals("center", vlayout.getCssValue("justify-content"));
         WebElement component = layout.findElement(By.id("center"));
         Assert.assertEquals("center", component.getCssValue("align-self"));
     }

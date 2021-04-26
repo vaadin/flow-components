@@ -64,9 +64,8 @@ public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
     }
 
     protected void setUnknownCount() {
-        findElement(
-                By.id(AbstractItemCountGridPage.UNDEFINED_SIZE_BUTTON_ID))
-                        .click();
+        findElement(By.id(AbstractItemCountGridPage.UNDEFINED_SIZE_BUTTON_ID))
+                .click();
     }
 
     protected void setCountCallback() {
@@ -87,8 +86,8 @@ public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
     }
 
     protected void setEstimate(int estimate) {
-        $(IntegerFieldElement.class).id(
-                AbstractItemCountGridPage.ITEM_COUNT_ESTIMATE_INPUT)
+        $(IntegerFieldElement.class)
+                .id(AbstractItemCountGridPage.ITEM_COUNT_ESTIMATE_INPUT)
                 .setValue(estimate + "");
     }
 

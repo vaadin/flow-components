@@ -45,11 +45,15 @@ public class CheckboxPage extends Div {
      * Creates a new instance.
      */
     public CheckboxPage() {
-        add(createInitialValueTest(false, false), createInitialValueTest(true, false), createInitialValueTest(false, true), createInitialValueTest(true, true));
+        add(createInitialValueTest(false, false),
+                createInitialValueTest(true, false),
+                createInitialValueTest(false, true),
+                createInitialValueTest(true, true));
     }
 
     // https://github.com/vaadin/vaadin-checkbox-flow/issues/22
-    private Component createInitialValueTest(boolean checked, boolean indeterminate) {
+    private Component createInitialValueTest(boolean checked,
+            boolean indeterminate) {
         int id = checked ? 1 : 0;
         id += indeterminate ? 2 : 0;
 
@@ -61,20 +65,23 @@ public class CheckboxPage extends Div {
         Label valueLabel = new Label("Value: " + checkbox2.getValue());
         valueLabel.setId("value-label-" + id);
 
-        Label indeterminateLabel = new Label("Indeterminate: " + checkbox2.isIndeterminate());
+        Label indeterminateLabel = new Label(
+                "Indeterminate: " + checkbox2.isIndeterminate());
         indeterminateLabel.setId("indeterminate-label-" + id);
 
         AtomicInteger checkedCounter = new AtomicInteger();
 
         checkbox2.addValueChangeListener(event -> {
-            valueLabel.setText("Value: " + checkedCounter.incrementAndGet() + " " + event.getValue());
+            valueLabel.setText("Value: " + checkedCounter.incrementAndGet()
+                    + " " + event.getValue());
         });
 
         AtomicInteger indeterminateCounter = new AtomicInteger();
 
-        checkbox2.getElement().addPropertyChangeListener("indeterminate", event ->
-                indeterminateLabel.setText("Indeterminate: " + indeterminateCounter.incrementAndGet() + " " + event.getValue())
-        );
+        checkbox2.getElement().addPropertyChangeListener("indeterminate",
+                event -> indeterminateLabel.setText("Indeterminate: "
+                        + indeterminateCounter.incrementAndGet() + " "
+                        + event.getValue()));
 
         return new Div(checkbox2, valueLabel, indeterminateLabel);
     }

@@ -71,7 +71,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         // Check that the client filter does not affect the item handling API
         // in data view
         Assert.assertArrayEquals("The client filter shouldn't impact the items",
-                new String[] { "foo", "bar", "banana" }, filteredItems.toArray());
+                new String[] { "foo", "bar", "banana" },
+                filteredItems.toArray());
 
         dataView.setFilter(item -> item.length() == 3);
         filteredItems = dataView.getItems();
@@ -83,7 +84,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         filteredItems = dataView.getItems();
         Assert.assertArrayEquals(
                 "Unexpected data set after removing in-memory filter",
-                new String[] { "foo", "bar", "banana" }, filteredItems.toArray());
+                new String[] { "foo", "bar", "banana" },
+                filteredItems.toArray());
     }
 
     @Test
@@ -106,20 +108,20 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
         // Check that the client filter does not affect the item count
         Assert.assertEquals(
-                "The client filter shouldn't impact the items count",
-                3, itemCount);
+                "The client filter shouldn't impact the items count", 3,
+                itemCount);
 
         dataView.setFilter(item -> item.length() == 3);
         itemCount = dataView.getItemCount();
-        Assert.assertEquals("Unexpected item count after server side filter",
-                2, itemCount);
+        Assert.assertEquals("Unexpected item count after server side filter", 2,
+                itemCount);
 
         // Remove the filters
         dataView.removeFilters();
         itemCount = dataView.getItemCount();
         Assert.assertEquals(
-                "Unexpected item count after removing server side filter",
-                3, itemCount);
+                "Unexpected item count after removing server side filter", 3,
+                itemCount);
     }
 
     @Test
@@ -136,7 +138,8 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
                 }, null, null, component.getElement().getNode());
 
         ComboBoxListDataView<Item> dataView = new ComboBoxListDataView<>(
-                dataCommunicator, component, (filter, sorting) -> {});
+                dataCommunicator, component, (filter, sorting) -> {
+                });
         DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
         items.forEach(keyMapper::key);
 

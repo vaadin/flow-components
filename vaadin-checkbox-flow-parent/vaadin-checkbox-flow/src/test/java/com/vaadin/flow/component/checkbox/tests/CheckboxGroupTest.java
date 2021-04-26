@@ -378,17 +378,16 @@ public class CheckboxGroupTest {
     public void dataViewForFaultyDataProvider_throwsException() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(
-                "CheckboxGroupListDataView only supports 'ListDataProvider' " +
-                        "or it's subclasses, but was given a " +
-                        "'AbstractBackEndDataProvider'");
+                "CheckboxGroupListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'");
 
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         final CheckboxGroupListDataView<String> listDataView = checkboxGroup
                 .setItems(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Stream.of("one"),
-                        query -> 1);
+                .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
         checkboxGroup.setDataProvider(dataProvider);
 
@@ -518,8 +517,8 @@ public class CheckboxGroupTest {
 
         checkboxGroup
                 .setValue(Collections.singleton(new CustomItem(null, "First")));
-        Assert.assertNull(checkboxGroup.getSelectedItems()
-                .stream().findFirst().get().getId());
+        Assert.assertNull(checkboxGroup.getSelectedItems().stream().findFirst()
+                .get().getId());
     }
 
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(
@@ -643,8 +642,10 @@ public class CheckboxGroupTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof CustomItem)) return false;
+            if (this == o)
+                return true;
+            if (!(o instanceof CustomItem))
+                return false;
             CustomItem that = (CustomItem) o;
             return Objects.equals(getName(), that.getName());
         }

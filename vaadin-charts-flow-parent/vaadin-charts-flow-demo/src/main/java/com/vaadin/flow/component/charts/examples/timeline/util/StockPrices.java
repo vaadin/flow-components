@@ -65,7 +65,7 @@ public class StockPrices {
         private double close;
 
         private OhlcData(long date, double open, double high, double low,
-                         double close) {
+                double close) {
             super(date);
             this.open = open;
             this.high = high;
@@ -89,7 +89,6 @@ public class StockPrices {
             return close;
         }
     }
-
 
     public static class JsonData {
         private Number[][] data;
@@ -137,7 +136,7 @@ public class StockPrices {
         JsonData jsonData = readJsonDataFrom(filename);
 
         List<PriceData> data = new ArrayList<>();
-        for(int i = 0; i < jsonData.data.length; ++i) {
+        for (int i = 0; i < jsonData.data.length; ++i) {
             Number[] row = jsonData.data[i];
             data.add(new PriceData(row[0].longValue(), row[1].doubleValue()));
         }
@@ -149,9 +148,10 @@ public class StockPrices {
         JsonData jsonData = readJsonDataFrom(filename);
 
         List<RangeData> data = new ArrayList<>();
-        for(int i = 0; i < jsonData.data.length; ++i) {
+        for (int i = 0; i < jsonData.data.length; ++i) {
             Number[] row = jsonData.data[i];
-            data.add(new RangeData(row[0].longValue(), row[1].doubleValue(), row[2].doubleValue()));
+            data.add(new RangeData(row[0].longValue(), row[1].doubleValue(),
+                    row[2].doubleValue()));
         }
 
         return data;
@@ -161,10 +161,11 @@ public class StockPrices {
         JsonData jsonData = readJsonDataFrom(filename);
 
         List<OhlcData> data = new ArrayList<>();
-        for(int i = 0; i < jsonData.data.length; ++i) {
+        for (int i = 0; i < jsonData.data.length; ++i) {
             Number[] row = jsonData.data[i];
             data.add(new OhlcData(row[0].longValue(), row[1].doubleValue(),
-                    row[2].doubleValue(), row[3].doubleValue(), row[4].doubleValue()));
+                    row[2].doubleValue(), row[3].doubleValue(),
+                    row[4].doubleValue()));
         }
 
         return data;
@@ -175,11 +176,11 @@ public class StockPrices {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(
                     new InputStreamReader(
-                            StockPrices.class.getResourceAsStream(
-                                    filename)), JsonData.class);
+                            StockPrices.class.getResourceAsStream(filename)),
+                    JsonData.class);
 
         } catch (IOException e) {
-            throw new RuntimeException("Cannot read data from "+filename, e);
+            throw new RuntimeException("Cannot read data from " + filename, e);
         }
     }
 

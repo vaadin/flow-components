@@ -13,17 +13,16 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * The shape of the pane background. When solid, the background is circular.
- * When arc, the background extends only from the min to the max of the value axis.
+ * When arc, the background extends only from the min to the max of the value
+ * axis.
  *
  * Defaults to solid.
  */
 public enum BackgroundShape implements ChartEnum {
 
-    SOLID("solid"),
-    ARC("arc");
+    SOLID("solid"), ARC("arc");
 
     private final String shape;
 

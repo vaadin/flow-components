@@ -47,15 +47,17 @@ public class AvatarGroupPage extends Div {
         });
         updateItems.setId("update-items");
 
-        NativeButton setItemsWithResource = new NativeButton("Set new item with StreamResource image", e -> {
-            StreamResource resource = new StreamResource("avatar-group-img",
-                    () -> getClass().getResourceAsStream(
-                            "/META-INF/resources/frontend/images/user.png"));
-            AvatarGroupItem newItem = new AvatarGroupItem();
-            newItem.setImageResource(resource);
+        NativeButton setItemsWithResource = new NativeButton(
+                "Set new item with StreamResource image", e -> {
+                    StreamResource resource = new StreamResource(
+                            "avatar-group-img",
+                            () -> getClass().getResourceAsStream(
+                                    "/META-INF/resources/frontend/images/user.png"));
+                    AvatarGroupItem newItem = new AvatarGroupItem();
+                    newItem.setImageResource(resource);
 
-            avatarGroup.setItems(newItem);
-        });
+                    avatarGroup.setItems(newItem);
+                });
         setItemsWithResource.setId("set-items-with-resource");
 
         add(avatarGroup, updateItems, setItemsWithResource);

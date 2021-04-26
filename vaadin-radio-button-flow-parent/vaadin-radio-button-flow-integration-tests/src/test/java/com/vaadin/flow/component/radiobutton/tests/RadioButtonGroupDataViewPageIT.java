@@ -45,7 +45,6 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
     private static final String FIRST = "first";
     private static final String SECOND = "second";
 
-
     @Before
     public void openPage() {
         open();
@@ -275,16 +274,14 @@ public class RadioButtonGroupDataViewPageIT extends AbstractComponentIT {
 
         findElement(By.id(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON)).click();
 
-        selectedIdsSpan = findElement(
-                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        selectedIdsSpan = findElement(By.id(RADIO_GROUP_SELECTED_ID_SPAN));
         Assert.assertEquals("Selected item ids should be", "2",
                 selectedIdsSpan.getText());
 
         findElement(By.id(RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON))
                 .click();
 
-        selectedIdsSpan = findElement(
-                By.id(RADIO_GROUP_SELECTED_ID_SPAN));
+        selectedIdsSpan = findElement(By.id(RADIO_GROUP_SELECTED_ID_SPAN));
         Assert.assertEquals("Selected item ids should be", "3",
                 selectedIdsSpan.getText());
     }

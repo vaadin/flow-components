@@ -12,14 +12,16 @@ public class LoginFormI18nTest {
         Assert.assertEquals("Log in", i18n.getForm().getTitle());
         Assert.assertEquals("Username", i18n.getForm().getUsername());
         Assert.assertEquals("Password", i18n.getForm().getPassword());
-        Assert.assertEquals("Forgot password", i18n.getForm().getForgotPassword());
+        Assert.assertEquals("Forgot password",
+                i18n.getForm().getForgotPassword());
         Assert.assertEquals("Log in", i18n.getForm().getSubmit());
 
-        Assert.assertEquals("Incorrect username or password", i18n.getErrorMessage().getTitle());
-        Assert.assertEquals("Check that you have entered the correct username and password and try again.",
+        Assert.assertEquals("Incorrect username or password",
+                i18n.getErrorMessage().getTitle());
+        Assert.assertEquals(
+                "Check that you have entered the correct username and password and try again.",
                 i18n.getErrorMessage().getMessage());
 
-        Assert.assertEquals(null,
-                i18n.getAdditionalInformation());
+        Assert.assertEquals(null, i18n.getAdditionalInformation());
     }
 }

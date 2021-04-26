@@ -82,7 +82,8 @@ public class Bullet extends AbstractChartExample {
         yAxis.addPlotBand(new PlotBand(plotBandY3, plotBandY4,
                 new SolidColor("#bbbbbb")));
         conf.getxAxis().addCategory(category);
-        conf.getTooltip().setPointFormat("<b>{point.y}</b> (with target at {point.target})");
+        conf.getTooltip().setPointFormat(
+                "<b>{point.y}</b> (with target at {point.target})");
         PlotOptionsBullet options = new PlotOptionsBullet();
         options.setPointPadding(0.25);
         options.setBorderWidth(0);

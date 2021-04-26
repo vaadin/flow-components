@@ -62,15 +62,16 @@ public class ClearValuePage extends Div {
                 event -> comboBoxWithAllowCustomValue.setValue(null));
         setNullCustom.setId(BUTTON_CUSTOM_VALUE_SET_NULL_ID);
 
-        NativeButton clearCustom = new NativeButton("Clear combo box with custom value",
+        NativeButton clearCustom = new NativeButton(
+                "Clear combo box with custom value",
                 event -> comboBoxWithAllowCustomValue.clear());
         clearCustom.setId(BUTTON_CUSTOM_VALUE_CLEAR_ID);
 
         Div valueMessages = new Div();
         valueMessages.setId("value-messages");
 
-        ComboBox<String> comboBoxWithClearButton = new ComboBox<>("Combo box with clear button", "one",
-                INITIAL_VALUE, "three");
+        ComboBox<String> comboBoxWithClearButton = new ComboBox<>(
+                "Combo box with clear button", "one", INITIAL_VALUE, "three");
         comboBoxWithClearButton.setValue(INITIAL_VALUE);
         comboBoxWithClearButton.setClearButtonVisible(true);
         comboBoxWithClearButton.setId(COMBO_BOX_WITH_CLEAR_BUTTON_ID);
@@ -78,8 +79,9 @@ public class ClearValuePage extends Div {
         comboBoxWithClearButton.addValueChangeListener(e -> valueMessages.add(
                 new Paragraph(e.getValue() == null ? "null" : e.getValue())));
 
-        add(new Div(comboBox, setNull, clear), new Div(
-                comboBoxWithAllowCustomValue, setNullCustom, clearCustom),
+        add(new Div(comboBox, setNull, clear),
+                new Div(comboBoxWithAllowCustomValue, setNullCustom,
+                        clearCustom),
                 new Div(comboBoxWithClearButton, valueMessages));
     }
 }

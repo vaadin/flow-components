@@ -82,21 +82,22 @@ public class RadioButtonGroupView extends DemoView {
         // source-example-heading: Helper text
         RadioButtonGroup<String> radioGroupHelperText = new RadioButtonGroup<>();
         radioGroupHelperText.setLabel("Label");
-        radioGroupHelperText.setItems("Option one", "Option two", "Option three");
+        radioGroupHelperText.setItems("Option one", "Option two",
+                "Option three");
         radioGroupHelperText.setHelperText("Helper text");
 
         RadioButtonGroup<String> radioGroupHelperComponent = new RadioButtonGroup<>();
         radioGroupHelperComponent.setLabel("Label");
-        radioGroupHelperComponent.setItems("Option one", "Option two", "Option three");
-        radioGroupHelperComponent.setHelperComponent(new Span("Helper text"));;
+        radioGroupHelperComponent.setItems("Option one", "Option two",
+                "Option three");
+        radioGroupHelperComponent.setHelperComponent(new Span("Helper text"));
+        ;
 
         add(radioGroupHelperText, radioGroupHelperComponent);
         // end-source-example
 
         addCard("Helper text", radioGroupHelperText, radioGroupHelperComponent);
     }
-
-    
 
     private void entityList() {
         // begin-source-example
@@ -310,8 +311,7 @@ public class RadioButtonGroupView extends DemoView {
         Button removeButton = new Button("Remove from Options", click -> {
             int itemCount = dataView.getItemCount();
             if (itemCount > 0) {
-                dataView.removeItem(
-                        dataView.getItem(itemCount - 1));
+                dataView.removeItem(dataView.getItem(itemCount - 1));
             }
         });
         // end-source-example
@@ -367,7 +367,7 @@ public class RadioButtonGroupView extends DemoView {
         below.setItems("Option one", "Option two", "Option three");
         below.setValue("Option one");
         below.setHelperText("Helper text below");
-        
+
         RadioButtonGroup<String> above = new RadioButtonGroup<>();
         above.setLabel("Label");
         above.setItems("Option one", "Option two", "Option three");

@@ -46,8 +46,11 @@ public class BinderValidationPage extends Div {
             timeFieldElement.setProperty("label", label == null ? "" : label);
         });
 
-        binder.forField(timePicker).asRequired().withValidator(value -> value != null &&
-                value.compareTo(LocalTime.of(15, 0, 0)) > -1, BINDER_ERROR_MSG)
+        binder.forField(timePicker).asRequired()
+                .withValidator(
+                        value -> value != null
+                                && value.compareTo(LocalTime.of(15, 0, 0)) > -1,
+                        BINDER_ERROR_MSG)
                 .bind(AData::getTime, AData::setTime);
 
         add(timePicker);

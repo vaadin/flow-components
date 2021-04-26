@@ -158,8 +158,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public enum NestedNullBehavior {
         /**
-         * throw a NullPointerException if there is a nested
-         * <code>null</code> value
+         * throw a NullPointerException if there is a nested <code>null</code>
+         * value
          */
         THROW,
         /**
@@ -1499,16 +1499,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             BiFunction<Renderer<T>, String, C> columnFactory) {
         String columnId = createColumnId(false);
 
-        C column = addColumn(new ColumnPathRenderer<T>(columnId,
-                item -> formatValueToSendToTheClient(
-                        applyValueProvider(valueProvider, item))),
+        C column = addColumn(
+                new ColumnPathRenderer<T>(columnId,
+                        item -> formatValueToSendToTheClient(
+                                applyValueProvider(valueProvider, item))),
                 columnFactory);
         ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
-                applyValueProvider(valueProvider,a), applyValueProvider(valueProvider,b)));
+                applyValueProvider(valueProvider, a),
+                applyValueProvider(valueProvider, b)));
         return column;
     }
 
-    private Object applyValueProvider(ValueProvider<T, ?> valueProvider, T item) {
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
+            T item) {
         Object value;
         try {
             value = valueProvider.apply(item);
@@ -2410,17 +2413,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // We don't use DataProvider.withConvertedFilter() here because it's
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<T, Void> convertedDataProvider =
-                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
-                        inMemoryDataProvider) {
-                    @Override
-                    protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
-                        // Just ignore the query filter (Void) and apply the
-                        // predicate only
-                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                                .orElse(item -> true);
-                    }
-                };
+        DataProvider<T, Void> convertedDataProvider = new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                inMemoryDataProvider) {
+            @Override
+            protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                // Just ignore the query filter (Void) and apply the
+                // predicate only
+                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        .orElse(item -> true);
+            }
+        };
         return setItems(convertedDataProvider);
     }
 
@@ -3101,22 +3103,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable
     private void select(String key) {
-        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::selectFromClient);
+        findByKey(String.valueOf(key))
+                .ifPresent(getSelectionModel()::selectFromClient);
     }
 
     @ClientCallable
     private void deselect(String key) {
-        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::deselectFromClient);
+        findByKey(String.valueOf(key))
+                .ifPresent(getSelectionModel()::deselectFromClient);
     }
 
     private Optional<T> findByKey(String key) {
         Objects.requireNonNull(key);
-        Optional<T> item = Optional.ofNullable(getDataCommunicator().getKeyMapper().get(key));
+        Optional<T> item = Optional
+                .ofNullable(getDataCommunicator().getKeyMapper().get(key));
         if (!item.isPresent()) {
-            LoggerFactory.getLogger(Grid.class)
-                    .debug("Key not found: %s. "
-                            + "This can happen due to user action while changing"
-                            + " the data provider.", key);
+            LoggerFactory.getLogger(Grid.class).debug("Key not found: %s. "
+                    + "This can happen due to user action while changing"
+                    + " the data provider.", key);
         }
         return item;
     }
@@ -3136,9 +3140,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (key == null) {
             detailsManager.setDetailsVisibleFromClient(Collections.emptySet());
         } else {
-            findByKey(key)
-                .map(Collections::singleton)
-                .ifPresent(detailsManager::setDetailsVisibleFromClient);
+            findByKey(key).map(Collections::singleton)
+                    .ifPresent(detailsManager::setDetailsVisibleFromClient);
         }
     }
 
@@ -3195,7 +3198,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
-        if (getDataProvider() != null && dataProviderChangeRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderChangeRegistration == null) {
             handleDataProviderChange(getDataProvider());
         }
     }
@@ -3405,8 +3409,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(property);
         Objects.requireNonNull(valueProvider);
 
-        return addDataGenerator((item, data) -> data.put(property,
-                JsonSerializer.toJson(applyValueProvider(valueProvider,item))));
+        return addDataGenerator(
+                (item, data) -> data.put(property, JsonSerializer
+                        .toJson(applyValueProvider(valueProvider, item))));
     }
 
     @Override
@@ -3501,23 +3506,23 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Adds a listener to the grid that will be notified, when a cell has been
-     * focused.
-     * <br><br>
+     * focused. <br>
+     * <br>
      * The listener will be notified, when
      * <ul>
-     *     <li>the navigation focus of a cell gets activated</li>
-     *     <li>the focus is restored to the browser if a cell had navigation
-     *     focus before the focus was lost</li>
-     *     <li>the navigation focus moves between header/body/footer
-     *     sections</li>
-     * </ul><br>
+     * <li>the navigation focus of a cell gets activated</li>
+     * <li>the focus is restored to the browser if a cell had navigation focus
+     * before the focus was lost</li>
+     * <li>the navigation focus moves between header/body/footer sections</li>
+     * </ul>
+     * <br>
      * The listener will <b>not</b> be notified, when
      * <ul>
-     *     <li>the focus changes between focusable elements in the Grid
-     *     cells ("interaction mode")</li>
-     *     <li>on Grid Pro edit mode navigation ("interaction mode")</li>
-     *     <li>the focus changes between focusable elements in the cells in
-     *     Flow Grid's editor mode ("interaction mode")</li>
+     * <li>the focus changes between focusable elements in the Grid cells
+     * ("interaction mode")</li>
+     * <li>on Grid Pro edit mode navigation ("interaction mode")</li>
+     * <li>the focus changes between focusable elements in the cells in Flow
+     * Grid's editor mode ("interaction mode")</li>
      * </ul>
      *
      * @param listener
@@ -4136,7 +4141,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> getElement().executeJs("this.scrollToIndex(this._effectiveSize)")));
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
@@ -4153,13 +4160,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Set the behavior when facing nested <code>null</code> values. By default the value
-     * is <code>NestedNullBehavior.THROW</code>.
+     * Set the behavior when facing nested <code>null</code> values. By default
+     * the value is <code>NestedNullBehavior.THROW</code>.
      *
-     * @param nestedNullBehavior the behavior when facing nested <code>null</code> values.
+     * @param nestedNullBehavior
+     *            the behavior when facing nested <code>null</code> values.
      */
     public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
-    	this.nestedNullBehavior = nestedNullBehavior;
+        this.nestedNullBehavior = nestedNullBehavior;
     }
 
     /**
@@ -4168,7 +4176,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return The current behavior when facing nested <code>null</code> values.
      */
     public NestedNullBehavior getNestedNullBehavior() {
-    	return nestedNullBehavior;
+        return nestedNullBehavior;
     }
 
     private void onInMemoryFilterOrSortingChange(
@@ -4188,8 +4196,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // the filter slot type into in-memory filter (predicate).
         @SuppressWarnings("unchecked")
         SerializableConsumer<SerializablePredicate<T>> inMemoryFilter = (SerializableConsumer<SerializablePredicate<T>>) filterSlot;
-        inMemoryFilter
-                .accept(componentInMemoryFilter);
+        inMemoryFilter.accept(componentInMemoryFilter);
     }
 
     /**
@@ -4206,12 +4213,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         final SerializableComparator<T> currentClientSorting = createSortingComparator();
         if (componentSorting != null) {
             if (currentClientSorting != null) {
-                getDataCommunicator().setInMemorySorting(
-                        combineSortings(currentClientSorting,
-                                componentSorting));
+                getDataCommunicator().setInMemorySorting(combineSortings(
+                        currentClientSorting, componentSorting));
             } else {
-                getDataCommunicator().setInMemorySorting(
-                        componentSorting);
+                getDataCommunicator().setInMemorySorting(componentSorting);
             }
         } else {
             getDataCommunicator().setInMemorySorting(currentClientSorting);

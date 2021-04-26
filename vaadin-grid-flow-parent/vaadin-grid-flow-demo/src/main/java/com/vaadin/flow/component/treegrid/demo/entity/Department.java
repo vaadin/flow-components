@@ -45,7 +45,6 @@ public class Department {
         this.parent = parent;
     }
 
-
     @Override
     public String toString() {
         return name;

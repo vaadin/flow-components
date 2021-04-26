@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * Symbol that is fetched from the url, implementing ChartEnum to provide
  * correct serialization

@@ -14,7 +14,6 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-checkbox-test-demo")
 public class CheckboxDemoPage extends DemoView {
 
-
     @Override
     public void initView() {
 
@@ -29,8 +28,10 @@ public class CheckboxDemoPage extends DemoView {
     @Override
     public void populateSources() {
         // The body of this method is kept empty because no source population
-        // is needed for integration tests. CheckboxDemoPage is only used for testing.
-        // Old demos have been moved to integration tests and separated from demos.
+        // is needed for integration tests. CheckboxDemoPage is only used for
+        // testing.
+        // Old demos have been moved to integration tests and separated from
+        // demos.
     }
 
     private void addDefaultCheckbox() {
@@ -113,4 +114,3 @@ public class CheckboxDemoPage extends DemoView {
         checkbox.setId("html-checkbox");
     }
 }
-

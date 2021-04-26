@@ -22,8 +22,7 @@ public class SelectListDataViewIT extends AbstractComponentIT {
     public void init() {
         open();
 
-        select = $(SelectElement.class)
-                .id(SelectListDataViewPage.SELECT);
+        select = $(SelectElement.class).id(SelectListDataViewPage.SELECT);
 
         otherSelect = $(SelectElement.class)
                 .id(SelectListDataViewPage.OTHER_SELECT);
@@ -78,8 +77,7 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected item count after adding a new item in"
                 + " first select", 4, select.getItems().size());
         Assert.assertEquals("Wrong name for added person in first select",
-                "Peter",
-                select.getItems().get(3).getText());
+                "Peter", select.getItems().get(3).getText());
 
         Assert.assertEquals("Unexpected item count after adding a new item in"
                 + " second select", 4, otherSelect.getItems().size());

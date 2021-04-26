@@ -40,7 +40,6 @@ public class DialogView extends Div {
 
     private static final String BUTTON_CAPTION = "Open dialog";
 
-
     public DialogView() {
         addBasicDialog();
         addConfirmationDialog();
@@ -123,7 +122,7 @@ public class DialogView extends Div {
         });
 
         button.setId("focus-dialog-button");
-        add( button);
+        add(button);
     }
 
     private void addStyledDialogContent() {
@@ -136,9 +135,7 @@ public class DialogView extends Div {
         content.setText("This component is styled using global styles");
         dialog.add(content);
 
-        String styles = ".my-style { "
-                + "  color: red;"
-                + " }";
+        String styles = ".my-style { " + "  color: red;" + " }";
 
         /*
          * The code below register the style file dynamically. Normally you

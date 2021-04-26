@@ -153,9 +153,8 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
 
         TestBenchElement subMenuOverlay = $(OVERLAY_TAG).all().get(1);
 
-        TestBenchElement overlayContainer = subMenuOverlay.$("vaadin" +
-                "-context-menu-list-box")
-                .first();
+        TestBenchElement overlayContainer = subMenuOverlay
+                .$("vaadin" + "-context-menu-list-box").first();
         List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
         Assert.assertEquals("vaadin-context-menu-item",

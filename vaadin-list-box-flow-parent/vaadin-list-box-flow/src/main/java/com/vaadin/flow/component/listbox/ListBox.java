@@ -42,7 +42,7 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
     }
 
     private static <T> T presentationToModel(ListBox<T> listBox,
-                                             Integer selectedIndex) {
+            Integer selectedIndex) {
         if (selectedIndex == null || selectedIndex.intValue() == -1) {
             return null;
         }
@@ -52,16 +52,15 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
     }
 
     private static <T> Integer modelToPresentation(ListBox<T> listBox,
-                                                   T selectedItem) {
+            T selectedItem) {
         if (selectedItem == null) {
             return -1;
         }
 
         List<VaadinItem<T>> itemComponents = listBox.getItemComponents();
-        return IntStream.range(0, itemComponents.size()).filter(
-                idx -> listBox.getItemId(selectedItem)
-                        .equals(listBox.getItemId(itemComponents.get(idx)
-                                .getItem())))
+        return IntStream.range(0, itemComponents.size())
+                .filter(idx -> listBox.getItemId(selectedItem).equals(
+                        listBox.getItemId(itemComponents.get(idx).getItem())))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException(
                         "Could not find given value from the item set"));
     }

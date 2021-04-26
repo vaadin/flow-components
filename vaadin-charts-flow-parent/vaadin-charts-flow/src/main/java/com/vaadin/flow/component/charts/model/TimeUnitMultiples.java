@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * Class used to define allowed multiples a time unit is allowed to be grouped
  * to.
