@@ -22,9 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -51,19 +49,6 @@ public class DatePickerTest {
             super(TEST_VALUE, null, String.class, value -> null, value -> null,
                     true);
         }
-    }
-
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
