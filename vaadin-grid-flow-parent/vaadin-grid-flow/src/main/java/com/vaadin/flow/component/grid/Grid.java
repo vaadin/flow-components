@@ -3500,6 +3500,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Adds a listener to the grid that will be notified, when a cell has been
+     * focused.
+     * <br><br>
+     * The listener will be notified, when
+     * <ul>
+     *     <li>the navigation focus of a cell gets activated</li>
+     *     <li>the focus is restored to the browser if a cell had navigation
+     *     focus before the focus was lost</li>
+     *     <li>the navigation focus moves between header/body/footer
+     *     sections</li>
+     * </ul><br>
+     * The listener will <b>not</b> be notified, when
+     * <ul>
+     *     <li>the focus changes between focusable elements in the Grid
+     *     cells ("interaction mode")</li>
+     *     <li>on Grid Pro edit mode navigation ("interaction mode")</li>
+     *     <li>the focus changes between focusable elements in the cells in
+     *     Flow Grid's editor mode ("interaction mode")</li>
+     * </ul>
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Registration addCellFocusListener(
+            ComponentEventListener<CellFocusEvent<T>> listener) {
+        return addListener(CellFocusEvent.class,
+                (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
      * Enables or disables the vertical scrolling on the Grid web component. By
      * default, the scrolling is enabled.
      *
