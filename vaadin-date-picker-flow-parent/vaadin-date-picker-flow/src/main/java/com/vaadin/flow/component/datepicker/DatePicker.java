@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -46,7 +47,9 @@ import elemental.json.JsonObject;
  */
 @JsModule("./datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation {
+        implements HasSize, HasValidation, HasHelper {
+
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private DatePickerI18n i18n;
 
@@ -109,8 +112,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -332,6 +333,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         if (i18n != null) {
             setI18nWithJS();
         }
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     private void initConnector() {
@@ -620,6 +622,25 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public String getName() {
         return getNameString();
+    }
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @param autoOpen Value for the auto open property,
+     */
+    public void setAutoOpen(boolean autoOpen) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+    }
+
+
+    /**
+     * When auto open is enabled, the dropdown will open when the field is clicked.
+     *
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
     }
 
     /**

@@ -14,45 +14,13 @@
     <packaging>jar</packaging>
 
     <name>component</name>
-
+    <properties>
+        <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+    </properties>
     <dependencies>
     </dependencies>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>bundle-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-SymbolicName>${project.groupId}.flow.component.proComponent</Bundle-SymbolicName>
-                        <Import-Package>*</Import-Package>
-                        <Export-Package>com.vaadin.flow.component.*;-noimport:=true</Export-Package>
-                        <Private-Package></Private-Package>
-                        <Bundle-Activator></Bundle-Activator>
-                        <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
-                        <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
-                        <Bundle-Description></Bundle-Description>
-                        <!-- Package format version - do not change -->
-                        <Vaadin-Package-Version>1</Vaadin-Package-Version>
-                        <!-- Implementation-Title and Implementation-Version
-                            come from the POM by default -->
-                        <Implementation-Title>Vaadin proComponent</Implementation-Title>
-                        <_removeheaders>Built-By</_removeheaders>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
+        <plugins></plugins>
     </build>
     <profiles>
         <profile>
@@ -93,7 +61,7 @@
                                 </manifestEntries>
                             </archive>
                         </configuration>
-                    </plugin>                    
+                    </plugin>
                 </plugins>
             </build>
         </profile>

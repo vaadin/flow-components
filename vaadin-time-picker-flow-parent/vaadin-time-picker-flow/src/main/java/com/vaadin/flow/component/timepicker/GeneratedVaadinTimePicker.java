@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.timepicker;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -125,10 +123,8 @@ import elemental.json.JsonObject;
  * is propagated to the internal themable components listed above.
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#2.0-SNAPSHOT",
-        "WebComponent: Vaadin.TimePickerElement#2.0.0", "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "2.3.0")
+@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

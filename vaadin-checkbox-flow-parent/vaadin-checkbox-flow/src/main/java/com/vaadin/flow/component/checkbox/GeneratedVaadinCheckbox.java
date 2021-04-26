@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEvent;
@@ -118,10 +116,8 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.CheckboxElement#2.2.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.4.0")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

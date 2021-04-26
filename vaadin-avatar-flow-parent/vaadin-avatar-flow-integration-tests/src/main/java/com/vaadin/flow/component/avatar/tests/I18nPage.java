@@ -44,7 +44,6 @@ public class I18nPage extends Div {
         avatarWithAbbr.setAbbreviation("SK");
         items.add(avatarWithAbbr);
         items.add(new AvatarGroupItem("Jens Jansson"));
-        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/static/content/view/company/team/photos/Yuriy-Yevstihnyeyev.JPG"));
         avatarGroup.setItems(items);
 
         NativeButton addI18n = new NativeButton("Add i18n", e -> {

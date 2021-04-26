@@ -9,9 +9,9 @@ package com.vaadin.flow.component.customfield;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package com.vaadin.flow.component.customfield;
 
 import java.util.Objects;
 
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,10 @@ import com.vaadin.flow.dom.Element;
  * @param <T> field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version="1.2.0")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-    implements HasSize, HasValidation, Focusable<CustomField> {
+    implements HasSize, HasValidation, Focusable<CustomField>, HasHelper {
 
     /**
      * Default constructor.

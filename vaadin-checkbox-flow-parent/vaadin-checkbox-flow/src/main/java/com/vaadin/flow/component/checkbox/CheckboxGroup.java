@@ -27,7 +27,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -38,6 +40,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
@@ -71,7 +74,7 @@ public class CheckboxGroup<T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, Void, CheckboxGroupDataView<T>> {
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper {
 
     private static final String VALUE = "value";
 
@@ -151,7 +154,8 @@ public class CheckboxGroup<T>
      */
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
-        return new CheckboxGroupListDataView<>(this::getDataProvider, this);
+        return new CheckboxGroupListDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged, (filter, sorting) -> reset());
     }
 
     /**
@@ -164,7 +168,8 @@ public class CheckboxGroup<T>
      */
     @Override
     public CheckboxGroupDataView<T> getGenericDataView() {
-        return new CheckboxGroupDataView<>(this::getDataProvider, this);
+        return new CheckboxGroupDataView<>(this::getDataProvider, this,
+                this::identifierProviderChanged);
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -205,6 +210,7 @@ public class CheckboxGroup<T>
     @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
+        DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -444,16 +450,25 @@ public class CheckboxGroup<T>
         return selectedItems.stream().allMatch(itemEnabledProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private void reset() {
+        // Cache helper component before removal
+        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
         removeAll();
         clear();
 
+        // reinsert helper component
+        // see https://github.com/vaadin/vaadin-checkbox/issues/191
+        setHelperComponent(helperComponent);
+
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
+
+            getDataProvider().fetch(DataViewUtils.getQuery(this))
+                    .map(item -> createCheckBox((T) item))
                     .forEach(component -> {
-                        add(component);
+                        add((Component) component);
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();
@@ -599,4 +614,9 @@ public class CheckboxGroup<T>
             return identifierProviderObject;
         }
     }
+
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+        keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
 }

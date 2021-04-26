@@ -21,7 +21,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -52,7 +54,7 @@ public class BigDecimalField
         extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -96,8 +98,6 @@ public class BigDecimalField
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -447,5 +447,11 @@ public class BigDecimalField
     private char getDecimalSeparator() {
         String prop = getElement().getProperty("_decimalSeparator");
         return prop == null || prop.isEmpty() ? '.' : getElement().getProperty("_decimalSeparator").charAt(0);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        FieldValidationUtil.disableClientValidation(this);
     }
 }

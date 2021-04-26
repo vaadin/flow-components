@@ -31,8 +31,7 @@ public class AutoFocusFilterPage extends Div {
                 "Option 5", "Another Option 2");
 
         ComboBox<String> comboBox = new ComboBox<>("Choose option");
-        comboBox.setDataProvider((ComboBox.FetchItemsCallback<String>) (filter,
-                offset, limit) -> {
+        comboBox.setDataProvider((filter, offset, limit) -> {
             if (filter.isEmpty())
                 return Stream.of("");
             return data.stream().filter(s -> s.contains(filter)).skip(offset)

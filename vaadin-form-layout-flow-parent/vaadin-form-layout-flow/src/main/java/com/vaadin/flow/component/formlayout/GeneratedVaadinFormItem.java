@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.formlayout;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
@@ -165,10 +163,8 @@ import com.vaadin.flow.dom.Element;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.FormItemElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-item")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.3.0")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-form-layout/src/vaadin-form-item.js")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
         extends Component implements HasStyle, ClickNotifier<R> {

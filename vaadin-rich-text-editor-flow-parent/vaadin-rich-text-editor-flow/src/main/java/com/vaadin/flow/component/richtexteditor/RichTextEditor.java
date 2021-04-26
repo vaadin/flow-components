@@ -7,16 +7,15 @@ import java.util.Objects;
  * #%L
  * Vaadin Rich Text Editor for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright (C) 2017 - 2020 Vaadin Ltd
  * %%
- * This program is available under Commercial Vaadin Add-On License 3.0
- * (CVALv3).
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  * 
  * See the file license.html distributed with this software for more
  * information about licensing.
  * 
- * You should have received a copy of the CVALv3 along with this program.
- * If not, see <http://vaadin.com/license/cval-3>.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
 import com.vaadin.flow.component.ClientCallable;
@@ -27,14 +26,12 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.JsonObject;
 
 /**
@@ -61,6 +58,7 @@ public class RichTextEditor
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
     private AsHtml asHtml;
+    private HtmlSetRequest htmlSetRequest;
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -193,30 +191,12 @@ public class RichTextEditor
         super.setValue(value);
     }
 
-    /**
-     * Sets content represented by sanitized HTML string into the editor. The
-     * HTML string is interpreted by
-     * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-     * Clipboard matchers</a> on the client side, which may not produce the
-     * exactly input HTML.
-     * <p>
-     * Note: The value will be set asynchronously with client-server roundtrip.
-     *
-     * @param htmlValueString
-     *            the HTML string
-     */
-    private PendingJavaScriptResult setHtmlValueAsynchronously(
-            String htmlValueString) {
-        if (htmlValueString != null) {
-            htmlValueString = sanitize(htmlValueString);
-        }
-        return getElement().callJsFunction("dangerouslySetHtmlValue",
-                htmlValueString);
-    }
-
     @ClientCallable
     private void updateValue(String value) {
         setValue(value);
+        if(this.asHtml != null) {
+            this.asHtml.value.clear();
+        }
     }
 
     /**
@@ -267,6 +247,34 @@ public class RichTextEditor
                                 "title", "width")
                         .addAttributes(":all", "style")
                         .addProtocols("img", "src", "data"));
+    }
+
+    private class HtmlSetRequest implements Serializable {
+        private String html;
+        private boolean pending;
+
+        void requestUpdate(String htmlValueString) {
+            this.html =
+                htmlValueString != null ? sanitize(htmlValueString) : null;
+            if (!pending) {
+                runBeforeClientResponse(ui -> this.execute());
+                pending = true;
+            }
+        }
+
+        void execute() {
+            if (getValueChangeMode() != ValueChangeMode.EAGER) {
+                // Add a one-time listener if we are not in eager mode.
+                final String JS = "var listener = e => {"
+                    + "  this.$server.updateValue(e.detail.value);"
+                    + "  this.removeEventListener('value-changed', listener);"
+                    + "  listener = null; };"
+                    + "this.addEventListener('value-changed', listener);";
+                getElement().executeJs(JS);
+            }
+            getElement().callJsFunction("dangerouslySetHtmlValue", this.html);
+            pending = false;
+        }
     }
 
     /**
@@ -761,7 +769,7 @@ public class RichTextEditor
      */
     public HasValue<ValueChangeEvent<String>, String> asHtml() {
         if (asHtml == null) {
-            asHtml = new AsHtml(this);
+            asHtml = new AsHtml();
         }
         return asHtml;
     }
@@ -772,17 +780,11 @@ public class RichTextEditor
     private class AsHtml implements HasValue<ValueChangeEvent<String>, String> {
 
         private String oldValue;
-        private String value;
-        private RichTextEditor rte;
+        private final HtmlValue value;
 
-        AsHtml(RichTextEditor rte) {
-            this.rte = rte;
-            this.value = getHtmlValue();
-            rte.addValueChangeListener(event -> {
-                if (event.isFromClient()) {
-                    setValue(getHtmlValue(), false);
-                }
-            });
+        AsHtml() {
+            this.value = new HtmlValue();
+            RichTextEditor.this.addValueChangeListener(e -> this.value.clear());
         }
 
         /**
@@ -803,28 +805,30 @@ public class RichTextEditor
         @Override
         public void setValue(String value) {
             this.oldValue = getValue();
-            this.value = value;
-            setHtmlValueAsynchronously(value).then(result -> {
-                if (oldValue != null && !oldValue.equals(value)) {
-                    fireEvent(createValueChange(oldValue, false));
-                }
-            });
+            this.value.setValue(value);
+            setHtmlValueAsynchronously(value);
         }
 
-        private void setValue(String value, boolean fireEvent) {
-            if (fireEvent) {
-                setValue(value);
-            } else {
-                this.oldValue = getValue();
-                this.value = value;
+        /**
+         * Sets content represented by sanitized HTML string into the editor. The
+         * HTML string is interpreted by
+         * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
+         * Clipboard matchers</a> on the client side, which may not produce the
+         * exactly input HTML.
+         * <p>
+         * Note: The value will be set asynchronously with client-server roundtrip.
+         *
+         * @param htmlValueString
+         *            the HTML string
+         */
+        private void setHtmlValueAsynchronously(
+            String htmlValueString) {
+            if (htmlSetRequest == null) {
+                htmlSetRequest = new HtmlSetRequest();
             }
+            htmlSetRequest.requestUpdate(htmlValueString);
         }
 
-        private ComponentValueChangeEvent<RichTextEditor, String> createValueChange(
-                String oldValue, boolean fromClient) {
-            return new ComponentValueChangeEvent<>(rte, this, oldValue,
-                    fromClient);
-        }
 
         /**
          * Gets the value of the editor presented as an HTML string.
@@ -845,7 +849,7 @@ public class RichTextEditor
          */
         @Override
         public String getValue() {
-            return value;
+            return value.getValue();
         }
 
         /**
@@ -859,31 +863,35 @@ public class RichTextEditor
          */
         @Override
         public Registration addValueChangeListener(
-                ValueChangeListener listener) {
-            return rte.addValueChangeListener(originalEvent -> {
-                ValueChangeEvent event = new ValueChangeEvent<String>() {
-                    @Override
-                    public HasValue<ValueChangeEvent<String>, String> getHasValue() {
-                        return AsHtml.this;
-                    }
+            ValueChangeListener listener) {
+            return RichTextEditor.this.addValueChangeListener(
+                originalEvent -> listener
+                    .valueChanged(this.createNewEvent(originalEvent)));
+        }
 
-                    @Override
-                    public boolean isFromClient() {
-                        return originalEvent.isFromClient();
-                    }
+        private ValueChangeEvent createNewEvent(
+            ValueChangeEvent<String> originalEvent) {
+            return new ValueChangeEvent<String>() {
+                @Override
+                public HasValue<ValueChangeEvent<String>, String> getHasValue() {
+                    return AsHtml.this;
+                }
 
-                    @Override
-                    public String getOldValue() {
-                        return oldValue;
-                    }
+                @Override
+                public boolean isFromClient() {
+                    return originalEvent.isFromClient();
+                }
 
-                    @Override
-                    public String getValue() {
-                        return AsHtml.this.getValue();
-                    }
-                };
-                listener.valueChanged(event);
-            });
+                @Override
+                public String getOldValue() {
+                    return oldValue;
+                }
+
+                @Override
+                public String getValue() {
+                    return AsHtml.this.getValue();
+                }
+            };
         }
 
         /**
@@ -895,7 +903,7 @@ public class RichTextEditor
          */
         @Override
         public void setReadOnly(boolean readOnly) {
-            rte.setReadOnly(readOnly);
+            RichTextEditor.this.setReadOnly(readOnly);
         }
 
         /**
@@ -906,7 +914,7 @@ public class RichTextEditor
          */
         @Override
         public boolean isReadOnly() {
-            return rte.isReadOnly();
+            return RichTextEditor.this.isReadOnly();
         }
 
         /**
@@ -919,7 +927,7 @@ public class RichTextEditor
         @Override
         public void setRequiredIndicatorVisible(
                 boolean requiredIndicatorVisible) {
-            rte.setRequiredIndicatorVisible(requiredIndicatorVisible);
+            RichTextEditor.this.setRequiredIndicatorVisible(requiredIndicatorVisible);
         }
 
         /**
@@ -930,7 +938,39 @@ public class RichTextEditor
          */
         @Override
         public boolean isRequiredIndicatorVisible() {
-            return rte.isRequiredIndicatorVisible();
+            return RichTextEditor.this.isRequiredIndicatorVisible();
+        }
+
+        private class HtmlValue implements Serializable {
+            private String value;
+            private boolean present;
+
+            private String getValue() {
+                if (!present) {
+                    this.value = generateHtmlValue();
+                    this.present = true;
+                }
+                return value;
+            }
+
+            private void setValue(String value) {
+                this.value = value;
+                this.present = true;
+            }
+
+            private void clear() {
+                this.value = null;
+                this.present = false;
+            }
+
+            private String generateHtmlValue() {
+                if (RichTextEditor.this.isEmpty()) {
+                    return null;
+                } else {
+                    return RichTextEditor.this.getHtmlValue();
+                }
+            }
         }
     }
+
 }

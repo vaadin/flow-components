@@ -18,8 +18,6 @@ package com.vaadin.flow.component.button;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
@@ -105,10 +103,8 @@ import com.vaadin.flow.dom.Element;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
-        "WebComponent: Vaadin.ButtonElement#2.1.0", "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "2.4.0")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component

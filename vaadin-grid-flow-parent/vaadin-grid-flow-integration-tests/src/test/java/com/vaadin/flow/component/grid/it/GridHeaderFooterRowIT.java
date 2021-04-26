@@ -198,14 +198,13 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
 
         clickButton("remove-column");
 
-        List<WebElement> columns = grid
-                .findElements(By.tagName("vaadin-grid-column"));
-        List<WebElement> groups = grid
-                .findElements(By.tagName("vaadin-grid-column-group"));
-
-        Assert.assertEquals(
-                "There should be no column or column-group elements after removing the only column",
-                0, columns.size() + groups.size());
+        waitUntil(e -> {
+            List<WebElement> columns = grid
+                    .findElements(By.tagName("vaadin-grid-column"));
+            List<WebElement> groups = grid
+                    .findElements(By.tagName("vaadin-grid-column-group"));
+            return 0 == (columns.size() + groups.size());
+        }, 200);
     }
 
     private void assertHeaderComponentsAreRendered() {

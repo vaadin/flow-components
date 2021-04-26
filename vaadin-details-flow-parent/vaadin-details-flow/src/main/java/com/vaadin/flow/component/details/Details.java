@@ -9,9 +9,9 @@ package com.vaadin.flow.component.details;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -39,9 +40,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/vaadin-details", version = "1.2.0")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-details/src/vaadin-details.js")
-public class Details extends Component implements HasEnabled, HasTheme {
+public class Details extends Component implements HasEnabled, HasTheme, HasStyle {
 
     private Component summary;
     private final Div contentContainer;

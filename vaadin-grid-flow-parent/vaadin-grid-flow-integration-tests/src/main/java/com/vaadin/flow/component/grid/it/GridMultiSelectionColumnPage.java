@@ -27,7 +27,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 
@@ -39,6 +38,10 @@ public class GridMultiSelectionColumnPage extends Div {
 
     public static final int ITEM_COUNT = 1000;
 
+    static final String IN_MEMORY_GRID_ID = "in-memory-grid";
+    static final String DEFINED_ITEM_COUNT_LAZY_GRID_ID = "defined-item-count-lazy-grid";
+    static final String UNKNOWN_ITEM_COUNT_LAZY_GRID_ID = "unknown-item-count-lazy-grid";
+
     private Div message;
 
     /**
@@ -48,7 +51,8 @@ public class GridMultiSelectionColumnPage extends Div {
         message = new Div();
         message.setId("selected-item-count");
 
-        createLazyGrid();
+        createDefinedItemCountLazyGrid();
+        createUnknownItemCountLazyGrid();
         createInMemoryGrid();
         createGridWithSwappedDataProvider();
 
@@ -58,18 +62,26 @@ public class GridMultiSelectionColumnPage extends Div {
         setAutoWidthIsTrueOfSelectionColumn();
     }
 
-    private void createLazyGrid() {
+    private void createDefinedItemCountLazyGrid() {
         Grid<String> lazyGrid = new Grid<>();
-        lazyGrid.setItems(DataProvider.fromCallbacks(query -> {
-            return IntStream
-                    .range(query.getOffset(),
-                            query.getOffset() + query.getLimit())
-                    .mapToObj(Integer::toString);
-        }, query -> ITEM_COUNT));
+        lazyGrid.setItems(query -> IntStream
+                .range(query.getOffset(), query.getOffset() + query.getLimit())
+                .mapToObj(Integer::toString), query -> ITEM_COUNT);
         setUp(lazyGrid);
-        lazyGrid.setId("lazy-grid");
+        lazyGrid.setId(DEFINED_ITEM_COUNT_LAZY_GRID_ID);
 
         add(new H2("Lazy grid"), lazyGrid);
+    }
+
+    private void createUnknownItemCountLazyGrid() {
+        Grid<String> unknownItemCountLazyGrid = new Grid<>();
+        unknownItemCountLazyGrid.setItems(query -> IntStream
+                .range(query.getOffset(), query.getOffset() + query.getLimit())
+                .mapToObj(Integer::toString));
+        setUp(unknownItemCountLazyGrid);
+        unknownItemCountLazyGrid.setId(UNKNOWN_ITEM_COUNT_LAZY_GRID_ID);
+
+        add(new H2("Unknown Item Count Lazy grid"), unknownItemCountLazyGrid);
     }
 
     private void createInMemoryGrid() {
@@ -77,7 +89,7 @@ public class GridMultiSelectionColumnPage extends Div {
         grid.setItems(
                 IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString));
         setUp(grid);
-        grid.setId("in-memory-grid");
+        grid.setId(IN_MEMORY_GRID_ID);
         add(new H2("In-memory grid"), grid);
     }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="vaadin-grid-flow">
+   
+    <feature name="vaadin-grid-flow" description="Vaadin Grid Flow" version="${project.version}">
+        <details>Vaadin Grid Flow feature</details>
+    </feature>
+</features>

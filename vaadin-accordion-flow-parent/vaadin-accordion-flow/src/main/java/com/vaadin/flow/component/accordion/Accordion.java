@@ -27,6 +27,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -38,9 +39,9 @@ import com.vaadin.flow.shared.Registration;
  * can be opened at a time.
  */
 @Tag("vaadin-accordion")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "1.2.0")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-accordion/src/vaadin-accordion.js")
-public class Accordion extends Component implements HasSize {
+public class Accordion extends Component implements HasSize, HasStyle {
 
     private static final String OPENED_PROPERTY = "opened";
     private static final String OPENED_CHANGED_DOM_EVENT = "opened-changed";

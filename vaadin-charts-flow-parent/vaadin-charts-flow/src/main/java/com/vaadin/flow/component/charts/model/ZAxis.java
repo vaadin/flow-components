@@ -4,21 +4,16 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2019 Vaadin Ltd
+ * Copyright (C) 2014 - 2020 Vaadin Ltd
  * %%
- * This program is available under Commercial Vaadin Add-On License 3.0
- * (CVALv3).
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  * 
- * See the file licensing.txt distributed with this software for more
- * information about licensing.
- * 
- * You should have received a copy of the CVALv3 along with this program.
- * If not, see <https://vaadin.com/license/cval-3>.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
 
 
-import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +27,6 @@ import java.util.Arrays;
  * access to the axis.
  * </p>
  */
-@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class ZAxis extends Axis {
 
 	private Boolean allowDecimals;
@@ -54,9 +48,7 @@ public class ZAxis extends Axis {
 	private Color lineColor;
 	private Number lineWidth;
 	private Number linkedTo;
-	private Number max;
 	private Number maxPadding;
-	private Number min;
 	private Number minPadding;
 	private Number minRange;
 	private Number minTickInterval;
@@ -536,32 +528,6 @@ public class ZAxis extends Axis {
 	}
 
 	/**
-	 * @see #setMax(Number)
-	 */
-	public Number getMax() {
-		return max;
-	}
-
-	/**
-	 * <p>
-	 * The maximum value of the axis. If <code>null</code>, the max value is
-	 * automatically calculated. If the <code>endOnTick</code> option is true,
-	 * the <code>max</code> value might be rounded up.
-	 * </p>
-	 * 
-	 * <p>
-	 * If a <a href="#yAxis.tickAmount">tickAmount</a> is set, the axis may be
-	 * extended beyond the set max in order to reach the given number of ticks.
-	 * The same may happen in a chart with multiple axes, determined by <a
-	 * class="internal" href="#chart">chart.alignTicks</a>, where a
-	 * <code>tickAmount</code> is applied internally.
-	 * </p>
-	 */
-	public void setMax(Number max) {
-		this.max = max;
-	}
-
-	/**
 	 * @see #setMaxPadding(Number)
 	 */
 	public Number getMaxPadding() {
@@ -579,22 +545,6 @@ public class ZAxis extends Axis {
 	 */
 	public void setMaxPadding(Number maxPadding) {
 		this.maxPadding = maxPadding;
-	}
-
-	/**
-	 * @see #setMin(Number)
-	 */
-	public Number getMin() {
-		return min;
-	}
-
-	/**
-	 * The minimum value of the axis. If <code>null</code> the min value is
-	 * automatically calculated. If the <code>startOnTick</code> option is true,
-	 * the <code>min</code> value might be rounded down.
-	 */
-	public void setMin(Number min) {
-		this.min = min;
 	}
 
 	/**

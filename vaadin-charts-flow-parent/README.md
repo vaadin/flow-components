@@ -1,26 +1,22 @@
-# Vaadin Charts
+# Charts component for Vaadin Flow
 
-Vaadin Charts for Flow is a UI component add-on for Vaadin 10 which provides means to create multiple different types of charts in Vaadin applications.
+This project is the Component wrapper implementation of [`<vaadin-charts>`](https://github.com/vaadin/vaadin-charts)
+element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-## License & Author
+## Using the component in a Flow application
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
-
-Vaadin Charts is written by Vaadin Ltd.
-
-
-## Setting up for development:
-
-Clone the project in GitHub (or fork it if you plan on contributing) and required submodules
-
+To use the component in an application using maven,
+add the following dependency to your `pom.xml`:
 ```
-git clone git@github.com:vaadin/vaadin-charts-flow.git
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-charts-flow</artifactId>
+    <version>${component.version}</version>
+</dependency>
 ```
 
-To build and install the project into the local repository run 
+## License
 
-```mvn install -DskipITs```
+This add-on is distributed under [Commercial Vaadin Developer License 4.0](https://vaadin.com/license/cvdl-4.0) (CVDLv4).
 
-in the root directory. `-DskipITs` will skip the integration tests, which require a TestBench license. If you want to run all tests as part of the build, run
-
-```mvn install```
+To purchase a license, visit http://vaadin.com/pricing

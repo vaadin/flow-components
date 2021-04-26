@@ -20,11 +20,12 @@ package com.vaadin.flow.component.customfield.testbench;
  * #L%
  */
 
+import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-custom-field")
-public class CustomFieldElement extends TestBenchElement {
+public class CustomFieldElement extends TestBenchElement implements HasHelper {
 
     public String getLabel() {
         return getPropertyString("label");

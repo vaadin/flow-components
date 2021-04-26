@@ -60,10 +60,17 @@ async function createPom() {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
     // Add component-flow and component-testbench dependencies
-    addDependency(prev, 'com.vaadin', `${id}-flow`, '${project.version}');
-    addDependency(prev, 'com.vaadin', `${id}-testbench`, '${project.version}', 'test');
-    // Read original IT dependencies in master and add them
-    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'))
+    const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
+
+    if (fs.existsSync(`${name}/${id}-flow/pom.xml`)) {
+      const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow/pom.xml`, 'utf8'));
+      addDependency(prev, 'com.vaadin', js.project.artifactId[0], `${componentVersion}`);
+    }
+    if (fs.existsSync(`${name}/${id}-testbench/pom.xml`)) {
+      addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
+    }
+    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'));
+    // Read original IT dependencies of module
     js.project.dependencies[0].dependency.forEach(dep => {
       addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0]);
     });
@@ -87,6 +94,7 @@ async function createPom() {
   tplJs.project.artifactId = ['vaadin-flow-components-integration-tests'];
   tplJs.project.parent[0].artifactId = ['vaadin-flow-components'];
   tplJs.project.parent[0].version = [version];
+  delete tplJs.project.version;
   const tests = tplJs.project.build[0].plugins[0].plugin.find(p => p.artifactId[0] === 'maven-failsafe-plugin');
   tests.configuration = [{excludes: [{exclude: exclude}]}]
   if (!fs.existsSync(itFolder)) {
@@ -118,7 +126,7 @@ function copyFileSync(source, target, replaceCall) {
     content = content.replace('\r', '');
   }
   [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
-  fs.writeFileSync(targetFile, content, 'utf8');
+  targetFile && content && fs.writeFileSync(targetFile, content, 'utf8');
 }
 
 // copy recursively a folder without failing, and reusing already created folders in target
@@ -193,7 +201,9 @@ async function copySources() {
     // copy frontend sources
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/frontend`, `${itFolder}`);
     // copy java sources
-    copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`);
+    copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`, (source, target, content) => {
+      return /\n\s*@Theme.*Material/.test(content) ? []: [target, content];
+    });
   });
 }
 

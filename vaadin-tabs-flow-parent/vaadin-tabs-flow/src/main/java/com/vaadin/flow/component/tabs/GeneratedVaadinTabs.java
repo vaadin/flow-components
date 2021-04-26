@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.tabs;
 
-import javax.annotation.Generated;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,11 +97,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.TabsElement#2.1.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tabs")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.2.0")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "20.0.0-alpha5")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
         extends Component implements HasStyle, HasTheme {
 
