@@ -15,7 +15,6 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * #L%
  */
 
-
 /**
  * An object, or array of objects, for backgrounds. Sub options include
  * backgroundColor (which can be solid or gradient), innerWidth, outerWidth,
@@ -94,7 +93,8 @@ public class Background extends AbstractConfigurationObject {
     /**
      * The class name for this background. Defaults to highcharts-pane.
      *
-     * @param className new class name of the background
+     * @param className
+     *            new class name of the background
      */
     public void setClassName(String className) {
         this.className = className;
@@ -105,7 +105,8 @@ public class Background extends AbstractConfigurationObject {
      * representation of a percentage, e.g. "110%". The percentage is relative
      * to the radius of the chart.
      * 
-     * <em>This is applicable only to circular {@link ChartType#GAUGE} type charts.</em>
+     * <em>This is applicable only to circular {@link ChartType#GAUGE} type
+     * charts.</em>
      * 
      * @param outerRadius
      */
@@ -125,7 +126,8 @@ public class Background extends AbstractConfigurationObject {
      * representation of a percentage, e.g. "110%". The percentage is relative
      * to the radius of the chart.
      * 
-     * <em>This is applicable only to circular {@link ChartType#GAUGE} type charts.</em>
+     * <em>This is applicable only to circular {@link ChartType#GAUGE} type
+     * charts.</em>
      * 
      * @param innerRadius
      */

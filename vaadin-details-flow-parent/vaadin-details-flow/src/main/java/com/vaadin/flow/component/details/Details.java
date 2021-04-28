@@ -42,7 +42,8 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-details")
 @NpmPackage(value = "@vaadin/vaadin-details", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-details/src/vaadin-details.js")
-public class Details extends Component implements HasEnabled, HasTheme, HasStyle {
+public class Details extends Component
+        implements HasEnabled, HasTheme, HasStyle {
 
     private Component summary;
     private final Div contentContainer;

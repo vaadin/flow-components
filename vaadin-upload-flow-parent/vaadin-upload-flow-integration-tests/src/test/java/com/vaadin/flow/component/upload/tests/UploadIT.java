@@ -128,10 +128,9 @@ public class UploadIT extends AbstractUploadIT {
         Assert.assertEquals("Перетащите файл сюда...", dropLabel.getText());
     }
 
-
     private void fillPathToUploadInput(String... tempFileNames)
             throws Exception {
-        fillPathToUploadInput(getInput(),tempFileNames);
+        fillPathToUploadInput(getInput(), tempFileNames);
     }
 
     private WebElement getUpload() {
@@ -147,6 +146,5 @@ public class UploadIT extends AbstractUploadIT {
     private WebElement getInput() {
         return getInput(getUpload());
     }
-
 
 }

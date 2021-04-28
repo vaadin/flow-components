@@ -65,8 +65,7 @@ public class GridListDataViewPage extends Div {
         Grid<Person> secondGrid = new Grid<>(Person.class);
         secondGrid.setId(SECOND_GRID_ID);
 
-        final GridListDataView<Person> dataView = grid
-                .setItems(dataProvider);
+        final GridListDataView<Person> dataView = grid.setItems(dataProvider);
 
         secondGrid.setItems(dataProvider);
 
@@ -87,51 +86,47 @@ public class GridListDataViewPage extends Div {
         // For selecting a row to manipulate through the data view
         IntegerField rowSelect = new IntegerField("Target row");
         rowSelect.setId(ROW_SELECT);
-        Button selectItemOnRow = new Button("Select item", event -> grid
-                .select(dataView.getItem(rowSelect.getValue())));
+        Button selectItemOnRow = new Button("Select item",
+                event -> grid.select(dataView.getItem(rowSelect.getValue())));
         selectItemOnRow.setId("selectItemOnRow");
-        Button showItemData = new Button("Person data", event -> itemData
-                .setText("Item: " + dataView.getItem(rowSelect.getValue())
-                        .getFirstName()));
+        Button showItemData = new Button("Person data",
+                event -> itemData.setText("Item: " + dataView
+                        .getItem(rowSelect.getValue()).getFirstName()));
         showItemData.setId(SHOW_ITEM_DATA);
-        Button showNextData = new Button("Next person", event -> itemData
-                .setText("Item: " + dataView.getNextItem(
-                        dataView.getItem(rowSelect.getValue())).get()
-                        .getFirstName()));
+        Button showNextData = new Button("Next person",
+                event -> itemData.setText("Item: " + dataView
+                        .getNextItem(dataView.getItem(rowSelect.getValue()))
+                        .get().getFirstName()));
         showNextData.setId(SHOW_NEXT_DATA);
         Button showPreviousData = new Button("Previous person",
-                event -> itemData.setText("Item: " + dataView.getPreviousItem(
-                        dataView.getItem(rowSelect.getValue())).get()
-                        .getFirstName()));
+                event -> itemData.setText("Item: " + dataView
+                        .getPreviousItem(dataView.getItem(rowSelect.getValue()))
+                        .get().getFirstName()));
         showPreviousData.setId(SHOW_PREVIOUS_DATA);
         TextField filterByFirstName = new TextField("Firstname filter",
                 event -> {
-                    dataView.setFilter(
-                            item -> item.getFirstName().toLowerCase()
-                                    .contains(event.getValue().toLowerCase()));
+                    dataView.setFilter(item -> item.getFirstName().toLowerCase()
+                            .contains(event.getValue().toLowerCase()));
                 });
         filterByFirstName.setId(FIRST_NAME_FILTER);
-        Button addNewPerson = new Button("Add new person",
-                event -> {
-                    Person newPerson = new Person("John", "Doe",
-                            "john@test.com", 33, Gender.MALE, new Address());
-                    dataView.addItem(newPerson);
-                });
+        Button addNewPerson = new Button("Add new person", event -> {
+            Person newPerson = new Person("John", "Doe", "john@test.com", 33,
+                    Gender.MALE, new Address());
+            dataView.addItem(newPerson);
+        });
         addNewPerson.setId(ADD_ITEM);
         TextField updateFirstNameField = new TextField("Update first name",
                 event -> {
-                    Person updatedPerson =
-                            dataView.getItem(rowSelect.getValue());
+                    Person updatedPerson = dataView
+                            .getItem(rowSelect.getValue());
                     updatedPerson.setFirstName(event.getValue());
                     dataView.refreshItem(updatedPerson);
                 });
         updateFirstNameField.setId(UPDATE_ITEM);
-        Button deletePerson = new Button("Delete person",
-                event -> {
-                    Person deletedPerson =
-                            dataView.getItem(rowSelect.getValue());
-                    dataView.removeItem(deletedPerson);
-                });
+        Button deletePerson = new Button("Delete person", event -> {
+            Person deletedPerson = dataView.getItem(rowSelect.getValue());
+            dataView.removeItem(deletedPerson);
+        });
         deletePerson.setId(DELETE_ITEM);
         Button addExtraPersons = new Button("Add extra Persons", event -> {
             Person person18 = new Person("Person 99", "lastName",
@@ -154,15 +149,16 @@ public class GridListDataViewPage extends Div {
         dataView.addItemCountChangeListener(event -> {
             count.setText(Integer.toString(event.getItemCount()));
             showPreviousData.setEnabled(rowSelect.getValue() > 0);
-            showNextData.setEnabled(rowSelect.getValue() < event.getItemCount() - 1);
+            showNextData.setEnabled(
+                    rowSelect.getValue() < event.getItemCount() - 1);
         });
 
         rowSelect.setValue(0);
         showPreviousData.setEnabled(false);
         rowSelect.addValueChangeListener(event -> {
             if (event.getValue() >= dataView.getItemCount()) {
-                itemData.setText("Action: Item outside of data rage of [0," + (
-                        dataView.getItemCount() - 1)
+                itemData.setText("Action: Item outside of data rage of [0,"
+                        + (dataView.getItemCount() - 1)
                         + "]. Resetting to previous");
                 rowSelect.setValue(event.getOldValue());
                 return;
@@ -173,14 +169,14 @@ public class GridListDataViewPage extends Div {
         });
 
         add(grid, rowSelect, filterByFirstName, selectItemOnRow, showItemData,
-                showNextData, showPreviousData, count, itemData,
-                addNewPerson, updateFirstNameField, deletePerson,
-                addExtraPersons, addSorting, removeSorting, secondGrid);
+                showNextData, showPreviousData, count, itemData, addNewPerson,
+                updateFirstNameField, deletePerson, addExtraPersons, addSorting,
+                removeSorting, secondGrid);
     }
 
     private List<Person> generatePersonItems() {
-        return IntStream.range(1, 251).mapToObj(
-                i -> new Person("Person " + i, "lastName",
+        return IntStream.range(1, 251)
+                .mapToObj(i -> new Person("Person " + i, "lastName",
                         "person" + i + "@test.com", (i % 90) + 15,
                         Gender.UNKNOWN, new Address()))
                 .collect(Collectors.toList());

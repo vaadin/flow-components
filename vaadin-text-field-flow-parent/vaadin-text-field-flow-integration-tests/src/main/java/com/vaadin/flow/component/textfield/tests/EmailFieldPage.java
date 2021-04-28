@@ -41,8 +41,8 @@ public class EmailFieldPage extends Div {
         NativeButton button = new NativeButton(
                 "Set/unset text field read-only");
         button.setId("read-only");
-        button.addClickListener(event -> emailField
-                .setReadOnly(!emailField.isReadOnly()));
+        button.addClickListener(
+                event -> emailField.setReadOnly(!emailField.isReadOnly()));
         add(button);
 
         NativeButton required = new NativeButton(
@@ -57,8 +57,7 @@ public class EmailFieldPage extends Div {
                 "Set/unset field enabled property");
         enabled.setId("disabled");
         enabled.addClickListener(
-                event -> emailField.setEnabled(
-                        !emailField.isEnabled()));
+                event -> emailField.setEnabled(!emailField.isEnabled()));
         add(enabled);
 
         EmailField emailFieldClear = new EmailField();

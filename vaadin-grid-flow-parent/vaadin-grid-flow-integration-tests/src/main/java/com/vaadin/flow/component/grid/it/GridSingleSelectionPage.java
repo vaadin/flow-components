@@ -104,13 +104,13 @@ public class GridSingleSelectionPage extends VerticalLayout {
         // Set deselectAllowed to false
         gssm.setDeselectAllowed(false);
         // Set Items for grid
-        grid = setItemsGrid(grid,
-                ITEMS_GRID);
+        grid = setItemsGrid(grid, ITEMS_GRID);
         Button text = new Button();
-        grid.addSelectionListener( e -> {
+        grid.addSelectionListener(e -> {
             if (e.getFirstSelectedItem().isPresent()) {
-                text.setId("item"+ e.getFirstSelectedItem().get());
-                text.setText("The row "+ e.getFirstSelectedItem().get() + " is selected");
+                text.setId("item" + e.getFirstSelectedItem().get());
+                text.setText("The row " + e.getFirstSelectedItem().get()
+                        + " is selected");
                 add(text);
             }
         });
@@ -118,16 +118,15 @@ public class GridSingleSelectionPage extends VerticalLayout {
     }
 
     private NativeButton toggleSetItems(Grid grid, String idSetItems) {
-        NativeButton buttonSetItems = new NativeButton("Toggle set items", e -> {
-            if (!grid.getColumns().isEmpty()) {
-                grid.removeAllColumns();
-            }
-            setItemsGrid(grid,
-                    ITEMS_GRID);
-        });
+        NativeButton buttonSetItems = new NativeButton("Toggle set items",
+                e -> {
+                    if (!grid.getColumns().isEmpty()) {
+                        grid.removeAllColumns();
+                    }
+                    setItemsGrid(grid, ITEMS_GRID);
+                });
         buttonSetItems.setId(idSetItems);
         return buttonSetItems;
     }
-
 
 }

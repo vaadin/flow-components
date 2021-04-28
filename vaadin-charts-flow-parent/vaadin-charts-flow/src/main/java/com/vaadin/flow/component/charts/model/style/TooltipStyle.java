@@ -108,7 +108,6 @@ public class TooltipStyle extends AbstractConfigurationObject {
         this.followPointer = followPointer;
     }
 
-
     /**
      * @see #setBorderColor(Color)
      * @return The color of the plot border, null if not defined
@@ -118,8 +117,8 @@ public class TooltipStyle extends AbstractConfigurationObject {
     }
 
     /**
-     * Sets the color of the tooltip border. When null, the border takes the color
-     * of the corresponding series or point. Defaults to null.
+     * Sets the color of the tooltip border. When null, the border takes the
+     * color of the corresponding series or point. Defaults to null.
      *
      * @param borderColor
      */

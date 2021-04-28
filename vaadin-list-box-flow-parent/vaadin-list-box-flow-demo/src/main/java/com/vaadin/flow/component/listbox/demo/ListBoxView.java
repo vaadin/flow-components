@@ -177,13 +177,12 @@ public class ListBoxView extends DemoView {
     private void dataViewRefreshItem() {
         // begin-source-example
         // source-example-heading: Refresh Items
-        MultiSelectListBox<Employee> multiSelectListBox =
-                                                    new MultiSelectListBox<>();
+        MultiSelectListBox<Employee> multiSelectListBox = new MultiSelectListBox<>();
         Employee employee1 = new Employee("Employee One");
         Employee employee2 = new Employee("Employee Two");
         Employee employee3 = new Employee("Employee Three");
         ListBoxListDataView<Employee> dataView = multiSelectListBox
-                                    .setItems(employee1, employee2, employee3);
+                .setItems(employee1, employee2, employee3);
 
         Button updateButton = new Button("Update second employee's name",
                 click -> {
@@ -200,8 +199,7 @@ public class ListBoxView extends DemoView {
         // source-example-heading: Add and Remove Item
         ListBox<Employee> listBox = new ListBox<>();
         List<Employee> employeeList = getEmployeeList();
-        ListBoxListDataView<Employee> dataView = listBox
-                .setItems(employeeList);
+        ListBoxListDataView<Employee> dataView = listBox.setItems(employeeList);
         AtomicInteger employeeCounter = new AtomicInteger(1);
         Button addButton = new Button("Add to Options",
                 click -> dataView.addItem(new Employee(
@@ -209,8 +207,7 @@ public class ListBoxView extends DemoView {
         Button removeButton = new Button("Remove from Options", click -> {
             int itemCount = dataView.getItemCount();
             if (itemCount > 0) {
-                dataView.removeItem(
-                        dataView.getItem(itemCount - 1));
+                dataView.removeItem(dataView.getItem(itemCount - 1));
             }
         });
         // end-source-example
@@ -231,20 +228,20 @@ public class ListBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Filtering Items
         MultiSelectListBox<Integer> numbers = new MultiSelectListBox<>();
-        ListBoxListDataView<Integer> numbersDataView = numbers
-                .setItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        ListBoxListDataView<Integer> numbersDataView = numbers.setItems(1, 2, 3,
+                4, 5, 6, 7, 8, 9, 10);
 
-        Button showOdds = new Button("Show Odds", click ->
-                numbersDataView.setFilter(number -> number % 2 == 1));
+        Button showOdds = new Button("Show Odds",
+                click -> numbersDataView.setFilter(number -> number % 2 == 1));
 
-        Button showEvens = new Button("Show Evens", click ->
-                numbersDataView.setFilter(number -> number % 2 == 0));
+        Button showEvens = new Button("Show Evens",
+                click -> numbersDataView.setFilter(number -> number % 2 == 0));
 
-        Button noFilter = new Button("Show All", click ->
-                numbersDataView.removeFilters());
+        Button noFilter = new Button("Show All",
+                click -> numbersDataView.removeFilters());
         // end-source-example
-        HorizontalLayout buttonLayout = new HorizontalLayout(showOdds, showEvens,
-                noFilter);
+        HorizontalLayout buttonLayout = new HorizontalLayout(showOdds,
+                showEvens, noFilter);
         buttonLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
         addCard(DATA_VIEW, "Filtering Items", buttonLayout, numbers);
     }

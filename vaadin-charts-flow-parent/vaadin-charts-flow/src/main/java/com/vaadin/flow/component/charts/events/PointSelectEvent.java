@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -31,9 +30,9 @@ public class PointSelectEvent extends ComponentEvent<Chart> implements HasItem {
     private final int pointIndex;
 
     public PointSelectEvent(Chart source, boolean fromClient,
-                            @EventData("event.detail.originalEvent.target.series.index") int seriesIndex,
-                            @EventData("event.detail.originalEvent.target.category") String category,
-                            @EventData("event.detail.originalEvent.target.index") int pointIndex) {
+            @EventData("event.detail.originalEvent.target.series.index") int seriesIndex,
+            @EventData("event.detail.originalEvent.target.category") String category,
+            @EventData("event.detail.originalEvent.target.index") int pointIndex) {
         super(source, fromClient);
         this.seriesIndex = seriesIndex;
         this.category = category;

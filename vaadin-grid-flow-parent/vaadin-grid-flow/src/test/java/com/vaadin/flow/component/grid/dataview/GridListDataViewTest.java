@@ -41,8 +41,8 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
                 "Given index 7 is outside of the accepted range '0 - 3'");
 
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid
-                .setItems("one", "two", "three", "four");
+        GridListDataView<String> dataView = grid.setItems("one", "two", "three",
+                "four");
 
         dataView.getItem(7);
     }
@@ -54,8 +54,8 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
                 "Given index -7 is outside of the accepted range '0 - 3'");
 
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid
-                .setItems("one", "two", "three", "four");
+        GridListDataView<String> dataView = grid.setItems("one", "two", "three",
+                "four");
 
         dataView.getItem(-7);
     }
@@ -133,8 +133,8 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     @Test
     public void dataViewWithItems_contains_returnsCorrectItems() {
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid
-                .setItems("first", "middle", "last");
+        GridListDataView<String> dataView = grid.setItems("first", "middle",
+                "last");
 
         Assert.assertTrue("Returned false for item that should exist",
                 dataView.contains("middle"));
@@ -143,8 +143,8 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
     @Test
     public void contains_itemPresentedInDataSet_itemFound() {
         Grid<String> grid = new Grid<>();
-        GridListDataView<String> dataView = grid
-                .setItems("first", "middle", "last");
+        GridListDataView<String> dataView = grid.setItems("first", "middle",
+                "last");
 
         Assert.assertTrue("The item was not found in the data",
                 dataView.contains("first"));

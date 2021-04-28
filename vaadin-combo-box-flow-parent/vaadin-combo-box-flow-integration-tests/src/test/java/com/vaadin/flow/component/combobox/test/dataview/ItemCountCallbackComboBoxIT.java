@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
 
-
 @TestPath("item-count-callback")
 public class ItemCountCallbackComboBoxIT extends AbstractItemCountComboBoxIT {
 

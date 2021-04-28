@@ -18,13 +18,13 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
 
-
 /**
  * The PointClickEvent class stores data for click events on the points of the
  * chart.
  */
 @DomEvent("point-click")
-public class PointClickEvent extends ComponentEvent<Chart> implements ClickEvent, HasItem {
+public class PointClickEvent extends ComponentEvent<Chart>
+        implements ClickEvent, HasItem {
 
     private final int seriesIndex;
     private final String category;
@@ -48,18 +48,18 @@ public class PointClickEvent extends ComponentEvent<Chart> implements ClickEvent
      * @param pointIndex
      */
     public PointClickEvent(Chart source, boolean fromClient,
-                           @EventData("event.detail.originalEvent.pageX") int pageX,
-                           @EventData("event.detail.originalEvent.pageY") int pageY,
-                           @EventData("event.detail.originalEvent.altKey") boolean altKey,
-                           @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
-                           @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
-                           @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
-                           @EventData("event.detail.originalEvent.button") int button,
-                           @EventData("event.detail.originalEvent.point.x") double x,
-                           @EventData("event.detail.originalEvent.point.y") double y,
-                           @EventData("event.detail.originalEvent.point.series.index") int seriesIndex,
-                           @EventData("event.detail.originalEvent.point.category") String category,
-                           @EventData("event.detail.originalEvent.point.index") int pointIndex) {
+            @EventData("event.detail.originalEvent.pageX") int pageX,
+            @EventData("event.detail.originalEvent.pageY") int pageY,
+            @EventData("event.detail.originalEvent.altKey") boolean altKey,
+            @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
+            @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
+            @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
+            @EventData("event.detail.originalEvent.button") int button,
+            @EventData("event.detail.originalEvent.point.x") double x,
+            @EventData("event.detail.originalEvent.point.y") double y,
+            @EventData("event.detail.originalEvent.point.series.index") int seriesIndex,
+            @EventData("event.detail.originalEvent.point.category") String category,
+            @EventData("event.detail.originalEvent.point.index") int pointIndex) {
         super(source, fromClient);
         this.seriesIndex = seriesIndex;
         this.category = category;

@@ -52,13 +52,15 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *            <code>true</code> if the event was originally fired on the
      *            client, <code>false</code> if the event originates from
      *            server-side logic
-     * @param columnIDs the internal column IDs; automatically translated to
-     *            proper Grid Column instances.
+     * @param columnIDs
+     *            the internal column IDs; automatically translated to proper
+     *            Grid Column instances.
      *
      */
     public ColumnReorderEvent(Grid<T> source, boolean fromClient,
-                              @EventData("event.detail.columns") JsonArray columnIDs) {
-        this(source, fromClient, getSortedByIds(source.getColumns(), columnIDs));
+            @EventData("event.detail.columns") JsonArray columnIDs) {
+        this(source, fromClient,
+                getSortedByIds(source.getColumns(), columnIDs));
     }
 
     /**
@@ -70,13 +72,15 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *            <code>true</code> if the event was originally fired on the
      *            client, <code>false</code> if the event originates from
      *            server-side logic
-     * @param columns the newly ordered Grid columns. Not null, may be empty.
+     * @param columns
+     *            the newly ordered Grid columns. Not null, may be empty.
      *
      */
     public ColumnReorderEvent(Grid<T> source, boolean fromClient,
-                              List<Grid.Column<T>> columns) {
+            List<Grid.Column<T>> columns) {
         super(source, fromClient);
-        this.columns = Collections.unmodifiableList(new ArrayList<>(columns)); // defensive copy
+        this.columns = Collections.unmodifiableList(new ArrayList<>(columns)); // defensive
+                                                                               // copy
     }
 
     /**
@@ -88,9 +92,10 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
         return columns;
     }
 
-    private static <T> List<Grid.Column<T>> getSortedByIds(List<Grid.Column<T>> currentColumns,
-                                                           JsonArray columnIDs) {
-        final List<Grid.Column<T>> columns = new ArrayList<>(currentColumns.size());
+    private static <T> List<Grid.Column<T>> getSortedByIds(
+            List<Grid.Column<T>> currentColumns, JsonArray columnIDs) {
+        final List<Grid.Column<T>> columns = new ArrayList<>(
+                currentColumns.size());
         for (int i = 0; i < columnIDs.length(); i++) {
             final String columnID = columnIDs.getString(i);
             columns.add(findByColumnId(currentColumns, columnID));
@@ -98,10 +103,10 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
         return columns;
     }
 
-    private static <T> Grid.Column<T> findByColumnId(List<Grid.Column<T>> columns, String id) {
-        return columns.stream()
-                .filter(it -> id.equals(it.getInternalId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No column with ID " + id));
+    private static <T> Grid.Column<T> findByColumnId(
+            List<Grid.Column<T>> columns, String id) {
+        return columns.stream().filter(it -> id.equals(it.getInternalId()))
+                .findFirst().orElseThrow(() -> new IllegalArgumentException(
+                        "No column with ID " + id));
     }
 }

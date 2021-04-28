@@ -60,16 +60,14 @@ public class UploadView extends Div {
             }
             eventsOutput.add("-succeeded");
         });
-        upload.addAllFinishedListener(
-                event -> eventsOutput.add("-finished"));
+        upload.addAllFinishedListener(event -> eventsOutput.add("-finished"));
 
         upload.setMaxFileSize(500 * 1024);
         upload.setId("test-upload");
         output.setId("test-output");
         eventsOutput.setId("test-events-output");
 
-        addCard("Simple in memory receiver", upload,
-                output, eventsOutput);
+        addCard("Simple in memory receiver", upload, output, eventsOutput);
     }
 
     private void i18nSampleUpload() {

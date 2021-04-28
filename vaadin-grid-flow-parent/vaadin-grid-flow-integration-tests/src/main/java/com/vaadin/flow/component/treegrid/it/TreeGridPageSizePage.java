@@ -69,12 +69,11 @@ public class TreeGridPageSizePage extends Div {
                             query.getOffset(), query.getLimit(),
                             query.getParentOptional().map(String::valueOf)
                                     .orElse("root"))
-                            + "\n"
-                            + log.getValue());
+                            + "\n" + log.getValue());
                 }
                 return super.fetchChildren(query);
             }
-            
+
         };
         grid.setDataProvider(dataProvider);
 

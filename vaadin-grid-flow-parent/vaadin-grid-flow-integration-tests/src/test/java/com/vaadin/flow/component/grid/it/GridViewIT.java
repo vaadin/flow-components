@@ -40,6 +40,7 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.testbench.TestBenchElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
  * Integration tests for the {@link GridView}.
  */
@@ -336,7 +337,7 @@ public class GridViewIT extends GridViewBase {
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
         Assert.assertEquals(4l, getCommandExecutor()
-            .executeScript(firstCellHiddenScript, grid));
+                .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
                 grid.getAttribute("columnReorderingAllowed"));
@@ -423,8 +424,7 @@ public class GridViewIT extends GridViewBase {
 
         getCellContent(grid.getCell(1, 2)).click();
         getCellContent(grid.getCell(3, 2)).click();
-        assertThat(
-                "Details should be closed after clicking the button again",
+        assertThat("Details should be closed after clicking the button again",
                 grid.findElement(By.className("custom-details"))
                         .getAttribute("innerHTML"),
                 CoreMatchers.not(CoreMatchers
@@ -1041,13 +1041,14 @@ public class GridViewIT extends GridViewBase {
 
         verifyOpened(1);
 
-        openSubMenu($(OVERLAY_TAG).first().$("vaadin-context-menu-item").get(menuIndex));
+        openSubMenu($(OVERLAY_TAG).first().$("vaadin-context-menu-item")
+                .get(menuIndex));
 
         verifyOpened(2);
 
-        $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item").get(subMenuIndex).click();
+        $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item")
+                .get(subMenuIndex).click();
     }
-
 
     private void assertFirstCells(GridElement grid, String... cellContents) {
         IntStream.range(0, cellContents.length).forEach(i -> {

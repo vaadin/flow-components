@@ -35,8 +35,7 @@ public class GridDataView<T> extends AbstractDataView<T> {
 
     private DataCommunicator<T> dataCommunicator;
 
-    public GridDataView(DataCommunicator<T> dataCommunicator,
-                        Grid<T> grid) {
+    public GridDataView(DataCommunicator<T> dataCommunicator, Grid<T> grid) {
         super(dataCommunicator::getDataProvider, grid);
         this.dataCommunicator = dataCommunicator;
     }

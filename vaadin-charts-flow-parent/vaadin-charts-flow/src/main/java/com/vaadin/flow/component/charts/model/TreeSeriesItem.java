@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * This class represents one node in a {@link TreeSeries}.
  */

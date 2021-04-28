@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * Defines the Axis on which the zones are applied.
  *
@@ -21,8 +20,7 @@ package com.vaadin.flow.component.charts.model;
  */
 public enum ZoneAxis implements ChartEnum {
 
-    X("x"),
-    Y("y");
+    X("x"), Y("y");
 
     private final String axis;
 

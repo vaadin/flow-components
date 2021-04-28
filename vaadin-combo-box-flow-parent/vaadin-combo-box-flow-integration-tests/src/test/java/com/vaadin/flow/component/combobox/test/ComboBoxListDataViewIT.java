@@ -138,8 +138,8 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
         // No item count change on server side, because the filtered items
         // count are 2 < page size.
-        verifyNotifiedItemCount(
-                "Expected no item count change on server side", 2);
+        verifyNotifiedItemCount("Expected no item count change on server side",
+                2);
 
         // Reset client filter
         resetTextFilter(firstComboBox);
@@ -181,8 +181,8 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 "Expected item count = 250 after removing an item", 250);
 
         Assert.assertEquals(
-                "The last Person is expected to be removed from a second " +
-                        "combo box also",
+                "The last Person is expected to be removed from a second "
+                        + "combo box also",
                 250, getItems(secondComboBox).size());
     }
 
@@ -208,9 +208,8 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 && "Person 222".equals(getItemLabel(items, 0)));
 
         clickButton(SHOW_ITEM_COUNT);
-        Assert.assertEquals(
-                "The client filter shouldn't impact the item count", "250",
-                getItemCount());
+        Assert.assertEquals("The client filter shouldn't impact the item count",
+                "250", getItemCount());
 
         firstComboBox.openPopup();
 
@@ -308,8 +307,7 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
     }
 
     private void verifySelectedPerson(int personIndex) {
-        Assert.assertEquals("Item: Person " + personIndex,
-                getItemData());
+        Assert.assertEquals("Item: Person " + personIndex, getItemData());
     }
 
     private String getItemData() {

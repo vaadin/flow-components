@@ -15,7 +15,6 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Style;
 
-
 /**
  * HTML labels that can be positioned anywhere in the chart area.
  */

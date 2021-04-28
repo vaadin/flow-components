@@ -9,13 +9,13 @@ public class NameFieldViewIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL()+ "/custom-field-helper");
+        getDriver().get(getBaseURL() + "/custom-field-helper");
     }
 
     @Test
     public void assertHelperText() {
         final CustomFieldElement customFieldHelper = $(CustomFieldElement.class)
-              .id("custom-field-helper-text");
+                .id("custom-field-helper-text");
 
         Assert.assertEquals("Helper text", customFieldHelper.getHelperText());
         $("button").id("button-clear-helper").click();
@@ -26,11 +26,10 @@ public class NameFieldViewIT extends AbstractParallelTest {
     @Test
     public void assertHelperComponent() {
         final CustomFieldElement customFieldHelperComponent = $(
-              CustomFieldElement.class).id("custom-field-helper-component");
+                CustomFieldElement.class).id("custom-field-helper-component");
 
-        Assert.assertEquals("helper-component",
-              customFieldHelperComponent.getHelperComponent()
-                    .getAttribute("id"));
+        Assert.assertEquals("helper-component", customFieldHelperComponent
+                .getHelperComponent().getAttribute("id"));
         $("button").id("button-clear-helper-component").click();
 
         Assert.assertNull(customFieldHelperComponent.getHelperComponent());
