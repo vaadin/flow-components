@@ -31,7 +31,7 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         ThreeString ts1 = new ThreeString("111", "222", "333");
         ThreeString ts2 = new ThreeString("444", "555", "667");
 
-        Collection<ThreeString> itemList = new ArrayList<ThreeString>();
+        Collection<ThreeString> itemList = new ArrayList<>();
         itemList.add(ts1);
         itemList.add(ts2);
 
