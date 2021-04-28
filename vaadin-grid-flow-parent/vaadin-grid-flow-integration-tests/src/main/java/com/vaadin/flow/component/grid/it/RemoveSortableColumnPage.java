@@ -1,4 +1,4 @@
-  
+
 /*
  * Copyright 2000-2020 Vaadin Ltd.
  *
@@ -125,7 +125,7 @@ public class RemoveSortableColumnPage extends VerticalLayout {
         selects = new Select[5];
         for (int i = 0; i < 5; ++i) {
             Select<String> select = new Select<>();
-            select.setId("select"+i);
+            select.setId("select" + i);
             select.setItems(headers);
             select.setValue(headers.get(i));
             select.getElement().addEventListener("click", e -> {
@@ -149,7 +149,7 @@ public class RemoveSortableColumnPage extends VerticalLayout {
             sortOrderBuilder.thenAsc(grid.getColumns().get(0));
             grid.sort(sortOrderBuilder.build());
         });
-        add(sort);      
+        add(sort);
     }
 
 }
