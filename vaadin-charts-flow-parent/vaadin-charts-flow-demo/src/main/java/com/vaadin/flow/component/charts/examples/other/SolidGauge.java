@@ -14,7 +14,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSolidgauge;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value="./styles/SolidGauge.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/SolidGauge.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class SolidGauge extends AbstractChartExample {
 
     @Override
@@ -24,7 +24,7 @@ public class SolidGauge extends AbstractChartExample {
         Configuration configuration = chart.getConfiguration();
 
         Pane pane = configuration.getPane();
-        pane.setCenter(new String[] {"50%", "50%"});
+        pane.setCenter(new String[] { "50%", "50%" });
         pane.setStartAngle(-90);
         pane.setEndAngle(90);
 
@@ -43,7 +43,6 @@ public class SolidGauge extends AbstractChartExample {
         yAxis.setMin(0);
         yAxis.setMax(200);
 
-
         PlotOptionsSolidgauge plotOptionsSolidgauge = new PlotOptionsSolidgauge();
 
         DataLabels dataLabels = plotOptionsSolidgauge.getDataLabels();
@@ -56,12 +55,13 @@ public class SolidGauge extends AbstractChartExample {
 
         DataSeriesItem item = new DataSeriesItem();
         item.setY(80);
-//        item.setColorIndex(2);
+        // item.setColorIndex(2);
         item.setClassName("myClassName");
         DataLabels dataLabelsSeries = new DataLabels();
-        dataLabelsSeries.setFormat("<div style=\"text-align:center\"><span style=\"font-size:25px;"
-                + "color:black' + '\">{y}</span><br/>"
-                + "<span style=\"font-size:12px;color:silver\">km/h</span></div>");
+        dataLabelsSeries.setFormat(
+                "<div style=\"text-align:center\"><span style=\"font-size:25px;"
+                        + "color:black' + '\">{y}</span><br/>"
+                        + "<span style=\"font-size:12px;color:silver\">km/h</span></div>");
 
         item.setDataLabels(dataLabelsSeries);
 

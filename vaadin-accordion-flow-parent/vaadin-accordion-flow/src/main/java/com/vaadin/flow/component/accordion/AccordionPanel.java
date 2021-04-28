@@ -35,8 +35,10 @@ public class AccordionPanel extends Details {
     /**
      * Creates a panel with the provided summary text and content.
      *
-     * @param summary the summary. Null is treated like an empty string.
-     * @param content the content. If null no content is added.
+     * @param summary
+     *            the summary. Null is treated like an empty string.
+     * @param content
+     *            the content. If null no content is added.
      */
     public AccordionPanel(String summary, Component content) {
         super(summary, content);
@@ -45,8 +47,10 @@ public class AccordionPanel extends Details {
     /**
      * Creates a panel with the provided summary component and content.
      *
-     * @param summary the summary. Null clears any existing summary.
-     * @param content the content. If null no content is added.
+     * @param summary
+     *            the summary. Null clears any existing summary.
+     * @param content
+     *            the content. If null no content is added.
      */
     public AccordionPanel(Component summary, Component content) {
         super(summary, content);

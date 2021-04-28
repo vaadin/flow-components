@@ -152,10 +152,9 @@ public class TimePickerView extends DemoView {
             if (event.getValue() == null) {
                 localTimeValue.setText("");
             } else {
-                localTimeValue.setText(
-                      String.format(localTimeValueFormat, value.getHour(),
-                            value.getMinute(), value.getSecond(),
-                            value.get(ChronoField.MILLI_OF_SECOND)));
+                localTimeValue.setText(String.format(localTimeValueFormat,
+                        value.getHour(), value.getMinute(), value.getSecond(),
+                        value.get(ChronoField.MILLI_OF_SECOND)));
             }
         });
         timePicker.setId("step-setting-picker");
@@ -230,13 +229,12 @@ public class TimePickerView extends DemoView {
         // source-example-heading: Helper text and helper component
         TimePicker timePicker = new TimePicker();
         timePicker.setLabel("Start time");
-        timePicker
-              .setHelperText("Select the best suited time for a meeting");
+        timePicker.setHelperText("Select the best suited time for a meeting");
 
         TimePicker timePickerHelperComponent = new TimePicker();
         timePickerHelperComponent.setLabel("Arrival time");
         timePickerHelperComponent.setHelperComponent(
-              new Span("Choose the best suited parcel arrive time"));
+                new Span("Choose the best suited parcel arrive time"));
 
         add(timePicker, timePickerHelperComponent);
         // end-source-example
@@ -251,15 +249,13 @@ public class TimePickerView extends DemoView {
         // source-example-heading: Helper above the field
         TimePicker timePicker = new TimePicker();
         timePicker.setLabel("Start time");
-        timePicker
-              .setHelperText("Select the best suited time for a meeting");
+        timePicker.setHelperText("Select the best suited time for a meeting");
         timePicker.getElement().getThemeList().set("helper-above-field", true);
         add(timePicker);
 
         // end-source-example
         addCard("Helper above the field", timePicker);
     }
-
 
     private Div createMessageDiv(String id) {
         Div message = new Div();

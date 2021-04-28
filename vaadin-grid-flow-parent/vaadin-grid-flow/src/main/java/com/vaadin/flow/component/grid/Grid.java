@@ -151,8 +151,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public enum NestedNullBehavior {
         /**
-         * throw a NullPointerException if there is a nested
-         * <code>null</code> value
+         * throw a NullPointerException if there is a nested <code>null</code>
+         * value
          */
         THROW,
         /**
@@ -571,8 +571,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
          * <p>
-         * <strong>Note:</strong> Comparator is not serializable. If you need
-         * to write serializable implementation, use inlined class of
+         * <strong>Note:</strong> Comparator is not serializable. If you need to
+         * write serializable implementation, use inlined class of
          * {@link SerializableComparator} instead of Lambda expression.
          *
          * @param comparator
@@ -1060,7 +1060,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Remove the displayed details and remove details item from the list
          *
-         * @param item item to removed
+         * @param item
+         *            item to removed
          */
         @Override
         public void destroyData(T item) {
@@ -1486,16 +1487,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             BiFunction<Renderer<T>, String, C> columnFactory) {
         String columnId = createColumnId(false);
 
-        C column = addColumn(new ColumnPathRenderer<T>(columnId,
-                item -> formatValueToSendToTheClient(
-                        applyValueProvider(valueProvider, item))),
+        C column = addColumn(
+                new ColumnPathRenderer<T>(columnId,
+                        item -> formatValueToSendToTheClient(
+                                applyValueProvider(valueProvider, item))),
                 columnFactory);
         ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
-                applyValueProvider(valueProvider,a), applyValueProvider(valueProvider,b)));
+                applyValueProvider(valueProvider, a),
+                applyValueProvider(valueProvider, b)));
         return column;
     }
 
-    private Object applyValueProvider(ValueProvider<T, ?> valueProvider, T item) {
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
+            T item) {
         Object value;
         try {
             value = valueProvider.apply(item);
@@ -2592,7 +2596,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
         JsonArray jsonArray = Json.createArray();
         for (T item : items) {
-            JsonObject jsonObject = item != null ? generateJsonForSelection(item) : null;
+            JsonObject jsonObject = item != null
+                    ? generateJsonForSelection(item)
+                    : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
         getElement().callJsFunction("$connector." + function, jsonArray, false);
@@ -2733,10 +2739,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
+     * 
      * @param internalId
      *            the internal identifier of the column to get
-     * @return the column corresponding to the given column identifier, or {@code null}
-     *         if no column has such an identifier
+     * @return the column corresponding to the given column identifier, or
+     *         {@code null} if no column has such an identifier
      */
     Column<T> getColumnByInternalId(String internalId) {
         return idToColumnMap.get(internalId);
@@ -2956,22 +2963,24 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     @ClientCallable
     private void select(String key) {
-        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::selectFromClient);
+        findByKey(String.valueOf(key))
+                .ifPresent(getSelectionModel()::selectFromClient);
     }
 
     @ClientCallable
     private void deselect(String key) {
-        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::deselectFromClient);
+        findByKey(String.valueOf(key))
+                .ifPresent(getSelectionModel()::deselectFromClient);
     }
 
     private Optional<T> findByKey(String key) {
         Objects.requireNonNull(key);
-        Optional<T> item = Optional.ofNullable(getDataCommunicator().getKeyMapper().get(key));
+        Optional<T> item = Optional
+                .ofNullable(getDataCommunicator().getKeyMapper().get(key));
         if (!item.isPresent()) {
-            LoggerFactory.getLogger(Grid.class)
-                    .debug("Key not found: %s. "
-                            + "This can happen due to user action while changing"
-                            + " the data provider.", key);
+            LoggerFactory.getLogger(Grid.class).debug("Key not found: %s. "
+                    + "This can happen due to user action while changing"
+                    + " the data provider.", key);
         }
         return item;
     }
@@ -2991,9 +3000,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (key == null) {
             detailsManager.setDetailsVisibleFromClient(Collections.emptySet());
         } else {
-            findByKey(key)
-                .map(Collections::singleton)
-                .ifPresent(detailsManager::setDetailsVisibleFromClient);
+            findByKey(key).map(Collections::singleton)
+                    .ifPresent(detailsManager::setDetailsVisibleFromClient);
         }
     }
 
@@ -3050,7 +3058,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
-        if (getDataProvider() != null && dataProviderChangeRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderChangeRegistration == null) {
             handleDataProviderChange(getDataProvider());
         }
     }
@@ -3152,26 +3161,27 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     protected SerializableComparator<T> createSortingComparator() {
         BinaryOperator<SerializableComparator<T>> operator = (comparator1,
                 comparator2) -> {
-            /*
-             * thenComparing is defined to return a serializable comparator as
-             * long as both original comparators are also serializable
-             */
-            return comparator1.thenComparing(comparator2)::compare;
-        };
+                    /*
+                     * thenComparing is defined to return a serializable
+                     * comparator as long as both original comparators are also
+                     * serializable
+                     */
+                    return comparator1.thenComparing(comparator2)::compare;
+                };
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
     }
 
     /**
-     * If <code>true</code>, the grid's height is defined by its
-     * rows. All items are fetched from the {@link DataProvider}, and the Grid
-     * shows no vertical scroll bar.
+     * If <code>true</code>, the grid's height is defined by its rows. All items
+     * are fetched from the {@link DataProvider}, and the Grid shows no vertical
+     * scroll bar.
      * <p>
      * Note: <code>setHeightByRows</code> disables the grid's virtual scrolling
-     * so that all the rows are rendered in the DOM at once.
-     * If the grid has a large number of items, using the feature is discouraged
-     * to avoid performance issues.
+     * so that all the rows are rendered in the DOM at once. If the grid has a
+     * large number of items, using the feature is discouraged to avoid
+     * performance issues.
      *
      * @param heightByRows
      *            <code>true</code> to make Grid compute its height by the
@@ -3230,8 +3240,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Objects.requireNonNull(property);
         Objects.requireNonNull(valueProvider);
 
-        return addDataGenerator((item, data) -> data.put(property,
-                JsonSerializer.toJson(applyValueProvider(valueProvider,item))));
+        return addDataGenerator(
+                (item, data) -> data.put(property, JsonSerializer
+                        .toJson(applyValueProvider(valueProvider, item))));
     }
 
     @Override
@@ -3845,29 +3856,29 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Sets a new column order for the grid.
      * <p>
-     * The function doesn't support column
-     * removal: all columns must be present in the list, otherwise
-     * {@link IllegalArgumentException} is thrown.
+     * The function doesn't support column removal: all columns must be present
+     * in the list, otherwise {@link IllegalArgumentException} is thrown.
      * <p>
      * The {@link #getColumns()} function will reflect the new column ordering.
      * <p>
-     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
-     * returning {@code false}.
+     * Fires the {@link ColumnReorderEvent} with
+     * {@link ColumnReorderEvent#isFromClient()} returning {@code false}.
      * <p>
-     * The method is atomic: if the requested reordering is not achievable,
-     * the function fails cleanly with {@link IllegalArgumentException} without
+     * The method is atomic: if the requested reordering is not achievable, the
+     * function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
      * @see #setColumnOrder(List)
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
-     *            if the {@code columns} parameter is {@code null}.
-     * @throws IllegalArgumentException if a column is present two times in the
-     *            list, or if the column is not owned by this Grid, or if the
-     *            list doesn't contain all columns currently present in the Grid,
-     *            or if the column rearranging would require to split a joined
-     *            header/footer cell group.
+     *             if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException
+     *             if a column is present two times in the list, or if the
+     *             column is not owned by this Grid, or if the list doesn't
+     *             contain all columns currently present in the Grid, or if the
+     *             column rearranging would require to split a joined
+     *             header/footer cell group.
      */
     public void setColumnOrder(Column<T>... columns) {
         setColumnOrder(Arrays.asList(columns));
@@ -3876,29 +3887,29 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Sets a new column order for the grid.
      * <p>
-     * The function doesn't support column
-     * removal: all columns must be present in the list, otherwise
-     * {@link IllegalArgumentException} is thrown.
+     * The function doesn't support column removal: all columns must be present
+     * in the list, otherwise {@link IllegalArgumentException} is thrown.
      * <p>
      * The {@link #getColumns()} function will reflect the new column ordering.
      * <p>
-     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
-     * returning {@code false}.
+     * Fires the {@link ColumnReorderEvent} with
+     * {@link ColumnReorderEvent#isFromClient()} returning {@code false}.
      * <p>
-     * The method is atomic: if the requested reordering is not achievable,
-     * the function fails cleanly with {@link IllegalArgumentException} without
+     * The method is atomic: if the requested reordering is not achievable, the
+     * function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
      * @see #setColumnOrder(Column[])
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
-     *            if the {@code columns} parameter is {@code null}.
-     * @throws IllegalArgumentException if a column is present two times in the
-     *            list, or if the column is not owned by this Grid, or if the
-     *            list doesn't contain all columns currently present in the Grid,
-     *            or if the column rearranging would require to split a joined
-     *            header/footer cell group.
+     *             if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException
+     *             if a column is present two times in the list, or if the
+     *             column is not owned by this Grid, or if the list doesn't
+     *             contain all columns currently present in the Grid, or if the
+     *             column rearranging would require to split a joined
+     *             header/footer cell group.
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
@@ -3934,29 +3945,33 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> getElement().executeJs("this.scrollToIndex(this._effectiveSize)")));
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
-        ComponentUtil.setData(this,
-                DRAG_SOURCE_DATA_KEY, event.getDraggedItems());
-        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(this));
+        ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY,
+                event.getDraggedItems());
+        getUI().ifPresent(
+                ui -> ui.getInternals().setActiveDragSourceComponent(this));
     }
 
     private void onDragEnd(GridDragEndEvent<T> event) {
-        ComponentUtil.setData(this,
-                DRAG_SOURCE_DATA_KEY, null);
-        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(null));
+        ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY, null);
+        getUI().ifPresent(
+                ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
     /**
-     * Set the behavior when facing nested <code>null</code> values. By default the value
-     * is <code>NestedNullBehavior.THROW</code>.
+     * Set the behavior when facing nested <code>null</code> values. By default
+     * the value is <code>NestedNullBehavior.THROW</code>.
      * 
-     * @param nestedNullBehavior the behavior when facing nested <code>null</code> values.
+     * @param nestedNullBehavior
+     *            the behavior when facing nested <code>null</code> values.
      */
     public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
-    	this.nestedNullBehavior = nestedNullBehavior;
+        this.nestedNullBehavior = nestedNullBehavior;
     }
 
     /**
@@ -3965,6 +3980,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @return The current behavior when facing nested <code>null</code> values.
      */
     public NestedNullBehavior getNestedNullBehavior() {
-    	return nestedNullBehavior;
+        return nestedNullBehavior;
     }
 }

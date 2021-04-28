@@ -44,7 +44,8 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/vaadin-details", version = "1.2.0")
 @JsModule("@vaadin/vaadin-details/src/vaadin-details.js")
 @HtmlImport("frontend://bower_components/vaadin-details/src/vaadin-details.html")
-public class Details extends Component implements HasEnabled, HasTheme, HasStyle {
+public class Details extends Component
+        implements HasEnabled, HasTheme, HasStyle {
 
     private Component summary;
     private final Div contentContainer;

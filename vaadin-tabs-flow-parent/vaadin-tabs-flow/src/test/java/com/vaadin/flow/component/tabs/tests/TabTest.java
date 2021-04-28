@@ -33,10 +33,8 @@ public class TabTest {
     @Test
     public void shouldCreateEmptyTabWithDefaultState() throws Exception {
 
-        assertThat("Initial label is invalid", tab.getLabel(),
-                is(""));
-        assertThat("Initial flexGrow is invalid", tab.getFlexGrow(),
-                is(0.0));
+        assertThat("Initial label is invalid", tab.getLabel(), is(""));
+        assertThat("Initial flexGrow is invalid", tab.getFlexGrow(), is(0.0));
     }
 
     @Test
@@ -45,17 +43,14 @@ public class TabTest {
 
         tab = new Tab(label);
 
-        assertThat("Initial label is invalid", tab.getLabel(),
-                is(label));
-        assertThat("Initial flexGrow is invalid", tab.getFlexGrow(),
-                is(0.0));
+        assertThat("Initial label is invalid", tab.getLabel(), is(label));
+        assertThat("Initial flexGrow is invalid", tab.getFlexGrow(), is(0.0));
     }
 
     @Test
     public void shouldSetFlexGrow() throws Exception {
         tab.setFlexGrow(1);
 
-        assertThat("flexGrow is invalid", tab.getFlexGrow(),
-                is(1.0));
+        assertThat("flexGrow is invalid", tab.getFlexGrow(), is(1.0));
     }
 }

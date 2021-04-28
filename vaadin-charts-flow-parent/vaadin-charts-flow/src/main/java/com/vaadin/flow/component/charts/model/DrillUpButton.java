@@ -19,7 +19,6 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.ButtonTheme;
 
-
 /**
  * Options for the drill up button that appears when drilling down on a series.
  * The text for the button is defined in {@link Lang#setDrillUpText(String)}.

@@ -55,7 +55,8 @@ public class CheckboxPageIT extends AbstractComponentIT {
         testInitialValue(true, true);
     }
 
-    private void testInitialValue(boolean checkedExpected, boolean indeterminateExpected) {
+    private void testInitialValue(boolean checkedExpected,
+            boolean indeterminateExpected) {
         open();
 
         int id = checkedExpected ? 1 : 0;
@@ -63,26 +64,39 @@ public class CheckboxPageIT extends AbstractComponentIT {
 
         TestBenchElement cb = (TestBenchElement) findElement(By.id("cb-" + id));
         WebElement valueLabel = findElement(By.id("value-label-" + id));
-        WebElement indeterminateLabel = findElement(By.id("indeterminate-label-" + id));
+        WebElement indeterminateLabel = findElement(
+                By.id("indeterminate-label-" + id));
 
-        Assert.assertEquals("Wrong checked value", checkedExpected, cb.getPropertyBoolean("checked"));
-        Assert.assertEquals("Wrong indeterminate value", indeterminateExpected, cb.getPropertyBoolean("indeterminate"));
+        Assert.assertEquals("Wrong checked value", checkedExpected,
+                cb.getPropertyBoolean("checked"));
+        Assert.assertEquals("Wrong indeterminate value", indeterminateExpected,
+                cb.getPropertyBoolean("indeterminate"));
 
-        Assert.assertEquals("Extra checked change event", "Value: " + checkedExpected, valueLabel.getText());
-        Assert.assertEquals("Extra indeterminate property change event", "Indeterminate: " + indeterminateExpected, indeterminateLabel.getText());
+        Assert.assertEquals("Extra checked change event",
+                "Value: " + checkedExpected, valueLabel.getText());
+        Assert.assertEquals("Extra indeterminate property change event",
+                "Indeterminate: " + indeterminateExpected,
+                indeterminateLabel.getText());
 
-        // the indeterminate=true won't work properly otherwise, checked is not changed
+        // the indeterminate=true won't work properly otherwise, checked is not
+        // changed
         cb.$(InputElement.class).first().click();
 
-        // after clicking, checked value should have changed and indeterminate is always false
-        Assert.assertEquals("After click wrong checked value", !checkedExpected, cb.getPropertyBoolean("checked"));
-        Assert.assertEquals("After click wrong indeterminate value", false, cb.getPropertyBoolean("indeterminate"));
+        // after clicking, checked value should have changed and indeterminate
+        // is always false
+        Assert.assertEquals("After click wrong checked value", !checkedExpected,
+                cb.getPropertyBoolean("checked"));
+        Assert.assertEquals("After click wrong indeterminate value", false,
+                cb.getPropertyBoolean("indeterminate"));
 
-        Assert.assertEquals("No checked change event", "Value: 1 " + !checkedExpected, valueLabel.getText());
+        Assert.assertEquals("No checked change event",
+                "Value: 1 " + !checkedExpected, valueLabel.getText());
         if (indeterminateExpected) {
-            Assert.assertEquals("No indeterminate property change event", "Indeterminate: 1 " + false, indeterminateLabel.getText());
+            Assert.assertEquals("No indeterminate property change event",
+                    "Indeterminate: 1 " + false, indeterminateLabel.getText());
         } else {
-            Assert.assertEquals("Extra indeterminate property change event", "Indeterminate: " + false, indeterminateLabel.getText());
+            Assert.assertEquals("Extra indeterminate property change event",
+                    "Indeterminate: " + false, indeterminateLabel.getText());
         }
     }
 }

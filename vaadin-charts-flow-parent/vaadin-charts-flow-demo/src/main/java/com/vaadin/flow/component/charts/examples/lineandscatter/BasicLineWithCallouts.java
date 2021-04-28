@@ -12,7 +12,7 @@ import com.vaadin.flow.component.charts.model.Shape;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value="./styles/BasicLineWithCallouts.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/BasicLineWithCallouts.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class BasicLineWithCallouts extends AbstractChartExample {
 
     @Override
@@ -32,10 +32,8 @@ public class BasicLineWithCallouts extends AbstractChartExample {
         YAxis yAxis = configuration.getyAxis();
         yAxis.setTitle(new AxisTitle("Temperature (°C)"));
 
-        configuration
-                .getTooltip()
-                .setFormatter(
-                        "'<b>'+ this.series.name +'</b><br/>'+this.x +': '+ this.y +'°C'");
+        configuration.getTooltip().setFormatter(
+                "'<b>'+ this.series.name +'</b><br/>'+this.x +': '+ this.y +'°C'");
 
         PlotOptionsLine plotOptions = new PlotOptionsLine();
         plotOptions.setEnableMouseTracking(false);

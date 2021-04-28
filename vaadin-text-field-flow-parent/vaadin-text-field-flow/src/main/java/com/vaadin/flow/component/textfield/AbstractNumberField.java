@@ -162,8 +162,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the visibility of the control buttons for increasing/decreasing
-     * the value accordingly to the default or specified step.
+     * Sets the visibility of the control buttons for increasing/decreasing the
+     * value accordingly to the default or specified step.
      *
      * @see #setStep(double)
      *
@@ -177,8 +177,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Gets whether the control buttons for increasing/decreasing
-     * the value are visible.
+     * Gets whether the control buttons for increasing/decreasing the value are
+     * visible.
      *
      * @see #setStep(double)
      *
@@ -212,7 +212,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      *
      * @return the {@code title} property from the webcomponent
      */

@@ -33,8 +33,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         String referenceName = prefix + "_" + screenshotName;
         Thread.sleep(1000);
         Assert.assertTrue(
-                "Screenshot " + referenceName + " contains differences",
-                true);
+                "Screenshot " + referenceName + " contains differences", true);
     }
 
     protected void open(Class<?> viewClass, Dimension size) {
@@ -58,7 +57,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     protected String getDeploymentPath(Class<?> viewClass) {
 
-        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        com.vaadin.flow.router.Route[] ann = viewClass
+                .getAnnotationsByType(com.vaadin.flow.router.Route.class);
         if (ann.length > 0) {
             return "/" + ann[0].value();
         }
@@ -75,10 +75,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
-
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList(
-                BrowserUtil.chrome());
+        return Arrays.asList(BrowserUtil.chrome());
     }
 
 }

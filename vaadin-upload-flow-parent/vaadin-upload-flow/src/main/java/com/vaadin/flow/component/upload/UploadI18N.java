@@ -50,7 +50,7 @@ public class UploadI18N implements Serializable {
     /**
      * Translations for adding files.
      */
-    public static class AddFiles extends SingleMulti implements Serializable{
+    public static class AddFiles extends SingleMulti implements Serializable {
         @Override
         public AddFiles setOne(String one) {
             super.setOne(one);
@@ -85,7 +85,7 @@ public class UploadI18N implements Serializable {
          * Set too many files error translation.
          *
          * @param tooManyFiles
-         *         translation string
+         *            translation string
          * @return error translation class
          */
         public Error setTooManyFiles(String tooManyFiles) {
@@ -106,7 +106,7 @@ public class UploadI18N implements Serializable {
          * Set file too big translation.
          *
          * @param fileIsTooBig
-         *         translation string
+         *            translation string
          * @return error translation class
          */
         public Error setFileIsTooBig(String fileIsTooBig) {
@@ -128,7 +128,7 @@ public class UploadI18N implements Serializable {
          * Set incorrect file type translation.
          *
          * @param incorrectFileType
-         *         translation string
+         *            translation string
          * @return error translation class
          */
         public Error setIncorrectFileType(String incorrectFileType) {
@@ -140,7 +140,7 @@ public class UploadI18N implements Serializable {
     /**
      * Upload time translation strings.
      */
-    public static class Uploading implements Serializable{
+    public static class Uploading implements Serializable {
         private Status status;
         private RemainingTime remainingTime;
         private Error error;
@@ -158,7 +158,7 @@ public class UploadI18N implements Serializable {
          * Set status translations.
          *
          * @param status
-         *         status translations
+         *            status translations
          * @return uploading translations
          */
         public Uploading setStatus(Status status) {
@@ -179,7 +179,7 @@ public class UploadI18N implements Serializable {
          * Set remaining time translations.
          *
          * @param remainingTime
-         *         remaining time translations
+         *            remaining time translations
          * @return uploading translations
          */
         public Uploading setRemainingTime(RemainingTime remainingTime) {
@@ -200,7 +200,7 @@ public class UploadI18N implements Serializable {
          * Set upload error translations.
          *
          * @param error
-         *         error translations
+         *            error translations
          * @return uploading translations
          */
         public Uploading setError(Error error) {
@@ -230,7 +230,7 @@ public class UploadI18N implements Serializable {
              * Set connecting translation.
              *
              * @param connecting
-             *         translation string
+             *            translation string
              * @return status translations
              */
             public Status setConnecting(String connecting) {
@@ -251,7 +251,7 @@ public class UploadI18N implements Serializable {
              * Set stalled translation.
              *
              * @param stalled
-             *         translation string
+             *            translation string
              * @return status translations
              */
             public Status setStalled(String stalled) {
@@ -272,7 +272,7 @@ public class UploadI18N implements Serializable {
              * Set processing translation.
              *
              * @param processing
-             *         translation string
+             *            translation string
              * @return status translations
              */
             public Status setProcessing(String processing) {
@@ -293,7 +293,7 @@ public class UploadI18N implements Serializable {
              * Set held translation.
              *
              * @param held
-             *         translation string
+             *            translation string
              * @return status translations
              */
             public Status setHeld(String held) {
@@ -322,7 +322,7 @@ public class UploadI18N implements Serializable {
              * Set prefix translation.
              *
              * @param prefix
-             *         translation string
+             *            translation string
              * @return remaining time translations
              */
             public RemainingTime setPrefix(String prefix) {
@@ -343,7 +343,7 @@ public class UploadI18N implements Serializable {
              * Set unknown translation.
              *
              * @param unknown
-             *         translation string
+             *            translation string
              * @return remaining time translations
              */
             public RemainingTime setUnknown(String unknown) {
@@ -369,7 +369,7 @@ public class UploadI18N implements Serializable {
 
             /**
              * @param serverUnavailable
-             *         translation string
+             *            translation string
              * @return
              */
             public Error setServerUnavailable(String serverUnavailable) {
@@ -386,7 +386,7 @@ public class UploadI18N implements Serializable {
 
             /**
              * @param unexpectedServerError
-             *         translation string
+             *            translation string
              * @return
              */
             public Error setUnexpectedServerError(
@@ -404,7 +404,7 @@ public class UploadI18N implements Serializable {
 
             /**
              * @param forbidden
-             *         translation string
+             *            translation string
              * @return
              */
             public Error setForbidden(String forbidden) {
@@ -418,12 +418,14 @@ public class UploadI18N implements Serializable {
      * unit translations.
      */
     public static class Units implements Serializable {
-        private List<String> size = Arrays.asList("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
+        private List<String> size = Arrays.asList("B", "kB", "MB", "GB", "TB",
+                "PB", "EB", "ZB", "YB");
 
         /**
          * unit translations with default size:
          *
-         * size = Arrays.asList("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
+         * size = Arrays.asList("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB",
+         * "YB");
          */
         public Units() {
         }
@@ -438,6 +440,7 @@ public class UploadI18N implements Serializable {
 
         /**
          * get units size list
+         * 
          * @return
          */
         public List<String> getSize() {
@@ -445,7 +448,9 @@ public class UploadI18N implements Serializable {
         }
 
         /**
-         * units size list: ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+         * units size list: ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB",
+         * "YB"]
+         * 
          * @param size
          * @return
          */
@@ -475,7 +480,7 @@ public class UploadI18N implements Serializable {
          * Set translation for single upload.
          *
          * @param one
-         *         translation string
+         *            translation string
          * @return translation class
          */
         public SingleMulti setOne(String one) {
@@ -492,7 +497,7 @@ public class UploadI18N implements Serializable {
 
         /**
          * @param many
-         *         translation string
+         *            translation string
          * @return translation class
          */
         public SingleMulti setMany(String many) {
@@ -514,7 +519,7 @@ public class UploadI18N implements Serializable {
      * Set drop translation.
      *
      * @param dropFiles
-     *         drop files translations
+     *            drop files translations
      * @return i18n translations
      */
     public UploadI18N setDropFiles(DropFiles dropFiles) {
@@ -535,7 +540,7 @@ public class UploadI18N implements Serializable {
      * Set add files translations.
      *
      * @param addFiles
-     *         add files translations
+     *            add files translations
      * @return i18n translations
      */
     public UploadI18N setAddFiles(AddFiles addFiles) {
@@ -556,7 +561,7 @@ public class UploadI18N implements Serializable {
      * Set cancel translation.
      *
      * @param cancel
-     *         translation string
+     *            translation string
      * @return i18n translations
      */
     public UploadI18N setCancel(String cancel) {
@@ -577,7 +582,7 @@ public class UploadI18N implements Serializable {
      * Set error translations.
      *
      * @param error
-     *         error translations
+     *            error translations
      * @return i18n translations
      */
     public UploadI18N setError(Error error) {
@@ -598,7 +603,7 @@ public class UploadI18N implements Serializable {
      * Set uploading translations.
      *
      * @param uploading
-     *         uploading translations
+     *            uploading translations
      * @return i18n translations
      */
     public UploadI18N setUploading(Uploading uploading) {
@@ -619,7 +624,7 @@ public class UploadI18N implements Serializable {
      * Set unit translations.
      *
      * @param units
-     *         list of unit translations
+     *            list of unit translations
      * @return i18n translations
      */
     public UploadI18N setUnits(List<String> units) {
@@ -638,7 +643,7 @@ public class UploadI18N implements Serializable {
      * </code>
      *
      * @param units
-     *         unit translations object.
+     *            unit translations object.
      * @return unit translations.
      */
     public UploadI18N setUnits(Units units) {

@@ -21,8 +21,8 @@ public abstract class AbstractChartExample extends Div {
     public abstract void initDemo();
 
     protected void showNotification(String message) {
-        UI.getCurrent().getPage()
-                .executeJavaScript("window.alert($0);", message);
+        UI.getCurrent().getPage().executeJavaScript("window.alert($0);",
+                message);
 
     }
 

@@ -116,10 +116,13 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         waitUntil(driver -> getLogEntries(Level.WARNING).toString().contains(
                 "The locale is not supported, using default locale setting(en-US)."));
         WebElement picker = findElement(By.id("field"));
-        WebElement displayText = findInShadowRoot(picker, By.id("input")).get(0);
+        WebElement displayText = findInShadowRoot(picker, By.id("input"))
+                .get(0);
 
         executeScript("arguments[0].value = '2018-12-26'", picker);
-        Assert.assertEquals("DatePicker should use default locale(en-US) format, MM/DD/YYYY", true,
+        Assert.assertEquals(
+                "DatePicker should use default locale(en-US) format, MM/DD/YYYY",
+                true,
                 executeScript("return arguments[0].value === '12/26/2018'",
                         displayText));
     }
@@ -193,17 +196,18 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     }
 
     private void assertInvalidAfterClientChange(String clientPropertyUnderTest,
-        LocalDate invalidValue, LocalDate validValue) {
+            LocalDate invalidValue, LocalDate validValue) {
 
         final boolean valid = true;
         final DatePickerElement element = $(DatePickerElement.class)
-            .id("picker-with-valid-range");
+                .id("picker-with-valid-range");
         assertValidStateOfPickerWithValidRange(valid);
 
         element.setDate(invalidValue);
         assertValidStateOfPickerWithValidRange(!valid);
 
-        // Forcing max to invalid value on the client does not make the field valid
+        // Forcing max to invalid value on the client does not make the field
+        // valid
         element.setProperty(clientPropertyUnderTest, invalidValue.toString());
         getCommandExecutor().waitForVaadin();
         assertValidStateOfPickerWithValidRange(!valid);
@@ -247,8 +251,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     }
 
     private void assertServerValueField(String text) {
-        assertTrue($("label").id("server-side-value").getText()
-                .contains(text));
+        assertTrue($("label").id("server-side-value").getText().contains(text));
     }
 
     private void setValue(String value) {

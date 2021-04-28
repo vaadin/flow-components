@@ -117,7 +117,8 @@ public class RadioButtonGroup<T>
                 .addDataProviderListener(event -> {
                     if (event instanceof DataChangeEvent.DataRefreshEvent) {
                         resetRadioButton(
-                            ((DataChangeEvent.DataRefreshEvent<T>) event).getItem());
+                                ((DataChangeEvent.DataRefreshEvent<T>) event)
+                                        .getItem());
                     } else {
                         reset();
                     }
@@ -127,13 +128,15 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons().forEach(rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        getRadioButtons().forEach(
+                rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
         FieldValidationUtil.disableClientValidation(this);
@@ -142,8 +145,8 @@ public class RadioButtonGroup<T>
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         if (dataProviderListenerRegistration != null) {
-        	dataProviderListenerRegistration.remove();
-        	dataProviderListenerRegistration = null;
+            dataProviderListenerRegistration.remove();
+            dataProviderListenerRegistration = null;
         }
         super.onDetach(detachEvent);
     }
@@ -310,10 +313,11 @@ public class RadioButtonGroup<T>
     }
 
     private void resetRadioButton(T item) {
-        getRadioButtons().filter(radioButton ->
-            getDataProvider().getId(radioButton.getItem()).equals(getDataProvider().getId(item)))
-        .findFirst()
-        .ifPresent(this::updateButton);
+        getRadioButtons()
+                .filter(radioButton -> getDataProvider()
+                        .getId(radioButton.getItem())
+                        .equals(getDataProvider().getId(item)))
+                .findFirst().ifPresent(this::updateButton);
     }
 
     private Component createRadioButton(T item) {

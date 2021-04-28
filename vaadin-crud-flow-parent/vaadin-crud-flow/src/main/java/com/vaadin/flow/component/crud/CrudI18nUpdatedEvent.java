@@ -21,7 +21,8 @@ import com.vaadin.flow.component.ComponentEvent;
 
 /**
  * Event fired to a crud grid when the internationalization object is changed.
- * This allows the grid to localize its content, most especially the accessibility of the edit column.
+ * This allows the grid to localize its content, most especially the
+ * accessibility of the edit column.
  *
  * <br>
  * <code>
@@ -39,11 +40,15 @@ public class CrudI18nUpdatedEvent extends ComponentEvent<Crud<?>> {
      * Creates a new event using the given source and indicator whether the
      * event originated from the client side or the server side.
      *
-     * @param source     the source component
-     * @param fromClient <code>true</code> if the event originated from the client
-     * @param i18n the new i18n object
+     * @param source
+     *            the source component
+     * @param fromClient
+     *            <code>true</code> if the event originated from the client
+     * @param i18n
+     *            the new i18n object
      */
-    public CrudI18nUpdatedEvent(Crud<?> source, boolean fromClient, CrudI18n i18n) {
+    public CrudI18nUpdatedEvent(Crud<?> source, boolean fromClient,
+            CrudI18n i18n) {
         super(source, fromClient);
         this.i18n = i18n;
     }

@@ -32,11 +32,12 @@ import com.vaadin.testbench.TestBenchElement;
 public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
 
     @Test
-    public void focusTextField(){
+    public void focusTextField() {
         open();
 
-        // Move focus to the first  cell of second row of grid and press `Enter`
-        new Actions(getDriver()).sendKeys(Keys.TAB, Keys.TAB, Keys.ARROW_RIGHT, Keys.ENTER)
+        // Move focus to the first cell of second row of grid and press `Enter`
+        new Actions(getDriver())
+                .sendKeys(Keys.TAB, Keys.TAB, Keys.ARROW_RIGHT, Keys.ENTER)
                 .build().perform();
 
         GridElement grid = $(GridElement.class).id("grid");
@@ -44,17 +45,19 @@ public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
         Assert.assertTrue(grid.getCell(0, 1).$("vaadin-text-field").exists());
 
         // Assert vaadin-text-field with id 'foo' is focused
-        TestBenchElement focusableComponent = grid.getCell(0, 1).$("vaadin-text-field").id("foo");
+        TestBenchElement focusableComponent = grid.getCell(0, 1)
+                .$("vaadin-text-field").id("foo");
         assertElementHasFocus(focusableComponent);
 
     }
+
     @Test
-    public void focusButton(){
+    public void focusButton() {
         open();
 
-        // Move focus to the first  cell of third row of grid and press `Enter`
-        new Actions(getDriver()).sendKeys(Keys.TAB, Keys.TAB, Keys.ARROW_RIGHT, Keys.ARROW_RIGHT, Keys.ENTER)
-                .build().perform();
+        // Move focus to the first cell of third row of grid and press `Enter`
+        new Actions(getDriver()).sendKeys(Keys.TAB, Keys.TAB, Keys.ARROW_RIGHT,
+                Keys.ARROW_RIGHT, Keys.ENTER).build().perform();
 
         GridElement grid = $(GridElement.class).id("grid");
 
@@ -65,13 +68,10 @@ public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
         assertElementHasFocus(button);
 
         // Click on the button using `Enter`
-        new Actions(getDriver()).sendKeys(Keys.ENTER)
-                .build().perform();
-
+        new Actions(getDriver()).sendKeys(Keys.ENTER).build().perform();
 
         WebElement info = $("div").id("info");
         Assert.assertEquals("foo", info.getText());
-
 
     }
 

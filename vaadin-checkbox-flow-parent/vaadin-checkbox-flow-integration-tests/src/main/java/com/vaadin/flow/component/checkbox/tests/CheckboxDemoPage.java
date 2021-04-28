@@ -14,7 +14,6 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-checkbox-test-demo")
 public class CheckboxDemoPage extends DemoView {
 
-
     @Override
     public void initView() {
 
@@ -113,4 +112,3 @@ public class CheckboxDemoPage extends DemoView {
         checkbox.setId("html-checkbox");
     }
 }
-

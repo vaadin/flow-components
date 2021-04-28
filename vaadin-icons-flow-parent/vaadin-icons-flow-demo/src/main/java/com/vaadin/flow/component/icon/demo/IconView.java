@@ -52,8 +52,7 @@ public class IconView extends DemoView {
         // end-source-example
 
         close.getStyle().set("marginRight", "5px");
-        addCard("Creating a new icon",
-                new HorizontalLayout(close, clock));
+        addCard("Creating a new icon", new HorizontalLayout(close, clock));
 
         close.setId("close-icon");
         clock.setId("clock-icon");
