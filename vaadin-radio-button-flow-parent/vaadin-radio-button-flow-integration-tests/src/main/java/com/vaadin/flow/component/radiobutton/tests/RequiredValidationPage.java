@@ -32,7 +32,8 @@ public class RequiredValidationPage extends Div {
 
         Entity entity = new Entity();
         Binder<Entity> binder = new Binder<>(Entity.class);
-        Binding<Entity, String> nonRequiredBinding = binder.forField(group).bind("gender");
+        Binding<Entity, String> nonRequiredBinding = binder.forField(group)
+                .bind("gender");
 
         group.setId("gender");
 
@@ -40,10 +41,11 @@ public class RequiredValidationPage extends Div {
 
         add(group);
 
-        NativeButton off = new NativeButton(
-                "Make required and validate", event -> {
+        NativeButton off = new NativeButton("Make required and validate",
+                event -> {
                     nonRequiredBinding.unbind();
-                    binder.forField(group).asRequired("required").bind("gender");
+                    binder.forField(group).asRequired("required")
+                            .bind("gender");
                     binder.validate();
                 });
         off.setId("hide");
@@ -53,22 +55,24 @@ public class RequiredValidationPage extends Div {
         radioGroupWithInvalidOption.setId("radio-button-with-invalid-option");
         radioGroupWithInvalidOption.setItems("valid 1", "valid 2", "invalid");
         Binder<Entity> binderForInvalidOption = new Binder<>(Entity.class);
-    	binderForInvalidOption.forField(radioGroupWithInvalidOption)
-    	         .withValidator(value->!"invalid".equals(value), "Value is invalid")
-                 .bind("gender");
+        binderForInvalidOption.forField(radioGroupWithInvalidOption)
+                .withValidator(value -> !"invalid".equals(value),
+                        "Value is invalid")
+                .bind("gender");
         add(radioGroupWithInvalidOption);
-        
+
         RadioButtonGroup<String> radioGroupInvalidOnAttach = new RadioButtonGroup<>();
         radioGroupInvalidOnAttach.setId("radio-button-invalid-on-attach");
         radioGroupInvalidOnAttach.setItems("valid 1", "valid 2", "invalid");
         Binder<Entity> binderForInvalidOnAttach = new Binder<>(Entity.class);
-    	binderForInvalidOnAttach.forField(radioGroupInvalidOnAttach)
-    	         .withValidator(value->!"invalid".equals(value), "Value is invalid")
-                 .bind("gender");
+        binderForInvalidOnAttach.forField(radioGroupInvalidOnAttach)
+                .withValidator(value -> !"invalid".equals(value),
+                        "Value is invalid")
+                .bind("gender");
         Entity invalidBean = new Entity();
         invalidBean.setGender("invalid");
         binderForInvalidOnAttach.setBean(invalidBean);
         binderForInvalidOnAttach.validate();
-    	add(radioGroupInvalidOnAttach);
+        add(radioGroupInvalidOnAttach);
     }
 }

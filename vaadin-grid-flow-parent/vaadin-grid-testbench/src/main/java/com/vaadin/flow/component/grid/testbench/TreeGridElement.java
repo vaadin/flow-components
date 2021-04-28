@@ -273,8 +273,8 @@ public class TreeGridElement extends GridElement {
      */
     public long getNumberOfExpandedRows() {
         waitUntilLoadingFinished();
-        return (long) executeScript(
-                "return arguments[0].expandedItems.length;", this);
+        return (long) executeScript("return arguments[0].expandedItems.length;",
+                this);
     }
 
     /**

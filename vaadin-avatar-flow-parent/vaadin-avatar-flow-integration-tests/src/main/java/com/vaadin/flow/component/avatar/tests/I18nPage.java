@@ -49,8 +49,8 @@ public class I18nPage extends Div {
         NativeButton addI18n = new NativeButton("Add i18n", e -> {
             avatar.setI18n(new AvatarI18n().setAnonymous("анонимный"));
             avatarGroup.setI18n(new AvatarGroupI18n().setAnonymous("анонимный")
-                .setOneActiveUser("Один активный пользователь")
-                .setManyActiveUsers("{count} активных пользователей"));
+                    .setOneActiveUser("Один активный пользователь")
+                    .setManyActiveUsers("{count} активных пользователей"));
         });
         addI18n.setId("set-i18n");
 
@@ -62,7 +62,10 @@ public class I18nPage extends Div {
 
         NativeButton getI18n = new NativeButton("Get i18n", e -> {
             dataTitle.setText(avatar.getI18n().getAnonymous());
-            dataAriaLabel.setText(avatarGroup.getI18n().getManyActiveUsers().replaceFirst("\\{count\\}", ((Integer) avatarGroup.getItems().size()).toString()));
+            dataAriaLabel.setText(avatarGroup.getI18n().getManyActiveUsers()
+                    .replaceFirst("\\{count\\}",
+                            ((Integer) avatarGroup.getItems().size())
+                                    .toString()));
         });
         getI18n.setId("get-i18n");
 

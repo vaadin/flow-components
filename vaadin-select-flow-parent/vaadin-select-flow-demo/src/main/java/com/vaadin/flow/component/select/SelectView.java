@@ -95,13 +95,13 @@ public class SelectView extends DemoView {
         // begin-source-example
         // source-example-heading: Helper text and component
         Select<String> degree = new Select<>("Baccalaureate", "Licence",
-              "Master", "Doctorate");
+                "Master", "Doctorate");
         degree.setLabel("Academic degree");
         degree.setHelperText(
-              "Please, select only the highest accomplished degree");
+                "Please, select only the highest accomplished degree");
 
         Select<String> pet = new Select<>("Cat", "Dog", "Rabbit", "Fish",
-              "Bird", "Other");
+                "Bird", "Other");
         pet.setLabel("Pets");
         pet.setHelperComponent(new Span("Your favorite pet"));
 
@@ -113,7 +113,6 @@ public class SelectView extends DemoView {
         layout.getStyle().set("flex-wrap", "wrap");
         addCard("Helper text and component", layout);
     }
-
 
     private List<Department> getDepartments() {
 
@@ -316,18 +315,18 @@ public class SelectView extends DemoView {
         addCard("Theme Variants", "Small size", select);
     }
 
-    private void helperTextAbove () {
+    private void helperTextAbove() {
         // begin-source-example
         // source-example-heading: Helper text and component above the field
         Select<String> degree = new Select<>("Baccalaureate", "Licence",
-              "Master", "Doctorate");
+                "Master", "Doctorate");
         degree.setLabel("Academic degree");
         degree.setHelperText(
-              "Please, select only the highest accomplished degree");
+                "Please, select only the highest accomplished degree");
         degree.getElement().getThemeList().set("helper-above-field", true);
 
         Select<String> pet = new Select<>("Cat", "Dog", "Rabbit", "Fish",
-              "Bird", "Other");
+                "Bird", "Other");
         pet.setLabel("Pets");
         pet.setHelperComponent(new Span("Your favorite pet"));
         pet.getElement().getThemeList().set("helper-above-field", true);
@@ -339,7 +338,7 @@ public class SelectView extends DemoView {
         HorizontalLayout layout = new HorizontalLayout(degree, pet);
         layout.getStyle().set("flex-wrap", "wrap");
         addCard("Theme Variants", "Helper text and component above the field",
-              layout);
+                layout);
     }
 
     private void styling() {

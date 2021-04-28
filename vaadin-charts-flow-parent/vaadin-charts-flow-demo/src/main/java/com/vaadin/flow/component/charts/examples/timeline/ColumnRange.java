@@ -20,7 +20,8 @@ public class ColumnRange extends AbstractChartExample {
 
         DataSeries dataSeries = new DataSeries("Temperatures");
         for (StockPrices.RangeData data : StockPrices.fetchDailyTempRanges()) {
-            dataSeries.add(new DataSeriesItem(data.getDate(), data.getMin(), data.getMax()));
+            dataSeries.add(new DataSeriesItem(data.getDate(), data.getMin(),
+                    data.getMax()));
         }
         configuration.setSeries(dataSeries);
 

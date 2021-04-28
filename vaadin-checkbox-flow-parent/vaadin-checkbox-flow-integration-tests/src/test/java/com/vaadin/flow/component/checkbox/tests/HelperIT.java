@@ -25,8 +25,7 @@ import org.junit.Test;
 public class HelperIT extends AbstractComponentIT {
 
     /**
-     * Assert that helper component exists after
-     * setItems.
+     * Assert that helper component exists after setItems.
      * https://github.com/vaadin/vaadin-checkbox/issues/191
      */
     @Test
@@ -35,7 +34,7 @@ public class HelperIT extends AbstractComponentIT {
         TestBenchElement checkboxGroup = $("vaadin-checkbox-group").first();
 
         TestBenchElement helperComponent = checkboxGroup.$("span")
-            .attributeContains("slot", "helper").first();
+                .attributeContains("slot", "helper").first();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
     }

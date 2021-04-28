@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -23,7 +22,8 @@ import com.vaadin.flow.component.charts.Chart;
  * Fired when a series is shown
  */
 @DomEvent("series-show")
-public class SeriesShowEvent extends ComponentEvent<Chart> implements HasSeries {
+public class SeriesShowEvent extends ComponentEvent<Chart>
+        implements HasSeries {
 
     private final int seriesIndex;
 

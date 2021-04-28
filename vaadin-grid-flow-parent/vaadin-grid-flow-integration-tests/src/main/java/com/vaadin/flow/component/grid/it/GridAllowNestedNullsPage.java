@@ -54,7 +54,7 @@ public class GridAllowNestedNullsPage extends Div {
         nullThrownGridBtn.addClickListener(event -> {
             addEmployeeGrid(NestedNullBehavior.THROW);
         });
-        add(nullAllowedGridBtn,nullThrownGridBtn);
+        add(nullAllowedGridBtn, nullThrownGridBtn);
     }
 
     private List<Employee> mockEmployees() {
@@ -71,19 +71,24 @@ public class GridAllowNestedNullsPage extends Div {
         public Employee(String name) {
             this.name = name;
         }
+
         public Employee(String name, Company company) {
             this.name = name;
             this.company = company;
         }
+
         public String getName() {
             return name;
         }
+
         public void setName(String name) {
             this.name = name;
         }
+
         public Company getCompany() {
             return company;
         }
+
         public void setCompany(Company company) {
             this.company = company;
         }
@@ -95,9 +100,11 @@ public class GridAllowNestedNullsPage extends Div {
         public Company(String companyname) {
             this.companyname = companyname;
         }
+
         public String getCompanyname() {
             return companyname;
         }
+
         public void setCompanyname(String companyname) {
             this.companyname = companyname;
         }

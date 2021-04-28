@@ -97,8 +97,7 @@ public class GridMultiSelectionColumnPage extends Div {
         Grid<String> grid = new Grid<>();
         setUp(grid);
         grid.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
-        grid.setItems(
-                new CallbackDataProvider<>(this::fetch, this::count));
+        grid.setItems(new CallbackDataProvider<>(this::fetch, this::count));
         grid.setId("swapped-grid");
 
         NativeButton inMemory = new NativeButton("Set in-memory DataProvider",

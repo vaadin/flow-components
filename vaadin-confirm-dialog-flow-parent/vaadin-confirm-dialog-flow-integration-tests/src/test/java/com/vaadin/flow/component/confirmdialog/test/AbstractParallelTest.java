@@ -8,7 +8,6 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 
@@ -26,15 +25,15 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     public void compareScreen(String screenshotName) throws Exception {
         // Only check screenshots in npm-mode and sauce-labs
-        if (Boolean.getBoolean("vaadin.bowerMode") || System.getProperty("runLocally") != null) {
+        if (Boolean.getBoolean("vaadin.bowerMode")
+                || System.getProperty("runLocally") != null) {
             return;
         }
         String prefix = getClass().getSimpleName().replaceAll("IT", "");
         String referenceName = prefix + "_" + screenshotName;
         Thread.sleep(1000);
         Assert.assertTrue(
-                "Screenshot " + referenceName + " contains differences",
-                true);
+                "Screenshot " + referenceName + " contains differences", true);
     }
 
     public void open(Class<?> viewClass, Dimension size) {
@@ -58,7 +57,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     protected String getDeploymentPath(Class<?> viewClass) {
 
-        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        com.vaadin.flow.router.Route[] ann = viewClass
+                .getAnnotationsByType(com.vaadin.flow.router.Route.class);
         if (ann.length > 0) {
             return "/" + ann[0].value();
         }
@@ -75,9 +75,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
-
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList( BrowserUtil.chrome());
+        return Arrays.asList(BrowserUtil.chrome());
     }
 
 }

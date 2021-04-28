@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * DataSeriesItem that can hold also Z value. Used in e.g. bubble charts.
  */

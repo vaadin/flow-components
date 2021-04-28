@@ -10,29 +10,31 @@ public class BasicIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-custom-field") ;
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-custom-field");
         getDriver().get(url);
     }
 
     @Test
     public void valueIsUpdated() {
         final CustomFieldElement customField = $(CustomFieldElement.class)
-            .waitForFirst();
+                .waitForFirst();
         Assert.assertEquals("",
-            $("div").attribute("id", "result").get(0).getText());
+                $("div").attribute("id", "result").get(0).getText());
         TextFieldElement field1 = getById(customField, "field1");
         field1.setValue("1");
         TextFieldElement field2 = getById(customField, "field2");
         field2.setValue("2");
         $("button").waitForFirst().click();
         executeScript(
-            "!!document.activeElement ? document.activeElement.blur() : 0");
-        waitUntil(e -> "3".equals($("div").attribute("id", "result").get(0).getText()));
+                "!!document.activeElement ? document.activeElement.blur() : 0");
+        waitUntil(e -> "3"
+                .equals($("div").attribute("id", "result").get(0).getText()));
     }
 
     private TextFieldElement getById(CustomFieldElement customField,
-        String id) {
+            String id) {
         return customField.$(TextFieldElement.class).attribute("id", id)
-            .waitForFirst();
+                .waitForFirst();
     }
 }

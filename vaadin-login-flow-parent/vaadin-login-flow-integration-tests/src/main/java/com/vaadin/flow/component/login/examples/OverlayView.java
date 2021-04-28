@@ -25,16 +25,19 @@ public class OverlayView extends AbstractView {
     }
 
     @Override
-    public void setParameter(BeforeEvent beforeEvent,  @OptionalParameter String s) {
+    public void setParameter(BeforeEvent beforeEvent,
+            @OptionalParameter String s) {
         super.setParameter(beforeEvent, s);
         if ("component-title".equals(s)) {
-            Div div = new Div(VaadinIcon.VAADIN_H.create(), new H3("Component title"));
+            Div div = new Div(VaadinIcon.VAADIN_H.create(),
+                    new H3("Component title"));
             div.setId("componentTitle");
             login.setTitle(div);
 
             NativeButton removeCustomTitle = new NativeButton("Remove title");
             removeCustomTitle.setId("removeCustomTitle");
-            removeCustomTitle.addClickListener(e -> login.setTitle("Make title string again"));
+            removeCustomTitle.addClickListener(
+                    e -> login.setTitle("Make title string again"));
             add(removeCustomTitle);
 
         }

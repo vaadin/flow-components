@@ -109,22 +109,26 @@ public class GridPro<E> extends Grid<E> {
 
     private void setup() {
         addItemPropertyChangedListener(e -> {
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
+            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
+                    .get(e.getPath());
 
             if (column.getEditorType().equals("custom")) {
                 column.getItemUpdater().accept(e.getItem(), null);
             } else {
-                column.getItemUpdater().accept(e.getItem(), e.getSourceItem().get(e.getPath()).asString());
+                column.getItemUpdater().accept(e.getItem(),
+                        e.getSourceItem().get(e.getPath()).asString());
             }
 
             getDataProvider().refreshItem(e.getItem());
         });
 
         addCellEditStartedListener(e -> {
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
+            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
+                    .get(e.getPath());
 
             if (column.getEditorType().equals("custom")) {
-                column.getEditorField().setValue(column.getValueProvider().apply(e.getItem()));
+                column.getEditorField()
+                        .setValue(column.getValueProvider().apply(e.getItem()));
             }
         });
     }
@@ -158,7 +162,8 @@ public class GridPro<E> extends Grid<E> {
          *            the renderer to use in this column, must not be
          *            {@code null}
          */
-        public EditColumn(GridPro<T> grid, String columnId, Renderer<T> renderer) {
+        public EditColumn(GridPro<T> grid, String columnId,
+                Renderer<T> renderer) {
             super(grid, columnId, renderer);
         }
 
@@ -170,7 +175,8 @@ public class GridPro<E> extends Grid<E> {
          *            It receives two arguments: item and newValue.
          * @return this column instance
          */
-        protected EditColumn<T> setItemUpdater(ItemUpdater<T, String> itemUpdater) {
+        protected EditColumn<T> setItemUpdater(
+                ItemUpdater<T, String> itemUpdater) {
             this.itemUpdater = itemUpdater;
             return this;
         }
@@ -202,7 +208,8 @@ public class GridPro<E> extends Grid<E> {
          * @see EditorType
          */
         protected EditColumn<T> setEditorType(EditorType type) {
-            getElement().setProperty("editorType", type == null ? "text" : type.getTypeName());
+            getElement().setProperty("editorType",
+                    type == null ? "text" : type.getTypeName());
             return this;
         }
 
@@ -224,7 +231,8 @@ public class GridPro<E> extends Grid<E> {
          * @return this column instance
          */
         protected EditColumn<T> setOptions(List<String> options) {
-            getElement().setPropertyJson("editorOptions", JsonSerializer.toJson(options));
+            getElement().setPropertyJson("editorOptions",
+                    JsonSerializer.toJson(options));
             return this;
         }
 
@@ -235,9 +243,9 @@ public class GridPro<E> extends Grid<E> {
          */
         @Synchronize("editor-options-changed")
         protected List<String> getOptions() {
-            return JsonSerializer.toObjects(String.class,  (JsonArray) getElement().getPropertyRaw("editorOptions"));
+            return JsonSerializer.toObjects(String.class,
+                    (JsonArray) getElement().getPropertyRaw("editorOptions"));
         }
-
 
         public ValueProvider<T, ?> getValueProvider() {
             return valueProvider;
@@ -261,16 +269,18 @@ public class GridPro<E> extends Grid<E> {
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
      */
-    public EditColumnConfigurator<E> addEditColumn(ValueProvider<E, ?> valueProvider) {
-        EditColumn<E> column = this.addColumn(valueProvider, this::createEditColumn);
+    public EditColumnConfigurator<E> addEditColumn(
+            ValueProvider<E, ?> valueProvider) {
+        EditColumn<E> column = this.addColumn(valueProvider,
+                this::createEditColumn);
 
         return new EditColumnConfigurator<>(column, valueProvider);
     }
 
     /**
-     * Adds a new edit column to this {@link GridPro} with a value provider 
-     * and renderer which is used to display the content when the cell is
-     * not in the edit mode.
+     * Adds a new edit column to this {@link GridPro} with a value provider and
+     * renderer which is used to display the content when the cell is not in the
+     * edit mode.
      *
      * @param valueProvider
      *            the value provider
@@ -284,11 +294,12 @@ public class GridPro<E> extends Grid<E> {
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
      */
-    public EditColumnConfigurator<E> addEditColumn(ValueProvider<E, ?> valueProvider, Renderer<E> renderer) {
+    public EditColumnConfigurator<E> addEditColumn(
+            ValueProvider<E, ?> valueProvider, Renderer<E> renderer) {
         String columnId = createColumnId(false);
 
-        EditColumn<E> column = this.addColumn((new ColumnComponentPathRenderer<>(columnId,
-                value -> {
+        EditColumn<E> column = this.addColumn(
+                (new ColumnComponentPathRenderer<>(columnId, value -> {
                     Object item = valueProvider.apply(value);
                     if (item != null) {
                         return item.toString();
@@ -344,28 +355,33 @@ public class GridPro<E> extends Grid<E> {
      * @see #removeColumn(Column)
      */
     public EditColumnConfigurator<E> addEditColumn(String propertyName) {
-        EditColumn<E> column = this.addColumn(propertyName, this::createEditColumn);
-        ValueProvider<E, ?> valueProvider = item -> getPropertySet().getProperty(propertyName).get().getGetter().apply(item);
+        EditColumn<E> column = this.addColumn(propertyName,
+                this::createEditColumn);
+        ValueProvider<E, ?> valueProvider = item -> getPropertySet()
+                .getProperty(propertyName).get().getGetter().apply(item);
         return new EditColumnConfigurator<>(column, valueProvider);
     }
 
     /**
-     * Sets the value of the webcomponent's property enterNextRow. Default values is false.
-     * When true, pressing Enter while in cell edit mode will move focus to the editable cell
-     * in the next row (Shift + Enter - same, but for previous row).
+     * Sets the value of the webcomponent's property enterNextRow. Default
+     * values is false. When true, pressing Enter while in cell edit mode will
+     * move focus to the editable cell in the next row (Shift + Enter - same,
+     * but for previous row).
      *
      * @param enterNextRow
-     *            when <code>true</code>, pressing Enter while in cell edit mode will move focus
-     *            to the editable cell in the next row (Shift + Enter - same, but for previous row)
+     *            when <code>true</code>, pressing Enter while in cell edit mode
+     *            will move focus to the editable cell in the next row (Shift +
+     *            Enter - same, but for previous row)
      */
     public void setEnterNextRow(boolean enterNextRow) {
         getElement().setProperty("enterNextRow", enterNextRow);
     }
 
     /**
-     * Gets the value of the webcomponent's property enterNextRow. Default values is false.
-     * When true, pressing Enter while in cell edit mode will move focus to the editable cell
-     * in the next row (Shift + Enter - same, but for previous row).
+     * Gets the value of the webcomponent's property enterNextRow. Default
+     * values is false. When true, pressing Enter while in cell edit mode will
+     * move focus to the editable cell in the next row (Shift + Enter - same,
+     * but for previous row).
      *
      * @return enterNextRow value
      */
@@ -375,22 +391,23 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Sets the value of the webcomponent's property singleCellEdit. Default values is false.
-     * When true, after moving to next or previous editable cell using Tab / Shift+Tab,
-     * it will be focused without edit mode.
+     * Sets the value of the webcomponent's property singleCellEdit. Default
+     * values is false. When true, after moving to next or previous editable
+     * cell using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @param singleCellEdit
-     *            when <code>true</code>, after moving to next or previous editable cell
-     *            using Tab / Shift+Tab, it will be focused without edit mode
+     *            when <code>true</code>, after moving to next or previous
+     *            editable cell using Tab / Shift+Tab, it will be focused
+     *            without edit mode
      */
     public void setSingleCellEdit(boolean singleCellEdit) {
         getElement().setProperty("singleCellEdit", singleCellEdit);
     }
 
     /**
-     * Gets the value of the webcomponent's property singleCellEdit. Default values is false.
-     * When true, after moving to next or previous editable cell using Tab / Shift+Tab,
-     * it will be focused without edit mode.
+     * Gets the value of the webcomponent's property singleCellEdit. Default
+     * values is false. When true, after moving to next or previous editable
+     * cell using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @return singleCellEdit value
      */
@@ -400,22 +417,22 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Sets the value of the webcomponent's property editOnClick. Default values is false.
-     * When true, cell edit mode gets activated on a single click instead of the default 
-     * double click.
+     * Sets the value of the webcomponent's property editOnClick. Default values
+     * is false. When true, cell edit mode gets activated on a single click
+     * instead of the default double click.
      *
      * @param editOnClick
-     *            when <code>true</code>, cell edit mode gets activated on a single
- *                click instead of the default double click
+     *            when <code>true</code>, cell edit mode gets activated on a
+     *            single click instead of the default double click
      */
     public void setEditOnClick(boolean editOnClick) {
         getElement().setProperty("editOnClick", editOnClick);
     }
 
     /**
-     * Gets the value of the webcomponent's property editOnClick. Default values is false.
-     * When true, cell edit mode gets activated on a single click instead of the default 
-     * double click.
+     * Gets the value of the webcomponent's property editOnClick. Default values
+     * is false. When true, cell edit mode gets activated on a single click
+     * instead of the default double click.
      *
      * @return editOnClick value
      */
@@ -436,7 +453,8 @@ public class GridPro<E> extends Grid<E> {
      * @return edit column instance
      * @see Renderer
      */
-    protected EditColumn<E> createEditColumn(Renderer<E> renderer, String columnId) {
+    protected EditColumn<E> createEditColumn(Renderer<E> renderer,
+            String columnId) {
         EditColumn<E> column = new EditColumn<>(this, columnId, renderer);
         idToColumnMap.put(columnId, column);
         return column;
@@ -445,10 +463,12 @@ public class GridPro<E> extends Grid<E> {
     /**
      * Event fired when the user starts to edit an existing item.
      *
-     * @param <E> the bean type
+     * @param <E>
+     *            the bean type
      */
     @DomEvent("cell-edit-started")
-    public static class CellEditStartedEvent<E> extends ComponentEvent<GridPro<E>> {
+    public static class CellEditStartedEvent<E>
+            extends ComponentEvent<GridPro<E>> {
 
         private E item;
         private String path;
@@ -457,17 +477,22 @@ public class GridPro<E> extends Grid<E> {
          * Creates a new event using the given source and indicator whether the
          * event originated from the client side or the server side.
          *
-         * @param source     the source component
-         * @param fromClient <code>true</code> if the event originated from the client
-         * @param item       the item to be edited, provided in JSON as internally represented in Grid
-         * @param path       item subproperty that was changed
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            <code>true</code> if the event originated from the client
+         * @param item
+         *            the item to be edited, provided in JSON as internally
+         *            represented in Grid
+         * @param path
+         *            item subproperty that was changed
          */
         public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
-                                        @EventData("event.detail.item") JsonObject item,
-                                        @EventData("event.detail.path") String path) {
+                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.path") String path) {
             super(source, fromClient);
-            this.item = source.getDataCommunicator()
-                    .getKeyMapper().get(item.getString("key"));
+            this.item = source.getDataCommunicator().getKeyMapper()
+                    .get(item.getString("key"));
             this.path = path;
         }
 
@@ -480,7 +505,6 @@ public class GridPro<E> extends Grid<E> {
             return item;
         }
 
-
         /**
          * Gets the key of the column where item was edited.
          *
@@ -492,12 +516,15 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Registers a listener to be notified when the user starts to edit an existing item.
+     * Registers a listener to be notified when the user starts to edit an
+     * existing item.
      *
-     * @param listener a listener to be notified
+     * @param listener
+     *            a listener to be notified
      * @return a handle that can be used to unregister the listener
      */
-    public Registration addCellEditStartedListener(ComponentEventListener<CellEditStartedEvent<E>> listener) {
+    public Registration addCellEditStartedListener(
+            ComponentEventListener<CellEditStartedEvent<E>> listener) {
         return ComponentUtil.addListener(this, CellEditStartedEvent.class,
                 (ComponentEventListener) listener);
     }
@@ -505,10 +532,12 @@ public class GridPro<E> extends Grid<E> {
     /**
      * Event fired when the user has edited an existing item.
      *
-     * @param <E> the bean type
+     * @param <E>
+     *            the bean type
      */
     @DomEvent("item-property-changed")
-    public static class ItemPropertyChangedEvent<E> extends ComponentEvent<GridPro<E>> {
+    public static class ItemPropertyChangedEvent<E>
+            extends ComponentEvent<GridPro<E>> {
 
         private E item;
         private JsonObject sourceItem;
@@ -518,18 +547,23 @@ public class GridPro<E> extends Grid<E> {
          * Creates a new event using the given source and indicator whether the
          * event originated from the client side or the server side.
          *
-         * @param source     the source component
-         * @param fromClient <code>true</code> if the event originated from the client
-         * @param item       the item to be edited, provided in JSON as internally represented in Grid
-         * @param path       item subproperty that was changed
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            <code>true</code> if the event originated from the client
+         * @param item
+         *            the item to be edited, provided in JSON as internally
+         *            represented in Grid
+         * @param path
+         *            item subproperty that was changed
          */
         public ItemPropertyChangedEvent(GridPro<E> source, boolean fromClient,
-                                        @EventData("event.detail.item") JsonObject item,
-                                        @EventData("event.detail.path") String path) {
+                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.sourceItem = item;
-            this.item = source.getDataCommunicator()
-                    .getKeyMapper().get(item.getString("key"));
+            this.item = source.getDataCommunicator().getKeyMapper()
+                    .get(item.getString("key"));
             this.path = path;
         }
 
@@ -562,30 +596,34 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Registers a listener to be notified when the user has edited an existing item.
+     * Registers a listener to be notified when the user has edited an existing
+     * item.
      *
-     * @param listener a listener to be notified
+     * @param listener
+     *            a listener to be notified
      * @return a handle that can be used to unregister the listener
      */
-    public Registration addItemPropertyChangedListener(ComponentEventListener<ItemPropertyChangedEvent<E>> listener) {
+    public Registration addItemPropertyChangedListener(
+            ComponentEventListener<ItemPropertyChangedEvent<E>> listener) {
         return ComponentUtil.addListener(this, ItemPropertyChangedEvent.class,
                 (ComponentEventListener) listener);
     }
 
     /**
-     * Renderer for edit columns that use custom template for rendering its value
-     * (only the value from the object model).
+     * Renderer for edit columns that use custom template for rendering its
+     * value (only the value from the object model).
      *
      * @param <SOURCE>
      *            the object model type
      * @see GridPro#addEditColumn(ValueProvider, Renderer)
      */
-    class ColumnComponentPathRenderer<SOURCE> extends ColumnPathRenderer<SOURCE> {
+    class ColumnComponentPathRenderer<SOURCE>
+            extends ColumnPathRenderer<SOURCE> {
         private Renderer<SOURCE> representationRenderer;
 
         /**
-         * Creates a new renderer based on the property, value provider for
-         * that property, and renderer for its visual representation in column
+         * Creates a new renderer based on the property, value provider for that
+         * property, and renderer for its visual representation in column
          *
          * @param property
          *            the property name
@@ -594,24 +632,29 @@ public class GridPro<E> extends Grid<E> {
          * @param renderer
          *            the renderer for the visual representation
          */
-        public ColumnComponentPathRenderer(String property, ValueProvider<SOURCE, ?> provider, Renderer<SOURCE> renderer) {
+        public ColumnComponentPathRenderer(String property,
+                ValueProvider<SOURCE, ?> provider, Renderer<SOURCE> renderer) {
             super(property, provider);
             representationRenderer = renderer;
         }
 
         @Override
         public Rendering<SOURCE> render(Element container,
-                                        DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
+                DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
 
-            Rendering<SOURCE> columnPathRendering = super.render(container, keyMapper, contentTemplate);
-            Rendering<SOURCE> representationRendering = representationRenderer.render(container, keyMapper);
+            Rendering<SOURCE> columnPathRendering = super.render(container,
+                    keyMapper, contentTemplate);
+            Rendering<SOURCE> representationRendering = representationRenderer
+                    .render(container, keyMapper);
 
             return new Rendering<SOURCE>() {
                 @Override
                 public Optional<DataGenerator<SOURCE>> getDataGenerator() {
                     CompositeDataGenerator<SOURCE> compositeDataGenerator = new CompositeDataGenerator<>();
-                    compositeDataGenerator.addDataGenerator(representationRendering.getDataGenerator().get());
-                    compositeDataGenerator.addDataGenerator(columnPathRendering.getDataGenerator().get());
+                    compositeDataGenerator.addDataGenerator(
+                            representationRendering.getDataGenerator().get());
+                    compositeDataGenerator.addDataGenerator(
+                            columnPathRendering.getDataGenerator().get());
                     return Optional.of(compositeDataGenerator);
                 }
 
@@ -621,7 +664,6 @@ public class GridPro<E> extends Grid<E> {
                 }
             };
         }
-
 
     }
 }

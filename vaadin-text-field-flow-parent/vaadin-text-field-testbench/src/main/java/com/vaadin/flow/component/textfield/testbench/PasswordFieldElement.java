@@ -30,7 +30,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-password-field")
 public class PasswordFieldElement extends TestBenchElement
-      implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
+        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
     /**
      * Checks whether the password is shown in clear text or is hidden from
@@ -58,8 +58,7 @@ public class PasswordFieldElement extends TestBenchElement
     @Override
     public void setValue(String string) {
         HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change",
-                Collections.singletonMap("bubbles", true));
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
         dispatchEvent("blur");
     }
 

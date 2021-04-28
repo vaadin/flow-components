@@ -107,10 +107,10 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setId("flex-layout-with-alignment-content");
 
         Consumer<FlexLayout.ContentAlignment> changeLayout = alignment -> layout
-              .setAlignContent(alignment);
+                .setAlignContent(alignment);
         addCard("FlexLayout", "FlexLayout with alignment content", layout,
-              createRadioButtonGroup(FlexLayout.ContentAlignment.values(),
-                    changeLayout, layout.getAlignContent()));
+                createRadioButtonGroup(FlexLayout.ContentAlignment.values(),
+                        changeLayout, layout.getAlignContent()));
     }
 
     private void createFlexLayoutWithFlexBasis() {
@@ -132,7 +132,7 @@ public class OrderedLayoutView extends AbstractLayout {
         widths.setItems("200px", "100%", "auto");
         widths.setValue("auto");
         widths.addValueChangeListener(
-              event -> layout.setFlexBasis(event.getValue(), component1));
+                event -> layout.setFlexBasis(event.getValue(), component1));
 
         layout.setId("flex-layout-with-flex-basis");
 
@@ -155,10 +155,10 @@ public class OrderedLayoutView extends AbstractLayout {
 
         // end-source-example
         Consumer<FlexLayout.FlexDirection> flexDirectionConsumer = flexDirection -> layout
-              .setFlexDirection(flexDirection);
+                .setFlexDirection(flexDirection);
         RadioButtonGroup<FlexLayout.FlexDirection> rbg = createRadioButtonGroup(
-              FlexLayout.FlexDirection.values(), flexDirectionConsumer,
-              FlexLayout.FlexDirection.ROW);
+                FlexLayout.FlexDirection.values(), flexDirectionConsumer,
+                FlexLayout.FlexDirection.ROW);
 
         layout.setId("flex-layout-with-flex-direction");
 
@@ -185,12 +185,12 @@ public class OrderedLayoutView extends AbstractLayout {
         shrinkValues.setItems(0, 1, 2);
         shrinkValues.setValue(1);
         shrinkValues.addValueChangeListener(
-              event -> layout.setFlexShrink(event.getValue(), component1));
+                event -> layout.setFlexShrink(event.getValue(), component1));
 
         layout.setId("flex-layout-with-flex-shrink");
 
         addCard("FlexLayout", "FlexLayout with flex shrink", layout,
-              shrinkValues);
+                shrinkValues);
     }
 
     private void createFlexLayoutWithOrderedItems() {

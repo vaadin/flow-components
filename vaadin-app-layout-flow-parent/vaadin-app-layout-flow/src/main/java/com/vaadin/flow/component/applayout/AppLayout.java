@@ -33,23 +33,25 @@ import com.vaadin.flow.router.RouterLayout;
 import java.util.Objects;
 
 /**
- * Server-side component for the {@code <vaadin-app-layout>} element.
- * Provides a quick and easy way to get a common application layout.
+ * Server-side component for the {@code <vaadin-app-layout>} element. Provides a
+ * quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
 @NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.2.0")
 @JsModule("@vaadin/vaadin-app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
-        .propertyWithDefault("primarySection", Section.NAVBAR.toWebcomponentValue());
+            .propertyWithDefault("primarySection",
+                    Section.NAVBAR.toWebcomponentValue());
     private static final PropertyDescriptor<Boolean, Boolean> overlayProperty = PropertyDescriptors
-        .propertyWithDefault("overlay", false);
+            .propertyWithDefault("overlay", false);
 
     private Component content;
 
     /**
      * @see #setPrimarySection(Section)
-     * @return value for the primarySection property. Default is {@link Section#NAVBAR}.
+     * @return value for the primarySection property. Default is
+     *         {@link Section#NAVBAR}.
      */
     @Synchronize("primary-section-changed")
     public Section getPrimarySection() {
@@ -60,27 +62,33 @@ public class AppLayout extends Component implements RouterLayout {
      * Defines whether navbar or drawer will come first visually.
      *
      * <ul>
-     * <li>If {@link Section#NAVBAR}, the navbar takes the full available width and moves the drawer down. This is the default.</li>
-     * <li>If {@link Section#DRAWER} is set, then the drawer will move the navbar, taking the full available height.</li>
+     * <li>If {@link Section#NAVBAR}, the navbar takes the full available width
+     * and moves the drawer down. This is the default.</li>
+     * <li>If {@link Section#DRAWER} is set, then the drawer will move the
+     * navbar, taking the full available height.</li>
      * </ul>
      *
-     * @param primarySection new value for the primarySection property. Not {@code null}.
-     * @throws NullPointerException if primarySection is {@code null}.
+     * @param primarySection
+     *            new value for the primarySection property. Not {@code null}.
+     * @throws NullPointerException
+     *             if primarySection is {@code null}.
      */
     public void setPrimarySection(Section primarySection) {
-        Objects.requireNonNull(primarySection, "primary section must not be null");
+        Objects.requireNonNull(primarySection,
+                "primary section must not be null");
         primarySectionProperty.set(this, primarySection.toWebcomponentValue());
     }
 
     /**
-     * Whether the drawer is opened (visible) or not.
-     * Its default value depends on the viewport:
+     * Whether the drawer is opened (visible) or not. Its default value depends
+     * on the viewport:
      * <ul>
      * <li>{@code true} for desktop size views</li>
      * <li>{@code false} for mobile size views</li>
      * </ul>
      *
-     * @return {@code true} if the drawer is opened (visible). {@code false} otherwise.
+     * @return {@code true} if the drawer is opened (visible). {@code false}
+     *         otherwise.
      */
     @Synchronize("drawer-opened-changed")
     public boolean isDrawerOpened() {
@@ -90,18 +98,22 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * Server-side API for showing and hiding the drawer.
      *
-     * @param drawerOpened new value for the drawerOpened property.
+     * @param drawerOpened
+     *            new value for the drawerOpened property.
      * @see #isDrawerOpened
-     * @see DrawerToggle for a component that allows the user to open and close the drawer.
+     * @see DrawerToggle for a component that allows the user to open and close
+     *      the drawer.
      */
     public void setDrawerOpened(boolean drawerOpened) {
         getElement().setProperty("drawerOpened", drawerOpened);
     }
 
     /**
-     *  <strong>Note:</strong> This property is controlled via CSS and can not be changed directly.
+     * <strong>Note:</strong> This property is controlled via CSS and can not be
+     * changed directly.
      *
-     * @return {@code true} if drawer is an overlay on top of the content. {@code false} otherwise.
+     * @return {@code true} if drawer is an overlay on top of the content.
+     *         {@code false} otherwise.
      */
     @Synchronize("overlay-changed")
     public boolean isOverlay() {
@@ -118,7 +130,8 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * Sets the displayed content.
      *
-     * @param content {@link Component} to display in the content area
+     * @param content
+     *            {@link Component} to display in the content area
      */
     public void setContent(Component content) {
 
@@ -134,8 +147,11 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * Adds the components to the <em>drawer</em> slot of this AppLayout.
      *
-     * @param components Components to add to the drawer slot.
-     * @throws NullPointerException if any of the components is null or if the components array is null.
+     * @param components
+     *            Components to add to the drawer slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
      */
     public void addToDrawer(Component... components) {
         addToSlot("drawer", components);
@@ -144,8 +160,11 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * Adds the components to the <em>navbar</em> slot of this AppLayout.
      *
-     * @param components Components to add to the navbar slot.
-     * @throws NullPointerException if any of the components is null or if the components array is null.
+     * @param components
+     *            Components to add to the navbar slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
      */
     public void addToNavbar(Component... components) {
         final boolean touchOptimized = false;
@@ -155,24 +174,31 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * Adds the components to the <em>navbar</em> slot of this AppLayout.
      *
-     * @param touchOptimized if true, the components will be moved to the bottom navbar area on mobile devices.
-     * @param components Components to add to the navbar slot.
-     * @throws NullPointerException if any of the components is null or if the components array is null.
+     * @param touchOptimized
+     *            if true, the components will be moved to the bottom navbar
+     *            area on mobile devices.
+     * @param components
+     *            Components to add to the navbar slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
      */
     public void addToNavbar(boolean touchOptimized, Component... components) {
-        final String slot =
-            "navbar" + (touchOptimized ? " touch-optimized" : "");
+        final String slot = "navbar"
+                + (touchOptimized ? " touch-optimized" : "");
         addToSlot(slot, components);
     }
 
     /**
-     * Removes the child components from the parent. Components can be in any slot or be the main content.
+     * Removes the child components from the parent. Components can be in any
+     * slot or be the main content.
      *
-     * @param components Components to remove.
+     * @param components
+     *            Components to remove.
      */
     public void remove(Component... components) {
         for (Component component : components) {
-            if(this.content != null && this.content.equals(component)) {
+            if (this.content != null && this.content.equals(component)) {
                 this.content = null;
             }
             remove(component);
@@ -182,27 +208,28 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException if content is not a {@link Component}
+     * @throws IllegalArgumentException
+     *             if content is not a {@link Component}
      */
     @Override
     public void showRouterLayoutContent(HasElement content) {
         Component target = null;
         if (content != null) {
-            target = content.getElement().getComponent().orElseThrow(
-                () -> new IllegalArgumentException(
-                    "AppLayout content must be a Component"));
+            target = content.getElement().getComponent()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "AppLayout content must be a Component"));
         }
         setContent(target);
         afterNavigation();
     }
 
     /**
-     * Called after a navigation event.
-     * The default behaviour is to close the drawer on mobile devices after a navigation event.
+     * Called after a navigation event. The default behaviour is to close the
+     * drawer on mobile devices after a navigation event.
      */
     protected void afterNavigation() {
         // Close drawer after navigation on mobile devices.
-        if(isOverlay()) {
+        if (isOverlay()) {
             setDrawerOpened(false);
         }
     }
@@ -238,6 +265,7 @@ public class AppLayout extends Component implements RouterLayout {
 
     /**
      * Sections in the component that can be used as primary.
+     * 
      * @see #setPrimarySection(Section)
      */
     public enum Section {
@@ -248,7 +276,9 @@ public class AppLayout extends Component implements RouterLayout {
         }
 
         public static Section fromWebcomponentValue(String webcomponentValue) {
-            return webcomponentValue != null ? valueOf(webcomponentValue.toUpperCase()) : null;
+            return webcomponentValue != null
+                    ? valueOf(webcomponentValue.toUpperCase())
+                    : null;
         }
     }
 }

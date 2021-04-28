@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.events.internal;
  * #L%
  */
 
-
 import com.vaadin.flow.component.charts.model.Series;
 
 /**
@@ -37,7 +36,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
      * @param animation
      */
     public ItemSlicedEvent(Series series, int index, boolean sliced,
-                           boolean redraw, boolean animation) {
+            boolean redraw, boolean animation) {
         super(series);
         this.index = index;
         this.sliced = sliced;

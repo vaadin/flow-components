@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 public abstract class GaugeOptions extends AbstractPlotOptions {
 
     /**
@@ -50,12 +49,12 @@ public abstract class GaugeOptions extends AbstractPlotOptions {
     public abstract Boolean getCrisp();
 
     /**
-     * When true, each point or column edge is rounded to its nearest pixel
-     * in order to render sharp on screen. In some cases,
-     * when there are a lot of densely packed columns, this leads to
-     * visible difference in column widths or distance between columns.
-     * In these cases, setting <code>crisp</code> to <code>false</code>
-     * may look better, even though each column is rendered blurry.
+     * When true, each point or column edge is rounded to its nearest pixel in
+     * order to render sharp on screen. In some cases, when there are a lot of
+     * densely packed columns, this leads to visible difference in column widths
+     * or distance between columns. In these cases, setting <code>crisp</code>
+     * to <code>false</code> may look better, even though each column is
+     * rendered blurry.
      */
     public abstract void setCrisp(Boolean crisp);
 

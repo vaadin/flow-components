@@ -32,7 +32,8 @@ public class GridProTest {
         grid = createFakeGridPro();
 
         // We should ensure the correct value were passed
-        grid.addEditColumn(Person::getName).text((item, newValue) -> Assert.assertEquals("foo", newValue));
+        grid.addEditColumn(Person::getName)
+                .text((item, newValue) -> Assert.assertEquals("foo", newValue));
 
         // A client-side Grid item.
         selectedItem = new JreJsonFactory()
@@ -42,9 +43,11 @@ public class GridProTest {
     private GridPro<Person> createFakeGridPro() {
         GridPro<Person> grid = Mockito.spy(new GridPro<>());
 
-        Mockito.when(grid.getDataProvider()).thenReturn(Mockito.mock(DataProvider.class));
+        Mockito.when(grid.getDataProvider())
+                .thenReturn(Mockito.mock(DataProvider.class));
 
-        DataCommunicator<Person> communicator = Mockito.mock(DataCommunicator.class);
+        DataCommunicator<Person> communicator = Mockito
+                .mock(DataCommunicator.class);
         Mockito.when(grid.getDataCommunicator()).thenReturn(communicator);
 
         KeyMapper<Person> keyMapper = Mockito.mock(KeyMapper.class);
@@ -80,9 +83,11 @@ public class GridProTest {
 
         // Simulate a sequence of interactions.
         Arrays.asList(
-                new GridPro.CellEditStartedEvent<>(grid, false, selectedItem, "col0"),
-                new GridPro.ItemPropertyChangedEvent<>(grid, false, selectedItem, "col0")
-        ).forEach(e -> ComponentUtil.fireEvent(grid, e));
+                new GridPro.CellEditStartedEvent<>(grid, false, selectedItem,
+                        "col0"),
+                new GridPro.ItemPropertyChangedEvent<>(grid, false,
+                        selectedItem, "col0"))
+                .forEach(e -> ComponentUtil.fireEvent(grid, e));
 
         Assert.assertEquals(2, items.size());
         items.forEach(item -> Assert.assertEquals(testItem, item));
