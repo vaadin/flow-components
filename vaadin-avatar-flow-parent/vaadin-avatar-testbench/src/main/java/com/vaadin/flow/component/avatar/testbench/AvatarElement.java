@@ -19,7 +19,8 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-avatar&gt;</code> element.
+ * A TestBench element representing a <code>&lt;vaadin-avatar&gt;</code>
+ * element.
  */
 @Element("vaadin-avatar")
 public class AvatarElement extends TestBenchElement {

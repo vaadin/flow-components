@@ -46,6 +46,7 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
     private void assertTimePickerIsValidOnTab() {
         WebElement timePicker = findElement(By.id("time-picker"));
         timePicker.sendKeys(Keys.TAB);
-        Assert.assertFalse("Time picker should be valid after Tab", Boolean.parseBoolean(timePicker.getAttribute("invalid")));
+        Assert.assertFalse("Time picker should be valid after Tab",
+                Boolean.parseBoolean(timePicker.getAttribute("invalid")));
     }
 }

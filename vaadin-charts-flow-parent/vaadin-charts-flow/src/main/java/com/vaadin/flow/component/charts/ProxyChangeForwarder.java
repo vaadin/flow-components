@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts;
  * #L%
  */
 
-
 import com.vaadin.flow.component.charts.events.internal.AbstractSeriesEvent;
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
@@ -43,10 +42,10 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void dataAdded(DataAddedEvent event) {
         if (event.getItem() != null) {
-            chart.getElement().callFunction("__callSeriesFunction",
-                    "addPoint", getSeriesIndex(event),
-                    chart.getJsonFactory().parse(
-                            ChartSerialization.toJSON(event.getItem())),
+            chart.getElement().callFunction("__callSeriesFunction", "addPoint",
+                    getSeriesIndex(event),
+                    chart.getJsonFactory()
+                            .parse(ChartSerialization.toJSON(event.getItem())),
                     true, event.isShift());
         }
     }
@@ -66,8 +65,8 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
         } else {
             chart.getElement().callFunction("__callPointFunction", "update",
                     getSeriesIndex(event), event.getPointIndex(),
-                    chart.getJsonFactory().parse(
-                            ChartSerialization.toJSON(event.getItem())));
+                    chart.getJsonFactory()
+                            .parse(ChartSerialization.toJSON(event.getItem())));
         }
     }
 
@@ -115,23 +114,20 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     @Override
     public void resetZoom(boolean redraw, boolean animate) {
-        for (int i = 0; i < chart.getConfiguration()
-                .getNumberOfxAxes(); i++) {
-            chart.getElement().callFunction("__callAxisFunction",
-                    "setExtremes", AxisDimension.X_AXIS.getIndex(), i, null, null, redraw,
+        for (int i = 0; i < chart.getConfiguration().getNumberOfxAxes(); i++) {
+            chart.getElement().callFunction("__callAxisFunction", "setExtremes",
+                    AxisDimension.X_AXIS.getIndex(), i, null, null, redraw,
                     animate);
         }
-        for (int i = 0; i < chart.getConfiguration()
-                .getNumberOfyAxes(); i++) {
-            chart.getElement().callFunction("__callAxisFunction",
-                    "setExtremes", AxisDimension.Y_AXIS.getIndex(), i, null, null, redraw,
+        for (int i = 0; i < chart.getConfiguration().getNumberOfyAxes(); i++) {
+            chart.getElement().callFunction("__callAxisFunction", "setExtremes",
+                    AxisDimension.Y_AXIS.getIndex(), i, null, null, redraw,
                     animate);
         }
     }
 
     private int getSeriesIndex(AbstractSeriesEvent event) {
-        return chart.getConfiguration().getSeries()
-                .indexOf(event.getSeries());
+        return chart.getConfiguration().getSeries().indexOf(event.getSeries());
     }
 
 }

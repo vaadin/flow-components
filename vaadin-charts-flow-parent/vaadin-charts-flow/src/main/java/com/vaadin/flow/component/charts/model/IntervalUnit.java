@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-
 /**
  * Irregular time unit used to define point interval unit.
  */

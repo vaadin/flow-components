@@ -25,7 +25,7 @@ import com.vaadin.flow.component.ComponentEvent;
 public class ExpandEvent<T, C extends Component> extends ComponentEvent<C> {
 
     private final Collection<T> items;
-    
+
     /**
      * ExpandEvent base constructor.
      *

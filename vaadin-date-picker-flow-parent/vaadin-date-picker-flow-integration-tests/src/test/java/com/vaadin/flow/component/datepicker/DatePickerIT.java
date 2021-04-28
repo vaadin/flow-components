@@ -68,7 +68,8 @@ public class DatePickerIT extends ComponentDemoTest {
         Assert.assertEquals("The selected date should be considered valid",
                 false, executeScript("return arguments[0].invalid", picker));
 
-        waitUntil(driver -> message.getText().contains(("Day: " + now.getDayOfMonth() + "\nMonth: "
+        waitUntil(driver -> message.getText()
+                .contains(("Day: " + now.getDayOfMonth() + "\nMonth: "
                         + now.getMonthValue() + "\nYear: " + now.getYear())));
 
         executeScript("arguments[0].value = ''", picker);
@@ -184,8 +185,7 @@ public class DatePickerIT extends ComponentDemoTest {
 
         layout.findElement(By.id("Locale-UK")).click();
         assertTrue((Boolean) executeScript(
-                "return arguments[0].value === '25/03/2018'",
-                displayText));
+                "return arguments[0].value === '25/03/2018'", displayText));
     }
 
     @Override

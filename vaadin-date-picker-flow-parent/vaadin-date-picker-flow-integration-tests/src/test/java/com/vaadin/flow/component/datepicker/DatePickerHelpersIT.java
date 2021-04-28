@@ -18,9 +18,9 @@ public class DatePickerHelpersIT extends AbstractComponentIT {
     @Test
     public void assertHelperText() {
         DatePickerElement dataPickerHelperText = $(DatePickerElement.class)
-              .id("data-picker-helper-text");
+                .id("data-picker-helper-text");
         Assert.assertEquals("Helper text",
-              dataPickerHelperText.getHelperText());
+                dataPickerHelperText.getHelperText());
 
         $("button").id("button-clear-text").click();
         Assert.assertEquals("", dataPickerHelperText.getHelperText());
@@ -29,10 +29,9 @@ public class DatePickerHelpersIT extends AbstractComponentIT {
     @Test
     public void assertHelperComponent() {
         DatePickerElement dataPickerHelperComponent = $(DatePickerElement.class)
-              .id("data-picker-helper-component");
-        Assert.assertEquals("helper-component",
-              dataPickerHelperComponent.getHelperComponent()
-                    .getAttribute("id"));
+                .id("data-picker-helper-component");
+        Assert.assertEquals("helper-component", dataPickerHelperComponent
+                .getHelperComponent().getAttribute("id"));
 
         $("button").id("button-clear-component").click();
         Assert.assertNull(dataPickerHelperComponent.getHelperComponent());

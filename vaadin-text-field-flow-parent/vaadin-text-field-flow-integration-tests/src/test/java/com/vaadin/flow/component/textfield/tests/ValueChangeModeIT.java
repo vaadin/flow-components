@@ -176,8 +176,9 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         }
 
         waitUntilMessageUpdated();
-        assertTrue("The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY",
-                  -last + (last = System.currentTimeMillis()) > 1000);
+        assertTrue(
+                "The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY",
+                -last + (last = System.currentTimeMillis()) > 1000);
 
         clickButton(componentName + "-timeout");
         field.sendKeys("1");
@@ -208,7 +209,8 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     private void waitUntilMessageUpdated() {
-        waitUntilMessageUpdated(2000, "It took more than 2000ms to change the message, probably CI performance problems");
+        waitUntilMessageUpdated(2000,
+                "It took more than 2000ms to change the message, probably CI performance problems");
     }
 
     private void waitUntilMessageUpdated(long timeout, String failMessage) {

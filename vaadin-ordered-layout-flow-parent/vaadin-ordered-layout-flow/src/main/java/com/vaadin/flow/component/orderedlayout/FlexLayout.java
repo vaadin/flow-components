@@ -63,14 +63,14 @@ public class FlexLayout extends Component
         STRETCH("stretch"),
 
         /**
-         * Items are distributed evenly inside the container.
-         * The first item is flush with the start, the last is flush with the end.
+         * Items are distributed evenly inside the container. The first item is
+         * flush with the start, the last is flush with the end.
          */
         SPACE_BETWEEN("space-between"),
 
         /**
-         * Items are distributed evenly inside the container.
-         * Items have a half-size space on either end.
+         * Items are distributed evenly inside the container. Items have a
+         * half-size space on either end.
          */
         SPACE_AROUND("space-around");
 
@@ -84,7 +84,8 @@ public class FlexLayout extends Component
             return flexValue;
         }
 
-        static ContentAlignment toAlignment(String flexValue, ContentAlignment defaultValue) {
+        static ContentAlignment toAlignment(String flexValue,
+                ContentAlignment defaultValue) {
             return Arrays.stream(values()).filter(
                     alignment -> alignment.getFlexValue().equals(flexValue))
                     .findFirst().orElse(defaultValue);
@@ -92,8 +93,8 @@ public class FlexLayout extends Component
     }
 
     /**
-     * Possible values for the {@code flex-direction} CSS property, which determines how the elements are placed
-     * inside the layout.
+     * Possible values for the {@code flex-direction} CSS property, which
+     * determines how the elements are placed inside the layout.
      */
     public enum FlexDirection {
 
@@ -127,7 +128,8 @@ public class FlexLayout extends Component
             return directionValue;
         }
 
-        static FlexDirection toFlexDirection(String flexValue, FlexDirection defaultValue) {
+        static FlexDirection toFlexDirection(String flexValue,
+                FlexDirection defaultValue) {
             return Arrays.stream(values())
                     .filter(flexDirection -> flexDirection.getDirectionValue()
                             .equals(flexValue))
@@ -135,11 +137,11 @@ public class FlexLayout extends Component
         }
     }
 
-
     /**
-     * @deprecated Use {@link FlexWrap} instead
-     * Possible values for the {@code flex-wrap} CSS property, which determines how the elements inside the layout
-     * should behave when they don't fit inside the layout.
+     * @deprecated Use {@link FlexWrap} instead Possible values for the
+     *             {@code flex-wrap} CSS property, which determines how the
+     *             elements inside the layout should behave when they don't fit
+     *             inside the layout.
      */
     @Deprecated
     public enum WrapMode {
@@ -150,14 +152,16 @@ public class FlexLayout extends Component
         NOWRAP("nowrap"),
 
         /**
-         * If items are not able to fit into a single row they are allowed to wrap into a follow up line.
+         * If items are not able to fit into a single row they are allowed to
+         * wrap into a follow up line.
          *
-         * */
+         */
         WRAP("wrap"),
 
         /**
-         * If items are not able to fit into a single row they are allowed to wrap into a follow up line.
-         *  Additionally the order of the items will be reversed.
+         * If items are not able to fit into a single row they are allowed to
+         * wrap into a follow up line. Additionally the order of the items will
+         * be reversed.
          */
         WRAP_REVERSE("wrap-reverse");
 
@@ -172,17 +176,17 @@ public class FlexLayout extends Component
         }
 
         static WrapMode toWrapMode(String flexValue, WrapMode defaultValue) {
-            return Arrays.stream(values())
-                    .filter(flexWrap -> flexWrap.getFlexValue()
-                            .equals(flexValue))
+            return Arrays.stream(values()).filter(
+                    flexWrap -> flexWrap.getFlexValue().equals(flexValue))
                     .findFirst().orElse(defaultValue);
         }
 
     }
 
     /**
-     * Possible values for the {@code flex-wrap} CSS property, which determines how the elements inside the layout
-     * should behave when they don't fit inside the layout.
+     * Possible values for the {@code flex-wrap} CSS property, which determines
+     * how the elements inside the layout should behave when they don't fit
+     * inside the layout.
      */
     public enum FlexWrap {
 
@@ -192,14 +196,16 @@ public class FlexLayout extends Component
         NOWRAP("nowrap"),
 
         /**
-         * If items are not able to fit into a single row they are allowed to wrap into a follow up line.
+         * If items are not able to fit into a single row they are allowed to
+         * wrap into a follow up line.
          *
-         * */
+         */
         WRAP("wrap"),
 
         /**
-         * If items are not able to fit into a single row they are allowed to wrap into a follow up line.
-         *  Additionally the order of the items will be reversed.
+         * If items are not able to fit into a single row they are allowed to
+         * wrap into a follow up line. Additionally the order of the items will
+         * be reversed.
          */
         WRAP_REVERSE("wrap-reverse");
 
@@ -214,9 +220,8 @@ public class FlexLayout extends Component
         }
 
         static FlexWrap toFlexWrap(String flexValue, FlexWrap defaultValue) {
-            return Arrays.stream(values())
-                    .filter(flexWrap -> flexWrap.getFlexValue()
-                            .equals(flexValue))
+            return Arrays.stream(values()).filter(
+                    flexWrap -> flexWrap.getFlexValue().equals(flexValue))
                     .findFirst().orElse(defaultValue);
         }
 
@@ -243,13 +248,13 @@ public class FlexLayout extends Component
     }
 
     /**
-     * @deprecated Use {@link #setFlexWrap(FlexWrap)} instead
-     * Gets the {@link WrapMode} used by this layout.
-     * <p>
-     * The default flex wrap mode is {@link WrapMode#NOWRAP}.
+     * @deprecated Use {@link #setFlexWrap(FlexWrap)} instead Gets the
+     *             {@link WrapMode} used by this layout.
+     *             <p>
+     *             The default flex wrap mode is {@link WrapMode#NOWRAP}.
      *
-     * @param wrapMode the flex wrap mode of the layout, never
-     *                     <code>null</code>
+     * @param wrapMode
+     *            the flex wrap mode of the layout, never <code>null</code>
      */
     @Deprecated
     public void setWrapMode(WrapMode wrapMode) {
@@ -266,8 +271,8 @@ public class FlexLayout extends Component
      * <p>
      * The default flex wrap is {@link FlexWrap#NOWRAP}.
      *
-     * @param flexWrap the flex wrap of the layout, never
-     *                     <code>null</code>
+     * @param flexWrap
+     *            the flex wrap of the layout, never <code>null</code>
      */
     public void setFlexWrap(FlexWrap flexWrap) {
         if (flexWrap == null) {
@@ -279,20 +284,17 @@ public class FlexLayout extends Component
     }
 
     /**
-     * @deprecated Use {@link #getFlexWrap()} instead
-     * Gets the current flex wrap mode of the layout.
-     * <p>
-     * The default flex wrap mode is {@link WrapMode#NOWRAP}.
+     * @deprecated Use {@link #getFlexWrap()} instead Gets the current flex wrap
+     *             mode of the layout.
+     *             <p>
+     *             The default flex wrap mode is {@link WrapMode#NOWRAP}.
      *
-     * @return the flex wrap mode used by the layout, never
-     * <code>null</code>
+     * @return the flex wrap mode used by the layout, never <code>null</code>
      */
     @Deprecated
     public WrapMode getWrapMode() {
-        return WrapMode.toWrapMode(
-                getElement().getStyle()
-                        .get(FlexConstants.FLEX_WRAP_CSS_PROPERTY),
-                WrapMode.NOWRAP);
+        return WrapMode.toWrapMode(getElement().getStyle()
+                .get(FlexConstants.FLEX_WRAP_CSS_PROPERTY), WrapMode.NOWRAP);
     }
 
     /**
@@ -300,22 +302,18 @@ public class FlexLayout extends Component
      * <p>
      * The default flex wrap is {@link FlexWrap#NOWRAP}.
      *
-     * @return the flex wrap used by the layout, never
-     * <code>null</code>
+     * @return the flex wrap used by the layout, never <code>null</code>
      */
     public FlexWrap getFlexWrap() {
-        return FlexWrap.toFlexWrap(
-                getElement().getStyle()
-                        .get(FlexConstants.FLEX_WRAP_CSS_PROPERTY),
-                FlexWrap.NOWRAP);
+        return FlexWrap.toFlexWrap(getElement().getStyle()
+                .get(FlexConstants.FLEX_WRAP_CSS_PROPERTY), FlexWrap.NOWRAP);
     }
 
     /**
-     * Sets how the lines within the layout are aligned when there is extra space,
-     * similar to how {@link #setJustifyContentMode(JustifyContentMode)}
-     * aligns individual items.
-     * Has no effect if {@link #getWrapMode()} is {@link WrapMode#NOWRAP},
-     * since, in that case, there is only one line.
+     * Sets how the lines within the layout are aligned when there is extra
+     * space, similar to how {@link #setJustifyContentMode(JustifyContentMode)}
+     * aligns individual items. Has no effect if {@link #getWrapMode()} is
+     * {@link WrapMode#NOWRAP}, since, in that case, there is only one line.
      * <p>
      * It effectively sets the {@code "alignContent"} style value.
      * <p>
@@ -327,11 +325,9 @@ public class FlexLayout extends Component
      */
     public void setAlignContent(ContentAlignment alignment) {
         if (alignment == null) {
-            getStyle().remove(
-                    FlexConstants.ALIGN_CONTENT_CSS_PROPERTY);
+            getStyle().remove(FlexConstants.ALIGN_CONTENT_CSS_PROPERTY);
         } else {
-            getStyle().set(
-                    FlexConstants.ALIGN_CONTENT_CSS_PROPERTY,
+            getStyle().set(FlexConstants.ALIGN_CONTENT_CSS_PROPERTY,
                     alignment.getFlexValue());
         }
     }
@@ -339,8 +335,8 @@ public class FlexLayout extends Component
     /**
      * Gets the current align content property of the layout.
      *
-     * @return the align content property,
-     *         or {@link ContentAlignment#STRETCH} if none was set
+     * @return the align content property, or {@link ContentAlignment#STRETCH}
+     *         if none was set
      */
     public ContentAlignment getAlignContent() {
         return ContentAlignment.toAlignment(
@@ -350,28 +346,25 @@ public class FlexLayout extends Component
     }
 
     /**
-     * Sets the flex basis property of the components inside the layout.
-     * The flex basis property specifies the initial main size of a component.
+     * Sets the flex basis property of the components inside the layout. The
+     * flex basis property specifies the initial main size of a component.
      *
      * @param width
-     *            the width for the components.
-     *            Setting <code>null</code> will remove the flex basis property
+     *            the width for the components. Setting <code>null</code> will
+     *            remove the flex basis property
      * @param elementContainers
-     *            the containers (components) to apply the flex basis
-     *            property
+     *            the containers (components) to apply the flex basis property
      */
-    public void setFlexBasis(String width,
-                                     HasElement... elementContainers) {
+    public void setFlexBasis(String width, HasElement... elementContainers) {
         if (width == null) {
             for (HasElement element : elementContainers) {
-                element.getElement().getStyle().remove(
-                        FlexConstants.FLEX_BASIS_CSS_PROPERTY);
+                element.getElement().getStyle()
+                        .remove(FlexConstants.FLEX_BASIS_CSS_PROPERTY);
             }
         } else {
             for (HasElement element : elementContainers) {
-                element.getElement().getStyle().set(
-                        FlexConstants.FLEX_BASIS_CSS_PROPERTY,
-                        width);
+                element.getElement().getStyle()
+                        .set(FlexConstants.FLEX_BASIS_CSS_PROPERTY, width);
             }
         }
     }
@@ -389,20 +382,20 @@ public class FlexLayout extends Component
     }
 
     /**
-     * Sets the flex direction property of the layout.
-     * The flex direction property specifies how components are placed in the
-     * layout defining the main axis and the direction (normal or reversed).
+     * Sets the flex direction property of the layout. The flex direction
+     * property specifies how components are placed in the layout defining the
+     * main axis and the direction (normal or reversed).
      *
      * The default direction is {@link FlexDirection#ROW}.
      *
      * @param flexDirection
-     *            the direction for the components.
-     *            Setting <code>null</code> will remove the flex direction property
+     *            the direction for the components. Setting <code>null</code>
+     *            will remove the flex direction property
      */
     public void setFlexDirection(FlexDirection flexDirection) {
         if (flexDirection == null) {
-            getElement().getStyle().remove(
-                    FlexConstants.FLEX_DIRECTION_CSS_PROPERTY);
+            getElement().getStyle()
+                    .remove(FlexConstants.FLEX_DIRECTION_CSS_PROPERTY);
         } else {
             getElement().getStyle().set(
                     FlexConstants.FLEX_DIRECTION_CSS_PROPERTY,
@@ -415,32 +408,33 @@ public class FlexLayout extends Component
      *
      * @param elementContainer
      *            the element container to read the flex direction property from
-     * @return the flex direction property,
-     *         or {@link FlexDirection#ROW} if none was set
+     * @return the flex direction property, or {@link FlexDirection#ROW} if none
+     *         was set
      */
     public FlexDirection getFlexDirection(HasElement elementContainer) {
-        return FlexDirection.toFlexDirection(elementContainer.getElement().getStyle()
+        return FlexDirection.toFlexDirection(
+                elementContainer.getElement().getStyle()
                         .get(FlexConstants.FLEX_DIRECTION_CSS_PROPERTY),
                 FlexDirection.ROW);
     }
 
     /**
-     * Sets the flex shrink property of the components inside the layout. The flex
-     * shrink property specifies how the item will shrink relative to the rest
-     * of the components inside the same layout.
+     * Sets the flex shrink property of the components inside the layout. The
+     * flex shrink property specifies how the item will shrink relative to the
+     * rest of the components inside the same layout.
      *
      * Negative values are not allowed.
      *
      * The default value is 1.
      *
      * @param flexShrink
-     *            how much the component will shrink relative to the rest
-     *            of the components
+     *            how much the component will shrink relative to the rest of the
+     *            components
      * @param elementContainers
      *            the containers (components) to apply the flex shrink property
      */
     public void setFlexShrink(double flexShrink,
-                                      HasElement... elementContainers) {
+            HasElement... elementContainers) {
         if (flexShrink < 0) {
             throw new IllegalArgumentException(
                     "Flex shrink property cannot be negative");
@@ -471,14 +465,16 @@ public class FlexLayout extends Component
             return Double.parseDouble(ratio);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "The flex shrink property of the element container is not parseable to double: " + ratio, e);
+                    "The flex shrink property of the element container is not parseable to double: "
+                            + ratio,
+                    e);
         }
     }
 
     /**
      * Sets the order property of the component inside the layout. The order
-     * property specifies the order of a component relative to the
-     * rest of the components inside the same layout.
+     * property specifies the order of a component relative to the rest of the
+     * components inside the same layout.
      *
      * The default value is 0, and setting 0 can be used to remove an existing
      * order for a component.
@@ -490,12 +486,11 @@ public class FlexLayout extends Component
      */
     public void setOrder(int order, HasElement elementContainer) {
         if (order == 0) {
-            elementContainer.getElement().getStyle().remove(
-                    FlexConstants.ORDER_CSS_PROPERTY);
+            elementContainer.getElement().getStyle()
+                    .remove(FlexConstants.ORDER_CSS_PROPERTY);
         }
-        elementContainer.getElement().getStyle().set(
-                FlexConstants.ORDER_CSS_PROPERTY,
-                String.valueOf(order));
+        elementContainer.getElement().getStyle()
+                .set(FlexConstants.ORDER_CSS_PROPERTY, String.valueOf(order));
     }
 
     /**
@@ -503,8 +498,7 @@ public class FlexLayout extends Component
      *
      * @param elementContainer
      *            the element container to read the order property from
-     * @return the order property,
-     *         or 0 if none was set
+     * @return the order property, or 0 if none was set
      */
     public int getOrder(HasElement elementContainer) {
         String order = elementContainer.getElement().getStyle()
@@ -517,7 +511,9 @@ public class FlexLayout extends Component
             return Integer.parseInt(order);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "The order property of the element container is not parseable to integer: " + order, e);
+                    "The order property of the element container is not parseable to integer: "
+                            + order,
+                    e);
         }
     }
 }

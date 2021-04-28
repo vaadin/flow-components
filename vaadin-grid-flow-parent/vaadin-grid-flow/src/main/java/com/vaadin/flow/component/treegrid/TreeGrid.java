@@ -210,7 +210,8 @@ public class TreeGrid<T> extends Grid<T>
 
             return new HierarchicalDataCommunicator<>(dataGenerator,
                     arrayUpdater,
-                    data -> element.callJsFunction("$connector.updateHierarchicalData", data),
+                    data -> element.callJsFunction(
+                            "$connector.updateHierarchicalData", data),
                     element.getNode(), uniqueKeyProviderSupplier);
         }
     }
@@ -319,8 +320,8 @@ public class TreeGrid<T> extends Grid<T>
                         item -> !getDataCommunicator().hasChildren(item))
                 .withProperty("name",
                         value -> String.valueOf(valueProvider.apply(value))));
-        final SerializableComparator<T> comparator = 
-                (a, b) -> compareMaybeComparables(valueProvider.apply(a),
+        final SerializableComparator<T> comparator = (a,
+                b) -> compareMaybeComparables(valueProvider.apply(a),
                         valueProvider.apply(b));
         column.setComparator(comparator);
 
@@ -350,10 +351,9 @@ public class TreeGrid<T> extends Grid<T>
                         item -> !getDataCommunicator().hasChildren(item)));
     }
 
-
     /**
-     * <strong>Note:</strong> This method can only be used for a TreeGrid created
-     * from a bean type with {@link #TreeGrid(Class)}.
+     * <strong>Note:</strong> This method can only be used for a TreeGrid
+     * created from a bean type with {@link #TreeGrid(Class)}.
      * <p>
      * Resets columns and their order based on bean properties.
      * <p>
@@ -378,8 +378,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * <strong>Note:</strong> This method can only be used for a TreeGrid created
-     * from a bean type with {@link #TreeGrid(Class)}.
+     * <strong>Note:</strong> This method can only be used for a TreeGrid
+     * created from a bean type with {@link #TreeGrid(Class)}.
      * <p>
      * Resets columns and their order based on bean properties.
      * <p>
@@ -411,8 +411,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * <strong>Note:</strong> This method can only be used for a TreeGrid created
-     * from a bean type with {@link #TreeGrid(Class)}.
+     * <strong>Note:</strong> This method can only be used for a TreeGrid
+     * created from a bean type with {@link #TreeGrid(Class)}.
      * <p>
      * Sets the columns and their order based on the given properties.
      * <p>
@@ -433,7 +433,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param propertyNames
      *            set of properties to create columns for. Including given
      *            hierarchyPropertyName
-     * @return the hierarchy column 
+     * @return the hierarchy column
      */
     public Column<T> setColumns(String hierarchyPropertyName,
             ValueProvider<T, ?> valueProvider,
@@ -441,8 +441,8 @@ public class TreeGrid<T> extends Grid<T>
         if (getPropertySet() == null) {
             throw new UnsupportedOperationException(
                     "This method can't be used for a Grid that isn't constructed from a bean type. "
-                        + "To construct Grid from a bean type, please provide a beanType argument"
-                        + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
+                            + "To construct Grid from a bean type, please provide a beanType argument"
+                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
         }
         resetColumns(hierarchyPropertyName, valueProvider, propertyNames);
         return getColumnByKey(hierarchyPropertyName);
@@ -478,8 +478,8 @@ public class TreeGrid<T> extends Grid<T>
         if (getPropertySet() == null) {
             throw new UnsupportedOperationException(
                     "This method can't be used for a Grid that isn't constructed from a bean type. "
-                        + "To construct Grid from a bean type, please provide a beanType argument"
-                        + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
+                            + "To construct Grid from a bean type, please provide a beanType argument"
+                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
         }
         Objects.requireNonNull(propertyName,
                 "Hierarchy Property name can't be null");
@@ -490,8 +490,9 @@ public class TreeGrid<T> extends Grid<T>
         } catch (NoSuchElementException | IllegalArgumentException exception) {
             throw new IllegalArgumentException(
                     "There is no such hierarchy property name in the beanType used "
-                        + "for construction of the grid:"
-                        + "Trying to get '" + propertyName + "' from '" + getPropertySet() + "'");
+                            + "for construction of the grid:"
+                            + "Trying to get '" + propertyName + "' from '"
+                            + getPropertySet() + "'");
         }
         return addHierarchyColumn(property);
     }

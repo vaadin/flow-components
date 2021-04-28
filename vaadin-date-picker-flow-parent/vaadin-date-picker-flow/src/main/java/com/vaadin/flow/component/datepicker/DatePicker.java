@@ -399,17 +399,21 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return isInvalidBoolean();
     }
 
-
     /**
-     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
-     * client side validation constraints using browser development tools.
+     * Performs a server-side validation of the given value. This is needed
+     * because it is possible to circumvent the client side validation
+     * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax  = value != null && max != null && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null && value.isBefore(min);
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax = value != null && max != null
+                && value.isAfter(max);
+        final boolean isSmallerThenMin = value != null && min != null
+                && value.isBefore(min);
         return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
     }
+
     /**
      * Sets displaying a clear button in the datepicker when it has value.
      * <p>
@@ -600,22 +604,25 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     /**
-     * When auto open is enabled, the dropdown will open when the field is clicked.
+     * When auto open is enabled, the dropdown will open when the field is
+     * clicked.
      *
-     * @param autoOpen Value for the auto open property,
+     * @param autoOpen
+     *            Value for the auto open property,
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
     }
 
-
     /**
-     * When auto open is enabled, the dropdown will open when the field is clicked.
+     * When auto open is enabled, the dropdown will open when the field is
+     * clicked.
      *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     * @return {@code true} if auto open is enabled. {@code false} otherwise.
+     *         Default is {@code true}
      */
     public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

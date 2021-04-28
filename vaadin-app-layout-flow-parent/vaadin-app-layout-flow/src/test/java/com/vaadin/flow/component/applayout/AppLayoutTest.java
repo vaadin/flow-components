@@ -31,7 +31,7 @@ public class AppLayoutTest {
         systemUnderTest.setContent(content);
 
         List<Element> children = systemUnderTest.getElement().getChildren()
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
         assertTrue(children.contains(content.getElement()));
     }
 
@@ -45,7 +45,7 @@ public class AppLayoutTest {
         systemUnderTest.setContent(null);
 
         List<Element> children = systemUnderTest.getElement().getChildren()
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
         assertFalse(children.contains(content.getElement()));
         assertNull(systemUnderTest.getContent());
     }
@@ -69,16 +69,17 @@ public class AppLayoutTest {
     @Test
     public void addToNavbarTouchOptimizedTrue() {
         final boolean touchOptimized = true;
-        addToNavbarTouchOptimized(touchOptimized,"navbar touch-optimized");
+        addToNavbarTouchOptimized(touchOptimized, "navbar touch-optimized");
     }
 
     @Test
     public void addToNavbarTouchOptimizedFalse() {
         final boolean touchOptimized = false;
-        addToNavbarTouchOptimized(touchOptimized,"navbar");
+        addToNavbarTouchOptimized(touchOptimized, "navbar");
     }
 
-    private void addToNavbarTouchOptimized(boolean touchOptimized, String expectedSlot) {
+    private void addToNavbarTouchOptimized(boolean touchOptimized,
+            String expectedSlot) {
         final Component component = new Div();
         systemUnderTest.addToNavbar(touchOptimized, component);
         assertEquals(expectedSlot, component.getElement().getAttribute("slot"));
@@ -104,15 +105,15 @@ public class AppLayoutTest {
     @Test
     public void removeNavbarTouchOptimizedTrue() {
         final boolean touchOptimized = true;
-        testRemoval(component -> systemUnderTest
-            .addToNavbar(touchOptimized, component));
+        testRemoval(component -> systemUnderTest.addToNavbar(touchOptimized,
+                component));
     }
 
     @Test
     public void removeNavbarTouchOptimizedFalse() {
         final boolean touchOptimized = false;
-        testRemoval(component -> systemUnderTest
-            .addToNavbar(touchOptimized, component));
+        testRemoval(component -> systemUnderTest.addToNavbar(touchOptimized,
+                component));
     }
 
     private void testRemoval(Consumer<Component> adder) {
@@ -171,12 +172,13 @@ public class AppLayoutTest {
     }
 
     private void testDrawerOpened(boolean expectedDrawerOpened) {
-        assertEquals(expectedDrawerOpened, systemUnderTest.getElement().getProperty("drawerOpened", false));
+        assertEquals(expectedDrawerOpened, systemUnderTest.getElement()
+                .getProperty("drawerOpened", false));
         assertEquals(expectedDrawerOpened, systemUnderTest.isDrawerOpened());
     }
 
     private void testAfterNavigationClosesDrawerOnOverlay(
-        boolean expectedDrawerOpened) {
+            boolean expectedDrawerOpened) {
         systemUnderTest.setDrawerOpened(true);
         assertTrue(systemUnderTest.isDrawerOpened());
         systemUnderTest.afterNavigation();

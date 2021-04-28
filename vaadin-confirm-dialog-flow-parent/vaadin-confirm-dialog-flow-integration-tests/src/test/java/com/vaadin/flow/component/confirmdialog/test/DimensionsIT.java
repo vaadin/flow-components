@@ -15,7 +15,8 @@ public class DimensionsIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-confirm-dialog") + "/Dimensions";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-confirm-dialog") + "/Dimensions";
         getDriver().get(url);
     }
 
@@ -46,8 +47,10 @@ public class DimensionsIT extends AbstractParallelTest {
         changeDialogHeight();
         openDialog();
 
-        Assert.assertEquals(Dimensions.DIMENSION_BIGGER, getCssContentValue("height"));
-        Assert.assertEquals(Dimensions.DIMENSION_BIGGER, getCssContentValue("width"));
+        Assert.assertEquals(Dimensions.DIMENSION_BIGGER,
+                getCssContentValue("height"));
+        Assert.assertEquals(Dimensions.DIMENSION_BIGGER,
+                getCssContentValue("width"));
     }
 
     @Test
@@ -63,7 +66,8 @@ public class DimensionsIT extends AbstractParallelTest {
 
         openDialog();
 
-        waitUntil(driver -> Dimensions.DIMENSION_BIGGER.equals(getCssContentValue("height")));
+        waitUntil(driver -> Dimensions.DIMENSION_BIGGER
+                .equals(getCssContentValue("height")));
     }
 
     @Test
@@ -93,11 +97,15 @@ public class DimensionsIT extends AbstractParallelTest {
 
         ConfirmDialogElement confirmDialog = getConfirmDialog();
 
-        confirmDialog.$(ButtonElement.class).id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID).click();
-        confirmDialog.$(ButtonElement.class).id(Dimensions.CHANGE_DIALOG_ATTACHED_HEIGHT_ID).click();
+        confirmDialog.$(ButtonElement.class)
+                .id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID).click();
+        confirmDialog.$(ButtonElement.class)
+                .id(Dimensions.CHANGE_DIALOG_ATTACHED_HEIGHT_ID).click();
 
-        waitUntil(driver -> Dimensions.DIMENSION_SMALLER.equals(getCssContentValue("height"))
-                && Dimensions.DIMENSION_SMALLER.equals(getCssContentValue("width")));
+        waitUntil(driver -> Dimensions.DIMENSION_SMALLER
+                .equals(getCssContentValue("height"))
+                && Dimensions.DIMENSION_SMALLER
+                        .equals(getCssContentValue("width")));
     }
 
     private ConfirmDialogElement getConfirmDialog() {
@@ -129,7 +137,8 @@ public class DimensionsIT extends AbstractParallelTest {
     }
 
     private void resetDimensions() {
-        $(ButtonElement.class).id(Dimensions.RESET_DIALOG_DIMENSIONS_ID).click();
+        $(ButtonElement.class).id(Dimensions.RESET_DIALOG_DIMENSIONS_ID)
+                .click();
     }
 
 }
