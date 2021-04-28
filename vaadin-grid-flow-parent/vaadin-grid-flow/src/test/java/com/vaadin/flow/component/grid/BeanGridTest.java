@@ -77,6 +77,7 @@ public class BeanGridTest {
         public ExtendedGrid() {
             super();
         }
+
         public ExtendedGrid(Class<T> beanType) {
             super(beanType, false);
         }
