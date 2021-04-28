@@ -46,9 +46,12 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
 
         add(grid1);
 
-        // Ensure _recalculateColumnWidthOnceLoadingFinished flag is cleared, otherwise the flag
-        // would trigger the column recalculation automatically when refreshing the data
-        // The web component has some flaky behaviour where the flag is not always cleared
+        // Ensure _recalculateColumnWidthOnceLoadingFinished flag is cleared,
+        // otherwise the flag
+        // would trigger the column recalculation automatically when refreshing
+        // the data
+        // The web component has some flaky behaviour where the flag is not
+        // always cleared
         // after the initial data load
         // See https://github.com/vaadin/web-components/issues/268
         grid1.getElement().executeJs(
