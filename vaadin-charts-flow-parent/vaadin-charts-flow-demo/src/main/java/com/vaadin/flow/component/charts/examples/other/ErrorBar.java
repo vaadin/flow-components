@@ -39,31 +39,24 @@ public class ErrorBar extends AbstractChartExample {
         tooltip.setShared(true);
         configuration.setTooltip(tooltip);
 
-        Series rainfall = new ListSeries("Rainfall",
-                49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6,
-                148.5, 216.4, 194.1, 95.6, 54.4);
+        Series rainfall = new ListSeries("Rainfall", 49.9, 71.5, 106.4, 129.2,
+                144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4);
         PlotOptionsColumn rainfallOptions = new PlotOptionsColumn();
         SeriesTooltip rainfallTooltip = new SeriesTooltip();
         rainfallTooltip.setPointFormat(
-                "<span style=\"font-weight: bold; color: {series.color}\">" +
-                    "{series.name}</span>: <b>{point.y:.1f} mm</b> ");
+                "<span style=\"font-weight: bold; color: {series.color}\">"
+                        + "{series.name}</span>: <b>{point.y:.1f} mm</b> ");
         rainfallOptions.setTooltip(rainfallTooltip);
         rainfall.setPlotOptions(rainfallOptions);
         configuration.addSeries(rainfall);
 
         Series error = new RangeSeries("Rainfall error",
-                new Number[] {48, 51},
-                new Number[] {68, 73},
-                new Number[] {92, 110},
-                new Number[] {128, 136},
-                new Number[] {140, 150},
-                new Number[] {171, 179},
-                new Number[] {135, 143},
-                new Number[] {142, 149},
-                new Number[] {204, 220},
-                new Number[] {189, 199},
-                new Number[] {95, 110},
-                new Number[] {52, 56});
+                new Number[] { 48, 51 }, new Number[] { 68, 73 },
+                new Number[] { 92, 110 }, new Number[] { 128, 136 },
+                new Number[] { 140, 150 }, new Number[] { 171, 179 },
+                new Number[] { 135, 143 }, new Number[] { 142, 149 },
+                new Number[] { 204, 220 }, new Number[] { 189, 199 },
+                new Number[] { 95, 110 }, new Number[] { 52, 56 });
         PlotOptionsErrorbar errorOptions = new PlotOptionsErrorbar();
         SeriesTooltip errorTooltip = new SeriesTooltip();
         errorTooltip.setPointFormat(

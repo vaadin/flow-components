@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.vaadin.flow.component.charts.Chart;
 
-
 /**
  * Abstract base class for series
  */

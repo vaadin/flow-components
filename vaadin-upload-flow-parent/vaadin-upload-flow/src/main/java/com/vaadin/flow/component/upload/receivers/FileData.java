@@ -29,9 +29,12 @@ public class FileData implements Serializable {
     /**
      * Create a FileData instance for a file.
      *
-     * @param fileName the file name
-     * @param mimeType the file MIME type
-     * @param outputBuffer the output buffer where to write the file
+     * @param fileName
+     *            the file name
+     * @param mimeType
+     *            the file MIME type
+     * @param outputBuffer
+     *            the output buffer where to write the file
      */
     public FileData(String fileName, String mimeType,
             OutputStream outputBuffer) {
@@ -70,8 +73,10 @@ public class FileData implements Serializable {
     /**
      *
      * @return Temporary file containing the uploaded data.
-     * @throws NullPointerException if outputBuffer is null
-     * @throws UnsupportedOperationException if outputBuffer is not an {@link UploadOutputStream}
+     * @throws NullPointerException
+     *             if outputBuffer is null
+     * @throws UnsupportedOperationException
+     *             if outputBuffer is not an {@link UploadOutputStream}
      */
     public File getFile() {
         if (outputBuffer == null) {
@@ -80,8 +85,8 @@ public class FileData implements Serializable {
         if (outputBuffer instanceof UploadOutputStream) {
             return ((UploadOutputStream) outputBuffer).getFile();
         }
-        final String MESSAGE = String
-            .format("%s not supported. Use a UploadOutputStream",
+        final String MESSAGE = String.format(
+                "%s not supported. Use a UploadOutputStream",
                 outputBuffer.getClass());
         throw new UnsupportedOperationException(MESSAGE);
     }

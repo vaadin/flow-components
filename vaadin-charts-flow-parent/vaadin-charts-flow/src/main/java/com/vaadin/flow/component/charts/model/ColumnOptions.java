@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import java.util.Date;
 
 public abstract class ColumnOptions extends AbstractPlotOptions {
@@ -252,8 +251,8 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract IntervalUnit getPointIntervalUnit();
 
     /**
-     * On datetime series, this allows for setting the <a
-     * href="plotOptions.series.pointInterval">pointInterval</a> to irregular
+     * On datetime series, this allows for setting the
+     * <a href="plotOptions.series.pointInterval">pointInterval</a> to irregular
      * time units, <code>day</code>, <code>month</code> and <code>year</code>. A
      * day is usually the same as 24 hours, but pointIntervalUnit also takes the
      * DST crossover into consideration when dealing with local time. Combine

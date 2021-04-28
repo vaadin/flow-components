@@ -50,7 +50,8 @@ public class EditColumnConfigurator<T> implements Serializable {
      * @param column
      *            the column to edit, not <code>null</code>
      */
-    EditColumnConfigurator(EditColumn<T> column, ValueProvider<T, ?> valueProvider) {
+    EditColumnConfigurator(EditColumn<T> column,
+            ValueProvider<T, ?> valueProvider) {
         assert column != null;
         this.column = column;
         this.column.setValueProvider(valueProvider);
@@ -72,7 +73,7 @@ public class EditColumnConfigurator<T> implements Serializable {
     }
 
     private <V> Column<T> configureColumn(ItemUpdater<T, String> itemUpdater,
-                                      EditorType type, AbstractField<?, V> editorField) {
+            EditorType type, AbstractField<?, V> editorField) {
         column.setEditorType(type);
         column.setItemUpdater(itemUpdater);
         column.setEditorField(editorField);
@@ -93,8 +94,8 @@ public class EditColumnConfigurator<T> implements Serializable {
      * Configures the column to have a text editor with the given item updater.
      *
      * @param itemUpdater
-     *            the callback function that is called when item is changed.
-     *            It receives two arguments: item, newValue.
+     *            the callback function that is called when item is changed. It
+     *            receives two arguments: item, newValue.
      * @return the configured column
      *
      */
@@ -103,13 +104,15 @@ public class EditColumnConfigurator<T> implements Serializable {
                 Collections.emptyList());
     }
 
-    public <V> Column<T> custom(AbstractField<?, V> component, ItemUpdater<T, V> itemUpdater) {
+    public <V> Column<T> custom(AbstractField<?, V> component,
+            ItemUpdater<T, V> itemUpdater) {
         column.getElement().appendVirtualChild(component.getElement());
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
                         context -> setEditModeRenderer(component)));
 
-        return configureColumn((item, ignore) -> itemUpdater.accept(item, component.getValue()), EditorType.CUSTOM, component);
+        return configureColumn((item, ignore) -> itemUpdater.accept(item,
+                component.getValue()), EditorType.CUSTOM, component);
     }
 
     private <V> void setEditModeRenderer(AbstractField<?, V> component) {
@@ -118,14 +121,13 @@ public class EditColumnConfigurator<T> implements Serializable {
                 column.getElement(), component.getElement());
     }
 
-
     /**
      * Configures the column to have a checkbox editor with the given item
      * updater.
      *
      * @param itemUpdater
-     *            the callback function that is called when item is changed.
-     *            It receives two arguments: item, newValue.
+     *            the callback function that is called when item is changed. It
+     *            receives two arguments: item, newValue.
      * @return the configured column
      */
     public Column<T> checkbox(ItemUpdater<T, Boolean> itemUpdater) {
@@ -141,8 +143,8 @@ public class EditColumnConfigurator<T> implements Serializable {
      * and options.
      *
      * @param itemUpdater
-     *            the callback function that is called when item is changed.
-     *            It receives two arguments: item, newValue.
+     *            the callback function that is called when item is changed. It
+     *            receives two arguments: item, newValue.
      * @param options
      *            options provided for the select editor
      * @return the configured column
@@ -159,8 +161,8 @@ public class EditColumnConfigurator<T> implements Serializable {
      * and options.
      *
      * @param itemUpdater
-     *            the callback function that is called when item is changed.
-     *            It receives two arguments: item, newValue.
+     *            the callback function that is called when item is changed. It
+     *            receives two arguments: item, newValue.
      * @param options
      *            options provided for the select editor
      * @return the configured column
@@ -180,16 +182,18 @@ public class EditColumnConfigurator<T> implements Serializable {
      * @param <E>
      *            the enum type
      * @param itemUpdater
-     *            the callback function that is called when item is changed.
-     *            It receives two arguments: item and newValue.
+     *            the callback function that is called when item is changed. It
+     *            receives two arguments: item and newValue.
      * @param enumType
      *            the enum class
      * @param getStringRepresentation
-     *            callback used to get the string representation for each enum constant.
+     *            callback used to get the string representation for each enum
+     *            constant.
      * @return the configured column
      *
      * @throws IllegalArgumentException
-     *             if any of the enum constants have the same string representation
+     *             if any of the enum constants have the same string
+     *             representation
      */
     public <E extends Enum<E>> Column<T> select(ItemUpdater<T, E> itemUpdater,
             Class<E> enumType,
@@ -198,18 +202,20 @@ public class EditColumnConfigurator<T> implements Serializable {
         E[] items = enumType.getEnumConstants();
         List<String> itemsList = new ArrayList<>();
 
-        for(E item: items) {
+        for (E item : items) {
             String stringRepresentation = getStringRepresentation.apply(item);
             if (map.containsKey(stringRepresentation)) {
-                throw new IllegalArgumentException("Enum constants " +
-                        map.get(stringRepresentation) + " and " +
-                        item + " both have the same string representation: " + stringRepresentation);
+                throw new IllegalArgumentException("Enum constants "
+                        + map.get(stringRepresentation) + " and " + item
+                        + " both have the same string representation: "
+                        + stringRepresentation);
             }
             map.put(stringRepresentation, item);
             itemsList.add(stringRepresentation);
         }
 
-        ItemUpdater<T, String> wrapper = (item, value) -> itemUpdater.accept(item, map.get(value));
+        ItemUpdater<T, String> wrapper = (item, value) -> itemUpdater
+                .accept(item, map.get(value));
 
         return select(wrapper, itemsList);
     }
@@ -224,8 +230,8 @@ public class EditColumnConfigurator<T> implements Serializable {
      * @param <E>
      *            the enum type
      * @param itemUpdater
-     *            the callback function that is called when item is changed.
-     *            It receives two arguments: item and newValue.
+     *            the callback function that is called when item is changed. It
+     *            receives two arguments: item and newValue.
      * @param enumType
      *            the enum class
      * @return the configured column

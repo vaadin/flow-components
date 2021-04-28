@@ -207,7 +207,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     public boolean isSelected(T item) {
         return getSelectedItems().stream().anyMatch(selectedItem -> Objects
-            .equals(getItemId(selectedItem), getItemId(item)));
+                .equals(getItemId(selectedItem), getItemId(item)));
     }
 
     @Override
@@ -405,19 +405,19 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Map<Object, T> addedItemsMap = mapItemsById(addedItems);
         Map<Object, T> removedItemsMap = mapItemsById(removedItems);
         addedItemsMap.keySet().stream().filter(removedItemsMap::containsKey)
-            .collect(Collectors.toList()).forEach(key -> {
-            addedItemsMap.remove(key);
-            removedItemsMap.remove(key);
-        });
-        doUpdateSelection(addedItemsMap,removedItemsMap,userOriginated);
+                .collect(Collectors.toList()).forEach(key -> {
+                    addedItemsMap.remove(key);
+                    removedItemsMap.remove(key);
+                });
+        doUpdateSelection(addedItemsMap, removedItemsMap, userOriginated);
     }
 
     private void doUpdateSelection(Map<Object, T> addedItems,
-        Map<Object, T> removedItems, boolean userOriginated) {
+            Map<Object, T> removedItems, boolean userOriginated) {
 
         Map<Object, T> selectedMap = mapItemsById(selected);
         if (selectedMap.keySet().containsAll(addedItems.keySet()) && Collections
-            .disjoint(selectedMap.keySet(), removedItems.keySet())) {
+                .disjoint(selectedMap.keySet(), removedItems.keySet())) {
             return;
         }
         Set<T> oldSelection = new LinkedHashSet<>(selected);
@@ -427,13 +427,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         selected.addAll(selectedMap.values());
 
         sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
-            getGrid()::doClientSideSelection);
+                getGrid()::doClientSideSelection);
         sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
-            getGrid()::doClientSideDeselection);
+                getGrid()::doClientSideDeselection);
 
-        fireSelectionEvent(
-            new MultiSelectionEvent<>(getGrid(), getGrid().asMultiSelect(),
-                oldSelection, userOriginated));
+        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                getGrid().asMultiSelect(), oldSelection, userOriginated));
         if (!removedItems.isEmpty()) {
             selectionColumn.setSelectAllCheckboxState(false);
         }
@@ -441,7 +440,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private Map<Object, T> mapItemsById(Set<T> items) {
         return items.stream().collect(LinkedHashMap::new,
-            (map, item) -> map.put(this.getItemId(item), item), Map::putAll);
+                (map, item) -> map.put(this.getItemId(item), item),
+                Map::putAll);
     }
 
     private void sendSelectionUpdate(Set<T> updatedItems,

@@ -26,7 +26,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-
 @TestPath("vaadin-dialog-view")
 public class DialogIT extends AbstractComponentIT {
 
@@ -82,12 +81,14 @@ public class DialogIT extends AbstractComponentIT {
                 By.id("confirmation-dialog-label"));
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("vaadin-button")).get(0).click();
+        getOverlayContent().findElements(By.tagName("vaadin-button")).get(0)
+                .click();
         verifyDialogClosed();
         Assert.assertEquals("Confirmed!", messageLabel.getText());
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("vaadin-button")).get(1).click();
+        getOverlayContent().findElements(By.tagName("vaadin-button")).get(1)
+                .click();
         verifyDialogClosed();
         Assert.assertEquals("Cancelled...", messageLabel.getText());
     }

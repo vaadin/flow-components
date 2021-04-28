@@ -17,14 +17,13 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.charts.Chart;
 
 /**
- * ChartDrillupEvent triggered after all the series  has been drilled up
- * if chart has multiple drilldown series
+ * ChartDrillupEvent triggered after all the series has been drilled up if chart
+ * has multiple drilldown series
  */
 @DomEvent("chart-drillupall")
 public class ChartDrillupAllEvent extends ComponentEvent<Chart> {

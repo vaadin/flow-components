@@ -19,14 +19,15 @@ public class AccountService {
 
     public Boolean hasChildren(Account parent) {
 
-        return accountList.stream()
-                .anyMatch(account -> Objects.equals(parent, account.getParent()));
+        return accountList.stream().anyMatch(
+                account -> Objects.equals(parent, account.getParent()));
     }
 
     public List<Account> fetchChildren(Account parent) {
 
         return accountList.stream()
-                .filter(account -> Objects.equals(parent, account.getParent())).collect(Collectors.toList());
+                .filter(account -> Objects.equals(parent, account.getParent()))
+                .collect(Collectors.toList());
     }
 
 }

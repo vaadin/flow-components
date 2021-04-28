@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -25,11 +24,12 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.YAxis;
 
 /**
- * The YAxesExtremesSetEvent class stores data for set extremes events
- * on the y axes of the chart.
+ * The YAxesExtremesSetEvent class stores data for set extremes events on the y
+ * axes of the chart.
  */
 @DomEvent("yaxes-extremes-set")
-public class YAxesExtremesSetEvent extends ComponentEvent<Chart> implements HasAxis<YAxis> {
+public class YAxesExtremesSetEvent extends ComponentEvent<Chart>
+        implements HasAxis<YAxis> {
 
     private double minimum;
     private double maximum;

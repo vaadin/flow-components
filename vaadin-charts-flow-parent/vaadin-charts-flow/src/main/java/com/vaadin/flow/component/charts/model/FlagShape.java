@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-
 /**
  * The name of a symbol to use for the border in {@link ChartType#FLAGS} series.
  */

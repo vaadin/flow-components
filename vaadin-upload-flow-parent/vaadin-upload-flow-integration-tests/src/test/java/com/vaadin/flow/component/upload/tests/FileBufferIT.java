@@ -22,16 +22,17 @@ public class FileBufferIT extends AbstractUploadIT {
         waitUntil(driver -> upload.isDisplayed());
 
         File tempFile = createTempFile();
-        fillPathToUploadInput(getInput(upload),tempFile.getPath());
+        fillPathToUploadInput(getInput(upload), tempFile.getPath());
 
-        WebElement uploadOutput = getDriver().findElement(By.id("single-upload-output"));
+        WebElement uploadOutput = getDriver()
+                .findElement(By.id("single-upload-output"));
 
         String content = uploadOutput.getText();
 
         String expectedContent = tempFile.getName() + getTempFileContents();
 
         Assert.assertEquals("Upload content does not match expected",
-            expectedContent, content);
+                expectedContent, content);
     }
 
     @Test
@@ -40,7 +41,7 @@ public class FileBufferIT extends AbstractUploadIT {
             // Multiple file upload does not work with Remotewebdriver
             // https://github.com/SeleniumHQ/selenium/issues/7408
             throw new AssumptionViolatedException(
-                "Skipped <Multiple file upload does not work with Remotewebdriver>");
+                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
         }
         open();
 
@@ -49,14 +50,14 @@ public class FileBufferIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(getInput(upload),tempFile.getPath(), tempFile.getPath(),
-            tempFile.getPath());
+        fillPathToUploadInput(getInput(upload), tempFile.getPath(),
+                tempFile.getPath(), tempFile.getPath());
 
         WebElement eventsOutput = getDriver()
-            .findElement(By.id("multi-upload-event-output"));
+                .findElement(By.id("multi-upload-event-output"));
 
         Assert.assertEquals("Upload event order does not match expected",
-            "-succeeded-succeeded-succeeded-finished",
-            eventsOutput.getText());
+                "-succeeded-succeeded-succeeded-finished",
+                eventsOutput.getText());
     }
 }

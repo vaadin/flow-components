@@ -37,7 +37,7 @@ class LayoutComponent extends Div {
         content.getElement().getStyle().set("border", "1px solid black");
 
         NativeButton toggleButton = new NativeButton("Toggle",
-            event -> toggleSidebar());
+                event -> toggleSidebar());
         toggleButton.setId("toggleButtonInLayoutComponent");
         buttonContainer.add(toggleButton);
         add(buttonContainer, contentContainer);

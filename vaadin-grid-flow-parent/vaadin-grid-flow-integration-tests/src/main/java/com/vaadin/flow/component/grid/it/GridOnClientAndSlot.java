@@ -25,5 +25,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Tag("grid-on-client-and-slot")
 @JsModule("src/grid-on-client-and-slot.js")
 @HtmlImport("src/grid-on-client-and-slot.html")
-public class GridOnClientAndSlot extends PolymerTemplate<TemplateModel> implements HasComponents {
+public class GridOnClientAndSlot extends PolymerTemplate<TemplateModel>
+        implements HasComponents {
 }
