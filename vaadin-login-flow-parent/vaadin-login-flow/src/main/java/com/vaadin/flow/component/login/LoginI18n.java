@@ -31,8 +31,9 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Internationalization object for customizing the component UI texts.
- * An instance with the default messages can be obtained using {@link LoginI18n#createDefault()}
+ * Internationalization object for customizing the component UI texts. An
+ * instance with the default messages can be obtained using
+ * {@link LoginI18n#createDefault()}
  *
  * @see LoginForm#setI18n(LoginI18n)
  */
@@ -43,13 +44,13 @@ public class LoginI18n implements Serializable {
     static {
         try {
             final JsonFactory JSON_FACTORY = new JreJsonFactory();
-            DEFAULT_I18N = JSON_FACTORY.parse(IOUtils
-                .toString(LoginI18n.class.getResource("i18n.json"),
-                        StandardCharsets.UTF_8));
+            DEFAULT_I18N = JSON_FACTORY.parse(
+                    IOUtils.toString(LoginI18n.class.getResource("i18n.json"),
+                            StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException(
-                "Cannot find the default i18n configuration. "
-                    + "Please make sure the i18n.json does exist.");
+                    "Cannot find the default i18n configuration. "
+                            + "Please make sure the i18n.json does exist.");
         }
     }
 
@@ -73,7 +74,8 @@ public class LoginI18n implements Serializable {
     }
 
     /**
-     * @param header {@link Header} object.
+     * @param header
+     *            {@link Header} object.
      */
     public void setHeader(Header header) {
         this.header = header;
@@ -87,7 +89,8 @@ public class LoginI18n implements Serializable {
     }
 
     /**
-     * @param form {@link Form} object.
+     * @param form
+     *            {@link Form} object.
      */
     public void setForm(Form form) {
         this.form = form;
@@ -101,7 +104,8 @@ public class LoginI18n implements Serializable {
     }
 
     /**
-     * @param errorMessage {@link ErrorMessage} object.
+     * @param errorMessage
+     *            {@link ErrorMessage} object.
      */
     public void setErrorMessage(ErrorMessage errorMessage) {
         this.errorMessage = errorMessage;
@@ -115,7 +119,8 @@ public class LoginI18n implements Serializable {
     }
 
     /**
-     * @param additionalInformation new value for the additional information property.
+     * @param additionalInformation
+     *            new value for the additional information property.
      */
     public void setAdditionalInformation(String additionalInformation) {
         this.additionalInformation = additionalInformation;
@@ -136,7 +141,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param title new value for the title property.
+         * @param title
+         *            new value for the title property.
          */
         public void setTitle(String title) {
             this.title = title;
@@ -150,7 +156,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param description new value for the description property.
+         * @param description
+         *            new value for the description property.
          */
         public void setDescription(String description) {
             this.description = description;
@@ -175,7 +182,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param title new value for the title property.
+         * @param title
+         *            new value for the title property.
          */
         public void setTitle(String title) {
             this.title = title;
@@ -189,7 +197,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param username new value for the username property.
+         * @param username
+         *            new value for the username property.
          */
         public void setUsername(String username) {
             this.username = username;
@@ -203,7 +212,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param password new value for the password property.
+         * @param password
+         *            new value for the password property.
          */
         public void setPassword(String password) {
             this.password = password;
@@ -217,7 +227,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param submit new value for the submit property.
+         * @param submit
+         *            new value for the submit property.
          */
         public void setSubmit(String submit) {
             this.submit = submit;
@@ -231,7 +242,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param forgotPassword new value for the forgotPassword property.
+         * @param forgotPassword
+         *            new value for the forgotPassword property.
          */
         public void setForgotPassword(String forgotPassword) {
             this.forgotPassword = forgotPassword;
@@ -253,7 +265,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param title new value for the title property.
+         * @param title
+         *            new value for the title property.
          */
         public void setTitle(String title) {
             this.title = title;
@@ -267,7 +280,8 @@ public class LoginI18n implements Serializable {
         }
 
         /**
-         * @param message new value for the message property.
+         * @param message
+         *            new value for the message property.
          */
         public void setMessage(String message) {
             this.message = message;

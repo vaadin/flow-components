@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
- 
+
 package com.vaadin.flow.component.combobox.test;
 
 import com.vaadin.flow.testutil.TestPath;
@@ -33,7 +33,7 @@ public class LazyComboBoxFilterIT extends AbstractComponentIT {
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
         comboBox.sendKeys("1");
         comboBox.openPopup();
-		
+
         WebElement query = findElement(By.id("query"));
         Assert.assertTrue(query.getText().contains("Filter: 1"));
         Assert.assertTrue(query.getText().contains("Count: 10"));

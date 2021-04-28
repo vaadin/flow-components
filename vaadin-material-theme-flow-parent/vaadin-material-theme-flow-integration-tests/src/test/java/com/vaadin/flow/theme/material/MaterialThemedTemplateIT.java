@@ -22,7 +22,6 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-
 @TestPath(value = "vaadin-material-theme/material-themed-template-view")
 public class MaterialThemedTemplateIT extends AbstractComponentIT {
 
@@ -40,10 +39,11 @@ public class MaterialThemedTemplateIT extends AbstractComponentIT {
         // when merging all modules in one application during CI
         // lumo is used and material removed.
         Assert.assertTrue("Should be Lumo or Material themed",
-            div.getText().matches("(Material|Lumo) themed Template"));
+                div.getText().matches("(Material|Lumo) themed Template"));
 
         // this is silly, but a concrete way to test that the theme files are
-        // imported by verifying that the material css variables introduced in the
+        // imported by verifying that the material css variables introduced in
+        // the
         // files work
 
         // Material css property values
@@ -55,11 +55,11 @@ public class MaterialThemedTemplateIT extends AbstractComponentIT {
 
         String color = div.getCssValue("color");
         Assert.assertTrue("Should set correct color but it was " + color,
-            color.matches("rgba\\((176, 0, 32, 1|246, 84, 76, 1)\\)"));
+                color.matches("rgba\\((176, 0, 32, 1|246, 84, 76, 1)\\)"));
 
         String font = div.getCssValue("font-size");
         Assert.assertTrue("Should set correct font size but it was " + font,
-            font.matches("(16|40)px"));
+                font.matches("(16|40)px"));
     }
 
 }

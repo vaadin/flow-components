@@ -18,7 +18,8 @@ import com.vaadin.flow.router.Route;
 public class DialogWithShortcutPage extends VerticalLayout {
 
     public static final Key SHORTCUT_KEY = Key.KEY_X;
-    public static final String SHORTCUT = String.join("", SHORTCUT_KEY.getKeys());
+    public static final String SHORTCUT = String.join("",
+            SHORTCUT_KEY.getKeys());
     public static final String EVENT_LOG = "event-log";
     public static final String UI_BUTTON = "ui-button";
     public static final String MODELESS_SHORTCUT_ON_UI = "modeless-shortcut-on-ui";
@@ -54,8 +55,8 @@ public class DialogWithShortcutPage extends VerticalLayout {
         final NativeButton dialogWithShortcutOnUi = new NativeButton(
                 "Dialog with shortcut on UI", e -> createAndOpenDialog(false));
         dialogWithShortcutOnUi.setId(SHORTCUT_ON_UI);
-        final NativeButton reusableDialogButton = new NativeButton("Reusable dialog",
-                event -> {
+        final NativeButton reusableDialogButton = new NativeButton(
+                "Reusable dialog", event -> {
                     if (reusableDialog == null) {
                         reusableDialog = createAndOpenDialog(true);
                     } else {
@@ -67,8 +68,8 @@ public class DialogWithShortcutPage extends VerticalLayout {
                 dialogWithShortcutOnUi, dialogWithShortcutListenOnDialog,
                 reusableDialogButton);
 
-        NativeButton nonDialogButton = new NativeButton("Button on UI with shortcut on UI",
-                this::onEvent);
+        NativeButton nonDialogButton = new NativeButton(
+                "Button on UI with shortcut on UI", this::onEvent);
         nonDialogButton.addClickShortcut(SHORTCUT_KEY);
         nonDialogButton.setId(UI_BUTTON);
 
@@ -86,10 +87,10 @@ public class DialogWithShortcutPage extends VerticalLayout {
         final String dialogId = DIALOG_ID + index;
         NativeButton myDialogButton = createDialogButton();
         myDialogButton.setId(dialogId + "-button");
-        Dialog dialog = new Dialog(
-                new Div(new Div(new Text("" + index)), myDialogButton,
-                        new Input()));
-        NativeButton closeButton = new NativeButton("Close", buttonClickEvent -> dialog.close());
+        Dialog dialog = new Dialog(new Div(new Div(new Text("" + index)),
+                myDialogButton, new Input()));
+        NativeButton closeButton = new NativeButton("Close",
+                buttonClickEvent -> dialog.close());
         dialog.add(closeButton);
         dialog.setDraggable(true);
         dialog.open();

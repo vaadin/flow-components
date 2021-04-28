@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * Options for range selector buttons.
  */

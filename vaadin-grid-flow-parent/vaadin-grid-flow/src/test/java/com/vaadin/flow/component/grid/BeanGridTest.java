@@ -78,7 +78,8 @@ public class BeanGridTest {
             super(beanType, false);
         }
 
-        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer, String columnId) {
+        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer,
+                String columnId) {
             return new ExtendedColumn<>(this, columnId, renderer);
         }
     }
@@ -91,10 +92,12 @@ public class BeanGridTest {
     @Test
     public void addRegularColumnAndExtendedColumn() {
         Column<Person> regularColumn = extendedGrid.addColumn("name");
-        ExtendedColumn<Person> extendedColumn = extendedGrid.addColumn("born", extendedGrid::createCustomColumn);
+        ExtendedColumn<Person> extendedColumn = extendedGrid.addColumn("born",
+                extendedGrid::createCustomColumn);
 
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
-        assertEqualColumnClasses(extendedColumn.getClass(), ExtendedColumn.class);
+        assertEqualColumnClasses(extendedColumn.getClass(),
+                ExtendedColumn.class);
     }
 
     @Test
@@ -206,7 +209,7 @@ public class BeanGridTest {
         binder.bind(new TextField(), "name");
         binder.bind(new TextField(), "born");
     }
-    
+
     @Test
     public void removeAllColumns() {
         int initialColumnCount = grid.getColumns().size();

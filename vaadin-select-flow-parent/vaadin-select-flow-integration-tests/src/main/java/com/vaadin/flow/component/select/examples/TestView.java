@@ -330,8 +330,8 @@ public class TestView extends Div implements HasUrlParameter<String> {
             return Integer.parseInt(parameter.substring(fromIndex, endIndex)
                     .replace(parameterName, ""));
         } else {
-            return Integer.parseInt(parameter.substring(fromIndex)
-                    .replace(parameterName, ""));
+            return Integer.parseInt(
+                    parameter.substring(fromIndex).replace(parameterName, ""));
         }
     }
 

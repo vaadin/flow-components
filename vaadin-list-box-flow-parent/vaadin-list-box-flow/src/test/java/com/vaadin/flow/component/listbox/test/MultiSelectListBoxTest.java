@@ -192,17 +192,16 @@ public class MultiSelectListBoxTest {
     public void dataViewForFaultyDataProvider_throwsException() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(
-                "ListBoxListDataView only supports 'ListDataProvider' " +
-                        "or it's subclasses, but was given a " +
-                        "'AbstractBackEndDataProvider'");
+                "ListBoxListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'");
 
         MultiSelectListBox<String> multiSelectListBox = new MultiSelectListBox<>();
         final ListBoxListDataView<String> dataView = multiSelectListBox
                 .setItems(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Stream.of("one"),
-                        query -> 1);
+                .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
         multiSelectListBox.setItems(dataProvider);
 
@@ -214,11 +213,10 @@ public class MultiSelectListBoxTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
-        MultiSelectListBox<CustomItem> multiSelectListBox =
-                new MultiSelectListBox<>();
+        MultiSelectListBox<CustomItem> multiSelectListBox = new MultiSelectListBox<>();
         ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
                 .setItems(items);
         // Setting the following Identifier Provider makes the component
@@ -228,9 +226,8 @@ public class MultiSelectListBoxTest {
         multiSelectListBox.setValue(createSet(new CustomItem(1L)));
 
         long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
-                .mapToLong(CustomItem::getId)
-                .toArray();
-        Assert.assertArrayEquals(new long[] {1L}, selectedIds);
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -243,11 +240,9 @@ public class MultiSelectListBoxTest {
         // with just the Id:
         multiSelectListBox.setValue(Collections.singleton(new CustomItem(2L)));
 
-        selectedIds = multiSelectListBox.getSelectedItems()
-                .stream()
-                .mapToLong(CustomItem::getId)
-                .toArray();
-        Assert.assertArrayEquals(new long[] {2L}, selectedIds);
+        selectedIds = multiSelectListBox.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
     @Test
@@ -255,11 +250,10 @@ public class MultiSelectListBoxTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
-        MultiSelectListBox<CustomItem> multiSelectListBox =
-                new MultiSelectListBox<>();
+        MultiSelectListBox<CustomItem> multiSelectListBox = new MultiSelectListBox<>();
         ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
                 .setItems(items);
         // Setting the following Identifier Provider makes the component
@@ -269,9 +263,8 @@ public class MultiSelectListBoxTest {
         multiSelectListBox.setValue(createSet(new CustomItem(1L)));
 
         long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
-                .mapToLong(CustomItem::getId)
-                .toArray();
-        Assert.assertArrayEquals(new long[] {1L}, selectedIds);
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -282,14 +275,12 @@ public class MultiSelectListBoxTest {
 
         // Select the item not with the reference of existing item, but instead
         // with just the Id:
-        multiSelectListBox.setValue(Collections.singleton(
-                new CustomItem(3L, "Second")));
+        multiSelectListBox
+                .setValue(Collections.singleton(new CustomItem(3L, "Second")));
 
-        selectedIds = multiSelectListBox.getSelectedItems()
-                .stream()
-                .mapToLong(CustomItem::getId)
-                .toArray();
-        Assert.assertArrayEquals(new long[] {3L}, selectedIds);
+        selectedIds = multiSelectListBox.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
+        Assert.assertArrayEquals(new long[] { 3L }, selectedIds);
     }
 
     @Test
@@ -297,24 +288,22 @@ public class MultiSelectListBoxTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
-        MultiSelectListBox<CustomItem> multiSelectListBox =
-                new MultiSelectListBox<>();
-        ListBoxListDataView<CustomItem> listDataView =
-                multiSelectListBox.setItems(items);
+        MultiSelectListBox<CustomItem> multiSelectListBox = new MultiSelectListBox<>();
+        ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
+                .setItems(items);
 
-        multiSelectListBox.setValue(Collections.singleton(
-                new CustomItem( null,"Second")));
+        multiSelectListBox.setValue(
+                Collections.singleton(new CustomItem(null, "Second")));
 
         Assert.assertNotNull(multiSelectListBox.getValue());
 
-        long[] selectedIds =  multiSelectListBox.getSelectedItems().stream()
-                                .mapToLong(CustomItem::getId)
-                                .toArray();
+        long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
+                .mapToLong(CustomItem::getId).toArray();
 
-        Assert.assertArrayEquals(new long[] {2L}, selectedIds);
+        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
     @Test
@@ -325,8 +314,8 @@ public class MultiSelectListBoxTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
         ListBox<CustomItem> multiSelectListBox = new ListBox<>();
         ListBoxListDataView<CustomItem> listDataView = multiSelectListBox

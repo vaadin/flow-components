@@ -13,8 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-
 /**
  * Alignment of the title relative to the axis values and more generically
  * horizontal alignment. Possible values are RIGHT("right"), CENTER("center") or

@@ -34,7 +34,7 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
 
     private WebElement getFirstDrilldownPoint(ChartElement chart) {
         return getElementFromShadowRoot(chart,
-            By.cssSelector(".highcharts-drilldown-point"));
+                By.cssSelector(".highcharts-drilldown-point"));
     }
 
     private WebElement getDrillUpButton(ChartElement chart) {
@@ -43,7 +43,7 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
 
     private void assertLogText(String text) {
         assertTrue(String.format("Couldn't find text '%s' from the log.", text),
-            logContainsText(text));
+                logContainsText(text));
     }
 
     private boolean logContainsText(String string) {

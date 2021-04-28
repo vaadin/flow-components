@@ -14,7 +14,9 @@ public class TemplateSupportIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-accordion") + "/accordionintemplate";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-accordion")
+                + "/accordionintemplate";
         getDriver().get(url);
     }
 
@@ -41,7 +43,7 @@ public class TemplateSupportIT extends AbstractParallelTest {
     }
 
     protected String getLastEvent() {
-        return $(APP_ROOT).waitForFirst().$(VerticalLayoutElement.class)
-                .last().$("span").last().getText();
+        return $(APP_ROOT).waitForFirst().$(VerticalLayoutElement.class).last()
+                .$("span").last().getText();
     }
 }

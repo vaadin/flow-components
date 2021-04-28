@@ -37,8 +37,8 @@ public class GridClearAfterDetachAndReattachIT extends AbstractComponentIT {
         waitUntil((driver) -> gridElement.getLastVisibleRowIndex() > 0);
         // Scroll to the end
         gridElement.scrollToRow(gridElement.getRowCount());
-        waitUntil((driver) -> gridElement.getLastVisibleRowIndex() ==
-            GRID_ROW_COUNT - 1);
+        waitUntil((driver) -> gridElement
+                .getLastVisibleRowIndex() == GRID_ROW_COUNT - 1);
 
         // Check that there are no exceptions/errors in the logs
         checkLogsForErrors();

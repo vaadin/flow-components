@@ -109,7 +109,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         grid.expandWithClick(1);
         waitUntil(tets -> grid.getNumberOfExpandedRows() == 99);
-        waitUntil(test -> !grid.isLoadingExpandedRows(),25);
+        waitUntil(test -> !grid.isLoadingExpandedRows(), 25);
 
         assertCellTexts(0, 0, cellTexts);
     }
@@ -140,12 +140,13 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         int firstVisibleIndex = grid.getFirstVisibleRowIndex();
         int lastVisibleIndex = grid.getLastVisibleRowIndex();
         for (int i = lastVisibleIndex; i >= firstVisibleIndex; i--) {
-                String cellText = grid.getCell(i, 0).getText();
-                if (cellText.contains("Dad")) {
-                        String sonText = grid.getCell(i + 1, 0).getText();
-                        Assert.assertThat(sonText + " is not a Son item", sonText, StringContains.containsString("Son"));
+            String cellText = grid.getCell(i, 0).getText();
+            if (cellText.contains("Dad")) {
+                String sonText = grid.getCell(i + 1, 0).getText();
+                Assert.assertThat(sonText + " is not a Son item", sonText,
+                        StringContains.containsString("Son"));
 
-                }
+            }
         }
     }
 

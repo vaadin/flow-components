@@ -52,7 +52,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
-        stringBoxAutoOpenDisabled = $(ComboBoxElement.class).id("lazy-strings-autoopendisabled");
+        stringBoxAutoOpenDisabled = $(ComboBoxElement.class)
+                .id("lazy-strings-autoopendisabled");
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
         filterBox = $(ComboBoxElement.class).id("custom-filter");
@@ -62,8 +63,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
         lazyCustomPageSize = $(ComboBoxElement.class)
                 .id("lazy-custom-page-size");
-        lazySizeRequestCountSpan =
-                findElement(By.id("callback-dataprovider-size-request-count"));
+        lazySizeRequestCountSpan = findElement(
+                By.id("callback-dataprovider-size-request-count"));
     }
 
     @Test
@@ -383,9 +384,10 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         filterBox.setFilter("Person");
 
-        Assert.assertEquals("None of the items should match the filter " +
-                        "and overlay is not displayed", 0,
-                $("vaadin-combo-box-overlay").all().size());
+        Assert.assertEquals(
+                "None of the items should match the filter "
+                        + "and overlay is not displayed",
+                0, $("vaadin-combo-box-overlay").all().size());
 
         filterBox.setFilter("10");
 
@@ -488,7 +490,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
         stringBoxAutoOpenDisabled.selectByText(item);
         assertMessage(item);
-        Assert.assertEquals(item, getSelectedItemLabel(stringBoxAutoOpenDisabled));
+        Assert.assertEquals(item,
+                getSelectedItemLabel(stringBoxAutoOpenDisabled));
         Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpen());
     }
 

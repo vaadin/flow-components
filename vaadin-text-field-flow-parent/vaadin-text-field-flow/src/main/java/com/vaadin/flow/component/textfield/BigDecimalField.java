@@ -446,7 +446,8 @@ public class BigDecimalField
 
     private char getDecimalSeparator() {
         String prop = getElement().getProperty("_decimalSeparator");
-        return prop == null || prop.isEmpty() ? '.' : getElement().getProperty("_decimalSeparator").charAt(0);
+        return prop == null || prop.isEmpty() ? '.'
+                : getElement().getProperty("_decimalSeparator").charAt(0);
     }
 
     @Override

@@ -53,16 +53,20 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
         emailField.setValue("another@domain.com");
         Assert.assertEquals("mail@domain.com", emailField.getValue());
-        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.", messageDiv.getText());
+        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.",
+                messageDiv.getText());
 
         emailField.setProperty("readonly", "");
         emailField.setValue("another@domain.com");
         Assert.assertEquals("mail@domain.com", emailField.getValue());
-        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.", messageDiv.getText());
+        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.",
+                messageDiv.getText());
 
         readOnlyButton.click();
         emailField.setValue("yetanother@domain.com");
-        Assert.assertEquals("Old value: 'mail@domain.com'. New value: 'yetanother@domain.com'.", messageDiv.getText());
+        Assert.assertEquals(
+                "Old value: 'mail@domain.com'. New value: 'yetanother@domain.com'.",
+                messageDiv.getText());
     }
 
     @Test
@@ -76,15 +80,19 @@ public class EmailFieldPageIT extends AbstractComponentIT {
         disableEnableButton.click();
 
         emailField.setValue("another@domain.com");
-        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.", messageDiv.getText());
+        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.",
+                messageDiv.getText());
 
         emailField.setProperty("disabled", "");
         emailField.setValue("another@domain.com");
-        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.", messageDiv.getText());
-        
+        Assert.assertEquals("Old value: ''. New value: 'mail@domain.com'.",
+                messageDiv.getText());
+
         disableEnableButton.click();
         emailField.setValue("yetanother@domain.com");
-        Assert.assertEquals("Old value: 'mail@domain.com'. New value: 'yetanother@domain.com'.", messageDiv.getText());
+        Assert.assertEquals(
+                "Old value: 'mail@domain.com'. New value: 'yetanother@domain.com'.",
+                messageDiv.getText());
     }
 
     @Test
@@ -103,13 +111,15 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-        EmailFieldElement field = $(EmailFieldElement.class).id("clear-email-field");
+        EmailFieldElement field = $(EmailFieldElement.class)
+                .id("clear-email-field");
 
         WebElement input = field.$("input").first();
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = getInShadowRoot(field,
+                By.cssSelector("[part~='clear-button']"));
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -118,7 +128,8 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertInvalidValue() {
-        EmailFieldElement field = $(EmailFieldElement.class).id("clear-email-field");
+        EmailFieldElement field = $(EmailFieldElement.class)
+                .id("clear-email-field");
 
         field.sendKeys("username");
         blur();
@@ -131,9 +142,11 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertValueChange() {
-        EmailFieldElement field = $(EmailFieldElement.class).id("clear-email-field");
+        EmailFieldElement field = $(EmailFieldElement.class)
+                .id("clear-email-field");
         field.setValue("account@domain.com");
         String message = $("div").id("clear-message").getText();
-        Assert.assertEquals("Old value: ''. New value: 'account@domain.com'.", message);
+        Assert.assertEquals("Old value: ''. New value: 'account@domain.com'.",
+                message);
     }
 }

@@ -41,7 +41,7 @@ public class CustomFieldView extends DemoView {
         PhoneNumberField() {
             setLabel("Phone number");
             setHelperText(
-                  "Please, provide your phone number with all the details");
+                    "Please, provide your phone number with all the details");
             countryCode.setItems("+358", "+46", "+34");
             countryCode.getStyle().set("width", "6em");
             countryCode.setPlaceholder("Code");

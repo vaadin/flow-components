@@ -16,7 +16,8 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") ;
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-crud");
         getDriver().get(url);
     }
 
@@ -28,7 +29,8 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void dataPresentInGrid() {
-        Assert.assertEquals(3, $(CrudElement.class).waitForFirst().getGrid().getRowCount());
+        Assert.assertEquals(3,
+                $(CrudElement.class).waitForFirst().getGrid().getRowCount());
     }
 
     @Test
@@ -41,14 +43,17 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void filterCanBeDisabled() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/nofilter";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-crud") + "/nofilter";
         getDriver().get(url);
-        Assert.assertTrue($(CrudElement.class).waitForFirst().getFilterFields().isEmpty());
+        Assert.assertTrue($(CrudElement.class).waitForFirst().getFilterFields()
+                .isEmpty());
     }
 
     @Test
     public void filterValueCorrect() {
-        List<TextFieldElement> fields = $(CrudElement.class).waitForFirst().getFilterFields();
+        List<TextFieldElement> fields = $(CrudElement.class).waitForFirst()
+                .getFilterFields();
         fields.get(0).setValue("Me");
         fields.get(2).setValue("You");
 
@@ -61,31 +66,38 @@ public class BasicUseIT extends AbstractParallelTest {
     @Test
     public void sortEnabledInGrid() {
         GridElement grid = $(GridElement.class).waitForFirst();
-        Assert.assertTrue(grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").exists());
+        Assert.assertTrue(grid.getHeaderCellContent(0, 0)
+                .$("vaadin-grid-sorter").exists());
     }
 
     @Test
     public void sortOrdersCorrect() {
         GridElement grid = $(GridElement.class).waitForFirst();
 
-        TestBenchElement firstNameSorter = grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").get(0);
-        TestBenchElement lasttNameSorter = grid.getHeaderCellContent(0, 2).$("vaadin-grid-sorter").get(0);
+        TestBenchElement firstNameSorter = grid.getHeaderCellContent(0, 0)
+                .$("vaadin-grid-sorter").get(0);
+        TestBenchElement lasttNameSorter = grid.getHeaderCellContent(0, 2)
+                .$("vaadin-grid-sorter").get(0);
 
         firstNameSorter.click(); // First name ascending
-        lasttNameSorter.click(); lasttNameSorter.click(); // Last name descending
+        lasttNameSorter.click();
+        lasttNameSorter.click(); // Last name descending
 
         ButtonElement showFilterButton = getTestButton("showFilter");
         showFilterButton.click();
 
-        Assert.assertEquals("{}{lastName=DESCENDING, firstName=ASCENDING}", getLastEvent());
+        Assert.assertEquals("{}{lastName=DESCENDING, firstName=ASCENDING}",
+                getLastEvent());
     }
 
     @Test
     public void i18n() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
-        Assert.assertEquals("New item", crud.getNewItemButton().get().getText().trim());
+        Assert.assertEquals("New item",
+                crud.getNewItemButton().get().getText().trim());
         getTestButton("updateI18n").click();
-        Assert.assertEquals("Eeyan titun", crud.getNewItemButton().get().getText().trim());
+        Assert.assertEquals("Eeyan titun",
+                crud.getNewItemButton().get().getText().trim());
         Assert.assertEquals("I18n updated", getLastEvent());
     }
 

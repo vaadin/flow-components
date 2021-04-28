@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.charts.Chart;
@@ -34,4 +33,3 @@ public class ChartBeforePrintEvent extends ComponentEvent<Chart> {
         super(source, fromClient);
     }
 }
-
