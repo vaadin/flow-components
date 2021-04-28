@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model.serializers;
  * #L%
  */
 
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.AbstractSeries;

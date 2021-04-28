@@ -15,19 +15,19 @@ public class MultiFileBufferTest {
     public void shouldBeAbleToReadFilesAfterReceiving() throws IOException {
         MultiFileBuffer fileBuffer = new MultiFileBuffer();
         TestData[] testData = { new TestData("upload1", "Upload data 1"),
-            new TestData("upload2", "Upload data 2"),
-            new TestData("upload3", "Upload data 3"), };
+                new TestData("upload2", "Upload data 2"),
+                new TestData("upload3", "Upload data 3"), };
         for (TestData data : testData) {
             final byte[] dataBytes = data.data
-                .getBytes(Charset.defaultCharset());
-            try (OutputStream os = fileBuffer
-                .receiveUpload(data.filename, "text")) {
+                    .getBytes(Charset.defaultCharset());
+            try (OutputStream os = fileBuffer.receiveUpload(data.filename,
+                    "text")) {
                 os.write(dataBytes);
             }
         }
         for (TestData data : testData) {
-            final String readData = IOUtils
-                .toString(fileBuffer.getInputStream(data.filename),
+            final String readData = IOUtils.toString(
+                    fileBuffer.getInputStream(data.filename),
                     Charset.defaultCharset());
             Assert.assertEquals(data.data, readData);
         }

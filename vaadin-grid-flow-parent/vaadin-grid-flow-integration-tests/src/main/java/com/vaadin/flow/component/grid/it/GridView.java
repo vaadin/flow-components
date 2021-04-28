@@ -647,7 +647,8 @@ public class GridView extends DemoView {
         Column<Person> idColumn = grid.addColumn(Person::getId).setHeader("ID")
                 .setFlexGrow(0).setWidth("75px");
 
-        grid.addColumn(Person::getFirstName).setHeader("Name").setResizable(true);
+        grid.addColumn(Person::getFirstName).setHeader("Name")
+                .setResizable(true);
 
         // Setting a column-key allows fetching the column later
         grid.addColumn(Person::getAge).setHeader("Age").setKey("age");
@@ -1673,7 +1674,8 @@ public class GridView extends DemoView {
         addCard("Styling", "Generating CSS Class Names for Cells", grid);
     }
 
-    private <T> Component[] withTreeGridToggleButtons(List<T> roots, TreeGrid<T> grid, Component... other) { //NOSONAR
+    private <T> Component[] withTreeGridToggleButtons(List<T> roots,
+            TreeGrid<T> grid, Component... other) { // NOSONAR
         @SuppressWarnings("unchecked")
         NativeButton toggleFirstItem = new NativeButton("Toggle first item",
                 evt -> {

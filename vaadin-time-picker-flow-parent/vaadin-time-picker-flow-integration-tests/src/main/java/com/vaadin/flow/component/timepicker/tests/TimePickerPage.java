@@ -117,11 +117,11 @@ public class TimePickerPage extends Div {
 
     private void createTimePickerFromRenderer() {
         ComponentRenderer<TimePicker, TimePickerPage> renderer = new ComponentRenderer<>(
-            () -> {
-                TimePicker timePicker = new TimePicker();
-                timePicker.setValue(LocalTime.now());
-                return timePicker;
-            });
+                () -> {
+                    TimePicker timePicker = new TimePicker();
+                    timePicker.setValue(LocalTime.now());
+                    return timePicker;
+                });
         renderer.render(getElement(), null);
     }
 
@@ -146,9 +146,9 @@ public class TimePickerPage extends Div {
         timePickerHelperComponent.setHelperComponent(span);
 
         NativeButton clearComponent = new NativeButton("Clear component helper",
-              e -> {
-                  timePickerHelperComponent.setHelperComponent(null);
-              });
+                e -> {
+                    timePickerHelperComponent.setHelperComponent(null);
+                });
         clearComponent.setId("button-clear-helper-component");
 
         add(timePickerHelperComponent, clearComponent);

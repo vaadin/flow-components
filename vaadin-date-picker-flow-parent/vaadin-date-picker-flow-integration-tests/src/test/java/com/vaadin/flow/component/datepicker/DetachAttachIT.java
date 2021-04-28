@@ -63,7 +63,8 @@ public class DetachAttachIT extends AbstractComponentIT {
     private void assertDatePickerIsValidOnTab() {
         WebElement datePickerElement = $(DatePickerElement.class).first();
         datePickerElement.sendKeys(Keys.TAB);
-        Assert.assertFalse("Date picker should be valid after Tab", Boolean.parseBoolean(datePickerElement.getAttribute("invalid")));
+        Assert.assertFalse("Date picker should be valid after Tab", Boolean
+                .parseBoolean(datePickerElement.getAttribute("invalid")));
     }
 
     @Test
@@ -83,7 +84,8 @@ public class DetachAttachIT extends AbstractComponentIT {
     }
 
     private String getInputValue() {
-        return $(DatePickerElement.class).first().$("vaadin-date-picker-text-field").first()
+        return $(DatePickerElement.class).first()
+                .$("vaadin-date-picker-text-field").first()
                 .getPropertyString("value");
     }
 

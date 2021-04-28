@@ -28,9 +28,11 @@ public class NullValueChangePage extends Div {
 
     public static class Person implements Serializable {
         private String name;
+
         public Person(String firstName) {
             this.name = firstName;
         }
+
         @Override
         public String toString() {
             return name;
@@ -53,4 +55,3 @@ public class NullValueChangePage extends Div {
 
     }
 }
-

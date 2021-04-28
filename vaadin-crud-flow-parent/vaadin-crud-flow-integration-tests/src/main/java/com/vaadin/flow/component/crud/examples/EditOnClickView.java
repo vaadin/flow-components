@@ -14,7 +14,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
 public class EditOnClickView extends VerticalLayout {
-    public static String CLICKTOEDIT_BUTTON_ID =  "setClickToEdit";
+    public static String CLICKTOEDIT_BUTTON_ID = "setClickToEdit";
 
     public EditOnClickView() {
         final CrudGrid<Person> grid = new CrudGrid<>(Person.class, false);

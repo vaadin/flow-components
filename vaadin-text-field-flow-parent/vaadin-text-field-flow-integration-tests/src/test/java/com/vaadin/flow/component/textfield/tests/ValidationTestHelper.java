@@ -14,8 +14,8 @@ class ValidationTestHelper {
     }
 
     public static <E extends TestBenchElement & HasStringValueProperty> void testValidation(
-        TestBenchCommandExecutor commandExecutor, SearchContext searchContext,
-        E field) {
+            TestBenchCommandExecutor commandExecutor,
+            SearchContext searchContext, E field) {
         final boolean valid = true;
         assertValidState(searchContext, valid);
 
@@ -41,11 +41,11 @@ class ValidationTestHelper {
 
     private static void assertValidState(SearchContext context, boolean valid) {
         final WebElement checkIsInvalid = context
-            .findElement(By.id("check-is-invalid"));
+                .findElement(By.id("check-is-invalid"));
         checkIsInvalid.click();
 
         final String expectedValue = !valid ? "invalid" : "valid";
         Assert.assertEquals(expectedValue,
-            context.findElement(By.id("is-invalid")).getText());
+                context.findElement(By.id("is-invalid")).getText());
     }
 }

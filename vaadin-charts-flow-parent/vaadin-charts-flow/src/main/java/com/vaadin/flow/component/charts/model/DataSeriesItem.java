@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.Instant;

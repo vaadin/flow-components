@@ -25,7 +25,7 @@ import com.vaadin.flow.data.provider.SortOrder;
  * Sorting information for {@link Grid}.
  *
  * @param <T>
- *         the grid type
+ *            the grid type
  */
 public class GridSortOrder<T> extends SortOrder<Column<T>> {
 
@@ -33,9 +33,9 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
      * Construct sorting information for usage in a {@link Grid}.
      *
      * @param column
-     *         the column to be sorted
+     *            the column to be sorted
      * @param direction
-     *         sorting direction
+     *            sorting direction
      */
     public GridSortOrder(Column<T> column, SortDirection direction) {
         super(column, direction);
@@ -56,9 +56,9 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
      * direction.
      *
      * @param by
-     *         the column to sort by
+     *            the column to sort by
      * @param <T>
-     *         the grid type
+     *            the grid type
      * @return the grid sort builder
      */
     public static <T> GridSortOrderBuilder<T> asc(Column<T> by) {
@@ -70,9 +70,9 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
      * direction.
      *
      * @param by
-     *         the column to sort by
+     *            the column to sort by
      * @param <T>
-     *         the grid type
+     *            the grid type
      * @return the grid sort builder
      */
     public static <T> GridSortOrderBuilder<T> desc(Column<T> by) {

@@ -61,7 +61,7 @@ public class ListBoxIT extends ComponentDemoTest {
         messageLabel = layout.findElement(By.tagName("label"));
 
         final List<String> texts = listBox.getOptions();
-        Assert.assertEquals(Arrays.asList(BREAD, BUTTER, MILK ),texts);
+        Assert.assertEquals(Arrays.asList(BREAD, BUTTER, MILK), texts);
 
         listBox.selectByText(texts.get(1));
 
@@ -82,14 +82,13 @@ public class ListBoxIT extends ComponentDemoTest {
             boolean fromClient) {
         Assert.assertThat(
                 "The label should show the old and new values of the ListBox "
-                        + "after selection changes", messageLabel.getText(),
-                containsString(
+                        + "after selection changes",
+                messageLabel.getText(), containsString(
                         String.format("from %s to %s", oldValue, newValue)));
         Assert.assertThat(
-                "The label should indicate that the event is from " + (
-                        fromClient ?
-                                "client" :
-                                "server"), messageLabel.getText(),
+                "The label should indicate that the event is from "
+                        + (fromClient ? "client" : "server"),
+                messageLabel.getText(),
                 containsString("from client: " + fromClient));
     }
 
@@ -98,9 +97,8 @@ public class ListBoxIT extends ComponentDemoTest {
         init("list-box-with-components-between");
         List<WebElement> children = listBox.findElements(By.xpath("child::*"));
         Object[] texts = children.stream().map(WebElement::getText).toArray();
-        Assert.assertArrayEquals(
-                new Object[] { "Before bread", BREAD, BUTTER, "After butter",
-                        MILK, "After all the items" }, texts);
+        Assert.assertArrayEquals(new Object[] { "Before bread", BREAD, BUTTER,
+                "After butter", MILK, "After all the items" }, texts);
     }
 
     @Test

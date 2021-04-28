@@ -23,7 +23,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 /**
  * Options for drill down, the concept of inspecting increasingly high
  * resolution data through clicking on chart items like columns or pie slices.

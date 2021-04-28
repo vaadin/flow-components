@@ -11,15 +11,15 @@ class TextFieldTestPageUtil {
     }
 
     static <C extends Component & HasValidation> void addInvalidCheck(
-        HasComponents parent, C field) {
+            HasComponents parent, C field) {
         field.setId("invalid-test-field");
         Div isValid = new Div();
         isValid.setId("is-invalid");
         NativeButton checkIsValid = new NativeButton(
-            "Check if current value of invalid-test-field is invalid");
+                "Check if current value of invalid-test-field is invalid");
         checkIsValid.setId("check-is-invalid");
-        checkIsValid.addClickListener(
-            event -> isValid.setText(field.isInvalid() ? "invalid" : "valid"));
+        checkIsValid.addClickListener(event -> isValid
+                .setText(field.isInvalid() ? "invalid" : "valid"));
         parent.add(field, checkIsValid, isValid);
     }
 }

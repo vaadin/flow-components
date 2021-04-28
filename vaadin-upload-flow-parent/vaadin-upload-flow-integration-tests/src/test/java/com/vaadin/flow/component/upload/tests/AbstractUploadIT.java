@@ -31,7 +31,7 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
     }
 
     void fillPathToUploadInput(WebElement input, String... tempFileNames)
-        throws Exception {
+            throws Exception {
         // create a valid path in upload input element. Instead of selecting a
         // file by some file browsing dialog, we use the local path directly.
         setLocalFileDetector(input);
@@ -48,11 +48,11 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
         }
         if (element instanceof RemoteWebElement) {
             ((RemoteWebElement) element)
-                .setFileDetector(new LocalFileDetector());
+                    .setFileDetector(new LocalFileDetector());
         } else {
             throw new IllegalArgumentException(
-                "Expected argument of type RemoteWebElement, received "
-                    + element.getClass().getName());
+                    "Expected argument of type RemoteWebElement, received "
+                            + element.getClass().getName());
         }
     }
 

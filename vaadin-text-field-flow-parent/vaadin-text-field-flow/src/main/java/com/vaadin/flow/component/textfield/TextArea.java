@@ -192,8 +192,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     }
 
     private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(), getValueChangeTimeout(),
-                getSynchronizationRegistration());
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
     @Override
@@ -245,8 +245,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     }
 
     /**
-     * Specifies if the field value gets automatically selected when
-     * the field gains focus.
+     * Specifies if the field value gets automatically selected when the field
+     * gains focus.
      *
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
@@ -260,8 +260,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * selected when the field gains focus, <code>false</code> otherwise.
      *
      * @param autoselect
-     *            <code>true</code> to set auto select on,
-     *            <code>false</code> otherwise
+     *            <code>true</code> to set auto select on, <code>false</code>
+     *            otherwise
      */
     @Override
     public void setAutoselect(boolean autoselect) {
@@ -269,8 +269,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     }
 
     /**
-     * Gets the visibility state of the button which clears the text
-     * area.
+     * Gets the visibility state of the button which clears the text area.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
