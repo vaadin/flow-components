@@ -48,11 +48,13 @@ public class MainView extends HorizontalLayout {
 
         final AccordionPanel redPanel = accordion.add("Red", redDiv);
         final AccordionPanel greenPanel = accordion.add("Green", greenDiv);
-        final AccordionPanel disabledPanel = accordion.add("Disabled", new Span("Disabled panel"));
+        final AccordionPanel disabledPanel = accordion.add("Disabled",
+                new Span("Disabled panel"));
         disabledPanel.setEnabled(false);
         final AccordionPanel bluePanel = accordion.add("Blue", blueDiv);
 
-        final VerticalLayout accordionEvents;accordionEvents = new VerticalLayout();
+        final VerticalLayout accordionEvents;
+        accordionEvents = new VerticalLayout();
         accordionEvents.setId(ACCORDION_EVENTS);
 
         final VerticalLayout panelEvents = new VerticalLayout();
@@ -62,16 +64,16 @@ public class MainView extends HorizontalLayout {
             final Optional<AccordionPanel> openedPanel = e.getOpenedPanel();
 
             final String text = openedPanel
-                    .map(accordionPanel -> accordionPanel.getSummaryText() + " opened")
+                    .map(accordionPanel -> accordionPanel.getSummaryText()
+                            + " opened")
                     .orElse("Accordion closed");
             accordionEvents.add(new Span(text));
         });
 
-        accordion.getChildren()
-                .map(AccordionPanel.class::cast)
+        accordion.getChildren().map(AccordionPanel.class::cast)
                 .forEach(panel -> panel.addOpenedChangeListener(event -> {
-                    final String text = "Panel " + panel.getSummaryText()
-                            + " " + (event.isOpened() ? "opened" : "closed");
+                    final String text = "Panel " + panel.getSummaryText() + " "
+                            + (event.isOpened() ? "opened" : "closed");
                     panelEvents.add(new Span(text));
                 }));
 
@@ -83,10 +85,12 @@ public class MainView extends HorizontalLayout {
         final Button red = new Button("Red", e -> accordion.open(redPanel));
         red.setId("red");
 
-        final Button green = new Button("Green", e -> accordion.open(greenPanel));
+        final Button green = new Button("Green",
+                e -> accordion.open(greenPanel));
         green.setId("green");
 
-        final Button disabled = new Button("Disabled", e -> accordion.open(disabledPanel));
+        final Button disabled = new Button("Disabled",
+                e -> accordion.open(disabledPanel));
         disabled.setId("disabled");
 
         final Button blue = new Button("Blue", e -> accordion.open(bluePanel));
@@ -97,18 +101,20 @@ public class MainView extends HorizontalLayout {
         toggleDisabled.setId("toggle-disabled");
 
         final Map<Button, Integer> indexButtons = IntStream.rangeClosed(0, 3)
-                .boxed()
-                .collect(toMap(e -> {
+                .boxed().collect(toMap(e -> {
                     final Button btn = new Button(e.toString());
                     btn.setId(e.toString());
                     btn.addClickListener(clickEvent -> accordion.open(e));
                     return btn;
-                }, Function.identity(), Integer::compareTo, LinkedHashMap::new));
+                }, Function.identity(), Integer::compareTo,
+                        LinkedHashMap::new));
 
-        controls.add(red, green, disabled, blue, new Hr(), close, toggleDisabled, new Hr());
+        controls.add(red, green, disabled, blue, new Hr(), close,
+                toggleDisabled, new Hr());
         controls.add(indexButtons.keySet().toArray(new Component[0]));
 
-        final Button removeRed = new Button("Remove red", e -> accordion.remove(redPanel));
+        final Button removeRed = new Button("Remove red",
+                e -> accordion.remove(redPanel));
         removeRed.setId("removeRed");
 
         final Button removeBlueByContent = new Button("Remove blue by content",

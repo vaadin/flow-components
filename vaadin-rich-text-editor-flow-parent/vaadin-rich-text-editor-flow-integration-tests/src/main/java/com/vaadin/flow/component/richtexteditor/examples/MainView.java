@@ -22,9 +22,7 @@ import java.util.stream.Collectors;
 @Route(value = "vaadin-rich-text-editor")
 public class MainView extends VerticalLayout {
 
-    private Div valuePanel,
-                htmlValuePanel,
-                i18nPanel;
+    private Div valuePanel, htmlValuePanel, i18nPanel;
 
     public MainView() {
         valuePanel = new Div();
@@ -40,7 +38,8 @@ public class MainView extends VerticalLayout {
 
         Button setValueButton = new Button("Set value");
         setValueButton.setId("setValue");
-        setValueButton.addClickListener(event -> rte.setValue("[{\"insert\":\"Foo\"}]"));
+        setValueButton.addClickListener(
+                event -> rte.setValue("[{\"insert\":\"Foo\"}]"));
 
         Button getValueButton = new Button("Get value");
         getValueButton.setId("getValue");
@@ -73,7 +72,8 @@ public class MainView extends VerticalLayout {
             }
         });
 
-        add(rte, setValueButton, getValueButton, getHtmlValueButton, setI18n, getI18n, valuePanel, htmlValuePanel, i18nPanel);
+        add(rte, setValueButton, getValueButton, getHtmlValueButton, setI18n,
+                getI18n, valuePanel, htmlValuePanel, i18nPanel);
 
         createRichTextEditorWithBinder();
 
@@ -82,22 +82,23 @@ public class MainView extends VerticalLayout {
         createRichTextEditorWithHtmlBinder();
     }
 
-    private RichTextEditor.RichTextEditorI18n createCustomI18n () {
+    private RichTextEditor.RichTextEditorI18n createCustomI18n() {
         RichTextEditor.RichTextEditorI18n i18n = new RichTextEditor.RichTextEditorI18n()
-                .setUndo("1").setRedo("2").setBold("3")
-                .setItalic("4").setUnderline("5").setStrike("6")
-                .setH1("7").setH2("8").setH3("9")
-                .setSubscript("10").setSuperscript("11").setListOrdered("12")
-                .setListBullet("13").setAlignLeft("14").setAlignCenter("15")
-                .setAlignRight("16").setImage("17").setLink("18").setBlockquote("19")
-                .setCodeBlock("20").setClean("21");
+                .setUndo("1").setRedo("2").setBold("3").setItalic("4")
+                .setUnderline("5").setStrike("6").setH1("7").setH2("8")
+                .setH3("9").setSubscript("10").setSuperscript("11")
+                .setListOrdered("12").setListBullet("13").setAlignLeft("14")
+                .setAlignCenter("15").setAlignRight("16").setImage("17")
+                .setLink("18").setBlockquote("19").setCodeBlock("20")
+                .setClean("21");
         return i18n;
     }
 
     private void createRichTextEditorInATemplate() {
         RichTextEditorInATemplate richTextEditorInATemplate = new RichTextEditorInATemplate();
         richTextEditorInATemplate.setId("template");
-        RichTextEditor rteTemplate = richTextEditorInATemplate.getRichTextEditor();
+        RichTextEditor rteTemplate = richTextEditorInATemplate
+                .getRichTextEditor();
 
         Div valuePanel = new Div();
         valuePanel.setId("template-value-panel");
@@ -144,7 +145,8 @@ public class MainView extends VerticalLayout {
         SerializablePredicate<String> deltaValuePredicate = value -> !rteWithBinder
                 .getValue().trim().isEmpty();
 
-        Binding<Entry, String> deltaValueBinding = binder.forField(rteWithBinder)
+        Binding<Entry, String> deltaValueBinding = binder
+                .forField(rteWithBinder)
                 .withValidator(deltaValuePredicate,
                         "Delta value should contain something")
                 .bind(Entry::getDeltaValue, Entry::setDeltaValue);
@@ -202,7 +204,8 @@ public class MainView extends VerticalLayout {
         getValueButton.setId("get-html-binder-rte-value");
         getValueButton.addClickListener(event -> {
             String value = rte.asHtml().getValue();
-            String webcomponentValue = rte.getElement().getProperty("htmlValue");
+            String webcomponentValue = rte.getElement()
+                    .getProperty("htmlValue");
             valuePanel.setText(value + ' ' + webcomponentValue);
         });
 
@@ -212,12 +215,12 @@ public class MainView extends VerticalLayout {
         save.getStyle().set("marginRight", "10px");
 
         SerializablePredicate<String> htmlValuePredicate = value -> {
-            String htmlValue = rte.asHtml()
-                .getValue();
+            String htmlValue = rte.asHtml().getValue();
             return htmlValue != null && !htmlValue.trim().isEmpty();
         };
 
-        Binding<HtmlEntry, String> asHtmlValueBinding = binder.forField(rte.asHtml())
+        Binding<HtmlEntry, String> asHtmlValueBinding = binder
+                .forField(rte.asHtml())
                 .withValidator(htmlValuePredicate,
                         "html value should contain something")
                 .bind(HtmlEntry::getHtmlValue, HtmlEntry::setHtmlValue);
@@ -274,9 +277,7 @@ public class MainView extends VerticalLayout {
 
         @Override
         public String toString() {
-            return "Contact{" +
-                    "deltaValue='" + deltaValue + '\'' +
-                    '}';
+            return "Contact{" + "deltaValue='" + deltaValue + '\'' + '}';
         }
     }
 
@@ -297,9 +298,7 @@ public class MainView extends VerticalLayout {
 
         @Override
         public String toString() {
-            return "Contact{" +
-                    "htmlValue='" + htmlValue + '\'' +
-                    '}';
+            return "Contact{" + "htmlValue='" + htmlValue + '\'' + '}';
         }
     }
 }

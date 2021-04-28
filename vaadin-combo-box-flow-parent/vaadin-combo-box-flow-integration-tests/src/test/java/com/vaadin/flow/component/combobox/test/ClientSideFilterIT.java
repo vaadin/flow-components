@@ -125,7 +125,8 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         waitForItems(comboBox, items -> items.size() == 19);
 
-        Assert.assertEquals("Expected no item count change events on client filter change",
+        Assert.assertEquals(
+                "Expected no item count change events on client filter change",
                 100, getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
     }
 

@@ -40,7 +40,8 @@ public class EditorPositionView extends VerticalLayout {
         editorPosition.setId("editorPositionLabel");
 
         final Button getEditorPosition = new Button("Get Editor Position",
-                event -> editorPosition.setText(crud.getElement().getProperty("editorPosition")));
+                event -> editorPosition.setText(
+                        crud.getElement().getProperty("editorPosition")));
         getEditorPosition.setId("getEditorPosition");
 
         setHeight("100%");

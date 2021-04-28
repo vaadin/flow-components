@@ -83,8 +83,8 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        CustomIdentityItemDataProvider customIdentityItemDataProvider =
-                new CustomIdentityItemDataProvider(items);
+        CustomIdentityItemDataProvider customIdentityItemDataProvider = new CustomIdentityItemDataProvider(
+                items);
 
         ListBox<Item> component = new ListBox<>();
         component.setItems(customIdentityItemDataProvider);
@@ -122,8 +122,7 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
     public void setInMemoryDataProvider_convertsToGenericDataProvider() {
         ListBox<String> checkboxGroup = Mockito.spy(new ListBox<>());
 
-        InMemoryDataProvider<String> inMemoryDataProvider =
-                                            new InMemoryDataProvider<String>() {
+        InMemoryDataProvider<String> inMemoryDataProvider = new InMemoryDataProvider<String>() {
 
             private SerializablePredicate<String> filter;
 

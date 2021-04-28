@@ -40,8 +40,7 @@ public class SortingPage extends Div {
 
         NativeButton btRm = new NativeButton("detach", evt -> remove(grid));
         btRm.setId("btn-detach");
-        NativeButton btattach = new NativeButton("attach",
-                evt -> add(grid));
+        NativeButton btattach = new NativeButton("attach", evt -> add(grid));
         btattach.setId("btn-attach");
         add(btRm, btattach, grid);
 
@@ -82,11 +81,14 @@ public class SortingPage extends Div {
                 .thenAsc(nameColumn).build();
         grid.sort(sortByName);
 
-        NativeButton button = new NativeButton(sortBtnId.equals("sort-hidden-by-age") ? "Sort hidden by age" : "Sort by age", e -> {
-            List<GridSortOrder<Person>> sortByAge = new GridSortOrderBuilder<Person>()
-                    .thenAsc(ageColumn).build();
-            grid.sort(sortByAge);
-        });
+        NativeButton button = new NativeButton(
+                sortBtnId.equals("sort-hidden-by-age") ? "Sort hidden by age"
+                        : "Sort by age",
+                e -> {
+                    List<GridSortOrder<Person>> sortByAge = new GridSortOrderBuilder<Person>()
+                            .thenAsc(ageColumn).build();
+                    grid.sort(sortByAge);
+                });
         button.setId(sortBtnId);
 
         add(button);
@@ -94,4 +96,3 @@ public class SortingPage extends Div {
         return grid;
     }
 }
-

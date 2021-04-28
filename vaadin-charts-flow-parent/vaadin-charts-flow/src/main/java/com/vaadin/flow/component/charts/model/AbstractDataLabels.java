@@ -31,24 +31,24 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      */
     public abstract void setClassName(String className);
 
-    /**	
-     * @see #setBackgroundColor(Color)	
-     */	
-    public abstract Color getBackgroundColor();	
+    /**
+     * @see #setBackgroundColor(Color)
+     */
+    public abstract Color getBackgroundColor();
 
-    /**	
-     * The background color or gradient for the data label.	
-     */	
-    public abstract void setBackgroundColor(Color backgroundColor);	
+    /**
+     * The background color or gradient for the data label.
+     */
+    public abstract void setBackgroundColor(Color backgroundColor);
 
-    /**	
-     * @see #setBorderColor(Color)	
-     */	
-    public abstract Color getBorderColor();	
+    /**
+     * @see #setBorderColor(Color)
+     */
+    public abstract Color getBorderColor();
 
-    /**	
-     * The border color for the data label.	
-     */	
+    /**
+     * The border color for the data label.
+     */
     public abstract void setBorderColor(Color borderColor);
 
     /**
@@ -61,16 +61,16 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      */
     public abstract void setBorderRadius(Number borderRadius);
 
-    /**	
-     * @see #setColor(Color)	
-     */	
-    public abstract Color getColor();	
+    /**
+     * @see #setColor(Color)
+     */
+    public abstract Color getColor();
 
-    /**	
-     * The text color for the data labels.	
-     */	
+    /**
+     * The text color for the data labels.
+     */
     public abstract void setColor(Color color);
-	
+
     /**
      * @see #setBorderWidth(Number)
      */
@@ -88,7 +88,8 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     /**
      * Whether to hide data labels that are outside the plot area. By default,
-     * the data label is moved inside the plot area according to the overflow option.
+     * the data label is moved inside the plot area according to the overflow
+     * option.
      */
     public abstract void setCrop(Boolean crop);
 
@@ -119,8 +120,8 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public abstract String getFormat();
 
     /**
-     * A format string for the data label. Available variables are the same
-     * as for <code>formatter</code>.
+     * A format string for the data label. Available variables are the same as
+     * for <code>formatter</code>.
      */
     public abstract void setFormat(String format);
 
@@ -130,9 +131,9 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public abstract String getFormatter();
 
     /**
-     * Callback JavaScript function to format the data label.
-     * Note that if a <code>format</code> is defined, the format
-     * takes precedence and the formatter is ignored.
+     * Callback JavaScript function to format the data label. Note that if a
+     * <code>format</code> is defined, the format takes precedence and the
+     * formatter is ignored.
      */
     public abstract void setFormatter(String _fn_formatter);
 
@@ -204,14 +205,14 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      */
     public abstract void setShape(Shape shape);
 
-    /**	
-     * @see #setStyle(Style)	
-     */	
-    public abstract Style getStyle();	
+    /**
+     * @see #setStyle(Style)
+     */
+    public abstract Style getStyle();
 
-    /**	
-     * Styles for the label.	
-     */	
+    /**
+     * Styles for the label.
+     */
     public abstract void setStyle(Style style);
 
     /**
@@ -233,7 +234,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * The vertical alignment of a data label.
      */
     public abstract void setVerticalAlign(VerticalAlign verticalAlign);
-
 
     /**
      * @see #setZIndex(Number)

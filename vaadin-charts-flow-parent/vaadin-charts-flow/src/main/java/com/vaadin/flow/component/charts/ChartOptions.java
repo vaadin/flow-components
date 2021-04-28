@@ -121,8 +121,8 @@ public class ChartOptions extends AbstractConfigurationObject {
     }
 
     /**
-     * Returns a ChartOptions instance for the current UI. If a ChartOptions extension
-     * has not yet been added, a new one is created and added.
+     * Returns a ChartOptions instance for the current UI. If a ChartOptions
+     * extension has not yet been added, a new one is created and added.
      *
      * @return a ChartOptions instance connected to the currently active UI
      */

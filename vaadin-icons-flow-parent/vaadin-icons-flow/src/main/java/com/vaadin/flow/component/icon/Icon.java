@@ -54,12 +54,13 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *            the icon to display
      */
     public Icon(VaadinIcon icon) {
-        this(ICON_COLLECTION_NAME, icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
+        this(ICON_COLLECTION_NAME,
+                icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
     }
 
-	/**
-     * Creates an Icon component that displays the given icon from
-     * vaadin-icons collection.
+    /**
+     * Creates an Icon component that displays the given icon from vaadin-icons
+     * collection.
      *
      * @param icon
      *            the icon name
@@ -67,7 +68,7 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
     public Icon(String icon) {
         this(ICON_COLLECTION_NAME, icon);
     }
-	
+
     /**
      * Creates an Icon component that displays the given {@code icon} from the
      * given {@code collection}.
@@ -76,8 +77,9 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *            the icon collection
      * @param icon
      *            the icon name
-     * @deprecated Use either {@link #Icon(String)} or 
-     * {@link IronIcon#IronIcon(String,String) IronIcon(String,String)}
+     * @deprecated Use either {@link #Icon(String)} or
+     *             {@link IronIcon#IronIcon(String,String)
+     *             IronIcon(String,String)}
      */
     @Deprecated
     public Icon(String collection, String icon) {

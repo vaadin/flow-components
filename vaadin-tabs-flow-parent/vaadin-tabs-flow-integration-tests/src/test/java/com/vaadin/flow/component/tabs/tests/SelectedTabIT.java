@@ -40,7 +40,8 @@ public class SelectedTabIT extends AbstractComponentIT {
         findElement(By.id("second")).click();
         findElement(By.id("show-selection")).click();
 
-        List<WebElement> firstSelections = findElements(By.className("tab-first"));
+        List<WebElement> firstSelections = findElements(
+                By.className("tab-first"));
         WebElement firstSelection = firstSelections
                 .get(firstSelections.size() - 1);
         Assert.assertEquals("The first tab is selected: false",

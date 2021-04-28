@@ -28,7 +28,8 @@ public class ConfirmDialogElement extends TestBenchElement {
 
     @Override
     public SearchContext getContext() {
-        return getPropertyElement("$", "dialog", "$", "overlay", "$", "content");
+        return getPropertyElement("$", "dialog", "$", "overlay", "$",
+                "content");
     }
 
     private TestBenchElement getButton(String buttonId, String slotName) {

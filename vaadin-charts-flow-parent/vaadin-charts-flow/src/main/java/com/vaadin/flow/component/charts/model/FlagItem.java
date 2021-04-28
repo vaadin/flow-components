@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import java.time.Instant;
 import java.util.Date;
 
