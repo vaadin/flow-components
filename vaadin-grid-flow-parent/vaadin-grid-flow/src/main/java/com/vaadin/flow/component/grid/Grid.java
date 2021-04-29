@@ -3613,11 +3613,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void recalculateColumnWidths() {
         // Defer column width recalculation to occur after the data was
-        // refreshed
-        // The data communicator will insert the JS call to refresh the client
-        // side
-        // grid in the beforeClientResponse hook, we need to match this here so
-        // that the column width recalculation runs after the data was updated.
+        // refreshed. The data communicator will insert the JS call to refresh
+        // the client side grid in the beforeClientResponse hook, we need to
+        // match this here so that the column width recalculation runs after the
+        // data was updated.
         getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
                 this,
                 ctx -> getElement().callJsFunction("recalculateColumnWidths")));
