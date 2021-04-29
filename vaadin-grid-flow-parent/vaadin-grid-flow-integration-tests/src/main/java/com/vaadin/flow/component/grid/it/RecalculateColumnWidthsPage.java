@@ -31,18 +31,14 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         ThreeString ts1 = new ThreeString("111", "222", "333");
         ThreeString ts2 = new ThreeString("444", "555", "667");
 
-        Collection<ThreeString> itemList = new ArrayList<>();
-        itemList.add(ts1);
-        itemList.add(ts2);
-
         Grid<ThreeString> grid1 = new Grid<>();
         grid1.setId("grid");
         grid1.setHeightByRows(true);
-        grid1.setItems(itemList);
+        grid1.setItems(ts1, ts2);
 
-        grid1.addColumn(ThreeString::getA).setAutoWidth(true);
-        grid1.addColumn(ThreeString::getB).setAutoWidth(true);
-        grid1.addColumn(ThreeString::getC).setAutoWidth(true);
+        grid1.addColumn(item -> item.a).setAutoWidth(true);
+        grid1.addColumn(item -> item.b).setAutoWidth(true);
+        grid1.addColumn(item -> item.c).setAutoWidth(true);
 
         add(grid1);
 
@@ -61,8 +57,9 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         button.setId("change-data-button");
         button.addClickListener(event -> {
 
-            ts2.setB(
-                    "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
+
+            ts2.b = 
+                    "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.";
             grid1.getDataProvider().refreshAll();
             grid1.recalculateColumnWidths();
         });
@@ -78,30 +75,6 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         public ThreeString(String a, String b, String c) {
             this.a = a;
             this.b = b;
-            this.c = c;
-        }
-
-        public String getA() {
-            return a;
-        }
-
-        public void setA(String a) {
-            this.a = a;
-        }
-
-        public String getB() {
-            return b;
-        }
-
-        public void setB(String b) {
-            this.b = b;
-        }
-
-        public String getC() {
-            return c;
-        }
-
-        public void setC(String c) {
             this.c = c;
         }
     }
