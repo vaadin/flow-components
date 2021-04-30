@@ -17,6 +17,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
+
 /**
  * Possible values: null, ON, BETWEEN.
  * 

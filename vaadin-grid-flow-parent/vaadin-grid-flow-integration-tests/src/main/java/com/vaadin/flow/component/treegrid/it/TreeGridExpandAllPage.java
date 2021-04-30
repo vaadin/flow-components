@@ -64,38 +64,35 @@ public class TreeGridExpandAllPage extends Div {
         treeGrid = new TreeGrid<>();
         treeGrid.setDataProvider(inMemoryDataProvider);
         treeGrid.setWidth("100%");
-        treeGrid.addHierarchyColumn(String::toString).setHeader("String")
-                .setAutoWidth(true);
-        treeGrid.addColumn((i) -> "Second Column").setHeader("Second Column")
-                .setAutoWidth(true);
+        treeGrid.addHierarchyColumn(String::toString).setHeader("String").setAutoWidth(true);
+        treeGrid.addColumn((i) -> "Second Column").setHeader("Second Column").setAutoWidth(true);
         treeGrid.setId("second-grid");
         treeGrid.addCollapseListener(e -> treeGrid.recalculateColumnWidths());
         treeGrid.addExpandListener(e -> treeGrid.recalculateColumnWidths());
 
         add(treeGrid);
     }
-
     private void initializeDataProvider() {
         TreeData<String> data = new TreeData<>();
 
         final Map<String, String> parentPathMap = new HashMap<>();
 
-        addRootItems("Granddad", 3, data, parentPathMap)
-                .forEach(granddad -> addItems("Dad is very long and large", 3,
-                        granddad, data, parentPathMap)
-                                .forEach(dad -> addItems("Son", 300, dad, data,
-                                        parentPathMap)));
+        addRootItems("Granddad", 3, data, parentPathMap).forEach(
+                granddad -> addItems("Dad is very long and large", 3, granddad, data, parentPathMap)
+                        .forEach(dad -> addItems("Son", 300, dad, data,
+                                parentPathMap)));
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
     }
 
     static List<String> addRootItems(String name, int numberOfItems,
-            TreeData<String> data, Map<String, String> parentPathMap) {
+                                     TreeData<String> data, Map<String, String> parentPathMap) {
         return addItems(name, numberOfItems, null, data, parentPathMap);
     }
 
-    static List<String> addItems(String name, int numberOfItems, String parent,
-            TreeData<String> data, Map<String, String> parentPathMap) {
+    static List<String> addItems(String name, int numberOfItems,
+                                 String parent, TreeData<String> data,
+                                 Map<String, String> parentPathMap) {
         List<String> items = new ArrayList<>();
         IntStream.range(0, numberOfItems).forEach(index -> {
             String parentPath = parentPathMap.get(parent);

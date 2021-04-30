@@ -159,11 +159,10 @@ public class RadioButtonGroupTest {
     @Test
     public void changeItems_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
-        radioButtonGroup.setItems("Foo", "Bar");
+        radioButtonGroup.setItems("Foo","Bar");
 
         AtomicReference<String> capture = new AtomicReference<>();
-        radioButtonGroup
-                .addValueChangeListener(event -> capture.set(event.getValue()));
+        radioButtonGroup.addValueChangeListener(event -> capture.set(event.getValue()));
 
         radioButtonGroup.setValue("Foo");
 
@@ -190,17 +189,12 @@ public class RadioButtonGroupTest {
         item2.setName("bar");
         group.getDataProvider().refreshAll();
 
-        List<Component> components = group.getChildren()
-                .collect(Collectors.toList());
-        RadioButton<ItemHelper> radioZoo = (RadioButton<ItemHelper>) components
-                .get(0);
-        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
-                .get(1);
+        List<Component> components = group.getChildren().collect(Collectors.toList());
+        RadioButton<ItemHelper> radioZoo = (RadioButton<ItemHelper>) components.get(0);
+        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components.get(1);
 
-        Assert.assertEquals(String.format(OUTER_HTML, "zoo"),
-                radioZoo.getElement().getOuterHTML());
-        Assert.assertEquals(String.format(OUTER_HTML, "bar"),
-                radioBar.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "zoo"), radioZoo.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
     }
 
     @Test
@@ -216,17 +210,12 @@ public class RadioButtonGroupTest {
         item2.setName("bar");
         group.getDataProvider().refreshItem(item2);
 
-        List<Component> components = group.getChildren()
-                .collect(Collectors.toList());
-        RadioButton<ItemHelper> radioFoo = (RadioButton<ItemHelper>) components
-                .get(0);
-        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
-                .get(1);
+        List<Component> components = group.getChildren().collect(Collectors.toList());
+        RadioButton<ItemHelper> radioFoo = (RadioButton<ItemHelper>) components.get(0);
+        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components.get(1);
 
-        Assert.assertEquals(String.format(OUTER_HTML, "foo"),
-                radioFoo.getElement().getOuterHTML());
-        Assert.assertEquals(String.format(OUTER_HTML, "bar"),
-                radioBar.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "foo"), radioFoo.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
     }
 
     @Test

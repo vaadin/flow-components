@@ -153,8 +153,7 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
         validateLatestShortcutEventOnDialog(0, 0);
 
         // shortcut key is registered
-        Assert.assertEquals("Shortcut did not update input value",
-                "foo" + DialogWithShortcutPage.SHORTCUT + "bar",
+        Assert.assertEquals("Shortcut did not update input value", "foo" + DialogWithShortcutPage.SHORTCUT + "bar",
                 getFirstDialogInput().getValue());
     }
 

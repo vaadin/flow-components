@@ -30,16 +30,14 @@ public class ItemEnabledGeneratorIT extends AbstractSelectIT {
         page.toggleItemEnabledProvider(true);
 
         List<SelectElement.ItemElement> items = selectElement.getItems();
-        Assert.assertEquals("Invalid amout of items", getInitialNumberOfItems(),
-                items.size());
+        Assert.assertEquals("Invalid amout of items", getInitialNumberOfItems(), items.size());
         int valueChangeEvents = 0;
         String previousValue = null;
         for (int i = 0; i < items.size(); i++) {
             SelectElement.ItemElement itemElement = items.get(i);
             if (i % 2 == 0) {
                 itemElement.click();
-                verify.valueChangeEvent("Item-" + i, previousValue, true,
-                        valueChangeEvents);
+                verify.valueChangeEvent("Item-" + i, previousValue, true, valueChangeEvents);
                 verify.selectedItem("Item-" + i);
                 valueChangeEvents++;
                 previousValue = "Item-" + i;

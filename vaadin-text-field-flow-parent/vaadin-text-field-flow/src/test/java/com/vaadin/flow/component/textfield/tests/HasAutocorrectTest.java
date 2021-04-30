@@ -24,8 +24,7 @@ import org.junit.Test;
 public class HasAutocorrectTest {
 
     @Tag("div")
-    public static class HasAutocorrectComponent extends Component
-            implements HasAutocorrect {
+    public static class HasAutocorrectComponent extends Component implements HasAutocorrect {
 
     }
 

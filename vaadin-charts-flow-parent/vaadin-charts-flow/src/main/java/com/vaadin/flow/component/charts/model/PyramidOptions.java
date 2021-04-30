@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 public abstract class PyramidOptions extends AbstractPlotOptions {
 
     @Override
@@ -69,8 +70,8 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract Number getColorIndex();
 
     /**
-     * A specific color index to use for the series, so its graphic
-     * representations are given the class name
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
@@ -303,11 +304,10 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract Boolean getSkipKeyboardNavigation();
 
     /**
-     * Whether or not to skip past the points in this series for keyboard
-     * navigation.
+     * Whether or not to skip past the
+     * points in this series for keyboard navigation.
      */
-    public abstract void setSkipKeyboardNavigation(
-            Boolean skipKeyboardNavigation);
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setSlicedOffset(Number)

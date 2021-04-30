@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.events.internal;
  * #L%
  */
 
+
 import java.io.Serializable;
 
 /**

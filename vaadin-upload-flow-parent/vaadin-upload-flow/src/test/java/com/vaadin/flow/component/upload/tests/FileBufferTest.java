@@ -19,8 +19,8 @@ public class FileBufferTest {
         try (OutputStream os = fileBuffer.receiveUpload("uploadData", "text")) {
             os.write(dataBytes);
         }
-        final String readData = IOUtils.toString(fileBuffer.getInputStream(),
-                Charset.defaultCharset());
+        final String readData = IOUtils
+            .toString(fileBuffer.getInputStream(), Charset.defaultCharset());
         Assert.assertEquals(data, readData);
     }
 }

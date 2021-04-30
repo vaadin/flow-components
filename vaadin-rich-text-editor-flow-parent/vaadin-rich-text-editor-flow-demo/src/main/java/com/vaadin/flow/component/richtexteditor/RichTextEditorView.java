@@ -35,16 +35,13 @@ public class RichTextEditorView extends DemoView {
         // source-example-heading: Save Rich Text Editor value
         Div valueBlock = new Div();
         RichTextEditor rte = new RichTextEditor();
-        Button saveBtn = new Button("Save value",
-                e -> valueBlock.setText(rte.getValue()));
-        Button setBtn = new Button("Set value",
-                e -> rte.setValue(valueBlock.getText()));
+        Button saveBtn = new Button("Save value", e -> valueBlock.setText(rte.getValue()));
+        Button setBtn = new Button("Set value", e ->  rte.setValue(valueBlock.getText()));
 
         add(rte, saveBtn, setBtn, valueBlock);
         // end-source-example
 
-        addCard("Save Rich Text Editor value", rte, saveBtn, setBtn,
-                valueBlock);
+        addCard("Save Rich Text Editor value", rte, saveBtn, setBtn, valueBlock);
     }
 
     private void createGetHtmlValue() {
@@ -55,16 +52,14 @@ public class RichTextEditorView extends DemoView {
         Button showHtmlValue = new Button("Show html value", e -> {
             String exsValue = htmlBlock.getElement().getProperty("innerHTML");
             if (exsValue == null || !exsValue.equals(rte.getHtmlValue())) {
-                htmlBlock.getElement().setProperty("innerHTML",
-                        rte.getHtmlValue());
+                htmlBlock.getElement().setProperty("innerHTML", rte.getHtmlValue());
             }
         });
 
         add(rte, showHtmlValue, htmlBlock);
         // end-source-example
 
-        addCard("Save Rich Text Editor htmlValue", rte, showHtmlValue,
-                htmlBlock);
+        addCard("Save Rich Text Editor htmlValue", rte, showHtmlValue, htmlBlock);
     }
 
 }

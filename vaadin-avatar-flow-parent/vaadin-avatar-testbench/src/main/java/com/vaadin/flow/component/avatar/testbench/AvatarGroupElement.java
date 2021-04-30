@@ -21,8 +21,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-avatar-group&gt;</code>
- * element.
+ * A TestBench element representing a <code>&lt;vaadin-avatar-group&gt;</code> element.
  */
 @Element("vaadin-avatar-group")
 public class AvatarGroupElement extends TestBenchElement {
@@ -36,8 +35,7 @@ public class AvatarGroupElement extends TestBenchElement {
      * @throws NoSuchElementException
      *             if no match was found
      */
-    public AvatarElement getAvatarElement(int index)
-            throws NoSuchElementException {
+    public AvatarElement getAvatarElement(int index) throws NoSuchElementException {
         return $(AvatarElement.class).get(index);
     }
 

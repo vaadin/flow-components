@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.model.style.LabelStyle;
 
 /**

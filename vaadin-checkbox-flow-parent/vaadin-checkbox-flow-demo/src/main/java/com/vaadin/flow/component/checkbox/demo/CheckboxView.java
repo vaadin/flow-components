@@ -204,12 +204,12 @@ public class CheckboxView extends DemoView {
 
         CheckboxGroup<String> checkboxGroupHelperComponent = new CheckboxGroup<>();
         checkboxGroupHelperComponent.setLabel("Options");
-        checkboxGroupHelperComponent.setItems("Option one", "Option two",
-                "Option three");
         checkboxGroupHelperComponent
-                .addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+              .setItems("Option one", "Option two", "Option three");
         checkboxGroupHelperComponent
-                .setHelperComponent(new Span("Choose any options"));
+              .addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroupHelperComponent
+              .setHelperComponent(new Span("Choose any options"));
 
         add(checkboxGroup, checkboxGroupHelperComponent);
         // end-source-example
@@ -280,14 +280,13 @@ public class CheckboxView extends DemoView {
         checkboxGroup.setItems(departmentList);
         checkboxGroup.setHelperText("Choose your current departments");
         checkboxGroup
-                .addThemeVariants(CheckboxGroupVariant.LUMO_HELPER_ABOVE_FIELD);
+              .addThemeVariants(CheckboxGroupVariant.LUMO_HELPER_ABOVE_FIELD);
 
         add(checkboxGroup);
         // end-source-example
 
         addCard("Theme variants", "Helper text above the field", checkboxGroup);
     }
-
     private void styling() {
         Paragraph p1 = new Paragraph(
                 "To read about styling you can read the related tutorial ");

@@ -70,7 +70,7 @@ import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/vaadin-charts", version = "6.3.1")
+@NpmPackage(value="@vaadin/vaadin-charts", version = "6.3.1")
 @JsModule("@vaadin/vaadin-charts/vaadin-chart.js")
 @HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
 public class Chart extends Component implements HasStyle, HasSize {
@@ -83,8 +83,8 @@ public class Chart extends Component implements HasStyle, HasSize {
             this);
 
     private final static List<ChartType> TIMELINE_NOT_SUPPORTED = Arrays.asList(
-            ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE,
-            ChartType.PYRAMID, ChartType.FUNNEL);
+            ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE, ChartType.PYRAMID,
+            ChartType.FUNNEL);
 
     /**
      * Creates a new chart with default configuration
@@ -139,13 +139,12 @@ public class Chart extends Component implements HasStyle, HasSize {
      * Draws a chart using the current configuration.
      *
      * <p>
-     * The chart takes the current configuration from
-     * {@link #getConfiguration()}.
+     * The chart takes the current configuration from {@link #getConfiguration()}.
      * </p>
      *
      * <p>
-     * Note that if you modify the underlying {@link Series} directly, the chart
-     * will automatically be updated.
+     * Note that if you modify the underlying {@link Series}
+     * directly, the chart will automatically be updated.
      * </p>
      *
      * <p>
@@ -153,8 +152,7 @@ public class Chart extends Component implements HasStyle, HasSize {
      * ready before element is attached.
      * </p>
      *
-     * @param resetConfiguration
-     *            defines whether the chart should be redrawn or not
+     * @param resetConfiguration defines whether the chart should be redrawn or not
      * @see #getConfiguration()
      */
     public void drawChart(boolean resetConfiguration) {
@@ -168,8 +166,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Determines if the chart is a timeline chart or a normal chart. The
-     * following chart types do not support timeline:
+     * Determines if the chart is a timeline chart or a normal chart.
+     * The following chart types do not support timeline:
      * <ul>
      * <li>ChartType.PIE</li>
      * <li>ChartType.GAUGE</li>
@@ -177,11 +175,10 @@ public class Chart extends Component implements HasStyle, HasSize {
      * <li>ChartType.PYRAMID</li>
      * <li>ChartType.FUNNEL</li>
      * </ul>
-     * Enabling timeline in these unsupported chart types results in an
-     * <code>IllegalArgumentException</code>
+     * Enabling timeline in these unsupported chart types
+     * results in an <code>IllegalArgumentException</code>
      *
-     * @param timeline
-     *            true for timeline chart
+     * @param timeline true for timeline chart
      */
     public void setTimeline(Boolean timeline) {
         getElement().setProperty("timeline", timeline);
@@ -192,8 +189,7 @@ public class Chart extends Component implements HasStyle, HasSize {
             final ChartType type = getConfiguration().getChart().getType();
             if (TIMELINE_NOT_SUPPORTED.contains(type)) {
                 throw new IllegalArgumentException(
-                        "Timeline is not supported for chart type '" + type
-                                + "'");
+                        "Timeline is not supported for chart type '" + type + "'");
             }
         }
     }
@@ -218,8 +214,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a chart add series listener, which will be notified after a new
-     * series is added to the chart
+     * Adds a chart add series listener, which will be notified after a
+     * new series is added to the chart
      *
      * @param listener
      */
@@ -240,8 +236,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a chart before print listener, which will be notified before the
-     * chart is printed using the print menu
+     * Adds a chart before print listener, which will be notified before the chart
+     * is printed using the print menu
      *
      * @param listener
      */
@@ -273,8 +269,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds chart drillupall listener, which will be notified after all the
-     * series have been drilled up in a chart with multiple drilldown series.
+     * Adds chart drillupall listener, which will be notified after all the series
+     * have been drilled up in a chart with multiple drilldown series.
      *
      * @param listener
      */
@@ -284,8 +280,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a chart load listener, which will be notified after a chart is
-     * loaded
+     * Adds a chart load listener, which will be notified after a chart
+     * is loaded
      *
      * @param listener
      */
@@ -295,8 +291,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a chart redraw listener, which will be notified after a chart is
-     * redrawn
+     * Adds a chart redraw listener, which will be notified after a chart
+     * is redrawn
      *
      * @param listener
      */
@@ -321,8 +317,8 @@ public class Chart extends Component implements HasStyle, HasSize {
      * drilldown series for each drilldown callback when doing async drilldown
      *
      * @param listener
-     * @see DataSeries#addItemWithDrilldown(DataSeriesItem) addItemWithDrilldown
-     *      to find out how to enable async drilldown
+     * @see DataSeries#addItemWithDrilldown(DataSeriesItem)
+     * addItemWithDrilldown to find out how to enable async drilldown
      */
     public Registration addDrilldownListener(
             ComponentEventListener<DrilldownEvent> listener) {
@@ -378,8 +374,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a series after animate listener, which will be notified after a
-     * series is animated
+     * Adds a series after animate listener, which will be notified after a series
+     * is animated
      *
      * @param listener
      */
@@ -477,8 +473,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a point remove listener, which will be notified when a data point is
-     * removed.
+     * Adds a point remove listener, which will be notified when a data point
+     * is removed.
      *
      * @param listener
      */
@@ -488,8 +484,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a point select listener, which will be notified when a data point is
-     * selected.
+     * Adds a point select listener, which will be notified when a data point
+     * is selected.
      *
      * @param listener
      */
@@ -510,8 +506,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a point update listener, which will be notified when a data point is
-     * updated.
+     * Adds a point update listener, which will be notified when a data point
+     * is updated.
      *
      * @param listener
      */

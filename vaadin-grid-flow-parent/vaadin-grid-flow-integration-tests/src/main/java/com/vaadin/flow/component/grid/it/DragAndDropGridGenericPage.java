@@ -21,8 +21,8 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-grid/generic-dnd")
 public class DragAndDropGridGenericPage extends Div {
 
-    private List<String> items = IntStream.range(0, 10)
-            .mapToObj(String::valueOf).collect(Collectors.toList());
+    private List<String> items = IntStream.range(0, 10).mapToObj(String::valueOf)
+            .collect(Collectors.toList());
     private Grid<String> grid = new Grid<>();
     private String draggedCard;
     private final Div dropbox;
@@ -43,13 +43,11 @@ public class DragAndDropGridGenericPage extends Div {
         DropTarget<Div> dropTarget = DropTarget.create(dropbox);
         dropTarget.addDropListener(event -> {
             Optional<Object> dragData = event.getDragData();
-            dragData.filter(object -> object instanceof List)
-                    .map(object -> ((List<String>) object))
-                    .ifPresent(draggedItems -> {
-                        draggedItems.stream().forEach(this::addCard);
-                        items.removeAll(draggedItems);
-                        grid.setItems(items);
-                    });
+            dragData.filter(object -> object instanceof List).map(object -> ((List<String>) object)).ifPresent(draggedItems -> {
+                draggedItems.stream().forEach(this::addCard);
+                items.removeAll(draggedItems);
+                grid.setItems(items);
+            });
         });
 
         add(grid, dropbox);
@@ -72,8 +70,7 @@ public class DragAndDropGridGenericPage extends Div {
             if (draggedCard != null) {
                 items.add(draggedCard);
                 grid.setItems(items);
-                getUI().ifPresent(ui -> dropbox
-                        .remove(ui.getActiveDragSourceComponent()));
+                getUI().ifPresent(ui -> dropbox.remove(ui.getActiveDragSourceComponent()));
             }
         });
     }
@@ -104,10 +101,10 @@ public class DragAndDropGridGenericPage extends Div {
 
         NativeButton setSelectionDragDataButton = new NativeButton(
                 "set selection drag data", e -> {
-                    Map<String, String> dragData = new HashMap<>();
-                    dragData.put("text", "selection-drag-data");
-                    grid.setSelectionDragDetails(-1, dragData);
-                });
+            Map<String, String> dragData = new HashMap<>();
+            dragData.put("text", "selection-drag-data");
+            grid.setSelectionDragDetails(-1, dragData);
+        });
         setSelectionDragDataButton.setId("set-selection-drag-data");
         add(setSelectionDragDataButton);
 

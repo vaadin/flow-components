@@ -55,17 +55,17 @@ public class TreeGridExpandAllIT extends AbstractTreeGridIT {
         open();
         TreeGridElement grid = $(TreeGridElement.class).get(1);
         WebElement expandToggleElement = grid.getExpandToggleElement(1, 0);
-        int widthBeforeExpend = grid.getCell(1, 0).getSize().getWidth();
+        int widthBeforeExpend = grid.getCell(1,0).getSize().getWidth();
 
         expandToggleElement.click();
-        waitUntil(e -> {
-            int widthAfterExpend = grid.getCell(1, 0).getSize().getWidth();
+        waitUntil( e -> {
+            int widthAfterExpend = grid.getCell(1,0).getSize().getWidth();
             return widthBeforeExpend != widthAfterExpend;
         }, 200);
 
         grid.collapseWithClick(1);
-        waitUntil(e -> {
-            int widthAfterCollapse = grid.getCell(1, 0).getSize().getWidth();
+        waitUntil( e -> {
+            int widthAfterCollapse = grid.getCell(1,0).getSize().getWidth();
             return widthBeforeExpend == widthAfterCollapse;
         }, 200);
     }

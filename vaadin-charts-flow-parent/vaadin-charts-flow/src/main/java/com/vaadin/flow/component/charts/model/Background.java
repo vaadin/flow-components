@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * An object, or array of objects, for backgrounds. Sub options include
  * backgroundColor (which can be solid or gradient), innerWidth, outerWidth,
@@ -35,8 +36,7 @@ public class Background extends AbstractConfigurationObject {
      * representation of a percentage, e.g. "110%". The percentage is relative
      * to the radius of the chart.
      * 
-     * <em>This is applicable only to circular {@link ChartType#GAUGE} type
-     * charts.</em>
+     * <em>This is applicable only to circular {@link ChartType#GAUGE} type charts.</em>
      * 
      * @param outerRadius
      */
@@ -56,8 +56,7 @@ public class Background extends AbstractConfigurationObject {
      * representation of a percentage, e.g. "110%". The percentage is relative
      * to the radius of the chart.
      * 
-     * <em>This is applicable only to circular {@link ChartType#GAUGE} type
-     * charts.</em>
+     * <em>This is applicable only to circular {@link ChartType#GAUGE} type charts.</em>
      * 
      * @param innerRadius
      */

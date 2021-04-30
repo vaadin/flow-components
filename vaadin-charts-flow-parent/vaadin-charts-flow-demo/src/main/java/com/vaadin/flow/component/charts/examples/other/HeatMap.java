@@ -27,9 +27,9 @@ public class HeatMap extends AbstractChartExample {
 
         config.getTitle().setText("Sales per employee per weekday");
 
-        config.getxAxis().setCategories("Marta", "Mysia", "Misiek", "Maniek",
-                "Miki", "Guillermo", "Jonatan", "Zdzisław", "Antoni",
-                "Zygmunt");
+        config.getxAxis()
+                .setCategories("Marta", "Mysia", "Misiek", "Maniek", "Miki",
+                        "Guillermo", "Jonatan", "Zdzisław", "Antoni", "Zygmunt");
         config.getyAxis().setCategories("Monday", "Tuesday", "Wednesday",
                 "Thursday", "Friday");
 

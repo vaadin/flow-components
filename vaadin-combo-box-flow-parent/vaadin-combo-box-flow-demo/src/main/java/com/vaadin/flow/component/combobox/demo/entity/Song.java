@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.combobox.demo.entity;
 
-public class Song {
+public  class Song {
 
     private String name;
     private String artist;
@@ -15,12 +15,9 @@ public class Song {
     /**
      * Construct a song with the given name, artist and album.
      *
-     * @param name
-     *            name of the song
-     * @param artist
-     *            name of the artist
-     * @param album
-     *            name of the album
+     * @param name   name of the song
+     * @param artist name of the artist
+     * @param album  name of the album
      */
     public Song(String name, String artist, String album) {
         this.name = name;

@@ -220,8 +220,7 @@ public class GridColumnTest {
 
     @Test
     public void createColumn_returnsNonNullAndBasicType() {
-        Column column = new Grid<Person>().createColumn(TemplateRenderer.of(""),
-                "");
+        Column column = new Grid<Person>().createColumn(TemplateRenderer.of(""), "");
         assertNotNull(column);
         Assert.assertEquals(Column.class, column.getClass());
     }
@@ -230,8 +229,7 @@ public class GridColumnTest {
     public void addColumn_extendedColumnTypeByOverridingCreateMethod() {
         Grid<Person> extendedGrid = new Grid<Person>() {
             @Override
-            protected Column<Person> createColumn(Renderer<Person> renderer,
-                    String columnId) {
+            protected Column<Person> createColumn(Renderer<Person> renderer, String columnId) {
                 return new ExtendedColumn<>(this, columnId, renderer);
             }
         };
@@ -245,8 +243,7 @@ public class GridColumnTest {
     @Test
     public void addColumn_extendedColumnTypeByOverridingDefaultColumnFactoryGetter() {
         Grid<Person> extendedGrid = new Grid<Person>() {
-            public ExtendedColumn<Person> createCustomColumn(
-                    Renderer<Person> renderer, String columnId) {
+            public ExtendedColumn<Person> createCustomColumn(Renderer<Person> renderer, String columnId) {
                 return new ExtendedColumn<>(this, columnId, renderer);
             }
 
@@ -268,12 +265,9 @@ public class GridColumnTest {
 
         List<ExtendedColumn<Person>> columnsList = new ArrayList<>();
 
-        columnsList.add(extendedGrid.addColumn(Person::toString,
-                extendedGrid::createCustomColumn));
-        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""),
-                extendedGrid::createCustomColumn));
-        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""),
-                extendedGrid::createCustomColumn, ""));
+        columnsList.add(extendedGrid.addColumn(Person::toString, extendedGrid::createCustomColumn));
+        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn));
+        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn, ""));
 
         columnsList.forEach(column -> {
             assertNotNull(column);
@@ -286,14 +280,11 @@ public class GridColumnTest {
         ExtendedGrid<Person> extendedGrid = new ExtendedGrid<>();
 
         Column regularColumn = extendedGrid.addColumn(Person::toString);
-        ExtendedColumn extendedColumn = extendedGrid.addColumn(
-                TemplateRenderer.of(""), extendedGrid::createCustomColumn);
+        ExtendedColumn extendedColumn = extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn);
 
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
-        assertEqualColumnClasses(extendedColumn.getClass(),
-                ExtendedColumn.class);
+        assertEqualColumnClasses(extendedColumn.getClass(), ExtendedColumn.class);
     }
-
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
         assertNotNull(columnClass);
         Assert.assertEquals(compareTo, columnClass);
@@ -306,8 +297,7 @@ public class GridColumnTest {
     }
 
     private static class ExtendedGrid<T> extends Grid<T> {
-        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer,
-                String columnId) {
+        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer, String columnId) {
             return new ExtendedColumn<>(this, columnId, renderer);
         }
     }

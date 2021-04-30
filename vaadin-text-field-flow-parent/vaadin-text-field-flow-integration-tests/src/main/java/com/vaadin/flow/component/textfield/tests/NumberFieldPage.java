@@ -42,8 +42,8 @@ public class NumberFieldPage extends Div {
         NativeButton button = new NativeButton(
                 "Set/unset text field read-only");
         button.setId("read-only");
-        button.addClickListener(
-                event -> numberField.setReadOnly(!numberField.isReadOnly()));
+        button.addClickListener(event -> numberField
+                .setReadOnly(!numberField.isReadOnly()));
         add(button);
 
         NativeButton required = new NativeButton(
@@ -58,7 +58,8 @@ public class NumberFieldPage extends Div {
                 "Set/unset field enabled property");
         enabled.setId("disabled");
         enabled.addClickListener(
-                event -> numberField.setEnabled(!numberField.isEnabled()));
+                event -> numberField.setEnabled(
+                        !numberField.isEnabled()));
         add(enabled);
 
         NumberField numberFieldClear = new NumberField();
@@ -67,8 +68,7 @@ public class NumberFieldPage extends Div {
         numberFieldClear.setClearButtonVisible(true);
         Div clearValueMessage = new Div();
         clearValueMessage.setId("clear-message");
-        numberFieldClear.addValueChangeListener(
-                logValueChangeListener(clearValueMessage));
+        numberFieldClear.addValueChangeListener(logValueChangeListener(clearValueMessage));
         add(numberFieldClear, clearValueMessage);
 
         NumberField numberFieldStep = new NumberField();
@@ -79,18 +79,17 @@ public class NumberFieldPage extends Div {
         numberFieldStep.setHasControls(true);
         Div stepValueMessage = new Div();
         stepValueMessage.setId("step-message");
-        numberFieldStep.addValueChangeListener(
-                logValueChangeListener(stepValueMessage));
+        numberFieldStep.addValueChangeListener(logValueChangeListener(stepValueMessage));
 
         add(numberFieldStep, stepValueMessage);
         Div isValid = new Div();
-        isValid.setId("is-invalid");
+        isValid .setId("is-invalid");
         NativeButton checkIsValid = new NativeButton(
-                "Check if current value of step-number-field is invalid");
+            "Check if current value of step-number-field is invalid");
         checkIsValid.setId("check-is-invalid");
         checkIsValid.addClickListener(event -> isValid
-                .setText(numberFieldStep.isInvalid() ? "invalid" : "valid"));
-        add(checkIsValid, isValid);
+            .setText(numberFieldStep.isInvalid() ? "invalid" : "valid"));
+        add(checkIsValid,isValid);
         addNumberFields();
     }
 

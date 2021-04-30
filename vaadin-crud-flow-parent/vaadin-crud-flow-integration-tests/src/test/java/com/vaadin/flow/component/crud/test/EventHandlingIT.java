@@ -18,8 +18,7 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") ;
         getDriver().get(url);
     }
 
@@ -31,11 +30,9 @@ public class EventHandlingIT extends AbstractParallelTest {
         }
     }
 
-    private void dismissConfirmDialog(CrudElement crud,
-            ConfirmDialogType type) {
+    private void dismissConfirmDialog(CrudElement crud, ConfirmDialogType type) {
         final TestBenchElement confirmButton = crud
-                .$(ConfirmDialogElement.class).id(type.getId())
-                .getConfirmButton();
+                .$(ConfirmDialogElement.class).id(type.getId()).getConfirmButton();
         confirmButton.click();
     }
 
@@ -44,7 +41,9 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
-        Assert.assertEquals("New: null", getLastEvent());
+        Assert.assertEquals(
+                "New: null",
+                getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
     }
 
@@ -184,8 +183,8 @@ public class EventHandlingIT extends AbstractParallelTest {
         crud.getNewItemButton().get().click();
 
         TextFieldElement firstNameField = crud.getEditor()
-                .$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first();
+                .$(TextFieldElement.class).attribute("editor-role", "first-name")
+                .first();
 
         Assert.assertFalse(firstNameField.hasAttribute("invalid"));
 

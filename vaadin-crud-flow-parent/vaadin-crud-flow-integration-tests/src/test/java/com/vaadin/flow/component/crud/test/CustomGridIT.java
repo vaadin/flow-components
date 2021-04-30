@@ -16,8 +16,7 @@ public class CustomGridIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/customgrid";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/customgrid";
         getDriver().get(url);
     }
 
@@ -87,10 +86,10 @@ public class CustomGridIT extends AbstractParallelTest {
     @Test
     public void editorShouldHaveRightTitleWhenOpenedInExistingItemMode() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
-
+        
         crud.getNewItemButton().ifPresent(button -> button.click());
         Assert.assertEquals("New item", getEditorHeaderText(crud));
-
+        
         crud.getEditorCancelButton().click();
         editItemButton().click();
 
@@ -109,7 +108,7 @@ public class CustomGridIT extends AbstractParallelTest {
 
         crud.$("vaadin-crud-edit").first().click();
         Assert.assertEquals("Edit item", getEditorHeaderText(crud));
-
+        
         crud.getEditorCancelButton().click();
 
         newItemButton().click();
@@ -118,8 +117,10 @@ public class CustomGridIT extends AbstractParallelTest {
     }
 
     private String getEditorHeaderText(CrudElement crud) {
-        return crud.getEditor().$(TestBenchElement.class)
-                .attribute("slot", "header").first().getText();
+        return crud.getEditor()
+                .$(TestBenchElement.class)
+                .attribute("slot","header")
+                .first().getText();
     }
 
     private ButtonElement newItemButton() {

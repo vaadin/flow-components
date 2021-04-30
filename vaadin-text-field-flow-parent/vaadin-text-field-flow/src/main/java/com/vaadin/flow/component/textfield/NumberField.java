@@ -157,9 +157,9 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
 
     /**
      * Sets the allowed number intervals of the field. This specifies how much
-     * the value will be increased/decreased. It is also used to invalidate the
-     * field, if the value doesn't align with the specified step and
-     * {@link #setMin(double) min} (if specified by user).
+     * the value will be increased/decreased. It is also used to
+     * invalidate the field, if the value doesn't align with the specified step
+     * and {@link #setMin(double) min} (if specified by user).
      *
      * @param step
      *            the new step to set
@@ -169,8 +169,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
     @Override
     public void setStep(double step) {
         if (step <= 0) {
-            throw new IllegalArgumentException(
-                    "The step cannot be less or equal to zero.");
+            throw new IllegalArgumentException("The step cannot be less or equal to zero.");
         }
         super.setStep(step);
     }

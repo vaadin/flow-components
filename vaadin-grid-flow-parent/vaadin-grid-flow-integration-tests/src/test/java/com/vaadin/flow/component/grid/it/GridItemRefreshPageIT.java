@@ -70,43 +70,32 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
         GridElement grid = $(GridElement.class).first();
         GridTHTDElement firstRowCell = grid.getCell(0, 1);
 
-        Assert.assertEquals("Invalid cell content", "0",
-                firstRowCell.getText());
-        Assert.assertEquals("Invalid cell content", "5",
-                grid.getCell(5, 1).getText());
+        Assert.assertEquals("Invalid cell content", "0", firstRowCell.getText());
+        Assert.assertEquals("Invalid cell content", "5", grid.getCell(5,1).getText());
 
-        // click the next cell to get the value updated in the DOM, but not in
-        // the cache
+        // click the next cell to get the value updated in the DOM, but not in the cache
         grid.findElement(By.id("div-0")).click();
-        Assert.assertEquals("Invalid cell content", "EDITED",
-                firstRowCell.getText());
+        Assert.assertEquals("Invalid cell content", "EDITED", firstRowCell.getText());
 
-        // refreshing items 5-10 should only effect those sells, but not cell on
-        // row 0
-        // before the fix for #419 all visible rows in DOM were refreshed in the
-        // grid all the time
+        // refreshing items 5-10 should only effect those sells, but not cell on row 0
+        // before the fix for #419 all visible rows in DOM were refreshed in the grid all the time
         findElement(By.id("template-refresh-multiple")).click();
 
-        Assert.assertEquals("Cell content should have updated", "12345",
-                grid.getCell(5, 1).getText());
-        Assert.assertEquals("Cell content should have not updated", "EDITED",
-                firstRowCell.getText());
+        Assert.assertEquals("Cell content should have updated", "12345", grid.getCell(5,1).getText());
+        Assert.assertEquals("Cell content should have not updated", "EDITED", firstRowCell.getText());
 
         grid.findElement(By.id("div-5")).click();
-        Assert.assertEquals("Invalid cell content", "EDITED",
-                grid.getCell(5, 1).getText());
+        Assert.assertEquals("Invalid cell content", "EDITED", grid.getCell(5,1).getText());
 
         findElement(By.id("template-refresh-first")).click();
 
-        Assert.assertEquals("Cell content should have updated", "12345",
-                firstRowCell.getText());
-        Assert.assertEquals("Cell content should have not updated", "EDITED",
-                grid.getCell(5, 1).getText());
+        Assert.assertEquals("Cell content should have updated", "12345", firstRowCell.getText());
+        Assert.assertEquals("Cell content should have not updated", "EDITED", grid.getCell(5,1).getText());
     }
 
     private void updateAndRefreshItemsOnTheServer(String gridId,
-            String refreshFirstItemButtonId,
-            String refreshMultipleItemsButtonId, String refreshAllButtonId) {
+                                                  String refreshFirstItemButtonId,
+                                                  String refreshMultipleItemsButtonId, String refreshAllButtonId) {
         open();
         WebElement grid = findElement(By.id(gridId));
         scrollToElement(grid);
@@ -145,7 +134,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
     }
 
     private void waitUntilUpdated(WebElement grid, int startIndex,
-            int lastIndex) {
+                                  int lastIndex) {
         Set<String> expected = IntStream.range(startIndex, lastIndex + 1)
                 .mapToObj(intVal -> "updated " + String.valueOf(intVal))
                 .collect(Collectors.toSet());
@@ -156,7 +145,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
     }
 
     private void assertNotUpdated(WebElement grid, int startIndex,
-            int lastIndex) {
+                                  int lastIndex) {
         Set<String> expected = IntStream.range(startIndex, lastIndex + 1)
                 .mapToObj(intVal -> "updated " + String.valueOf(intVal))
                 .collect(Collectors.toSet());

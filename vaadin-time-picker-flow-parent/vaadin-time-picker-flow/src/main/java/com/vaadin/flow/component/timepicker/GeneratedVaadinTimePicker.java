@@ -66,9 +66,9 @@ import elemental.json.JsonObject;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  * <p>
  * The following state attributes are available for styling:
@@ -853,9 +853,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the property type
      */
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableFunction<P, T> presentationToModel,
-            SerializableFunction<T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableFunction<P, T> presentationToModel,
+                                         SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -876,7 +876,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
+                                     boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -904,9 +904,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the property type
      */
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableBiFunction<R, P, T> presentationToModel,
-            SerializableBiFunction<R, T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableBiFunction<R, P, T> presentationToModel,
+                                         SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {

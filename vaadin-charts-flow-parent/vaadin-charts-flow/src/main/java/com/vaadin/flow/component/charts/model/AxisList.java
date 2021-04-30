@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import java.util.ArrayList;
 import java.util.List;
 

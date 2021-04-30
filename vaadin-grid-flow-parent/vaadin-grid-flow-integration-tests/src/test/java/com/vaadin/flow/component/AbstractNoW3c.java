@@ -37,7 +37,7 @@ public class AbstractNoW3c extends AbstractComponentIT {
     @Override
     public void setup() throws Exception {
         final WebDriver webDriver = createChromeDriverWithoutW3c(
-                getLocalExecution(), getDesiredCapabilities(), getHubURL());
+            getLocalExecution(), getDesiredCapabilities(), getHubURL());
         if (webDriver != null) {
             setDesiredCapabilities(getDesiredCapabilities());
             setDriver(webDriver);
@@ -47,15 +47,15 @@ public class AbstractNoW3c extends AbstractComponentIT {
     }
 
     public static WebDriver createChromeDriverWithoutW3c(
-            Optional<LocalExecution> localExecution,
-            DesiredCapabilities capabilities, String hubURL) throws Exception {
+        Optional<LocalExecution> localExecution,
+        DesiredCapabilities capabilities, String hubURL) throws Exception {
 
         final ChromeOptions options = createChromeOptions();
         options.merge(capabilities);
 
         if (!localExecution.isPresent()) {
-            return TestBench.createDriver(
-                    new RemoteWebDriver(new URL(hubURL), options));
+            return TestBench
+                .createDriver(new RemoteWebDriver(new URL(hubURL), options));
         } else if (localExecution.get().value() == Browser.CHROME) {
             return TestBench.createDriver(new ChromeDriver(options));
         }
@@ -64,7 +64,8 @@ public class AbstractNoW3c extends AbstractComponentIT {
 
     private static ChromeOptions createChromeOptions() {
         final ChromeOptions options = new ChromeOptions();
-        options.addArguments(new String[] { "--headless", "--disable-gpu" });
+        options.addArguments(
+            new String[] { "--headless", "--disable-gpu" });
         options.setExperimentalOption("w3c", false);
         return options;
     }

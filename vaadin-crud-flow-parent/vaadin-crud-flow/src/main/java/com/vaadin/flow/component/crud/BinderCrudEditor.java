@@ -23,11 +23,9 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 
 /**
- * A CRUD editor that binds editor fields to bean properties using a
- * {@link Binder}.
+ * A CRUD editor that binds editor fields to bean properties using a {@link Binder}.
  *
- * @param <E>
- *            the bean type
+ * @param <E> the bean type
  * @see Binder
  */
 public class BinderCrudEditor<E> implements CrudEditor<E> {
@@ -39,8 +37,7 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
     /**
      * Initializes a BinderCrudEditor with the given binder and no form view
      *
-     * @param binder
-     *            the editor binder
+     * @param binder the editor binder
      */
     public BinderCrudEditor(Binder<E> binder) {
         this(binder, null);
@@ -49,10 +46,8 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
     /**
      * Initializes a BinderCrudEditor with the given binder and form view
      *
-     * @param binder
-     *            the editor binder
-     * @param view
-     *            the form view
+     * @param binder the editor binder
+     * @param view the form view
      */
     public BinderCrudEditor(Binder<E> binder, Component view) {
         this.binder = binder;

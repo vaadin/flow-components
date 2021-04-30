@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * Defines different step line types. Configurable in {@link PlotOptionsLine}.
  */

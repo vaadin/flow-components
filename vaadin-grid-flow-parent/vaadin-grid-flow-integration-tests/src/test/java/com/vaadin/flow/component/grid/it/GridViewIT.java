@@ -370,7 +370,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
         Assert.assertEquals(4l, getCommandExecutor()
-                .executeScript(firstCellHiddenScript, grid));
+            .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
                 grid.getAttribute("columnReorderingAllowed"));
@@ -1498,13 +1498,11 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         verifyOpened(1);
 
-        openSubMenu($(OVERLAY_TAG).first().$("vaadin-context-menu-item")
-                .get(menuIndex));
+        openSubMenu($(OVERLAY_TAG).first().$("vaadin-context-menu-item").get(menuIndex));
 
         verifyOpened(2);
 
-        $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item")
-                .get(subMenuIndex).click();
+        $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item").get(subMenuIndex).click();
     }
 
     private void assertElementHasFocus(WebElement element) {

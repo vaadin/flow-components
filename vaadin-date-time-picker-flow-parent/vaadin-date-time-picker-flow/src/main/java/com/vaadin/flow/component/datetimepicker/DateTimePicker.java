@@ -247,8 +247,8 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         // is fixed: https://github.com/vaadin/vaadin-time-picker-flow/issues/77
         getElement().executeJs("return this.value;")
                 .then(jsonValue -> super.setValue(
-                        jsonValue.asString().isEmpty() ? null
-                                : LocalDateTime.parse(jsonValue.asString())));
+                        jsonValue.asString().isEmpty() ? null :
+                                LocalDateTime.parse(jsonValue.asString())));
     }
 
     @Override
@@ -679,11 +679,9 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
+     * When auto open is enabled, the dropdown will open when the field is clicked.
      *
-     * @param autoOpen
-     *            Value for the auto open property,
+     * @param autoOpen Value for the auto open property,
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
@@ -692,14 +690,12 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
+     * When auto open is enabled, the dropdown will open when the field is clicked.
      *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise.
-     *         Default is {@code true}
+     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
      */
     public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
     }
 
     @Override

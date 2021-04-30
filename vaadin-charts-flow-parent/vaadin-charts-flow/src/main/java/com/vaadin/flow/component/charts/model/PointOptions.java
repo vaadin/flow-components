@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import java.time.Instant;
 import java.util.Date;
 
@@ -83,8 +84,8 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract Number getColorIndex();
 
     /**
-     * A specific color index to use for the series, so its graphic
-     * representations are given the class name
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
@@ -281,8 +282,8 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract IntervalUnit getPointIntervalUnit();
 
     /**
-     * On datetime series, this allows for setting the
-     * <a href="plotOptions.series.pointInterval">pointInterval</a> to irregular
+     * On datetime series, this allows for setting the <a
+     * href="plotOptions.series.pointInterval">pointInterval</a> to irregular
      * time units, <code>day</code>, <code>month</code> and <code>year</code>. A
      * day is usually the same as 24 hours, but pointIntervalUnit also takes the
      * DST crossover into consideration when dealing with local time. Combine
@@ -355,11 +356,10 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract Boolean getSkipKeyboardNavigation();
 
     /**
-     * Whether or not to skip past the points in this series for keyboard
-     * navigation.
+     * Whether or not to skip past the
+     * points in this series for keyboard navigation.
      */
-    public abstract void setSkipKeyboardNavigation(
-            Boolean skipKeyboardNavigation);
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setSoftThreshold(Boolean)
@@ -513,7 +513,8 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract Number getCompareBase();
 
     /**
-     * This option dictates whether to use 0 or 100 as the base of comparison.
+     * This option dictates whether to use 0 or 100 as the
+     * base of comparison.
      */
     public abstract void setCompareBase(Number compareBase);
 
@@ -559,8 +560,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * Options for the corresponding navigator series if
      * <code>showInNavigator</code> is <code>true</code> for this series.
      */
-    public abstract void setNavigatorOptions(
-            PlotOptionsSeries navigatorOptions);
+    public abstract void setNavigatorOptions(PlotOptionsSeries navigatorOptions);
 
     /**
      * @see #setPointPlacement(PointPlacement)

@@ -32,17 +32,14 @@ public class GridProEditColumnTest {
         };
 
         grid = new GridPro<>();
-        textColumn = (EditColumn<String>) grid.addEditColumn(str -> str)
-                .text(itemUpdater);
-        checkboxColumn = (EditColumn<String>) grid.addEditColumn(str -> str)
-                .checkbox(itemUpdater);
+        textColumn = (EditColumn<String>) grid.addEditColumn(str -> str).text(itemUpdater);
+        checkboxColumn = (EditColumn<String>) grid.addEditColumn(str -> str).checkbox(itemUpdater);
 
         listOptions = new ArrayList<>();
         listOptions.add("foo");
         listOptions.add("bar");
         listOptions.add("baz");
-        selectColumn = (EditColumn<String>) grid.addEditColumn(str -> str)
-                .select(itemUpdater, listOptions);
+        selectColumn = (EditColumn<String>) grid.addEditColumn(str -> str).select(itemUpdater, listOptions);
     }
 
     @Test
@@ -70,8 +67,7 @@ public class GridProEditColumnTest {
 
     @Test
     public void setItemUpdater_getItemUpdater() {
-        ItemUpdater itemUpdater = (Object item, Object newValue) -> {
-        };
+        ItemUpdater itemUpdater = (Object item, Object newValue) -> {};
         checkboxColumn.setItemUpdater(itemUpdater);
         Assert.assertEquals(checkboxColumn.getItemUpdater(), itemUpdater);
     }
@@ -80,8 +76,7 @@ public class GridProEditColumnTest {
     public void setEditorType_getEditorType() {
         EditorType editorType = EditorType.CHECKBOX;
         textColumn.setEditorType(editorType);
-        Assert.assertEquals(textColumn.getEditorType(),
-                editorType.getTypeName());
+        Assert.assertEquals(textColumn.getEditorType(), editorType.getTypeName());
     }
 
     @Test
@@ -94,27 +89,20 @@ public class GridProEditColumnTest {
     public void addColumn_changeEditorType() {
         GridPro<Person> grid = new GridPro<>();
 
-        GridPro.EditColumn<Person> nameColumn = (EditColumn<Person>) grid
-                .addEditColumn(Person::getName).text((item, newValue) -> {
-                });
+        GridPro.EditColumn<Person> nameColumn = (EditColumn<Person>) grid.addEditColumn(Person::getName).text((item, newValue) -> {});
         nameColumn.setEditorType(EditorType.CHECKBOX);
-        Assert.assertEquals(nameColumn.getEditorType(),
-                EditorType.CHECKBOX.getTypeName());
+        Assert.assertEquals(nameColumn.getEditorType(), EditorType.CHECKBOX.getTypeName());
 
         nameColumn.setEditorType(EditorType.SELECT);
-        Assert.assertEquals(nameColumn.getEditorType(),
-                EditorType.SELECT.getTypeName());
+        Assert.assertEquals(nameColumn.getEditorType(), EditorType.SELECT.getTypeName());
 
         nameColumn.setEditorType(EditorType.TEXT);
-        Assert.assertEquals(nameColumn.getEditorType(),
-                EditorType.TEXT.getTypeName());
+        Assert.assertEquals(nameColumn.getEditorType(), EditorType.TEXT.getTypeName());
     }
 
     @Test
     public void addEditColumn_returnsNonNullAndEditColumnType() {
-        Grid.Column<Person> column = new GridPro<Person>()
-                .addEditColumn(str -> str).text((item, newValue) -> {
-                });
+        Grid.Column<Person> column = new GridPro<Person>().addEditColumn(str -> str).text((item, newValue) -> {});
         Assert.assertNotNull(column);
         Assert.assertEquals(GridPro.EditColumn.class, column.getClass());
     }

@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * DataSeriesItem that can be used as sum or intermediate sum in waterfall
  * charts. Note that sums don't support all standard point features and their

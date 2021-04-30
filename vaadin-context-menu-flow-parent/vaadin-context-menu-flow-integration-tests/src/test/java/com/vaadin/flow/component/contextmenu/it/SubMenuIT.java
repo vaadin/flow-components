@@ -142,8 +142,8 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         TestBenchElement subMenuOverlay = getAllOverlays().get(1);
 
-        WebElement firstItem = subMenuOverlay.$("vaadin-context-menu-list-box")
-                .first().findElement(By.xpath("./*"));
+        WebElement firstItem = subMenuOverlay.$("vaadin-context-menu-list-box").first()
+                .findElement(By.xpath("./*"));
 
         Assert.assertEquals("a",
                 firstItem.getTagName().toLowerCase(Locale.ENGLISH));
@@ -161,8 +161,8 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         TestBenchElement subMenuOverlay = getAllOverlays().get(1);
 
-        WebElement checkableItem = subMenuOverlay
-                .$("vaadin-context-menu-list-box").first()
+        WebElement checkableItem =
+                subMenuOverlay.$("vaadin-context-menu-list-box").first()
                 .findElements(By.xpath("./*")).get(1);
 
         // verify checkable item

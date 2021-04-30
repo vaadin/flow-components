@@ -17,16 +17,14 @@ import java.util.Arrays;
 
 public class CrudTest {
 
-    final Crud<Thing> systemUnderTest = new Crud<>(Thing.class,
-            createFakeGrid(), new ThingEditor());
+    final Crud<Thing> systemUnderTest
+            = new Crud<>(Thing.class, createFakeGrid(), new ThingEditor());
 
     @Test
     public void itemAvailableInAllEvents() {
         // Assert that all these events come with an item.
-        systemUnderTest
-                .addCancelListener(e -> Assert.assertNotNull(e.getItem()));
-        systemUnderTest
-                .addDeleteListener(e -> Assert.assertNotNull(e.getItem()));
+        systemUnderTest.addCancelListener(e -> Assert.assertNotNull(e.getItem()));
+        systemUnderTest.addDeleteListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addEditListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addSaveListener(e -> Assert.assertNotNull(e.getItem()));
 
@@ -38,33 +36,29 @@ public class CrudTest {
                 .parse("{\"key\": \"1\"}");
 
         // Simulate a sequence of interactions.
-        Arrays.asList(new Crud.NewEvent<>(systemUnderTest, false, null),
+        Arrays.asList(
+                new Crud.NewEvent<>(systemUnderTest, false, null),
                 new Crud.CancelEvent<>(systemUnderTest, false, null),
 
-                new Crud.EditEvent<>(systemUnderTest, false, selectedItem,
-                        null),
+                new Crud.EditEvent<>(systemUnderTest, false, selectedItem, null),
                 new Crud.DeleteEvent<>(systemUnderTest, false, null),
 
-                new Crud.EditEvent<>(systemUnderTest, false, selectedItem,
-                        null),
-                new Crud.SaveEvent<>(systemUnderTest, false, null))
-                .forEach(e -> ComponentUtil.fireEvent(systemUnderTest, e));
+                new Crud.EditEvent<>(systemUnderTest, false, selectedItem, null),
+                new Crud.SaveEvent<>(systemUnderTest, false, null)
+        ).forEach(e -> ComponentUtil.fireEvent(systemUnderTest, e));
     }
 
     @Test
     public void getEditorPosition_defaultOVERLAY() {
-        Assert.assertEquals(CrudEditorPosition.OVERLAY,
-                systemUnderTest.getEditorPosition());
+        Assert.assertEquals(CrudEditorPosition.OVERLAY, systemUnderTest.getEditorPosition());
     }
 
     private Grid<Thing> createFakeGrid() {
         Grid<Thing> grid = Mockito.spy(new Grid<>());
 
-        Mockito.when(grid.getDataProvider())
-                .thenReturn(Mockito.mock(DataProvider.class));
+        Mockito.when(grid.getDataProvider()).thenReturn(Mockito.mock(DataProvider.class));
 
-        DataCommunicator<Thing> communicator = Mockito
-                .mock(DataCommunicator.class);
+        DataCommunicator<Thing> communicator = Mockito.mock(DataCommunicator.class);
         Mockito.when(grid.getDataCommunicator()).thenReturn(communicator);
 
         DataKeyMapper<Thing> keyMapper = Mockito.mock(DataKeyMapper.class);

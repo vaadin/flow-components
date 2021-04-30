@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import java.util.Objects;
 
 /**
@@ -27,8 +28,9 @@ import java.util.Objects;
  * Own custom extensions can be made by extending this class.
  * <p>
  * Configuration specific to each ChartType can be set using
- * {@link Configuration#setPlotOptions(AbstractPlotOptions...)} or for a single
- * series using {@link AbstractSeries#setPlotOptions(AbstractPlotOptions)}
+ * {@link Configuration#setPlotOptions(AbstractPlotOptions...)} or for a
+ * single series using
+ * {@link AbstractSeries#setPlotOptions(AbstractPlotOptions)}
  */
 public class ChartType implements ChartEnum {
 
@@ -161,10 +163,8 @@ public class ChartType implements ChartEnum {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof ChartType))
-            return false;
+        if (this == o) return true;
+        if (!(o instanceof ChartType)) return false;
 
         ChartType chartType = (ChartType) o;
 

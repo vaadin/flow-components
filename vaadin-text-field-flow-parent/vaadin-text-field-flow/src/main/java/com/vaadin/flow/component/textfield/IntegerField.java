@@ -188,8 +188,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      */
     public void setStep(int step) {
         if (step <= 0) {
-            throw new IllegalArgumentException(
-                    "The step cannot be less or equal to zero.");
+            throw new IllegalArgumentException("The step cannot be less or equal to zero.");
         }
         super.setStep(step);
     }

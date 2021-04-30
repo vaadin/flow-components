@@ -42,20 +42,27 @@ public class AccordionView extends DemoView {
         Accordion accordion = new Accordion();
 
         VerticalLayout personalInformationLayout = new VerticalLayout();
-        personalInformationLayout.add(new TextField("Name"),
-                new TextField("Phone"), new TextField("Email"));
+        personalInformationLayout.add(
+            new TextField("Name"),
+            new TextField("Phone"),
+            new TextField("Email")
+        );
         accordion.add("Personal Information", personalInformationLayout);
 
         VerticalLayout billingAddressLayout = new VerticalLayout();
-        billingAddressLayout.add(new TextField("Address"),
-                new TextField("City"), new TextField("State"),
-                new TextField("Zip Code"));
+        billingAddressLayout.add(
+            new TextField("Address"),
+            new TextField("City"),
+            new TextField("State"),
+            new TextField("Zip Code")
+        );
         accordion.add("Billing Address", billingAddressLayout);
 
         VerticalLayout paymentLayout = new VerticalLayout();
-        paymentLayout.add(new Span("Not yet implemented"));
-        AccordionPanel billingAddressPanel = accordion.add("Payment",
-                paymentLayout);
+        paymentLayout.add(
+            new Span("Not yet implemented")
+        );
+        AccordionPanel billingAddressPanel = accordion.add("Payment", paymentLayout);
         billingAddressPanel.setEnabled(false);
         add(accordion);
         // end-source-example
@@ -70,13 +77,12 @@ public class AccordionView extends DemoView {
         Accordion accordion = new Accordion();
 
         accordion.add("Panel 1", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.FILLED);
+            .addThemeVariants(DetailsVariant.FILLED);
 
         accordion.add("Panel 2", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.FILLED);
+            .addThemeVariants(DetailsVariant.FILLED);
 
-        AccordionPanel disabledPanel = accordion.add("Panel 3",
-                new Span("Panel content"));
+        AccordionPanel disabledPanel = accordion.add("Panel 3", new Span("Panel content"));
         disabledPanel.addThemeVariants(DetailsVariant.FILLED);
         disabledPanel.setEnabled(false);
         add(accordion);
@@ -92,13 +98,13 @@ public class AccordionView extends DemoView {
         Accordion accordion = new Accordion();
 
         accordion.add("Panel 1", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.SMALL);
+            .addThemeVariants(DetailsVariant.SMALL);
 
         accordion.add("Panel 2", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.SMALL);
+            .addThemeVariants(DetailsVariant.SMALL);
 
         accordion.add("Panel 3", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.SMALL);
+            .addThemeVariants(DetailsVariant.SMALL);
         add(accordion);
         // end-source-example
 
@@ -112,13 +118,13 @@ public class AccordionView extends DemoView {
         Accordion accordion = new Accordion();
 
         accordion.add("Panel 1", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.REVERSE);
+            .addThemeVariants(DetailsVariant.REVERSE);
 
         accordion.add("Panel 2", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.REVERSE);
+            .addThemeVariants(DetailsVariant.REVERSE);
 
         accordion.add("Panel 3", new Span("Panel content"))
-                .addThemeVariants(DetailsVariant.REVERSE);
+            .addThemeVariants(DetailsVariant.REVERSE);
         add(accordion);
         // end-source-example
 

@@ -22,6 +22,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
 
+
 /**
  * The DrilldownEvent class stores information on click events in drilldown
  * points
@@ -42,12 +43,12 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
      * @param source
      */
     public DrilldownEvent(Chart source, boolean fromClient,
-            @EventData("event.detail.originalEvent.point.drilldown") String drilldown,
-            @EventData("event.detail.originalEvent.point.category") String category,
-            @EventData("event.detail.originalEvent.point.x") Double x,
-            @EventData("event.detail.originalEvent.point.y") Double y,
-            @EventData("event.detail.originalEvent.point.index") int pointIndex,
-            @EventData("event.detail.originalEvent.point.series.index") int seriesIndex) {
+                          @EventData("event.detail.originalEvent.point.drilldown") String drilldown,
+                          @EventData("event.detail.originalEvent.point.category") String category,
+                          @EventData("event.detail.originalEvent.point.x") Double x,
+                          @EventData("event.detail.originalEvent.point.y") Double y,
+                          @EventData("event.detail.originalEvent.point.index") int pointIndex,
+                          @EventData("event.detail.originalEvent.point.series.index") int seriesIndex) {
         super(source, fromClient);
 
         this.drilldown = drilldown;

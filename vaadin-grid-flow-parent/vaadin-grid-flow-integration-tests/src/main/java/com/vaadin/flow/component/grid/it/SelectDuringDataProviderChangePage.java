@@ -33,8 +33,8 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
 
         btn.addClickListener(ev -> setItems());
 
-        grid.setItemDetailsRenderer(TemplateRenderer.<Item> of("<div></div>")
-                .withProperty("id", i -> 1));
+        grid.setItemDetailsRenderer(
+            TemplateRenderer.<Item>of("<div></div>").withProperty("id",i->1));
         add(grid, btn);
     }
 
@@ -44,7 +44,7 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
             // Simulate heavy work
             Thread.sleep(3000);
         } catch (final InterruptedException e) {
-            throw new RuntimeException(e); // NOSONAR
+            throw new RuntimeException(e); //NOSONAR
         }
 
     }

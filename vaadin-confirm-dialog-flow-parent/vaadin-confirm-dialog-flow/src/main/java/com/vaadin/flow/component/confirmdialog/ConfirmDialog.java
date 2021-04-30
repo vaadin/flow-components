@@ -40,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "1.3.0")
+@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.3.0")
 @JsModule("@vaadin/vaadin-confirm-dialog/src/vaadin-confirm-dialog.js")
 @HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component
@@ -67,8 +67,9 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * `cancel` is sent when the user clicks Cancel button or presses Escape
-     * key. `cancel` is not sent if Cancel button is hidden
+     * `cancel` is sent when the user clicks Cancel button
+     * or presses Escape key. `cancel` is not sent if Cancel
+     * button is hidden
      */
     @DomEvent("cancel")
     public static class CancelEvent extends ComponentEvent<ConfirmDialog> {
@@ -84,8 +85,7 @@ public class ConfirmDialog extends Component
      * Sets the width of the component content area.
      * <p>
      * The width should be in a format understood by the browser, e.g. "100px"
-     * or "2.5em" (Using relative unit, such as percentage, will lead to
-     * unexpected results).
+     * or "2.5em" (Using relative unit, such as percentage, will lead to unexpected results).
      * <p>
      * If the provided {@code width} value is {@literal null} then width is
      * removed.
@@ -107,8 +107,7 @@ public class ConfirmDialog extends Component
      * Sets the height of the component content area.
      * <p>
      * The height should be in a format understood by the browser, e.g. "100px"
-     * or "2.5em" (Using relative unit, such as percentage, will lead to
-     * unexpected results).
+     * or "2.5em" (Using relative unit, such as percentage, will lead to unexpected results).
      * <p>
      * If the provided {@code height} value is {@literal null} then height is
      * removed.
@@ -141,8 +140,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Creates a dialog with a Confirm button with its click listener and a
-     * given texts
+     * Creates a dialog with a Confirm button with its click listener
+     * and a given texts
      * 
      * @param header
      *            the header text
@@ -243,8 +242,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets Reject button text and `reject` event listener. Makes Reject button
-     * visible
+     * Sets Reject button text and `reject` event listener.
+     * Makes Reject button visible
      * 
      * @param buttonText
      *            the text inside Reject button
@@ -259,8 +258,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets Reject button text, `reject` event listener, Reject button theme.
-     * Makes Reject button visible
+     * Sets Reject button text, `reject` event listener,
+     * Reject button theme. Makes Reject button visible
      * 
      * @param buttonText
      *            the text inside Reject button
@@ -270,7 +269,8 @@ public class ConfirmDialog extends Component
      *            the theme applied for a Reject button
      */
     public void setRejectButton(String buttonText,
-            ComponentEventListener<RejectEvent> rejectListener, String theme) {
+            ComponentEventListener<RejectEvent> rejectListener,
+            String theme) {
         setRejectButton(buttonText, rejectListener);
         setRejectButtonTheme(theme);
     }
@@ -296,8 +296,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets Cancel button text and `cancel` event listener. Makes Cancel button
-     * visible
+     * Sets Cancel button text and `cancel` event listener.
+     * Makes Cancel button visible
      * 
      * @param buttonText
      *            the text inside Cancel button
@@ -312,8 +312,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets Cancel button text, `cancel` event listener and Cancel button theme.
-     * Makes Cancel button visible
+     * Sets Cancel button text, `cancel` event listener and
+     * Cancel button theme. Makes Cancel button visible
      * 
      * @param buttonText
      *            the text inside Cancel button
@@ -323,7 +323,8 @@ public class ConfirmDialog extends Component
      *            the theme applied for a Cancel button
      */
     public void setCancelButton(String buttonText,
-            ComponentEventListener<CancelEvent> cancelListener, String theme) {
+            ComponentEventListener<CancelEvent> cancelListener,
+            String theme) {
         setCancelButton(buttonText, cancelListener);
         setCancelButtonTheme(theme);
     }
@@ -363,8 +364,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets Confirm button text, `confirm` event listener and Confirm button
-     * theme
+     * Sets Confirm button text, `confirm` event listener and
+     * Confirm button theme
      * 
      * @param buttonText
      *            the text inside Confirm button
@@ -416,8 +417,8 @@ public class ConfirmDialog extends Component
      * Sets custom confirmation message element
      * 
      * @param component
-     *            the component to display instead of default confirmation text
-     *            node
+     *            the component to display instead of default 
+     *            confirmation text node
      */
     public void setText(Component component) {
         setText(component.getElement());
@@ -427,8 +428,8 @@ public class ConfirmDialog extends Component
      * Sets custom confirmation message element
      * 
      * @param element
-     *            the element to display instead of default confirmation text
-     *            node
+     *            the element to display instead of default 
+     *            confirmation text node
      */
     public void setText(Element element) {
         getElement().appendChild(element);
@@ -531,9 +532,9 @@ public class ConfirmDialog extends Component
     /**
      * Opens the dialog.
      * <p>
-     * Note: You don't need to add the dialog component before opening it, cause
-     * opening a dialog will automatically add it to the {@code <body>} if it's
-     * not yet attached anywhere.
+     * Note: You don't need to add the dialog component before opening it,
+     * cause opening a dialog will automatically add it to the {@code <body>}
+     * if it's not yet attached anywhere.
      */
     public void open() {
         setOpened(true);
@@ -557,12 +558,11 @@ public class ConfirmDialog extends Component
     /**
      * Opens or closes the dialog.
      * <p>
-     * Note: Confirm-dialog will be attached or detached from the DOM
-     * automatically, if it was not added manually.
+     * Note: Confirm-dialog will be attached or detached from the DOM automatically,
+     * if it was not added manually. 
      *
      * @param opened
-     *            {@code true} to open the confirm-dialog, {@code false} to
-     *            close it
+     *            {@code true} to open the confirm-dialog, {@code false} to close it
      */
     public void setOpened(boolean opened) {
         if (opened) {

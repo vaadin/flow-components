@@ -192,8 +192,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(), getValueChangeTimeout(),
+                getSynchronizationRegistration());
     }
 
     @Override
@@ -245,8 +245,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
+     * Specifies if the field value gets automatically selected when
+     * the field gains focus.
      *
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
@@ -260,8 +260,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * selected when the field gains focus, <code>false</code> otherwise.
      *
      * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
+     *            <code>true</code> to set auto select on,
+     *            <code>false</code> otherwise
      */
     @Override
     public void setAutoselect(boolean autoselect) {
@@ -269,7 +269,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * Gets the visibility state of the button which clears the text field.
+     * Gets the visibility state of the button which clears the text
+     * field.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
@@ -406,8 +407,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
+     * The text usually displayed in a tooltip popup when the mouse is over the field.
      *
      * @return the {@code title} property from the webcomponent
      */

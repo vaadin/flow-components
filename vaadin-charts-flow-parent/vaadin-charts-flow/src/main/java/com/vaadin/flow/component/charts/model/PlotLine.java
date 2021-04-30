@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * <p>
  * An array of lines stretching across the plot area, marking a specific value
@@ -24,8 +25,8 @@ package com.vaadin.flow.component.charts.model;
  * </p>
  * 
  * <p>
- * In
- * <a href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+ * In <a
+ * href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
  * >styled mode</a>, the plot lines are styled by the
  * <code>.highcharts-plot-line</code> class in addition to the
  * <code>className</code> option.
@@ -33,90 +34,90 @@ package com.vaadin.flow.component.charts.model;
  */
 public class PlotLine extends AbstractConfigurationObject {
 
-    private String className;
-    private String id;
-    private Label label;
-    private Number value;
-    private Number zIndex;
+	private String className;
+	private String id;
+	private Label label;
+	private Number value;
+	private Number zIndex;
 
-    public PlotLine() {
-    }
+	public PlotLine() {
+	}
 
-    /**
-     * @see #setClassName(String)
-     */
-    public String getClassName() {
-        return className;
-    }
+	/**
+	 * @see #setClassName(String)
+	 */
+	public String getClassName() {
+		return className;
+	}
 
-    /**
-     * A custom class name, in addition to the default
-     * <code>highcharts-plot-line</code>, to apply to each individual line.
-     */
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	/**
+	 * A custom class name, in addition to the default
+	 * <code>highcharts-plot-line</code>, to apply to each individual line.
+	 */
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-    /**
-     * @see #setId(String)
-     */
-    public String getId() {
-        return id;
-    }
+	/**
+	 * @see #setId(String)
+	 */
+	public String getId() {
+		return id;
+	}
 
-    /**
-     * An id used for identifying the plot line in Axis.removePlotLine.
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
+	/**
+	 * An id used for identifying the plot line in Axis.removePlotLine.
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    /**
-     * @see #setLabel(Label)
-     */
-    public Label getLabel() {
-        if (label == null) {
-            label = new Label();
-        }
-        return label;
-    }
+	/**
+	 * @see #setLabel(Label)
+	 */
+	public Label getLabel() {
+		if (label == null) {
+			label = new Label();
+		}
+		return label;
+	}
 
-    /**
-     * Text labels for the plot bands
-     */
-    public void setLabel(Label label) {
-        this.label = label;
-    }
+	/**
+	 * Text labels for the plot bands
+	 */
+	public void setLabel(Label label) {
+		this.label = label;
+	}
 
-    /**
-     * @see #setValue(Number)
-     */
-    public Number getValue() {
-        return value;
-    }
+	/**
+	 * @see #setValue(Number)
+	 */
+	public Number getValue() {
+		return value;
+	}
 
-    /**
-     * The position of the line in axis units.
-     */
-    public void setValue(Number value) {
-        this.value = value;
-    }
+	/**
+	 * The position of the line in axis units.
+	 */
+	public void setValue(Number value) {
+		this.value = value;
+	}
 
-    /**
-     * @see #setZIndex(Number)
-     */
-    public Number getZIndex() {
-        return zIndex;
-    }
+	/**
+	 * @see #setZIndex(Number)
+	 */
+	public Number getZIndex() {
+		return zIndex;
+	}
 
-    /**
-     * The z index of the plot line within the chart.
-     */
-    public void setZIndex(Number zIndex) {
-        this.zIndex = zIndex;
-    }
+	/**
+	 * The z index of the plot line within the chart.
+	 */
+	public void setZIndex(Number zIndex) {
+		this.zIndex = zIndex;
+	}
 
-    public PlotLine(Number value) {
-        this.value = value;
-    }
+	public PlotLine(Number value) {
+		this.value = value;
+	}
 }

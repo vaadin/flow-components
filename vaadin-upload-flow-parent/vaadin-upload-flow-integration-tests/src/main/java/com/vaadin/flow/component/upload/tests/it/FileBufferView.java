@@ -28,8 +28,7 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 /**
- * View for {@link Upload} tests using {@link FileBuffer} and
- * {@link MultiFileBuffer}.
+ * View for {@link Upload} tests using {@link FileBuffer} and {@link MultiFileBuffer}.
  *
  * @author Vaadin Ltd
  */
@@ -46,7 +45,7 @@ public class FileBufferView extends Div {
         singleFileUpload.setId("single-upload");
         singleFileUpload.setMaxFiles(1);
         return setupUploadSection(singleFileUpload,
-                e -> buffer.getInputStream());
+            e -> buffer.getInputStream());
 
     }
 
@@ -55,11 +54,11 @@ public class FileBufferView extends Div {
         final Upload multiFileUpload = new Upload(buffer);
         multiFileUpload.setId("multi-upload");
         return setupUploadSection(multiFileUpload,
-                e -> buffer.getInputStream(e.getFileName()));
+            e -> buffer.getInputStream(e.getFileName()));
     }
 
     private static Div setupUploadSection(Upload upload,
-            Function<SucceededEvent, InputStream> streamProvider) {
+        Function<SucceededEvent, InputStream> streamProvider) {
         final String uploadId = upload.getId().orElse("");
         final Div output = new Div();
         output.setId(uploadId + "-output");
@@ -70,7 +69,7 @@ public class FileBufferView extends Div {
             try {
                 output.add(event.getFileName());
                 output.add(
-                        IOUtils.toString(streamProvider.apply(event), "UTF-8"));
+                    IOUtils.toString(streamProvider.apply(event), "UTF-8"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

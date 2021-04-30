@@ -36,6 +36,7 @@ import static com.vaadin.flow.component.charts.model.DataProviderSeries.HIGH_PRO
 import static com.vaadin.flow.component.charts.model.DataProviderSeries.LOW_PROPERTY;
 import static com.vaadin.flow.component.charts.model.DataProviderSeries.OPEN_PROPERTY;
 
+
 /**
  * Custom bean serializer for {@link DataProviderSeries}
  */

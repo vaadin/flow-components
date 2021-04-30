@@ -38,16 +38,15 @@ public class GridScrollToPage extends Div {
         grid2.setItems(items);
         grid2.addColumn(item -> item);
 
-        NativeButton addRowsAndScrollToEnd = new NativeButton(
-                "Add row and scroll to end", e -> {
-                    items.add(String.valueOf(items.size()));
-                    items.add(String.valueOf(items.size()));
-                    grid2.getDataProvider().refreshAll();
-                    grid2.scrollToEnd();
+        NativeButton addRowsAndScrollToEnd = new NativeButton("Add row and scroll to end",
+                e -> {
+                        items.add(String.valueOf(items.size()));
+                        items.add(String.valueOf(items.size()));
+                        grid2.getDataProvider().refreshAll();
+                        grid2.scrollToEnd();
                 });
         addRowsAndScrollToEnd.setId("add-row-and-scroll-to-end");
 
-        add(grid, scrollToStart, scrollToEnd, scrollToRow500, grid2,
-                addRowsAndScrollToEnd);
+        add(grid, scrollToStart, scrollToEnd, scrollToRow500, grid2, addRowsAndScrollToEnd);
     }
 }

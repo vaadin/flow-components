@@ -137,7 +137,9 @@ public class DialogView extends Div {
         content.setText("This component is styled using global styles");
         dialog.add(content);
 
-        String styles = ".my-style { " + "  color: red;" + " }";
+        String styles = ".my-style { "
+                + "  color: red;"
+                + " }";
 
         /*
          * The code below register the style file dynamically. Normally you
@@ -167,15 +169,19 @@ public class DialogView extends Div {
         NativeButton openSecondDialog = new NativeButton("Open another dialog");
 
         Dialog firstDialog = new Dialog();
-        firstDialog.add(new Text("This is the first dialog"),
-                new Button("Close", e -> firstDialog.close()));
+        firstDialog.add(
+            new Text("This is the first dialog"),
+            new Button("Close", e -> firstDialog.close())
+        );
         firstDialog.setModal(false);
         firstDialog.setDraggable(true);
         firstDialog.setResizable(true);
-
+        
         Dialog secondDialog = new Dialog();
-        secondDialog.add(new Text("This is the second dialog"),
-                new Button("Close", e -> secondDialog.close()));
+        secondDialog.add(
+            new Text("This is the second dialog"),
+            new Button("Close", e -> secondDialog.close())
+        );
         secondDialog.setModal(false);
         secondDialog.setDraggable(true);
         secondDialog.setResizable(true);
@@ -183,7 +189,6 @@ public class DialogView extends Div {
         openDialog.addClickListener(e -> firstDialog.open());
         openSecondDialog.addClickListener(e -> secondDialog.open());
 
-        add(new Text("Modeless Draggable Resizable Dialog"), openDialog,
-                openSecondDialog, firstDialog);
+        add(new Text("Modeless Draggable Resizable Dialog"), openDialog, openSecondDialog, firstDialog);
     }
 }

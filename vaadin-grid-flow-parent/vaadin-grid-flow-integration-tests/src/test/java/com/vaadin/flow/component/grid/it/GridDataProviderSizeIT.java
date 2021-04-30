@@ -30,7 +30,6 @@ public class GridDataProviderSizeIT extends AbstractComponentIT {
         open();
 
         WebElement info = $("div").id("info");
-        Assert.assertEquals("sizeInBackEnd should be called once", "1",
-                info.getText());
+        Assert.assertEquals("sizeInBackEnd should be called once", "1", info.getText());
     }
 }

@@ -148,7 +148,8 @@ public class TimePickerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetStep_lessThan0Ms_throwsException() {
-        TimePicker timePicker=new TimePicker();timePicker.setStep(Duration.ofNanos(500_000));
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofNanos(500_000));
     }
 
     @Test
@@ -217,12 +218,11 @@ public class TimePickerTest {
         assertClearButtonPropertyValueEquals(timePicker, false);
     }
 
-    public void assertClearButtonPropertyValueEquals(TimePicker timePicker,
-            Boolean value) {
+    public void assertClearButtonPropertyValueEquals(TimePicker timePicker, Boolean value) {
         timePicker.setClearButtonVisible(value);
         assertEquals(value, timePicker.isClearButtonVisible());
-        assertEquals(timePicker.isClearButtonVisible(), timePicker.getElement()
-                .getProperty("clearButtonVisible", value));
+        assertEquals(timePicker.isClearButtonVisible(),
+                timePicker.getElement().getProperty("clearButtonVisible", value));
     }
 
     @Test

@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     public static final String OVERFLOW_JUSTIFY = "justify";
@@ -39,8 +40,7 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     /**
      * Whether to hide data labels that are outside the plot area. By default,
-     * the data label is moved inside the plot area according to the overflow
-     * option.
+     * the data label is moved inside the plot area according to the overflow option.
      */
     public abstract void setCrop(Boolean crop);
 
@@ -71,8 +71,8 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public abstract String getFormat();
 
     /**
-     * A format string for the data label. Available variables are the same as
-     * for <code>formatter</code>.
+     * A format string for the data label. Available variables are the same
+     * as for <code>formatter</code>.
      */
     public abstract void setFormat(String format);
 
@@ -82,9 +82,9 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public abstract String getFormatter();
 
     /**
-     * Callback JavaScript function to format the data label. Note that if a
-     * <code>format</code> is defined, the format takes precedence and the
-     * formatter is ignored.
+     * Callback JavaScript function to format the data label.
+     * Note that if a <code>format</code> is defined, the format
+     * takes precedence and the formatter is ignored.
      */
     public abstract void setFormatter(String _fn_formatter);
 

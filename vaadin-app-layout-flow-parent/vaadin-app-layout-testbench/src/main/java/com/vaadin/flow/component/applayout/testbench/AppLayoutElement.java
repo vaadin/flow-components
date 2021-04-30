@@ -27,13 +27,13 @@ import com.vaadin.testbench.elementsbase.Element;
 public class AppLayoutElement extends TestBenchElement {
 
     @SuppressWarnings("unchecked")
-    public TestBenchElement getContent() {
+	public TestBenchElement getContent() {
         TestBenchElement contentPlaceholder = $(TestBenchElement.class)
-                .attribute("content", "").first();
+            .attribute("content", "").first();
 
         return (TestBenchElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0];",
-                contentPlaceholder);
+            "return arguments[0].firstElementChild.assignedNodes()[0];",
+            contentPlaceholder);
     }
 
     public boolean isDrawerFirst() {

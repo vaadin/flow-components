@@ -35,18 +35,18 @@ import java.util.stream.Stream;
  */
 @Element("vaadin-list-box")
 public class ListBoxElement extends TestBenchElement
-        implements HasLabel, HasSelectByText {
+    implements HasLabel, HasSelectByText {
 
     @Override
     public void selectByText(String text) {
         getItems().filter(e -> Objects.equals(text, e.getText())).findFirst()
-                .orElseThrow(NoSuchElementException::new).click();
+            .orElseThrow(NoSuchElementException::new).click();
     }
 
     @Override
     public String getSelectedText() {
         return getItems().filter(i -> i.getAttribute("selected") != null)
-                .findFirst().map(WebElement::getText).orElse(null);
+            .findFirst().map(WebElement::getText).orElse(null);
     }
 
     public List<String> getOptions() {

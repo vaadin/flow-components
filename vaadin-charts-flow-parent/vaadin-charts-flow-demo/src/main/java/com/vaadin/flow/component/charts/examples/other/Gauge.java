@@ -16,7 +16,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 
 import java.util.Random;
 
-@CssImport(value = "./styles/Gauge.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value="./styles/Gauge.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class Gauge extends AbstractChartExample {
 
     @Override
@@ -78,8 +78,7 @@ public class Gauge extends AbstractChartExample {
 
         runWhileAttached(chart, () -> {
             Integer oldValue = series.getData()[0].intValue();
-            Integer newValue = (int) (oldValue
-                    + (random.nextDouble() - 0.5) * 20.0);
+            Integer newValue = (int) (oldValue + (random.nextDouble() - 0.5) * 20.0);
             series.updatePoint(0, newValue);
         }, 5000, 12000);
 

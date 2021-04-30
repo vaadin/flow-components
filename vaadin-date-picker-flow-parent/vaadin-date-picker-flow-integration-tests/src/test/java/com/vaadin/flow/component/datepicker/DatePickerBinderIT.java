@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.util.Collections;
 
+
 /**
  * Integration tests for the {@link BinderValidationView}.
  */
@@ -38,8 +39,7 @@ public class DatePickerBinderIT extends AbstractComponentIT {
 
     @Test
     public void selectDateOnSimpleDatePicker() {
-        final DatePickerElement element = $(DatePickerElement.class)
-                .waitForFirst();
+        final DatePickerElement element = $(DatePickerElement.class).waitForFirst();
         Assert.assertFalse(element.getPropertyBoolean("invalid"));
     }
 
@@ -50,8 +50,7 @@ public class DatePickerBinderIT extends AbstractComponentIT {
         field.dispatchEvent("blur");
     }
 
-    private void setInternalValidBinderInvalidValue(DatePickerElement field,
-            int day) {
+    private void setInternalValidBinderInvalidValue(DatePickerElement field, int day) {
         field.setDate(LocalDate.of(2019, 1, day));
         field.dispatchEvent("change",
                 Collections.singletonMap("bubbles", true));
@@ -90,8 +89,8 @@ public class DatePickerBinderIT extends AbstractComponentIT {
 
         setInternalValidBinderInvalidValue(field);
 
-        field.getCommandExecutor().executeScript("arguments[0].invalid = false",
-                field);
+        field.getCommandExecutor()
+                .executeScript("arguments[0].invalid = false", field);
 
         Assert.assertEquals(field.getPropertyString("label"), "invalid");
     }

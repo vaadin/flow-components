@@ -111,8 +111,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * `resize` event is sent when the user finishes resizing the overlay.
      */
-    @DomEvent("resize")
-    public static class DialogResizeEvent extends ComponentEvent<Dialog> {
+    @DomEvent("resize") 
+    public static class DialogResizeEvent
+            extends ComponentEvent<Dialog> {
 
         private final String width;
         private final String height;
@@ -425,14 +426,13 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Sets whether component will open modal or modeless dialog.
      * <p>
      * Note: When dialog is set to be modeless, then it's up to you to provide
-     * means for it to be closed (eg. a button that calls
-     * {@link Dialog#close()}). The reason being that a modeless dialog allows
-     * user to interact with the interface under it and won't be closed by
-     * clicking outside or the ESC key.
+     * means for it to be closed (eg. a button that calls {@link Dialog#close()}).
+     * The reason being that a modeless dialog allows user to interact with the
+     * interface under it and won't be closed by clicking outside or the ESC key.
      * 
-     * @param modal
-     *            {@code false} to enable dialog to open as modeless modal,
-     *            {@code true} otherwise.
+     * @param modal 
+     *          {@code false} to enable dialog to open as modeless modal,
+     *          {@code true} otherwise.
      */
     public void setModal(boolean modal) {
         getElement().setProperty("modeless", !modal);
@@ -441,7 +441,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Gets whether component is set as modal or modeless dialog.
      * 
-     * @return {@code true} if modal dialog (default), {@code false} otherwise.
+     * @return  {@code true} if modal dialog (default),
+     *          {@code false} otherwise.
      */
     public boolean isModal() {
         return !getElement().getProperty("modeless", false);
@@ -450,19 +451,19 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Sets whether dialog is enabled to be dragged by the user or not.
      * <p>
-     * To allow an element inside the dialog to be dragged by the user (for
-     * instance, a header inside the dialog), a class {@code "draggable"} can be
-     * added to it (see {@link HasStyle#addClassName(String)}).
+     * To allow an element inside the dialog to be dragged by the user
+     * (for instance, a header inside the dialog), a class {@code "draggable"}
+     * can be added to it (see {@link HasStyle#addClassName(String)}).
      * <p>
-     * Note: If draggable is enabled and dialog is opened without first being
-     * explicitly attached to a parent, then it won't restore its last position
-     * in the case the user closes and opens it again. Reason being that a self
-     * attached dialog is removed from the DOM when it's closed and position is
-     * not synched.
+     * Note: If draggable is enabled and dialog is opened without first
+     * being explicitly attached to a parent, then it won't restore its
+     * last position in the case the user closes and opens it again.
+     * Reason being that a self attached dialog is removed from the DOM
+     * when it's closed and position is not synched.
      * 
-     * @param draggable
-     *            {@code true} to enable dragging of the dialog, {@code false}
-     *            otherwise
+     * @param draggable 
+     *          {@code true} to enable dragging of the dialog,
+     *          {@code false} otherwise
      */
     public void setDraggable(boolean draggable) {
         getElement().setProperty("draggable", draggable);
@@ -471,8 +472,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Gets whether dialog is enabled to be dragged or not.
      * 
-     * @return {@code true} if dragging is enabled, {@code false} otherwise
-     *         (default).
+     * @return 
+     *      {@code true} if dragging is enabled,
+     *      {@code false} otherwise (default).
      */
     public boolean isDraggable() {
         return getElement().getProperty("draggable", false);
@@ -481,9 +483,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Sets whether dialog can be resized by user or not.
      * 
-     * @param resizable
-     *            {@code true} to enabled resizing of the dialog, {@code false}
-     *            otherwise.
+     * @param resizable 
+     *          {@code true} to enabled resizing of the dialog,
+     *          {@code false} otherwise. 
      */
     public void setResizable(boolean resizable) {
         getElement().setProperty("resizable", resizable);
@@ -492,8 +494,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Gets whether dialog is enabled to be resized or not.
      * 
-     * @return {@code true} if resizing is enabled, {@code falsoe} otherwiser
-     *         (default).
+     * @return
+     *      {@code true} if resizing is enabled,
+     *      {@code falsoe} otherwiser (default).
      */
     public boolean isResizable() {
         return getElement().getProperty("resizable", false);
@@ -633,8 +636,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     private void setDimension(String dimension, String value) {
-        getElement().executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
-                dimension, value);
+        getElement()
+                .executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
+                        dimension, value);
     }
 
     private void attachComponentRenderer() {

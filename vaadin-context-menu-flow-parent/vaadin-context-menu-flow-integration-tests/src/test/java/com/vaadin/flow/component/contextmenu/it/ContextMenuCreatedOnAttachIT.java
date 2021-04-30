@@ -21,19 +21,16 @@ public class ContextMenuCreatedOnAttachIT extends AbstractContextMenuIT {
     @Test
     public void contextMenuCreatedOnAttach_leftClickOpensMenu() {
         final String TARGET_ID = "target-open-left-click";
-        correctActionOpensMenu(() -> leftClickOn(TARGET_ID),
-                () -> rightClickOn(TARGET_ID));
+        correctActionOpensMenu(() -> leftClickOn(TARGET_ID),() -> rightClickOn(TARGET_ID));
     }
 
     @Test
     public void contextMenuCreatedOnAttach_rightClickOpensMenu() {
         final String TARGET_ID = "target-open-right-click";
-        correctActionOpensMenu(() -> rightClickOn(TARGET_ID),
-                () -> leftClickOn(TARGET_ID));
+        correctActionOpensMenu(() -> rightClickOn(TARGET_ID),() -> leftClickOn(TARGET_ID));
     }
 
-    private void correctActionOpensMenu(Runnable rightAction,
-            Runnable wrongAction) {
+    private void correctActionOpensMenu(Runnable rightAction, Runnable wrongAction) {
         verifyClosed();
         wrongAction.run();
         verifyClosed();

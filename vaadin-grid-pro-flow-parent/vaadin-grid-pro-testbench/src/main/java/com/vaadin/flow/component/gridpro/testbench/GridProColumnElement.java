@@ -17,15 +17,15 @@ package com.vaadin.flow.component.gridpro.testbench;
  * #L%
  */
 
+
 import com.vaadin.testbench.TestBenchElement;
 
 import java.util.ArrayList;
 
 /**
- * A TestBench element representing a
- * <code>&lt;vaadin-pro-grid-edit-column&gt;</code> element. This is not a
- * TestBenchElement as polyfilled browsers are not capable of finding it or
- * handling it as a web element.
+ * A TestBench element representing a <code>&lt;vaadin-pro-grid-edit-column&gt;</code>
+ * element. This is not a TestBenchElement as polyfilled browsers are not
+ * capable of finding it or handling it as a web element.
  */
 public class GridProColumnElement {
 
@@ -52,8 +52,7 @@ public class GridProColumnElement {
      * @return the options list
      */
     public ArrayList<String> getOptionsList() {
-        ArrayList<String> editorOptions = (ArrayList<String>) execJs(
-                "return column.editorOptions");
+        ArrayList<String> editorOptions = (ArrayList<String>) execJs("return column.editorOptions");
         return editorOptions;
     }
 

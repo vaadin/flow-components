@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * A specialized series for use with HeatMaps
  */

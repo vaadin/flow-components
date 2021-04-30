@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model.serializers;
  * #L%
  */
 
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -28,8 +29,7 @@ import com.vaadin.flow.component.charts.model.TimeUnitMultiples;
 import java.io.IOException;
 
 /**
- * Serializer for
- * {@link com.vaadin.flow.component.charts.model.TimeUnitMultiples}.
+ * Serializer for {@link com.vaadin.flow.component.charts.model.TimeUnitMultiples}.
  *
  */
 public class TimeUnitMultiplesSerializer

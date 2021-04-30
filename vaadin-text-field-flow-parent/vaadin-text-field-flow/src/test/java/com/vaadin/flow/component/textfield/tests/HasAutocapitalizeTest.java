@@ -25,8 +25,7 @@ import org.junit.Test;
 public class HasAutocapitalizeTest {
 
     @Tag("div")
-    public static class HasAutocapitalizeComponent extends Component
-            implements HasAutocapitalize {
+    public static class HasAutocapitalizeComponent extends Component implements HasAutocapitalize {
 
     }
 

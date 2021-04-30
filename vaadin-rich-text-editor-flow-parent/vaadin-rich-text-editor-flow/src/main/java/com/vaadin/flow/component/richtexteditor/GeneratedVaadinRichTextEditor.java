@@ -66,8 +66,8 @@ import elemental.json.JsonArray;
  * </p>
  * <p>
  * Vaadin Rich Text Editor focuses on the structure, not the styling of content.
- * Therefore, the semantic HTML5 tags and CSS usage is limited to most common
- * cases, like horizontal text alignment.
+ * Therefore, the semantic HTML5 tags and CSS usage is limited to most common cases,
+ * like horizontal text alignment.
  * </p>
  * <h3>Styling</h3>
  * <p>
@@ -91,7 +91,8 @@ import elemental.json.JsonArray;
  * <td>Set to a readonly text editor</td>
  * <td>:host</td>
  * </tr>
- * </tbody> <caption>Styling</caption>
+ * </tbody>
+ * <caption>Styling</caption>
  * </table>
  * <p>
  * The following shadow DOM parts are available for styling:
@@ -195,12 +196,13 @@ import elemental.json.JsonArray;
  * <td>{@code clean-button}</td>
  * <td>The &quot;clean formatting&quot; button</td>
  * </tr>
- * </tbody> <caption>Shadow parts</caption>
+ * </tbody>
+ * <caption>Shadow parts</caption>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  */
 @Tag("vaadin-rich-text-editor")

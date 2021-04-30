@@ -26,35 +26,27 @@ public class OverlayIT extends BasicIT {
     @Test
     public void login() {
         openOverlay();
-        LoginOverlayElement overlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-        checkSuccessfulLogin(overlay.getUsernameField(),
-                overlay.getPasswordField(), () -> overlay.submit());
+        LoginOverlayElement overlay = $(LoginOverlayElement.class).waitForFirst();
+        checkSuccessfulLogin(overlay.getUsernameField(), overlay.getPasswordField(), () -> overlay.submit());
     }
 
     @Override
     public void testDefaults() {
         super.testDefaults();
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
+        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         Assert.assertEquals("App name", loginOverlay.getTitle());
-        Assert.assertEquals("Application description",
-                loginOverlay.getDescription());
-        checkLoginForm(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(),
-                loginOverlay.getSubmitButton());
+        Assert.assertEquals("Application description", loginOverlay.getDescription());
+        checkLoginForm(loginOverlay.getUsernameField(), loginOverlay.getPasswordField(), loginOverlay.getSubmitButton());
     }
 
     @Test
     public void testOverlaySelfAttached() {
-        getDriver()
-                .get(super.getBaseURL() + "/vaadin-login/overlayselfattached");
+        getDriver().get(super.getBaseURL() + "/vaadin-login/overlayselfattached");
 
         Assert.assertFalse($(LoginOverlayElement.class).exists());
         openOverlay();
 
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
+        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         Assert.assertTrue(loginOverlay.isOpened());
 
         loginOverlay.getUsernameField().setValue("value");
@@ -66,19 +58,17 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/component-title";
         getDriver().get(url);
         openOverlay();
 
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
+        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         TestBenchElement title = loginOverlay.getTitleComponent();
 
         Assert.assertEquals("Component title", title.getText());
 
-        checkSuccessfulLogin(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(), () -> loginOverlay.submit());
+        checkSuccessfulLogin(loginOverlay.getUsernameField(), loginOverlay.getPasswordField(),
+                () -> loginOverlay.submit());
 
         Assert.assertFalse(loginOverlay.isOpened());
         openOverlay();
@@ -88,10 +78,11 @@ public class OverlayIT extends BasicIT {
         Assert.assertEquals("vaadin:vaadin-h",
                 title.$("iron-icon").first().getAttribute("icon"));
 
-        Assert.assertEquals("Component title", title.$("h3").first().getText());
+        Assert.assertEquals("Component title",
+                title.$("h3").first().getText());
 
-        checkSuccessfulLogin(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(), () -> loginOverlay.submit());
+        checkSuccessfulLogin(loginOverlay.getUsernameField(), loginOverlay.getPasswordField(),
+                () -> loginOverlay.submit());
         Assert.assertFalse(loginOverlay.isOpened());
 
         checkTitleComponentWasReset();
@@ -99,8 +90,7 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testResetTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/component-title";
         getDriver().get(url);
         checkTitleComponentWasReset();
     }
@@ -110,25 +100,20 @@ public class OverlayIT extends BasicIT {
         $("button").id("removeCustomTitle").click();
         openOverlay();
 
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
+        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
 
         Assert.assertFalse(loginOverlay.hasTitleComponent());
         Assert.assertEquals("Make title string again", loginOverlay.getTitle());
     }
 
     public void testTitleAndDescriptionStrings() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login")
-                + "/property-title-description";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/property-title-description";
         getDriver().get(url);
         openOverlay();
 
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
+        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         Assert.assertEquals("Property title", loginOverlay.getTitle());
-        Assert.assertEquals("Property description",
-                loginOverlay.getDescription());
+        Assert.assertEquals("Property description", loginOverlay.getDescription());
     }
 
 }

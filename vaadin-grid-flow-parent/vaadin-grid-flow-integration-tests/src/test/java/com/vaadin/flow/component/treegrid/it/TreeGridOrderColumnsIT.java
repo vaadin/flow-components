@@ -69,12 +69,15 @@ public class TreeGridOrderColumnsIT extends AbstractComponentIT {
         for (int i = 0; i < headers.length; i++) {
             // columnIndex 0 is multi select in the grid
             int columnIndex = i + 1;
-            Assert.assertEquals("Unexpected header for column " + i, headers[i],
+            Assert.assertEquals(
+                    "Unexpected header for column " + i, headers[i],
                     treeGrid.getHeaderCellContent(0, columnIndex).getText());
-            Assert.assertEquals("Unexpected header for column " + i,
+            Assert.assertEquals(
+                    "Unexpected header for column " + i,
                     TreeGridOrderColumnsPage.HEADER2_PREFIX + headers[i],
                     treeGrid.getHeaderCellContent(1, columnIndex).getText());
-            Assert.assertEquals("Unexpected header for column " + i,
+            Assert.assertEquals(
+                    "Unexpected header for column " + i,
                     TreeGridOrderColumnsPage.HEADER3_PREFIX + headers[i],
                     treeGrid.getHeaderCellContent(2, columnIndex).getText());
         }

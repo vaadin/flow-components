@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model.style;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
@@ -32,7 +33,6 @@ public class LabelStyle extends AbstractConfigurationObject {
     private String top;
     private StylePosition position;
     private String textShadow;
-
     /**
      * @see #setColor(Color)
      */
@@ -148,7 +148,7 @@ public class LabelStyle extends AbstractConfigurationObject {
     /**
      * @see #setTextShadow(String)
      */
-    public String getTextShadow() {
+    public String getTextShadow(){
         return textShadow;
     }
 
@@ -158,6 +158,6 @@ public class LabelStyle extends AbstractConfigurationObject {
      * @param textShadow
      */
     public void setTextShadow(String textShadow) {
-        this.textShadow = textShadow;
+        this.textShadow=textShadow;
     }
 }

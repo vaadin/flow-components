@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.events.internal;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.Series;
 
@@ -57,8 +58,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
      * @param pointIndex
      *            Point index.
      */
-    public DataUpdatedEvent(Series series, DataSeriesItem item,
-            int pointIndex) {
+    public DataUpdatedEvent(Series series, DataSeriesItem item, int pointIndex) {
         super(series, item);
         this.pointIndex = pointIndex;
     }

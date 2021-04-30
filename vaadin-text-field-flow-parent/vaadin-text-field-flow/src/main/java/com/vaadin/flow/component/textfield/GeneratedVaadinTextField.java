@@ -865,8 +865,7 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
+     * The text usually displayed in a tooltip popup when the mouse is over the field.
      * </p>
      *
      * @param title

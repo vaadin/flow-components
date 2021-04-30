@@ -14,8 +14,7 @@ public class Person implements Serializable {
         super();
     }
 
-    public Person(String name, boolean isSubscriber, String email, int age,
-            Department department) {
+    public Person(String name, boolean isSubscriber, String email, int age, Department department) {
         super();
         this.name = name;
         this.isSubscriber = isSubscriber;
@@ -98,8 +97,8 @@ public class Person implements Serializable {
         try {
             return (Person) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("The Person object could not be cloned.",
-                    e);
+            throw new RuntimeException(
+                    "The Person object could not be cloned.", e);
         }
     }
 }
