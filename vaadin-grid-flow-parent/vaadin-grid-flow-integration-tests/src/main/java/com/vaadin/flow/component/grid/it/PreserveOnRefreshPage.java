@@ -28,10 +28,32 @@ public class PreserveOnRefreshPage extends Div {
 
     public PreserveOnRefreshPage() {
         Grid<Person> grid = new Grid<>();
-        grid.setItems(new Person("foo", 20));
+        Person foo = new Person("foo", 20);
+        grid.setItems(foo);
         grid.addComponentColumn(person -> new Span(person.getFirstName()))
                 .setHeader(new Span("header")).setFooter(new Span("footer"));
-        add(grid);
+
+        // Add editable column
+        Column<Person> firstNameColumn = grid.addColumn(Person::getFirstName).setHeader("First Name");
+
+        // define editor & binder for editor
+        Binder<Person> binder = new Binder<>(Person.class);
+                Editor<Person> editor = grid.getEditor();
+                editor.setBinder(binder);
+                editor.setBuffered(true);
+
+        // define editor components for columns
+        TextField firstNameField = new TextField();
+        binder.bind(firstNameField, Person::getFirstName, Person::setFirstName);
+        firstNameColumn.setEditorComponent(firstNameField);
+
+        Button button = new Button("Edit");
+        button.setId("edit");
+        button.addClickListener(event -> {
+            grid.getEditor().editItem(foo);
+        });
+
+        add(grid,button);
     }
 
 }
