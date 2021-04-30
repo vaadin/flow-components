@@ -82,7 +82,6 @@ public class ListBoxDataViewPage extends Div {
     static final String LIST_BOX_SELECTED_IDS_SPAN = "list-box-selected-ids-span";
     static final String MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN = "multi-select-list-box-selected-ids-span";
 
-
     public ListBoxDataViewPage() {
         createGenericDataView();
         createListDataView();
@@ -306,72 +305,72 @@ public class ListBoxDataViewPage extends Div {
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
         CustomItem fourth = new CustomItem(4L, "Fourth");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third, fourth));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third, fourth));
 
-        MultiSelectListBox<CustomItem> multiSelectListBox =
-                new MultiSelectListBox<>();
+        MultiSelectListBox<CustomItem> multiSelectListBox = new MultiSelectListBox<>();
         ListBoxListDataView<CustomItem> listDataView = multiSelectListBox
                 .setItems(items);
         // Setting the following Identifier Provider makes the component
         // independent from the CustomItem's equals method implementation:
         listDataView.setIdentifierProvider(CustomItem::getId);
 
-        Set<CustomItem> selected = new HashSet<>(Arrays.asList(
-                new CustomItem(1L), third));
+        Set<CustomItem> selected = new HashSet<>(
+                Arrays.asList(new CustomItem(1L), third));
         multiSelectListBox.setValue(selected);
 
         Span selectedIdsSpan = new Span();
         selectedIdsSpan.setId(MULTI_SELECT_LIST_BOX_SELECTED_IDS_SPAN);
         multiSelectListBox.getSelectedItems().stream()
-                .map(item -> String.valueOf(item.getId()))
-                .sorted()
+                .map(item -> String.valueOf(item.getId())).sorted()
                 .reduce((a, b) -> a + ", " + b)
                 .ifPresent(selectedIdsSpan::setText);
 
-        Button updateAndSelectByIdButton =
-                new Button("Update & Select by Id", click -> {
-            // Make the names of unselected items similar to the name of selected
-            // one to mess with the <equals> implementation in CustomItem:
-            second.setName("First");
-            listDataView.refreshItem(second);
+        Button updateAndSelectByIdButton = new Button("Update & Select by Id",
+                click -> {
+                    // Make the names of unselected items similar to the name of
+                    // selected
+                    // one to mess with the <equals> implementation in
+                    // CustomItem:
+                    second.setName("First");
+                    listDataView.refreshItem(second);
 
-            fourth.setName("Third");
-            listDataView.refreshItem(fourth);
+                    fourth.setName("Third");
+                    listDataView.refreshItem(fourth);
 
-            // Select the items not only with the reference of existing items,
-            // but also the Id to verify <equals> is not in use and the
-            // selection is happening only based on identifier:
-            Set<CustomItem> newSelected = new HashSet<>(Arrays.asList(
-                    second, new CustomItem(4L)));
-            multiSelectListBox.setValue(newSelected);
+                    // Select the items not only with the reference of existing
+                    // items,
+                    // but also the Id to verify <equals> is not in use and the
+                    // selection is happening only based on identifier:
+                    Set<CustomItem> newSelected = new HashSet<>(
+                            Arrays.asList(second, new CustomItem(4L)));
+                    multiSelectListBox.setValue(newSelected);
 
-            multiSelectListBox.getSelectedItems()
-                    .stream()
-                    .map(item -> String.valueOf(item.getId()))
-                    .sorted()
-                    .reduce((a, b) -> a + ", " + b)
-                    .ifPresent(selectedIdsSpan::setText);
-        });
+                    multiSelectListBox.getSelectedItems().stream()
+                            .map(item -> String.valueOf(item.getId())).sorted()
+                            .reduce((a, b) -> a + ", " + b)
+                            .ifPresent(selectedIdsSpan::setText);
+                });
         updateAndSelectByIdButton
                 .setId(MULTI_SELECT_LIST_BOX_SELECTION_UPDATE_BUTTON);
 
-        Button selectByIdAndNameButton =
-                new Button("Select by Id and Name", click -> {
-            // Select the items not only with the reference of existing items,
-            // but also the Id and a challenging name to verify <equals> is not
-            // in use and the selection is happening only based on identifier:
-            Set<CustomItem> newSelected = new HashSet<>(Arrays.asList(
-                    first, new CustomItem(3L, "Third")));
-            multiSelectListBox.setValue(newSelected);
+        Button selectByIdAndNameButton = new Button("Select by Id and Name",
+                click -> {
+                    // Select the items not only with the reference of existing
+                    // items,
+                    // but also the Id and a challenging name to verify <equals>
+                    // is not
+                    // in use and the selection is happening only based on
+                    // identifier:
+                    Set<CustomItem> newSelected = new HashSet<>(
+                            Arrays.asList(first, new CustomItem(3L, "Third")));
+                    multiSelectListBox.setValue(newSelected);
 
-            multiSelectListBox.getSelectedItems()
-                    .stream()
-                    .map(item -> String.valueOf(item.getId()))
-                    .sorted()
-                    .reduce((a, b) -> a + ", " + b)
-                    .ifPresent(selectedIdsSpan::setText);
-        });
+                    multiSelectListBox.getSelectedItems().stream()
+                            .map(item -> String.valueOf(item.getId())).sorted()
+                            .reduce((a, b) -> a + ", " + b)
+                            .ifPresent(selectedIdsSpan::setText);
+                });
         selectByIdAndNameButton
                 .setId(MULTI_SELECT_LIST_BOX_SELECTION_BY_ID_AND_NAME_BUTTON);
 
@@ -383,8 +382,8 @@ public class ListBoxDataViewPage extends Div {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
         ListBox<CustomItem> listBox = new ListBox<>();
         ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
@@ -398,28 +397,29 @@ public class ListBoxDataViewPage extends Div {
         selectedIdsSpan.setId(LIST_BOX_SELECTED_IDS_SPAN);
         selectedIdsSpan.setText(String.valueOf(listBox.getValue().getId()));
 
-        Button updateAndSelectByIdOnlyButton =
-                new Button("Update & Select by Id", click -> {
-            // Make the names of unselected items similar to the name of
-            // selected one to mess with the <equals> implementation in
-            // CustomItem:
-            first.setName("Second");
-            listDataView.refreshItem(first);
+        Button updateAndSelectByIdOnlyButton = new Button(
+                "Update & Select by Id", click -> {
+                    // Make the names of unselected items similar to the name of
+                    // selected one to mess with the <equals> implementation in
+                    // CustomItem:
+                    first.setName("Second");
+                    listDataView.refreshItem(first);
 
-            third.setName("Second");
-            listDataView.refreshItem(third);
+                    third.setName("Second");
+                    listDataView.refreshItem(third);
 
-            // Select the item not with the reference of existing item,
-            // and instead with just the Id:
-            listBox.setValue(new CustomItem(2L));
+                    // Select the item not with the reference of existing item,
+                    // and instead with just the Id:
+                    listBox.setValue(new CustomItem(2L));
 
-            selectedIdsSpan.setText(String.valueOf(listBox.getValue().getId()));
-        });
+                    selectedIdsSpan.setText(
+                            String.valueOf(listBox.getValue().getId()));
+                });
         updateAndSelectByIdOnlyButton
                 .setId(LIST_BOX_SELECTION_BY_ID_UPDATE_BUTTON);
 
-        Button selectByIdAndNameButton =
-                new Button("Select by Id and Name", click -> {
+        Button selectByIdAndNameButton = new Button("Select by Id and Name",
+                click -> {
                     // Select the item with the Id and a challenging wrong name
                     // to verify <equals> method is not in use:
                     listBox.setValue(new CustomItem(3L, "Second"));
@@ -535,8 +535,10 @@ public class ListBoxDataViewPage extends Div {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof CustomItem)) return false;
+            if (this == o)
+                return true;
+            if (!(o instanceof CustomItem))
+                return false;
             CustomItem that = (CustomItem) o;
             return Objects.equals(getName(), that.getName());
         }

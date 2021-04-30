@@ -237,11 +237,12 @@ class ColumnLayer implements Serializable {
     }
 
     /**
-     * Updates the internal column order according to given column total ordering.
+     * Updates the internal column order according to given column total
+     * ordering.
      *
      * @param columnsPreOrder
-     *            the total column ordering, having parent column groups preceding
-     *            children (pre-order).
+     *            the total column ordering, having parent column groups
+     *            preceding children (pre-order).
      */
     protected void updateColumnOrder(List<ColumnBase<?>> columnsPreOrder) {
         columns.sort(Comparator.comparingInt(columnsPreOrder::indexOf));

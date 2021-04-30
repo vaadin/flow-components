@@ -388,7 +388,9 @@ public class GridElement extends TestBenchElement {
     }
 
     private void removeActiveItem(GridTRElement row) {
-        executeScript("if(arguments[0].activeItem == arguments[1]._item) { arguments[0].activeItem=null;}", this, row);
+        executeScript(
+                "if(arguments[0].activeItem == arguments[1]._item) { arguments[0].activeItem=null;}",
+                this, row);
     }
 
     /**

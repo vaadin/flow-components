@@ -60,7 +60,6 @@ public class EditorImplTest {
         }
     }
 
-
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
@@ -251,7 +250,8 @@ public class EditorImplTest {
     @Test
     public void editorIsInBufferedMode_closeEditorThrows() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.reportMissingExceptionWithMessage("Buffered editor should be closed using save() or cancel()");
+        thrown.reportMissingExceptionWithMessage(
+                "Buffered editor should be closed using save() or cancel()");
 
         editor.editItem("bar");
         fakeClientResponse();
@@ -266,7 +266,9 @@ public class EditorImplTest {
 
         editor.closeEditor();
 
-        Assert.assertNull("Received close event even though method should have thrown.", closeEventCapture.get());
+        Assert.assertNull(
+                "Received close event even though method should have thrown.",
+                closeEventCapture.get());
     }
 
     @Test
@@ -283,9 +285,9 @@ public class EditorImplTest {
 
         editor.closeEditor();
 
-        Assert.assertNotNull("No close event was fired.", closeEventCapture.get());
+        Assert.assertNotNull("No close event was fired.",
+                closeEventCapture.get());
     }
-
 
     private void assertNegativeSave(
             AtomicReference<StatusChangeEvent> statusEventCapture,

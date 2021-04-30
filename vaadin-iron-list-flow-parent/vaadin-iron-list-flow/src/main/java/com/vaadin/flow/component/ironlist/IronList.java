@@ -173,7 +173,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      *
      * @return the data provider of this list, not {@code null}
      */
-    public DataProvider<T, ?> getDataProvider() { //NOSONAR
+    public DataProvider<T, ?> getDataProvider() { // NOSONAR
         return getDataCommunicator().getDataProvider();
     }
 
@@ -368,8 +368,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         super.onEnabledStateChanged(enabled);
 
         /*
-         * Rendered component's enabled state needs to be updated via
-         * rendering
+         * Rendered component's enabled state needs to be updated via rendering
          */
         setRenderer(renderer);
     }

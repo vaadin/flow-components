@@ -44,7 +44,8 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getSubmitButton() {
-        return $(ButtonElement.class).attribute("part", "vaadin-login-submit").first();
+        return $(ButtonElement.class).attribute("part", "vaadin-login-submit")
+                .first();
     }
 
     private TestBenchElement getFormWrapper() {
@@ -53,7 +54,8 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getForgotPasswordButton() {
-        return getFormWrapper().$(ButtonElement.class).id("forgotPasswordButton");
+        return getFormWrapper().$(ButtonElement.class)
+                .id("forgotPasswordButton");
     }
 
     @Override
@@ -74,7 +76,8 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public TestBenchElement getErrorComponent() {
-        return getFormWrapper().$(TestBenchElement.class).attribute("part", "error-message").first();
+        return getFormWrapper().$(TestBenchElement.class)
+                .attribute("part", "error-message").first();
     }
 
     @Override
@@ -95,6 +98,7 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public boolean isEnabled() {
-        return !Boolean.TRUE.equals(getPropertyBoolean("disabled")) && super.isEnabled();
+        return !Boolean.TRUE.equals(getPropertyBoolean("disabled"))
+                && super.isEnabled();
     }
 }

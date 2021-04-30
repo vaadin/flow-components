@@ -45,44 +45,46 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void gridThenCompRendered_nativeButton() {
-        assertCellContents(gridThenComp,0,0,"<button>click</button>");
-        assertCellContents(gridThenComp,1,0,"<button>click</button>");
+        assertCellContents(gridThenComp, 0, 0, "<button>click</button>");
+        assertCellContents(gridThenComp, 1, 0, "<button>click</button>");
     }
-
 
     @Test
     public void compThenGridRendered_nativeButton() {
-        assertCellContents(compThenGrid,0,0,"<button>click</button>");
-        assertCellContents(compThenGrid,1,0,"<button>click</button>");
+        assertCellContents(compThenGrid, 0, 0, "<button>click</button>");
+        assertCellContents(compThenGrid, 1, 0, "<button>click</button>");
     }
 
     @Test
     public void compThenGridRendered_compButton() {
-        // <flow-component-renderer appid="ROOT" style=""><vaadin-button tabindex="0" role="button" focus-target="true">foo</vaadin-button></flow-component-renderer>
-        assertCellContains(compThenGrid,0,1,"foo");
-        assertCellContains(compThenGrid,0,1,"vaadin-button");
-        assertCellContains(compThenGrid,1,1,"bar");
-        assertCellContains(compThenGrid,1,1,"vaadin-button");
+        // <flow-component-renderer appid="ROOT" style=""><vaadin-button
+        // tabindex="0" role="button"
+        // focus-target="true">foo</vaadin-button></flow-component-renderer>
+        assertCellContains(compThenGrid, 0, 1, "foo");
+        assertCellContains(compThenGrid, 0, 1, "vaadin-button");
+        assertCellContains(compThenGrid, 1, 1, "bar");
+        assertCellContains(compThenGrid, 1, 1, "vaadin-button");
     }
-
 
     @Test
     public void gridThenCompRendered_compButton() {
-        // <flow-component-renderer appid="ROOT" style=""><vaadin-button tabindex="0" role="button" focus-target="true">foo</vaadin-button></flow-component-renderer>
-        assertCellContains(gridThenComp,0,1,"foo");
-        assertCellContains(gridThenComp,0,1,"vaadin-button");
-        assertCellContains(gridThenComp,1,1,"bar");
-        assertCellContains(gridThenComp,1,1,"vaadin-button");
+        // <flow-component-renderer appid="ROOT" style=""><vaadin-button
+        // tabindex="0" role="button"
+        // focus-target="true">foo</vaadin-button></flow-component-renderer>
+        assertCellContains(gridThenComp, 0, 1, "foo");
+        assertCellContains(gridThenComp, 0, 1, "vaadin-button");
+        assertCellContains(gridThenComp, 1, 1, "bar");
+        assertCellContains(gridThenComp, 1, 1, "vaadin-button");
     }
 
-
-    private void assertCellContents(GridElement grid, int rowIndex, int colIndex, String expected) {
+    private void assertCellContents(GridElement grid, int rowIndex,
+            int colIndex, String expected) {
         Assert.assertEquals(expected,
                 grid.getCell(rowIndex, colIndex).getInnerHTML());
     }
 
-
-    private void assertCellContains(GridElement grid, int rowIndex, int colIndex, String expected) {
+    private void assertCellContains(GridElement grid, int rowIndex,
+            int colIndex, String expected) {
         Assert.assertThat(grid.getCell(rowIndex, colIndex).getInnerHTML(),
                 CoreMatchers.containsString(expected));
     }

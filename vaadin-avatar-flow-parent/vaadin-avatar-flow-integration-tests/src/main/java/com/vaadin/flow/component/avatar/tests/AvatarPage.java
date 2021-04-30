@@ -37,7 +37,8 @@ public class AvatarPage extends Div {
         toggleImage.setId("toggle-img");
 
         NativeButton toggleAbbr = new NativeButton("Toggle abbr", e -> {
-            if (avatar.getAbbreviation() == null || avatar.getAbbreviation().isEmpty()) {
+            if (avatar.getAbbreviation() == null
+                    || avatar.getAbbreviation().isEmpty()) {
                 avatar.setAbbreviation("BB");
             } else {
                 avatar.setAbbreviation(null);
@@ -54,16 +55,18 @@ public class AvatarPage extends Div {
         });
         toggleName.setId("toggle-name");
 
-        NativeButton toggleImgResource = new NativeButton("Toggle image resource", e -> {
-            if (avatar.getImageResource() == null) {
-                StreamResource avatarResource = new StreamResource("user+.png",
-                        () -> getClass().getResourceAsStream(
-                                "/META-INF/resources/frontend/images/user.png"));
-                avatar.setImageResource(avatarResource);
-            } else {
-                avatar.setImageResource(null);
-            }
-        });
+        NativeButton toggleImgResource = new NativeButton(
+                "Toggle image resource", e -> {
+                    if (avatar.getImageResource() == null) {
+                        StreamResource avatarResource = new StreamResource(
+                                "user+.png",
+                                () -> getClass().getResourceAsStream(
+                                        "/META-INF/resources/frontend/images/user.png"));
+                        avatar.setImageResource(avatarResource);
+                    } else {
+                        avatar.setImageResource(null);
+                    }
+                });
         toggleImgResource.setId("toggle-res");
 
         Div dataImg = new Div();
@@ -78,14 +81,17 @@ public class AvatarPage extends Div {
         Div dataResource = new Div();
         dataResource.setId("data-block-resource");
 
-        NativeButton getPropertyValues = new NativeButton("Get properties", e -> {
-            dataImg.setText(avatar.getElement().getAttribute("img"));
-            dataAbbr.setText(avatar.getElement().getProperty("abbr"));
-            dataName.setText(avatar.getElement().getProperty("name"));
-            dataResource.setText(avatar.getElement().getAttribute("img"));
-        });
+        NativeButton getPropertyValues = new NativeButton("Get properties",
+                e -> {
+                    dataImg.setText(avatar.getElement().getAttribute("img"));
+                    dataAbbr.setText(avatar.getElement().getProperty("abbr"));
+                    dataName.setText(avatar.getElement().getProperty("name"));
+                    dataResource
+                            .setText(avatar.getElement().getAttribute("img"));
+                });
         getPropertyValues.setId("get-props");
 
-        add(avatar, toggleImage, toggleAbbr, toggleName, toggleImgResource, dataImg, dataAbbr, dataName, dataResource, getPropertyValues);
+        add(avatar, toggleImage, toggleAbbr, toggleName, toggleImgResource,
+                dataImg, dataAbbr, dataName, dataResource, getPropertyValues);
     }
 }

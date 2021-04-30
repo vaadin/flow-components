@@ -37,8 +37,7 @@ public class DetachReattachIT extends AbstractComponentIT {
         clickButton("detach");
         clickButton("attach");
         Assert.assertEquals("Checkboxes should remain checked on reattach",
-                checkedBeforeDetach,
-                getCheckboxexCheckedState());
+                checkedBeforeDetach, getCheckboxexCheckedState());
     }
 
     @Test
@@ -49,16 +48,15 @@ public class DetachReattachIT extends AbstractComponentIT {
         clickButton("detach");
         clickButton("deselectAll");
         clickButton("attach");
-        Assert.assertTrue("Checkboxes should not be checked after deselectAll on reattach",
-                getCheckboxexCheckedState()
-                        .stream()
+        Assert.assertTrue(
+                "Checkboxes should not be checked after deselectAll on reattach",
+                getCheckboxexCheckedState().stream()
                         .allMatch(checked -> checked == null));
     }
 
     private List getCheckboxexCheckedState() {
         TestBenchElement group = $("vaadin-checkbox-group").first();
-        return group.findElements(By.tagName("vaadin-checkbox"))
-                .stream()
+        return group.findElements(By.tagName("vaadin-checkbox")).stream()
                 .map(checkbox -> checkbox.getAttribute("checked"))
                 .collect(Collectors.toList());
     }

@@ -28,16 +28,16 @@ public class DateTimePickerHelpersPage extends Div {
 
     private void helperComponent() {
         DateTimePicker dateTimePickerHelperComponent = new DateTimePicker(
-              "Arrival time");
+                "Arrival time");
         dateTimePickerHelperComponent.setId("dtp-helper-component");
         Span span = new Span("Select your arrival time");
         span.setId("helper-component");
         dateTimePickerHelperComponent.setHelperComponent(span);
 
         NativeButton clearHelperComponent = new NativeButton(
-              "Remove helper component", e -> {
-            dateTimePickerHelperComponent.setHelperComponent(null);
-        });
+                "Remove helper component", e -> {
+                    dateTimePickerHelperComponent.setHelperComponent(null);
+                });
         clearHelperComponent.setId("button-clear-helper-component");
 
         add(dateTimePickerHelperComponent, clearHelperComponent);

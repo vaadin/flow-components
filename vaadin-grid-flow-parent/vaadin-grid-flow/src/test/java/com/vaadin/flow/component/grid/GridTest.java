@@ -35,18 +35,17 @@ public class GridTest {
     @Test
     public void dataViewForFaultyDataProvider_throwsException() {
         exceptionRule.expect(IllegalStateException.class);
-                exceptionRule.expectMessage(
-                        "GridListDataView only supports 'ListDataProvider' " +
-                                "or it's subclasses, but was given a " +
-                                "'AbstractBackEndDataProvider'");
+        exceptionRule.expectMessage(
+                "GridListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'");
 
         Grid<String> grid = new Grid<>();
         final GridListDataView<String> listDataView = grid
                 .setItems(Arrays.asList("one", "two"));
 
-        DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Arrays.asList("one").stream(),
-                        query -> 1);
+        DataProvider<String, Void> dataProvider = DataProvider.fromCallbacks(
+                query -> Arrays.asList("one").stream(), query -> 1);
 
         grid.setDataProvider(dataProvider);
 

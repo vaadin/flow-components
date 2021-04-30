@@ -70,15 +70,13 @@ public class IconIT extends ComponentDemoTest {
     @Test
     public void allAvailableIcons() {
         WebElement allIcons = layout.findElement(By.id("all-icons"));
-        List<WebElement> labels = allIcons
-                .findElements(By.tagName("label"));
-        List<WebElement> icons = allIcons
-                .findElements(By.tagName("iron-icon"));
+        List<WebElement> labels = allIcons.findElements(By.tagName("label"));
+        List<WebElement> icons = allIcons.findElements(By.tagName("iron-icon"));
 
         Assert.assertEquals(VaadinIcon.values().length, labels.size());
         Assert.assertEquals(VaadinIcon.values().length, icons.size());
 
-        for (int i = 0; i < labels.size(); i+=17) {
+        for (int i = 0; i < labels.size(); i += 17) {
             WebElement label = labels.get(i);
             WebElement icon = icons.get(i);
             String enumName = VaadinIcon.values()[i].name();
@@ -90,8 +88,7 @@ public class IconIT extends ComponentDemoTest {
 
     private void assertIconProperty(String id, String collection,
             String iconName) {
-        assertIconProperty(findElement(By.id(id)), collection,
-                iconName);
+        assertIconProperty(findElement(By.id(id)), collection, iconName);
     }
 
     private void assertIconProperty(WebElement icon, String collection,

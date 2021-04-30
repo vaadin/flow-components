@@ -27,7 +27,6 @@ import java.util.List;
 
 import static com.vaadin.flow.component.avatar.demo.AvatarView.getFileStream;
 
-
 /**
  * View for {@link AvatarGroup} demo.
  *
@@ -41,7 +40,8 @@ public class AvatarGroupView extends DemoView {
     @Override
     public void initView() {
         localAvatarResource = new StreamResource("avatar+.png",
-            () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/avatar.png"));
+                () -> getClass().getResourceAsStream(
+                        "/META-INF/resources/frontend/images/avatar.png"));
 
         createBasicAvatarGroup();
         createMaxAvatarGroup();
@@ -63,12 +63,14 @@ public class AvatarGroupView extends DemoView {
 
         AvatarGroupItem avatarWithImageResource = new AvatarGroupItem();
         StreamResource avatarResource = new StreamResource("user+.png",
-                () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/user.png"));
+                () -> getClass().getResourceAsStream(
+                        "/META-INF/resources/frontend/images/user.png"));
         avatarWithImageResource.setImageResource(avatarResource);
         items.add(avatarWithImageResource);
 
         items.add(new AvatarGroupItem("Jens Jansson"));
-        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/avatars/avatar.png"));
+        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev",
+                "https://vaadin.com/avatars/avatar.png"));
 
         avatarGroup.setItems(items);
 
@@ -119,7 +121,8 @@ public class AvatarGroupView extends DemoView {
 
         items.add(new AvatarGroupItem());
         items.add(new AvatarGroupItem("Jens Jansson"));
-        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev", "https://vaadin.com/avatars/avatar.png"));
+        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev",
+                "https://vaadin.com/avatars/avatar.png"));
         avatarGroup.setItems(items);
         add(avatarGroup);
 

@@ -174,7 +174,8 @@ public class ComboBoxView extends DemoView {
     }
 
     private void autoOpenDisabled() {
-        Span note = new Span("Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
+        Span note = new Span(
+                "Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
         // begin-source-example
         // source-example-heading: Auto open disabled
         ComboBox<String> comboBox = new ComboBox<>();
@@ -195,8 +196,8 @@ public class ComboBoxView extends DemoView {
 
         ComboBoxListDataView<Ticket> dataView = comboBox.setItems(tickets);
 
-        Button buyTicketButton = new Button("Buy a ticket", click ->
-                comboBox.getOptionalValue().ifPresent(dataView::removeItem));
+        Button buyTicketButton = new Button("Buy a ticket", click -> comboBox
+                .getOptionalValue().ifPresent(dataView::removeItem));
 
         /*
          * If you want to get notified when the ComboBox's items count has
@@ -217,9 +218,8 @@ public class ComboBoxView extends DemoView {
                                 ticket, event.getItemCount()), 3000,
                                 Notification.Position.MIDDLE);
                     } else {
-                        Notification.show(
-                                "All tickets were sold out",
-                                3000, Notification.Position.MIDDLE);
+                        Notification.show("All tickets were sold out", 3000,
+                                Notification.Position.MIDDLE);
                         buyTicketButton.setEnabled(false);
                     }
                     comboBox.clear();
@@ -455,17 +455,16 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Helper text and helper component
         ComboBox<String> helperTextCombobox = new ComboBox<>("Language");
-        helperTextCombobox
-              .setItems("Java", "Python", "C++", "Scala", "JavaScript");
-        helperTextCombobox
-              .setHelperText("Select the language you are most familiar with");
+        helperTextCombobox.setItems("Java", "Python", "C++", "Scala",
+                "JavaScript");
+        helperTextCombobox.setHelperText(
+                "Select the language you are most familiar with");
 
         ComboBox<String> helperComponentCombobox = new ComboBox<>("Continent");
-        helperComponentCombobox
-              .setItems("North America", "South America", "Africa", "Europe",
-                    "Asia", "Australia", "Antarctica");
-        helperComponentCombobox
-              .setHelperComponent(new Span("Select the continent of your residence"));
+        helperComponentCombobox.setItems("North America", "South America",
+                "Africa", "Europe", "Asia", "Australia", "Antarctica");
+        helperComponentCombobox.setHelperComponent(
+                new Span("Select the continent of your residence"));
 
         add(helperTextCombobox, helperComponentCombobox);
 
@@ -538,8 +537,8 @@ public class ComboBoxView extends DemoView {
                         || person.getAge() > event.getValue()));
 
         /*
-         * Providing a value provider or comparator allows sorting combo
-         * box's items by custom field, or combination of fields
+         * Providing a value provider or comparator allows sorting combo box's
+         * items by custom field, or combination of fields
          */
         Button sortPersons = new Button("Sort Persons by Name",
                 event -> dataView.setSortOrder(Person::toString,
@@ -571,14 +570,14 @@ public class ComboBoxView extends DemoView {
                         query.getFilter().orElse(null), query.getOffset(),
                         query.getLimit()),
                 ageStr -> ageStr.trim().isEmpty() ? null
-                        : Integer.parseInt(ageStr)
-            );
+                        : Integer.parseInt(ageStr));
         // end-source-example
         comboBox.setItemLabelGenerator(person -> person.getFirstName() + " "
                 + person.getLastName() + " - " + person.getAge());
         comboBox.setClearButtonVisible(true);
         comboBox.setWidth(WIDTH_STRING);
-        addCard("Filtering", "Filtering with types other than String", comboBox);
+        addCard("Filtering", "Filtering with types other than String",
+                comboBox);
     }
 
     private void customOptionsDemo() {
@@ -698,15 +697,15 @@ public class ComboBoxView extends DemoView {
         helperTextAbove.setLabel("Label");
         helperTextAbove.setItems("Option 1", "Option 2");
         helperTextAbove.setHelperText(
-              "Helper text positioned above the field using `helper-above-field` theme");
-        helperTextAbove.getElement().getThemeList()
-              .set("helper-above-field", true);
+                "Helper text positioned above the field using `helper-above-field` theme");
+        helperTextAbove.getElement().getThemeList().set("helper-above-field",
+                true);
 
         add(helperTextAbove);
         // end-source-example
 
         addCard("Theme Variants", "Helper text above the component",
-              helperTextAbove);
+                helperTextAbove);
     }
 
     private void styling() {

@@ -194,7 +194,7 @@ public class RichTextEditor
     @ClientCallable
     private void updateValue(String value) {
         setValue(value);
-        if(this.asHtml != null) {
+        if (this.asHtml != null) {
             this.asHtml.value.clear();
         }
     }
@@ -254,8 +254,8 @@ public class RichTextEditor
         private boolean pending;
 
         void requestUpdate(String htmlValueString) {
-            this.html =
-                htmlValueString != null ? sanitize(htmlValueString) : null;
+            this.html = htmlValueString != null ? sanitize(htmlValueString)
+                    : null;
             if (!pending) {
                 runBeforeClientResponse(ui -> this.execute());
                 pending = true;
@@ -266,10 +266,10 @@ public class RichTextEditor
             if (getValueChangeMode() != ValueChangeMode.EAGER) {
                 // Add a one-time listener if we are not in eager mode.
                 final String JS = "var listener = e => {"
-                    + "  this.$server.updateValue(e.detail.value);"
-                    + "  this.removeEventListener('value-changed', listener);"
-                    + "  listener = null; };"
-                    + "this.addEventListener('value-changed', listener);";
+                        + "  this.$server.updateValue(e.detail.value);"
+                        + "  this.removeEventListener('value-changed', listener);"
+                        + "  listener = null; };"
+                        + "this.addEventListener('value-changed', listener);";
                 getElement().executeJs(JS);
             }
             getElement().callJsFunction("dangerouslySetHtmlValue", this.html);
@@ -810,25 +810,24 @@ public class RichTextEditor
         }
 
         /**
-         * Sets content represented by sanitized HTML string into the editor. The
-         * HTML string is interpreted by
+         * Sets content represented by sanitized HTML string into the editor.
+         * The HTML string is interpreted by
          * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
          * Clipboard matchers</a> on the client side, which may not produce the
          * exactly input HTML.
          * <p>
-         * Note: The value will be set asynchronously with client-server roundtrip.
+         * Note: The value will be set asynchronously with client-server
+         * roundtrip.
          *
          * @param htmlValueString
          *            the HTML string
          */
-        private void setHtmlValueAsynchronously(
-            String htmlValueString) {
+        private void setHtmlValueAsynchronously(String htmlValueString) {
             if (htmlSetRequest == null) {
                 htmlSetRequest = new HtmlSetRequest();
             }
             htmlSetRequest.requestUpdate(htmlValueString);
         }
-
 
         /**
          * Gets the value of the editor presented as an HTML string.
@@ -863,14 +862,14 @@ public class RichTextEditor
          */
         @Override
         public Registration addValueChangeListener(
-            ValueChangeListener listener) {
-            return RichTextEditor.this.addValueChangeListener(
-                originalEvent -> listener
-                    .valueChanged(this.createNewEvent(originalEvent)));
+                ValueChangeListener listener) {
+            return RichTextEditor.this
+                    .addValueChangeListener(originalEvent -> listener
+                            .valueChanged(this.createNewEvent(originalEvent)));
         }
 
         private ValueChangeEvent createNewEvent(
-            ValueChangeEvent<String> originalEvent) {
+                ValueChangeEvent<String> originalEvent) {
             return new ValueChangeEvent<String>() {
                 @Override
                 public HasValue<ValueChangeEvent<String>, String> getHasValue() {
@@ -927,7 +926,8 @@ public class RichTextEditor
         @Override
         public void setRequiredIndicatorVisible(
                 boolean requiredIndicatorVisible) {
-            RichTextEditor.this.setRequiredIndicatorVisible(requiredIndicatorVisible);
+            RichTextEditor.this
+                    .setRequiredIndicatorVisible(requiredIndicatorVisible);
         }
 
         /**

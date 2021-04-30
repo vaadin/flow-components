@@ -7,7 +7,8 @@ public class Customer {
     private String country;
     private String state;
 
-    public Customer(int id, String firstName, String lastName, String country, String state) {
+    public Customer(int id, String firstName, String lastName, String country,
+            String state) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

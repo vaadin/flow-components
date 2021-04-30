@@ -14,8 +14,8 @@ public class DatePickerHelpers extends Div {
         datePickerHelperText.setId("data-picker-helper-text");
 
         NativeButton clearHelperText = new NativeButton("Clear helper text");
-        clearHelperText
-              .addClickListener(e -> datePickerHelperText.setHelperText(null));
+        clearHelperText.addClickListener(
+                e -> datePickerHelperText.setHelperText(null));
         clearHelperText.setId("button-clear-text");
 
         DatePicker datePickerComponentHelper = new DatePicker();
@@ -26,12 +26,12 @@ public class DatePickerHelpers extends Div {
         datePickerComponentHelper.setHelperComponent(helper);
 
         NativeButton clearHelperComponent = new NativeButton(
-              "Clear helper component");
+                "Clear helper component");
         clearHelperComponent.addClickListener(
-              e -> datePickerComponentHelper.setHelperComponent(null));
+                e -> datePickerComponentHelper.setHelperComponent(null));
         clearHelperComponent.setId("button-clear-component");
 
         add(datePickerHelperText, clearHelperText, datePickerComponentHelper,
-              clearHelperComponent);
+                clearHelperComponent);
     }
 }
