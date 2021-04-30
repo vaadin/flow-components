@@ -123,8 +123,7 @@ public class TreeGridDemo extends DemoView {
         grid.addHierarchyColumn(Account::toString).setHeader("Account Title");
         grid.addColumn(Account::getCode).setHeader("Code");
 
-        HierarchicalDataProvider dataProvider =
-                new AbstractBackEndHierarchicalDataProvider<Account, Void>() {
+        HierarchicalDataProvider dataProvider = new AbstractBackEndHierarchicalDataProvider<Account, Void>() {
 
             @Override
             public int getChildCount(HierarchicalQuery<Account, Void> query) {
@@ -157,18 +156,20 @@ public class TreeGridDemo extends DemoView {
         // source-example-heading: TreeGrid with Component in Hierarchy Column
         TreeGrid<Department> grid = new TreeGrid<>();
 
-        grid.setItems(departmentData.getRootDepartments(), departmentData::getChildDepartments);
-        grid.addComponentHierarchyColumn(
-                department -> {
-                    Span departmentName = new Span(department.getName());
-                    Span managerName = new Span(department.getManager());
-                    managerName.getStyle().set("color", "var(--lumo-secondary-text-color)");
-                    managerName.getStyle().set("font-size", "var(--lumo-font-size-s)");
-                    VerticalLayout departmentLine = new VerticalLayout(departmentName, managerName);
-                    departmentLine.setPadding(false);
-                    departmentLine.setSpacing(false);
-                    return departmentLine;
-                }).setHeader("Departments");
+        grid.setItems(departmentData.getRootDepartments(),
+                departmentData::getChildDepartments);
+        grid.addComponentHierarchyColumn(department -> {
+            Span departmentName = new Span(department.getName());
+            Span managerName = new Span(department.getManager());
+            managerName.getStyle().set("color",
+                    "var(--lumo-secondary-text-color)");
+            managerName.getStyle().set("font-size", "var(--lumo-font-size-s)");
+            VerticalLayout departmentLine = new VerticalLayout(departmentName,
+                    managerName);
+            departmentLine.setPadding(false);
+            departmentLine.setSpacing(false);
+            return departmentLine;
+        }).setHeader("Departments");
 
         // end-source-example
         grid.setId("treegridcomponent");

@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.vaadin.flow.component.charts.Chart;
 
-
 /**
  * Abstract base class for series
  */
@@ -226,9 +225,10 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
     }
 
     /**
-     * When using dual or multiple color-axes, this number defines which color-axis the
-     * particular series is connected to. It refers to the index of the axis in
-     * the color-axis array, with 0 being the first. Defaults to 0.
+     * When using dual or multiple color-axes, this number defines which
+     * color-axis the particular series is connected to. It refers to the index
+     * of the axis in the color-axis array, with 0 being the first. Defaults to
+     * 0.
      *
      * @param colorAxis
      *            The index of the color-axis to bind this data series to.

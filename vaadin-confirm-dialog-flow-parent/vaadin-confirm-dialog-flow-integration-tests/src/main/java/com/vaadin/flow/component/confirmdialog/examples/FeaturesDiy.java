@@ -17,7 +17,8 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader(new H2("Meeting starting").getElement());
-        dialog.setText(new Span("Your next meeting starts in 5 minutes").getElement());
+        dialog.setText(
+                new Span("Your next meeting starts in 5 minutes").getElement());
         Button confirmButton = new Button("Confirm");
         confirmButton.setId("confirmDiy");
         confirmButton.setIcon(VaadinIcon.CALENDAR.create());
@@ -35,9 +36,9 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Delete product");
-        dialog.setText(
-                new Html("<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>")
-                .getElement());
+        dialog.setText(new Html(
+                "<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>")
+                        .getElement());
         Button deleteButton = new Button("Delete");
         deleteButton.setId("confirmDiy");
         deleteButton.setIconAfterText(true);
@@ -58,7 +59,8 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Ready to publish?");
-        dialog.setText(new Label("Do you want to publish this post?").getElement());
+        dialog.setText(
+                new Label("Do you want to publish this post?").getElement());
         Button publishButton = new Button("Publish");
         publishButton.setId("confirmDiy");
         publishButton.getElement().setAttribute("theme", "primary");
@@ -84,9 +86,9 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Unsaved changes");
-        dialog.setText(
-                new Html("<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>")
-                .getElement());
+        dialog.setText(new Html(
+                "<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>")
+                        .getElement());
 
         Button saveButton = new Button("Save");
         saveButton.setId("confirmDiy");

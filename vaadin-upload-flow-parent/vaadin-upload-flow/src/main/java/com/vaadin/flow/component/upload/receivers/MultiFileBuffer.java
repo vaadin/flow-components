@@ -31,9 +31,8 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
 
 /**
  * Basic receiver implementation for receiving multiple file upload and storing
- * them as files. Files are stored by default to Files
- * created using {@link java.io.File#createTempFile(String, String)} with a null
- * suffix.
+ * them as files. Files are stored by default to Files created using
+ * {@link java.io.File#createTempFile(String, String)} with a null suffix.
  * <p>
  * For a custom file the constructor {@link AbstractFileBuffer(FileFactory)}
  * should be used.
@@ -64,7 +63,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * Get file data for upload with file name.
      *
      * @param fileName
-     *         file name to get upload data for
+     *            file name to get upload data for
      * @return file data for filename or null if not found
      */
     public FileData getFileData(String fileName) {
@@ -75,7 +74,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * Get the output stream for file.
      *
      * @param fileName
-     *         name of file to get stream for
+     *            name of file to get stream for
      * @return file output stream or null if not available
      */
     public FileDescriptor getFileDescriptor(String fileName) {
@@ -96,7 +95,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * Get the input stream for file with fileName.
      *
      * @param fileName
-     *         name of file to get input stream for
+     *            name of file to get input stream for
      * @return input stream for file or empty stream if file not found
      */
     public InputStream getInputStream(String fileName) {

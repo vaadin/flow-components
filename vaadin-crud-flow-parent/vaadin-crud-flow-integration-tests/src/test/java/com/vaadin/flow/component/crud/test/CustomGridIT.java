@@ -16,7 +16,8 @@ public class CustomGridIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/customgrid";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-crud") + "/customgrid";
         getDriver().get(url);
     }
 
@@ -119,10 +120,8 @@ public class CustomGridIT extends AbstractParallelTest {
     }
 
     private String getEditorHeaderText(CrudElement crud) {
-        return crud.getEditor()
-                .$(TestBenchElement.class)
-                .attribute("slot","header")
-                .first().getText();
+        return crud.getEditor().$(TestBenchElement.class)
+                .attribute("slot", "header").first().getText();
     }
 
     private ButtonElement customGridClickToEditButton() {

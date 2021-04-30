@@ -28,8 +28,7 @@ public class ItemHelper {
         this.name = name;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
@@ -39,8 +38,7 @@ public class ItemHelper {
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -54,8 +52,7 @@ public class ItemHelper {
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return name;
     }
 }

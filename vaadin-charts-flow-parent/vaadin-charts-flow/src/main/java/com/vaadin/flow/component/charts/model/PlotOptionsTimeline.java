@@ -157,13 +157,13 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
     public Boolean getColorByPoint() {
         return colorByPoint;
     }
+
     /**
      * Defaults to <code>true</code>
      */
     public void setColorByPoint(Boolean colorByPoint) {
         this.colorByPoint = colorByPoint;
     }
-
 
     /**
      * @see #setColorIndex(Number)
@@ -207,13 +207,12 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
     }
 
     /**
-     * When true, each point or column edge is rounded to its nearest pixel
-     * in order to render sharp on screen.
-     * In some cases, when there are a lot of densely packed columns,
-     * this leads to visible difference in column widths or distance between columns.
-     * In these cases, setting crisp to false may look better,
-     * even though each column is rendered blurry.
-     *<p>
+     * When true, each point or column edge is rounded to its nearest pixel in
+     * order to render sharp on screen. In some cases, when there are a lot of
+     * densely packed columns, this leads to visible difference in column widths
+     * or distance between columns. In these cases, setting crisp to false may
+     * look better, even though each column is rendered blurry.
+     * <p>
      * Defaults to <code>true</code>.
      */
     public void setCrisp(Boolean crisp) {

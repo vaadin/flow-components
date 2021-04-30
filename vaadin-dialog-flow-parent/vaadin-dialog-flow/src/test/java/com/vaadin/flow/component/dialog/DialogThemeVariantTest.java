@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.dialog;
 
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

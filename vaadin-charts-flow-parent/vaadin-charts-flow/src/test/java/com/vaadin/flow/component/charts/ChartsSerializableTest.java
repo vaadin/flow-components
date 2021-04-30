@@ -23,12 +23,9 @@ import java.util.stream.Stream;
 public class ChartsSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
-        return Stream.concat(
-                super.getExcludedPatterns(),
-                Stream.of(
-                        ".*\\Serializer(Modifier)?$",
-                        "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializationDelegate"
-                ));
+        return Stream.concat(super.getExcludedPatterns(), Stream.of(
+                ".*\\Serializer(Modifier)?$",
+                "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializationDelegate"));
     }
 
     @Test

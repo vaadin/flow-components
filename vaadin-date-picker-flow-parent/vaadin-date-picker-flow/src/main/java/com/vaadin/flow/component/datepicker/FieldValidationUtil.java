@@ -18,8 +18,8 @@ package com.vaadin.flow.component.datepicker;
 import com.vaadin.flow.internal.StateNode;
 
 /**
- * Utility class for date picker web component to disable client
- * side validation.
+ * Utility class for date picker web component to disable client side
+ * validation.
  *
  * @author Vaadin Ltd
  */

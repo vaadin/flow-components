@@ -47,10 +47,9 @@ public class PersonService {
     }
 
     public Stream<Person> fetchOlderThan(Integer ageFilter, int offset,
-                                         int limit) {
-        return personData.getPersons().stream()
-                .filter(person -> ageFilter == null ||
-                        person.getAge() > ageFilter)
+            int limit) {
+        return personData.getPersons().stream().filter(
+                person -> ageFilter == null || person.getAge() > ageFilter)
                 .skip(offset).limit(limit);
     }
 }

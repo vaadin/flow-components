@@ -252,7 +252,8 @@ public class TabsView extends DemoView {
         Text newText = new Text("");
         Text oldText = new Text("");
         tabs.addSelectedChangeListener(event -> {
-            newText.setText("Current tab : " + event.getSelectedTab().getLabel());
+            newText.setText(
+                    "Current tab : " + event.getSelectedTab().getLabel());
 
             if (event.getPreviousTab() != null) {
                 oldText.setText(
@@ -262,6 +263,7 @@ public class TabsView extends DemoView {
         // end-source-example
 
         tabs.setId("tabs-auto-select-false");
-        addCard("Tabs with automatic select set to false", tabs, newText, oldText);
+        addCard("Tabs with automatic select set to false", tabs, newText,
+                oldText);
     }
 }

@@ -36,8 +36,7 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
     public SelectListDataView(
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             Select<T> select,
-            SerializableBiConsumer<SerializablePredicate<T>,
-                    SerializableComparator<T>> filterOrSortingChangedCallback) {
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
         super(dataProviderSupplier, select, filterOrSortingChangedCallback);
     }
 
@@ -60,8 +59,7 @@ public class SelectListDataView<T> extends AbstractListDataView<T> {
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             Select<T> select,
             SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
-            SerializableBiConsumer<SerializablePredicate<T>,
-                    SerializableComparator<T>> filterOrSortingChangedCallback) {
+            SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
         super(dataProviderSupplier, select, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
