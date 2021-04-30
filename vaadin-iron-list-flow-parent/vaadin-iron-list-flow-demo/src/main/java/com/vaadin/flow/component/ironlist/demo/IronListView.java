@@ -195,8 +195,7 @@ public class IronListView extends DemoView {
         list.setHeight("400px");
 
         DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
-                query -> createFacts(query.getLimit() - query.getOffset()),
-                query -> 1000);
+                query -> createFacts(query.getLimit()-query.getOffset()), query -> 1000);
 
         list.setDataProvider(dataProvider);
         list.setRenderer(TemplateRenderer.<String> of(
@@ -444,8 +443,7 @@ public class IronListView extends DemoView {
             person.setFirstName(faker.name().firstName());
             person.setLastName(faker.name().lastName());
             person.setEmail(faker.internet().safeEmailAddress());
-            person.setPicture(
-                    "data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7");
+            person.setPicture("data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7");
             people.add(person);
         }
 

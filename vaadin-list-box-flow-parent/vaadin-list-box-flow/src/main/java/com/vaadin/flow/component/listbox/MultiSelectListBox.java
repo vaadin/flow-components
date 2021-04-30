@@ -56,7 +56,7 @@ public class MultiSelectListBox<T>
     }
 
     private static <T> Set<T> presentationToModel(MultiSelectListBox<T> listBox,
-            JsonArray presentation) {
+                                                  JsonArray presentation) {
         Set<T> modelValue = IntStream.range(0, presentation.length())
                 .map(idx -> (int) presentation.getNumber(idx))
                 .mapToObj(index -> listBox.getItems().get(index))
@@ -65,19 +65,20 @@ public class MultiSelectListBox<T>
     }
 
     private static <T> JsonArray modelToPresentation(
-            MultiSelectListBox<T> listBox, Set<T> model) {
+                                  MultiSelectListBox<T> listBox, Set<T> model) {
         JsonArray array = Json.createArray();
 
         AtomicInteger idx = new AtomicInteger(0);
         listBox.getItems().forEach(item -> {
-            int index = idx.getAndIncrement();
-            Object itemId = listBox.getItemId(item);
-            model.stream()
-                    .filter(selectedItem -> itemId
-                            .equals(listBox.getItemId(selectedItem)))
-                    .findFirst()
-                    .ifPresent(ignored -> array.set(array.length(), index));
-        });
+                int index = idx.getAndIncrement();
+                Object itemId = listBox.getItemId( item );
+                model.stream()
+                        .filter( selectedItem ->
+                            itemId.equals(listBox.getItemId(selectedItem)) )
+                        .findFirst().ifPresent( ignored ->
+                            array.set(array.length(), index) );
+            }
+        );
 
         return array;
     }

@@ -36,9 +36,9 @@ public class GridSetItemsAfterDetachPage extends VerticalLayout {
         NativeButton detach = new NativeButton("detach", e -> remove(grid));
         NativeButton setItemsAndAttach = new NativeButton(
                 "set items and attach", e -> {
-                    grid.setItems(items);
-                    add(grid);
-                });
+            grid.setItems(items);
+            add(grid);
+        });
 
         detach.setId("detach");
         setItemsAndAttach.setId("set-items-and-attach");

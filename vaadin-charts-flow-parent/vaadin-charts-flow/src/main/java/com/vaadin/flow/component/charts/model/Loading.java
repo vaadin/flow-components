@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
@@ -26,83 +27,83 @@ import com.vaadin.flow.component.charts.model.style.Style;
  */
 public class Loading extends AbstractConfigurationObject {
 
-    private Number hideDuration;
-    private Style labelStyle;
-    private Number showDuration;
-    private Style style;
+	private Number hideDuration;
+	private Style labelStyle;
+	private Number showDuration;
+	private Style style;
 
-    public Loading() {
-    }
+	public Loading() {
+	}
 
-    /**
-     * @see #setHideDuration(Number)
-     */
-    public Number getHideDuration() {
-        return hideDuration;
-    }
+	/**
+	 * @see #setHideDuration(Number)
+	 */
+	public Number getHideDuration() {
+		return hideDuration;
+	}
 
-    /**
-     * The duration in milliseconds of the fade out effect.
-     * <p>
-     * Defaults to: 100
-     */
-    public void setHideDuration(Number hideDuration) {
-        this.hideDuration = hideDuration;
-    }
+	/**
+	 * The duration in milliseconds of the fade out effect.
+	 * <p>
+	 * Defaults to: 100
+	 */
+	public void setHideDuration(Number hideDuration) {
+		this.hideDuration = hideDuration;
+	}
 
-    /**
-     * @see #setLabelStyle(Style)
-     */
-    public Style getLabelStyle() {
-        if (labelStyle == null) {
-            labelStyle = new Style();
-        }
-        return labelStyle;
-    }
+	/**
+	 * @see #setLabelStyle(Style)
+	 */
+	public Style getLabelStyle() {
+		if (labelStyle == null) {
+			labelStyle = new Style();
+		}
+		return labelStyle;
+	}
 
-    /**
-     * CSS styles for the loading label <code>span</code>.
-     * <p>
-     * Defaults to: { "fontWeight": "bold", "position": "relative", "top": "45%"
-     * }
-     */
-    public void setLabelStyle(Style labelStyle) {
-        this.labelStyle = labelStyle;
-    }
+	/**
+	 * CSS styles for the loading label <code>span</code>.
+	 * <p>
+	 * Defaults to: { "fontWeight": "bold", "position": "relative", "top": "45%"
+	 * }
+	 */
+	public void setLabelStyle(Style labelStyle) {
+		this.labelStyle = labelStyle;
+	}
 
-    /**
-     * @see #setShowDuration(Number)
-     */
-    public Number getShowDuration() {
-        return showDuration;
-    }
+	/**
+	 * @see #setShowDuration(Number)
+	 */
+	public Number getShowDuration() {
+		return showDuration;
+	}
 
-    /**
-     * The duration in milliseconds of the fade in effect.
-     * <p>
-     * Defaults to: 100
-     */
-    public void setShowDuration(Number showDuration) {
-        this.showDuration = showDuration;
-    }
+	/**
+	 * The duration in milliseconds of the fade in effect.
+	 * <p>
+	 * Defaults to: 100
+	 */
+	public void setShowDuration(Number showDuration) {
+		this.showDuration = showDuration;
+	}
 
-    /**
-     * @see #setStyle(Style)
-     */
-    public Style getStyle() {
-        if (style == null) {
-            style = new Style();
-        }
-        return style;
-    }
+	/**
+	 * @see #setStyle(Style)
+	 */
+	public Style getStyle() {
+		if (style == null) {
+			style = new Style();
+		}
+		return style;
+	}
 
-    /**
-     * CSS styles for the loading screen that covers the plot area.
-     * <p>
-     * Defaults to: { "position": "absolute", "backgroundColor": "#ffffff",
-     * "opacity": 0.5, "textAlign": "center" }
-     */
-    public void setStyle(Style style) {
-        this.style = style;
-    }
+	/**
+	 * CSS styles for the loading screen that covers the plot area.
+	 * <p>
+	 * Defaults to: { "position": "absolute", "backgroundColor": "#ffffff",
+	 * "opacity": 0.5, "textAlign": "center" }
+	 */
+	public void setStyle(Style style) {
+		this.style = style;
+	}
 }

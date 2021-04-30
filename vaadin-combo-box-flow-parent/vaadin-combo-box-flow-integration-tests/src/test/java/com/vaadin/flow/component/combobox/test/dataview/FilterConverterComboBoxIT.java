@@ -52,10 +52,10 @@ public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
         // Apply text filter
         definedCountComboBox.sendKeys("50", Keys.ENTER);
 
-        waitForItems(definedCountComboBox,
-                items -> items.size() == 5
-                        && "Item 50".equals(getItemLabel(items, 0))
-                        && "Item 450".equals(getItemLabel(items, 4)));
+        waitForItems(definedCountComboBox, items -> items.size() == 5
+                && "Item 50".equals(getItemLabel(items, 0))
+                && "Item 450".equals(getItemLabel(items, 4))
+        );
 
         // Reset text filter
         definedCountComboBox.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
@@ -73,10 +73,10 @@ public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
         // Apply text filter
         unknownCountComboBox.sendKeys("50", Keys.ENTER);
 
-        waitForItems(unknownCountComboBox,
-                items -> items.size() == 5
-                        && "Item 50".equals(getItemLabel(items, 0))
-                        && "Item 450".equals(getItemLabel(items, 4)));
+        waitForItems(unknownCountComboBox, items -> items.size() == 5
+                && "Item 50".equals(getItemLabel(items, 0))
+                && "Item 450".equals(getItemLabel(items, 4))
+        );
 
         // Reset text filter
         unknownCountComboBox.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);

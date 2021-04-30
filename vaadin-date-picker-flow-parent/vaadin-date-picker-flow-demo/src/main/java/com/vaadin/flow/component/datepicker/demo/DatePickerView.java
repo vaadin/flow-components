@@ -148,7 +148,7 @@ public class DatePickerView extends DemoView {
 
         DatePicker datePickerHelperComponent = new DatePicker("Order");
         datePickerHelperComponent
-                .setHelperComponent(new Span("Select an order date"));
+              .setHelperComponent(new Span("Select an order date"));
         // end-source-example
 
         datePickerHelperText.getStyle().set("margin-right", "15px");
@@ -162,8 +162,7 @@ public class DatePickerView extends DemoView {
         // source-example-heading: Auto open disabled
         DatePicker datePicker = new DatePicker();
 
-        // Dropdown is only opened when clicking the toggle button or pressing
-        // Up or Down arrow keys.
+        // Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.
         datePicker.setAutoOpen(false);
         // end-source-example
 
@@ -179,7 +178,9 @@ public class DatePickerView extends DemoView {
         binder.forField(datePicker).asRequired("Please choose a date")
                 .bind(Person::getBirthDate, Person::setBirthDate);
 
-        Button button = new Button("Submit", event -> binder.validate());
+        Button button = new Button("Submit", event ->
+            binder.validate()
+        );
         // end-source-example
 
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -394,27 +395,26 @@ public class DatePickerView extends DemoView {
         addCard("Theme Variants", "Small text field", datePicker);
     }
 
-    private void helperTextVariants() {
+    private void helperTextVariants(){
         Div div = new Div();
         // begin-source-example
         // source-example-heading: Helper text and component above the field
         DatePicker datePickerHelperTextAbove = new DatePicker("Label");
         datePickerHelperTextAbove.setHelperText("Helper text above the field");
         datePickerHelperTextAbove.getElement().getThemeList()
-                .set("helper-above-field", true);
+              .set("helper-above-field", true);
 
         DatePicker datePickerHelperComponentAbove = new DatePicker("Label");
-        datePickerHelperComponentAbove.setHelperComponent(
-                new Span("Helper component above the field"));
+        datePickerHelperComponentAbove
+              .setHelperComponent(new Span("Helper component above the field"));
         datePickerHelperComponentAbove.getElement().getThemeList()
-                .set("helper-above-field", true);
+              .set("helper-above-field", true);
         add(datePickerHelperTextAbove, datePickerHelperComponentAbove);
         // end-source-example
 
         datePickerHelperTextAbove.getStyle().set("margin-right", "15px");
         div.add(datePickerHelperTextAbove, datePickerHelperComponentAbove);
-        addCard("Theme Variants", "Helper text and component above the field",
-                div);
+        addCard("Theme Variants", "Helper text and component above the field", div);
     }
 
     private void styling() {

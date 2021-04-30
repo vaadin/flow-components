@@ -13,6 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
+
 /**
  * The direction where the layout algorithm will start drawing. Applies to
  * {@link ChartType#TREEMAP} charts.

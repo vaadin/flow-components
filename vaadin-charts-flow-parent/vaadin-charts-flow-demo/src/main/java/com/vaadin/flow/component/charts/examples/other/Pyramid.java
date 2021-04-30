@@ -9,7 +9,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsPyramid;
 
-public class Pyramid extends AbstractChartExample {
+public class Pyramid  extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.PYRAMID);

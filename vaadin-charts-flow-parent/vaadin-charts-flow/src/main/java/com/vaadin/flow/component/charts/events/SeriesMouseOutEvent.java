@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -22,8 +23,7 @@ import com.vaadin.flow.component.charts.Chart;
  * Fired when the mouse exits the neighborhood of a series
  */
 @DomEvent("series-mouse-out")
-public class SeriesMouseOutEvent extends ComponentEvent<Chart>
-        implements HasSeries {
+public class SeriesMouseOutEvent extends ComponentEvent<Chart> implements HasSeries {
 
     private final int seriesIndex;
 

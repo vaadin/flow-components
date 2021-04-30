@@ -9,7 +9,7 @@ import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-crud/editonclick")
 public class EditOnClickView extends VerticalLayout {
-    public static String CLICKTOEDIT_BUTTON_ID = "setClickToEdit";
+    public static String CLICKTOEDIT_BUTTON_ID =  "setClickToEdit";
 
     public EditOnClickView() {
         final CrudGrid<Person> grid = new CrudGrid<>(Person.class, false);

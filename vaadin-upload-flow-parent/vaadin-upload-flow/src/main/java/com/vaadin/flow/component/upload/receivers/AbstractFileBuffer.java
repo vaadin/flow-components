@@ -57,8 +57,7 @@ public abstract class AbstractFileBuffer implements Serializable {
     /**
      * Create a file output stream for the file.
      *
-     * @param fileName
-     *            the name of the file
+     * @param fileName the name of the file
      * @return the file output stream
      */
     protected FileOutputStream createFileOutputStream(String fileName) {

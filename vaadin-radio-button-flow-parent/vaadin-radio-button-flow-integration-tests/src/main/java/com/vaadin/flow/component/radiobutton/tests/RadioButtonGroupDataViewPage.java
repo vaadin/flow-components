@@ -59,6 +59,7 @@ public class RadioButtonGroupDataViewPage extends Div {
     static final String HAS_NEXT_ITEM_SPAN = "has-next-item-span";
     static final String HAS_PREV_ITEM_SPAN = "has-prev-item-span";
 
+
     public RadioButtonGroupDataViewPage() {
         createGenericDataView();
         createListDataView();
@@ -282,12 +283,12 @@ public class RadioButtonGroupDataViewPage extends Div {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
-        RadioButtonGroupListDataView<CustomItem> listDataView = radioButtonGroup
-                .setItems(items);
+        RadioButtonGroupListDataView<CustomItem> listDataView =
+                radioButtonGroup.setItems(items);
         // Setting the following Identifier Provider makes the component
         // independent from the CustomItem's equals method implementation:
         listDataView.setIdentifierProvider(CustomItem::getId);
@@ -296,11 +297,10 @@ public class RadioButtonGroupDataViewPage extends Div {
 
         Span selectedIdSpan = new Span();
         selectedIdSpan.setId(RADIO_GROUP_SELECTED_ID_SPAN);
-        selectedIdSpan
-                .setText(String.valueOf(radioButtonGroup.getValue().getId()));
+        selectedIdSpan.setText(String.valueOf(radioButtonGroup.getValue().getId()));
 
-        Button updateAndSelectByIdOnlyButton = new Button(
-                "Update & Select by Id", click -> {
+        Button updateAndSelectByIdOnlyButton =
+                new Button("Update & Select by Id", click -> {
                     // Make the names of unselected items similar to the name of
                     // selected one to mess with the <equals> implementation in
                     // CustomItem:
@@ -314,20 +314,20 @@ public class RadioButtonGroupDataViewPage extends Div {
                     // and instead with just the Id:
                     radioButtonGroup.setValue(new CustomItem(2L));
 
-                    selectedIdSpan.setText(String
-                            .valueOf(radioButtonGroup.getValue().getId()));
+                    selectedIdSpan.setText(String.valueOf(
+                            radioButtonGroup.getValue().getId()));
                 });
         updateAndSelectByIdOnlyButton
                 .setId(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON);
 
-        Button selectByIdAndNameButton = new Button("Select by Id and Name",
-                click -> {
+        Button selectByIdAndNameButton =
+                new Button("Select by Id and Name", click -> {
                     // Select the item with the Id and a challenging wrong name
                     // to verify <equals> method is not in use:
                     radioButtonGroup.setValue(new CustomItem(3L, "Second"));
 
-                    selectedIdSpan.setText(String
-                            .valueOf(radioButtonGroup.getValue().getId()));
+                    selectedIdSpan.setText(
+                            String.valueOf(radioButtonGroup.getValue().getId()));
                 });
         selectByIdAndNameButton
                 .setId(RADIO_GROUP_SELECTION_BY_ID_AND_NAME_UPDATE_BUTTON);
@@ -437,10 +437,8 @@ public class RadioButtonGroupDataViewPage extends Div {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (!(o instanceof CustomItem))
-                return false;
+            if (this == o) return true;
+            if (!(o instanceof CustomItem)) return false;
             CustomItem that = (CustomItem) o;
             return Objects.equals(getName(), that.getName());
         }

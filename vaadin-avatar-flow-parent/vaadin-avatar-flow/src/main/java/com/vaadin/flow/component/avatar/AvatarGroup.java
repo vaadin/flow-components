@@ -58,14 +58,14 @@ import java.util.stream.Stream;
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar-group.js")
 @NpmPackage(value = "@vaadin/vaadin-avatar", version = "20.0.0-alpha5")
 public class AvatarGroup extends Component
-        implements HasStyle, HasSize, HasTheme {
+    implements HasStyle, HasSize, HasTheme {
 
     /**
      * Item to be set as an avatar for the avatar group.
      *
      * @author Vaadin Ltd
      */
-    public static class AvatarGroupItem implements Serializable {
+    public static class AvatarGroupItem implements Serializable  {
         private String name;
         private String abbr;
         private String img;
@@ -81,8 +81,8 @@ public class AvatarGroup extends Component
         /**
          * Creates a new empty avatar group item.
          * <p>
-         * The avatar displays the user icon in the avatar and "Anonymous" in
-         * the tooltip unless overridden by setting other properties.
+         * The avatar displays the user icon in the avatar and "Anonymous"
+         * in the tooltip unless overridden by setting other properties.
          */
         public AvatarGroupItem() {
         }
@@ -152,8 +152,8 @@ public class AvatarGroup extends Component
         /**
          * Sets the abbreviation for the avatar.
          * <p>
-         * The abbreviation will be displayed in the avatar if no image has been
-         * set.
+         * The abbreviation will be displayed in the avatar if no image has
+         * been set.
          *
          * @param abbr
          *            the abbreviation
@@ -178,7 +178,7 @@ public class AvatarGroup extends Component
          * Gets the image that was set for the avatar.
          *
          * @return the image resource value or {@code null} if the resource has
-         *         not been set
+         * not been set
          */
         public AbstractStreamResource getImageResource() {
             return imageResource;
@@ -224,11 +224,9 @@ public class AvatarGroup extends Component
                 return;
             }
 
-            // The following is the copy of functionality from the
-            // ElementAttributeMap
+            // The following is the copy of functionality from the ElementAttributeMap
             doSetResource(resource);
-            if (getHost() != null
-                    && getHost().getElement().getNode().isAttached()) {
+            if (getHost() != null && getHost().getElement().getNode().isAttached()) {
                 registerResource(resource);
             } else {
                 deferRegistration(resource);
@@ -298,15 +296,14 @@ public class AvatarGroup extends Component
             if (handle != null) {
                 handle.remove();
             }
-            pendingRegistration = getHost().getElement().getNode()
-                    .addDetachListener(
-                            // Do not convert to lambda
-                            new Command() {
-                                @Override
-                                public void execute() {
-                                    AvatarGroupItem.this.unsetResource();
-                                }
-                            });
+            pendingRegistration = getHost().getElement().getNode().addDetachListener(
+                    // Do not convert to lambda
+                    new Command() {
+                        @Override
+                        public void execute() {
+                            AvatarGroupItem.this.unsetResource();
+                        }
+                    });
         }
 
         private void unsetResource() {
@@ -338,8 +335,8 @@ public class AvatarGroup extends Component
         /**
          * Sets the color index for the avatar group item.
          * <p>
-         * The color index defines which color will be used for the border of
-         * the avatar. Color index N applies CSS variable
+         * The color index defines which color will be used for the border
+         * of the avatar. Color index N applies CSS variable
          * {@code --vaadin-user-color-N} to the border.
          *
          * @param colorIndex
@@ -438,8 +435,8 @@ public class AvatarGroup extends Component
          * Sets the translated phrase for avatar group accessible label when
          * having many active users.
          * <p>
-         * You can use word <code>{count}</code> in order to display current
-         * count of active users. For example, "Currently {count} active users".
+         * You can use word <code>{count}</code> in order to display current count of
+         * active users. For example, "Currently {count} active users".
          *
          * @param manyActiveUsers
          *            the translated word for the label, not <code>null</code>
@@ -507,18 +504,19 @@ public class AvatarGroup extends Component
     private void setClientItems() {
         if (!pendingUpdate) {
             pendingUpdate = true;
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, ctx -> {
-                        getElement().setPropertyJson("items",
-                                createItemsJsonArray(items));
-                        pendingUpdate = false;
-                    }));
+            getElement().getNode().runWhenAttached(ui ->
+                    ui.beforeClientResponse(this,
+                            ctx -> {
+                                getElement().setPropertyJson("items",
+                                        createItemsJsonArray(items));
+                                pendingUpdate = false;
+                            }));
         }
     }
 
     private JsonArray createItemsJsonArray(Collection<AvatarGroupItem> items) {
         JsonArray jsonItems = Json.createArray();
-        for (AvatarGroupItem item : items) {
+        for (AvatarGroupItem item: items) {
             JsonObject jsonItem = Json.createObject();
             if (item.getName() != null) {
                 jsonItem.put("name", item.getName());
@@ -549,8 +547,8 @@ public class AvatarGroup extends Component
      *            the items to add
      */
     public void add(AvatarGroupItem... items) {
-        setItems(Stream.concat(this.items.stream(), Arrays.stream(items))
-                .collect(Collectors.toList()));
+        setItems(Stream.concat(this.items.stream(),
+                Arrays.stream(items)).collect(Collectors.toList()));
     }
 
     /**
@@ -650,8 +648,9 @@ public class AvatarGroup extends Component
      *            theme variants to add
      */
     public void addThemeVariants(AvatarGroupVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(AvatarGroupVariant::getVariantName)
+        getThemeNames()
+                .addAll(Stream.of(variants)
+                        .map(AvatarGroupVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
 

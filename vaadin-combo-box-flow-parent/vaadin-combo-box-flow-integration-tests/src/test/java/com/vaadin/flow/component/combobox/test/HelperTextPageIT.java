@@ -17,7 +17,7 @@ public class HelperTextPageIT extends AbstractComboBoxIT {
     @Test
     public void assertHelperText() {
         ComboBoxElement comboHelperText = $(ComboBoxElement.class)
-                .id("combobox-helper-text");
+              .id("combobox-helper-text");
         Assert.assertEquals("Helper text", comboHelperText.getHelperText());
 
         clickButton("empty-helper-text");
@@ -27,9 +27,9 @@ public class HelperTextPageIT extends AbstractComboBoxIT {
     @Test
     public void assertHelperComponent() {
         ComboBoxElement comboHelperComponent = $(ComboBoxElement.class)
-                .id("combobox-helper-component");
+              .id("combobox-helper-component");
         Assert.assertEquals("helper-component",
-                comboHelperComponent.getHelperComponent().getAttribute("id"));
+              comboHelperComponent.getHelperComponent().getAttribute("id"));
 
         clickButton("empty-helper-component");
         Assert.assertEquals(null, comboHelperComponent.getHelperComponent());

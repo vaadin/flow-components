@@ -105,10 +105,9 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract String getColorKey();
 
     /**
-     * Determines what data value should be used to calculate point color if
-     * colorAxis is used. Requires to set <code>min</code> and <code>max</code>
-     * if some custom point property is used or if approximation for data
-     * grouping is set to <code>'sum'</code>'.
+     * Determines what data value should be used to calculate point color if colorAxis is used.
+     * Requires to set <code>min</code> and <code>max</code> if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>'.
      */
     public abstract void setColorKey(String colorKey);
 
@@ -147,11 +146,11 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract Boolean getCrisp();
 
     /**
-     * When true, each point or column edge is rounded to its nearest pixel in
-     * order to render sharp on screen. In some cases, when there are a lot of
-     * densely packed columns, this leads to visible difference in column widths
-     * or distance between columns. In these cases, setting crisp to false may
-     * look better, even though each column is rendered blurry.
+     * When true, each point or column edge is rounded to its nearest pixel in order to render sharp on screen.
+     * In some cases, when there are a lot of densely packed columns, this leads to visible difference
+     * in column widths or distance between columns.
+     * In these cases, setting crisp to false may look better,
+     * even though each column is rendered blurry.
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -355,8 +354,8 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract IntervalUnit getPointIntervalUnit();
 
     /**
-     * On datetime series, this allows for setting the
-     * <a href="plotOptions.series.pointInterval">pointInterval</a> to irregular
+     * On datetime series, this allows for setting the <a
+     * href="plotOptions.series.pointInterval">pointInterval</a> to irregular
      * time units, <code>day</code>, <code>month</code> and <code>year</code>. A
      * day is usually the same as 24 hours, but pointIntervalUnit also takes the
      * DST crossover into consideration when dealing with local time. Combine

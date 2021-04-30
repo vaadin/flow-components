@@ -149,10 +149,10 @@ public class DatePickerValidationPage extends Div {
         final Div isValid = new Div();
         isValid.setId("is-invalid");
         final NativeButton checkIsValid = new NativeButton(
-                "Check if current value of step-number-field is invalid");
+            "Check if current value of step-number-field is invalid");
         checkIsValid.setId("check-is-invalid");
         checkIsValid.addClickListener(event -> isValid
-                .setText(datePicker.isInvalid() ? "invalid" : "valid"));
+            .setText(datePicker.isInvalid() ? "invalid" : "valid"));
         add(datePicker, checkIsValid, isValid);
     }
 }

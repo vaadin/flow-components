@@ -13,6 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
+
 /**
  * The layout of the legend items. Can be one of HORIZONTAL("horizontal") or
  * VERTICAL("vertical"). Defaults to HORIZONTAL.

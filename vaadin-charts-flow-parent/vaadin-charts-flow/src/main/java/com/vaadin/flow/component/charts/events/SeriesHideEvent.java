@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -22,8 +23,7 @@ import com.vaadin.flow.component.charts.Chart;
  * Fired when a series is hidden
  */
 @DomEvent("series-hide")
-public class SeriesHideEvent extends ComponentEvent<Chart>
-        implements HasSeries {
+public class SeriesHideEvent extends ComponentEvent<Chart> implements HasSeries {
 
     private final int seriesIndex;
 

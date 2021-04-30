@@ -53,8 +53,7 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
             SerializableSupplier<DataProvider<T, ?>> dataProviderSupplier,
             CheckboxGroup<T> checkboxGroup,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
-        super(dataProviderSupplier, checkboxGroup,
-                filterOrSortingChangedCallback);
+        super(dataProviderSupplier, checkboxGroup, filterOrSortingChangedCallback);
     }
 
     /**
@@ -77,8 +76,7 @@ public class CheckboxGroupListDataView<T> extends AbstractListDataView<T> {
             CheckboxGroup<T> checkboxGroup,
             SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
-        super(dataProviderSupplier, checkboxGroup,
-                filterOrSortingChangedCallback);
+        super(dataProviderSupplier, checkboxGroup, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 

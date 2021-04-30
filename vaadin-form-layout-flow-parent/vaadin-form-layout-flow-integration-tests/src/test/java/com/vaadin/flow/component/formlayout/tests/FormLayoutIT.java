@@ -49,14 +49,14 @@ public class FormLayoutIT extends ComponentDemoTest {
         List<WebElement> textFields = firstLayout
                 .findElements(By.tagName("vaadin-text-field"));
         Assert.assertEquals(3, textFields.size());
-
-        // 3 columns, all should be horizontally aligned (tolerance of some
-        // pixels)
+        
+        // 3 columns, all should be horizontally aligned (tolerance of some pixels)
         getDriver().manage().window().setSize(new Dimension(1000, 1000));
         int y2 = textFields.get(2).getLocation().getY();
         int y1 = textFields.get(1).getLocation().getY();
         Assert.assertTrue("All 3 columns should be horizontally aligned y1="
                 + y1 + " y2=" + y2, Math.abs(y2 - y1) < 2);
+
 
         // window resized, should be in 2 column mode, two below one
         getDriver().manage().window().setSize(new Dimension(620, 620));
@@ -65,8 +65,8 @@ public class FormLayoutIT extends ComponentDemoTest {
         y1 = textFields.get(1).getLocation().getY();
         Assert.assertTrue(
                 "Layout should be in 2 column mode, last field should be below the first two y1="
-                        + y1 + " y2=" + y2,
-                y2 > y1 + 2);
+                        + y1 + " y2=" + y2, y2 > y1 + 2);
+
 
         // resized to 1 column mode, fields should be arranged below one another
         getDriver().manage().window().setSize(new Dimension(100, 620));
@@ -74,8 +74,7 @@ public class FormLayoutIT extends ComponentDemoTest {
         int y0 = textFields.get(0).getLocation().getY();
         Assert.assertTrue(
                 "Layout should be in 1 column mode, all fields should be below one another y0="
-                        + y0 + " y1=" + y1,
-                y1 > y0);
+                        + y0 + " y1=" + y1, y1 > y0);
     }
 
     @Test

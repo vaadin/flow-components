@@ -48,19 +48,16 @@ public class GridBenchmark extends Div implements HasUrlParameter<String> {
     private Grid<String> grid;
 
     private static final List<String> items = Collections
-            .unmodifiableList(IntStream.range(0, 1000).mapToObj(String::valueOf)
-                    .collect(Collectors.toList()));
+            .unmodifiableList(IntStream.range(0, 1000).mapToObj(String::valueOf).collect(Collectors.toList()));
     private static final TreeData<String> treeData = new TreeData<>();
 
     static {
         addTreeItems(treeData, null, 1000, 2);
     }
 
-    private static void addTreeItems(TreeData<String> treeData, String parent,
-            int count, int level) {
+    private static void addTreeItems(TreeData<String> treeData, String parent, int count, int level) {
         IntStream.range(0, count).forEach(index -> {
-            String child = parent != null ? parent + "-" + index
-                    : String.valueOf(index);
+            String child = parent != null ? parent + "-" + index : String.valueOf(index);
             treeData.addItem(parent, child);
             if (level > 0) {
                 addTreeItems(treeData, child, 3, level - 1);
@@ -69,91 +66,79 @@ public class GridBenchmark extends Div implements HasUrlParameter<String> {
     }
 
     @Override
-    public void setParameter(BeforeEvent event,
-            @OptionalParameter String parameter) {
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         Location location = event.getLocation();
         QueryParameters queryParameters = location.getQueryParameters();
 
-        Map<String, List<String>> parametersMap = queryParameters
-                .getParameters();
-        if (!parametersMap.containsKey("variant")
-                || !parametersMap.containsKey("metric")) {
+        Map<String, List<String>> parametersMap = queryParameters.getParameters();
+        if (!parametersMap.containsKey("variant") || !parametersMap.containsKey("metric")) {
             add(new Text("Provide query parameters: variant and metric"));
             return;
         }
         String metric = parametersMap.get("metric").get(0);
         String variant = parametersMap.get("variant").get(0);
 
-        LoggerFactory.getLogger(GridBenchmark.class)
-                .info("Sample: " + variant + "-" + metric);
+        LoggerFactory.getLogger(GridBenchmark.class).info("Sample: " + variant + "-" + metric);
 
         switch (variant) {
-        case "simple":
-            grid = getGrid();
-            addColumns(grid, 5, false);
-            break;
-        case "multicolumn":
-            grid = getGrid();
-            addColumns(grid, 50, false);
-            break;
-        case "componentrenderers":
-            grid = getGrid();
-            addColumns(grid, 5, true);
-            break;
-        case "detailsopened":
-            grid = getGrid();
-            addColumns(grid, 5, false);
-            grid.setItemDetailsRenderer(
-                    new ComponentRenderer<>(item -> new Text(item.toString())));
-            items.forEach(item -> grid.setDetailsVisible(item, true));
-            break;
-        case "tree":
-            grid = getTreeGrid();
-            ((TreeGrid<String>) grid).addHierarchyColumn(i -> i);
-            addColumns(grid, 5, false);
-            break;
-        case "mixed":
-            grid = getTreeGrid();
-            ((TreeGrid<String>) grid).addHierarchyColumn(i -> i);
-            addColumns(grid, 50, true);
-            grid.setItemDetailsRenderer(
-                    new ComponentRenderer<>(item -> new Text(item.toString())));
-            treeData.getRootItems()
-                    .forEach(item -> grid.setDetailsVisible(item, true));
-            break;
-        default:
-            break;
+            case "simple":
+                grid = getGrid();
+                addColumns(grid, 5, false);
+                break;
+            case "multicolumn":
+                grid = getGrid();
+                addColumns(grid, 50, false);
+                break;
+            case "componentrenderers":
+                grid = getGrid();
+                addColumns(grid, 5, true);
+                break;
+            case "detailsopened":
+                grid = getGrid();
+                addColumns(grid, 5, false);
+                grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> new Text(item.toString())));
+                items.forEach(item -> grid.setDetailsVisible(item, true));
+                break;
+            case "tree":
+                grid = getTreeGrid();
+                ((TreeGrid<String>) grid).addHierarchyColumn(i -> i);
+                addColumns(grid, 5, false);
+                break;
+            case "mixed":
+                grid = getTreeGrid();
+                ((TreeGrid<String>) grid).addHierarchyColumn(i -> i);
+                addColumns(grid, 50, true);
+                grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> new Text(item.toString())));
+                treeData.getRootItems().forEach(item -> grid.setDetailsVisible(item, true));
+                break;
+            default:
+                break;
         }
 
         switch (metric) {
-        case "verticalscrollframetime":
-            add(grid);
-            whenRendered(grid).then(v -> grid.getElement()
-                    .executeJs("window.measureScrollFrameTime(this, false)"));
-            break;
-        case "horizontalscrollframetime":
-            add(grid);
-            whenRendered(grid).then(v -> grid.getElement()
-                    .executeJs("window.measureScrollFrameTime(this, true)"));
-            break;
-        case "rendertime":
-            measureRendered(grid);
-            UI.getCurrent().getElement()
-                    .executeJs("return window.startWhenReady()")
-                    .then(v -> add(grid));
-            break;
-        case "expandtime":
-            add(grid);
-            startWhenRendered(grid).then(v -> {
+            case "verticalscrollframetime":
+                add(grid);
+                whenRendered(grid).then(v -> grid.getElement().executeJs("window.measureScrollFrameTime(this, false)"));
+                break;
+            case "horizontalscrollframetime":
+                add(grid);
+                whenRendered(grid).then(v -> grid.getElement().executeJs("window.measureScrollFrameTime(this, true)"));
+                break;
+            case "rendertime":
                 measureRendered(grid);
-                TreeGrid<String> treeGrid = (TreeGrid<String>) grid;
-                TreeData<String> data = ((TreeDataProvider<String>) treeGrid
-                        .getDataProvider()).getTreeData();
-                treeGrid.expandRecursively(data.getRootItems(), 5);
-            });
-            break;
-        default:
-            break;
+                UI.getCurrent().getElement().executeJs("return window.startWhenReady()").then(v -> add(grid));
+                break;
+            case "expandtime":
+                add(grid);
+                startWhenRendered(grid).then(v -> {
+                    measureRendered(grid);
+                    TreeGrid<String> treeGrid = (TreeGrid<String>) grid;
+                    TreeData<String> data = ((TreeDataProvider<String>) treeGrid.getDataProvider()).getTreeData();
+                    treeGrid.expandRecursively(data.getRootItems(), 5);
+                });
+                break;
+            default:
+                break;
         }
     }
 
@@ -162,8 +147,7 @@ public class GridBenchmark extends Div implements HasUrlParameter<String> {
     }
 
     private PendingJavaScriptResult startWhenRendered(Grid<String> grid) {
-        return grid.getElement()
-                .executeJs("return window.startWhenRendered(this)");
+        return grid.getElement().executeJs("return window.startWhenRendered(this)");
     }
 
     private void measureRendered(Grid<String> grid) {
@@ -182,12 +166,10 @@ public class GridBenchmark extends Div implements HasUrlParameter<String> {
         return result;
     }
 
-    private void addColumns(Grid<String> grid, int count,
-            boolean componentrenderers) {
+    private void addColumns(Grid<String> grid, int count, boolean componentrenderers) {
         IntStream.range(0, count).forEach(index -> {
             if (componentrenderers) {
-                grid.addColumn(
-                        new ComponentRenderer<>(item -> new NativeButton(item)))
+                grid.addColumn(new ComponentRenderer<>(item -> new NativeButton(item)))
                         .setHeader(String.valueOf(index));
             } else {
                 grid.addColumn(item -> item).setHeader(String.valueOf(index));

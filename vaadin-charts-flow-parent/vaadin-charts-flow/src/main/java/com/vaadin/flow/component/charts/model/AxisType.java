@@ -15,6 +15,7 @@ package com.vaadin.flow.component.charts.model;
 
 import java.util.Date;
 
+
 /**
  * Enum representing different axis types. Can be one of LINEAR, LOGARITHMIC,
  * CATEGORY or DATETIME. In a DATETIME axis, the numbers are given in

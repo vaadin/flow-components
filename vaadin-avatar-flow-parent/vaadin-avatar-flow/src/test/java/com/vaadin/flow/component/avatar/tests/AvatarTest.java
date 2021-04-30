@@ -37,8 +37,7 @@ public class AvatarTest {
     @Test
     public void shouldCreateEmptyAvatarWithDefaultState() {
         Assert.assertNull("Initial name is null", avatar.getName());
-        Assert.assertNull("Initial abbreviation is null",
-                avatar.getAbbreviation());
+        Assert.assertNull("Initial abbreviation is null", avatar.getAbbreviation());
         Assert.assertNull("Initial image is null", avatar.getImage());
     }
 
@@ -79,8 +78,8 @@ public class AvatarTest {
         avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
 
         Set<String> themeNames = avatar.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+        Assert.assertTrue(themeNames
+                .contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test
@@ -89,8 +88,8 @@ public class AvatarTest {
         avatar.removeThemeVariants(AvatarVariant.LUMO_LARGE);
 
         Set<String> themeNames = avatar.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+        Assert.assertFalse(themeNames
+                .contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test

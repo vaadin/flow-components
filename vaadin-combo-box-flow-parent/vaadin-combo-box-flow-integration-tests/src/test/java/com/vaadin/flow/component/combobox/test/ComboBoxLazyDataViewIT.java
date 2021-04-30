@@ -124,25 +124,25 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
 
         comboBox.openPopup();
 
-        waitForItems(comboBox,
-                items -> items.size() == 200
-                        && "Item 0".equals(getItemLabel(items, 0))
-                        && "Item 49".equals(getItemLabel(items, 49)));
+        waitForItems(comboBox, items -> items.size() == 200
+                && "Item 0".equals(getItemLabel(items, 0))
+                && "Item 49".equals(getItemLabel(items, 49)));
 
         clickButton(GET_ITEMS_BUTTON_ID);
 
         Assert.assertTrue("The client filter shouldn't impact the items",
                 itemsList.getText().startsWith("Item 0,Item 1,Item 2")
                         && itemsList.getText()
-                                .endsWith("Item 997,Item 998,Item 999"));
+                        .endsWith("Item 997,Item 998,Item 999"));
     }
 
     @Test
     public void getItems_withDefinedItemCountAndClientSideFilter_returnsNotFilteredItems() {
         comboBox.setFilter("777");
 
-        waitForItems(comboBox, items -> items.size() == 1
-                && "Item 777".equals(getItemLabel(items, 0)));
+        waitForItems(comboBox,
+                items -> items.size() == 1
+                        && "Item 777".equals(getItemLabel(items, 0)));
 
         clickButton(GET_ITEMS_BUTTON_ID);
 
@@ -154,7 +154,7 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
         Assert.assertTrue("The client filter shouldn't impact the items",
                 itemsList.getText().startsWith("Item 0,Item 1,Item 2")
                         && itemsList.getText()
-                                .endsWith("Item 997,Item 998,Item 999"));
+                        .endsWith("Item 997,Item 998,Item 999"));
 
         comboBox.openPopup();
 
@@ -168,7 +168,7 @@ public class ComboBoxLazyDataViewIT extends AbstractComboBoxIT {
         Assert.assertTrue("The client filter shouldn't impact the items",
                 itemsList.getText().startsWith("Item 0,Item 1,Item 2")
                         && itemsList.getText()
-                                .endsWith("Item 997,Item 998,Item 999"));
+                        .endsWith("Item 997,Item 998,Item 999"));
     }
 
 }

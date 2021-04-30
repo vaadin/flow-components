@@ -57,8 +57,11 @@ public class City {
 
     @Override
     public String toString() {
-        return "City{" + "id=" + id + ", name='" + name + '\'' + ", person='"
-                + person.getName() + "'}";
+        return "City{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", person='" + person.getName() +
+                "'}";
     }
 
     @Override
@@ -66,8 +69,8 @@ public class City {
         try {
             return (City) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("The City object could not be cloned.",
-                    e);
+            throw new RuntimeException(
+                    "The City object could not be cloned.", e);
         }
     }
 }

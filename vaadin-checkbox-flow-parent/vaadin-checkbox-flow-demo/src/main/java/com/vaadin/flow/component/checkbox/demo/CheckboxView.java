@@ -144,8 +144,8 @@ public class CheckboxView extends DemoView {
                 return false;
             }
             Dish dish = (Dish) o;
-            return vegetarian == dish.vegetarian
-                    && Objects.equals(name, dish.name);
+            return vegetarian == dish.vegetarian &&
+                    Objects.equals(name, dish.name);
         }
 
         @Override
@@ -163,7 +163,8 @@ public class CheckboxView extends DemoView {
 
     public static class DepartmentData {
 
-        private static final List<Department> DEPARTMENT_LIST = createDepartmentList();
+        private static final List<Department> DEPARTMENT_LIST =
+                createDepartmentList();
 
         public List<Department> getDepartments() {
             return DEPARTMENT_LIST;
@@ -172,11 +173,11 @@ public class CheckboxView extends DemoView {
         private static List<Department> createDepartmentList() {
             List<Department> departmentList = new ArrayList<>();
             departmentList.add(new Department(1, "Product",
-                    "Development and maintenance of the official "
-                            + "software products"));
+                    "Development and maintenance of the official " +
+                            "software products"));
             departmentList.add(new Department(2, "Services",
-                    "Customer consulting projects and service "
-                            + "product delivery and development"));
+                    "Customer consulting projects and service " +
+                            "product delivery and development"));
             departmentList.add(new Department(3, "HR",
                     "Employee well-being and development"));
             departmentList.add(new Department(4, "Accounting",
@@ -188,8 +189,8 @@ public class CheckboxView extends DemoView {
 
     public static class DishData {
 
-        private static final Dish DISH_OF_THE_DAY = new Dish(false,
-                "Caprese Pasta Salad");
+        private static final Dish DISH_OF_THE_DAY =
+                new Dish(false, "Caprese Pasta Salad");
 
         private static final Collection<Dish> DISH_LIST = createDishList();
 
@@ -206,9 +207,11 @@ public class CheckboxView extends DemoView {
         }
 
         private static Collection<Dish> createDishList() {
-            return Arrays.asList(new Dish(false, "Pasta Carbonara"),
+            return Arrays.asList(
+                    new Dish(false, "Pasta Carbonara"),
                     new Dish(true, "Vegetarian Tortilla Soup"),
-                    new Dish(false, "Beef steak"), DISH_OF_THE_DAY);
+                    new Dish(false, "Beef steak"),
+                    DISH_OF_THE_DAY);
         }
     }
 
@@ -260,7 +263,8 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Disabled state
         CheckboxGroup<String> disabledCheckGroup = new CheckboxGroup<>();
         disabledCheckGroup.setLabel("Disabled");
-        disabledCheckGroup.setItems("Option one", "Option two", "Option three");
+        disabledCheckGroup.setItems(
+                "Option one", "Option two", "Option three");
         disabledCheckGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         disabledCheckGroup.setValue(Collections.singleton("Option one"));
         disabledCheckGroup.setEnabled(false);
@@ -367,12 +371,12 @@ public class CheckboxView extends DemoView {
 
         CheckboxGroup<String> checkboxGroupHelperComponent = new CheckboxGroup<>();
         checkboxGroupHelperComponent.setLabel("Options");
-        checkboxGroupHelperComponent.setItems("Option one", "Option two",
-                "Option three");
         checkboxGroupHelperComponent
-                .addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+              .setItems("Option one", "Option two", "Option three");
         checkboxGroupHelperComponent
-                .setHelperComponent(new Span("Choose any options"));
+              .addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroupHelperComponent
+              .setHelperComponent(new Span("Choose any options"));
 
         add(checkboxGroup, checkboxGroupHelperComponent);
         // end-source-example
@@ -441,14 +445,13 @@ public class CheckboxView extends DemoView {
         checkboxGroup.setItems(departmentList);
         checkboxGroup.setHelperText("Choose your current departments");
         checkboxGroup
-                .addThemeVariants(CheckboxGroupVariant.LUMO_HELPER_ABOVE_FIELD);
+              .addThemeVariants(CheckboxGroupVariant.LUMO_HELPER_ABOVE_FIELD);
 
         add(checkboxGroup);
         // end-source-example
 
         addCard("Theme variants", "Helper text above the field", checkboxGroup);
     }
-
     private void styling() {
         Paragraph p1 = new Paragraph(
                 "To read about styling you can read the related tutorial ");
@@ -473,12 +476,13 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Filtering and accessing items
         CheckboxGroup<Dish> checkboxGroup = new CheckboxGroup<>();
 
-        CheckboxGroupListDataView<Dish> dataView = checkboxGroup
-                .setItems(DishData.getDishes());
+        CheckboxGroupListDataView<Dish> dataView = checkboxGroup.
+                setItems(DishData.getDishes());
 
         Checkbox showVegetarianDishes = new Checkbox(
-                "Show only vegetarian dishes", event -> dataView.setFilter(
-                        event.getValue() ? Dish::isVegetarian : null));
+                "Show only vegetarian dishes",
+                event -> dataView.setFilter(event.getValue() ?
+                        Dish::isVegetarian : null));
 
         Div allDishesAvailable = new Div();
         allDishesAvailable.setText(String.format("%d dishes available in total",
@@ -486,13 +490,13 @@ public class CheckboxView extends DemoView {
 
         Button askForDishOfTheDay = new Button(
                 "Check availability of Dish Of The Day", event -> {
-                    Dish dishOfTheDay = DishData.getDishOfTheDay();
-                    Notification.show(
-                            dataView.contains(dishOfTheDay)
-                                    ? "Dish of the day is available"
-                                    : "Dish of the day is not available, sorry",
-                            2000, Notification.Position.MIDDLE);
-                });
+            Dish dishOfTheDay = DishData.getDishOfTheDay();
+            Notification.show(dataView.contains(dishOfTheDay) ?
+                            "Dish of the day is available" :
+                            "Dish of the day is not available, sorry",
+                    2000,
+                    Notification.Position.MIDDLE);
+        });
         // end-source-example
 
         addCard("Filtering and accessing items", checkboxGroup,

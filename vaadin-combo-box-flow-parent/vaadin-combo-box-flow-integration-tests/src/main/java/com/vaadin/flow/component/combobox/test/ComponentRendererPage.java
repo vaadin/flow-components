@@ -109,8 +109,8 @@ public class ComponentRendererPage extends Div {
         List<ComboBoxDemoPage.Song> listOfSongs = new ArrayList<>();
         listOfSongs.add(new ComboBoxDemoPage.Song("A V Club Disagrees",
                 "Haircuts for Men", "Physical Fitness"));
-        listOfSongs.add(new ComboBoxDemoPage.Song("Sculpted", "Haywyre",
-                "Two Fold Pt.1"));
+        listOfSongs.add(
+                new ComboBoxDemoPage.Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
         listOfSongs.add(new ComboBoxDemoPage.Song("Voices of a Distant Star",
                 "Killigrew", "Animus II"));
         return listOfSongs;

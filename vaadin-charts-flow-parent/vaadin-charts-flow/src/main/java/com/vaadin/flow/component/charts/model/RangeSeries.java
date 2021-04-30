@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * Series for range type data
  */

@@ -16,8 +16,8 @@
 package com.vaadin.flow.component.upload;
 
 /**
- * FailedEvent event is sent when the upload is received, but the reception is
- * interrupted for some reason.
+ * FailedEvent event is sent when the upload is received, but the
+ * reception is interrupted for some reason.
  *
  * @author Vaadin Ltd.
  */

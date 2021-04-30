@@ -13,17 +13,19 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
- * The text alignment for the label. While align determines where the texts
- * anchor point is placed within the plot band, textAlign determines how the
- * text is aligned against its anchor point. Defaults to the same as the align
- * option.
+ * The text alignment for the label. While align determines where the texts anchor point is placed within the plot band,
+ * textAlign determines how the text is aligned against its anchor point.
+ * Defaults to the same as the align option.
  *
  * Defaults to undefined.
  */
 public enum TextAlign implements ChartEnum {
 
-    LEFT("left"), CENTER("center"), RIGHT("right");
+    LEFT("left"),
+    CENTER("center"),
+    RIGHT("right");
 
     private final String alignment;
 

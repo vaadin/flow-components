@@ -13,14 +13,15 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * The name of a symbol to use for the border around the {@link Datalabels} or
  * {@link Tooltip}.
  */
 public enum Shape implements ChartEnum {
 
-    CALLOUT("callout"), CIRCLE("circle"), DIAMOND("diamond"), SQUARE(
-            "square"), TRIANGLE("triangle"), TRIANGLE_DOWN("triangle-down");
+    CALLOUT("callout"), CIRCLE("circle"), DIAMOND("diamond"), SQUARE("square"), TRIANGLE(
+            "triangle"), TRIANGLE_DOWN("triangle-down");
 
     Shape(String type) {
         this.type = type;

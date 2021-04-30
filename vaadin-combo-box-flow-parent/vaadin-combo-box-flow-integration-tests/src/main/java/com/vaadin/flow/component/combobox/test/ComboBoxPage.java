@@ -136,10 +136,10 @@ public class ComboBoxPage extends Div {
         Span sizeRequestCountSpan = new Span("0");
         sizeRequestCountSpan.setId("list-size-request-count-span");
 
-        ListDataProvider<String> dataProvider = new SpyListDataProvider<>(
-                Arrays.asList("foo", "bar", "baz"),
-                ignore -> sizeRequestCountSpan.setText(
-                        String.valueOf(sizeRequestCounter.incrementAndGet())));
+        ListDataProvider<String> dataProvider =
+                new SpyListDataProvider<>(Arrays.asList("foo", "bar", "baz"),
+                        ignore -> sizeRequestCountSpan.setText(
+                                String.valueOf(sizeRequestCounter.incrementAndGet())));
         comboBox.setDataProvider(dataProvider);
 
         NativeButton resetDataProvider = new NativeButton("Set data provider",
@@ -229,7 +229,7 @@ public class ComboBoxPage extends Div {
         private SerializableConsumer<Void> sizeRequestListener;
 
         public SpyListDataProvider(Collection<T> items,
-                SerializableConsumer<Void> sizeRequestListener) {
+                                   SerializableConsumer<Void> sizeRequestListener) {
             super(items);
             this.sizeRequestListener = sizeRequestListener;
         }

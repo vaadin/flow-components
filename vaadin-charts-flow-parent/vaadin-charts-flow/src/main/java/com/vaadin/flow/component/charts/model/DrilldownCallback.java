@@ -35,7 +35,7 @@ public interface DrilldownCallback extends Serializable {
      *
      * @param event
      * @return a {@link Series} instance to be used as drilldown for the point
-     *         or <code>null</code> if nothing should be done
+     * or <code>null</code> if nothing should be done
      */
     Series handleDrilldown(DrilldownDetails event);
 
@@ -46,16 +46,12 @@ public interface DrilldownCallback extends Serializable {
 
         /**
          * Construct a DrilldownDetails
-         * 
-         * @param series
-         *            {@link Series} in which the event was originated
-         * @param item
-         *            {@link DataSeriesItem}
-         * @param itemIndex
-         *            index of the item.
+         * @param series {@link Series} in which the event was originated
+         * @param item {@link DataSeriesItem}
+         * @param  itemIndex index of the item.
          */
         public DrilldownDetails(Series series, DataSeriesItem item,
-                int itemIndex) {
+            int itemIndex) {
             this.series = series;
             this.item = item;
             this.itemIndex = itemIndex;

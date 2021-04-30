@@ -29,10 +29,8 @@ public class CustomItem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof CustomItem))
-            return false;
+        if (this == o) return true;
+        if (!(o instanceof CustomItem)) return false;
         CustomItem that = (CustomItem) o;
         return Objects.equals(getName(), that.getName());
     }

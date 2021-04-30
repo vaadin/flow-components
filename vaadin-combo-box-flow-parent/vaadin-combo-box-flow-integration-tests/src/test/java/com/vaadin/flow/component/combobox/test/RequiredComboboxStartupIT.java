@@ -37,8 +37,8 @@ public class RequiredComboboxStartupIT extends AbstractComponentIT {
 
         TestBenchElement textField = comboBox.$("vaadin-text-field").first();
 
-        TestBenchElement error = textField.$(TestBenchElement.class)
-                .id("vaadin-text-field-error-0");
+        TestBenchElement error = textField
+                .$(TestBenchElement.class).id("vaadin-text-field-error-0");
 
         Assert.assertTrue(error.getSize().getHeight() > 0);
         Assert.assertEquals("Must be false", error.getText());
@@ -52,8 +52,7 @@ public class RequiredComboboxStartupIT extends AbstractComponentIT {
 
         } catch (TimeoutException e) {
             // Validation error message is still visible after the timeout and
-            // wasn't hidden. This is expected since the input field is not
-            // valid.
+            // wasn't hidden. This is expected since the input field is not valid.
         }
 
     }

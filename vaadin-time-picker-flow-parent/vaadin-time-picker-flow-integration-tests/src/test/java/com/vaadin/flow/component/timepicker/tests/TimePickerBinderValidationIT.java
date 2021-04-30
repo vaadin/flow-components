@@ -72,8 +72,8 @@ public class TimePickerBinderValidationIT extends AbstractComponentIT {
 
         setInternalValidBinderInvalidValue(field);
 
-        field.getCommandExecutor().executeScript("arguments[0].invalid = false",
-                field);
+        field.getCommandExecutor()
+                .executeScript("arguments[0].invalid = false", field);
 
         Assert.assertEquals(field.getPropertyString("label"), "invalid");
     }

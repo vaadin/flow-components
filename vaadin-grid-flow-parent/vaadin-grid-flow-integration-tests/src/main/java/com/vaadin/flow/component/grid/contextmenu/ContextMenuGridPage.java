@@ -59,7 +59,7 @@ public class ContextMenuGridPage extends Div {
             String name = event.getItem().map(Person::getFirstName)
                     .orElse(NO_TARGET_ITEM);
             String columnId = event.getColumnId().orElse("No column");
-            message.setText("pre-open: name=" + name + ", colId=" + columnId);
+            message.setText("pre-open: name="+name+", colId="+columnId);
         });
 
         NativeButton toggleOpenOnClick = new NativeButton(

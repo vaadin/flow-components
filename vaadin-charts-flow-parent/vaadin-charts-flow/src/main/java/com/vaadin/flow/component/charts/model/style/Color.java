@@ -15,6 +15,7 @@ package com.vaadin.flow.component.charts.model.style;
 
 import java.io.Serializable;
 
+
 /**
  * Interface used for different type of colors used in model and theme
  * 

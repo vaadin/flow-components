@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -23,8 +24,7 @@ import com.vaadin.flow.component.charts.Chart;
  * area of the chart.
  */
 @DomEvent("chart-click")
-public class ChartClickEvent extends ComponentEvent<Chart>
-        implements ClickEvent {
+public class ChartClickEvent extends ComponentEvent<Chart> implements ClickEvent {
 
     private final MouseEventDetails details;
 
@@ -42,15 +42,15 @@ public class ChartClickEvent extends ComponentEvent<Chart>
      * @param button
      */
     public ChartClickEvent(Chart source, boolean fromClient,
-            @EventData("event.detail.xValue") Double x,
-            @EventData("event.detail.yValue") Double y,
-            @EventData("event.detail.originalEvent.pageX") int pageX,
-            @EventData("event.detail.originalEvent.pageY") int pageY,
-            @EventData("event.detail.originalEvent.altKey") boolean altKey,
-            @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
-            @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
-            @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
-            @EventData("event.detail.originalEvent.button") int button) {
+                           @EventData("event.detail.xValue") Double x,
+                           @EventData("event.detail.yValue") Double y,
+                           @EventData("event.detail.originalEvent.pageX") int pageX,
+                           @EventData("event.detail.originalEvent.pageY") int pageY,
+                           @EventData("event.detail.originalEvent.altKey") boolean altKey,
+                           @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
+                           @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
+                           @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
+                           @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
         details = new MouseEventDetails();

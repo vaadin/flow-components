@@ -52,7 +52,7 @@ public class TreeGridItemDetailsRendererPage extends Div {
                                 parentPathMap)));
 
         grid.setDataProvider(new TreeDataProvider<String>(data));
-
+        
         grid.expand("Granddad 0");
         add(grid);
     }

@@ -68,8 +68,7 @@ public class DialogTestPage extends Div {
         dialog.addDialogCloseActionListener(e -> dialog.close());
 
         message.setText("The open state of the dialog is " + dialog.isOpened());
-        Div content = new Div(
-                new Text("There is an opened change listener for this dialog"));
+        Div content = new Div(new Text("There is an opened change listener for this dialog"));
         content.getElement().getStyle().set("margin-top", "100px");
 
         dialog.add(content);
@@ -113,7 +112,7 @@ public class DialogTestPage extends Div {
 
         open.addClickListener(event -> {
             dialog.setOpened(true);
-            if (getChildren().noneMatch(child -> child.equals(dialog))) {
+            if(getChildren().noneMatch(child -> child.equals(dialog))){
                 add(dialog);
             }
         });
@@ -191,13 +190,13 @@ public class DialogTestPage extends Div {
         Div message = new Div();
         message.setId("dialog-resizable-draggable-message");
 
-        dialog.addResizeListener(e -> message
-                .setText("Rezise listener called with width (" + e.getWidth()
-                        + ") and height (" + e.getHeight() + ")"));
+        dialog.addResizeListener(e ->
+                message.setText("Rezise listener called with width (" +
+                e.getWidth() + ") and height (" + e.getHeight() + ")"));
 
-        dialog.addOpenedChangeListener(e -> message
-                .setText("Initial size with width (" + dialog.getWidth()
-                        + ") and height (" + dialog.getHeight() + ")"));
+        dialog.addOpenedChangeListener(e ->
+                message.setText("Initial size with width (" +
+                dialog.getWidth() + ") and height (" + dialog.getHeight() + ")"));            
 
         NativeButton closeButton = new NativeButton(CLOSE_CAPTION,
                 e -> dialog.close());
@@ -208,13 +207,12 @@ public class DialogTestPage extends Div {
                 e -> dialog.open());
         openDialog.setId("dialog-resizable-draggable-open-button");
 
-        NativeButton sizeRestrictions = new NativeButton(
-                "set resizing restrictions", e -> {
-                    dialog.setMinWidth("175px");
-                    dialog.setMaxWidth("225px");
-                    dialog.setMinHeight("175px");
-                    dialog.setMaxHeight("225px");
-                });
+        NativeButton sizeRestrictions = new NativeButton("set resizing restrictions", e -> {
+            dialog.setMinWidth("175px");
+            dialog.setMaxWidth("225px");
+            dialog.setMinHeight("175px");
+            dialog.setMaxHeight("225px");
+        });
         sizeRestrictions.setId("dialog-resizing-restrictions-button");
 
         add(openDialog, message, sizeRestrictions);
@@ -224,7 +222,7 @@ public class DialogTestPage extends Div {
         Dialog selfAttachedDialog = new Dialog();
         selfAttachedDialog.setId("dimension-dialog-self-attached");
         selfAttachedDialog.setModal(false);
-        selfAttachedDialog.add(new NativeButton(CLOSE_CAPTION,
+        selfAttachedDialog.add(new NativeButton(CLOSE_CAPTION, 
                 e -> selfAttachedDialog.close()));
 
         NativeButton openSelfAttachedButton = new NativeButton(
@@ -234,8 +232,8 @@ public class DialogTestPage extends Div {
         Dialog attachedDialog = new Dialog();
         attachedDialog.setId("dimension-dialog-attached");
         attachedDialog.setModal(false);
-        attachedDialog.add(
-                new NativeButton(CLOSE_CAPTION, e -> attachedDialog.close()));
+        attachedDialog
+                .add(new NativeButton(CLOSE_CAPTION, e -> attachedDialog.close()));
 
         NativeButton openAttachedButton = new NativeButton(
                 "open attached dialog", e -> attachedDialog.open());
@@ -259,8 +257,7 @@ public class DialogTestPage extends Div {
         });
 
         add(attachedDialog, openSelfAttachedButton, openAttachedButton,
-                changeDimensionSelfAttachedButton,
-                changeDimensionAttachedButton);
+            changeDimensionSelfAttachedButton, changeDimensionAttachedButton);
     }
 
     private void addVerticalLayoutWithNoPadding() {

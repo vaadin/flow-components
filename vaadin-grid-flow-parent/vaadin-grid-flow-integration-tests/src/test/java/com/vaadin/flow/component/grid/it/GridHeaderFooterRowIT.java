@@ -233,8 +233,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         clickButton("prepend-header");
         clickButton("set-multiselect");
         WebElement gridVaadinCheckbox = findElement(By.id("selectAllCheckbox"));
-        Assert.assertTrue("The select all checkbox should be displayed",
-                gridVaadinCheckbox.isDisplayed());
+        Assert.assertTrue("The select all checkbox should be displayed", gridVaadinCheckbox.isDisplayed());
         List<WebElement> headerCells = getHeaderCells();
         Assert.assertEquals(
                 "There should be one header cell for multiselection checkbox "
@@ -263,13 +262,10 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     public void multiSelectionToSingleselect() {
         clickButton("set-singleselect");
         grid.select(1);
-        Assert.assertTrue("The first row of the grid should be selected",
-                grid.getRow(1).isSelected());
+        Assert.assertTrue("The first row of the grid should be selected", grid.getRow(1).isSelected());
         grid.select(2);
-        Assert.assertFalse("The first row of the grid should be not selected",
-                grid.getRow(1).isSelected());
-        Assert.assertTrue("The second row of the grid should be selected",
-                grid.getRow(2).isSelected());
+        Assert.assertFalse("The first row of the grid should be not selected", grid.getRow(1).isSelected());
+        Assert.assertTrue("The second row of the grid should be selected", grid.getRow(2).isSelected());
     }
 
     @Test

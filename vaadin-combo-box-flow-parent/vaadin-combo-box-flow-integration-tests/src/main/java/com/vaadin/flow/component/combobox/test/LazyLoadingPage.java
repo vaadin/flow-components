@@ -82,7 +82,7 @@ public class LazyLoadingPage extends Div {
 
         add(comboBox);
     }
-
+    
     private void createListDataProviderWithStrings() {
         addTitle("ListDataProvider with strings");
         ComboBox<String> comboBox = new ComboBox<>();
@@ -261,15 +261,17 @@ public class LazyLoadingPage extends Div {
         ComboBox<String> comboBox = new ComboBox<>(42);
         comboBox.setId("lazy-custom-page-size");
 
-        comboBox.setDataProvider(DataProvider.fromFilteringCallbacks(query -> {
-            Stream<String> stream = IntStream.range(0, 500)
-                    .mapToObj(String::valueOf);
-            message.setText(String.valueOf(query.getPageSize()));
-            return stream.skip(query.getOffset()).limit(query.getLimit());
-        }, query -> 500));
+        comboBox.setDataProvider(
+                DataProvider.fromFilteringCallbacks(query -> {
+                    Stream<String> stream = IntStream.range(0, 500)
+                            .mapToObj(String::valueOf);
+                    message.setText(String.valueOf(query.getPageSize()));
+                    return stream.skip(query.getOffset())
+                            .limit(query.getLimit());
+                }, query -> 500));
 
-        NativeButton changePageSizeButton = new NativeButton("Change page size",
-                event -> comboBox.setPageSize(41));
+        NativeButton changePageSizeButton = new NativeButton(
+                "Change page size", event -> comboBox.setPageSize(41));
         changePageSizeButton.setId("change-page-size-button");
 
         add(comboBox, changePageSizeButton);

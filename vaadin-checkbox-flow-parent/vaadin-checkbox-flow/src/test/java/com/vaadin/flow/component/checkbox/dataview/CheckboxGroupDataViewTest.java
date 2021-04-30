@@ -40,7 +40,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest {
+public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest  {
 
     @Test
     public void getItem_dataViewWithItems_returnsCorrectItem() {
@@ -79,8 +79,9 @@ public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        CustomIdentityItemDataProvider customIdentityItemDataProvider = new CustomIdentityItemDataProvider(
-                items);
+
+        CustomIdentityItemDataProvider customIdentityItemDataProvider =
+                new CustomIdentityItemDataProvider(items);
 
         CheckboxGroup<Item> component = new CheckboxGroup<>();
         component.setItems(customIdentityItemDataProvider);
@@ -116,10 +117,10 @@ public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest {
 
     @Test
     public void setInMemoryDataProvider_convertsToGenericDataProvider() {
-        CheckboxGroup<String> checkboxGroup = Mockito
-                .spy(new CheckboxGroup<>());
+        CheckboxGroup<String> checkboxGroup = Mockito.spy(new CheckboxGroup<>());
 
-        InMemoryDataProvider<String> inMemoryDataProvider = new InMemoryDataProvider<String>() {
+        InMemoryDataProvider<String> inMemoryDataProvider =
+                new InMemoryDataProvider<String>() {
 
             private SerializablePredicate<String> filter;
 
@@ -176,8 +177,8 @@ public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest {
             }
         };
 
-        CheckboxGroupDataView<String> dataView = checkboxGroup
-                .setItems(inMemoryDataProvider);
+        CheckboxGroupDataView<String> dataView =
+                checkboxGroup.setItems(inMemoryDataProvider);
 
         // We expect that the current implementation of 'setItems' with IMDP
         // will delegate to 'setItems(DataProvider)'

@@ -17,8 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
- * Data for the {@link NodeSeries}. Represents a link between the from and to
- * nodes.
+ * Data for the {@link NodeSeries}. Represents a link between the from and to nodes.
  */
 public class NodeSeriesItem extends AbstractConfigurationObject {
 
@@ -58,10 +57,8 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
 
     /**
      *
-     * @param from
-     *            see {@link #setFrom(Node)}
-     * @param to
-     *            see {@link #setTo(Node)}
+     * @param from see {@link #setFrom(Node)}
+     * @param to see {@link #setTo(Node)}
      */
     public NodeSeriesItem(Node from, Node to) {
         this.from = from;
@@ -76,8 +73,7 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * @param from
-     *            The node that the link runs from.
+     * @param from The node that the link runs from.
      */
     public void setFrom(Node from) {
         this.from = from;
@@ -91,8 +87,7 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * @param to
-     *            The node that the link runs to.
+     * @param to The node that the link runs to.
      */
     public void setTo(Node to) {
         this.to = to;
@@ -106,10 +101,8 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * An additional, individual class name for the data point's graphic
-     * representation.
-     * </p>
+     * <p>An additional, individual class name for the data point's graphic
+     * representation.</p>
      */
     public void setClassName(String className) {
         this.className = className;
@@ -123,12 +116,10 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * The color for the individual <em>link</em>. By default, the link color is
-     * the same as the node it extends from. The <code>series.fillOpacity</code>
-     * option also applies to the points, so when setting a specific link color,
-     * consider setting the <code>fillOpacity</code> to 1.
-     * </p>
+     * <p>The color for the individual <em>link</em>. By default, the link color is the same
+     * as the node it extends from. The <code>series.fillOpacity</code> option also applies to
+     * the points, so when setting a specific link color, consider setting the
+     * <code>fillOpacity</code> to 1.</p>
      */
     public void setColor(Color color) {
         this.color = color;
@@ -142,15 +133,12 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * A specific color index to use for the point, so its graphic
-     * representations are given the class name
-     * <code>highcharts-color-{n}</code>. In <a href=
-     * "https://www.highcharts.com/docs/chart-design-and-style/style-by-css">styled
-     * mode</a> this will change the color of the graphic. In non-styled mode,
-     * the color by is set by the <code>fill</code> attribute, so the change in
-     * class name won't have a visual effect by default.
-     * </p>
+     * <p>A specific color index to use for the point, so its graphic representations
+     * are given the class name <code>highcharts-color-{n}</code>. In
+     * <a href="https://www.highcharts.com/docs/chart-design-and-style/style-by-css">styled mode</a> this will
+     * change the color of the graphic. In non-styled mode, the color by is set by
+     * the <code>fill</code> attribute, so the change in class name won't have a visual effect
+     * by default.</p>
      */
     public void setColorIndex(Number colorIndex) {
         this.colorIndex = colorIndex;
@@ -164,11 +152,9 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * Individual data label for each point. The options are the same as the
-     * ones for <a href="../highcharts/plotOptions.series.dataLabels" >
-     * plotOptions.series.dataLabels</a>.
-     * </p>
+     * <p>Individual data label for each point. The options are the same as
+     * the ones for <a href="../highcharts/plotOptions.series.dataLabels" >
+     * plotOptions.series.dataLabels</a>.</p>
      */
     public void setDataLabels(DataLabels dataLabels) {
         this.dataLabels = dataLabels;
@@ -182,10 +168,8 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * A description of the point to add to the screen reader information about
-     * the point.
-     * </p>
+     * <p>A description of the point to add to the screen reader information
+     * about the point.</p>
      */
     public void setDescription(String description) {
         this.description = description;
@@ -199,10 +183,8 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * An id for the point. This can be used after render time to get a pointer
-     * to the point object through <code>chart.get()</code>.
-     * </p>
+     * <p>An id for the point. This can be used after render time to get a
+     * pointer to the point object through <code>chart.get()</code>.</p>
      */
     public void setId(String id) {
         this.id = id;
@@ -216,11 +198,9 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * The rank for this point's data label in case of collision. If two data
-     * labels are about to overlap, only the one with the highest
-     * <code>labelrank</code> will be drawn.
-     * </p>
+     * <p>The rank for this point's data label in case of collision. If two
+     * data labels are about to overlap, only the one with the highest <code>labelrank</code>
+     * will be drawn.</p>
      */
     public void setLabelrank(Number labelrank) {
         this.labelrank = labelrank;
@@ -234,9 +214,7 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * The name of the point as shown in the legend, tooltip, dataLabels, etc.
-     * </p>
+     * <p>The name of the point as shown in the legend, tooltip, dataLabels, etc.</p>
      */
     public void setName(String name) {
         this.name = name;
@@ -250,9 +228,7 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * Whether the link goes out of the system.
-     * </p>
+     * <p>Whether the link goes out of the system.</p>
      */
     public void setOutgoing(Boolean outgoing) {
         this.outgoing = outgoing;
@@ -266,9 +242,7 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * Whether the data point is selected initially.
-     * </p>
+     * <p>Whether the data point is selected initially.</p>
      */
     public void setSelected(Boolean selected) {
         this.selected = selected;
@@ -282,9 +256,7 @@ public class NodeSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * <p>
-     * The weight of the link.
-     * </p>
+     * <p>The weight of the link.</p>
      */
     public void setWeight(Number weight) {
         this.weight = weight;

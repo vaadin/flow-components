@@ -33,14 +33,10 @@ public class GridItemRefreshPage extends Div {
     public static final String UPDATED_FIRST_FIELD = "updated";
     public static final int UPDATED_SECOND_FIELD = 12345;
 
-    // update the element values from client side so that it should only be
-    // updated in DOM, not in caches
-    // updating the previous cell in animation frame so that grid active item
-    // handling doesn't reset the changes
+    // update the element values from client side so that it should only be updated in DOM, not in caches
+    // updating the previous cell in animation frame so that grid active item handling doesn't reset the changes
     private static final String EDIT_CELL_VALUE = "debugger; this['innerText'] = 'EDITED';window.requestAnimationFrame(() => {this.parentElement.previousElementSibling['textContent']='EDITED';})";
-    private static final TemplateRenderer<Bean> UPDATE_RENDERER = TemplateRenderer
-            .of("<div id=[[item.thirdField]] onclick=\"" + EDIT_CELL_VALUE
-                    + "\">[[item.thirdField]]</div>");
+    private static final TemplateRenderer<Bean> UPDATE_RENDERER = TemplateRenderer.of("<div id=[[item.thirdField]] onclick=\"" + EDIT_CELL_VALUE + "\">[[item.thirdField]]</div>");
 
     private static class Bean {
         private String firstField;
@@ -50,7 +46,7 @@ public class GridItemRefreshPage extends Div {
         public Bean(String firstField, int secondField) {
             this.firstField = firstField;
             this.secondField = secondField;
-            this.thirdField = "div-" + secondField;
+            this.thirdField = "div-"+secondField;
         }
 
         public String getFirstField() {
@@ -85,9 +81,8 @@ public class GridItemRefreshPage extends Div {
         grid.setHeight("500px");
         grid.addColumn(Bean::getFirstField).setHeader("First Field");
         grid.addColumn(Bean::getSecondField).setHeader("Second Field");
-        grid.addColumn(UPDATE_RENDERER.withProperty("thirdField",
-                bean -> bean.thirdField)).setHeader("mutation");
-        List<Bean> items = createItems(1000);
+        grid.addColumn(UPDATE_RENDERER.withProperty("thirdField", bean -> bean.thirdField)).setHeader("mutation");
+      List<Bean> items = createItems(1000);
         grid.setItems(items);
         grid.setId("template-grid");
 
@@ -117,24 +112,24 @@ public class GridItemRefreshPage extends Div {
     }
 
     private void addButtons(Grid<Bean> grid, List<Bean> items,
-            String idPrefix) {
+                            String idPrefix) {
         NativeButton refreshFirstBtn = new NativeButton(
                 "update and refresh first item", event -> {
-                    updateBean(items.get(0));
-                    grid.getDataProvider().refreshItem(items.get(0));
-                });
+            updateBean(items.get(0));
+            grid.getDataProvider().refreshItem(items.get(0));
+        });
         NativeButton refreshMultipleBtn = new NativeButton(
                 "update and refresh items 5-10", event -> {
-                    items.subList(4, 10).forEach(item -> {
-                        updateBean(item);
-                        grid.getDataProvider().refreshItem(item);
-                    });
-                });
+            items.subList(4, 10).forEach(item -> {
+                updateBean(item);
+                grid.getDataProvider().refreshItem(item);
+            });
+        });
         NativeButton refreshProviderBtn = new NativeButton(
                 "refresh all through data provider", event -> {
-                    items.forEach(this::updateBean);
-                    grid.getDataProvider().refreshAll();
-                });
+            items.forEach(this::updateBean);
+            grid.getDataProvider().refreshAll();
+        });
 
         NativeButton refreshFirstCommunicatorBtn = new NativeButton(
                 "update and refresh first item through data communicator",
@@ -152,9 +147,9 @@ public class GridItemRefreshPage extends Div {
                 });
         NativeButton resetCommunicatorBtn = new NativeButton(
                 "refresh all through data communicator", event -> {
-                    items.forEach(this::updateBean);
-                    grid.getDataCommunicator().reset();
-                });
+            items.forEach(this::updateBean);
+            grid.getDataCommunicator().reset();
+        });
 
         refreshFirstBtn.setId(idPrefix + "refresh-first");
         refreshMultipleBtn.setId(idPrefix + "refresh-multiple");

@@ -16,8 +16,7 @@ import java.util.Random;
 
 public class SplineUpdatingEachSecond extends AbstractChartExample {
 
-    @Override
-    public void initDemo() {
+    @Override public void initDemo() {
         final Random random = new Random();
 
         final Chart chart = new Chart();
@@ -40,16 +39,15 @@ public class SplineUpdatingEachSecond extends AbstractChartExample {
         series.setPlotOptions(new PlotOptionsSpline());
         series.setName("Random data");
         for (int i = -19; i <= 0; i++) {
-            series.add(new DataSeriesItem(System.currentTimeMillis() + i * 1000,
-                    random.nextDouble()));
+            series.add(new DataSeriesItem(System.currentTimeMillis() + i * 1000, random.nextDouble()));
         }
 
         configuration.setSeries(series);
 
         runWhileAttached(chart, () -> {
-            final long x = System.currentTimeMillis();
-            final double y = random.nextDouble();
-            series.add(new DataSeriesItem(x, y), true, true);
+                final long x = System.currentTimeMillis();
+                final double y = random.nextDouble();
+                series.add(new DataSeriesItem(x, y), true, true);
         }, 1000, 1000);
 
         add(chart);

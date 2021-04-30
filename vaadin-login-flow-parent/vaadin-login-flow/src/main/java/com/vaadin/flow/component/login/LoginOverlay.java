@@ -30,17 +30,17 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
  *
- * On {@link LoginForm.LoginEvent} component becomes disabled. Disabled
- * component stops to process login events, however the
- * {@link LoginForm.ForgotPasswordEvent} event is processed anyway. To enable
- * use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)}
- * method. Setting error {@link #setError(boolean)} true makes component
- * automatically enabled for the next login attempt.
+ * On {@link LoginForm.LoginEvent} component becomes disabled.
+ * Disabled component stops to process login events, however
+ * the {@link LoginForm.ForgotPasswordEvent} event is processed anyway.
+ * To enable use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
+ * Setting error {@link #setError(boolean)} true makes component automatically enabled for
+ * the next login attempt.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "20.0.0-alpha5")
+@NpmPackage(value="@vaadin/vaadin-login", version = "20.0.0-alpha5")
 @JsModule("@vaadin/vaadin-login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin {
 
@@ -82,15 +82,14 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Opens or closes the login overlay. On open component becomes enabled
-     * {@link #setEnabled(boolean)}
+     * Opens or closes the login overlay.
+     * On open component becomes enabled {@link #setEnabled(boolean)}
      * <p>
-     * Note: Overlay will be attached or detached from the DOM automatically, if
-     * it was not added manually.
+     * Note: Overlay will be attached or detached from the DOM automatically,
+     * if it was not added manually.
      *
      * @param opened
-     *            {@code true} to open the login overlay, {@code false} to close
-     *            it
+     *            {@code true} to open the login overlay, {@code false} to close it
      */
     public void setOpened(boolean opened) {
         if (opened) {
@@ -123,10 +122,11 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Sets the application title. Detaches the component title if it was set
-     * earlier. Note: the method calls {@link #setTitle(Component)}, which will
-     * reset the custom title, if it was set. Custom title can be reset only
-     * when the overlay is closed.
+     * Sets the application title. Detaches the component title
+     * if it was set earlier.
+     * Note: the method calls {@link #setTitle(Component)}, which
+     * will reset the custom title, if it was set. Custom title can be
+     * reset only when the overlay is closed.
      *
      * Title is a part of the I18n object. See {@link #setI18n(LoginI18n)}.
      *
@@ -138,8 +138,8 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Returns the value of the title property or a text content of the title if
-     * it was set via {@link #setTitle(Component)}
+     * Returns the value of the title property or a text content
+     * of the title if it was set via {@link #setTitle(Component)}
      *
      * @return the string value of title
      */
@@ -152,14 +152,14 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Sets the application title, <code>null</code> to remove any previous
-     * title and to display title set via {@link #setTitle(String)}. Note: the
-     * title component has to be set when the overlay is closed.
+     * Sets the application title, <code>null</code> to remove any previous title
+     * and to display title set via {@link #setTitle(String)}.
+     * Note: the title component has to be set when the overlay is closed.
      *
      * @see #getTitle()
      * @param title
-     *            the title component to set, or <code>null</code> to remove any
-     *            previously set title
+     *            the title component to set, or <code>null</code> to remove
+     *            any previously set title
      */
     public void setTitle(Component title) {
         if (isOpened()) {
@@ -179,8 +179,7 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Returns custom title component which was set via
-     * {@link #setTitle(Component)}
+     * Returns custom title component which was set via {@link #setTitle(Component)}
      *
      * @return the title component, <code>null</code> if nothing was set
      */

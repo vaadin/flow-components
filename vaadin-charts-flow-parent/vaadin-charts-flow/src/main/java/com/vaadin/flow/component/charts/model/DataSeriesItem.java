@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.model.style.Color;
 
@@ -412,8 +413,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * <i>Requires Accessibility module</i>
      * </p>
      * <p>
-     * A description of the series to add to the screen reader information about
-     * the series.
+     * A description of the series to add to the screen reader information about the
+     * series.
      * </p>
      * <p>
      * Defaults to: undefined

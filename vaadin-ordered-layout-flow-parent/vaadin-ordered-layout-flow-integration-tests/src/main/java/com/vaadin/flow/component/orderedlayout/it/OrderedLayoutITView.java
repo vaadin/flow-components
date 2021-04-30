@@ -14,13 +14,12 @@ public class OrderedLayoutITView extends Div {
     public OrderedLayoutITView() {
         VerticalLayout verticalLayoutWithSpacing = new VerticalLayout();
         verticalLayoutWithSpacing.setId("vl-spacing");
-        verticalLayoutWithSpacing.add(
-                AbstractLayout.createToggleThemeCheckbox(
+        verticalLayoutWithSpacing.add(AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-xs"),
                 AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-s"),
                 AbstractLayout.createToggleThemeCheckbox("spacing",
-                        verticalLayoutWithSpacing::setSpacing, true),
+                        verticalLayoutWithSpacing::setSpacing,true),
                 AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-l"),
                 AbstractLayout.createToggleThemeCheckbox(
@@ -34,7 +33,7 @@ public class OrderedLayoutITView extends Div {
                 AbstractLayout.createToggleThemeCheckbox(
                         horizontalLayoutWithSpacing, "spacing-s"),
                 AbstractLayout.createToggleThemeCheckbox("spacing",
-                        horizontalLayoutWithSpacing::setSpacing, true),
+                        horizontalLayoutWithSpacing::setSpacing,true),
                 AbstractLayout.createToggleThemeCheckbox(
                         horizontalLayoutWithSpacing, "spacing-l"),
                 AbstractLayout.createToggleThemeCheckbox(
@@ -51,13 +50,17 @@ public class OrderedLayoutITView extends Div {
         NativeButton flexWrapDisplay = new NativeButton("no-flex-wrap");
         flexWrapDisplay.setId("flex-wrap-display");
         NativeButton getFlexWrap = new NativeButton("Get flex-wrap button",
-                e -> flexWrapDisplay
-                        .setText(String.valueOf(flayout.getFlexWrap())));
+                e -> flexWrapDisplay.setText(String.valueOf(flayout.getFlexWrap())));
         noWrap.setId("no-wrap");
         wrap.setId("wrap");
         wrapReverse.setId("wrap-reverse");
         getFlexWrap.setId("wrap-btn");
-        flayout.add(noWrap, wrap, wrapReverse, getFlexWrap, flexWrapDisplay);
+        flayout.add(
+                noWrap,
+                wrap,
+                wrapReverse,
+                getFlexWrap,
+                flexWrapDisplay);
 
         add(verticalLayoutWithSpacing, horizontalLayoutWithSpacing, flayout);
     }

@@ -388,7 +388,8 @@ public class GridElement extends TestBenchElement {
     }
 
     private void removeActiveItem(GridTRElement row) {
-        final String JS_DEACTIVATE_IF_ACTIVE = "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
+        final String JS_DEACTIVATE_IF_ACTIVE =
+            "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
                 + "arguments[1]._item)) { arguments[0].activeItem=null;}";
         executeScript(JS_DEACTIVATE_IF_ACTIVE, this, row);
     }

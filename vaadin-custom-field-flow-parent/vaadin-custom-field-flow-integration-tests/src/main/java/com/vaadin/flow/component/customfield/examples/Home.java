@@ -17,8 +17,8 @@ public class Home extends Div {
         button.setId("button1");
         button.addClickListener(e -> customField.updateValue());
         customField
-                .addValueChangeListener(e -> result.setText("" + e.getValue()));
-        add(customField, result, button);
+            .addValueChangeListener(e -> result.setText("" + e.getValue()));
+        add(customField, result,button);
     }
 
     private class MyField extends CustomField<Integer> {
@@ -31,6 +31,7 @@ public class Home extends Div {
             add(field1, field2);
 
         }
+
 
         @Override
         protected Integer generateModelValue() {

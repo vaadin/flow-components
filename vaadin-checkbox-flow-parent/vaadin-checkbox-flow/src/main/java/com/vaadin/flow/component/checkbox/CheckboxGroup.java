@@ -615,8 +615,7 @@ public class CheckboxGroup<T>
         }
     }
 
-    private void identifierProviderChanged(
-            IdentifierProvider<T> identifierProvider) {
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 

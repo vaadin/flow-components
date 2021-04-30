@@ -9,6 +9,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.tests.ParallelTest;
 
@@ -29,7 +30,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
         String referenceName = prefix + "_" + screenshotName;
         Thread.sleep(1000);
         Assert.assertTrue(
-                "Screenshot " + referenceName + " contains differences", true);
+                "Screenshot " + referenceName + " contains differences",
+                true);
     }
 
     public void open(Class<?> viewClass, Dimension size) {
@@ -53,8 +55,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     protected String getDeploymentPath(Class<?> viewClass) {
 
-        com.vaadin.flow.router.Route[] ann = viewClass
-                .getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
         if (ann.length > 0) {
             return "/" + ann[0].value();
         }
@@ -71,11 +72,12 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
+
     public List<DesiredCapabilities> getBrowserConfiguration() {
         final DesiredCapabilities safari = BrowserUtil.safari();
         safari.setVersion("13");
 
-        return Arrays.asList(BrowserUtil.chrome());
+        return Arrays.asList( BrowserUtil.chrome());
     }
 
     protected String getLastEvent() {

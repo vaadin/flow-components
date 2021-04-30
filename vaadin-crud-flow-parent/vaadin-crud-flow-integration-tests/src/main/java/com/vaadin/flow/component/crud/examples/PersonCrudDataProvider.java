@@ -20,18 +20,17 @@ import static java.util.Comparator.naturalOrder;
 /**
  * A dummy data provider. DO NOT DO THIS IN A PRODUCTION APP!
  */
-class PersonCrudDataProvider
-        extends AbstractBackEndDataProvider<Person, CrudFilter> {
+class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA
     private List<Person> database = generatePersonsList();
 
     public static List<Person> generatePersonsList() {
-        return Stream
-                .of(new Person(1, "Sayo", "Sayo"),
-                        new Person(2, "Manolo", "Otto"),
-                        new Person(3, "Guille", "Guille"))
-                .collect(Collectors.toList());
+        return Stream.of(
+            new Person(1, "Sayo", "Sayo"),
+            new Person(2, "Manolo", "Otto"),
+            new Person(3, "Guille", "Guille")
+        ).collect(Collectors.toList());
     }
 
     private Consumer<Long> sizeChangeListener;
@@ -54,7 +53,8 @@ class PersonCrudDataProvider
         Stream<Person> stream = getDatabaseCopy().stream();
 
         if (query.getFilter().isPresent()) {
-            stream = stream.filter(predicate(query.getFilter().get()))
+            stream = stream
+                    .filter(predicate(query.getFilter().get()))
                     .sorted(comparator(query.getFilter().get()));
         }
 
@@ -89,26 +89,31 @@ class PersonCrudDataProvider
                         e.printStackTrace();
                         return false;
                     }
-                }).reduce(Predicate::and).orElse(e -> true);
+                })
+                .reduce(Predicate::and)
+                .orElse(e -> true);
     }
 
     private Comparator<Person> comparator(CrudFilter filter) {
         // For RDBMS just generate an ORDER BY clause
-        return filter.getSortOrders().entrySet().stream().map(sortClause -> {
-            try {
-                Comparator<Person> comparator = Comparator.comparing(
-                        person -> (Comparable) valueOf(sortClause.getKey(),
-                                person));
+        return filter.getSortOrders().entrySet().stream()
+                .map(sortClause -> {
+                    try {
+                        Comparator<Person> comparator
+                                = Comparator.comparing(person ->
+                                (Comparable) valueOf(sortClause.getKey(), person));
 
-                if (sortClause.getValue() == SortDirection.DESCENDING) {
-                    comparator = comparator.reversed();
-                }
+                        if (sortClause.getValue() == SortDirection.DESCENDING) {
+                            comparator = comparator.reversed();
+                        }
 
-                return comparator;
-            } catch (Exception ex) {
-                return (Comparator<Person>) (o1, o2) -> 0;
-            }
-        }).reduce(Comparator::thenComparing).orElse((o1, o2) -> 0);
+                        return comparator;
+                    } catch (Exception ex) {
+                        return (Comparator<Person>) (o1, o2) -> 0;
+                    }
+                })
+                .reduce(Comparator::thenComparing)
+                .orElse((o1, o2) -> 0);
     }
 
     private Object valueOf(String fieldName, Person person) {
@@ -123,7 +128,10 @@ class PersonCrudDataProvider
 
     void persist(Person item) {
         if (item.getId() == null) {
-            item.setId(database.stream().map(Person::getId).max(naturalOrder())
+            item.setId(database
+                    .stream()
+                    .map(Person::getId)
+                    .max(naturalOrder())
                     .orElse(0) + 1);
         }
 
@@ -138,7 +146,9 @@ class PersonCrudDataProvider
     }
 
     Optional<Person> find(Integer id) {
-        return database.stream().filter(entity -> entity.getId().equals(id))
+        return database
+                .stream()
+                .filter(entity -> entity.getId().equals(id))
                 .findFirst();
     }
 

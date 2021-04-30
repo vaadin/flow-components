@@ -30,20 +30,17 @@ public class Dimensions extends Div {
         confirmDialog.setId(CONFIRM_DIALOG_ID);
         confirmDialog.setHeader("Confirm dialog header");
 
-        Button changeWidthOpenedButton = new Button("ChangeWidth",
-                e -> confirmDialog.setWidth(DIMENSION_SMALLER));
+        Button changeWidthOpenedButton = new Button("ChangeWidth", e -> confirmDialog.setWidth(DIMENSION_SMALLER));
         changeWidthOpenedButton.setId(CHANGE_DIALOG_ATTACHED_WIDTH_ID);
 
-        Button changeHeightOpenedButton = new Button("ChangeHeight",
-                e -> confirmDialog.setHeight(DIMENSION_SMALLER));
+        Button changeHeightOpenedButton = new Button("ChangeHeight", e -> confirmDialog.setHeight(DIMENSION_SMALLER));
         changeHeightOpenedButton.setId(CHANGE_DIALOG_ATTACHED_HEIGHT_ID);
 
         confirmDialog.add(changeWidthOpenedButton, changeHeightOpenedButton);
 
-        Button attachConfirmDialogButton = new Button("AttachConfirmDialog",
-                e -> {
-                    add(confirmDialog);
-                });
+        Button attachConfirmDialogButton = new Button("AttachConfirmDialog", e -> {
+            add(confirmDialog);
+        });
         attachConfirmDialogButton.setId(ATTACH_DIALOG_ID);
 
         Button openConfirmDialogButton = new Button("OpenConfirmDialog", e -> {
@@ -56,21 +53,18 @@ public class Dimensions extends Div {
         });
         changeDialogWidthButton.setId(CHANGE_DIALOG_WIDTH_ID);
 
-        Button changeDialogHeightButton = new Button("ChangeDialogHeight",
-                e -> {
-                    confirmDialog.setHeight(DIMENSION_BIGGER);
-                });
+        Button changeDialogHeightButton = new Button("ChangeDialogHeight", e -> {
+            confirmDialog.setHeight(DIMENSION_BIGGER);
+        });
         changeDialogHeightButton.setId(CHANGE_DIALOG_HEIGHT_ID);
 
-        Button resetDialogDimenssion = new Button("ResetDialogDimensions",
-                e -> {
-                    confirmDialog.setWidth(null);
-                    confirmDialog.setHeight(null);
-                });
+        Button resetDialogDimenssion = new Button("ResetDialogDimensions", e -> {
+            confirmDialog.setWidth(null);
+            confirmDialog.setHeight(null);
+        });
         resetDialogDimenssion.setId(RESET_DIALOG_DIMENSIONS_ID);
 
-        add(attachConfirmDialogButton, openConfirmDialogButton,
-                changeDialogWidthButton, changeDialogHeightButton,
+        add(attachConfirmDialogButton, openConfirmDialogButton, changeDialogWidthButton, changeDialogHeightButton,
                 resetDialogDimenssion);
     }
 }

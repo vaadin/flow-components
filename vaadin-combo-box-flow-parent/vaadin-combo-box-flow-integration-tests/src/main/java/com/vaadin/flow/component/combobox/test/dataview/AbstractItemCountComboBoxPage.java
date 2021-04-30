@@ -51,8 +51,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
                             .toString());
             Logger.getLogger(getClass().getName())
                     .info(() -> String.format(
-                            "DataProvider Query : limit %s offset %s", limit,
-                            offset));
+                    "DataProvider Query : limit %s offset %s", limit, offset));
             return IntStream.range(offset, offset + limit)
                     .mapToObj(index -> "DataProvider Item " + index);
         }

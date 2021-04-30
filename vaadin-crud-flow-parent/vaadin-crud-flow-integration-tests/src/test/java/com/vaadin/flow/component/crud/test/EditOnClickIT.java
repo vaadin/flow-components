@@ -12,8 +12,7 @@ public class EditOnClickIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/editonclick";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/editonclick";
         getDriver().get(url);
     }
 
@@ -31,8 +30,7 @@ public class EditOnClickIT extends AbstractParallelTest {
         Assert.assertFalse(crud.isEditorOpen());
         Assert.assertFalse(crud.getPropertyBoolean("editOnClick"));
 
-        Assert.assertTrue("Number of edit columns are greated than zero",
-                crud.$("vaadin-crud-edit").all().size() > 0);
+        Assert.assertTrue("Number of edit columns are greated than zero", crud.$("vaadin-crud-edit").all().size() > 0);
     }
 
     @Test
@@ -41,13 +39,11 @@ public class EditOnClickIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
 
-        $(ButtonElement.class).onPage()
-                .id(EditOnClickView.CLICKTOEDIT_BUTTON_ID).click();
+        $(ButtonElement.class).onPage().id(EditOnClickView.CLICKTOEDIT_BUTTON_ID).click();
 
         Assert.assertTrue(crud.getPropertyBoolean("editOnClick"));
 
-        Assert.assertTrue("Number of edit columns is zero",
-                crud.$("vaadin-crud-edit").all().size() == 0);
+        Assert.assertTrue("Number of edit columns is zero", crud.$("vaadin-crud-edit").all().size() == 0);
     }
 
     @Test
@@ -55,8 +51,7 @@ public class EditOnClickIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
 
-        $(ButtonElement.class).onPage()
-                .id(EditOnClickView.CLICKTOEDIT_BUTTON_ID).click();
+        $(ButtonElement.class).onPage().id(EditOnClickView.CLICKTOEDIT_BUTTON_ID).click();
 
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
@@ -67,8 +62,7 @@ public class EditOnClickIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
 
-        $(ButtonElement.class).onPage()
-                .id(EditOnClickView.CLICKTOEDIT_BUTTON_ID).click();
+        $(ButtonElement.class).onPage().id(EditOnClickView.CLICKTOEDIT_BUTTON_ID).click();
 
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());

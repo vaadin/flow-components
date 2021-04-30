@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.events.internal;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.Series;
 

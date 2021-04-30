@@ -56,19 +56,19 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     public ComboBoxListDataView(DataCommunicator<T> dataCommunicator,
             ComboBox<T> comboBox,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
-        super(dataCommunicator::getDataProvider, comboBox,
-                filterOrSortingChangedCallback);
+        super(dataCommunicator::getDataProvider, comboBox, filterOrSortingChangedCallback);
         this.dataCommunicator = dataCommunicator;
     }
 
     /**
      * Gets the items available on the ComboBox's server-side.
      * <p>
-     * Data is sorted the same way as in the ComboBox, but it does not take into
-     * account the ComboBox client-side filtering, since it doesn't change the
-     * item count on the server-side, but only makes it easier for users to
-     * search through the items in the UI. Only the server-side filtering
-     * considered, which is set by: {@link #setFilter(SerializablePredicate)} or
+     * Data is sorted the same way as in the ComboBox, but it does not take
+     * into account the ComboBox client-side filtering, since it doesn't change
+     * the item count on the server-side, but only makes it easier for users
+     * to search through the items in the UI.
+     * Only the server-side filtering considered, which is set by:
+     * {@link #setFilter(SerializablePredicate)} or
      * {@link #addFilter(SerializablePredicate)}.
      *
      * @return filtered and sorted items available in server-side
@@ -83,12 +83,13 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This method takes into account only the server-side filtering, which is
-     * set by: {@link #setFilter(SerializablePredicate)} or
-     * {@link #addFilter(SerializablePredicate)}. ComboBox's client-side filter
-     * is not considered, since it doesn't change the item count on the
-     * server-side, but only makes it easier for users to search through the
-     * items in the UI.
+     * This method takes into account only the server-side filtering, which
+     * is set by:
+     * {@link #setFilter(SerializablePredicate)} or
+     * {@link #addFilter(SerializablePredicate)}.
+     * ComboBox's client-side filter is not considered, since it doesn't change
+     * the item count on the server-side, but only makes it easier for users
+     * to search through the items in the UI.
      *
      * @return filtered item count
      */
@@ -110,15 +111,15 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * {@inheritDoc}
      * <p>
      * Combo box fires {@link ItemCountChangeEvent} and notifies all the
-     * listeners added by this method, if the items count changed due to adding
-     * or removing an item(s), or by changing the server-side filtering with
-     * {@link #setFilter(SerializablePredicate)} or
+     * listeners added by this method, if the items count changed due to
+     * adding or removing an item(s), or by changing the server-side filtering
+     * with {@link #setFilter(SerializablePredicate)} or
      * {@link #addFilter(SerializablePredicate)}.
      * <p>
      * ComboBox's client-side filter change won't fire
-     * {@link ItemCountChangeEvent}, since it doesn't change the item count on
-     * the server-side, but only makes it easier for users to search through the
-     * items in the UI.
+     * {@link ItemCountChangeEvent}, since it doesn't change the item count
+     * on the server-side, but only makes it easier for users to search
+     * through the items in the UI.
      */
     @Override
     public Registration addItemCountChangeListener(

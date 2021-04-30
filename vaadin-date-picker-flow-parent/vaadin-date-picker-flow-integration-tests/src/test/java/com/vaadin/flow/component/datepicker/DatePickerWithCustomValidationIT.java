@@ -26,16 +26,13 @@ import org.openqa.selenium.Keys;
 public class DatePickerWithCustomValidationIT extends AbstractComponentIT {
 
     @Test
-    public void requiredAndCustomValidationOnServerSide_initialStateIsInvalid_changingToValidValueResetsInvalidFlag()
-            throws Exception {
+    public void requiredAndCustomValidationOnServerSide_initialStateIsInvalid_changingToValidValueResetsInvalidFlag() throws Exception {
         open();
 
         TestBenchElement dateField = $("vaadin-date-picker").first();
-        TestBenchElement input = dateField.$("vaadin-date-picker-text-field")
-                .first();
+        TestBenchElement input = dateField.$("vaadin-date-picker-text-field").first();
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                dateField.getAttribute("invalid"));
+        Assert.assertEquals(Boolean.TRUE.toString(), dateField.getAttribute("invalid"));
         Assert.assertEquals("2019-01-02", dateField.getAttribute("value"));
 
         while (!input.getAttribute("value").isEmpty()) {
@@ -48,7 +45,6 @@ public class DatePickerWithCustomValidationIT extends AbstractComponentIT {
         input.sendKeys(Keys.ENTER);
 
         Assert.assertEquals("2019-01-01", dateField.getAttribute("value"));
-        Assert.assertEquals(Boolean.FALSE.toString(),
-                dateField.getAttribute("invalid"));
+        Assert.assertEquals(Boolean.FALSE.toString(), dateField.getAttribute("invalid"));
     }
 }

@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * Position configuration for the credits label. Supported properties are align,
  * verticalAlign, x and y. Defaults to

@@ -38,17 +38,16 @@ public class SplitLayoutIT extends ComponentDemoTest {
                 .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(2);
         WebElement firstComponent = splitLayout
                 .findElement(By.id("first-component"));
-        WebElement nestedLayout = splitLayout
-                .findElement(By.id("nested-layout"));
+        WebElement nestedLayout = splitLayout.findElement(By.id("nested-layout"));
         WebElement secondComponent = nestedLayout
                 .findElement(By.id("second-component"));
         WebElement thirdComponent = nestedLayout
                 .findElement(By.id("third-component"));
 
-        Assert.assertTrue("First component on the left",
-                firstComponent.getLocation().x < secondComponent.getLocation().x
-                        && firstComponent.getLocation().x < thirdComponent
-                                .getLocation().x);
+        Assert.assertTrue("First component on the left", firstComponent
+                .getLocation().x < secondComponent.getLocation().x
+                && firstComponent.getLocation().x < thirdComponent
+                        .getLocation().x);
         Assert.assertTrue("Second component above third component",
                 secondComponent.getLocation().y < thirdComponent
                         .getLocation().y);
@@ -59,21 +58,22 @@ public class SplitLayoutIT extends ComponentDemoTest {
     public void resize_events_fired() {
         WebElement splitLayout = layout
                 .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(3);
-        WebElement resizeMessage = layout.findElement(By.id("resize-message"));
+        WebElement resizeMessage = layout
+                .findElement(By.id("resize-message"));
         WebElement splitter = getInShadowRoot(splitLayout, By.id("splitter"))
                 .findElement(By.tagName("div"));
 
         new Actions(getDriver()).dragAndDropBy(splitter, 1, 1).clickAndHold()
                 .moveByOffset(200, 0).release().build().perform();
 
-        Assert.assertTrue("Resize events fired", resizeMessage.getText()
-                .matches("SplitLayout Resized 1 times."));
+        Assert.assertTrue("Resize events fired",
+                resizeMessage.getText().matches("SplitLayout Resized 1 times."));
 
         new Actions(getDriver()).dragAndDropBy(splitter, 1, 1).clickAndHold()
                 .moveByOffset(200, 0).release().build().perform();
 
-        Assert.assertTrue("Resize events fired", resizeMessage.getText()
-                .matches("SplitLayout Resized 2 times."));
+        Assert.assertTrue("Resize events fired",
+                resizeMessage.getText().matches("SplitLayout Resized 2 times."));
     }
 
     @Test
@@ -102,14 +102,14 @@ public class SplitLayoutIT extends ComponentDemoTest {
         new Actions(getDriver()).moveToElement(splitter, 1, 1).clickAndHold()
                 .moveByOffset(-1000, 0).release().build().perform();
 
-        Assert.assertEquals("Primary component width should be 100", 100,
-                primaryComponent.getSize().width);
+        Assert.assertEquals("Primary component width should be 100",
+                100, primaryComponent.getSize().width);
 
         new Actions(getDriver()).moveToElement(splitter, 1, 1).clickAndHold()
                 .moveByOffset(2000, 0).release().build().perform();
 
-        Assert.assertEquals("Primary component width should be 150", 150,
-                primaryComponent.getSize().width);
+        Assert.assertEquals("Primary component width should be 150",
+                150, primaryComponent.getSize().width);
     }
 
     @Test

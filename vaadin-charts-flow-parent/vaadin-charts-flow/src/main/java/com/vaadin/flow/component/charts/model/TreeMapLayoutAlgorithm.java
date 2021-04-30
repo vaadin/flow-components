@@ -13,13 +13,15 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
+
 /**
  * The layout algorithm used by {@link ChartType#TREEMAP} charts.
  */
 public enum TreeMapLayoutAlgorithm implements ChartEnum {
 
-    SLICEANDDICE("sliceAndDice"), STRIPES("stripes"), SQUARIFIED(
-            "squarified"), STRIP("strip");
+    SLICEANDDICE("sliceAndDice"), STRIPES("stripes"), SQUARIFIED("squarified"), STRIP(
+            "strip");
 
     private String type;
 

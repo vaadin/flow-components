@@ -107,8 +107,8 @@ public class GridTestPage extends Div {
                     "grid-with-component-renderers-remove-" + item.getNumber());
             return remove;
         })).setKey("remove");
-        grid.addColumn(TemplateRenderer.<Item> of("hidden")).setHeader("hidden")
-                .setKey("hidden").setVisible(false);
+        grid.addColumn(TemplateRenderer.<Item> of("hidden"))
+            .setHeader("hidden").setKey("hidden").setVisible(false);
 
         grid.setId("grid-with-component-renderers");
         grid.setWidth("500px");
@@ -123,35 +123,31 @@ public class GridTestPage extends Div {
             usingFirstList.set(!usingFirstList.get());
         });
         changeList.setId("grid-with-component-renderers-change-list");
-        NativeButton toggleColumnOrdering = new NativeButton(
-                "Toggle column ordering", evt -> {
-                    grid.setColumnReorderingAllowed(
-                            !grid.isColumnReorderingAllowed());
-                });
+        NativeButton toggleColumnOrdering = new NativeButton("Toggle column ordering", evt -> {
+            grid.setColumnReorderingAllowed(!grid.isColumnReorderingAllowed());
+        });
         toggleColumnOrdering.setId("toggle-column-ordering");
 
-        NativeButton setReorderListener = new NativeButton(
-                "Set reorder listener", evt -> {
-                    grid.addColumnReorderListener(e -> {
-                        if (e.isFromClient()) {
-                            List<Column<Item>> columnList = e.getColumns()
-                                    .stream().collect(Collectors.toList());
-                            // Reorder columns in the list
-                            Collections.swap(columnList, 1, 2);
-                            grid.setColumnOrder(columnList);
-                        }
-                    });
-                });
+        NativeButton setReorderListener = new NativeButton("Set reorder listener", evt -> {
+            grid.addColumnReorderListener(e -> {
+                if (e.isFromClient()) {
+                    List<Column<Item>> columnList = e.getColumns().stream()
+                            .collect(Collectors.toList());
+                    // Reorder columns in the list
+                    Collections.swap(columnList, 1, 2);
+                    grid.setColumnOrder(columnList);
+                }
+            });
+        });
         setReorderListener.setId("set-reorder-listener");
 
         Span currentColumnOrdering = new Span();
         currentColumnOrdering.setId("current-column-ordering");
-        grid.addColumnReorderListener(e -> currentColumnOrdering
-                .setText(e.getColumns().stream().map(Column::getKey)
-                        .collect(Collectors.joining(", "))));
+        grid.addColumnReorderListener(e -> currentColumnOrdering.setText(e.getColumns().stream()
+                .map(Column::getKey)
+                .collect(Collectors.joining(", "))));
 
-        add(grid, changeList, toggleColumnOrdering, setReorderListener,
-                currentColumnOrdering);
+        add(grid, changeList, toggleColumnOrdering, setReorderListener, currentColumnOrdering);
     }
 
     private void createGridWithTemplateDetailsRow() {

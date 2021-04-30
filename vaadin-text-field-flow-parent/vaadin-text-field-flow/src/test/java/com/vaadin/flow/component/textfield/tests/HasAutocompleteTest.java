@@ -25,8 +25,7 @@ import org.junit.Test;
 public class HasAutocompleteTest {
 
     @Tag("div")
-    public static class HasAutocompleteComponent extends Component
-            implements HasAutocomplete {
+    public static class HasAutocompleteComponent extends Component implements HasAutocomplete {
 
     }
 
@@ -138,8 +137,7 @@ public class HasAutocompleteTest {
     public void organizationTitleAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ORGANIZATION_TITLE);
-        Assert.assertEquals(Autocomplete.ORGANIZATION_TITLE,
-                c.getAutocomplete());
+        Assert.assertEquals(Autocomplete.ORGANIZATION_TITLE, c.getAutocomplete());
     }
 
     @Test
@@ -244,8 +242,7 @@ public class HasAutocompleteTest {
     public void ccAdditionalNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_ADDITIONAL_NAME);
-        Assert.assertEquals(Autocomplete.CC_ADDITIONAL_NAME,
-                c.getAutocomplete());
+        Assert.assertEquals(Autocomplete.CC_ADDITIONAL_NAME, c.getAutocomplete());
     }
 
     @Test
@@ -301,16 +298,14 @@ public class HasAutocompleteTest {
     public void transactionCurrencyAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TRANSACTION_CURRENCY);
-        Assert.assertEquals(Autocomplete.TRANSACTION_CURRENCY,
-                c.getAutocomplete());
+        Assert.assertEquals(Autocomplete.TRANSACTION_CURRENCY, c.getAutocomplete());
     }
 
     @Test
     public void transactionAmountAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TRANSACTION_AMOUNT);
-        Assert.assertEquals(Autocomplete.TRANSACTION_AMOUNT,
-                c.getAutocomplete());
+        Assert.assertEquals(Autocomplete.TRANSACTION_AMOUNT, c.getAutocomplete());
     }
 
     @Test

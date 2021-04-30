@@ -41,17 +41,16 @@ public abstract class AbstractLayout extends DemoView {
     }
 
     public static Checkbox createToggleThemeCheckbox(ThemableLayout layout,
-            String themeName) {
+                                                       String themeName) {
         return createToggleThemeCheckbox(themeName,
-                toggle -> layout.getThemeList().set(themeName, toggle), false);
+                toggle -> layout.getThemeList().set(themeName, toggle),false);
     }
 
     public static Checkbox createToggleThemeCheckbox(String themeName,
-            Consumer<Boolean> toggleAction, boolean defaultValue) {
+                                                   Consumer<Boolean> toggleAction, boolean defaultValue) {
         Checkbox toggleButton = new Checkbox(themeName);
         toggleButton.setValue(defaultValue);
-        toggleButton.addValueChangeListener(
-                event -> toggleAction.accept(event.getValue()));
+        toggleButton.addValueChangeListener(event -> toggleAction.accept(event.getValue()));
         toggleButton.setId(String.format("toggle-%s", themeName));
         return toggleButton;
     }
@@ -75,12 +74,12 @@ public abstract class AbstractLayout extends DemoView {
     }
 
     public <T extends Enum> RadioButtonGroup<T> createRadioButtonGroup(
-            T[] values, Consumer<T> consumer, T defaultValue) {
+          T[] values, Consumer<T> consumer, T defaultValue) {
         RadioButtonGroup<T> rbg = new RadioButtonGroup<>();
         rbg.setItems(values);
         rbg.setValue(defaultValue);
-        rbg.setRenderer(new TextRenderer<>(
-                enumValue -> enumValue.name().toLowerCase()));
+        rbg.setRenderer(
+              new TextRenderer<>(enumValue -> enumValue.name().toLowerCase()));
 
         rbg.addValueChangeListener(e -> {
             consumer.accept(e.getValue());
@@ -91,12 +90,12 @@ public abstract class AbstractLayout extends DemoView {
     protected Div createLoremIpsum() {
         Div component = new Div();
         component.setText("Lorem ipsum dolor sit amet, consectetur "
-                + "adipiscing elit, sed do eiusmod tempor incididunt "
-                + "ut labore et dolore magna aliqua. Ut enim ad minim "
-                + "veniam, quis nostrud exercitation ullamco laboris "
-                + "nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit "
-                + "esse cillum dolore eu fugiat nulla pariatur.");
+              + "adipiscing elit, sed do eiusmod tempor incididunt "
+              + "ut labore et dolore magna aliqua. Ut enim ad minim "
+              + "veniam, quis nostrud exercitation ullamco laboris "
+              + "nisi ut aliquip ex ea commodo consequat. Duis aute "
+              + "irure dolor in reprehenderit in voluptate velit "
+              + "esse cillum dolore eu fugiat nulla pariatur.");
         component.getStyle().set("border", "1px solid #CCCCCC");
 
         return component;

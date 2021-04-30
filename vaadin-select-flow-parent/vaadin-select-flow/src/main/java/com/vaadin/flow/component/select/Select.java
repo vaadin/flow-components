@@ -856,8 +856,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(DataViewUtils.getQuery(this))
-                    .map(item -> createItem((T) item)).forEach(component -> {
+            getDataProvider().fetch(DataViewUtils.getQuery(this)).map(item -> createItem((T) item))
+                    .forEach(component -> {
                         add((Component) component);
                         itemCounter.incrementAndGet();
                     });
@@ -994,8 +994,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         return getIdentifierProvider().apply(item);
     }
 
-    private void identifierProviderChanged(
-            IdentifierProvider<T> identifierProvider) {
+    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 

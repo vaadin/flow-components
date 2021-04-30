@@ -34,7 +34,7 @@ public class HelperPage extends Div {
         checkboxGroup.setItems("foo", "bar", "baz");
         Binder<Bean> binder = new Binder<>();
         binder.bind(checkboxGroup, bean -> bean.choices,
-                (bean, value) -> bean.choices = value);
+            (bean, value) -> bean.choices = value);
         binder.setBean(new Bean());
         add(checkboxGroup);
     }

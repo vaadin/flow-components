@@ -21,8 +21,7 @@ import org.junit.Test;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("item-count-estimate-increase")
-public class ItemCountEstimateIncreaseComboBoxIT
-        extends AbstractItemCountComboBoxIT {
+public class ItemCountEstimateIncreaseComboBoxIT extends AbstractItemCountComboBoxIT {
 
     @Test
     public void customIncrease_scrollingPastEstimate_estimateIncreased() {
@@ -87,8 +86,7 @@ public class ItemCountEstimateIncreaseComboBoxIT
 
         // Open the combo box drop down and scroll again to last item
         scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
-        waitUntilTextInContent(
-                "Callback Item " + (unknownCountBackendItemsCount - 1));
+        waitUntilTextInContent("Callback Item " + (unknownCountBackendItemsCount - 1));
 
         // since the end was reached, only a reset() to data provider will reset
         // estimated count
@@ -96,8 +94,7 @@ public class ItemCountEstimateIncreaseComboBoxIT
         verifyItemsCount(unknownCountBackendItemsCount);
         // Open the combo box drop down and scroll again to last item
         scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
-        waitUntilTextInContent(
-                "Callback Item " + (unknownCountBackendItemsCount - 1));
+        waitUntilTextInContent("Callback Item " + (unknownCountBackendItemsCount - 1));
     }
 
 }

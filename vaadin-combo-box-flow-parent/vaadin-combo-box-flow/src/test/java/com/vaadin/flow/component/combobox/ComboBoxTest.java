@@ -192,8 +192,7 @@ public class ComboBoxTest {
         ComboBox<String> comboBox = new ComboBox<>();
         Assert.assertTrue(comboBox.isAutoOpen());
         comboBox.setAutoOpen(false);
-        Assert.assertTrue(comboBox.getElement()
-                .getProperty(PROP_AUTO_OPEN_DISABLED, false));
+        Assert.assertTrue(comboBox.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false));
         Assert.assertFalse(comboBox.isAutoOpen());
     }
 
@@ -375,24 +374,24 @@ public class ComboBoxTest {
         DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
         ui.add(comboBox);
 
-        DataProvider<Object, Void> dataProvider = Mockito
-                .spy(new AbstractDataProvider<Object, Void>() {
+        DataProvider<Object, Void> dataProvider = Mockito.spy(
+                new AbstractDataProvider<Object, Void>() {
 
-                    @Override
-                    public boolean isInMemory() {
-                        return true;
-                    }
+            @Override
+            public boolean isInMemory() {
+                return true;
+            }
 
-                    @Override
-                    public int size(Query query) {
-                        return 0;
-                    }
+            @Override
+            public int size(Query query) {
+                return 0;
+            }
 
-                    @Override
-                    public Stream<Object> fetch(Query query) {
-                        return Stream.empty();
-                    }
-                });
+            @Override
+            public Stream<Object> fetch(Query query) {
+                return Stream.empty();
+            }
+        });
 
         comboBox.setDataProvider(dataProvider, filter -> null);
 

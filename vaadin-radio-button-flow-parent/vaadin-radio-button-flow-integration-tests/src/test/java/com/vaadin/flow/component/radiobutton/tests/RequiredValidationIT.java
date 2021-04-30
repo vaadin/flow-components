@@ -43,15 +43,14 @@ public class RequiredValidationIT extends AbstractComponentIT {
                 Boolean.parseBoolean(group.getAttribute("invalid")));
     }
 
+
     @Test
     public void groupWithInvalidOption() {
         open();
 
-        WebElement group = findElement(
-                By.id("radio-button-with-invalid-option"));
-        WebElement radioButton = group
-                .findElements(By.tagName("vaadin-radio-button")).get(2);
-
+        WebElement group = findElement(By.id("radio-button-with-invalid-option"));
+        WebElement radioButton = group.findElements(By.tagName("vaadin-radio-button")).get(2);
+        
         Assert.assertFalse("Radio button group should be valid.",
                 Boolean.parseBoolean(group.getAttribute("invalid")));
         radioButton.click();

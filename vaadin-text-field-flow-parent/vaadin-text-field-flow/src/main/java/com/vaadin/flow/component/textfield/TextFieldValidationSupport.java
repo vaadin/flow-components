@@ -8,9 +8,8 @@ import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 /**
- * Utility class for performing server-side validation of string values in text
- * fields. This is needed because it is possible to circumvent the client side
- * validation constraints using browser development tools.
+ * Utility class for performing server-side validation of string values in text fields. This is needed because it is
+ * possible to circumvent the client side validation constraints using browser development tools.
  *
  * @author Vaadin Ltd
  */
@@ -51,30 +50,29 @@ final class TextFieldValidationSupport implements Serializable {
      * @see GeneratedVaadinTextField#setPattern(String)
      */
     void setPattern(String pattern) {
-        this.pattern = pattern == null || pattern.isEmpty() ? null
-                : Pattern.compile(pattern);
+        this.pattern = pattern == null || pattern.isEmpty() ?
+            null :
+            Pattern.compile(pattern);
     }
 
     /**
      * Test if value is invalid for the field.
      *
-     * @param value
-     *            value to be tested.
+     * @param value value to be tested.
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(field.getEmptyValue(), value);
-        final boolean isMaxLengthExceeded = value != null && maxLength != null
-                && value.length() > maxLength;
-        final boolean isMinLengthNotReached = value != null && minLength != null
-                && value.length() < minLength;
+        final boolean isRequiredButEmpty =
+            required && Objects.equals(field.getEmptyValue(), value);
+        final boolean isMaxLengthExceeded =
+            value != null && maxLength != null && value.length() > maxLength;
+        final boolean isMinLengthNotReached =
+            value != null && minLength != null && value.length() < minLength;
         // Only evaluate if necessary.
         final BooleanSupplier doesValueViolatePattern = () -> value != null
-                && pattern != null && !pattern.matcher(value).matches();
+            && pattern != null && !pattern.matcher(value).matches();
         return isRequiredButEmpty || isMaxLengthExceeded
-                || isMinLengthNotReached
-                || doesValueViolatePattern.getAsBoolean();
+            || isMinLengthNotReached || doesValueViolatePattern.getAsBoolean();
     }
 
 }

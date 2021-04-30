@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model.serializers;
  * #L%
  */
 
+
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializationConfig;

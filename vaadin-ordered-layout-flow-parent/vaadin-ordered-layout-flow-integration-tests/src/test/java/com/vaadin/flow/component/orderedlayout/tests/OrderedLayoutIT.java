@@ -29,20 +29,27 @@ public class OrderedLayoutIT extends AbstractComponentIT {
     public void testGetterSetterFlexWrapFlexLayout() {
         open();
         WebElement fLayout = findElement(By.id("flex-layout"));
-        WebElement btnNoWrap = fLayout.findElement(By.id("no-wrap"));
-        WebElement btnWrap = fLayout.findElement(By.id("wrap"));
-        WebElement btnWrapReverse = fLayout.findElement(By.id("wrap-reverse"));
-        WebElement getFlexWrapBtn = fLayout.findElement(By.id("wrap-btn"));
+        WebElement btnNoWrap = fLayout
+                .findElement(By.id("no-wrap"));
+        WebElement btnWrap = fLayout
+                .findElement(By.id("wrap"));
+        WebElement btnWrapReverse = fLayout
+                .findElement(By.id("wrap-reverse"));
+        WebElement getFlexWrapBtn = fLayout
+                .findElement(By.id("wrap-btn"));
         WebElement flexWrapDisplay = findElement(By.id("flex-wrap-display"));
 
         btnNoWrap.click();
-        Assert.assertEquals("nowrap", fLayout.getCssValue("flex-wrap"));
+        Assert.assertEquals("nowrap",
+                fLayout.getCssValue("flex-wrap"));
 
         btnWrap.click();
-        Assert.assertEquals("wrap", fLayout.getCssValue("flex-wrap"));
+        Assert.assertEquals("wrap",
+                fLayout.getCssValue("flex-wrap"));
 
         btnWrapReverse.click();
-        Assert.assertEquals("wrap-reverse", fLayout.getCssValue("flex-wrap"));
+        Assert.assertEquals("wrap-reverse",
+                fLayout.getCssValue("flex-wrap"));
 
         getFlexWrapBtn.click();
         Assert.assertEquals("WRAP_REVERSE", flexWrapDisplay.getText());

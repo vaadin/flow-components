@@ -18,8 +18,7 @@ public class BasicIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-details");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-details") ;
         getDriver().get(url);
         detailsElements = $(DetailsElement.class).all();
 

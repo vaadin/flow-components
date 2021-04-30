@@ -20,11 +20,12 @@ import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.Objects;
 
 /**
- * A collection of options for the individual nodes. The nodes in an org chart
- * are auto-generated instances of Highcharts.Point, but options can be applied
- * here and linked by the id.
+ * A collection of options for the individual nodes.
+ * The nodes in an org chart are auto-generated instances of Highcharts.Point,
+ * but options can be applied here and linked by the id.
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
+      property = "id")
 public class Node extends AbstractConfigurationObject {
     private String id;
     private Color color;
@@ -47,18 +48,15 @@ public class Node extends AbstractConfigurationObject {
     }
 
     /**
-     * @param id
-     *            see {@link #setId(String)}
+     * @param id see {@link #setId(String)}
      */
     public Node(String id) {
         this.id = id;
     }
 
     /**
-     * @param id
-     *            see {@link #setId(String)}
-     * @param name
-     *            see {@link #setName(String)}
+     * @param id see {@link #setId(String)}
+     * @param name see {@link #setName(String)}
      */
     public Node(String id, String name) {
         this.id = id;
@@ -66,12 +64,9 @@ public class Node extends AbstractConfigurationObject {
     }
 
     /**
-     * @param id
-     *            see {@link #setId(String)}
-     * @param name
-     *            see {@link #setName(String)}
-     * @param title
-     *            see {@link #setTitle(String)}
+     * @param id see {@link #setId(String)}
+     * @param name see {@link #setName(String)}
+     * @param title see {@link #setTitle(String)}
      */
     public Node(String id, String name, String title) {
         this.id = id;
@@ -116,11 +111,11 @@ public class Node extends AbstractConfigurationObject {
     }
 
     /**
-     * An optional column index of where to place the node. The default
-     * behaviour is to place it next to the preceding node. Note that this
-     * option name is counter intuitive in inverted charts, like for example an
-     * organization chart rendered top down. In this case the "columns" are
-     * horizontal.
+     * An optional column index of where to place the node.
+     * The default behaviour is to place it next to the preceding node.
+     * Note that this option name is counter intuitive in inverted charts,
+     * like for example an organization chart rendered top down.
+     * In this case the "columns" are horizontal.
      */
     public void setColumn(Number column) {
         this.column = column;
@@ -242,10 +237,10 @@ public class Node extends AbstractConfigurationObject {
 
     /**
      * In a horizontal layout, the vertical offset of a node in terms of weight.
-     * Positive values shift the node downwards, negative shift it upwards. In a
-     * vertical layout, like organization chart, the offset is horizontal. If a
-     * percentage string is given, the node is offset by the percentage of the
-     * node size plus nodePadding. Defaults to 0.
+     * Positive values shift the node downwards, negative shift it upwards.
+     * In a vertical layout, like organization chart, the offset is horizontal.
+     * If a percentage string is given, the node is offset by the percentage of
+     * the node size plus nodePadding. Defaults to 0.
      */
     public void setOffset(String offset) {
         this.offset = offset;
