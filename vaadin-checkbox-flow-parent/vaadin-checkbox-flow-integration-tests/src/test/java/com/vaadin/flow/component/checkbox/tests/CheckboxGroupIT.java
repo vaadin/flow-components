@@ -181,12 +181,12 @@ public class CheckboxGroupIT extends ComponentDemoTest {
     }
 
     @Test
-    public void assertHelperText(){
+    public void assertHelperText() {
         TestBenchElement group = $(TestBenchElement.class)
-              .id("checkbox-helper-text");
+                .id("checkbox-helper-text");
 
         TestBenchElement helperText = group.$("slot")
-              .attributeContains("name", "helper").first();
+                .attributeContains("name", "helper").first();
         Assert.assertEquals("Helper text", helperText.getText());
 
         $("button").id("button-clear-helper").click();
@@ -194,12 +194,12 @@ public class CheckboxGroupIT extends ComponentDemoTest {
     }
 
     @Test
-    public void assertHelperComponent(){
+    public void assertHelperComponent() {
         TestBenchElement group = $(TestBenchElement.class)
-              .id("checkbox-helper-component");
+                .id("checkbox-helper-component");
 
         TestBenchElement helperComponent = group.$("span")
-              .attributeContains("slot", "helper").first();
+                .attributeContains("slot", "helper").first();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
         $("button").id("button-clear-component").click();

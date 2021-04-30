@@ -22,12 +22,15 @@ public class RendererIT extends AbstractSelectIT {
         page.clickRendererButton();
 
         List<SelectElement.ItemElement> items = selectElement.getItems();
-        Assert.assertEquals("invalid number of items", getInitialNumberOfItems(), items.size());
+        Assert.assertEquals("invalid number of items",
+                getInitialNumberOfItems(), items.size());
 
         for (int i = 0; i < items.size(); i++) {
             SelectElement.ItemElement itemElement = items.get(i);
-            Assert.assertEquals("invalid key", i + 1 + "", itemElement.getPropertyString("value"));
-            Assert.assertEquals("invalid text", "Item-" + i + "-UPDATED", itemElement.getText());
+            Assert.assertEquals("invalid key", i + 1 + "",
+                    itemElement.getPropertyString("value"));
+            Assert.assertEquals("invalid text", "Item-" + i + "-UPDATED",
+                    itemElement.getText());
         }
 
     }
@@ -35,7 +38,8 @@ public class RendererIT extends AbstractSelectIT {
     private void runRendererTestPattern() {
         List<SelectElement.ItemElement> items = selectElement.getItems();
 
-        Assert.assertEquals("Invalid number of items", getInitialNumberOfItems(), items.size());
+        Assert.assertEquals("Invalid number of items",
+                getInitialNumberOfItems(), items.size());
 
         for (int i = 0; i < items.size(); i++) {
             SelectElement.ItemElement item = items.get(i);
@@ -45,8 +49,10 @@ public class RendererIT extends AbstractSelectIT {
 
             Assert.assertEquals(2, buttons.size());
             Assert.assertEquals("Invalid text", "Item-" + i, span.getText());
-            Assert.assertEquals("Invalid button text", "Update-" + i, buttons.get(0).getText());
-            Assert.assertEquals("Invalid button text", "Remove button " + i, buttons.get(1).getText());
+            Assert.assertEquals("Invalid button text", "Update-" + i,
+                    buttons.get(0).getText());
+            Assert.assertEquals("Invalid button text", "Remove button " + i,
+                    buttons.get(1).getText());
 
             // remove button
             buttons.get(1).click();
@@ -71,7 +77,6 @@ public class RendererIT extends AbstractSelectIT {
 
         runRendererTestPattern();
     }
-
 
     @Override
     protected int getInitialNumberOfItems() {

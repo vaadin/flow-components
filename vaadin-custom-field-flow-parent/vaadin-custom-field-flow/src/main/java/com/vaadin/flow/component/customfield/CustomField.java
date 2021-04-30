@@ -44,16 +44,18 @@ import com.vaadin.flow.dom.Element;
  * Customization of both the visual presentation and the logic of the field is
  * possible.
  * <p>
- * Subclasses must implement {@link #generateModelValue()} and AbstractField{@link #setPresentationValue(Object)}.
+ * Subclasses must implement {@link #generateModelValue()} and
+ * AbstractField{@link #setPresentationValue(Object)}.
  *
- * @param <T> field value type
+ * @param <T>
+ *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version="1.3.0")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "1.3.0")
 @JsModule("@vaadin/vaadin-custom-field/src/vaadin-custom-field.js")
 @HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-    implements HasSize, HasValidation, Focusable<CustomField>, HasHelper {
+        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper {
 
     /**
      * Default constructor.
@@ -65,7 +67,9 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     /**
      * Constructs a new custom field.
      *
-     * @param defaultValue The initial value for the field. Will also be used by {@link #getEmptyValue()}.
+     * @param defaultValue
+     *            The initial value for the field. Will also be used by
+     *            {@link #getEmptyValue()}.
      * @see AbstractField#AbstractField(Object)
      */
     public CustomField(T defaultValue) {
@@ -75,35 +79,47 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     }
 
     /**
-     * This method should return the value of the field, based on value of the internal fields.
+     * This method should return the value of the field, based on value of the
+     * internal fields.
      *
      * @return new value of the field.
      */
     protected abstract T generateModelValue();
 
     /**
-     * This method should be implemented to set the value of the fields contained
-     * in this custom field according to the value of the parameter.
-     * It can also be use to show the value to the user in some way, like placing it in an element contained on the field.
+     * This method should be implemented to set the value of the fields
+     * contained in this custom field according to the value of the parameter.
+     * It can also be use to show the value to the user in some way, like
+     * placing it in an element contained on the field.
      * <p>
      * {@inheritDoc}
      *
-     * @param newPresentationValue The new presentation value.
+     * @param newPresentationValue
+     *            The new presentation value.
      */
     @Override
     protected abstract void setPresentationValue(T newPresentationValue);
 
     /**
-     * Regenerates the value by calling {@link #generateModelValue()} and updates the model.
-     * If the value is different than the current one, a {@link ValueChangeEvent} will be generated with {@link ValueChangeEvent#isFromClient()} set to <code>true</code>
+     * Regenerates the value by calling {@link #generateModelValue()} and
+     * updates the model. If the value is different than the current one, a
+     * {@link ValueChangeEvent} will be generated with
+     * {@link ValueChangeEvent#isFromClient()} set to <code>true</code>
      *
-     * <p>This method is called when the webcomponent generates a <b>changed</b> event, typically in response to a change made by the user in one of the contained fields.
+     * <p>
+     * This method is called when the webcomponent generates a <b>changed</b>
+     * event, typically in response to a change made by the user in one of the
+     * contained fields.
      *
-     * <p>Custom implementations of this method <b>must</b> call {@link #setModelValue(Object, boolean)} with the updated model value.
-     * Subclasses can call this method when the model value needs to be regenerated and updated.
+     * <p>
+     * Custom implementations of this method <b>must</b> call
+     * {@link #setModelValue(Object, boolean)} with the updated model value.
+     * Subclasses can call this method when the model value needs to be
+     * regenerated and updated.
      */
     protected void updateValue() {
-        // The second parameter is true since this method is called in response to a change event from the client.
+        // The second parameter is true since this method is called in response
+        // to a change event from the client.
         setModelValue(generateModelValue(), true);
     }
 
@@ -171,7 +187,8 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * This property is set to true when the control value is invalid.
      * </p>
      *
-     * @param invalid the boolean value to set
+     * @param invalid
+     *            the boolean value to set
      */
     @Override
     public void setInvalid(boolean invalid) {
@@ -200,11 +217,11 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     /**
      * Sets the label for the field.
      *
-     * @param label value for the {@code label} property in the webcomponent
+     * @param label
+     *            value for the {@code label} property in the webcomponent
      */
     public void setLabel(String label) {
         getElement().setProperty("label", label);
     }
 
 }
-

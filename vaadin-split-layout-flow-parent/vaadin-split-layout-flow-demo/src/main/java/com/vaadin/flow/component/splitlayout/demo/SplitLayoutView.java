@@ -130,8 +130,9 @@ public class SplitLayoutView extends DemoView {
 
         Label message = new Label("Drag and drop the splitter");
         AtomicInteger resizeCounter = new AtomicInteger();
-        layout.addSplitterDragendListener(event -> message.setText(
-                "SplitLayout Resized " + resizeCounter.incrementAndGet() + " times."));
+        layout.addSplitterDragendListener(
+                event -> message.setText("SplitLayout Resized "
+                        + resizeCounter.incrementAndGet() + " times."));
 
         add(layout, message);
         // end-source-example

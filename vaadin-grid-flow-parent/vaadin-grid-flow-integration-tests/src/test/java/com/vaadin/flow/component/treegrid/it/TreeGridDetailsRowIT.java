@@ -33,11 +33,12 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     public void gridRootItemDetailsDisplayedWhenOpen() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        //  detail configured
-        assertAmountOfOpenDetails(treegrid,1);
+        // detail configured
+        assertAmountOfOpenDetails(treegrid, 1);
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 1,1);
+                .findElements(By.tagName("flow-component-renderer"))
+                .size() == 1, 1);
 
         // each detail contain a button
         List<WebElement> detailsElement = treegrid
@@ -52,13 +53,14 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     public void gridChildItemDetailsDisplayedWhenClicked() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        //  detail configured
-        assertAmountOfOpenDetails(treegrid,1);
+        // detail configured
+        assertAmountOfOpenDetails(treegrid, 1);
         treegrid.expandWithClick(0);
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 2, 5);
+                .findElements(By.tagName("flow-component-renderer"))
+                .size() == 2, 5);
 
         List<WebElement> detailsElement = treegrid
                 .findElements(By.tagName("flow-component-renderer"));
@@ -68,53 +70,56 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
         // detail on row 0 is empty
         assertElementHasNoButton(detailsElement.get(0));
         // detail on row 1 contains a button
-        assertElementHasButton(detailsElement.get(1),"parent1-child2");
+        assertElementHasButton(detailsElement.get(1), "parent1-child2");
     }
 
     @Test
     public void gridChildItemDetailsDisplayedAfterCollapseWhenClicked() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        //  detail configured
-        assertAmountOfOpenDetails(treegrid,1);
+        // detail configured
+        assertAmountOfOpenDetails(treegrid, 1);
         treegrid.expandWithClick(0);
         treegrid.collapseWithClick(0);
         treegrid.expandWithClick(0);
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 2, 5);
+                .findElements(By.tagName("flow-component-renderer"))
+                .size() == 2, 5);
 
         List<WebElement> detailsElement = treegrid
                 .findElements(By.tagName("flow-component-renderer"));
 
-        Assert.assertEquals(" Details for parent1-child2 is not displayed",2, detailsElement.size());
+        Assert.assertEquals(" Details for parent1-child2 is not displayed", 2,
+                detailsElement.size());
 
         // detail on row 0 is empty
         assertElementHasNoButton(detailsElement.get(0));
         // detail on row 1 contains a button
-        assertElementHasButton(detailsElement.get(1),"parent1-child2");
+        assertElementHasButton(detailsElement.get(1), "parent1-child2");
     }
-
 
     @Test
     public void gridChildItemDetailsDisplayedAfterCollapse2WhenClicked() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        //  detail configured
-        assertAmountOfOpenDetails(treegrid,1);
+        // detail configured
+        assertAmountOfOpenDetails(treegrid, 1);
         treegrid.expandWithClick(1);
         treegrid.collapseWithClick(1);
         treegrid.expandWithClick(1);
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> treegrid
-                .findElements(By.tagName("flow-component-renderer")).size() == 2, 5);
+                .findElements(By.tagName("flow-component-renderer"))
+                .size() == 2, 5);
 
         List<WebElement> detailsElement = treegrid
                 .findElements(By.tagName("flow-component-renderer"));
 
-        Assert.assertEquals(" Details for parent2-child1 is not displayed",2, detailsElement.size());
+        Assert.assertEquals(" Details for parent2-child1 is not displayed", 2,
+                detailsElement.size());
         // detail on row 0 is empty
         assertElementHasNoButton(detailsElement.get(0));
         // detail on row 1 contains a button
@@ -127,15 +132,15 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,
-                                           int expectedAmount) {
-        waitUntil(driver ->
-                grid.findElements(By.className("row-details")).size()
-                        == expectedAmount);
+            int expectedAmount) {
+        waitUntil(driver -> grid.findElements(By.className("row-details"))
+                .size() == expectedAmount);
         Assert.assertEquals(expectedAmount,
                 grid.findElements(By.className("row-details")).size());
     }
 
-    private void assertElementHasButton(WebElement componentRenderer, String content) {
+    private void assertElementHasButton(WebElement componentRenderer,
+            String content) {
 
         List<WebElement> children = componentRenderer
                 .findElements(By.tagName("vaadin-button"));
@@ -147,7 +152,8 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
 
         List<WebElement> children = componentRenderer
                 .findElements(By.tagName("vaadin-button"));
-        Assert.assertTrue("Details should be empty or not visible",(children.size() == 0)||(!children.get(0).isDisplayed()));
+        Assert.assertTrue("Details should be empty or not visible",
+                (children.size() == 0) || (!children.get(0).isDisplayed()));
 
     }
 }

@@ -28,10 +28,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Server-side component for the {@code <vaadin-drawer-toggle>} element.
- * It is a button that allows the user to open and close the drawer.
- * To use it, add it to the {@link AppLayout}, typically in the navbar slot.
- * <code>
+ * Server-side component for the {@code <vaadin-drawer-toggle>} element. It is a
+ * button that allows the user to open and close the drawer. To use it, add it
+ * to the {@link AppLayout}, typically in the navbar slot. <code>
  *     AppLayout layout = new AppLayout();
  *     layout.addToNavbar(new DrawerToggle());
  * </code>

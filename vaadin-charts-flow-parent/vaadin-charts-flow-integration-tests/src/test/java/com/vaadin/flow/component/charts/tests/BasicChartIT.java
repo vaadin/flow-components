@@ -39,7 +39,6 @@ public class BasicChartIT extends AbstractTBTest {
         assertTrue(title.getText().contains("First Chart for Flow"));
     }
 
-
     @Test
     @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void Chart_TitleCanBeChanged() {

@@ -196,7 +196,8 @@ public class IronListView extends DemoView {
         list.setHeight("400px");
 
         DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
-                query -> createFacts(query.getLimit()-query.getOffset()), query -> 1000);
+                query -> createFacts(query.getLimit() - query.getOffset()),
+                query -> 1000);
 
         list.setDataProvider(dataProvider);
         list.setRenderer(TemplateRenderer.<String> of(

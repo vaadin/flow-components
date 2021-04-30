@@ -90,8 +90,8 @@ import elemental.json.JsonValue;
 @JavaScript("frontend://comboBoxConnector.js")
 @JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
-        implements HasSize, HasValidation,
-        HasFilterableDataProvider<T, String>, HasHelper {
+        implements HasSize, HasValidation, HasFilterableDataProvider<T, String>,
+        HasHelper {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -380,9 +380,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
      *
-     * Note that filtering of the ComboBox is not affected by the renderer that
-     * is set here. Filtering is done on the original values and can be affected
-     * by {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
@@ -556,7 +557,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
 
-    private <C> void setupDataProviderListener(DataProvider<T, C> dataProvider) {
+    private <C> void setupDataProviderListener(
+            DataProvider<T, C> dataProvider) {
         if (dataProviderListener != null) {
             dataProviderListener.remove();
         }

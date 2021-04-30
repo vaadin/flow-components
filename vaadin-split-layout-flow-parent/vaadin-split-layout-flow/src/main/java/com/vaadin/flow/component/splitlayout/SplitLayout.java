@@ -43,24 +43,25 @@ import com.vaadin.flow.shared.Registration;
  * <p>
  * By default, the split's orientation is horizontal, meaning that the content
  * elements are positioned side by side in a flex container with a horizontal
- * layout. You can change the split mode to vertical by using the {@link #setOrientation(Orientation)}
- * with {@link Orientation#VERTICAL}.
+ * layout. You can change the split mode to vertical by using the
+ * {@link #setOrientation(Orientation)} with {@link Orientation#VERTICAL}.
  * </p>
- * The {@code <vaadin-split-layout>} element itself is a flex container. It does not
- * inherit the parent height by default, but rather sets its height depending on
- * the content.
+ * The {@code <vaadin-split-layout>} element itself is a flex container. It does
+ * not inherit the parent height by default, but rather sets its height
+ * depending on the content.
  * </p>
  * <p>
  * You can use CSS to set the fixed height for the split layout, as usual with
- * any block element. It is possible to define percentage height as well.
- * Note that you have to set the parent height in order to make percentages work correctly.
+ * any block element. It is possible to define percentage height as well. Note
+ * that you have to set the parent height in order to make percentages work
+ * correctly.
  * </p>
  * <h3>Initial Splitter Position</h3>
  * <p>
  * The initial splitter position is determined from the sizes of the content
- * elements inside the split layout. Therefore, changing width on the
- * content components affects the initial splitter position for the horizontal
- * layouts, while height affects the vertical ones.
+ * elements inside the split layout. Therefore, changing width on the content
+ * components affects the initial splitter position for the horizontal layouts,
+ * while height affects the vertical ones.
  * </p>
  * <p>
  * Note that when the total size of the content component does not fit the
@@ -104,7 +105,8 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  * <h3>Resize Notification</h3>
  * <p>
- * For notification on when the user has resized the split position, use the {@link #addSplitterDragendListener(ComponentEventListener)}.
+ * For notification on when the user has resized the split position, use the
+ * {@link #addSplitterDragendListener(ComponentEventListener)}.
  * </p>
  * <h3>Styling</h3>
  * <p>
@@ -131,9 +133,9 @@ import com.vaadin.flow.shared.Registration;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  *
  * @author Vaadin Ltd
@@ -159,18 +161,21 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public SplitLayout() {
         setOrientation(Orientation.HORIZONTAL);
-        addAttachListener(e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        addAttachListener(
+                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
     }
 
     /**
      * Constructs a VaadinSplitLayout with the given initial components to set
      * to the primary and secondary splits.
      *
-     * @param primaryComponent   the component set to the primary split
-     * @param secondaryComponent the component set to the secondary split
+     * @param primaryComponent
+     *            the component set to the primary split
+     * @param secondaryComponent
+     *            the component set to the secondary split
      */
     public SplitLayout(Component primaryComponent,
-                       Component secondaryComponent) {
+            Component secondaryComponent) {
         this();
         addToPrimary(primaryComponent);
         addToSecondary(secondaryComponent);
@@ -182,8 +187,9 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * Default value is {@link Orientation#HORIZONTAL}.
      *
      *
-     * @param orientation the orientation of the SplitLayout. Valid enumerate values are
-     *                    VERTICAL and HORIZONTAL, never {@code null}
+     * @param orientation
+     *            the orientation of the SplitLayout. Valid enumerate values are
+     *            VERTICAL and HORIZONTAL, never {@code null}
      */
     public void setOrientation(Orientation orientation) {
         Objects.requireNonNull(orientation, "Orientation cannot be null");
@@ -195,11 +201,11 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * <p>
      * Default value is {@link Orientation#HORIZONTAL}.
      * <p>
-     * <em>NOTE:</em> This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * <em>NOTE:</em> This property is not synchronized automatically from the
+     * client side, so the returned value may not be the same as in client side.
      * </p>
-
      *
+     * 
      * @return the {@code orientation} property of the SplitLayout.
      */
     public Orientation getOrientation() {
@@ -278,7 +284,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * of the component and in vertical mode this is the height. The given value
      * will automatically be clamped to the range [0, 100].
      *
-     * @param position the relative position of the splitter, in percentages
+     * @param position
+     *            the relative position of the splitter, in percentages
      */
     public void setSplitterPosition(double position) {
         this.splitterPosition = position;
@@ -289,24 +296,24 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         if (this.updateStylesRegistration != null) {
             updateStylesRegistration.remove();
         }
-        this.updateStylesRegistration = ui
-            .beforeClientResponse(this, context -> {
-                // Remove flex property for primary and secondary children.
-                final String JS = "for(let i = 0;i < this.children.length;i++)"
-                    + "if(this.children[i].slot === 'primary'"
-                    + "   || this.children[i].slot === 'secondary')"
-                    + "this.children[i].style.flex = ''";
-                getElement().executeJs(JS);
+        this.updateStylesRegistration = ui.beforeClientResponse(this,
+                context -> {
+                    // Remove flex property for primary and secondary children.
+                    final String JS = "for(let i = 0;i < this.children.length;i++)"
+                            + "if(this.children[i].slot === 'primary'"
+                            + "   || this.children[i].slot === 'secondary')"
+                            + "this.children[i].style.flex = ''";
+                    getElement().executeJs(JS);
 
-                // Update width or height if splitter position is set.
-                updateStylesForSplitterPosition();
+                    // Update width or height if splitter position is set.
+                    updateStylesForSplitterPosition();
 
-                this.updateStylesRegistration = null;
-            });
+                    this.updateStylesRegistration = null;
+                });
     }
 
     private void updateStylesForSplitterPosition() {
-        if(this.splitterPosition == null) {
+        if (this.splitterPosition == null) {
             return;
         }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
@@ -324,8 +331,10 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     /**
      * Set a style to the component in the primary split.
      *
-     * @param styleName name of the style to set
-     * @param value     the value to set
+     * @param styleName
+     *            name of the style to set
+     * @param value
+     *            the value to set
      */
     public void setPrimaryStyle(String styleName, String value) {
         setInnerComponentStyle(styleName, value, true);
@@ -334,8 +343,10 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     /**
      * Set a style to the component in the secondary split.
      *
-     * @param styleName name of the style to set
-     * @param value     the value to set
+     * @param styleName
+     *            name of the style to set
+     * @param value
+     *            the value to set
      */
     public void setSecondaryStyle(String styleName, String value) {
         setInnerComponentStyle(styleName, value, false);
@@ -369,10 +380,11 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     }
 
     /**
-     * Adds a listener for the {@code splitter-dragend} event, which is fired when the user has stopped resizing the
-     * splitter with drag and drop.
+     * Adds a listener for the {@code splitter-dragend} event, which is fired
+     * when the user has stopped resizing the splitter with drag and drop.
      *
-     * @param listener the listener to add
+     * @param listener
+     *            the listener to add
      * @return a registration for removing the listener
      */
     @Override

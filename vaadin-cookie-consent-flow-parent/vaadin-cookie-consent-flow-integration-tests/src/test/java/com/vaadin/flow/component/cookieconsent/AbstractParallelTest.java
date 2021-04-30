@@ -35,8 +35,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         String referenceName = prefix + "_" + screenshotName;
         Thread.sleep(1000);
         Assert.assertTrue(
-                "Screenshot " + referenceName + " contains differences",
-                true);
+                "Screenshot " + referenceName + " contains differences", true);
     }
 
     public void open(Class<?> viewClass, Dimension size) {
@@ -60,7 +59,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     protected String getDeploymentPath(Class<?> viewClass) {
 
-        com.vaadin.flow.router.Route[] ann = viewClass.getAnnotationsByType(com.vaadin.flow.router.Route.class);
+        com.vaadin.flow.router.Route[] ann = viewClass
+                .getAnnotationsByType(com.vaadin.flow.router.Route.class);
         if (ann.length > 0) {
             return "/" + ann[0].value();
         }
@@ -77,10 +77,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "8080";
     }
 
-
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList(
-                BrowserUtil.chrome());
+        return Arrays.asList(BrowserUtil.chrome());
     }
 
     protected void verifyElement(String message, String dismissLabel,
@@ -91,10 +89,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
         assertNotNull(element);
         assertEquals(message, element.getMessage());
         assertEquals(dismissLabel, element.getDismissLabel());
-        assertEquals(learnMoreLabel,
-                element.getLearnMoreLabel());
-        assertEquals(learnMoreLink,
-                element.getLearnMoreLink());
+        assertEquals(learnMoreLabel, element.getLearnMoreLabel());
+        assertEquals(learnMoreLink, element.getLearnMoreLink());
         assertEquals(position, element.getPosition());
         final WebElement dismiss = element.getDismissLinkElement();
         dismiss.click();

@@ -54,8 +54,7 @@ public class DetachReattachIT extends AbstractComponentIT {
         clickButton("attach");
         clickButton("getValue");
         Assert.assertEquals("Radio button should remain checked on reattach",
-                value,
-                valueBlock.getText());
+                value, valueBlock.getText());
     }
 
     private void clickButton(String id) {

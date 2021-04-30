@@ -15,13 +15,16 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
         page.toggleEmptySelectionEnabled(true);
 
         List<SelectElement.ItemElement> items = selectElement.getItems();
-        Assert.assertEquals("invalid number of items", getInitialNumberOfItems() + 1, items.size());
+        Assert.assertEquals("invalid number of items",
+                getInitialNumberOfItems() + 1, items.size());
         verify.emptySelectionItemInDropDown("");
 
         for (int i = 1; i < items.size(); i++) {
             SelectElement.ItemElement itemElement = items.get(i);
-            Assert.assertEquals("invalid key", i + "", itemElement.getPropertyString("value"));
-            Assert.assertEquals("invalid text", "Item-" + (i - 1), itemElement.getText());
+            Assert.assertEquals("invalid key", i + "",
+                    itemElement.getPropertyString("value"));
+            Assert.assertEquals("invalid text", "Item-" + (i - 1),
+                    itemElement.getText());
         }
 
         // initial select doesn't change value, so no event
@@ -78,22 +81,24 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
         verify.emptySelectionItemSelected();
 
         page.setPlaceholder("placeholder");
-        // the placeholder will be shown at this point, but it is impossible to verify that
+        // the placeholder will be shown at this point, but it is impossible to
+        // verify that
         verify.emptySelectionItemSelected();
-        verify.selectedItem("","");
+        verify.selectedItem("", "");
 
         page.setEmptySelectionCaption("caption");
-        verify.selectedItem("caption","caption");
+        verify.selectedItem("caption", "caption");
 
         page.toggleItemLabelGenerator(true);
-        // the selected label should be updated accordingly to replace the caption
-        verify.selectedItem("caption","null-LABEL");
+        // the selected label should be updated accordingly to replace the
+        // caption
+        verify.selectedItem("caption", "null-LABEL");
 
         page.toggleItemLabelGenerator(false);
-        verify.selectedItem("caption","caption");
+        verify.selectedItem("caption", "caption");
 
         page.setEmptySelectionCaption("");
-        verify.selectedItem("","");
+        verify.selectedItem("", "");
     }
 
     @Override

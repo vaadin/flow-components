@@ -12,7 +12,8 @@ public class LoginFormIT extends BasicIT {
 
     @Override
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") ;
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-login");
         getDriver().get(url);
     }
 
@@ -49,7 +50,8 @@ public class LoginFormIT extends BasicIT {
 
     @Test
     public void disabledLogin() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/disable-login";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-login") + "/disable-login";
         getDriver().get(url);
         LoginFormElement login = getLoginForm();
         login.getUsernameField().setValue("username");
@@ -129,7 +131,8 @@ public class LoginFormIT extends BasicIT {
 
     @Test
     public void actionLogin() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/action";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-login") + "/action";
         getDriver().get(url);
         LoginFormElement login = getLoginForm();
 

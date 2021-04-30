@@ -165,8 +165,7 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         assertCellTexts(2, 0, new String[] { "1 | 1", "1 | 2", "0 | 1" });
 
         // Should navigate to "0 | 0"
-        new Actions(getDriver()).sendKeys(Keys.UP, Keys.UP)
-                .perform();
+        new Actions(getDriver()).sendKeys(Keys.UP, Keys.UP).perform();
         Assert.assertEquals(6, getTreeGrid().getRowCount());
         assertCellTexts(0, 0,
                 new String[] { "0 | 0", "1 | 0", "1 | 1", "1 | 2", "0 | 1" });
@@ -210,7 +209,6 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         assertFalse(getTreeGrid().getRow(1).isSelected());
         assertTrue(getTreeGrid().getRow(2).isSelected());
 
-
         // Should select "1 | 0" without moving focus
         new Actions(getDriver()).sendKeys(Keys.SPACE).perform();
         waitUntil(b -> getTreeGrid().getRow(1).isSelected(), 1);
@@ -240,22 +238,22 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         findElementByText("Expand listener").click();
         findElementByText("Collapse listener").click();
 
-        assertFalse(logContainsText(
-                "Item(s) expanded (from client: true): 0 | 0"));
+        assertFalse(
+                logContainsText("Item(s) expanded (from client: true): 0 | 0"));
         assertFalse(logContainsText(
                 "Item(s) collapsed (from client: true): 0 | 0"));
 
         getTreeGrid().expandWithClick(0);
 
-        assertTrue(logContainsText(
-                "Item(s) expanded (from client: true): 0 | 0"));
+        assertTrue(
+                logContainsText("Item(s) expanded (from client: true): 0 | 0"));
         assertFalse(logContainsText(
                 "Item(s) collapsed (from client: true): 0 | 0"));
 
         getTreeGrid().collapseWithClick(0);
 
-        assertTrue(logContainsText(
-                "Item(s) expanded (from client: true): 0 | 0"));
+        assertTrue(
+                logContainsText("Item(s) expanded (from client: true): 0 | 0"));
         assertTrue(logContainsText(
                 "Item(s) collapsed (from client: true): 0 | 0"));
 

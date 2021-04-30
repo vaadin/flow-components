@@ -198,7 +198,7 @@ public class ButtonView extends DemoView {
                 .listenOn(container);
 
         Paragraph paragraph = new Paragraph("Button \"Clean fields\"'s "
-              + "shortcut ALT+L works only within the text fields.");
+                + "shortcut ALT+L works only within the text fields.");
         container.add(paragraph);
 
         add(button, container);
@@ -271,7 +271,7 @@ public class ButtonView extends DemoView {
         });
 
         add(disableOnClickButton, enable, toggle, disabledMessage,
-              temporarilyDisabledButton);
+                temporarilyDisabledButton);
         // end-source-example
         toggle.setId("toggle-button");
 

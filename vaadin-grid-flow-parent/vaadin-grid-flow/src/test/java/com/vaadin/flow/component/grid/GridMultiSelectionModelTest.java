@@ -515,26 +515,26 @@ public class GridMultiSelectionModelTest {
     @Test
     public void shouldUseGetIdFromListProviderToAlterSelectionNoEquals() {
         shouldUseGetIdFromListProviderToAlterSelection(NoEquals::new,
-            NoEquals::getLabel);
+                NoEquals::getLabel);
     }
 
     @Test
     public void shouldUseGetIdFromListProviderToAlterSelectionAllEquals() {
         shouldUseGetIdFromListProviderToAlterSelection(AllEquals::new,
-            AllEquals::getLabel);
+                AllEquals::getLabel);
     }
 
-    private <T> void shouldUseGetIdFromListProviderToAlterSelection(Function<String,T> itemFactory,
-        Function<T,String> labelGetter) {
+    private <T> void shouldUseGetIdFromListProviderToAlterSelection(
+            Function<String, T> itemFactory, Function<T, String> labelGetter) {
         Grid<T> g = new Grid<T>();
         g.addColumn(labelGetter::apply).setHeader("Label");
-        g.setDataProvider(
-            new ListDataProvider<T>(Arrays.asList(itemFactory.apply("A"), itemFactory.apply("B"))) {
-                @Override
-                public Object getId(T item) {
-                    return labelGetter.apply(item);
-                }
-            });
+        g.setDataProvider(new ListDataProvider<T>(
+                Arrays.asList(itemFactory.apply("A"), itemFactory.apply("B"))) {
+            @Override
+            public Object getId(T item) {
+                return labelGetter.apply(item);
+            }
+        });
         g.setSelectionMode(Grid.SelectionMode.MULTI);
         g.select(itemFactory.apply("B"));
         g.select(itemFactory.apply("B"));

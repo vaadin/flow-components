@@ -17,7 +17,8 @@ public class ProtectedBackendIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/protectedbackend";
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-crud") + "/protectedbackend";
         getDriver().get(url);
     }
 
@@ -66,7 +67,8 @@ public class ProtectedBackendIT extends AbstractParallelTest {
         modify(crud, "Other", false);
 
         crud.openRowForEditing(1);
-        // A click in another row when editor is dirty opens confirmCancel dialog
+        // A click in another row when editor is dirty opens confirmCancel
+        // dialog
         ConfirmDialogElement confirmCancel = crud.$(ConfirmDialogElement.class)
                 .id("confirmCancel");
         Assert.assertEquals("Discard changes", confirmCancel.getHeaderText());

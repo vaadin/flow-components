@@ -13,9 +13,11 @@ public class LoginFormTest {
         LoginForm loginFormComponent = new LoginForm();
 
         AtomicInteger count = new AtomicInteger(0);
-        loginFormComponent.addForgotPasswordListener(e -> count.incrementAndGet());
+        loginFormComponent
+                .addForgotPasswordListener(e -> count.incrementAndGet());
 
-        ComponentUtil.fireEvent(loginFormComponent, new LoginForm.ForgotPasswordEvent(loginFormComponent, false));
+        ComponentUtil.fireEvent(loginFormComponent,
+                new LoginForm.ForgotPasswordEvent(loginFormComponent, false));
 
         Assert.assertEquals(1, count.get());
     }
@@ -32,8 +34,8 @@ public class LoginFormTest {
         });
 
         Assert.assertTrue(loginFormComponent.isEnabled());
-        ComponentUtil.fireEvent(loginFormComponent, new LoginForm.LoginEvent(loginFormComponent, false,
-                "username", "password"));
+        ComponentUtil.fireEvent(loginFormComponent, new LoginForm.LoginEvent(
+                loginFormComponent, false, "username", "password"));
 
         Assert.assertEquals(1, count.get());
         Assert.assertFalse(loginFormComponent.isEnabled());
