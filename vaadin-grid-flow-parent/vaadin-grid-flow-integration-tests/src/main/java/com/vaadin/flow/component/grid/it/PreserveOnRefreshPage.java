@@ -16,9 +16,13 @@
 package com.vaadin.flow.component.grid.it;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
@@ -51,6 +55,13 @@ public class PreserveOnRefreshPage extends Div {
         button.setId("edit");
         button.addClickListener(event -> {
             grid.getEditor().editItem(foo);
+        });
+
+        // Grid editor will fire close event, this will be tested
+        grid.getEditor().addCloseListener(event -> {
+            Span span = new Span("Closed");
+            span.setId("closed");
+            add(span);
         });
 
         add(grid,button);
