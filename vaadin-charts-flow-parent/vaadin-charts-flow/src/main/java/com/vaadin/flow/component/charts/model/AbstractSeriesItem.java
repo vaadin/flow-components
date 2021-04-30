@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.util.Util;
 
 import java.time.Instant;
@@ -37,6 +38,7 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     private Marker marker;
     private String id;
     private String className;
+
 
     /**
      * Returns the name of the item.
@@ -154,8 +156,8 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * A specific color index to use for the point, so its graphic
-     * representations are given the class name highcharts-color-{n}.
+     * A specific color index to use for the point, so its graphic representations
+     * are given the class name highcharts-color-{n}.
      *
      * @param colorIndex
      *            Color of the item.
@@ -245,11 +247,9 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * An additional, individual class name for the data point's graphic
-     * representation.
+     * An additional, individual class name for the data point's graphic representation.
      *
-     * @param className
-     *            new class name of the item
+     * @param className new class name of the item
      */
     public void setClassName(String className) {
         this.className = className;

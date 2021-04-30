@@ -44,8 +44,7 @@ public class AvatarView extends DemoView {
     @Override
     public void initView() {
         localAvatarResource = new StreamResource("avatar+.png",
-                () -> getClass().getResourceAsStream(
-                        "/META-INF/resources/frontend/images/avatar.png"));
+            () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/avatar.png"));
 
         createBasicAvatar();
         createAvatarWithCombinedProperties();
@@ -72,19 +71,16 @@ public class AvatarView extends DemoView {
         Avatar avatarWithImageResource = new Avatar();
 
         StreamResource avatarResource = new StreamResource("user+.png",
-                () -> getClass().getResourceAsStream(
-                        "/META-INF/resources/frontend/images/user.png"));
+                () -> getClass().getResourceAsStream("/META-INF/resources/frontend/images/user.png"));
         avatarWithImageResource.setImageResource(avatarResource);
 
-        add(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl,
-                avatarWithImageResource);
+        add(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);
         // end-source-example
 
         // Not using external image urls
         avatarWithImgUrl.setImageResource(localAvatarResource);
 
-        Div container = new Div(anonymousAvatar, avatarWithAbbr, avatarWithName,
-                avatarWithImgUrl, avatarWithImageResource);
+        Div container = new Div(anonymousAvatar, avatarWithAbbr, avatarWithName, avatarWithImgUrl, avatarWithImageResource);
 
         addCard("Basic usage", container);
     }
@@ -102,10 +98,8 @@ public class AvatarView extends DemoView {
 
         CheckboxGroup checkboxGroup = new CheckboxGroup();
         checkboxGroup.setLabel("Set avatar's properties");
-        checkboxGroup.setItems("setImage(\"avatars/avatar.png\")",
-                "setName(\"Serhii Kulykov\")", "setAbbreviation(\"YY\")");
-        checkboxGroup.setValue(
-                Collections.singleton("setImage(\"avatars/avatar.png\")"));
+        checkboxGroup.setItems("setImage(\"avatars/avatar.png\")", "setName(\"Serhii Kulykov\")", "setAbbreviation(\"YY\")");
+        checkboxGroup.setValue(Collections.singleton("setImage(\"avatars/avatar.png\")"));
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
         checkboxGroup.addValueChangeListener(e -> {
@@ -138,8 +132,7 @@ public class AvatarView extends DemoView {
         // source-example-heading: Localized Avatar
         Avatar anonymousAvatar = new Avatar();
 
-        anonymousAvatar
-                .setI18n(new Avatar.AvatarI18n().setAnonymous("anonyymi"));
+        anonymousAvatar.setI18n(new Avatar.AvatarI18n().setAnonymous("anonyymi"));
 
         add(anonymousAvatar);
         // end-source-example

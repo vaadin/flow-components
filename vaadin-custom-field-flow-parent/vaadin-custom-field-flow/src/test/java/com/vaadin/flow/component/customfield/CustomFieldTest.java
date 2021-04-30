@@ -36,11 +36,10 @@ public class CustomFieldTest {
     public void valuesAreUpdated() {
         Assert.assertNull(systemUnderTest.getValue());
         systemUnderTest.setValue(value);
-        Assert.assertSame(value, systemUnderTest.getValue());
+        Assert.assertSame(value,systemUnderTest.getValue());
         Mockito.verify(consumer).accept(value);
         Consumer<Object> listener = Mockito.mock(Consumer.class);
-        systemUnderTest
-                .addValueChangeListener(e -> listener.accept(e.getValue()));
+        systemUnderTest.addValueChangeListener(e -> listener.accept(e.getValue()));
     }
 
 }

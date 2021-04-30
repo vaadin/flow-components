@@ -93,9 +93,9 @@ public class CheckboxIT extends ComponentDemoTest {
     public void htmlCheckbox() {
         WebElement checkbox = layout.findElement(By.id("html-checkbox"));
         WebElement anchor = checkbox.findElement(By.tagName("a"));
-        Assert.assertEquals("Content should contain a link to vaadin.com",
-                "https://vaadin.com/privacy-policy",
-                anchor.getAttribute("href"));
+        Assert.assertEquals(
+                "Content should contain a link to vaadin.com",
+                "https://vaadin.com/privacy-policy", anchor.getAttribute("href"));
     }
 
     @Override

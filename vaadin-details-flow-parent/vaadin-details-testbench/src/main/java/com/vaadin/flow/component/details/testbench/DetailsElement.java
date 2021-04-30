@@ -26,57 +26,55 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-details")
 public class DetailsElement extends TestBenchElement {
 
-    /**
-     * Returns summary element
-     */
-    public TestBenchElement getSummary() {
-        return $(TestBenchElement.class).attribute("slot", "summary").first();
-    }
+	/**
+	 * Returns summary element
+	 */
+	public TestBenchElement getSummary() {
+		return $(TestBenchElement.class).attribute("slot", "summary").first();
+	}
 
-    /**
-     * Returns summary element as string
-     */
-    public String getSummaryText() {
-        return getSummary().getText();
-    }
+	/**
+	 * Returns summary element as string
+	 */
+	public String getSummaryText() {
+		return getSummary().getText();
+	}
 
-    /**
-     * Returns content element
-     */
-    public TestBenchElement getContent() {
-        TestBenchElement contentPlaceholder = $(TestBenchElement.class)
-                .attribute("part", "content").first();
+	/**
+	 * Returns content element
+	 */
+	public TestBenchElement getContent() {
+		TestBenchElement contentPlaceholder = $(TestBenchElement.class).attribute("part", "content").first();
 
-        return (TestBenchElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0];",
-                contentPlaceholder);
-    }
+		return (TestBenchElement) executeScript("return arguments[0].firstElementChild.assignedNodes()[0];",
+				contentPlaceholder);
+	}
 
-    /**
-     * Whether the details are opened or not
-     */
-    public boolean isOpened() {
-        return getPropertyBoolean("opened");
-    }
+	/**
+	 * Whether the details are opened or not
+	 */
+	public boolean isOpened() {
+		return getPropertyBoolean("opened");
+	}
 
-    /**
-     * Whether the component is enabled or not
-     */
-    public boolean isEnabled() {
-        return !getPropertyBoolean("disabled");
-    }
+	/**
+	 * Whether the component is enabled or not
+	 */
+	public boolean isEnabled() {
+		return !getPropertyBoolean("disabled");
+	}
 
-    /**
-     * Returns a wrapper of the summary component
-     */
-    public TestBenchElement getSummaryWrapper() {
-        return $(TestBenchElement.class).attribute("part", "summary").first();
-    }
+	/**
+	 * Returns a wrapper of the summary component
+	 */
+	public TestBenchElement getSummaryWrapper() {
+		return $(TestBenchElement.class).attribute("part", "summary").first();
+	}
 
-    /**
-     * Expands or collapses the details
-     */
-    public void toggle() {
-        getSummaryWrapper().click();
-    }
+	/**
+	 * Expands or collapses the details
+	 */
+	public void toggle() {
+		getSummaryWrapper().click();
+	}
 }

@@ -13,8 +13,7 @@ public class SelectionIT extends AbstractSelectIT {
     public void testSelection_userSelection_firesValueChangeEvent() {
         for (int i = 0; i < getInitialNumberOfItems(); i++) {
             selectElement.selectItemByIndex(i);
-            verify.valueChangeEvent("Item-" + i,
-                    i == 0 ? "null" : "Item-" + (i - 1), true, i);
+            verify.valueChangeEvent("Item-" + i, i == 0 ? "null" : "Item-" + (i - 1), true, i);
             verify.selectedItem("Item-" + i);
         }
     }

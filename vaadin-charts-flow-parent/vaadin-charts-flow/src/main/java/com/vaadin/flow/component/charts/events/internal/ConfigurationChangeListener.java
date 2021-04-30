@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.events.internal;
  * #L%
  */
 
+
 import java.io.Serializable;
 
 /**
@@ -50,7 +51,7 @@ public interface ConfigurationChangeListener extends Serializable {
      *            The event.
      */
     void dataUpdated(DataUpdatedEvent event);
-
+    
     /**
      * A point has been sliced
      *
@@ -58,7 +59,7 @@ public interface ConfigurationChangeListener extends Serializable {
      *            The event
      */
     void itemSliced(ItemSlicedEvent event);
-
+    
     /**
      * The series is enabled or disabled
      *

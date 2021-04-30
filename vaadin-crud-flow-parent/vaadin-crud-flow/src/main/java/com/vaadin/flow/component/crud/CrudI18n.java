@@ -28,9 +28,8 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Internationalization object for customizing the component UI texts. An
- * instance with the default messages can be obtained using
- * {@link CrudI18n#createDefault()}
+ * Internationalization object for customizing the component UI texts.
+ * An instance with the default messages can be obtained using {@link CrudI18n#createDefault()}
  *
  * @see Crud#setI18n(CrudI18n)
  */
@@ -49,12 +48,11 @@ public class CrudI18n implements Serializable {
     static {
         try {
             final JsonFactory JSON_FACTORY = new JreJsonFactory();
-            DEFAULT_I18N = JSON_FACTORY.parse(
-                    IOUtils.toString(CrudI18n.class.getResource("i18n.json"),
-                            StandardCharsets.UTF_8));
+            DEFAULT_I18N = JSON_FACTORY.parse(IOUtils.toString(
+                    CrudI18n.class.getResource("i18n.json"),
+                    StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new IllegalStateException(
-                    "Cannot find the default i18n configuration");
+            throw new IllegalStateException("Cannot find the default i18n configuration");
         }
     }
 
@@ -79,8 +77,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the new button and editor title text
      *
-     * @param newItem
-     *            the new button and editor title text
+     * @param newItem the new button and editor title text
      */
     public void setNewItem(String newItem) {
         this.newItem = newItem;
@@ -98,8 +95,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the save button text
      *
-     * @param saveItem
-     *            the save button text
+     * @param saveItem the save button text
      */
     public void setSaveItem(String saveItem) {
         this.saveItem = saveItem;
@@ -117,8 +113,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the delete button text
      *
-     * @param deleteItem
-     *            the delete button text
+     * @param deleteItem the delete button text
      */
     public void setDeleteItem(String deleteItem) {
         this.deleteItem = deleteItem;
@@ -136,8 +131,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the edit editor title text
      *
-     * @param editItem
-     *            the edit editor title text
+     * @param editItem the edit editor title text
      */
     public void setEditItem(String editItem) {
         this.editItem = editItem;
@@ -155,8 +149,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the cancel button text
      *
-     * @param cancel
-     *            the cancel button text
+     * @param cancel the cancel button text
      */
     public void setCancel(String cancel) {
         this.cancel = cancel;
@@ -174,8 +167,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the edit button aria label
      *
-     * @param editLabel
-     *            the edit button aria label
+     * @param editLabel the edit button aria label
      */
     public void setEditLabel(String editLabel) {
         this.editLabel = editLabel;
@@ -193,8 +185,7 @@ public class CrudI18n implements Serializable {
     /**
      * Sets the confirmation dialogs
      *
-     * @param confirm
-     *            the confirmation dialogs
+     * @param confirm the confirmation dialogs
      */
     public void setConfirm(Confirmations confirm) {
         this.confirm = confirm;
@@ -202,11 +193,15 @@ public class CrudI18n implements Serializable {
 
     @Override
     public String toString() {
-        return "CrudI18n{" + "newItem='" + newItem + '\'' + ", editItem='"
-                + editItem + '\'' + ", saveItem='" + saveItem + '\''
-                + ", deleteItem='" + deleteItem + '\'' + ", cancel='" + cancel
-                + '\'' + ", editLabel='" + editLabel + '\'' + ", confirm="
-                + confirm + '}';
+        return "CrudI18n{" +
+                "newItem='" + newItem + '\'' +
+                ", editItem='" + editItem + '\'' +
+                ", saveItem='" + saveItem + '\'' +
+                ", deleteItem='" + deleteItem + '\'' +
+                ", cancel='" + cancel + '\'' +
+                ", editLabel='" + editLabel + '\'' +
+                ", confirm=" + confirm +
+                '}';
     }
 
     /**
@@ -229,8 +224,7 @@ public class CrudI18n implements Serializable {
         /**
          * Sets the delete confirmation dialog
          *
-         * @param delete
-         *            the delete confirmation dialog
+         * @param delete the delete confirmation dialog
          */
         public void setDelete(Confirmation delete) {
             this.delete = delete;
@@ -248,8 +242,7 @@ public class CrudI18n implements Serializable {
         /**
          * Sets the cancel confirmation dialog
          *
-         * @param cancel
-         *            the cancel confirmation dialog
+         * @param cancel the cancel confirmation dialog
          */
         public void setCancel(Confirmation cancel) {
             this.cancel = cancel;
@@ -257,8 +250,10 @@ public class CrudI18n implements Serializable {
 
         @Override
         public String toString() {
-            return "Confirmations{" + "delete=" + delete + ", cancel=" + cancel
-                    + '}';
+            return "Confirmations{" +
+                    "delete=" + delete +
+                    ", cancel=" + cancel +
+                    '}';
         }
 
         /**
@@ -282,8 +277,7 @@ public class CrudI18n implements Serializable {
             /**
              * Sets the main content in a dialog
              *
-             * @param content
-             *            the main content
+             * @param content the main content
              */
             public void setContent(String content) {
                 this.content = content;
@@ -301,8 +295,7 @@ public class CrudI18n implements Serializable {
             /**
              * Sets the confirmation options in a dialog
              *
-             * @param button
-             *            the confirmation options
+             * @param button the confirmation options
              */
             public void setButton(Button button) {
                 this.button = button;
@@ -320,8 +313,7 @@ public class CrudI18n implements Serializable {
             /**
              * Sets the title on a dialog
              *
-             * @param title
-             *            the title
+             * @param title the title
              */
             public void setTitle(String title) {
                 this.title = title;
@@ -329,9 +321,11 @@ public class CrudI18n implements Serializable {
 
             @Override
             public String toString() {
-                return getClass().getSimpleName() + "{" + "content='" + content
-                        + '\'' + ", confirmationOptions=" + button + ", title='"
-                        + title + '\'' + '}';
+                return getClass().getSimpleName() + "{" +
+                        "content='" + content + '\'' +
+                        ", confirmationOptions=" + button +
+                        ", title='" + title + '\'' +
+                        '}';
             }
 
             /**
@@ -354,8 +348,7 @@ public class CrudI18n implements Serializable {
                 /**
                  * Sets the confirm text
                  *
-                 * @param confirm
-                 *            the confirm text
+                 * @param confirm the confirm text
                  */
                 public void setConfirm(String confirm) {
                     this.confirm = confirm;
@@ -373,8 +366,7 @@ public class CrudI18n implements Serializable {
                 /**
                  * Sets the dismiss text
                  *
-                 * @param dismiss
-                 *            the dismiss text
+                 * @param dismiss the dismiss text
                  */
                 public void setDismiss(String dismiss) {
                     this.dismiss = dismiss;
@@ -382,8 +374,10 @@ public class CrudI18n implements Serializable {
 
                 @Override
                 public String toString() {
-                    return "Button{" + "confirm='" + confirm + '\''
-                            + ", dismiss='" + dismiss + '\'' + '}';
+                    return "Button{" +
+                            "confirm='" + confirm + '\'' +
+                            ", dismiss='" + dismiss + '\'' +
+                            '}';
                 }
             }
         }

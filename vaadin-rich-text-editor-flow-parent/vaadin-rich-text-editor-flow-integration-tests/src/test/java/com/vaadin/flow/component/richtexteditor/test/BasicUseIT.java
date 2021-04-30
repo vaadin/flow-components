@@ -15,8 +15,7 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-rich-text-editor");
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-rich-text-editor") ;
         getDriver().get(url);
         ButtonElement setValue = getTestButton("setValue");
         setValue.click();
@@ -115,8 +114,7 @@ public class BasicUseIT extends AbstractParallelTest {
     public void useBinderWithRichTextEditorAsHtml() {
         WebElement info = findElement(By.id("html-binder-info"));
         ButtonElement save = getTestButton("html-binder-save");
-        ButtonElement setBeanHtmlValue = getTestButton(
-                "html-binder-set-bean-value");
+        ButtonElement setBeanHtmlValue = getTestButton("html-binder-set-bean-value");
         ButtonElement reset = getTestButton("html-binder-reset");
         ButtonElement getValue = getTestButton("get-html-binder-rte-value");
         save.click();
@@ -126,8 +124,7 @@ public class BasicUseIT extends AbstractParallelTest {
                 driver -> "There are errors: html value should contain something"
                         .equals(getLastHtmlBinderInfoValue()));
 
-        RichTextEditorElement rte = $(RichTextEditorElement.class)
-                .id("html-rte");
+        RichTextEditorElement rte = $(RichTextEditorElement.class).id("html-rte");
         TestBenchElement editor = rte.getEditor();
         editor.setProperty("innerHTML", "<p><b>Foo</b></p>");
 
@@ -138,8 +135,7 @@ public class BasicUseIT extends AbstractParallelTest {
             return info.getText().startsWith("Saved bean values");
         });
 
-        Assert.assertTrue(getLastHtmlBinderInfoValue()
-                .contains("<p><strong>Foo</strong></p>"));
+        Assert.assertTrue(getLastHtmlBinderInfoValue().contains("<p><strong>Foo</strong></p>"));
 
         reset.click();
         // Wait for everything to update.
@@ -148,8 +144,7 @@ public class BasicUseIT extends AbstractParallelTest {
         setBeanHtmlValue.click();
         waitUntil(driver -> {
             getValue.click();
-            return getLastRteHtmlBinderValue()
-                    .contains("<p><b>Foo</b></p> <p><strong>Foo</strong></p>");
+            return getLastRteHtmlBinderValue().contains("<p><b>Foo</b></p> <p><strong>Foo</strong></p>");
         });
 
         reset.click();

@@ -17,10 +17,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
+
 import java.io.Serializable;
 
 public interface ChartConfiguration extends Serializable {
 
-    void fireAxesRescaled(Axis axis, Number minimum, Number maximum,
-            boolean redraw, boolean animate);
+    void fireAxesRescaled(Axis axis, Number minimum, Number maximum, boolean redraw, boolean animate);
 }

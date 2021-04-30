@@ -20,8 +20,7 @@ public class ConfirmDialogView extends DemoView {
         customButtons();
     }
 
-    private void createCard(String heading, Button button,
-            ConfirmDialog dialog) {
+    private void createCard(String heading, Button button, ConfirmDialog dialog) {
         Span message = new Span();
         message.getStyle().set("margin-left", "var(--lumo-space-m)");
 

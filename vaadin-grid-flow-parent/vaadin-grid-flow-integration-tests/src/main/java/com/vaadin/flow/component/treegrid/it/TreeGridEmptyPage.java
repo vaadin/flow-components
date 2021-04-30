@@ -32,16 +32,15 @@ public class TreeGridEmptyPage extends Div {
 
         add(grid);
 
-        Button addExpandedButton = new Button("Add an empty expanded item",
-                e -> {
-                    TreeData<String> data = new TreeData<>();
-                    data.addItems(null, "parent");
-                    grid.setDataProvider(new TreeDataProvider<>(data));
-                    grid.getDataProvider().refreshAll();
-                    data.addItems("parent", "child");
-                    grid.expand("parent");
-                    data.removeItem("child");
-                });
+        Button addExpandedButton = new Button("Add an empty expanded item", e -> {
+            TreeData<String> data = new TreeData<>();
+            data.addItems(null, "parent");
+            grid.setDataProvider(new TreeDataProvider<>(data));
+            grid.getDataProvider().refreshAll();
+            data.addItems("parent", "child");
+            grid.expand("parent");
+            data.removeItem("child");
+        });
         addExpandedButton.setId("add-expanded-button");
 
         add(addExpandedButton);

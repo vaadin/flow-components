@@ -32,7 +32,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd.
  */
-public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
+public class EmailField
+        extends GeneratedVaadinEmailField<EmailField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
@@ -103,8 +104,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     }
 
     /**
-     * Constructs an empty {@code EmailField} with a value change listener and a
-     * label.
+     * Constructs an empty {@code EmailField} with a value change listener
+     * and a label.
      *
      * @param label
      *            the text to set as the label
@@ -121,8 +122,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     }
 
     /**
-     * Constructs a {@code EmailField} with a value change listener, a label and
-     * an initial value.
+     * Constructs a {@code EmailField} with a value change listener, a label
+     * and an initial value.
      *
      * @param label
      *            the text to set as the label
@@ -180,8 +181,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     }
 
     private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(), getValueChangeTimeout(),
+                getSynchronizationRegistration());
     }
 
     @Override
@@ -322,8 +323,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
+     * The text usually displayed in a tooltip popup when the mouse is over the field.
      *
      * @return the {@code title} property from the webcomponent
      */
@@ -337,8 +337,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     }
 
     /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
+     * Specifies if the field value gets automatically selected when
+     * the field gains focus.
      *
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
@@ -352,8 +352,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * selected when the field gains focus, <code>false</code> otherwise.
      *
      * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
+     *            <code>true</code> to set auto select on,
+     *            <code>false</code> otherwise
      */
     @Override
     public void setAutoselect(boolean autoselect) {

@@ -43,7 +43,7 @@ public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {
     }
 
     private void verifySelectionChangeDoesNotCauseError(
-            Runnable changeSelection) {
+        Runnable changeSelection) {
         TestBenchElement button = $("vaadin-button").first();
         testBench().disableWaitForVaadin();
         // Trigger data provider change

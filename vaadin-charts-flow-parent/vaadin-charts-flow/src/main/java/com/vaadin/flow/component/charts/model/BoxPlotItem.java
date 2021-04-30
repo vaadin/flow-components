@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * A DataSeriesItem implementation suitable for
  * <a href="http://en.wikipedia.org/wiki/Box_plot">box plot charts</a>. Plot box

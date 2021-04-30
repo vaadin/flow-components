@@ -42,3 +42,4 @@ public class DetachReattachTemplate extends PolymerTemplate<TemplateModel> {
         return testGroup.getValue();
     }
 }
+

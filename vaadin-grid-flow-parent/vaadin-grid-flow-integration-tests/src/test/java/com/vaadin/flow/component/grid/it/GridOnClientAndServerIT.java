@@ -27,23 +27,23 @@ import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-grid/grid-on-client-and-slot")
 public class GridOnClientAndServerIT extends AbstractComponentIT {
+  
+  @Test
+  public void treeGridOnClientShouldWorkIfAnotherGridIsAddedFromServer() {
+    open();
 
-    @Test
-    public void treeGridOnClientShouldWorkIfAnotherGridIsAddedFromServer() {
-        open();
+    TestBenchElement parent  = $("grid-on-client-and-slot").first();
 
-        TestBenchElement parent = $("grid-on-client-and-slot").first();
+    TreeGridElement treeGrid = parent.$(TreeGridElement.class).id("tree");
+    treeGrid.getExpandToggleElement(0, 0).click();
+    GridTHTDElement cell = treeGrid.getCell(1, 0);
 
-        TreeGridElement treeGrid = parent.$(TreeGridElement.class).id("tree");
-        treeGrid.getExpandToggleElement(0, 0).click();
-        GridTHTDElement cell = treeGrid.getCell(1, 0);
+    Assert.assertEquals("child 1-1", cell.getText().trim());
 
-        Assert.assertEquals("child 1-1", cell.getText().trim());
+    findElement(By.id("add-new-grid-button")).click();
+    treeGrid.getExpandToggleElement(3, 0).click();
+    cell = treeGrid.getCell(4, 0);
 
-        findElement(By.id("add-new-grid-button")).click();
-        treeGrid.getExpandToggleElement(3, 0).click();
-        cell = treeGrid.getCell(4, 0);
-
-        Assert.assertEquals("child 2-1", cell.getText().trim());
-    }
+    Assert.assertEquals("child 2-1", cell.getText().trim());
+  }
 }

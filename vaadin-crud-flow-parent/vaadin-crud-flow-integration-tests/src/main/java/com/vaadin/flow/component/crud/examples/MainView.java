@@ -31,32 +31,27 @@ public class MainView extends VerticalLayout {
         eventsPanel = new VerticalLayout();
         eventsPanel.setId("events");
 
-        final Crud<Person> crud = new Crud<>(Person.class,
-                createPersonEditor());
+        final Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
-        final Button newButton = new Button(
-                CrudI18n.createDefault().getNewItem());
+        final Button newButton = new Button(CrudI18n.createDefault().getNewItem());
         newButton.setThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
         newButton.getElement().setAttribute("new-button", "");
 
-        final Button serverSideNewButton = new Button(
-                CrudI18n.createDefault().getNewItem());
+        final Button serverSideNewButton = new Button(CrudI18n.createDefault().getNewItem());
         serverSideNewButton.setId("newServerItem");
-        serverSideNewButton.addClickListener(
-                e -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
+        serverSideNewButton.addClickListener(e -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
 
-        final Button serverSideEditButton = new Button(
-                CrudI18n.createDefault().getEditItem());
+        final Button serverSideEditButton = new Button(CrudI18n.createDefault().getEditItem());
         serverSideEditButton.setId("editServerItem");
-        serverSideEditButton.addClickListener(e -> crud.edit(
-                new Person(1, "Sayo", "Oladeji"), Crud.EditMode.EXISTING_ITEM));
+        serverSideEditButton.addClickListener(e ->
+                crud.edit(new Person(1, "Sayo", "Oladeji"), Crud.EditMode.EXISTING_ITEM));
 
         final Span footer = new Span();
         crud.setToolbar(footer, newButton);
 
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
-        dataProvider.setSizeChangeListener(count -> footer
-                .setText(String.format("%d items available", count)));
+        dataProvider.setSizeChangeListener(count ->
+                footer.setText(String.format("%d items available", count)));
 
         crud.setDataProvider(dataProvider);
 
@@ -71,26 +66,24 @@ public class MainView extends VerticalLayout {
             addEvent(filterString);
         });
 
-        final Button updateI18nButton = new Button("Switch to Yoruba",
-                event -> {
-                    CrudI18n yorubaI18n = createYorubaI18n();
-                    crud.setI18n(yorubaI18n);
-                    newButton.setText(yorubaI18n.getNewItem());
-                });
+        final Button updateI18nButton = new Button("Switch to Yoruba", event -> {
+            CrudI18n yorubaI18n = createYorubaI18n();
+            crud.setI18n(yorubaI18n);
+            newButton.setText(yorubaI18n.getNewItem());
+        });
         updateI18nButton.setId("updateI18n");
         ComponentUtil.addListener(crud.getGrid(), CrudI18nUpdatedEvent.class,
                 e -> addEvent("I18n updated"));
 
         // no-border should be reflected to the generated grid too
-        final Button toggleBordersButton = new Button("Toggle borders",
-                event -> {
-                    if (hasBorder) {
-                        crud.addThemeVariants(CrudVariant.NO_BORDER);
-                    } else {
-                        crud.removeThemeVariants(CrudVariant.NO_BORDER);
-                    }
-                    hasBorder = !hasBorder;
-                });
+        final Button toggleBordersButton = new Button("Toggle borders", event -> {
+            if (hasBorder) {
+                crud.addThemeVariants(CrudVariant.NO_BORDER);
+            } else {
+                crud.removeThemeVariants(CrudVariant.NO_BORDER);
+            }
+            hasBorder = !hasBorder;
+        });
         toggleBordersButton.setId("toggleBorders");
 
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));

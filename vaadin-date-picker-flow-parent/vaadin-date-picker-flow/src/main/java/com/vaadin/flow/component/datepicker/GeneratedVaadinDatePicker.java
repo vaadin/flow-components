@@ -176,9 +176,9 @@ import elemental.json.JsonObject;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  * <p>
  * The following state attributes are available for styling:
@@ -1122,11 +1122,11 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
@@ -1185,9 +1185,9 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the property type
      */
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableFunction<P, T> presentationToModel,
-            SerializableFunction<T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableFunction<P, T> presentationToModel,
+                                         SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -1208,7 +1208,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinDatePicker(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
+                                     boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -1236,9 +1236,9 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the property type
      */
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableBiFunction<R, P, T> presentationToModel,
-            SerializableBiFunction<R, T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableBiFunction<R, P, T> presentationToModel,
+                                         SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {

@@ -29,8 +29,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  *
- * @param <T>
- *            the type of the row/item being edited
+ * @param <T> the type of the row/item being edited
  */
 public interface Editor<T> extends Serializable {
 
@@ -107,21 +106,22 @@ public interface Editor<T> extends Serializable {
     void cancel();
 
     /**
-     * Closes the editor when in unbuffered mode and fires an
-     * {@link EditorCloseEvent} if the edited item is not <code>null</code>.
+     * Closes the editor when in unbuffered mode and fires an {@link
+     * EditorCloseEvent} if the edited item is
+     * not <code>null</code>.
      * <p>
-     * For buffered mode calling close editor will throw an
-     * {@link UnsupportedOperationException} as either {@link #save()} or
-     * {@link #cancel()} should be used.
+     * For buffered mode calling close editor will throw an {@link
+     * UnsupportedOperationException} as either {@link #save()} or {@link
+     * #cancel()} should be used.
      *
      * @throws UnsupportedOperationException
-     *             thrown if trying to close editor in buffered mode
+     *         thrown if trying to close editor in buffered mode
      */
     void closeEditor();
 
     /**
-     * Opens the editor component for the provided item and fires an
-     * {@link EditorOpenEvent}.
+     * Opens the editor component for the provided item and fires an {@link
+     * EditorOpenEvent}.
      * <p>
      * In case there is an open editor an {@link EditorCloseEvent} will also be
      * fired.
@@ -188,8 +188,8 @@ public interface Editor<T> extends Serializable {
     Registration addCancelListener(EditorCancelListener<T> listener);
 
     /**
-     * Adds an editor open {@code listener}. {@link EditorOpenEvent} is fired
-     * when the editor is opened through {@link #editItem(java.lang.Object) }
+     * Adds an editor open {@code listener}. {@link EditorOpenEvent} is
+     * fired when the editor is opened through {@link #editItem(java.lang.Object) }
      *
      * @param listener
      *            open listener

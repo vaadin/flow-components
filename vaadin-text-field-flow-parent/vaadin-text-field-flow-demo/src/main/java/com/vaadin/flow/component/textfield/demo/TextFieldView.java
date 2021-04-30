@@ -323,7 +323,7 @@ public class TextFieldView extends DemoView {
                 taxValue = BigDecimal.ZERO;
             } else {
                 taxValue = e.getValue().multiply(new BigDecimal("0.24"))
-                        .setScale(2, RoundingMode.HALF_EVEN);
+                      .setScale(2, RoundingMode.HALF_EVEN);
             }
             tax.setText("VAT 24%: $" + taxValue);
         });
@@ -341,11 +341,11 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Number fields with helper text
         NumberField numberField = new NumberField("Total Salary");
         numberField
-                .setHelperText("Any valid number can be put in a NumberField");
+              .setHelperText("Any valid number can be put in a NumberField");
 
         IntegerField integerField = new IntegerField("Your age");
         integerField
-                .setHelperText("Only integers can be put in an IntegerField");
+              .setHelperText("Only integers can be put in an IntegerField");
 
         add(numberField, integerField);
         // end-source-example
@@ -406,13 +406,13 @@ public class TextFieldView extends DemoView {
         TextArea textAreaHelperText = new TextArea("Overview");
         textAreaHelperText.setPlaceholder("Write here ...");
         textAreaHelperText
-                .setHelperText("Short description of your current role");
+              .setHelperText("Short description of your current role");
 
         TextArea textAreaHelperComponent = new TextArea("Feedback");
         textAreaHelperComponent.setPlaceholder("Write here ...");
-        textAreaHelperComponent.setHelperComponent(
-                new Span("Here you can share what you've liked and "
-                        + "what can be improved in the next lesson"));
+        textAreaHelperComponent.setHelperComponent(new Span(
+              "Here you can share what you've liked and "
+                    + "what can be improved in the next lesson"));
 
         add(textAreaHelperText, textAreaHelperComponent);
         // end-source-example
@@ -599,7 +599,7 @@ public class TextFieldView extends DemoView {
         TextField helperFieldAbove = new TextField();
         helperFieldAbove.setHelperText("Helper Text displayed above the field");
         helperFieldAbove
-                .addThemeVariants(TextFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+              .addThemeVariants(TextFieldVariant.LUMO_HELPER_ABOVE_FIELD);
 
         TextArea textAreaAbove = new TextArea();
         textAreaAbove.setPlaceholder("Write here ...");
@@ -620,14 +620,14 @@ public class TextFieldView extends DemoView {
         Div firstDiv = new Div();
         firstDiv.setText(
                 "To read about styling you can read the related tutorial in");
-        Anchor firstAnchor = new Anchor(
-                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
+        Anchor firstAnchor = new Anchor("https://vaadin.com/docs/flow/theme/using-component-themes.html",
                 "Using Component Themes");
 
         Div secondDiv = new Div();
         secondDiv.setText("To know about styling in html you can read the ");
-        Anchor secondAnchor = new Anchor("https://vaadin.com/components/"
-                + "vaadin-text-field/html-examples/text-field-styling-demos",
+        Anchor secondAnchor = new Anchor(
+                "https://vaadin.com/components/" +
+                        "vaadin-text-field/html-examples/text-field-styling-demos",
                 "HTML Styling Demos");
 
         HorizontalLayout firstHorizontalLayout = new HorizontalLayout(firstDiv,
@@ -642,3 +642,4 @@ public class TextFieldView extends DemoView {
                 secondHorizontalLayout);
     }
 }
+

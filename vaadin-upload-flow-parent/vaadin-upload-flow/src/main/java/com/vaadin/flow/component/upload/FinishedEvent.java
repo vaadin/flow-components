@@ -18,10 +18,10 @@ package com.vaadin.flow.component.upload;
 import com.vaadin.flow.component.ComponentEvent;
 
 /**
- * FinishedEvent is sent when the upload receives a file, regardless of whether
- * the reception was successful or failed. If you wish to distinguish between
- * the two cases, use either SucceededEvent or FailedEvent, which are both
- * subclasses of the FinishedEvent.
+ * FinishedEvent is sent when the upload receives a file, regardless of
+ * whether the reception was successful or failed. If you wish to distinguish
+ * between the two cases, use either SucceededEvent or FailedEvent, which are
+ * both subclasses of the FinishedEvent.
  *
  * @author Vaadin Ltd.
  */

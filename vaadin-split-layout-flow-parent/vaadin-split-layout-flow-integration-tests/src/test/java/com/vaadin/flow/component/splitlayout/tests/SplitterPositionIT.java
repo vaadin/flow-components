@@ -71,12 +71,12 @@ public class SplitterPositionIT extends AbstractComponentIT {
     public void testSplitterContentCanHaveWidthChanged() {
         $(NativeButtonElement.class).id("createLayoutComponent").click();
         final TestBenchElement toggleButton = $(TestBenchElement.class)
-                .id("toggleButtonInLayoutComponent");
+            .id("toggleButtonInLayoutComponent");
         toggleButton.click();
         toggleButton.click();
         final String width = $(DivElement.class)
-                .id("mainContentInLayoutComponent")
-                .getPropertyString("style", "width");
+            .id("mainContentInLayoutComponent")
+            .getPropertyString("style", "width");
         Assert.assertEquals("100%", width);
     }
 
@@ -88,16 +88,15 @@ public class SplitterPositionIT extends AbstractComponentIT {
     private void testSplitterPositionAfterDrag(String testId) {
         testSplitterPosition(testId, layout -> {
             new Actions(getDriver()).dragAndDropBy(layout.getSplitter(), 20, 0)
-                    .perform();
+                .perform();
             Assert.assertNotEquals("", getPrimaryElement(layout, testId)
-                    .getPropertyString("style", "flex"));
+                .getPropertyString("style", "flex"));
             Assert.assertNotEquals("", getSecondaryElement(layout, testId)
-                    .getPropertyString("style", "flex"));
+                .getPropertyString("style", "flex"));
         });
     }
 
-    private void testSplitterPosition(String testId,
-            Consumer<SplitLayoutElement> modifyState) {
+    private void testSplitterPosition(String testId, Consumer<SplitLayoutElement> modifyState) {
         $(NativeButtonElement.class).id("createLayout" + testId).click();
         SplitLayoutElement layout = $(SplitLayoutElement.class)
                 .id("splitLayout" + testId);
@@ -115,13 +114,11 @@ public class SplitterPositionIT extends AbstractComponentIT {
                 (int) SplitterPositionView.INITIAL_POSITION + "%");
     }
 
-    private TestBenchElement getPrimaryElement(SplitLayoutElement layout,
-            String testId) {
+    private TestBenchElement getPrimaryElement(SplitLayoutElement layout, String testId) {
         return layout.$(SpanElement.class).id("primary" + testId);
     }
 
-    private TestBenchElement getSecondaryElement(SplitLayoutElement layout,
-            String testId) {
+    private TestBenchElement getSecondaryElement(SplitLayoutElement layout, String testId) {
         return layout.$(SpanElement.class).id("secondary" + testId);
     }
 
@@ -131,7 +128,8 @@ public class SplitterPositionIT extends AbstractComponentIT {
         executeScript("console.log(arguments[0].style.width)", element);
         Assert.assertEquals(expected,
                 element.getPropertyString("style", "width"));
-        Assert.assertEquals("", element.getPropertyString("style", "flex"));
+        Assert.assertEquals("",
+            element.getPropertyString("style", "flex"));
     }
 
 }

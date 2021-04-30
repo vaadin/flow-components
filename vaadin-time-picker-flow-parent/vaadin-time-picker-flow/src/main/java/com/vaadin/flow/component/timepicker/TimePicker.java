@@ -68,6 +68,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private LocalTime min;
     private boolean required;
 
+
     /**
      * Default constructor.
      */
@@ -189,17 +190,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
+     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
+     * client side validation constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
+        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax  = value != null && max != null && value.isAfter(max);
+        final boolean isSmallerThenMin = value != null && min != null && value.isBefore(min);
         return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
     }
 
@@ -583,10 +580,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     private DateTimeFormatter initializeAndReturnFormatter() {
-        if (dateTimeFormatter == null) {
-            dateTimeFormatter = locale == null
-                    ? DateTimeFormatter.ISO_LOCAL_TIME
-                    : DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
+        if(dateTimeFormatter == null) {
+            dateTimeFormatter = locale == null ?
+                DateTimeFormatter.ISO_LOCAL_TIME :
+                DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
         }
         return dateTimeFormatter;
     }

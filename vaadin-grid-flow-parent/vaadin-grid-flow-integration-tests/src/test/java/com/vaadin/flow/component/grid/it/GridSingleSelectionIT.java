@@ -94,8 +94,7 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
     public void selectItemAndSetItemsWithDeselectDisallowed() {
         open();
 
-        // De-selection is not allowed(deselectAllowed is false) and then
-        // setting items for grid
+        // De-selection is not allowed(deselectAllowed is false) and then setting items for grid
         GridElement grid = $(GridElement.class)
                 .id(GridSingleSelectionPage.ITEMS_GRID);
 
@@ -103,16 +102,17 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
         Assert.assertTrue("Row 1 was selected after selecting it.",
                 grid.getRow(1).isSelected());
         // Set Items again by clicking the button
-        $("button").id(GridSingleSelectionPage.SET_ITEMS).click();
-        $("button").id(GridSingleSelectionPage.SET_ITEMS).click();
+        $("button").id(GridSingleSelectionPage.SET_ITEMS)
+                .click();
+        $("button").id(GridSingleSelectionPage.SET_ITEMS)
+                .click();
     }
 
     @Test
     public void selectAnotherItemWithDeselectDisallowed() {
         open();
 
-        // De-selection is not allowed(deselectAllowed is false) and then
-        // setting items for grid
+        // De-selection is not allowed(deselectAllowed is false) and then setting items for grid
         GridElement grid = $(GridElement.class)
                 .id(GridSingleSelectionPage.ITEMS_GRID);
 

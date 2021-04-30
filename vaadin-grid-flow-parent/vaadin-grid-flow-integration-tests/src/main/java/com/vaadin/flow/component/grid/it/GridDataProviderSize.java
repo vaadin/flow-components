@@ -34,8 +34,7 @@ public class GridDataProviderSize extends Div {
 
     public GridDataProviderSize() {
         final Grid<String> grid = new Grid<>();
-        final Grid.Column<String> col = grid.addColumn(it -> it)
-                .setHeader("First column");
+        final Grid.Column<String> col = grid.addColumn(it -> it).setHeader("First column");
 
         Div div = new Div();
         div.setText("0");
@@ -43,8 +42,7 @@ public class GridDataProviderSize extends Div {
 
         grid.setDataProvider(new AbstractBackEndDataProvider<String, Object>() {
             @Override
-            protected Stream<String> fetchFromBackEnd(
-                    Query<String, Object> query) {
+            protected Stream<String> fetchFromBackEnd(Query<String, Object> query) {
                 return Stream.of();
             }
 
@@ -56,8 +54,7 @@ public class GridDataProviderSize extends Div {
             }
         });
 
-        grid.sort(Arrays
-                .asList(new GridSortOrder<>(col, SortDirection.ASCENDING)));
+        grid.sort(Arrays.asList(new GridSortOrder<>(col, SortDirection.ASCENDING)));
         add(grid, div);
     }
 

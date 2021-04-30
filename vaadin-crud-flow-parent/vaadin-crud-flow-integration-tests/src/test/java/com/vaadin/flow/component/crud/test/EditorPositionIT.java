@@ -8,8 +8,7 @@ public class EditorPositionIT extends AbstractParallelTest {
 
     @Test
     public void compositeTouchesDirtyState() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/editorposition";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-crud") + "/editorposition";
         getDriver().get(url);
 
         final CrudElement crud = $(CrudElement.class).waitForFirst();

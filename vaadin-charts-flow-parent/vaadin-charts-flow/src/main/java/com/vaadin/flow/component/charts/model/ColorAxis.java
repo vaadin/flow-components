@@ -19,6 +19,7 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+
 public class ColorAxis extends YAxis {
 
     private static final long serialVersionUID = 1L;

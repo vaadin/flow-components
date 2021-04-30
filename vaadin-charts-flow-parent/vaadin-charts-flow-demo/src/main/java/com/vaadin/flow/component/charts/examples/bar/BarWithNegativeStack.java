@@ -50,8 +50,7 @@ public class BarWithNegativeStack extends AbstractChartExample {
         plot.setStacking(Stacking.NORMAL);
         conf.setPlotOptions(plot);
         Tooltip tooltip = new Tooltip();
-        tooltip.setFormatter(
-                "function() {return '<b>'+ this.series.name +', age '+ this.point.category +'</b><br/>'+ 'Population: '+ Highcharts.numberFormat(Math.abs(this.point.y), 0)}");
+        tooltip.setFormatter("function() {return '<b>'+ this.series.name +', age '+ this.point.category +'</b><br/>'+ 'Population: '+ Highcharts.numberFormat(Math.abs(this.point.y), 0)}");
         conf.setTooltip(tooltip);
 
         conf.addSeries(new ListSeries("Male", -1746181, -1884428, -2089758,

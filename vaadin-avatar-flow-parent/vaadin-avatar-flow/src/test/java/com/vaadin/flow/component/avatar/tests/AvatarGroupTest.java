@@ -94,10 +94,10 @@ public class AvatarGroupTest {
     public void createWithVarargsItems_getCreatedItems() {
         items.add(avatarGroupItem);
         items.add(avatarGroupItem2);
-        AvatarGroup createdAvatarGroup = new AvatarGroup(avatarGroupItem,
-                avatarGroupItem2);
+        AvatarGroup createdAvatarGroup = new AvatarGroup(avatarGroupItem, avatarGroupItem2);
 
-        Assert.assertEquals(items, createdAvatarGroup.getItems());
+        Assert.assertEquals(items,
+                createdAvatarGroup.getItems());
     }
 
     @Test
@@ -109,9 +109,8 @@ public class AvatarGroupTest {
         AvatarGroupItem addedItem = new AvatarGroupItem("Bar Baz");
         avatarGroup.add(addedItem);
 
-        Assert.assertEquals(
-                Arrays.asList(avatarGroupItem, avatarGroupItem2, addedItem),
-                avatarGroup.getItems());
+        Assert.assertEquals(Arrays.asList(avatarGroupItem, avatarGroupItem2,
+                addedItem), avatarGroup.getItems());
     }
 
     @Test
@@ -130,7 +129,8 @@ public class AvatarGroupTest {
     public void setMaxItemsVisible_getMaxItemsVisible() {
         avatarGroup.setMaxItemsVisible(3);
 
-        Assert.assertEquals(new Integer(3), avatarGroup.getMaxItemsVisible());
+        Assert.assertEquals(new Integer(3),
+                avatarGroup.getMaxItemsVisible());
     }
 
     @Test

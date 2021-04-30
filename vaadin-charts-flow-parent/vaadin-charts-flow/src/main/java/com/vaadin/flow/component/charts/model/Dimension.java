@@ -17,12 +17,15 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * Axial dimension.
  */
 public enum Dimension implements ChartEnum {
 
-    X("x"), Y("y"), XY("xy");
+    X("x"),
+    Y("y"),
+    XY("xy");
 
     private final String dimension;
 

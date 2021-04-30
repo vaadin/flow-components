@@ -37,8 +37,7 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
         open();
 
         GridElement grid = $(GridElement.class).id("data-grid");
-        // Even though grid is already as row 0, this makes the grid to wait
-        // until it has finished loading.
+        // Even though grid is already as row 0, this makes the grid to wait until it has finished loading.
         grid.scrollToRow(0);
 
         List<String> messages = getMessages();
@@ -73,10 +72,8 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
 
         GridElement grid = $(GridElement.class).id("data-grid");
 
-        // grid.scrollToRow includes logic that waits until grid has finished
-        // loading items
-        // so we need to use the vaadin-grid's scrollToIndex API instead (until
-        // last index).
+        // grid.scrollToRow includes logic that waits until grid has finished loading items
+        // so we need to use the vaadin-grid's scrollToIndex API instead (until last index).
         grid.callFunction("scrollToIndex", 100);
         grid.callFunction("scrollToIndex", 200);
         grid.callFunction("scrollToIndex", 300);

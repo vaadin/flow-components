@@ -66,8 +66,7 @@ public class DialogElement extends TestBenchElement {
             // Overlay content can be the overlay itself or the shadowRoot of
             // the content part
             // https://github.com/vaadin/vaadin-overlay/blob/master/src/vaadin-overlay.html#L837-L841
-            // return shadowRoot is not supported in WebDriver and doesn't work
-            // in Firefox
+            // return shadowRoot is not supported in WebDriver and doesn't work in Firefox
             return getPropertyElement("$", "overlay", "$", "content");
         }
     }

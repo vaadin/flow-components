@@ -20,7 +20,8 @@ public class RichTextEditorTest {
     @Test
     public void setValueNull() {
         RichTextEditor rte = new RichTextEditor();
-        assertEquals("Value should be an empty string", "", rte.getValue());
+        assertEquals("Value should be an empty string", "",
+                rte.getValue());
 
         thrown.expect(NullPointerException.class);
         thrown.expectMessage("Null value is not supported");
@@ -47,8 +48,7 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeStrongTag_StrongTagPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<strong>Foo</strong>",
-                rte.sanitize("<strong>Foo</strong>"));
+        Assert.assertEquals("<strong>Foo</strong>", rte.sanitize("<strong>Foo</strong>"));
     }
 
     @Test
@@ -72,8 +72,7 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeCombinedDecorationTags_AllTagsPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<strong><em><s><u>123123</u></s></em></strong>",
-                rte.sanitize("<strong><em><s><u>123123</u></s></em></strong>"));
+        Assert.assertEquals("<strong><em><s><u>123123</u></s></em></strong>", rte.sanitize("<strong><em><s><u>123123</u></s></em></strong>"));
     }
 
     // Headers group sanitization
@@ -135,8 +134,7 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeStyleTextAlign_StyleTextAlignPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<p style=\"text-align: center\">Foo</p>",
-                rte.sanitize("<p style=\"text-align: center\">Foo</p>"));
+        Assert.assertEquals("<p style=\"text-align: center\">Foo</p>", rte.sanitize("<p style=\"text-align: center\">Foo</p>"));
     }
 
     // Script sanitization
@@ -152,24 +150,20 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeImgTagWithHttpSource_srcAttributeRemoved() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<img>",
-                rte.sanitize("<img src='http://vaadin.com'>"));
+        Assert.assertEquals("<img>", rte.sanitize("<img src='http://vaadin.com'>"));
     }
 
     @Test
     public void sanitizeImgTagWithHttpsSource_srcAttributeRemoved() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<img>",
-                rte.sanitize("<img src='https://vaadin.com'>"));
+        Assert.assertEquals("<img>", rte.sanitize("<img src='https://vaadin.com'>"));
     }
 
     @Test
     public void sanitizeImgTagWithDataSource_srcAttributePersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals(
-                "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">",
-                rte.sanitize(
-                        "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">"));
+        Assert.assertEquals("<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">",
+                rte.sanitize("<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">"));
     }
 
     // Blockquote sanitization
@@ -177,8 +171,7 @@ public class RichTextEditorTest {
     @Test
     public void sanitizeBlockquoteTag_blockquoteTagPersist() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals("<blockquote>\n Foo\n</blockquote>",
-                rte.sanitize("<blockquote>Foo</blockquote>"));
+        Assert.assertEquals("<blockquote>\n Foo\n</blockquote>", rte.sanitize("<blockquote>Foo</blockquote>"));
     }
 
     // Code block sanitization
@@ -193,8 +186,7 @@ public class RichTextEditorTest {
 
     @Test
     public void asHtml_setValue_getValue() {
-        HasValue<ValueChangeEvent<String>, String> rteAsHtml = new RichTextEditor()
-                .asHtml();
+        HasValue<ValueChangeEvent<String>, String> rteAsHtml = new RichTextEditor().asHtml();
         String htmlValue = "<strong>Foo</strong>";
         rteAsHtml.setValue(htmlValue);
         Assert.assertEquals("Should get the same value as it was set",
@@ -215,8 +207,7 @@ public class RichTextEditorTest {
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> rteAsHtml = rte.asHtml();
         rteAsHtml.setRequiredIndicatorVisible(true);
-        Assert.assertTrue(
-                "Should be possible to set required indicator to be visible on asHtml",
+        Assert.assertTrue("Should be possible to set required indicator to be visible on asHtml",
                 rte.isRequiredIndicatorVisible());
     }
 }

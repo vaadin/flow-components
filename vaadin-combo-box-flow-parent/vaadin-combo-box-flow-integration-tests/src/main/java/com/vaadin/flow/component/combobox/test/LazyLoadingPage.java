@@ -76,7 +76,7 @@ public class LazyLoadingPage extends Div {
 
         add(comboBox);
     }
-
+    
     private void createListDataProviderWithStrings() {
         addTitle("ListDataProvider with strings");
         ComboBox<String> comboBox = new ComboBox<>();

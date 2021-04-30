@@ -17,6 +17,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 /**
  * <p>
  * Configure a crosshair that follows either the mouse pointer or the hovered
@@ -25,8 +26,8 @@ package com.vaadin.flow.component.charts.model;
  * </p>
  * 
  * <p>
- * In
- * <a href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+ * In <a
+ * href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
  * >styled mode</a>, the crosshairs are styled in the
  * <code>.highcharts-crosshair</code>, <code>.highcharts-crosshair-thin</code>
  * or <code>.highcharts-xaxis-category</code> classes.
@@ -34,85 +35,85 @@ package com.vaadin.flow.component.charts.model;
  */
 public class Crosshair extends AbstractConfigurationObject {
 
-    private String className;
-    private Boolean snap;
-    private Number zIndex;
-    private CrosshairLabel label;
+	private String className;
+	private Boolean snap;
+	private Number zIndex;
+	private CrosshairLabel label;
 
-    public Crosshair() {
-    }
+	public Crosshair() {
+	}
 
-    /**
-     * @see #setClassName(String)
-     */
-    public String getClassName() {
-        return className;
-    }
+	/**
+	 * @see #setClassName(String)
+	 */
+	public String getClassName() {
+		return className;
+	}
 
-    /**
-     * A class name for the crosshair, especially as a hook for styling.
-     */
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	/**
+	 * A class name for the crosshair, especially as a hook for styling.
+	 */
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-    /**
-     * @see #setSnap(Boolean)
-     */
-    public Boolean getSnap() {
-        return snap;
-    }
+	/**
+	 * @see #setSnap(Boolean)
+	 */
+	public Boolean getSnap() {
+		return snap;
+	}
 
-    /**
-     * Whether the crosshair should snap to the point or follow the pointer
-     * independent of points.
-     * <p>
-     * Defaults to: true
-     */
-    public void setSnap(Boolean snap) {
-        this.snap = snap;
-    }
+	/**
+	 * Whether the crosshair should snap to the point or follow the pointer
+	 * independent of points.
+	 * <p>
+	 * Defaults to: true
+	 */
+	public void setSnap(Boolean snap) {
+		this.snap = snap;
+	}
 
-    /**
-     * @see #setZIndex(Number)
-     */
-    public Number getZIndex() {
-        return zIndex;
-    }
+	/**
+	 * @see #setZIndex(Number)
+	 */
+	public Number getZIndex() {
+		return zIndex;
+	}
 
-    /**
-     * The Z index of the crosshair. Higher Z indices allow drawing the
-     * crosshair on top of the series or behind the grid lines.
-     * <p>
-     * Defaults to: 2
-     */
-    public void setZIndex(Number zIndex) {
-        this.zIndex = zIndex;
-    }
+	/**
+	 * The Z index of the crosshair. Higher Z indices allow drawing the
+	 * crosshair on top of the series or behind the grid lines.
+	 * <p>
+	 * Defaults to: 2
+	 */
+	public void setZIndex(Number zIndex) {
+		this.zIndex = zIndex;
+	}
 
-    /**
-     * @see #setLabel(CrosshairLabel)
-     */
-    public CrosshairLabel getLabel() {
-        if (label == null) {
-            label = new CrosshairLabel();
-        }
-        return label;
-    }
+	/**
+	 * @see #setLabel(CrosshairLabel)
+	 */
+	public CrosshairLabel getLabel() {
+		if (label == null) {
+			label = new CrosshairLabel();
+		}
+		return label;
+	}
 
-    /**
-     * <p>
-     * A label on the axis next to the crosshair.
-     * </p>
-     * 
-     * <p>
-     * In <a href=
-     * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-     * >styled mode</a>, the label is styled with the
-     * <code>.highcharts-crosshair-label</code> class.
-     * </p>
-     */
-    public void setLabel(CrosshairLabel label) {
-        this.label = label;
-    }
+	/**
+	 * <p>
+	 * A label on the axis next to the crosshair.
+	 * </p>
+	 * 
+	 * <p>
+	 * In <a href=
+	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
+	 * >styled mode</a>, the label is styled with the
+	 * <code>.highcharts-crosshair-label</code> class.
+	 * </p>
+	 */
+	public void setLabel(CrosshairLabel label) {
+		this.label = label;
+	}
 }

@@ -44,9 +44,10 @@ import com.vaadin.flow.theme.lumo.Lumo;
 public class TreeComponentColumnsPage extends Div {
 
     public TreeComponentColumnsPage() {
-        addButton("btn-add-comp-then-grid", () -> addTreeGrid(false));
-        addButton("btn-add-grid-then-comp", () -> addTreeGrid(true));
+        addButton("btn-add-comp-then-grid",() -> addTreeGrid(false));
+        addButton("btn-add-grid-then-comp",() -> addTreeGrid(true));
     }
+
 
     private void addButton(String id, Command action) {
         NativeButton button = new NativeButton(id, e -> action.execute());
@@ -63,21 +64,17 @@ public class TreeComponentColumnsPage extends Div {
 
         ComponentRenderer<TextField, String> componentRenderer = new ComponentRenderer<>(
                 TextField::new, (component, item) -> {
-                    component.setReadOnly(true);
-                    component.setValue(item);
-                });
+            component.setReadOnly(true);
+            component.setValue(item);
+        });
 
-        grid.addComponentHierarchyColumn(this::createTextField)
-                .setHeader("Header A").setId("textfield");
+        grid.addComponentHierarchyColumn(this::createTextField).setHeader("Header A").setId("textfield");
         grid.addColumn(componentRenderer).setHeader("Header B");
 
-        ComponentRenderer<Button, String> componentRendererBtn = new ComponentRenderer<>(
-                () -> new Button("btn"), ((button, s) -> {
-                    button.setText(s);
-                    button.setThemeName(
-                            ButtonVariant.LUMO_ERROR.getVariantName());
-                }));
+        ComponentRenderer<Button,String> componentRendererBtn = new ComponentRenderer<>(
+                () -> new Button("btn"), ((button, s) -> {button.setText(s);button.setThemeName(ButtonVariant.LUMO_ERROR.getVariantName());}));
         grid.addColumn(componentRendererBtn).setHeader("Header C");
+
 
         TreeData<String> data = new TreeData<>();
         final Map<String, String> parentPathMap = new HashMap<>();

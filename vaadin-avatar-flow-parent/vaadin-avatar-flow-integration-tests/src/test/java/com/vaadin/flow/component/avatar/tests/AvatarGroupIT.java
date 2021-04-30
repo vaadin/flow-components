@@ -64,7 +64,7 @@ public class AvatarGroupIT extends AbstractComponentIT {
     }
 
     private String getAvatarAbbr(int index) {
-        return $(AvatarGroupElement.class).waitForFirst()
-                .getAvatarElement(index).getAbbr();
+        return $(AvatarGroupElement.class)
+                .waitForFirst().getAvatarElement(index).getAbbr();
     }
 }

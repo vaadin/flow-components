@@ -36,41 +36,37 @@ import com.vaadin.flow.theme.lumo.Lumo;
 public class ComponentColumnsPage extends Div {
 
     public ComponentColumnsPage() {
-        addButton("btn-add-comp-then-grid", () -> {
+        addButton("btn-add-comp-then-grid",() -> {
             Grid<Person> compThenGrid = new Grid<>();
             compThenGrid.setId("comp-then-grid");
             compThenGrid.setItems(new Person("foo", 20), new Person("bar", 30));
 
-            compThenGrid.addColumn(
-                    new NativeButtonRenderer<>("click", this::clicked));
-            compThenGrid.addColumn(new ComponentRenderer<>(
-                    person -> new Button(person.getFirstName())));
-            compThenGrid.addColumn(new ComponentRenderer<>(
-                    person -> new Button("age " + person.getAge())));
+            compThenGrid.addColumn(new NativeButtonRenderer<>("click", this::clicked));
+            compThenGrid.addColumn(new ComponentRenderer<>(person -> new Button(person.getFirstName())));
+            compThenGrid.addColumn(new ComponentRenderer<>(person -> new Button("age "+person.getAge())));
 
             add(compThenGrid);
         });
-        addButton("btn-add-grid-then-comp", () -> {
+        addButton("btn-add-grid-then-comp",() -> {
             Grid<Person> gridThenComp = new Grid<>();
             gridThenComp.setId("grid-then-comp");
             gridThenComp.setItems(new Person("foo", 20), new Person("bar", 30));
 
             add(gridThenComp);
 
-            gridThenComp.addColumn(
-                    new NativeButtonRenderer<>("click", this::clicked));
-            gridThenComp.addColumn(new ComponentRenderer<>(
-                    person -> new Button(person.getFirstName())));
-            gridThenComp.addColumn(new ComponentRenderer<>(
-                    person -> new Button("age " + person.getAge())));
+            gridThenComp.addColumn(new NativeButtonRenderer<>("click", this::clicked));
+            gridThenComp.addColumn(new ComponentRenderer<>(person -> new Button(person.getFirstName())));
+            gridThenComp.addColumn(new ComponentRenderer<>(person -> new Button("age "+person.getAge())));
         });
     }
+
 
     private void addButton(String id, Command action) {
         NativeButton button = new NativeButton(id, e -> action.execute());
         button.setId(id);
         add(button);
     }
+
 
     private void clicked(Person person) {
         Div message = new Div();

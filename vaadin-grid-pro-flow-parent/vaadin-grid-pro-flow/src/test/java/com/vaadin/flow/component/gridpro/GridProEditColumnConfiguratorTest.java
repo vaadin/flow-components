@@ -27,8 +27,7 @@ public class GridProEditColumnConfiguratorTest {
         configurator = grid.addEditColumn(value -> value);
         column = (EditColumn<Person>) configurator.getColumn();
 
-        testItemUpdater = (item, newValue) -> {
-        };
+        testItemUpdater = (item, newValue) -> {};
         listOptions = new ArrayList<>();
         listOptions.add("foo");
         listOptions.add("bar");
@@ -39,8 +38,7 @@ public class GridProEditColumnConfiguratorTest {
     public void shouldConfigureTextEditColumnPreset() {
         configurator.text(testItemUpdater);
 
-        Assert.assertEquals(column.getEditorType(),
-                EditorType.TEXT.getTypeName());
+        Assert.assertEquals(column.getEditorType(), EditorType.TEXT.getTypeName());
         Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
     }
 
@@ -55,8 +53,7 @@ public class GridProEditColumnConfiguratorTest {
         };
 
         configurator.checkbox(testItemUpdater);
-        Assert.assertEquals(column.getEditorType(),
-                EditorType.CHECKBOX.getTypeName());
+        Assert.assertEquals(column.getEditorType(), EditorType.CHECKBOX.getTypeName());
         column.getItemUpdater().accept(initialItem, initialValue);
     }
 
@@ -64,8 +61,7 @@ public class GridProEditColumnConfiguratorTest {
     public void shouldConfigureSelectEditColumnPreset() {
         configurator.select(testItemUpdater, listOptions);
 
-        Assert.assertEquals(column.getEditorType(),
-                EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
         Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
         Assert.assertEquals(column.getOptions(), listOptions);
     }
@@ -74,8 +70,7 @@ public class GridProEditColumnConfiguratorTest {
     public void shouldConfigureSelectEditColumnEnumPreset() {
         configurator.select(testItemUpdater, "foo", "bar", "baz");
 
-        Assert.assertEquals(column.getEditorType(),
-                EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
         Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
         Assert.assertEquals(column.getOptions(), listOptions);
     }
@@ -87,14 +82,11 @@ public class GridProEditColumnConfiguratorTest {
 
         testItemUpdater = (item, newValue) -> {
             Assert.assertEquals(initialItem, item);
-            Assert.assertEquals(initialValue,
-                    ((TestEnum) newValue).getStringRepresentation());
+            Assert.assertEquals(initialValue, ((TestEnum) newValue).getStringRepresentation());
         };
-        configurator.select(testItemUpdater, TestEnum.class,
-                TestEnum::getStringRepresentation);
+        configurator.select(testItemUpdater, TestEnum.class, TestEnum::getStringRepresentation);
 
-        Assert.assertEquals(column.getEditorType(),
-                EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
         Assert.assertEquals(column.getOptions(), listOptions);
         column.getItemUpdater().accept(initialItem, initialValue);
     }
@@ -106,13 +98,11 @@ public class GridProEditColumnConfiguratorTest {
 
         testItemUpdater = (item, newValue) -> {
             Assert.assertEquals(initialItem, item);
-            Assert.assertEquals(initialValue,
-                    ((TestEnum) newValue).getStringRepresentation());
+            Assert.assertEquals(initialValue, ((TestEnum) newValue).getStringRepresentation());
         };
         configurator.select(testItemUpdater, TestEnum.class);
 
-        Assert.assertEquals(column.getEditorType(),
-                EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
         Assert.assertEquals(column.getOptions(), listOptions);
         column.getItemUpdater().accept(initialItem, initialValue);
     }

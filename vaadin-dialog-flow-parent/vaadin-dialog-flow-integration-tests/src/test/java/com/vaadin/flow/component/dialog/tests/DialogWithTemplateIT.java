@@ -47,8 +47,7 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
         DialogElement dialog = $(DialogElement.class).first();
 
-        TestBenchElement template = dialog.$("vaadin-dialog-flow-test-template")
-                .first();
+        TestBenchElement template = dialog.$("vaadin-dialog-flow-test-template").first();
         NativeButtonElement btn = template.$(NativeButtonElement.class).first();
         DivElement container = template.$(DivElement.class).first();
         List<SpanElement> spans = container.$(SpanElement.class).all();
@@ -58,8 +57,7 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
             btn.click();
 
             int size = i + 1;
-            LabelElement label = container.$(LabelElement.class)
-                    .id("label-" + size);
+            LabelElement label = container.$(LabelElement.class).id("label-" + size);
             Assert.assertEquals("Label " + size, label.getText());
         }
     }

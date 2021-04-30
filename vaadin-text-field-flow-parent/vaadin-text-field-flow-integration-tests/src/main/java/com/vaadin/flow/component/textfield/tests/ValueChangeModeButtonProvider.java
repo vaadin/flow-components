@@ -50,11 +50,9 @@ public class ValueChangeModeButtonProvider {
 
     private void onTimeoutChange(HasValue.ValueChangeEvent<String> event) {
         try {
-            elementWithChangeMode
-                    .setValueChangeTimeout(new Integer(event.getValue()));
+            elementWithChangeMode.setValueChangeTimeout(new Integer(event.getValue()));
         } catch (NumberFormatException e) {
-            event.getHasValue().setValue(
-                    elementWithChangeMode.getValueChangeTimeout() + "");
+            event.getHasValue().setValue(elementWithChangeMode.getValueChangeTimeout() + "");
         }
     }
 
@@ -63,8 +61,8 @@ public class ValueChangeModeButtonProvider {
         RadioButtonGroup<ValueChangeMode> group = new RadioButtonGroup<>();
         group.setItems(ValueChangeMode.values());
         group.setValue(elementWithChangeMode.getValueChangeMode());
-        group.addValueChangeListener(event -> elementWithChangeMode
-                .setValueChangeMode(event.getValue()));
+        group.addValueChangeListener(
+                event -> elementWithChangeMode.setValueChangeMode(event.getValue()));
         container.add(group, getTimeoutInput());
         return container;
     }

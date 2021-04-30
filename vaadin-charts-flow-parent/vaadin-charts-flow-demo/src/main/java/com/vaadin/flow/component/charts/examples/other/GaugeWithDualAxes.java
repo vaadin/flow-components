@@ -15,7 +15,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 
 import java.util.Random;
 
-@CssImport(value = "./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value="./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class GaugeWithDualAxes extends AbstractChartExample {
 
     @Override
@@ -66,8 +66,10 @@ public class GaugeWithDualAxes extends AbstractChartExample {
 
         PlotOptionsGauge plotOptionsGauge = new PlotOptionsGauge();
         plotOptionsGauge.setDataLabels(new DataLabels());
-        plotOptionsGauge.getDataLabels().setFormatter(
-                "function() {return '<span class=\"kmh\">'+ this.y + ' km/h</span><br/>' + '<span class=\"mph\">' + Math.round(this.y * 0.621) + ' mph</span>';}");
+        plotOptionsGauge
+                .getDataLabels()
+                .setFormatter(
+                        "function() {return '<span class=\"kmh\">'+ this.y + ' km/h</span><br/>' + '<span class=\"mph\">' + Math.round(this.y * 0.621) + ' mph</span>';}");
         plotOptionsGauge.setTooltip(new SeriesTooltip());
         plotOptionsGauge.getTooltip().setValueSuffix(" km/h");
         series.setPlotOptions(plotOptionsGauge);
@@ -76,8 +78,7 @@ public class GaugeWithDualAxes extends AbstractChartExample {
 
         runWhileAttached(chart, () -> {
             Integer oldValue = series.getData()[0].intValue();
-            Integer newValue = (int) (oldValue
-                    + (random.nextDouble() - 0.5) * 20.0);
+            Integer newValue = (int) (oldValue + (random.nextDouble() - 0.5) * 20.0);
             series.updatePoint(0, newValue);
         }, 5000, 12000);
 

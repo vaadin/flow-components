@@ -18,8 +18,7 @@ import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 public class ProtectedBackendView extends VerticalLayout {
 
     public ProtectedBackendView() {
-        final Crud<Person> crud = new Crud<>(Person.class,
-                createPersonEditor());
+        final Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
         List<Person> data = new ArrayList<>();
         data.add(new Person(1, "Unmodifiable", "User"));
@@ -38,8 +37,7 @@ public class ProtectedBackendView extends VerticalLayout {
                 throw new RuntimeException("User has to have longer name");
             }
             if (e.getItem().getId() != null && e.getItem().getId() == 1) {
-                throw new RuntimeException(
-                        "Forbidden to modify Unmodifiable user");
+                throw new RuntimeException("Forbidden to modify Unmodifiable user");
             }
             dataProvider.persist(e.getItem());
         });

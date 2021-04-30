@@ -47,7 +47,6 @@ public class TextFieldDetachAttachPageIT extends AbstractComponentIT {
     private void assertTextFieldIsValidOnTab() {
         WebElement textField = findElement(By.id("text-field"));
         textField.sendKeys(Keys.TAB);
-        Assert.assertFalse("Text field should be valid after Tab",
-                Boolean.parseBoolean(textField.getAttribute("invalid")));
+        Assert.assertFalse("Text field should be valid after Tab", Boolean.parseBoolean(textField.getAttribute("invalid")));
     }
 }

@@ -19,10 +19,11 @@ class Helper {
         FormLayout form = new FormLayout(firstName, lastName);
 
         Binder<Person> binder = new Binder<>(Person.class);
-        binder.forField(firstName).asRequired().bind(Person::getFirstName,
-                Person::setFirstName);
-        binder.forField(lastName)
-                .withValidator(value -> value != null && value.startsWith("O"),
+        binder.forField(firstName).asRequired().bind(Person::getFirstName, Person::setFirstName);
+        binder
+                .forField(lastName)
+                .withValidator(
+                        value -> value != null && value.startsWith("O"),
                         "Only last names starting with 'O' allowed")
                 .bind(Person::getLastName, Person::setLastName);
 
@@ -40,17 +41,13 @@ class Helper {
         yorubaI18n.setEditLabel("S'atunko eeyan");
 
         yorubaI18n.getConfirm().getCancel().setTitle("Akosile");
-        yorubaI18n.getConfirm().getCancel()
-                .setContent("Akosile ti a o tii fi pamo nbe");
-        yorubaI18n.getConfirm().getCancel().getButton()
-                .setDismiss("Se atunko sii");
+        yorubaI18n.getConfirm().getCancel().setContent("Akosile ti a o tii fi pamo nbe");
+        yorubaI18n.getConfirm().getCancel().getButton().setDismiss("Se atunko sii");
         yorubaI18n.getConfirm().getCancel().getButton().setConfirm("Fa'gi lee");
 
         yorubaI18n.getConfirm().getDelete().setTitle("Amudaju ipare");
-        yorubaI18n.getConfirm().getDelete().setContent(
-                "Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
-        yorubaI18n.getConfirm().getDelete().getButton()
-                .setDismiss("Da'wo duro");
+        yorubaI18n.getConfirm().getDelete().setContent("Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
+        yorubaI18n.getConfirm().getDelete().getButton().setDismiss("Da'wo duro");
         yorubaI18n.getConfirm().getDelete().getButton().setConfirm("Paare");
 
         return yorubaI18n;

@@ -57,12 +57,11 @@ public class TextFieldTest {
         assertClearButtonPropertyValueEquals(textField, false);
     }
 
-    public void assertClearButtonPropertyValueEquals(TextField textField,
-            Boolean value) {
+    public void assertClearButtonPropertyValueEquals(TextField textField, Boolean value) {
         textField.setClearButtonVisible(value);
         assertEquals(value, textField.isClearButtonVisible());
-        assertEquals(textField.isClearButtonVisible(), textField.getElement()
-                .getProperty("clearButtonVisible", value));
+        assertEquals(textField.isClearButtonVisible(),
+                textField.getElement().getProperty("clearButtonVisible", value));
     }
 
     @Test
@@ -73,8 +72,7 @@ public class TextFieldTest {
         assertAutoselectPropertyValueEquals(textField, false);
     }
 
-    public void assertAutoselectPropertyValueEquals(TextField textField,
-            Boolean value) {
+    public void assertAutoselectPropertyValueEquals(TextField textField, Boolean value) {
         textField.setAutoselect(value);
         assertEquals(value, textField.isAutoselect());
         assertEquals(textField.isAutoselect(),

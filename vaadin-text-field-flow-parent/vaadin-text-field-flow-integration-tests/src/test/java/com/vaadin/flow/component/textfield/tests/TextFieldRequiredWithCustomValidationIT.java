@@ -8,19 +8,16 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 @TestPath("vaadin-text-field/required-field-custom-validator")
-public class TextFieldRequiredWithCustomValidationIT
-        extends AbstractComponentIT {
+public class TextFieldRequiredWithCustomValidationIT extends AbstractComponentIT {
 
     @Test
-    public void requiredAndCustomValidationOnServerSide_initialStateIsInvalid_changingToValidValueResetsInvalidFlag()
-            throws Exception {
+    public void requiredAndCustomValidationOnServerSide_initialStateIsInvalid_changingToValidValueResetsInvalidFlag() throws Exception {
         open();
 
         TestBenchElement textField = $("vaadin-text-field").first();
         TestBenchElement input = textField.$("input").first();
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                textField.getAttribute("invalid"));
+        Assert.assertEquals(Boolean.TRUE.toString(), textField.getAttribute("invalid"));
         Assert.assertEquals("invalid", textField.getAttribute("value"));
 
         while (!input.getAttribute("value").isEmpty()) {
@@ -32,7 +29,6 @@ public class TextFieldRequiredWithCustomValidationIT
         input.sendKeys(Keys.ENTER);
 
         Assert.assertEquals("Valid", textField.getAttribute("value"));
-        Assert.assertEquals(Boolean.FALSE.toString(),
-                textField.getAttribute("invalid"));
+        Assert.assertEquals(Boolean.FALSE.toString(), textField.getAttribute("invalid"));
     }
 }
