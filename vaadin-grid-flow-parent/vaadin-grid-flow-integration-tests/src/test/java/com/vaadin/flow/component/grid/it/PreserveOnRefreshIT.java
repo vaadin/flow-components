@@ -23,6 +23,8 @@ import org.junit.Test;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-grid/preserve-on-refresh")
 public class PreserveOnRefreshIT extends AbstractComponentIT {
