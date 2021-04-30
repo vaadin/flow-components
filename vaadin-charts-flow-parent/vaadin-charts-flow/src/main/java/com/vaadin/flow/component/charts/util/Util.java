@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.util;
  * #L%
  */
 
+
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,21 +30,20 @@ public class Util {
     }
 
     /**
-     * Gets the number of miliseconds from the Java epoch of
-     * 1970-01-01T00:00:00Z.
+     * Gets the number of miliseconds from the Java epoch of 1970-01-01T00:00:00Z.
      *
-     * @param date
+     *  @param date
      * @return
      */
     public static long toHighchartsTS(Instant date) {
-        return date.getEpochSecond() * 1000;
+        return date.getEpochSecond()*1000;
     }
 
-    /**
+     /**
      * @deprecated as of 4.0. Use {@link #toServerInstant(double)}
      */
     @Deprecated
-    public static Date toServerDate(double rawClientSideValue) {
+        public static Date toServerDate(double rawClientSideValue) {
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         instance.setTimeInMillis((long) rawClientSideValue);
         // fix one field to force calendar re-adjust the value
@@ -51,7 +51,7 @@ public class Util {
         instance.setTimeZone(TimeZone.getDefault());
         return instance.getTime();
     }
-
+    
     /**
      * Converts UTC based raw date value from the client side rendering library
      * to an Instant value.
@@ -66,7 +66,7 @@ public class Util {
         String doubleAsText = Double.toString(rawClientSideValue);
         int milSecs = Integer.parseInt(doubleAsText.split(".")[0]);
         int nanSecs = Integer.parseInt(doubleAsText.split(".")[1]);
-        Instant dateTime = Instant.ofEpochSecond(milSecs, nanSecs);
+        Instant dateTime = Instant.ofEpochSecond(milSecs,nanSecs);
         return dateTime;
     }
 

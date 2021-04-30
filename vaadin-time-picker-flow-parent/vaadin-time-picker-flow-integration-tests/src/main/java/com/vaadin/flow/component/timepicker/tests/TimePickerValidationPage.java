@@ -48,10 +48,10 @@ public class TimePickerValidationPage extends ValidationTestView {
         final Div isValid = new Div();
         isValid.setId("is-invalid");
         final NativeButton checkIsValid = new NativeButton(
-                "Check if current value of step-number-field is invalid");
+            "Check if current value of step-number-field is invalid");
         checkIsValid.setId("check-is-invalid");
         checkIsValid.addClickListener(event -> isValid
-                .setText(timePicker.isInvalid() ? "invalid" : "valid"));
+            .setText(timePicker.isInvalid() ? "invalid" : "valid"));
         add(timePicker, checkIsValid, isValid);
     }
 

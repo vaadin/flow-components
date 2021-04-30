@@ -110,11 +110,13 @@ public class GridListDataViewIT extends AbstractComponentIT {
 
         $(ButtonElement.class).id(SHOW_NEXT_DATA).click();
         Assert.assertEquals("Wrong next item for sorted data.",
-                "Item: Person 97", $("span").id(ITEM_DATA).getText());
+                "Item: Person 97",
+                $("span").id(ITEM_DATA).getText());
 
         $(ButtonElement.class).id(SHOW_PREVIOUS_DATA).click();
         Assert.assertEquals("Wrong previous item for sorted data.",
-                "Item: Person 99", $("span").id(ITEM_DATA).getText());
+                "Item: Person 99",
+                $("span").id(ITEM_DATA).getText());
 
         $(ButtonElement.class).id(ADD_EXTRA_PERSONS_FOR_SORTING).click();
 
@@ -203,26 +205,27 @@ public class GridListDataViewIT extends AbstractComponentIT {
                 getAgeByRow(secondGrid, 0));
     }
 
+
     @Test
     public void addRemoveAndUpdateItem_addsThenUpdatesThenRemovesItem() {
         $(ButtonElement.class).id(ADD_ITEM).click();
         Assert.assertEquals("Item count not expected", "251",
                 $("span").id(ITEM_COUNT).getText());
-        Assert.assertEquals("Wrong first name for added person", "John",
-                firstGrid.getCell(250, 0).getText());
-        Assert.assertEquals("Wrong last name for added person", "Doe",
-                firstGrid.getCell(250, 1).getText());
-        Assert.assertEquals("Wrong age for added person", "33",
-                firstGrid.getCell(250, 2).getText());
+        Assert.assertEquals("Wrong first name for added person",
+                "John", firstGrid.getCell(250, 0).getText());
+        Assert.assertEquals("Wrong last name for added person",
+                "Doe", firstGrid.getCell(250, 1).getText());
+        Assert.assertEquals("Wrong age for added person",
+                "33", firstGrid.getCell(250, 2).getText());
 
         $(IntegerFieldElement.class).id(ROW_SELECT).setValue("250");
         $(TextFieldElement.class).id(UPDATE_ITEM).setValue("Bob");
-        Assert.assertEquals("Wrong first name for updated person", "Bob",
-                firstGrid.getCell(250, 0).getText());
-        Assert.assertEquals("Wrong last name for updated person", "Doe",
-                firstGrid.getCell(250, 1).getText());
-        Assert.assertEquals("Wrong age for updated person", "33",
-                firstGrid.getCell(250, 2).getText());
+        Assert.assertEquals("Wrong first name for updated person",
+                "Bob", firstGrid.getCell(250, 0).getText());
+        Assert.assertEquals("Wrong last name for updated person",
+                "Doe", firstGrid.getCell(250, 1).getText());
+        Assert.assertEquals("Wrong age for updated person",
+                "33", firstGrid.getCell(250, 2).getText());
 
         $(IntegerFieldElement.class).id(ROW_SELECT).setValue("250");
         $(ButtonElement.class).id(DELETE_ITEM).click();
@@ -262,11 +265,13 @@ public class GridListDataViewIT extends AbstractComponentIT {
     }
 
     private String getFirstNameByRow(GridElement grid, int row) {
-        return grid.getRow(row).getCell(grid.getColumn("First Name")).getText();
+        return grid.getRow(row).getCell(grid.getColumn("First Name"))
+                .getText();
     }
 
     private String getAgeByRow(GridElement grid, int row) {
-        return grid.getRow(row).getCell(grid.getColumn("Age")).getText();
+        return grid.getRow(row).getCell(grid.getColumn("Age"))
+                .getText();
     }
 
 }

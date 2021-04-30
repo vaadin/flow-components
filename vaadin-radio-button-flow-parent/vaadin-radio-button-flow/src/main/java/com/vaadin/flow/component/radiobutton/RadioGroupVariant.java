@@ -20,7 +20,7 @@ package com.vaadin.flow.component.radiobutton;
  */
 public enum RadioGroupVariant {
     LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD(
-            "helper-above-field"), MATERIAL_VERTICAL("vertical");
+        "helper-above-field"), MATERIAL_VERTICAL("vertical");
 
     private final String variant;
 

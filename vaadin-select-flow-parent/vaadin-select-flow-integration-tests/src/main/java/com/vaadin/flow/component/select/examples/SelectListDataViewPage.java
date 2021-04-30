@@ -20,16 +20,22 @@ public class SelectListDataViewPage extends Div {
     public static final String ITEM_PRESENT = "item-present-span-data-view";
     public static final String ALL_ITEMS = "all-items-span-data-view";
     public static final String ITEM_ON_INDEX = "item-on-index-data-view";
-    public static final String CURRENT_ITEM = "current-item-span-list-data-view";
-    public static final String HAS_NEXT_ITEM = "has-next-item-span-list-data-view";
-    public static final String HAS_PREVIOUS_ITEM = "has-prev-item-span-list-data-view";
+    public static final String CURRENT_ITEM =
+            "current-item-span-list-data-view";
+    public static final String HAS_NEXT_ITEM =
+            "has-next-item-span-list-data-view";
+    public static final String HAS_PREVIOUS_ITEM =
+            "has-prev-item-span-list-data-view";
     public static final String NEXT_ITEM = "next-item-button-list-data-view";
-    public static final String PREVIOUS_ITEM = "prev-item-button-list-data-view";
+    public static final String PREVIOUS_ITEM =
+            "prev-item-button-list-data-view";
     public static final String FILTER_BUTTON = "filter-button-list-data-view";
     public static final String SORT_BUTTON = "sort-button-list-data-view";
     public static final String ADD_ITEM = "add-person-button-list-data-view";
-    public static final String UPDATE_ITEM = "update-person-button-list-data-view";
-    public static final String DELETE_ITEM = "delete-person-button-list-data-view";
+    public static final String UPDATE_ITEM =
+            "update-person-button-list-data-view";
+    public static final String DELETE_ITEM =
+            "delete-person-button-list-data-view";
 
     public SelectListDataViewPage() {
         Select<Person> select = new Select<>();
@@ -46,51 +52,57 @@ public class SelectListDataViewPage extends Div {
         otherSelect.setItems(dataProvider);
 
         Span sizeSpan = new Span(String.valueOf(dataView.getItemCount()));
-        Span containsItemSpan = new Span(
-                String.valueOf(dataView.contains(john)));
-        Span allItemsSpan = new Span(dataView.getItems().map(Person::getName)
-                .collect(Collectors.joining(",")));
+        Span containsItemSpan = new Span(String.valueOf(
+                dataView.contains(john)));
+        Span allItemsSpan = new Span(dataView.getItems()
+                .map(Person::getName).collect(
+                        Collectors.joining(",")));
         Span itemOnIndexSpan = new Span(dataView.getItem(0).getName());
 
-        AtomicReference<Person> currentItem = new AtomicReference<>(paul);
+        AtomicReference<Person> currentItem =
+                new AtomicReference<>(paul);
 
         Span currentItemSpan = new Span(currentItem.get().getName());
-        Span hasNextItemSpan = new Span(
-                String.valueOf(dataView.getNextItem(john).isPresent()));
-        Span hasPrevItemSpan = new Span(
-                String.valueOf(dataView.getPreviousItem(paul).isPresent()));
+        Span hasNextItemSpan = new Span(String.valueOf(
+                dataView.getNextItem(john).isPresent()));
+        Span hasPrevItemSpan = new Span(String.valueOf(
+                dataView.getPreviousItem(paul).isPresent()));
 
         NativeButton nextItemButton = new NativeButton("Next Item", event -> {
-            Person nextItem = dataView.getNextItem(currentItem.get()).get();
+            Person nextItem =
+                    dataView.getNextItem(currentItem.get()).get();
             currentItem.set(nextItem);
             currentItemSpan.setText(currentItem.get().getName());
         });
-        NativeButton prevItemButton = new NativeButton("Previous Item",
-                event -> {
-                    Person prevItem = dataView
-                            .getPreviousItem(currentItem.get()).get();
-                    currentItem.set(prevItem);
-                    currentItemSpan.setText(currentItem.get().getName());
-                });
+        NativeButton prevItemButton = new NativeButton("Previous Item", event -> {
+            Person prevItem =
+                    dataView.getPreviousItem(currentItem.get()).get();
+            currentItem.set(prevItem);
+            currentItemSpan.setText(currentItem.get().getName());
+        });
         NativeButton filterButton = new NativeButton("Filter Items",
                 event -> dataView.setFilter(p -> p.getName().equals("Paul")));
         NativeButton sortButton = new NativeButton("Sort Items",
-                event -> dataView.setSortComparator((p1, p2) -> p1.getName()
-                        .compareToIgnoreCase(p2.getName())));
+                event -> dataView.setSortComparator((p1, p2) ->
+                        p1.getName().compareToIgnoreCase(p2.getName())));
 
         dataView.setIdentifierProvider(Person::getId);
-        NativeButton addNew = new NativeButton("Add new item", event -> {
-            Person newItem = new Person(4, "Peter");
-            dataView.addItem(newItem);
-        });
+        NativeButton addNew = new NativeButton("Add new item",
+                event -> {
+                    Person newItem =
+                            new Person(4, "Peter");
+                    dataView.addItem(newItem);
+                });
         NativeButton updateName = new NativeButton("Update first name",
                 event -> {
-                    Person updatedPerson = dataView.getItem(0);
+                    Person updatedPerson =
+                            dataView.getItem(0);
                     updatedPerson.setName("Jack");
                     dataView.refreshItem(updatedPerson);
                 });
         NativeButton deletePerson = new NativeButton("Delete person",
-                event -> dataView.removeItem(new Person(1, null)));
+                event -> dataView.removeItem(
+                        new Person(1, null)));
 
         select.setId(SELECT);
         otherSelect.setId(OTHER_SELECT);
@@ -109,10 +121,10 @@ public class SelectListDataViewPage extends Div {
         updateName.setId(UPDATE_ITEM);
         deletePerson.setId(DELETE_ITEM);
 
-        add(select, sizeSpan, containsItemSpan, allItemsSpan, itemOnIndexSpan,
-                currentItemSpan, hasNextItemSpan, hasPrevItemSpan, filterButton,
-                sortButton, nextItemButton, prevItemButton, addNew, updateName,
-                deletePerson, otherSelect);
+        add(select, sizeSpan, containsItemSpan, allItemsSpan,
+                itemOnIndexSpan, currentItemSpan, hasNextItemSpan,
+                hasPrevItemSpan, filterButton, sortButton, nextItemButton,
+                prevItemButton, addNew, updateName, deletePerson, otherSelect);
     }
 
     public static class Person {

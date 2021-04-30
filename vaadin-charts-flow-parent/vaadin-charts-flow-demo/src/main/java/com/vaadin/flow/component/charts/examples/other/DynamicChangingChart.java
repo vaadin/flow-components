@@ -39,18 +39,17 @@ public class DynamicChangingChart extends AbstractChartExample {
         chart.setConfiguration(getFunnelConfiguration());
         add(chart);
         add(createConfigurationButton(chart, "funnel",
-                this::getFunnelConfiguration));
+            this::getFunnelConfiguration));
         add(createConfigurationButton(chart, "polar",
-                this::getPolarConfiguration));
+            this::getPolarConfiguration));
         add(createConfigurationButton(chart, "line",
-                this::getLineConfiguration));
+            this::getLineConfiguration));
     }
 
     private Component createConfigurationButton(Chart chart, String type,
-            SerializableSupplier<Configuration> configurationSupplier) {
-        final NativeButton button = new NativeButton(
-                String.format("Set %s configuration", type),
-                e -> chart.setConfiguration(configurationSupplier.get()));
+        SerializableSupplier<Configuration> configurationSupplier) {
+        final NativeButton button = new NativeButton(String.format("Set %s configuration", type),
+            e -> chart.setConfiguration(configurationSupplier.get()));
         button.setId(String.format("set_%s_button", type));
         return button;
     }
@@ -152,16 +151,21 @@ public class DynamicChangingChart extends AbstractChartExample {
         plotOptionsSeries.setPointStart(2010);
         configuration.setPlotOptions(plotOptionsSeries);
 
-        configuration.addSeries(new ListSeries("Installation", 43934, 52503,
-                57177, 69658, 97031, 119931, 137133, 154175));
-        configuration.addSeries(new ListSeries("Manufacturing", 24916, 24064,
-                29742, 29851, 32490, 30282, 38121, 40434));
-        configuration.addSeries(new ListSeries("Sales & Distribution", 11744,
-                17722, 16005, 19771, 20185, 24377, 32147, 39387));
-        configuration.addSeries(new ListSeries("Project Development", null,
-                null, 7988, 12169, 15112, 22452, 34400, 34227));
-        configuration.addSeries(new ListSeries("Other", 12908, 5948, 8105,
-                11248, 8989, 11816, 18274, 18111));
+        configuration.addSeries(
+            new ListSeries("Installation", 43934, 52503, 57177, 69658, 97031,
+                119931, 137133, 154175));
+        configuration.addSeries(
+            new ListSeries("Manufacturing", 24916, 24064, 29742, 29851, 32490,
+                30282, 38121, 40434));
+        configuration.addSeries(
+            new ListSeries("Sales & Distribution", 11744, 17722, 16005, 19771,
+                20185, 24377, 32147, 39387));
+        configuration.addSeries(
+            new ListSeries("Project Development", null, null, 7988, 12169,
+                15112, 22452, 34400, 34227));
+        configuration.addSeries(
+            new ListSeries("Other", 12908, 5948, 8105, 11248, 8989, 11816,
+                18274, 18111));
 
         return configuration;
     }

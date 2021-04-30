@@ -15,6 +15,7 @@ package com.vaadin.flow.component.charts.model;
 
 import java.util.Date;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
@@ -100,6 +101,7 @@ public abstract class Axis extends AbstractConfigurationObject {
         this.max = Util.toHighchartsTS(max);
     }
 
+
     /**
      * Sets the minimum and maximum of the axes after rendering has finished. If
      * the startOnTick and endOnTick options are true, the minimum and maximum
@@ -175,11 +177,12 @@ public abstract class Axis extends AbstractConfigurationObject {
      * @see #setExtremes(Number, Number, boolean, boolean)
      */
     public void setExtremes(Date minimum, Date maximum, boolean redraw,
-            boolean animate) {
+        boolean animate) {
         setMin(minimum);
         setMax(maximum);
         if (configuration != null) {
-            configuration.fireAxesRescaled(this, min, max, redraw, animate);
+            configuration.fireAxesRescaled(this, min, max, redraw,
+                animate);
         }
     }
 
@@ -233,11 +236,12 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * <p>
-     * If categories are present for the axis, names are used instead of numbers
-     * for that axis. Since Highcharts 3.0, categories can also be extracted by
-     * giving each point a <code>name</code> and setting axis type to
-     * <code>category</code>. However, if you have multiple series, best
-     * practice remains defining the <code>categories</code> array.
+     * If categories are present for the axis, names are used instead of
+     * numbers for that axis. Since Highcharts 3.0, categories can also be
+     * extracted by giving each point a <code>name</code> and
+     * setting axis type to <code>category</code>.
+     * However, if you have multiple series, best practice remains defining the
+     * <code>categories</code> array.
      * </p>
      *
      * <p>
@@ -311,7 +315,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * dateFormat.
      */
     public abstract void setDateTimeLabelFormats(
-            DateTimeLabelFormats dateTimeLabelFormats);
+        DateTimeLabelFormats dateTimeLabelFormats);
 
     /**
      * @see #setDescription(String)
@@ -505,7 +509,8 @@ public abstract class Axis extends AbstractConfigurationObject {
      * sense, and will be ignored to prevent performance problems.</a>
      *
      * <p>
-     * On axes using <code>categories</code>, minor ticks are not supported.
+     * On axes using <code>categories</code>, minor ticks are
+     * not supported.
      * </p>
      */
     public abstract void setMinorTickInterval(String minorTickInterval);
@@ -741,10 +746,10 @@ public abstract class Axis extends AbstractConfigurationObject {
      * <p>
      * The interval of the tick marks in axis units. When <code>null</code>, the
      * tick interval is computed to approximately follow the
-     * <code>tickPixelInterval</code> on linear and datetime axes. On
-     * categorized axes, a <code>null</code> tickInterval will default to 1, one
-     * category. Note that datetime axes are based on milliseconds, so for
-     * example an interval of one day is expressed as
+     * <code>tickPixelInterval</code> on linear and
+     * datetime axes. On categorized axes, a <code>null</code> tickInterval will
+     * default to 1, one category. Note that datetime axes are based on
+     * milliseconds, so for example an interval of one day is expressed as
      * <code>24 * 3600 * 1000</code>.
      * </p>
      * <p>
@@ -816,8 +821,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * placed between categories. The default is <code>between</code> if the
      * <code>tickInterval</code> is 1, else <code>on</code>.
      */
-    public abstract void setTickmarkPlacement(
-            TickmarkPlacement tickmarkPlacement);
+    public abstract void setTickmarkPlacement(TickmarkPlacement tickmarkPlacement);
 
     /**
      * @see #setTitle(AxisTitle)
@@ -839,8 +843,9 @@ public abstract class Axis extends AbstractConfigurationObject {
      * <code>"logarithmic"</code>, <code>"datetime"</code> or
      * <code>"category"</code>. In a datetime axis, the numbers are given in
      * milliseconds, and tick marks are placed on appropriate values like full
-     * hours or days. In a category axis, the point names of the chart's series
-     * are used for categories, if not a categories array is defined.
+     * hours or days. In a category axis, the point
+     * names of the chart's series are used for categories, if not a
+     * categories array is defined.
      */
     public abstract void setType(AxisType type);
 

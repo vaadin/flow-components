@@ -37,10 +37,10 @@ public class CustomGridView extends VerticalLayout {
                 });
         toggleBordersButton.setId("toggleBorders");
 
-        final Button customGridClickToEditButton = new Button(
-                "Set click row to open", event -> {
-                    grid.addItemClickListener(listener -> crud.edit(
-                            listener.getItem(), Crud.EditMode.EXISTING_ITEM));
+        final Button customGridClickToEditButton = new Button("Set click row to open",
+                event -> {
+                    grid.addItemClickListener(
+                        listener -> crud.edit(listener.getItem(), Crud.EditMode.EXISTING_ITEM));
                 });
         customGridClickToEditButton.setId("clickToEdit");
 
@@ -49,7 +49,6 @@ public class CustomGridView extends VerticalLayout {
         openNewItemButton.setId("newItemEditor");
 
         setHeight("100%");
-        add(crud, toggleBordersButton, customGridClickToEditButton,
-                openNewItemButton);
+        add(crud, toggleBordersButton, customGridClickToEditButton, openNewItemButton);
     }
 }

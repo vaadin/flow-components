@@ -137,8 +137,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         dataCommunicator.setDataProvider(DataProvider.ofCollection(items),
                 null);
         dataView = new ComboBoxListDataView<>(dataCommunicator, comboBox,
-                (filter, sorting) -> {
-                });
+                (filter, sorting) -> {});
         // We need to repopulate the keyMapper after setting a new data provider
         items.forEach(keyMapper::key);
 
@@ -270,8 +269,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         Stream<String> filteredItems = dataView.getItems();
 
         Assert.assertArrayEquals("Unexpected items obtained",
-                new String[] { "first", "middle", "last" },
-                filteredItems.toArray());
+                new String[] { "first", "middle", "last" }, filteredItems.toArray());
     }
 
     @Test
@@ -284,8 +282,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         // Check that the client filter does not affect the item handling API
         // in data view
         Assert.assertArrayEquals("The client filter shouldn't impact the items",
-                new String[] { "first", "middle", "last" },
-                filteredItems.toArray());
+                new String[] { "first", "middle", "last" }, filteredItems.toArray());
 
         // Reset the client filter and check again
         ComboBoxDataViewTestHelper.setClientSideFilter(comboBox, "");
@@ -293,8 +290,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         filteredItems = dataView.getItems();
         Assert.assertArrayEquals(
                 "The client filter reset shouldn't impact the items",
-                new String[] { "first", "middle", "last" },
-                filteredItems.toArray());
+                new String[] { "first", "middle", "last"  }, filteredItems.toArray());
     }
 
     @Test
@@ -334,6 +330,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
                 "Given index 3 should be less than the item count '3'");
         dataView.getItem(3);
     }
+
 
     @Override
     protected ComboBox<String> getComponent() {

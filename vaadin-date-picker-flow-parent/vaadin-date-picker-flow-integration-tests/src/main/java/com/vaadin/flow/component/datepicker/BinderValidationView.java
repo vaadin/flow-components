@@ -30,10 +30,8 @@ public class BinderValidationView extends Div {
             dateFieldElement.setProperty("label", label == null ? "" : label);
         });
 
-        binder.forField(dateField)
-                .withValidator(value -> value != null
-                        && value.compareTo(LocalDate.of(2019, 2, 1)) > -1,
-                        BINDER_ERROR_MSG)
+        binder.forField(dateField).withValidator(value -> value != null &&
+                value.compareTo(LocalDate.of(2019, 2, 1)) > -1, BINDER_ERROR_MSG)
                 .bind(AData::getDate, AData::setDate);
 
         add(dateField);

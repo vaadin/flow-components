@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
@@ -21,94 +22,94 @@ import com.vaadin.flow.component.charts.model.style.Color;
  */
 public class Select extends AbstractConfigurationObject {
 
-    private Boolean enabled;
-    private Color fillColor;
-    private Color lineColor;
-    private Number lineWidth;
-    private Number radius;
+	private Boolean enabled;
+	private Color fillColor;
+	private Color lineColor;
+	private Number lineWidth;
+	private Number radius;
 
-    public Select() {
-    }
+	public Select() {
+	}
 
-    public Select(Boolean enabled) {
-        this.enabled = enabled;
-    }
+	public Select(Boolean enabled) {
+		this.enabled = enabled;
+	}
 
-    /**
-     * @see #setEnabled(Boolean)
-     */
-    public Boolean getEnabled() {
-        return enabled;
-    }
+	/**
+	 * @see #setEnabled(Boolean)
+	 */
+	public Boolean getEnabled() {
+		return enabled;
+	}
 
-    /**
-     * Enable or disable visible feedback for selection.
-     * <p>
-     * Defaults to: true
-     */
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
+	/**
+	 * Enable or disable visible feedback for selection.
+	 * <p>
+	 * Defaults to: true
+	 */
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
 
-    /**
-     * @see #setFillColor(Color)
-     */
-    public Color getFillColor() {
-        return fillColor;
-    }
+	/**
+	 * @see #setFillColor(Color)
+	 */
+	public Color getFillColor() {
+		return fillColor;
+	}
 
-    /**
-     * The fill color of the point marker.
-     */
-    public void setFillColor(Color fillColor) {
-        this.fillColor = fillColor;
-    }
+	/**
+	 * The fill color of the point marker.
+	 */
+	public void setFillColor(Color fillColor) {
+		this.fillColor = fillColor;
+	}
 
-    /**
-     * @see #setLineColor(Color)
-     */
-    public Color getLineColor() {
-        return lineColor;
-    }
+	/**
+	 * @see #setLineColor(Color)
+	 */
+	public Color getLineColor() {
+		return lineColor;
+	}
 
-    /**
-     * The color of the point marker's outline. When <code>null</code>, the
-     * series' or point's color is used.
-     * <p>
-     * Defaults to: #000000
-     */
-    public void setLineColor(Color lineColor) {
-        this.lineColor = lineColor;
-    }
+	/**
+	 * The color of the point marker's outline. When <code>null</code>, the
+	 * series' or point's color is used.
+	 * <p>
+	 * Defaults to: #000000
+	 */
+	public void setLineColor(Color lineColor) {
+		this.lineColor = lineColor;
+	}
 
-    /**
-     * @see #setLineWidth(Number)
-     */
-    public Number getLineWidth() {
-        return lineWidth;
-    }
+	/**
+	 * @see #setLineWidth(Number)
+	 */
+	public Number getLineWidth() {
+		return lineWidth;
+	}
 
-    /**
-     * The width of the point marker's outline.
-     * <p>
-     * Defaults to: 0
-     */
-    public void setLineWidth(Number lineWidth) {
-        this.lineWidth = lineWidth;
-    }
+	/**
+	 * The width of the point marker's outline.
+	 * <p>
+	 * Defaults to: 0
+	 */
+	public void setLineWidth(Number lineWidth) {
+		this.lineWidth = lineWidth;
+	}
 
-    /**
-     * @see #setRadius(Number)
-     */
-    public Number getRadius() {
-        return radius;
-    }
+	/**
+	 * @see #setRadius(Number)
+	 */
+	public Number getRadius() {
+		return radius;
+	}
 
-    /**
-     * The radius of the point marker. In hover state, it defaults to the normal
-     * state's radius + 2.
-     */
-    public void setRadius(Number radius) {
-        this.radius = radius;
-    }
+	/**
+	 * The radius of the point marker. In hover state, it defaults to the normal
+	 * state's radius + 2.
+	 */
+	public void setRadius(Number radius) {
+		this.radius = radius;
+	}
 }

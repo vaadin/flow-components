@@ -30,12 +30,13 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-text-field")
 public class TextFieldElement extends TestBenchElement
-        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
+      implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
     @Override
     public void setValue(String string) {
         HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
+        dispatchEvent("change",
+                Collections.singletonMap("bubbles", true));
         dispatchEvent("blur");
     }
 

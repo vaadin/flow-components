@@ -34,17 +34,14 @@ public class GridDelegateFocusToComponentPage extends Div {
         div.setId("info");
 
         grid.addColumn(item -> item);
-        grid.addComponentColumn(this::buildComplexComponent)
-                .setHeader("Components");
-        grid.addComponentColumn(
-                item -> new Button(item, e -> div.setText(item)))
-                .setHeader("Components");
+        grid.addComponentColumn(this::buildComplexComponent).setHeader("Components");
+        grid.addComponentColumn(item -> new Button(item, e -> div.setText(item))).setHeader("Components");
 
         grid.setItems("foo", "bar");
         add(grid, div);
     }
 
-    private Div buildComplexComponent(String item) {
+    private Div buildComplexComponent(String item){
         TextField hiddenTextField = new TextField();
         hiddenTextField.setValue("hidden");
         hiddenTextField.getElement().setAttribute("hidden", true);
@@ -55,11 +52,11 @@ public class GridDelegateFocusToComponentPage extends Div {
         focusableTextField.setValue(item);
         focusableTextField.setId(item);
         Button nextFocusableComponent = new Button("OK");
-        VerticalLayout layout = new VerticalLayout(hiddenTextField,
-                disabledTextField, focusableTextField, nextFocusableComponent);
+        VerticalLayout layout = new VerticalLayout(hiddenTextField, disabledTextField, focusableTextField, nextFocusableComponent);
 
         Button anotherFocusableComponent = new Button("NO");
         return new Div(layout, anotherFocusableComponent);
     }
+
 
 }

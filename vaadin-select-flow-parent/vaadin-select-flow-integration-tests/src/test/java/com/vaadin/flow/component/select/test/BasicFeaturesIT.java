@@ -73,9 +73,7 @@ public class BasicFeaturesIT extends AbstractSelectIT {
     public void testVisibility_invisible_noSelect() {
         selectElement.selectItemByIndex(2);
         page.toggleVisible(false);
-        Assert.assertEquals(
-                "No select should be found from page when invisible", 0,
-                findElements(By.tagName("select")).size());
+        Assert.assertEquals("No select should be found from page when invisible",0, findElements(By.tagName("select")).size());
 
         page.clickSelectFirstItem();
         page.toggleVisible(true);
@@ -86,9 +84,7 @@ public class BasicFeaturesIT extends AbstractSelectIT {
     public void testVisibility_initiallyInvisible_noSelect() {
         openWithExtraParameter("invisible");
 
-        Assert.assertEquals(
-                "No select should be found from page when invisible", 0,
-                findElements(By.tagName("select")).size());
+        Assert.assertEquals("No select should be found from page when invisible",0, findElements(By.tagName("select")).size());
 
         page.clickSelectFirstItem();
         page.toggleVisible(true);

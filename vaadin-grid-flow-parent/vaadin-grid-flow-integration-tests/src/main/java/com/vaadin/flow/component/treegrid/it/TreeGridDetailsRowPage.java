@@ -47,8 +47,7 @@ public class TreeGridDetailsRowPage extends Div {
         data.addItem("parent2", "parent2-child2");
         treeGrid.setDataProvider(new TreeDataProvider<>(data));
 
-        treeGrid.setItemDetailsRenderer(new ComponentRenderer<>(
-                (SerializableFunction<String, Button>) Button::new));
+        treeGrid.setItemDetailsRenderer(new ComponentRenderer<>((SerializableFunction<String, Button>) Button::new));
         treeGrid.setDetailsVisible(PARENT_1, true);
 
         add(treeGrid);

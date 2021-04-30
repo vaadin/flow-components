@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
-        extends AbstractTBTest {
+    extends AbstractTBTest {
 
     @Override
     protected Class<? extends AbstractChartExample> getTestView() {
@@ -30,16 +30,16 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
         // Can't drilldown with null callback
         assertEquals(0, getLogMessages().size());
 
-        // Set new callback
+        //Set new callback
         findElement(By.id("setNew")).click();
-        // Showing nested drilldowns
+        //Showing nested drilldowns
         clickDrilldownPoint(chart, 0);
         assertLastLogText("DrilldownEvent: Item1");
         clickDrilldownPoint(chart, 1);
         assertLastLogText("DrilldownEvent: Item1_2");
         clickDrilldownPoint(chart, 1);
         assertLastLogText("DrilldownEvent: Item1_2_2");
-        // Set same callback
+        //Set same callback
         findElement(By.id("setSame")).click();
         getDrillUpButtonByTopItemName(chart, "Item1_2").click();
         assertLastLogText("ChartDrillupEvent");
@@ -66,17 +66,17 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
 
     private void clickDrilldownPoint(ChartElement chart, int index) {
         getElementFromShadowRoot(chart,
-                By.cssSelector(".highcharts-drilldown-point"), index).click();
+            By.cssSelector(".highcharts-drilldown-point"), index).click();
     }
 
     private WebElement getDrillUpButtonByTopItemName(ChartElement chart,
-            String item) {
+        String item) {
         return getDrillUpButton(chart, "Back to " + item + "_drill");
     }
 
     private WebElement getDrillUpButton(ChartElement chart, String label) {
-        final String selector = String.format("button[aria-label=\"◁ %s\"",
-                label);
+        final String selector = String
+            .format("button[aria-label=\"◁ %s\"", label);
         return getElementFromShadowRoot(chart, By.cssSelector(selector));
     }
 
@@ -90,11 +90,11 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
         getLogMessages().forEach(sb::append);
         final String messages = sb.toString();
         assertTrue(String.format("Couldn't find text '%s' from the log.", text),
-                messages.contains(text));
+            messages.contains(text));
     }
 
     private List<String> getLogMessages() {
         return findElements(By.tagName("li")).stream().map(e -> e.getText())
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
     }
 }

@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("serial")
 @SkipFromDemo
 public class ColumnWithLazyMultiLevelDrilldownCallbackTests
-        extends AbstractChartExample {
+    extends AbstractChartExample {
 
     private OrderedList log;
     private int count;
@@ -54,13 +54,13 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTests
 
         chart.addChartDrillupListener(event -> log("ChartDrillupEvent"));
         final NativeButton setNew = new NativeButton("set new callback",
-                e -> chart.setDrilldownCallback(getDrilldownCallback()));
+            e -> chart.setDrilldownCallback(getDrilldownCallback()));
         setNew.setId("setNew");
         final NativeButton setSame = new NativeButton("set same callback",
-                e -> chart.setDrilldownCallback(chart.getDrilldownCallback()));
+            e -> chart.setDrilldownCallback(chart.getDrilldownCallback()));
         setSame.setId("setSame");
         final NativeButton setNull = new NativeButton("set null callback",
-                e -> chart.setDrilldownCallback(null));
+            e -> chart.setDrilldownCallback(null));
         setNull.setId("setNull");
         layout.add(chart, setNew, setSame, setNull, log);
         add(layout);
@@ -80,7 +80,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTests
     }
 
     private Component createButton(String id, String text,
-            SerializableRunnable runnable) {
+        SerializableRunnable runnable) {
         final NativeButton button = new NativeButton(text, e -> runnable.run());
         button.setId(id);
         return button;
@@ -99,6 +99,6 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTests
 
     private Stream<DataSeriesItem> createItems(String prefix) {
         return IntStream.range(1, 4)
-                .mapToObj(j -> createDataSeriesItem(prefix + j, j));
+            .mapToObj(j -> createDataSeriesItem(prefix + j, j));
     }
 }

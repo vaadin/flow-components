@@ -97,8 +97,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -107,14 +106,16 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
-                $(TextFieldElement.class).id("invalid-test-field"));
+        ValidationTestHelper.testValidation(getCommandExecutor(),getContext(),$(
+            TextFieldElement.class)
+            .id("invalid-test-field"));
     }
 
     @Test
     public void disabledTextFieldNotUpdating() {
         WebElement textField = findElement(By.id("disabled-text-field"));
-        WebElement message = findElement(By.id("disabled-text-field-message"));
+        WebElement message =
+                findElement(By.id("disabled-text-field-message"));
         Assert.assertEquals("", message.getText());
 
         executeScript("arguments[0].removeAttribute(\"disabled\");", textField);
@@ -128,17 +129,16 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void valueChangeListenerReportsCorrectValues() {
         WebElement textFieldValueDiv = findElement(By.id("text-field-value"));
-        WebElement textField = findElement(
-                By.id("text-field-with-value-change-listener"));
+        WebElement textField = findElement(By.id("text-field-with-value-change-listener"));
         updateValues(textFieldValueDiv, textField, true);
-        $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
+        $(RadioButtonGroupElement.class).first()
+                .selectByText(EAGER.toString());
         updateValues(textFieldValueDiv, textField, false);
     }
 
     @Test
     public void textFieldHasPlaceholder() {
-        WebElement textField = findElement(
-                By.id("text-field-with-value-change-listener"));
+        WebElement textField = findElement(By.id("text-field-with-value-change-listener"));
         Assert.assertEquals(textField.getAttribute("placeholder"),
                 "placeholder text");
     }
@@ -146,55 +146,47 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void assertFocusShortcut() {
         WebElement shortcutField = findElement(By.id("shortcut-field"));
-        Assert.assertNull(
-                "TextField should not be focused before the shortcut event is triggered.",
+        Assert.assertNull("TextField should not be focused before the shortcut event is triggered.",
                 shortcutField.getAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
-        Assert.assertTrue(
-                "TextField should be focused after the shortcut event is triggered.",
+        Assert.assertTrue("TextField should be focused after the shortcut event is triggered.",
                 shortcutField.getAttribute("focused").equals("true")
                         || shortcutField.getAttribute("focused").equals(""));
     }
 
     @Test
-    public void assertHelperText() {
-        TextFieldElement textFieldElement = $(TextFieldElement.class)
-                .id("helper-text-field");
-        Assert.assertEquals("Helper text", textFieldElement.getHelperText());
+    public void assertHelperText () {
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-text-field");
+        Assert.assertEquals("Helper text",textFieldElement.getHelperText());
     }
 
     @Test
-    public void clearHelper() {
-        TextFieldElement textFieldElement = $(TextFieldElement.class)
-                .id("helper-text-field");
-        Assert.assertEquals("Helper text", textFieldElement.getHelperText());
+    public void clearHelper (){
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-text-field");
+        Assert.assertEquals("Helper text",textFieldElement.getHelperText());
 
         $(TestBenchElement.class).id("clear-helper-text-button").click();
         Assert.assertEquals("", textFieldElement.getHelperText());
     }
 
     @Test
-    public void assertHelperComponent() {
-        TextFieldElement textFieldElement = $(TextFieldElement.class)
-                .id("helper-component-field");
-        Assert.assertEquals("helper-component",
-                textFieldElement.getHelperComponent().getAttribute("id"));
+    public void assertHelperComponent () {
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-component-field");
+        Assert.assertEquals("helper-component",textFieldElement.getHelperComponent().getAttribute("id"));
     }
 
     @Test
-    public void clearHelperComponent() {
-        TextFieldElement textFieldElement = $(TextFieldElement.class)
-                .id("helper-component-field");
-        Assert.assertEquals("helper-component",
-                textFieldElement.getHelperComponent().getAttribute("id"));
+    public void clearHelperComponent(){
+        TextFieldElement textFieldElement = $(TextFieldElement.class).id("helper-component-field");
+        Assert.assertEquals("helper-component",textFieldElement.getHelperComponent().getAttribute("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textFieldElement.getHelperComponent());
     }
 
     private void updateValues(WebElement textFieldValueDiv,
-            WebElement textField, boolean toggleBlur) {
+                              WebElement textField, boolean toggleBlur) {
         textField.sendKeys("a");
         if (toggleBlur) {
             blur();

@@ -696,8 +696,8 @@ public class SelectTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         Select<CustomItem> select = new Select<>();
         SelectListDataView<CustomItem> listDataView = select.setItems(items);
@@ -730,8 +730,8 @@ public class SelectTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         Select<CustomItem> select = new Select<>();
         SelectListDataView<CustomItem> listDataView = select.setItems(items);
@@ -764,8 +764,8 @@ public class SelectTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         Select<CustomItem> select = new Select<>();
         SelectListDataView<CustomItem> listDataView = select.setItems(items);
@@ -781,8 +781,8 @@ public class SelectTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         Select<CustomItem> select = new Select<>();
         SelectListDataView<CustomItem> listDataView = select.setItems(items);
@@ -863,10 +863,8 @@ public class SelectTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (!(o instanceof CustomItem))
-                return false;
+            if (this == o) return true;
+            if (!(o instanceof CustomItem)) return false;
             CustomItem that = (CustomItem) o;
             return Objects.equals(getName(), that.getName());
         }

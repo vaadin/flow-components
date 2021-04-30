@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
@@ -1086,9 +1087,9 @@ public class Configuration extends AbstractConfigurationObject
      * @param listener
      *            Listener to remove.
      */
-    public void removeChangeListener(ConfigurationChangeListener listener) {
+     public void removeChangeListener(ConfigurationChangeListener listener) {
         changeListeners.remove(listener);
-    }
+     }
 
     /**
      * Returns the color axis. This is used in color-based diagrams, like heat

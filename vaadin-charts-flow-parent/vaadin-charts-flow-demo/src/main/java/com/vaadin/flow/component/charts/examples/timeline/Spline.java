@@ -22,7 +22,7 @@ public class Spline extends AbstractChartExample {
 
         DataSeries dataSeries = new DataSeries();
 
-        for (StockPrices.PriceData data : StockPrices.fetchAaplPrice()) {
+        for (StockPrices.PriceData  data: StockPrices.fetchAaplPrice()) {
             DataSeriesItem item = new DataSeriesItem();
             item.setX(data.getDate());
             item.setY(data.getPrice());

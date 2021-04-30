@@ -27,8 +27,7 @@ public class Actionwords {
     }
 
     Optional<ConfirmDialogElement> getConfirmDialog() {
-        ElementQuery<ConfirmDialogElement> query = test
-                .$(ConfirmDialogElement.class).onPage();
+        ElementQuery<ConfirmDialogElement> query = test.$(ConfirmDialogElement.class).onPage();
         return query.exists() ? Optional.of(query.first()) : Optional.empty();
     }
 
@@ -48,8 +47,7 @@ public class Actionwords {
         test.$(ButtonElement.class).id(dialog).click();
     }
 
-    public void iCompareTheDialogToReferenceImage(String dialog)
-            throws Exception {
+    public void iCompareTheDialogToReferenceImage(String dialog) throws Exception {
         test.compareScreen(dialog + "opened");
     }
 

@@ -44,6 +44,8 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         verifyClosed();
     }
 
+
+
     @Test
     public void contextClickOnRow_itemClickGetsTargetItem() {
         grid.getCell(56, 1).contextClick();

@@ -63,8 +63,8 @@ public class ListBoxUnitTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         ListBox<CustomItem> listBox = new ListBox<>();
         ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
@@ -97,8 +97,8 @@ public class ListBoxUnitTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         ListBox<CustomItem> listBox = new ListBox<>();
         ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
@@ -131,8 +131,8 @@ public class ListBoxUnitTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         ListBox<CustomItem> listBox = new ListBox<>();
         ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);
@@ -151,8 +151,8 @@ public class ListBoxUnitTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(
-                Arrays.asList(first, second, third));
+        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
+                third));
 
         ListBox<CustomItem> listBox = new ListBox<>();
         ListBoxListDataView<CustomItem> listDataView = listBox.setItems(items);

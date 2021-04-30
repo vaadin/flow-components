@@ -35,6 +35,7 @@ public class BasicChartIT extends AbstractTBTest {
         assertTrue(title.getText().contains("First Chart for Flow"));
     }
 
+
     @Test
 
     public void Chart_TitleCanBeChanged() {

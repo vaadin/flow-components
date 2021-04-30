@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

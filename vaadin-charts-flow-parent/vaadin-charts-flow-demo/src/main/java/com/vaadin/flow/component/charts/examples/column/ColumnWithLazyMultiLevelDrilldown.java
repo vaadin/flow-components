@@ -155,7 +155,7 @@ public class ColumnWithLazyMultiLevelDrilldown extends AbstractChartExample {
             return getPointDrilldown(event.getItem());
         });
 
-        chart.addChartDrillupListener(event -> log("ChartDrillupEvent"));
+        chart.addChartDrillupListener( event -> log("ChartDrillupEvent"));
 
         layout.add(chart, log);
         add(layout);

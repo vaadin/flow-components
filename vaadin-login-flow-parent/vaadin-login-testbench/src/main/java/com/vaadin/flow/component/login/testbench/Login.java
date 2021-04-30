@@ -20,6 +20,7 @@ package com.vaadin.flow.component.login.testbench;
  * #L%
  */
 
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
@@ -68,19 +69,20 @@ interface Login {
     TestBenchElement getErrorComponent();
 
     /**
-     * Return the error message title. Returns empty string if the error message
-     * is not displayed
+     * Return the error message title. Returns empty string
+     * if the error message is not displayed
      */
     String getErrorMessageTitle();
 
     /**
-     * Return the error message text. Returns empty string if the error message
-     * is not displayed
+     * Return the error message text. Returns empty string
+     * if the error message is not displayed
      */
     String getErrorMessage();
 
     /**
-     * Return the additional information placed in a footer of the login element
+     * Return the additional information placed in a footer
+     * of the login element
      */
     String getAdditionalInformation();
 }

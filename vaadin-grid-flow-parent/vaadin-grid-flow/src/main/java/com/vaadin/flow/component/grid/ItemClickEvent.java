@@ -46,10 +46,10 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *            <code>true</code> if the event was originally fired on the
      *            client, <code>false</code> if the event originates from
      *            server-side logic
-     * @param itemKey
-     *            the item mapper key
+     * @param itemKey the item mapper key
      * @param internalColumnId
-     *            the internal id of the column associated with the click event
+     *            the internal id of the column associated with
+     *            the click event
      * @param screenX
      *            the x coordinate of the click event, relative to the upper
      *            left corner of the screen, -1 if unknown
@@ -108,8 +108,7 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *            <code>true</code> if the event was originally fired on the
      *            client, <code>false</code> if the event originates from
      *            server-side logic
-     * @param itemKey
-     *            the item mapper key
+     * @param itemKey the item mapper key
      * @param screenX
      *            the x coordinate of the click event, relative to the upper
      *            left corner of the screen, -1 if unknown
@@ -139,17 +138,15 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *            <code>true</code> if the meta key was down when the event was
      *            fired, <code>false</code> otherwise
      *
-     * @deprecated Please use the constructor with an extra parameter
-     *             {@code internalColumnId}
+     * @deprecated Please use the constructor with an extra parameter {@code internalColumnId}
      */
     @Deprecated
-    public ItemClickEvent(Grid<T> source, boolean fromClient, String itemKey,
-            int screenX, int screenY, int clientX, int clientY, int clickCount,
-            int button, boolean ctrlKey, boolean shiftKey, boolean altKey,
-            boolean metaKey) {
-        this(source, fromClient, itemKey, "", screenX, screenY, clientX,
-                clientY, clickCount, button, ctrlKey, shiftKey, altKey,
-                metaKey);
+    public ItemClickEvent(Grid<T> source, boolean fromClient,
+        String itemKey, int screenX, int screenY, int clientX, int clientY,
+        int clickCount, int button, boolean ctrlKey, boolean shiftKey,
+        boolean altKey, boolean metaKey) {
+        this(source, fromClient, itemKey, "", screenX, screenY, clientX, clientY,
+            clickCount, button, ctrlKey, shiftKey, altKey, metaKey);
     }
 
     /**

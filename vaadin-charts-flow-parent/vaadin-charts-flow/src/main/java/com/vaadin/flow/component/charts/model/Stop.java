@@ -40,4 +40,5 @@ public class Stop extends AbstractConfigurationObject {
         this.color = color;
     }
 
+
 }

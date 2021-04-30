@@ -26,12 +26,12 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  * Internal representation of {@code <vaadin-item>}. vaadin-select.html imports
  * vaadin-item.html.
  * 
- * @param <T>
- *            the type of the bean
+ * @param <T> the type of the bean
  */
 @Tag("vaadin-item")
-class VaadinItem<T> extends Component implements
-        HasItemComponents.ItemComponent<T>, HasComponents, HasStyle, HasText {
+class VaadinItem<T> extends Component
+        implements HasItemComponents.ItemComponent<T>, HasComponents,
+        HasStyle, HasText {
 
     private T item;
 

@@ -9,8 +9,7 @@ public class I18nIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/overlay/ptbr";
+        String url = getBaseURL().replace(super.getBaseURL(), super.getBaseURL() + "/vaadin-login") + "/overlay/ptbr";
         getDriver().get(url);
     }
 
@@ -25,10 +24,10 @@ public class I18nIT extends AbstractParallelTest {
         Assert.assertEquals("Senha", login.getPasswordField().getLabel());
         Assert.assertEquals("Entrar", login.getSubmitButton().getText());
         Assert.assertEquals("Esqueci minha senha",
-                login.getForgotPasswordButton().getText());
+            login.getForgotPasswordButton().getText());
         Assert.assertEquals(
-                "Caso necessite apresentar alguma informação extra para o usuário (como credenciais padrão), este é o lugar.",
-                login.getAdditionalInformation());
+            "Caso necessite apresentar alguma informação extra para o usuário (como credenciais padrão), este é o lugar.",
+            login.getAdditionalInformation());
     }
 
 }

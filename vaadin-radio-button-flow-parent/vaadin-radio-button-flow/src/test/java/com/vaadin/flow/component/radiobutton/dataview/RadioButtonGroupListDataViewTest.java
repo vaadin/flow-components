@@ -25,8 +25,8 @@ public class RadioButtonGroupListDataViewTest
 
     /*
      * ListDataView implementation is tested in AbstractListDataViewTest. No
-     * tests included here because RadioButtonGroupListDataView does not
-     * override any methods or add any new ones.
+     * tests included here because RadioButtonGroupListDataView does not override
+     * any methods or add any new ones.
      */
 
     @Override

@@ -101,7 +101,8 @@ public class RadioButtonGroupDemoPage extends DemoView {
         // end-source-example
         group.setId("group-with-label-and-error-message");
         button.setId("group-with-label-button");
-        addCard("Group with label and error message", group, button);
+        addCard("Group with label and error message", group,
+                button);
     }
 
     private void addHelperText() {
@@ -119,18 +120,17 @@ public class RadioButtonGroupDemoPage extends DemoView {
         helperComponent.setId("helper-component");
         groupWitHelperComponent.setHelperComponent(helperComponent);
         // end-source-example
-
-        NativeButton clearHelperText = new NativeButton("clear helper text",
-                e -> groupWitHelperText.setHelperText(null));
+        
+        NativeButton clearHelperText = new NativeButton("clear helper text", 
+            e -> groupWitHelperText.setHelperText(null));
         clearHelperText.setId("clear-helper-text-button");
 
-        NativeButton clearHelperComponent = new NativeButton(
-                "clear helper component",
-                e -> groupWitHelperComponent.setHelperComponent(null));
+        NativeButton clearHelperComponent = new NativeButton("clear helper component", 
+            e -> groupWitHelperComponent.setHelperComponent(null));
         clearHelperComponent.setId("clear-helper-component-button");
 
         addCard("Helper text", groupWitHelperText, groupWitHelperComponent,
-                clearHelperText, clearHelperComponent);
+            clearHelperText, clearHelperComponent);
     }
 
     private void addComponentWithThemeVariant() {
@@ -141,8 +141,8 @@ public class RadioButtonGroupDemoPage extends DemoView {
         group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
-        addVariantsDemo(() -> group,
-                GeneratedVaadinRadioGroup::addThemeVariants,
+
+        addVariantsDemo(() -> group, GeneratedVaadinRadioGroup::addThemeVariants,
                 GeneratedVaadinRadioGroup::removeThemeVariants,
                 RadioGroupVariant::getVariantName,
                 RadioGroupVariant.LUMO_VERTICAL);
@@ -383,3 +383,4 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
 }
+

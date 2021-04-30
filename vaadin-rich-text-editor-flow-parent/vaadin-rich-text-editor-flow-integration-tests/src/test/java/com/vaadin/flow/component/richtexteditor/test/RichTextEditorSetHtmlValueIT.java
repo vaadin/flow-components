@@ -105,11 +105,11 @@ public class RichTextEditorSetHtmlValueIT extends AbstractComponentIT {
     }
 
     private void setRteValue(ValueChangeMode valueChangeMode) {
-        final String id = String.format("setChangeMode_%s",
-                valueChangeMode.toString());
+        final String id = String
+            .format("setChangeMode_%s", valueChangeMode.toString());
         $(TestBenchElement.class).id(id).click();
         Assert.assertEquals(valueChangeMode.toString(),
-                $(TestBenchElement.class).id("rteValueChangeMode").getText());
+            $(TestBenchElement.class).id("rteValueChangeMode").getText());
     }
 
     private void waitForRteValue(String value) {

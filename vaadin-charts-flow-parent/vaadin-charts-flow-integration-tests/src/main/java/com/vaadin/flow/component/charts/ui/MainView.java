@@ -30,8 +30,7 @@ public class MainView extends Div implements HasUrlParameter<String> {
     public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.examples.";
 
     @Override
-    public void setParameter(BeforeEvent event,
-            @WildcardParameter String parameter) {
+    public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
         removeAll();
         Optional<Component> content = getContentFromParameter(parameter);
         if (content.isPresent()) {

@@ -76,9 +76,9 @@ public class CrudView extends DemoView {
         addCard("Basic CRUD", crud);
     }
 
-    // NOTE: heading is an unicode space
-    // begin-source-example
-    // source-example-heading:
+     // NOTE: heading is an unicode space
+     // begin-source-example
+     // source-example-heading:  
     private CrudEditor<Person> createPersonEditor() {
         TextField firstName = new TextField("First name");
         TextField lastName = new TextField("Last name");
@@ -137,8 +137,7 @@ public class CrudView extends DemoView {
         // begin-source-example
         // source-example-heading: No filtering and sorting
         CrudGrid<Person> crudGrid = new CrudGrid<>(Person.class, false);
-        Crud<Person> crud = new Crud<>(Person.class, crudGrid,
-                createPersonEditor());
+        Crud<Person> crud = new Crud<>(Person.class, crudGrid, createPersonEditor());
 
         PersonDataProvider dataProvider = new PersonDataProvider();
 
@@ -169,7 +168,7 @@ public class CrudView extends DemoView {
 
     // NOTE: heading is two unicode spaces
     // begin-source-example
-    // source-example-heading:
+    // source-example-heading:   
     private CrudI18n createYorubaI18n() {
         CrudI18n yorubaI18n = CrudI18n.createDefault();
 
@@ -181,17 +180,13 @@ public class CrudView extends DemoView {
         yorubaI18n.setEditLabel("S'atunko eeyan");
 
         yorubaI18n.getConfirm().getCancel().setTitle("Akosile");
-        yorubaI18n.getConfirm().getCancel()
-                .setContent("Akosile ti a o tii fi pamo nbe");
-        yorubaI18n.getConfirm().getCancel().getButton()
-                .setDismiss("Se atunko sii");
+        yorubaI18n.getConfirm().getCancel().setContent("Akosile ti a o tii fi pamo nbe");
+        yorubaI18n.getConfirm().getCancel().getButton().setDismiss("Se atunko sii");
         yorubaI18n.getConfirm().getCancel().getButton().setConfirm("Fa'gi lee");
 
         yorubaI18n.getConfirm().getDelete().setTitle("Amudaju ipare");
-        yorubaI18n.getConfirm().getDelete().setContent(
-                "Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
-        yorubaI18n.getConfirm().getDelete().getButton()
-                .setDismiss("Da'wo duro");
+        yorubaI18n.getConfirm().getDelete().setContent("Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
+        yorubaI18n.getConfirm().getDelete().getButton().setDismiss("Da'wo duro");
         yorubaI18n.getConfirm().getDelete().getButton().setConfirm("Paare");
 
         return yorubaI18n;
@@ -207,14 +202,12 @@ public class CrudView extends DemoView {
         footer.getElement().getStyle().set("flex", "1");
 
         Button newItemButton = new Button("Add person ...");
-        newItemButton.addClickListener(
-                e -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
+        newItemButton.addClickListener(e -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
 
         crud.setToolbar(footer, newItemButton);
 
         PersonDataProvider dataProvider = new PersonDataProvider();
-        dataProvider.setSizeChangeListener(
-                count -> footer.setText("Total: " + count));
+        dataProvider.setSizeChangeListener(count -> footer.setText("Total: " + count));
 
         crud.getGrid().removeColumnByKey("id");
         crud.setDataProvider(dataProvider);
@@ -229,8 +222,7 @@ public class CrudView extends DemoView {
         // begin-source-example
         // source-example-heading: Custom Grid
         Grid<Person> grid = new Grid<>();
-        Crud<Person> crud = new Crud<>(Person.class, grid,
-                createPersonEditor());
+        Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
 
         PersonDataProvider dataProvider = new PersonDataProvider();
         crud.setDataProvider(dataProvider);
@@ -238,10 +230,11 @@ public class CrudView extends DemoView {
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
 
         Crud.addEditColumn(grid);
-        grid.addColumn(TemplateRenderer.<Person> of(
-                "<img src=[[item.photoSource]] style=\"height: 40px; border-radius: 50%;\">")
+        grid.addColumn(TemplateRenderer.<Person>
+                of("<img src=[[item.photoSource]] style=\"height: 40px; border-radius: 50%;\">")
                 .withProperty("photoSource", CrudView::randomProfilePictureUrl))
-                .setWidth("60px").setFlexGrow(0);
+                .setWidth("60px")
+                .setFlexGrow(0);
         grid.addColumn(Person::getFirstName).setHeader("First name");
         grid.addColumn(Person::getLastName).setHeader("Last name");
         // end-source-example
@@ -253,8 +246,7 @@ public class CrudView extends DemoView {
         // begin-source-example
         // source-example-heading: Custom search
         Grid<Person> grid = new Grid<>(Person.class);
-        Crud<Person> crud = new Crud<>(Person.class, grid,
-                createPersonEditor());
+        Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
 
         List<Person> database = createPersonList();
 
@@ -263,9 +255,9 @@ public class CrudView extends DemoView {
 
             if (!query.isEmpty()) {
                 final String f = query.toLowerCase();
-                result = result.filter(p -> (p.getFirstName() != null)
-                        && (p.getFirstName().toLowerCase().contains(f))
-                        || p.getLastName().toLowerCase().contains(f));
+                result = result.filter(p ->
+                        (p.getFirstName() != null) && (p.getFirstName().toLowerCase().contains(f))
+                                || p.getLastName().toLowerCase().contains(f));
             }
 
             return result;
@@ -273,11 +265,10 @@ public class CrudView extends DemoView {
 
         DataProvider<Person, String> dataProvider = new CallbackDataProvider<>(
                 query -> filter.apply(query.getFilter().orElse("")),
-                query -> (int) filter.apply(query.getFilter().orElse(""))
-                        .count());
+                query -> (int) filter.apply(query.getFilter().orElse("")).count());
 
-        ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider = dataProvider
-                .withConfigurableFilter();
+        ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider
+                = dataProvider.withConfigurableFilter();
 
         grid.setDataProvider(filterableDataProvider);
         grid.removeColumnByKey("id");
@@ -307,22 +298,22 @@ public class CrudView extends DemoView {
     }
 
     // Dummy database
-    private static final String[] FIRSTS = { "James", "Mary", "John",
-            "Patricia", "Robert", "Jennifer" };
-    private static final String[] LASTS = { "Smith", "Johnson", "Williams",
-            "Brown" };
+    private static final String[] FIRSTS = {"James", "Mary", "John", "Patricia", "Robert", "Jennifer"};
+    private static final String[] LASTS = {"Smith", "Johnson", "Williams", "Brown"};
 
     private static List<Person> createPersonList() {
         return IntStream
-                .rangeClosed(1, 50).mapToObj(i -> new Person(i,
-                        FIRSTS[i % FIRSTS.length], LASTS[i % LASTS.length]))
+                .rangeClosed(1, 50)
+                .mapToObj(i -> new Person(i, FIRSTS[i % FIRSTS.length], LASTS[i % LASTS.length]))
                 .collect(toList());
     }
 
     private static String randomProfilePictureUrl(Object context) {
         return "https://randomuser.me/api/portraits/thumb/"
-                + (Math.random() > 0.5 ? "men" : "women") + '/'
-                + (1 + (int) (Math.random() * 100)) + ".jpg";
+                + (Math.random() > 0.5 ? "men" : "women")
+                + '/'
+                + (1 + (int) (Math.random() * 100))
+                + ".jpg";
     }
 
     // begin-source-example
@@ -334,8 +325,8 @@ public class CrudView extends DemoView {
         private String lastName;
 
         /**
-         * No-arg constructor required by Crud to be able to instantiate a new
-         * bean when the new item button is clicked.
+         * No-arg constructor required by Crud to be able to instantiate a new bean
+         * when the new item button is clicked.
          */
         public Person() {
         }
@@ -373,7 +364,7 @@ public class CrudView extends DemoView {
         @Override
         public Person clone() {
             try {
-                return (Person) super.clone();
+                return (Person)super.clone();
             } catch (CloneNotSupportedException e) {
                 return null;
             }
@@ -381,8 +372,7 @@ public class CrudView extends DemoView {
     }
 
     // Person data provider
-    public static class PersonDataProvider
-            extends AbstractBackEndDataProvider<Person, CrudFilter> {
+    public static class PersonDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
         // A real app should hook up something like JPA
         final List<Person> DATABASE = createPersonList();
@@ -390,15 +380,15 @@ public class CrudView extends DemoView {
         private Consumer<Long> sizeChangeListener;
 
         @Override
-        protected Stream<Person> fetchFromBackEnd(
-                Query<Person, CrudFilter> query) {
+        protected Stream<Person> fetchFromBackEnd(Query<Person, CrudFilter> query) {
             int offset = query.getOffset();
             int limit = query.getLimit();
 
             Stream<Person> stream = DATABASE.stream();
 
             if (query.getFilter().isPresent()) {
-                stream = stream.filter(predicate(query.getFilter().get()))
+                stream = stream
+                        .filter(predicate(query.getFilter().get()))
                         .sorted(comparator(query.getFilter().get()));
             }
 
@@ -427,14 +417,15 @@ public class CrudView extends DemoView {
                     .map(constraint -> (Predicate<Person>) person -> {
                         try {
                             Object value = valueOf(constraint.getKey(), person);
-                            return value != null && value.toString()
-                                    .toLowerCase().contains(constraint
-                                            .getValue().toLowerCase());
+                            return value != null && value.toString().toLowerCase()
+                                    .contains(constraint.getValue().toLowerCase());
                         } catch (Exception e) {
                             e.printStackTrace();
                             return false;
                         }
-                    }).reduce(Predicate::and).orElse(e -> true);
+                    })
+                    .reduce(Predicate::and)
+                    .orElse(e -> true);
         }
 
         private static Comparator<Person> comparator(CrudFilter filter) {
@@ -442,12 +433,11 @@ public class CrudView extends DemoView {
             return filter.getSortOrders().entrySet().stream()
                     .map(sortClause -> {
                         try {
-                            Comparator<Person> comparator = Comparator
-                                    .comparing(person -> (Comparable) valueOf(
-                                            sortClause.getKey(), person));
+                            Comparator<Person> comparator
+                                    = Comparator.comparing(person ->
+                                    (Comparable) valueOf(sortClause.getKey(), person));
 
-                            if (sortClause
-                                    .getValue() == SortDirection.DESCENDING) {
+                            if (sortClause.getValue() == SortDirection.DESCENDING) {
                                 comparator = comparator.reversed();
                             }
 
@@ -455,7 +445,9 @@ public class CrudView extends DemoView {
                         } catch (Exception ex) {
                             return (Comparator<Person>) (o1, o2) -> 0;
                         }
-                    }).reduce(Comparator::thenComparing).orElse((o1, o2) -> 0);
+                    })
+                    .reduce(Comparator::thenComparing)
+                    .orElse((o1, o2) -> 0);
         }
 
         private static Object valueOf(String fieldName, Person person) {
@@ -470,8 +462,11 @@ public class CrudView extends DemoView {
 
         void persist(Person item) {
             if (item.getId() == null) {
-                item.setId(DATABASE.stream().map(Person::getId)
-                        .max(naturalOrder()).orElse(0) + 1);
+                item.setId(DATABASE
+                        .stream()
+                        .map(Person::getId)
+                        .max(naturalOrder())
+                        .orElse(0) + 1);
             }
 
             final Optional<Person> existingItem = find(item.getId());
@@ -485,7 +480,9 @@ public class CrudView extends DemoView {
         }
 
         Optional<Person> find(Integer id) {
-            return DATABASE.stream().filter(entity -> entity.getId().equals(id))
+            return DATABASE
+                    .stream()
+                    .filter(entity -> entity.getId().equals(id))
                     .findFirst();
         }
 

@@ -34,11 +34,12 @@ import com.vaadin.tests.TabbedComponentDemoTest;
 public class GridViewBase extends TabbedComponentDemoTest {
 
     static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+    
 
     @Override
     protected String getTestPath() {
         return "/vaadin-grid-it-demo";
-    }
+    }    
 
     void assertElementHasFocus(WebElement element) {
         Assert.assertTrue("Element should have focus",

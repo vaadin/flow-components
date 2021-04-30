@@ -18,8 +18,8 @@ package com.vaadin.flow.component.timepicker;
 import com.vaadin.flow.internal.StateNode;
 
 /**
- * Utility class for time picker web component to disable client side
- * validation.
+ * Utility class for time picker web component to disable client
+ * side validation.
  *
  * @author Vaadin Ltd
  */

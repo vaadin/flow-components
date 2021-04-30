@@ -189,8 +189,7 @@ public class ContextMenuTest {
         NativeButton menuButton = new NativeButton();
         ContextMenu menu = new ContextMenu(menuButton);
         menu.add(new Label());
-        ObjectOutputStream out = new ObjectOutputStream(
-                new ByteArrayOutputStream());
+        ObjectOutputStream out = new ObjectOutputStream(new ByteArrayOutputStream());
         out.writeObject(menu);
     }
 

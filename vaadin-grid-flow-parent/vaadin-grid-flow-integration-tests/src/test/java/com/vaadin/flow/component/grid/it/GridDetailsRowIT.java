@@ -34,12 +34,11 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     public void gridTwoItemsSelectedWhenOpen() {
         open();
         GridElement grid = $(GridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(grid, 1);
+        //  detail configured
+        assertAmountOfOpenDetails(grid,1);
 
         waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 2, 1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 2,1);
 
         // each detail contain a button
         List<WebElement> detailsElement = grid
@@ -62,8 +61,7 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         clickElementWithJs(getRow(grid, 3).findElement(By.tagName("td")));
 
         waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 3, 1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 3,1);
 
         List<WebElement> detailsElement = grid
                 .findElements(By.tagName("flow-component-renderer"));
@@ -78,8 +76,8 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     }
 
     /**
-     * If the details of an item is opened and the item updated then the detail
-     * should be updated
+     * If the details of an item is opened
+     * and the item updated then the detail should be updated
      */
     @Test
 
@@ -90,8 +88,7 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         clickElementWithJs(getRow(grid, 2).findElement(By.tagName("td")));
 
         waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 3, 1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 3,1);
 
         List<WebElement> detailsElement = grid
                 .findElements(By.tagName("flow-component-renderer"));
@@ -101,14 +98,15 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         // detail on row 1 is empty
         assertElementHasNoButton(detailsElement.get(1));
         // detail on row 3 contains a button
-        assertElementHasButton(detailsElement.get(2), "Person 3");
+        assertElementHasButton(detailsElement.get(2),"Person 3");
+
 
         WebElement updateButton = findElement(By.id("update-button"));
         updateButton.click();
 
+
         waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 3, 1);
+                .findElements(By.tagName("flow-component-renderer")).size() == 3,1);
 
         detailsElement = grid
                 .findElements(By.tagName("flow-component-renderer"));
@@ -120,7 +118,9 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         // detail on row 1 is empty
         assertElementHasNoButton(detailsElement.get(1));
         // detail on row 3 contains a button
-        assertElementHasButton(detailsElement.get(2), "Person 3 - updates 1");
+        assertElementHasButton(detailsElement.get(2),"Person 3 - updates 1");
+
+
 
     }
 
@@ -130,15 +130,15 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,
-            int expectedAmount) {
-        waitUntil(driver -> grid.findElements(By.className("row-details"))
-                .size() == expectedAmount);
+                                           int expectedAmount) {
+        waitUntil(driver ->
+                grid.findElements(By.className("row-details")).size()
+                        == expectedAmount);
         Assert.assertEquals(expectedAmount,
                 grid.findElements(By.className("row-details")).size());
     }
 
-    private void assertElementHasButton(WebElement componentRenderer,
-            String content) {
+    private void assertElementHasButton(WebElement componentRenderer, String content) {
 
         List<WebElement> children = componentRenderer
                 .findElements(By.tagName("vaadin-button"));

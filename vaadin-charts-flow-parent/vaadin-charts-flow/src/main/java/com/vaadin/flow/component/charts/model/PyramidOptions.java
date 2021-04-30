@@ -78,8 +78,8 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract Number getColorIndex();
 
     /**
-     * A specific color index to use for the series, so its graphic
-     * representations are given the class name
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
@@ -91,9 +91,9 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Determines what data value should be used to calculate point color if
-     * <code>colorAxis</code> is used. Requires to set <code>min</code> and
-     * <code>max</code> if some custom point property is used or if
-     * approximation for data grouping is set to <code>'sum'</code>.
+     * <code>colorAxis</code> is used. Requires to set <code>min</code>
+     * and <code>max</code> if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>.
      */
     public abstract void setColorKey(String colorKey);
 
@@ -132,12 +132,12 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract Boolean getCrisp();
 
     /**
-     * When true, each point or column edge is rounded to its nearest pixel in
-     * order to render sharp on screen. In some cases, when there are a lot of
-     * densely packed columns, this leads to visible difference in column widths
-     * or distance between columns. In these cases, setting crisp to
-     * <code>falase</code> may look better, even though each column is rendered
-     * blurry.
+     * When true, each point or column edge is rounded to its nearest pixel
+     * in order to render sharp on screen. In some cases, when there are
+     * a lot of densely packed columns, this leads to visible difference
+     * in column widths or distance between columns.
+     * In these cases, setting crisp to <code>falase</code> may look better,
+     * even though each column is rendered blurry.
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -266,8 +266,8 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract Boolean getIgnoreHiddenPoint();
 
     /**
-     * This option tells whether the series shall be redrawn as if the hidden
-     * point were null.
+     * This option tells whether the series shall be redrawn
+     * as if the hidden point were null.
      */
     public abstract void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint);
 
@@ -390,11 +390,10 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract Boolean getSkipKeyboardNavigation();
 
     /**
-     * Whether or not to skip past the points in this series for keyboard
-     * navigation.
+     * Whether or not to skip past the
+     * points in this series for keyboard navigation.
      */
-    public abstract void setSkipKeyboardNavigation(
-            Boolean skipKeyboardNavigation);
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setSlicedOffset(Number)

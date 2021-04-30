@@ -20,6 +20,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 
+
 @TestPath("vaadin-grid/item-count-callback")
 public class ItemCountCallbackGridIT extends AbstractItemCountGridIT {
 

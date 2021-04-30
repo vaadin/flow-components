@@ -37,8 +37,7 @@ public class DetachReattachPage extends Div {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setId("group");
 
-        List<String> items = new LinkedList<>(
-                Arrays.asList("foo", "bar", "baz"));
+        List<String> items = new LinkedList<>(Arrays.asList("foo", "bar", "baz"));
         group.setItems(new ListDataProvider<>(items));
 
         NativeButton detach = new NativeButton("detach", e -> remove(group));
@@ -47,12 +46,10 @@ public class DetachReattachPage extends Div {
         NativeButton attach = new NativeButton("attach", e -> add(group));
         attach.setId("attach");
 
-        NativeButton setValue = new NativeButton("set value", e -> group
-                .setValue(new HashSet<>(Arrays.asList("foo", "baz"))));
+        NativeButton setValue = new NativeButton("set value", e -> group.setValue(new HashSet<>(Arrays.asList("foo", "baz"))));
         setValue.setId("setValue");
 
-        NativeButton deselectAll = new NativeButton("deselect all",
-                e -> group.deselectAll());
+        NativeButton deselectAll = new NativeButton("deselect all", e -> group.deselectAll());
         deselectAll.setId("deselectAll");
 
         add(group, detach, attach, setValue, deselectAll);

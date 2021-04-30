@@ -40,7 +40,8 @@ import java.util.stream.Stream;
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar.js")
 @NpmPackage(value = "@vaadin/vaadin-avatar", version = "2.0.2")
-public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
+public class Avatar extends Component
+    implements HasStyle, HasSize, HasTheme {
 
     /**
      * The internationalization properties for {@link AvatarGroup}.
@@ -62,8 +63,8 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
         /**
          * Sets the translated word for {@code anonymous}.
          *
-         * @param anonymous
-         *            the translated word for anonymous, not <code>null</code>
+         * @param anonymous the translated word for anonymous,
+         *                  not <code>null</code>
          * @return this instance for method chaining
          */
         public AvatarI18n setAnonymous(String anonymous) {
@@ -80,8 +81,8 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Creates a new empty avatar.
      * <p>
-     * The avatar displays the user icon in the avatar and "Anonymous" in the
-     * tooltip unless overridden by setting other properties.
+     * The avatar displays the user icon in the avatar and "Anonymous"
+     * in the tooltip unless overridden by setting other properties.
      */
     public Avatar() {
     }
@@ -176,8 +177,8 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Sets the abbreviation for the avatar.
      * <p>
-     * The abbreviation will be displayed in the avatar if no image has been
-     * set.
+     * The abbreviation will be displayed in the avatar if no image has
+     * been set.
      *
      * @param abbr
      *            the abbreviation
@@ -199,7 +200,7 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
      * Gets the image that was set for the avatar.
      *
      * @return the image resource value or {@code null} if the resource has not
-     *         been set
+     * been set
      */
     public AbstractStreamResource getImageResource() {
         return imageResource;
@@ -208,8 +209,8 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Sets the image url for the avatar.
      * <p>
-     * The image will be displayed in the avatar even if abbreviation or name is
-     * set.
+     * The image will be displayed in the avatar even if abbreviation or
+     * name is set.
      * <p>
      * Setting the image with this method resets the image resource provided
      * with {@link Avatar#setImageResource(AbstractStreamResource)}
@@ -265,9 +266,9 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Sets the color index for the avatar.
      * <p>
-     * The color index defines which color will be used for the border of the
-     * avatar. Color index N applies CSS variable {@code --vaadin-user-color-N}
-     * to the border.
+     * The color index defines which color will be used for the border
+     * of the avatar. Color index N applies CSS variable
+     * {@code --vaadin-user-color-N} to the border.
      *
      * @param colorIndex
      *            the color index or {@code null} to remove the index
@@ -284,7 +285,8 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
      */
     public void addThemeVariants(AvatarVariant... variants) {
         getThemeNames()
-                .addAll(Stream.of(variants).map(AvatarVariant::getVariantName)
+                .addAll(Stream.of(variants)
+                        .map(AvatarVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
 

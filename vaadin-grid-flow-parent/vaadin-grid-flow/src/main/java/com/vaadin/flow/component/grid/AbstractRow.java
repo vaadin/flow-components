@@ -92,8 +92,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     private SerializableFunction<AbstractColumn<?>, CELL> cellCtor;
 
-    AbstractRow(ColumnLayer layer,
-            SerializableFunction<AbstractColumn<?>, CELL> cellCtor) {
+    AbstractRow(ColumnLayer layer, SerializableFunction<AbstractColumn<?>, CELL> cellCtor) {
         this.layer = layer;
         this.cellCtor = cellCtor;
         cells = layer.getColumns().stream().map(cellCtor)
@@ -256,7 +255,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         if (!isOutmostRow()) {
             throw new IllegalArgumentException(
                     "Cells can be joined only on the top-most HeaderRow "
-                            + "or the bottom-most FooterRow.");
+                        + "or the bottom-most FooterRow.");
         }
         if (cells.size() < 2) {
             throw new IllegalArgumentException("Cannot join less than 2 cells");
@@ -357,7 +356,9 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
         layer.getColumns().removeAll(columnsToJoin);
         CELL keeper = this.cells.get(elementInsertIndex);
-        this.cells.removeAll(cellsToJoin.stream().filter(cell -> cell != keeper)
+        this.cells.removeAll(cellsToJoin
+                .stream()
+                .filter(cell -> cell != keeper)
                 .collect(Collectors.toList()));
 
         return this.cells.get(cellInsertIndex);

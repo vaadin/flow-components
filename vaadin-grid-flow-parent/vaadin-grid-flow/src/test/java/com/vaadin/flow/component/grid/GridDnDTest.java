@@ -49,14 +49,11 @@ public class GridDnDTest {
         array.set(0, item);
         object.put("draggedItems", array);
 
-        GridDragStartEvent<String> startEvent = new GridDragStartEvent<String>(
-                grid, true, object);
+        GridDragStartEvent<String> startEvent = new GridDragStartEvent<String>(grid, true, object);
         ComponentUtil.fireEvent(grid, startEvent);
 
-        Assert.assertEquals("No active drag source set", grid,
-                ui.getActiveDragSourceComponent());
-        Assert.assertEquals("No drag data set", dragData,
-                ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
+        Assert.assertEquals("No active drag source set", grid, ui.getActiveDragSourceComponent());
+        Assert.assertEquals("No drag data set", dragData, ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
 
         AtomicReference<DropEvent<RouterLink>> eventCapture = new AtomicReference<>();
         RouterLink routerLink = new RouterLink() {
@@ -68,22 +65,17 @@ public class GridDnDTest {
 
         DropTarget.create(routerLink).addDropListener(eventCapture::set);
 
-        ComponentUtil.fireEvent(routerLink, new DropEvent<RouterLink>(
-                routerLink, true, EffectAllowed.ALL.getClientPropertyValue()));
+        ComponentUtil.fireEvent(routerLink, new DropEvent<RouterLink>(routerLink, true, EffectAllowed.ALL.getClientPropertyValue()));
 
         DropEvent<RouterLink> dropEvent = eventCapture.get();
 
-        Assert.assertEquals("Incorrect drag data", dragData,
-                dropEvent.getDragData().get());
-        Assert.assertEquals("Incorrect drag source", grid,
-                dropEvent.getDragSourceComponent().get());
+        Assert.assertEquals("Incorrect drag data", dragData, dropEvent.getDragData().get());
+        Assert.assertEquals("Incorrect drag source", grid, dropEvent.getDragSourceComponent().get());
 
         ComponentUtil.fireEvent(grid, new GridDragEndEvent<>(grid, true));
 
-        Assert.assertNull("Active drag source not cleared",
-                ui.getActiveDragSourceComponent());
-        Assert.assertNull("Drag data not cleared",
-                ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
+        Assert.assertNull("Active drag source not cleared", ui.getActiveDragSourceComponent());
+        Assert.assertNull("Drag data not cleared", ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
     }
 
 }

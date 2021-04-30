@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -34,8 +35,8 @@ import static java.util.stream.Collectors.toMap;
 /**
  * A series which is based on data from a DataProvider.
  * <p>
- * You must use {@link #setY(SerializableFunction)} to define which part of the
- * data bean to use as <code>y</code> values.
+ * You must use {@link #setY(SerializableFunction)} to define which part of the data bean to
+ * use as <code>y</code> values.
  * <p>
  * Note that even if you use a lazy loading {@link DataProvider}, this series
  * will work in an eager fashion and load all the data from the provider at
@@ -75,14 +76,13 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * {@link ChartType#AREA} etc use {@code y} values to define the data points
      * to show in the chart. For these chart types you should use either
      * {@link #DataProviderSeries(DataProvider, SerializableFunction)} or
-     * {@link #setY(SerializableFunction)} to define the function (lambda) which
-     * extracts the values from the bean in the provider.
+     * {@link #setY(SerializableFunction)} to define the function (lambda) which extracts
+     * the values from the bean in the provider.
      * <p>
      * Other chart types such as {@link ChartType#ERRORBAR} do not require
      * {@code y} values but instead {@code high} and {@code low} values.
-     * Functions for extracting these are set using
-     * {@link #setHigh(SerializableFunction)} and
-     * {@link #setLow(SerializableFunction)} respectively.
+     * Functions for extracting these are set using {@link #setHigh(SerializableFunction)}
+     * and {@link #setLow(SerializableFunction)} respectively.
      *
      * @param dataProvider
      *            the data provider which contains the data
@@ -118,8 +118,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the value for the property
      */
-    public void setProperty(String propertyName,
-            SerializableFunction<T, Object> callBack) {
+    public void setProperty(String propertyName, SerializableFunction<T, Object> callBack) {
         chartAttributeToCallback.put(propertyName, callBack);
     }
 

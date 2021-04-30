@@ -76,8 +76,7 @@ public class ProgressBarTest {
         double max = 42.0;
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String
-                .format("min ('%s') must be less than max ('%s')", min, max));
+        thrown.expectMessage(String.format("min ('%s') must be less than max ('%s')", min, max));
 
         new ProgressBar(min, max);
     }
@@ -88,8 +87,7 @@ public class ProgressBarTest {
         double max = 1.0;
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String
-                .format("min ('%s') must be less than max ('%s')", min, max));
+        thrown.expectMessage(String.format("min ('%s') must be less than max ('%s')", min, max));
 
         new ProgressBar(min, max);
     }
@@ -100,8 +98,7 @@ public class ProgressBarTest {
         double max = 1.0;
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
         new ProgressBar(min, max, -0.01);
     }
@@ -112,8 +109,7 @@ public class ProgressBarTest {
         double max = 1.0;
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
         new ProgressBar(min, max, 1.01);
     }
@@ -169,8 +165,7 @@ public class ProgressBarTest {
         double max = 100.0;
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
         ProgressBar progressBar = new ProgressBar(min, max);
         progressBar.setValue(9);
@@ -182,8 +177,7 @@ public class ProgressBarTest {
         double max = 100.0;
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
         ProgressBar progressBar = new ProgressBar(min, max);
         progressBar.setValue(101);

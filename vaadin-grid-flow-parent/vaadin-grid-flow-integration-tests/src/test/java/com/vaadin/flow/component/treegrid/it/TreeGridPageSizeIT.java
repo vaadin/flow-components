@@ -44,10 +44,10 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         assertLogContainsFetch(0, 3, "Granddad 0");
         assertLogContainsFetch(0, 10, "Dad 0/0");
         assertLogContainsFetch(10, 30, "Dad 0/0/");
-
+        
         assertPageSize(grid, 10);
         assertCellContents(grid);
-
+        
         assertLogContainsFetch(150, 10, "Dad 0/0");
         assertLogContainsFetch(290, 10, "Dad 0/0");
         assertLogContainsFetch(0, 10, "Dad 0/1");

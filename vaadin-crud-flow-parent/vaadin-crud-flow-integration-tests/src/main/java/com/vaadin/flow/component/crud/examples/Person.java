@@ -41,8 +41,11 @@ public class Person implements Cloneable {
 
     @Override
     public String toString() {
-        return "Person{" + "id=" + id + ", firstName='" + firstName + '\''
-                + ", lastName='" + lastName + '\'' + '}';
+        return "Person{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
     }
 
     @Override

@@ -67,21 +67,21 @@ public class GridEditorFocusPage extends Div {
         TextField field = new TextField();
         binder.bind(field, "firstName");
         nameColumn.setEditorComponent(field);
-        editor.addOpenListener(event -> field.focus());
+        editor.addOpenListener(event ->field.focus());
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
 
-        NativeButton addItem = new NativeButton("Add item", event -> {
-            Person newPerson = new Person();
-            items.add(newPerson);
-            dataProvider.refreshAll();
-            editor.editItem(newPerson);
-        });
+        NativeButton addItem = new NativeButton("Add item",
+                event -> {
+                    Person newPerson = new Person();
+                    items.add(newPerson);
+                    dataProvider.refreshAll();
+                    editor.editItem(newPerson);
+                });
 
         addItem.setId("add-item");
 
-        NativeButton editFirstRow = new NativeButton("Edit first item",
-                event -> editor.editItem(items.get(0)));
+        NativeButton editFirstRow = new NativeButton("Edit first item", event -> editor.editItem(items.get(0)));
 
         editFirstRow.setId("edit-first-item");
 

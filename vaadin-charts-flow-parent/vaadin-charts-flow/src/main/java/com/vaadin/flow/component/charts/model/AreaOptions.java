@@ -83,7 +83,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract Boolean getClip();
 
     /**
-     * Disable this option to allow series rendering in the whole plotting area.
+     * Disable this option to allow series rendering
+     * in the whole plotting area.
      */
     public abstract void setClip(Boolean clip);
 
@@ -93,8 +94,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract Number getColorIndex();
 
     /**
-     * A specific color index to use for the series, so its graphic
-     * representations are given the class name
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
@@ -105,10 +106,9 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract String getColorKey();
 
     /**
-     * Determines what data value should be used to calculate point color if
-     * <code>colorAxis</code> is used. Requires to set <code>min</code> and
-     * <code>max</code> if some custom point property is used or if
-     * approximation for data grouping is set to <code>'sum'</code>.
+     * Determines what data value should be used to calculate point color if <code>colorAxis</code> is used.
+     * Requires to set <code>min</code> and <code>max</code> if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>.
      */
     public abstract void setColorKey(String colorKey);
 
@@ -128,11 +128,10 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract Boolean getCrisp();
 
     /**
-     * When true, each point or column edge is rounded to its nearest pixel in
-     * order to render sharp on screen. In some cases, when there are a lot of
-     * densely packed columns, this leads to visible difference in column widths
-     * or distance between columns. In these cases, setting crisp to false may
-     * look better, even though each column is rendered blurry.
+     * When true, each point or column edge is rounded to its nearest pixel
+     * in order to render sharp on screen. In some cases, when there are a lot of densely packed columns,
+     * this leads to visible difference in column widths or distance between columns.
+     * In these cases, setting crisp to false may look better, even though each column is rendered blurry.
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -390,6 +389,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      */
     public abstract void setOpacity(Number opacity);
 
+
     public abstract String getPointDescriptionFormatter();
 
     public abstract void setPointDescriptionFormatter(
@@ -419,8 +419,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract IntervalUnit getPointIntervalUnit();
 
     /**
-     * On datetime series, this allows for setting the
-     * <a href="plotOptions.series.pointInterval">pointInterval</a> to irregular
+     * On datetime series, this allows for setting the <a
+     * href="plotOptions.series.pointInterval">pointInterval</a> to irregular
      * time units, <code>day</code>, <code>month</code> and <code>year</code>. A
      * day is usually the same as 24 hours, but pointIntervalUnit also takes the
      * DST crossover into consideration when dealing with local time. Combine
@@ -539,11 +539,9 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract Boolean getSkipKeyboardNavigation();
 
     /**
-     * Whether or not to skip past the points in this series for keyboard
-     * navigation.
+     * Whether or not to skip past the points in this series for keyboard navigation.
      */
-    public abstract void setSkipKeyboardNavigation(
-            Boolean skipKeyboardNavigation);
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setStates(States)
@@ -677,7 +675,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract Number getCompareBase();
 
     /**
-     * This option dictates whether to use 0 or 100 as the base of comparison.
+     * This option dictates whether to use 0 or 100 as the
+     * base of comparison.
      */
     public abstract void setCompareBase(Number compareBase);
 
@@ -743,8 +742,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * Options for the corresponding navigator series if
      * <code>showInNavigator</code> is <code>true</code> for this series.
      */
-    public abstract void setNavigatorOptions(
-            PlotOptionsSeries navigatorOptions);
+    public abstract void setNavigatorOptions(PlotOptionsSeries navigatorOptions);
 
     /**
      * @see #setPointRange(Number)

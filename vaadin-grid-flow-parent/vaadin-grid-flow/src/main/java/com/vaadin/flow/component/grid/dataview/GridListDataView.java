@@ -48,10 +48,10 @@ public class GridListDataView<T> extends AbstractListDataView<T> {
      *            callback, which is being invoked when the Grid's filtering or
      *            sorting changes, not <code>null</code>
      */
-    public GridListDataView(DataCommunicator<T> dataCommunicator, Grid<T> grid,
+    public GridListDataView(DataCommunicator<T> dataCommunicator,
+            Grid<T> grid,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
-        super(dataCommunicator::getDataProvider, grid,
-                filterOrSortingChangedCallback);
+        super(dataCommunicator::getDataProvider, grid, filterOrSortingChangedCallback);
         this.dataCommunicator = dataCommunicator;
     }
 

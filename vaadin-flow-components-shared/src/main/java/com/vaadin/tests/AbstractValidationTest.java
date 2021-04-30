@@ -5,15 +5,14 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.util.List;
 
-public abstract class AbstractValidationTest
-        extends com.vaadin.flow.testutil.AbstractValidationTest {
+public abstract class AbstractValidationTest extends
+    com.vaadin.flow.testutil.AbstractValidationTest {
 
     private static SharedBrowser browser = new SharedBrowser();
 
     @Override
     public void setup() throws Exception {
-        browser.setup(super::setup, this::setDriver, this::getDriver,
-                screenshotOnFailure);
+        browser.setup(super::setup, this::setDriver, this::getDriver, screenshotOnFailure);
     }
 
     protected int getDeploymentPort() {

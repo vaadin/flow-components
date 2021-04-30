@@ -45,24 +45,20 @@ public class DetachReattachPage extends Div {
     }
 
     private void createGroupWithTemplate() {
-        NativeButton valueA = new NativeButton("Predefined value A",
-                e -> value = "A");
-        NativeButton valueB = new NativeButton("Predefined value B",
-                e -> value = "B");
+        NativeButton valueA = new NativeButton("Predefined value A", e -> value = "A");
+        NativeButton valueB = new NativeButton("Predefined value B", e -> value = "B");
 
         valueA.setId("valueA");
         valueB.setId("valueB");
 
-        NativeButton addGroup = new NativeButton("Add Group",
-                e -> attachTemplate(value));
-        NativeButton removeGroup = new NativeButton("Remove Group",
-                e -> remove(detachReattachTemplate));
+        NativeButton addGroup = new NativeButton("Add Group", e -> attachTemplate(value));
+        NativeButton removeGroup = new NativeButton("Remove Group", e -> remove(detachReattachTemplate));
 
         addGroup.setId("addGroup");
         removeGroup.setId("removeGroup");
 
-        NativeButton getValue = new NativeButton("Get Value Template",
-                e -> valueBlock.setText(detachReattachTemplate.getRBGValue()));
+        NativeButton getValue = new NativeButton("Get Value Template", e ->
+                valueBlock.setText(detachReattachTemplate.getRBGValue()));
         getValue.setId("getValueTemplate");
 
         add(valueA, valueB, addGroup, removeGroup, getValue);
@@ -72,8 +68,7 @@ public class DetachReattachPage extends Div {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setId("group");
 
-        List<String> items = new LinkedList<>(
-                Arrays.asList("foo", "bar", "baz"));
+        List<String> items = new LinkedList<>(Arrays.asList("foo", "bar", "baz"));
         group.setItems(new ListDataProvider<>(items));
 
         NativeButton detach = new NativeButton("detach", e -> remove(group));
@@ -82,12 +77,11 @@ public class DetachReattachPage extends Div {
         NativeButton attach = new NativeButton("attach", e -> add(group));
         attach.setId("attach");
 
-        NativeButton setValue = new NativeButton("set value",
-                e -> group.setValue("foo"));
+        NativeButton setValue = new NativeButton("set value", e -> group.setValue("foo"));
         setValue.setId("setValue");
 
-        NativeButton getValue = new NativeButton("Get Value",
-                e -> valueBlock.setText(group.getValue()));
+        NativeButton getValue = new NativeButton("Get Value", e ->
+                valueBlock.setText(group.getValue()));
         getValue.setId("getValue");
 
         add(group, detach, attach, setValue, getValue);

@@ -49,7 +49,7 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
      *            the ComboBox
      */
     public ComboBoxLazyDataView(DataCommunicator<T> dataCommunicator,
-            Component component) {
+                                Component component) {
         super(dataCommunicator, component);
     }
 
@@ -76,11 +76,9 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
 
     /**
      * @inheritDoc
-     *             <p>
-     *             Calling this method will clear any previously set count
-     *             callback with the
-     *             {@link #setItemCountCallback(CallbackDataProvider.CountCallback)}
-     *             method.
+     * <p>
+     * Calling this method will clear any previously set count callback with the
+     * {@link #setItemCountCallback(CallbackDataProvider.CountCallback)} method.
      */
     @Override
     public void setItemCountFromDataProvider() {
@@ -113,13 +111,14 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
      * {@inheritDoc}
      * <p>
      * Combo box fires {@link ItemCountChangeEvent} and notifies all the
-     * listeners added by this method, if the items count changed, for instance,
-     * due to fetching more items while scrolling with unknown item count.
+     * listeners added by this method, if the items count changed, for
+     * instance, due to fetching more items while scrolling with unknown item
+     * count.
      * <p>
      * ComboBox's client-side filter change won't fire
-     * {@link ItemCountChangeEvent}, since it doesn't change the item count on
-     * the server-side, but only makes it easier for users to search through the
-     * items in the UI.
+     * {@link ItemCountChangeEvent}, since it doesn't change the item count
+     * on the server-side, but only makes it easier for users to search
+     * through the items in the UI.
      */
     @Override
     public Registration addItemCountChangeListener(
@@ -132,8 +131,8 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
      * ComboBox's server-side.
      * <p>
      * This method does not take into account the ComboBox client-side
-     * filtering, since it doesn't change the item count on the server-side, but
-     * only makes it easier for users to search through the items in the UI.
+     * filtering, since it doesn't change the item count on the server-side,
+     * but only makes it easier for users to search through the items in the UI.
      *
      * @param index
      *            item index number
@@ -150,8 +149,8 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
      * Gets the items available on the ComboBox's server-side.
      * <p>
      * This method does not take into account the ComboBox client-filtering,
-     * since it doesn't change the item count on the server-side, but only makes
-     * it easier for users to search through the items in the UI.
+     * since it doesn't change the item count on the server-side, but only
+     * makes it easier for users to search through the items in the UI.
      *
      * @return items available on the server-side
      */

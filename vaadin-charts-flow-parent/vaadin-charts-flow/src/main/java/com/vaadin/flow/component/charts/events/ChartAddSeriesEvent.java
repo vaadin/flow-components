@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -20,8 +21,8 @@ import com.vaadin.flow.component.charts.Chart;
 import elemental.json.JsonArray;
 
 /**
- * The ChartAddSeriesEvent class stores data about new series added to an
- * existing chart.
+ * The ChartAddSeriesEvent class stores data about new series added
+ * to an existing chart.
  */
 @DomEvent("chart-add-series")
 public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
@@ -38,8 +39,8 @@ public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
      * @param data
      */
     public ChartAddSeriesEvent(Chart source, boolean fromClient,
-            @EventData("event.detail.originalEvent.options.name") String name,
-            @EventData("event.detail.originalEvent.options.data") JsonArray data) {
+                               @EventData("event.detail.originalEvent.options.name") String name,
+                               @EventData("event.detail.originalEvent.options.data") JsonArray data) {
         super(source, fromClient);
         this.name = name;
         this.data = new Number[data.length()];

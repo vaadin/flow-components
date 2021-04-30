@@ -55,8 +55,7 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
             SerializableSupplier<? extends DataProvider<T, ?>> dataProviderSupplier,
             RadioButtonGroup radioButtonGroup,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
-        super(dataProviderSupplier, radioButtonGroup,
-                filterOrSortingChangedCallback);
+        super(dataProviderSupplier, radioButtonGroup, filterOrSortingChangedCallback);
     }
 
     /**
@@ -79,8 +78,7 @@ public class RadioButtonGroupListDataView<T> extends AbstractListDataView<T> {
             RadioButtonGroup radioButtonGroup,
             SerializableConsumer<IdentifierProvider<T>> identifierChangedCallback,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
-        super(dataProviderSupplier, radioButtonGroup,
-                filterOrSortingChangedCallback);
+        super(dataProviderSupplier, radioButtonGroup, filterOrSortingChangedCallback);
         this.identifierChangedCallback = identifierChangedCallback;
     }
 

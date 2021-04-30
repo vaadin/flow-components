@@ -24,19 +24,15 @@ public class CompositeView extends Div {
         final CustomField language = new CustomField("Language");
         language.getElement().setAttribute("editor-role", "language");
 
-        final ComboBox<Country> countries = new ComboBox<>("Country",
-                Country.values());
+        final ComboBox<Country> countries = new ComboBox<>("Country", Country.values());
 
         final FormLayout form = new FormLayout(language, countries);
 
         final Binder<Localization> binder = new Binder<>(Localization.class);
-        binder.bind(language, Localization::getLanguage,
-                Localization::setLanguage);
-        binder.bind(countries, Localization::getCountry,
-                Localization::setCountry);
+        binder.bind(language, Localization::getLanguage, Localization::setLanguage);
+        binder.bind(countries, Localization::getCountry, Localization::setCountry);
 
-        final BinderCrudEditor<Localization> editor = new BinderCrudEditor<>(
-                binder, form);
+        final BinderCrudEditor<Localization> editor = new BinderCrudEditor<>(binder, form);
         final Crud<Localization> crud = new Crud<>(Localization.class, editor);
 
         language.addValueChangeListener(e -> crud.setDirty(true));
@@ -73,7 +69,10 @@ public class CompositeView extends Div {
 
         public enum Country {
 
-            FINLAND, CANADA, BRAZIL, NIGERIA;
+            FINLAND,
+            CANADA,
+            BRAZIL,
+            NIGERIA;
 
             @Override
             public String toString() {
@@ -82,8 +81,7 @@ public class CompositeView extends Div {
         }
     }
 
-    public static class CustomField
-            extends AbstractCompositeField<Div, CustomField, String> {
+    public static class CustomField extends AbstractCompositeField<Div, CustomField, String> {
 
         private final Span valueSpan = new Span();
         private final Div labelSpan = new Div();
@@ -91,25 +89,20 @@ public class CompositeView extends Div {
         public CustomField() {
             super(null);
 
-            final Button change = new Button(VaadinIcon.PENCIL.create(),
-                    event -> {
-                        final Dialog dialog = new Dialog();
-                        dialog.getElement().setAttribute("editor-role",
-                                "composite-dialog");
+            final Button change = new Button(VaadinIcon.PENCIL.create(), event -> {
+                final Dialog dialog = new Dialog();
+                dialog.getElement().setAttribute("editor-role", "composite-dialog");
 
-                        final TextField languageField = new TextField();
-                        languageField.getElement().setAttribute("editor-role",
-                                "language-field");
-                        languageField.setValueChangeMode(ValueChangeMode.EAGER);
-                        languageField.addValueChangeListener(
-                                e -> setValue(e.getValue()));
+                final TextField languageField = new TextField();
+                languageField.getElement().setAttribute("editor-role", "language-field");
+                languageField.setValueChangeMode(ValueChangeMode.EAGER);
+                languageField.addValueChangeListener(e -> setValue(e.getValue()));
 
-                        final Button close = new Button("Close",
-                                e -> dialog.close());
+                final Button close = new Button("Close", e -> dialog.close());
 
-                        dialog.add(languageField, close);
-                        dialog.open();
-                    });
+                dialog.add(languageField, close);
+                dialog.open();
+            });
             change.getElement().setAttribute("editor-role", "language-confirm");
 
             labelSpan.setWidth("100%");

@@ -263,6 +263,6 @@ public class GridContextMenu<T> extends
             return getDynamicContentHandler().test(item);
         }
 
-        return super.onBeforeOpenMenu(eventDetail);
+            return super.onBeforeOpenMenu(eventDetail);
     }
 }

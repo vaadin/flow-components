@@ -18,6 +18,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
 
+
 /**
  * The PointLegendItemClickEvent class stores information on click events on the
  * charts's legend items that correspond to a chart point.

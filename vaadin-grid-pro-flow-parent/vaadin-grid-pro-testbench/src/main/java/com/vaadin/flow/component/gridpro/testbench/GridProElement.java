@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-grid-pro&gt;</code>
- * element.
+ * A TestBench element representing a <code>&lt;vaadin-grid-pro&gt;</code> element.
  */
 @Element("vaadin-grid-pro")
 public class GridProElement extends TestBenchElement {
@@ -125,7 +124,7 @@ public class GridProElement extends TestBenchElement {
      *         in header.
      */
     public TestBenchElement getHeaderCellContent(int rowIndex,
-            int columnIndex) {
+                                                 int columnIndex) {
         WebElement thead = $("thead").id("header");
         List<WebElement> headerRows = thead.findElements(By.tagName("tr"));
         List<WebElement> headerCells = headerRows.get(rowIndex)
@@ -167,6 +166,7 @@ public class GridProElement extends TestBenchElement {
         return ((TestBenchElement) executeScript(script, this, rowIndex))
                 .wrap(GridTRElement.class);
     }
+
 
     protected void generatedColumnIdsIfNeeded() {
         String generateIds = "const grid = arguments[0];"

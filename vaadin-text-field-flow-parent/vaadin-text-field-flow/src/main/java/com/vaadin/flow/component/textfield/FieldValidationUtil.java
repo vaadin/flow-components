@@ -20,8 +20,8 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.internal.StateNode;
 
 /**
- * Utility class for text field mixin web components to disable client side
- * validation.
+ * Utility class for text field mixin web components to disable client
+ * side validation.
  *
  * @author Vaadin Ltd
  */

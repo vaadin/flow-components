@@ -112,7 +112,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_CLIENT_SIDE_FILTER = "_clientSideFilter";
     private static final String PROP_OPENED = "opened";
 
-    private static final String COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE = "Trying to use exact size with a lazy loading component"
+    private static final String COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE =
+            "Trying to use exact size with a lazy loading component"
             + " without either providing a count callback for the"
             + " component to fetch the count of the items or a data"
             + " provider that implements the size query. Provide the "
@@ -461,8 +462,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The returned data view object can be used for further access to combo box
      * items, or later on fetched with {@link #getListDataView()}. For using
-     * lazy data loading, use one of the {@code setItems} methods which take a
-     * fetch callback parameter instead.
+     * lazy data loading, use one of the {@code setItems} methods which take
+     * a fetch callback parameter instead.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -493,8 +494,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The returned data view object can be used for further access to combo box
      * items, or later on fetched with {@link #getListDataView()}. For using
-     * lazy data loading, use one of the {@code setItems} methods which take a
-     * fetch callback parameter instead.
+     * lazy data loading, use one of the {@code setItems} methods which take
+     * a fetch callback parameter instead.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -592,18 +593,22 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // We don't use DataProvider.withConvertedFilter() here because its
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<T, String> convertedDataProvider = new DataProviderWrapper<T, String, SerializablePredicate<T>>(
-                inMemoryDataProvider) {
-            @Override
-            protected SerializablePredicate<T> getFilter(
-                    Query<T, String> query) {
-                final Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
-                        .getComponentFilter(comboBox);
-                return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                        .orElse(item -> true)
-                        .and(item -> filterConverter
-                                .apply(query.getFilter().orElse("")).test(item))
-                        .and(componentInMemoryFilter.orElse(item -> true));
+        DataProvider<T, String> convertedDataProvider =
+                new DataProviderWrapper<T, String, SerializablePredicate<T>>(
+                        inMemoryDataProvider) {
+                    @Override
+                    protected SerializablePredicate<T> getFilter(
+                            Query<T, String> query) {
+                        final Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
+                                .getComponentFilter(comboBox);
+                        return Optional
+                                .ofNullable(inMemoryDataProvider.getFilter())
+                                .orElse(item -> true)
+                                .and(item -> filterConverter
+                                        .apply(query.getFilter().orElse(""))
+                                        .test(item))
+                                .and(componentInMemoryFilter
+                                        .orElse(item -> true));
             }
         };
 
@@ -652,8 +657,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * If the items are not fetched lazily an exception is thrown. When the
      * items are in-memory, use {@link #getListDataView()} instead.
      *
-     * @throws IllegalStateException
-     *             if no items fetch callback(s) set
+     * @throws IllegalStateException if no items fetch callback(s) set
      *
      * @return the lazy data view that provides access to the data bound to the
      *         ComboBox
@@ -717,16 +721,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Supply items lazily with a callback from a backend, using custom filter
-     * type. The combo box will automatically fetch more items and adjust its
-     * size until the backend runs out of items. Usage example:
+     * Supply items lazily with a callback from a backend, using custom
+     * filter type. The combo box will automatically fetch more items and
+     * adjust its size until the backend runs out of items.
+     * Usage example:
      * <p>
      * {@code comboBox.setItemsWithFilterConverter(
      *                 query -> orderService.getOrdersByCount(query.getFilter(),
      *                                                        query.getOffset,
      *                                                        query.getLimit()),
-     *                 orderCountStr -> Integer.parseInt(orderCountStr));} Note:
-     * Validations for <code>orderCountStr</code> are omitted for briefness.
+     *                 orderCountStr -> Integer.parseInt(orderCountStr));}
+     * Note: Validations for <code>orderCountStr</code> are omitted for
+     * briefness.
      * <p>
      * Combo box's client-side filter typed by the user is transformed into a
      * callback's filter through the given filter converter.
@@ -742,8 +748,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
      *            the user into a callback's object filter
-     * @param <C>
-     *            filter type used by a callback
+     * @param <C> filter type used by a callback
      *
      * @return ComboBoxLazyDataView instance for further configuration
      */
@@ -765,15 +770,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * on offset, limit and an optional filter, the second provides the exact
      * count of items in the backend. Use this only in case getting the count is
      * cheap and the user benefits from the component showing immediately the
-     * exact size. Usage example:
+     * exact size.
+     * Usage example:
      * <p>
      * {@code comboBox.setItemsWithFilterConverter(
      *                 query -> orderService.getOrdersByCount(query.getFilter(),
      *                                                        query.getOffset,
      *                                                        query.getLimit()),
      *                 query -> orderService.getSize(query.getFilter()),
-     *                 orderCountStr -> Integer.parseInt(orderCountStr));} Note:
-     * Validations for <code>orderCountStr</code> are omitted for briefness.
+     *                 orderCountStr -> Integer.parseInt(orderCountStr));}
+     * Note: Validations for <code>orderCountStr</code> are omitted for
+     * briefness.
      * <p>
      * Combo box's client-side filter typed by the user is transformed into a
      * custom filter type through the given filter converter.
@@ -789,8 +796,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
      *            the user into a callback's object filter
-     * @param <C>
-     *            filter type used by a callbacks
+     * @param <C> filter type used by a callbacks
      *
      * @return ComboBoxLazyDataView instance for further configuration
      */
@@ -848,7 +854,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             // Create data communicator with postponed initialisation
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
-                            .callJsFunction("$connector.updateData", data),
+                    .callJsFunction("$connector.updateData", data),
                     getElement().getNode(), enableFetch);
             dataCommunicator.setPageSize(getPageSize());
         } else {
@@ -874,8 +880,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         filterSlot = filter -> {
             if (!Objects.equals(filter, lastFilter)) {
-                DataCommunicator.Filter<C> objectFilter = new DataCommunicator.Filter<C>(
-                        convertOrNull.apply(filter), filter.isEmpty());
+                DataCommunicator.Filter<C> objectFilter =
+                        new DataCommunicator.Filter<C>(
+                                convertOrNull.apply(filter), filter.isEmpty());
                 providerFilterSlot.accept(objectFilter);
                 lastFilter = filter;
             }
@@ -944,8 +951,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             setupDataProviderListener(dataProvider);
         }
 
-        clearFilterOnCloseRegistration = getElement().addPropertyChangeListener(
-                PROP_OPENED, this::clearFilterOnClose);
+        clearFilterOnCloseRegistration = getElement()
+                .addPropertyChangeListener(PROP_OPENED,
+                        this::clearFilterOnClose);
     }
 
     @Override
@@ -1070,13 +1078,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(listDataProvider,
                 "List data provider cannot be null");
 
-        setDataProvider(listDataProvider, filterText -> {
-            Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
-                    .getComponentFilter(this);
-            return item -> itemFilter.test(item, filterText)
-                    && componentInMemoryFilter.orElse(ignore -> true)
-                            .test(item);
-        });
+        setDataProvider(listDataProvider,
+                filterText -> {
+                    Optional<SerializablePredicate<T>> componentInMemoryFilter = DataViewUtils
+                            .getComponentFilter(this);
+                    return item -> itemFilter.test(item, filterText)
+                            && componentInMemoryFilter.orElse(ignore -> true)
+                                    .test(item);
+                });
     }
 
     /**
@@ -1092,8 +1101,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The returned data view object can be used for further access to combo box
      * items, or later on fetched with {@link #getListDataView()}. For using
-     * lazy data loading, use one of the {@code setItems} methods which take a
-     * fetch callback parameter instead.
+     * lazy data loading, use one of the {@code setItems} methods which take
+     * a fetch callback parameter instead.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -1513,12 +1522,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * backend service is able to fetch and filter items by such type, converter
      * for client side's filter string can be set along with fetch callback.
      * See:
-     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, SerializableFunction)}
+     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback,
+     *                                      SerializableFunction)}
      *
-     * @param fetchCallback
-     *            function that returns a stream of items from the backend based
-     *            on the offset, limit and an optional filter provided by the
-     *            query object
+     * @param fetchCallback function that returns a stream of items from the
+     *                      backend based on the offset, limit and an optional
+     *                      filter provided by the query object
      * @return ComboBoxLazyDataView instance for further configuration
      */
     @Override
@@ -1555,14 +1564,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * backend service is able to fetch and filter items by such type, converter
      * for client side's filter string can be set along with fetch callback.
      * See:
-     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback, SerializableFunction)}
+     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback,
+     *                                      CallbackDataProvider.CountCallback,
+     *                                      SerializableFunction)}
      *
-     * @param fetchCallback
-     *            function that returns a stream of items from the back end for
-     *            a query
-     * @param countCallback
-     *            function that return the number of items in the back end for a
-     *            query
+     * @param fetchCallback function that returns a stream of items from the
+     *                      back end for a query
+     * @param countCallback function that return the number of items in the
+     *                      back end for a query
      * @return ComboBoxLazyDataView instance for further configuration
      */
     @Override
@@ -1639,9 +1648,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             String filter = lastFilter;
             lastFilter = null;
             /*
-             * This filter slot will eventually call the filter consumer in data
-             * communicator and 'DataCommunicator::reset' is done inside this
-             * consumer, so we don't need to explicitly call it.
+             * This filter slot will eventually call the filter consumer in
+             * data communicator and 'DataCommunicator::reset' is done inside
+             * this consumer, so we don't need to explicitly call it.
              */
             filterSlot.accept(filter);
         }

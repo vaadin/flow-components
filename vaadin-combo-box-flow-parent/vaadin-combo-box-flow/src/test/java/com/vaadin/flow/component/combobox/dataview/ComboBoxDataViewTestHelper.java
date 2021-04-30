@@ -27,7 +27,7 @@ final class ComboBoxDataViewTestHelper {
     }
 
     static void setClientSideFilter(ComboBox<String> comboBox,
-            String clientFilter) {
+                                 String clientFilter) {
         try {
             // Reset the client filter on server side as though it's sent from
             // client

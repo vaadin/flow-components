@@ -304,10 +304,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     protected void onAttach(AttachEvent attachEvent) {
         getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
                 this,
-                context -> ui.getPage()
-                        .executeJs("$0.addEventListener('items-changed', "
+                context -> ui.getPage().executeJs(
+                        "$0.addEventListener('items-changed', "
                                 + "function(){ this.$server.updateSelectedTab(true); });",
-                                getElement())));
+                        getElement())));
     }
 
     /**
@@ -358,7 +358,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         if (!(selectedComponent instanceof Tab)) {
             throw new IllegalStateException(
                     "Illegal component inside Tabs: " + selectedComponent + "."
-                            + "Component should be an instance of Tab.");
+                        + "Component should be an instance of Tab.");
         }
         return (Tab) selectedComponent;
     }

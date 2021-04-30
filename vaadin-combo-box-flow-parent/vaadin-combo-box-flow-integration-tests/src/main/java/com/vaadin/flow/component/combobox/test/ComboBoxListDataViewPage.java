@@ -109,12 +109,14 @@ public class ComboBoxListDataViewPage extends Div {
         showItems.setId(SHOW_ITEMS);
 
         // Navigation
-        NativeButton showNextData = new NativeButton("Next person", event -> {
-            itemData.setText("Item: " + dataView
-                    .getNextItem(dataView.getItem(itemSelect.getValue())).get()
-                    .getFirstName());
-            itemSelect.setValue(itemSelect.getValue() + 1);
-        });
+        NativeButton showNextData = new NativeButton("Next person",
+                event -> {
+                    itemData.setText("Item: " + dataView
+                            .getNextItem(
+                                    dataView.getItem(itemSelect.getValue()))
+                            .get().getFirstName());
+                    itemSelect.setValue(itemSelect.getValue() + 1);
+                });
         showNextData.setId(SHOW_NEXT_DATA);
 
         NativeButton showPreviousData = new NativeButton("Previous person",
@@ -171,15 +173,14 @@ public class ComboBoxListDataViewPage extends Div {
 
         add(comboBox, itemSelect, filterByAge, reverseSorting,
                 selectItemOnIndex, showItemData, showNextData, showPreviousData,
-                removePerson, count, itemData, showItemCount, showItems,
-                secondComboBox);
+                removePerson, count, itemData, showItemCount,
+                showItems, secondComboBox);
     }
 
     private List<Person> generatePersonItems() {
         return IntStream.range(0, 250)
-                .mapToObj(index -> new Person(index, "Person " + index,
-                        "lastName", index % 100, new Person.Address(),
-                        "1234567890"))
+                .mapToObj(index -> new Person(index, "Person " + index, "lastName",
+                        index % 100, new Person.Address(), "1234567890"))
                 .collect(Collectors.toList());
     }
 }

@@ -72,8 +72,8 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("space-between",
                 hLayout.getCssValue("justify-content"));
 
-        RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
-                .id("horizontal-layout-justify-content-radio-button");
+        RadioButtonGroupElement rbg = $(
+                RadioButtonGroupElement.class).id("horizontal-layout-justify-content-radio-button");
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.START.name().toLowerCase());
@@ -107,8 +107,8 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
         Assert.assertEquals("center", vlayout.getCssValue("align-items"));
 
-        RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
-                .id("horizontal-layout-alignment-radio-button");
+        RadioButtonGroupElement rbg = $(
+                RadioButtonGroupElement.class).id("horizontal-layout-alignment-radio-button");
         rbg.selectByText(FlexComponent.Alignment.END.name().toLowerCase());
         waitUntil(driver -> "flex-end"
                 .equals(vlayout.getCssValue("align-items")));
@@ -173,7 +173,8 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         WebElement hlayout = layout.findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(hlayout);
 
-        Assert.assertEquals("center", hlayout.getCssValue("justify-content"));
+        Assert.assertEquals("center",
+                hlayout.getCssValue("justify-content"));
 
         Assert.assertTrue(isElementPresent(By.id("center")));
     }

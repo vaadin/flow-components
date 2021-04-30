@@ -16,6 +16,7 @@ package com.vaadin.flow.component.gridpro.testbench;
  * #L%
  */
 
+
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 
@@ -33,7 +34,7 @@ public class GridTHTDElement extends TestBenchElement {
         // the elements assigned to that slot and then joins the `textContent`
         // of the elements slots
         String text = (String) executeScript("var cell = arguments[0];"
-                + "return Array.from(cell.firstElementChild.assignedNodes()).map(function(node) { return node.textContent;}).join('');",
+                        + "return Array.from(cell.firstElementChild.assignedNodes()).map(function(node) { return node.textContent;}).join('');",
                 this);
         if (text.trim().isEmpty()) {
             return "";
@@ -47,7 +48,7 @@ public class GridTHTDElement extends TestBenchElement {
         // the elements assigned to that slot and then joins the `innerHTML`
         // of the elements slots
         String text = (String) executeScript("var cell = arguments[0];"
-                + "return Array.from(cell.firstElementChild.assignedNodes()).map(function(node) { return node.innerHTML;}).join('');",
+                        + "return Array.from(cell.firstElementChild.assignedNodes()).map(function(node) { return node.innerHTML;}).join('');",
                 this);
         if (text.trim().isEmpty()) {
             return "";
@@ -87,7 +88,7 @@ public class GridTHTDElement extends TestBenchElement {
     public GridProElement getGrid() {
         return ((TestBenchElement) executeScript(
                 "return arguments[0].getRootNode().host", this))
-                        .wrap(GridProElement.class);
+                .wrap(GridProElement.class);
     }
 
     @Override

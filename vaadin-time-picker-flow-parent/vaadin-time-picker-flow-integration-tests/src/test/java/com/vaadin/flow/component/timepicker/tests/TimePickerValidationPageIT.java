@@ -46,18 +46,17 @@ public class TimePickerValidationPageIT extends AbstractValidationTest {
     }
 
     private void assertInvalidAfterClientChange(String clientPropertyUnderTest,
-            String invalidValue, String validValue) {
+        String invalidValue, String validValue) {
 
         final boolean valid = true;
         final TimePickerElement element = $(TimePickerElement.class)
-                .id("picker-with-valid-range");
+            .id("picker-with-valid-range");
         assertValidStateOfPickerWithValidRange(valid);
 
         element.setValue(invalidValue);
         assertValidStateOfPickerWithValidRange(!valid);
 
-        // Forcing max to invalid value on the client does not make the field
-        // valid
+        // Forcing max to invalid value on the client does not make the field valid
         element.setProperty(clientPropertyUnderTest, invalidValue);
         getCommandExecutor().waitForVaadin();
         assertValidStateOfPickerWithValidRange(!valid);

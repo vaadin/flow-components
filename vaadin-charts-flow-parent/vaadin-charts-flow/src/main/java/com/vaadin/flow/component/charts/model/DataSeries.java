@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.style.Color;
@@ -225,8 +226,8 @@ public class DataSeries extends AbstractSeries {
     /**
      * Adds a new item to the series data and enables drilldown for it. Used for
      * lazy loading drilldown. Using async drilldown requires setting
-     * {@link Chart#setDrilldownCallback(DrilldownCallback)} to return a
-     * {@link Series} when drilldown is done.
+     * {@link Chart#setDrilldownCallback(DrilldownCallback)}
+     * to return a {@link Series} when drilldown is done.
      * 
      * The remaining drilldown configurations can be set in
      * {@link Configuration#getDrilldown()}

@@ -49,9 +49,9 @@ public class GridLazyDataView<T> extends AbstractLazyDataView<T> {
     }
 
     /**
-     * Sets a callback that the Grid uses to get the exact item count in the
-     * backend. Use this when it is cheap to get the exact item count and it is
-     * desired that the user sees the "full scrollbar size".
+     * Sets a callback that the Grid uses to get the exact item count in
+     * the backend. Use this when it is cheap to get the exact item count and it
+     * is desired that the user sees the "full scrollbar size".
      * <p>
      * The given callback will be queried for the count instead of the data
      * provider {@link DataProvider#size(Query)} method when the component has a
@@ -71,11 +71,9 @@ public class GridLazyDataView<T> extends AbstractLazyDataView<T> {
 
     /**
      * @inheritDoc
-     *             <p>
-     *             Calling this method will clear any previously set count
-     *             callback with the
-     *             {@link #setItemCountCallback(CallbackDataProvider.CountCallback)}
-     *             method.
+     * <p>
+     * Calling this method will clear any previously set count callback with the
+     * {@link #setItemCountCallback(CallbackDataProvider.CountCallback)} method.
      */
     @Override
     public void setItemCountFromDataProvider() {

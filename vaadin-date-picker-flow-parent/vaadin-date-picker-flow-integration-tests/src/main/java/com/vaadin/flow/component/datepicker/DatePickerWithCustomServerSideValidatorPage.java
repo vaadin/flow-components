@@ -46,8 +46,7 @@ public class DatePickerWithCustomServerSideValidatorPage extends Div {
         DatePicker datePicker = new DatePicker();
 
         binder.forField(datePicker)
-                .withValidator(s -> s.compareTo(LocalDate.of(2019, 1, 1)) == 0,
-                        "Date is not 01/01/2019")
+                .withValidator(s -> s.compareTo(LocalDate.of(2019, 1, 1)) == 0, "Date is not 01/01/2019")
                 .asRequired()
                 .bind(LocalDateWrapper::getValue, LocalDateWrapper::setValue);
         binder.setBean(model);

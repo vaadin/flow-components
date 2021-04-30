@@ -61,6 +61,7 @@ public class DetailsGridIT extends AbstractComponentIT {
         Assert.assertEquals("Expected element to be reused in new details view",
                 "Jethro", children.get(0).getText());
 
+
         findElement(By.id("next")).click();
 
         Assert.assertEquals(
@@ -70,8 +71,9 @@ public class DetailsGridIT extends AbstractComponentIT {
 
     private void assertAmountOfOpenDetails(WebElement grid,
             int expectedAmount) {
-        waitUntil(driver -> grid.findElements(By.className("custom-details"))
-                .size() == expectedAmount);
+        waitUntil(driver ->
+                grid.findElements(By.className("custom-details")).size()
+                        == expectedAmount);
         Assert.assertEquals(expectedAmount,
                 grid.findElements(By.className("custom-details")).size());
     }

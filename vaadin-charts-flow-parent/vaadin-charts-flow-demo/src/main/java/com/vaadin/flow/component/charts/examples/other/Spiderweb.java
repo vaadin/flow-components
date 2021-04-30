@@ -25,8 +25,7 @@ public class Spiderweb extends AbstractChartExample {
         configuration.setTitle("Budget vs spending");
 
         XAxis xAxis = configuration.getxAxis();
-        xAxis.setCategories("Sales", "Marketing", "Development",
-                "Customer Support", "Information Technology", "Administration");
+        xAxis.setCategories("Sales","Marketing","Development","Customer Support", "Information Technology", "Administration");
         xAxis.setTickmarkPlacement(TickmarkPlacement.ON);
 
         YAxis yAxis = configuration.getyAxis();
@@ -35,8 +34,7 @@ public class Spiderweb extends AbstractChartExample {
 
         Tooltip tooltip = configuration.getTooltip();
         tooltip.setShared(true);
-        tooltip.setPointFormat(
-                "<span style=\"color:{series.color}\">{series.name}: <b>${point.y:,.0f}</b><br/>");
+        tooltip.setPointFormat("<span style=\"color:{series.color}\">{series.name}: <b>${point.y:,.0f}</b><br/>");
 
         Legend legend = configuration.getLegend();
         legend.setAlign(HorizontalAlign.RIGHT);
@@ -44,12 +42,10 @@ public class Spiderweb extends AbstractChartExample {
         legend.setLayout(LayoutDirection.VERTICAL);
         legend.setY(70);
 
-        ListSeries allocatedBudget = new ListSeries("Allocated Budget", 43000,
-                19000, 60000, 35000, 17000, 10000);
+        ListSeries allocatedBudget = new ListSeries("Allocated Budget", 43000, 19000, 60000, 35000, 17000, 10000);
         configuration.addSeries(allocatedBudget);
 
-        ListSeries actualSpending = new ListSeries("Actual Spending", 50000,
-                39000, 42000, 31000, 26000, 14000);
+        ListSeries actualSpending = new ListSeries("Actual Spending", 50000, 39000, 42000, 31000, 26000, 14000);
         configuration.addSeries(actualSpending);
 
         add(chart);

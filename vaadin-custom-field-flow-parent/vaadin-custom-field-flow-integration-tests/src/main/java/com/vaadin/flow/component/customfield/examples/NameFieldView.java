@@ -8,7 +8,7 @@ import com.vaadin.flow.router.Route;
 @Route("custom-field-helper")
 public class NameFieldView extends Div {
 
-    public NameFieldView() {
+    public NameFieldView(){
 
         NameField fieldHelper = new NameField();
         fieldHelper.setHelperText("Helper text");
@@ -26,9 +26,9 @@ public class NameFieldView extends Div {
         span.setId("helper-component");
 
         NativeButton clearComponent = new NativeButton("Clear helper component",
-                e -> {
-                    fieldHelperComponent.setHelperComponent(null);
-                });
+              e -> {
+                  fieldHelperComponent.setHelperComponent(null);
+              });
         clearComponent.setId("button-clear-helper-component");
 
         fieldHelperComponent.setHelperComponent(span);

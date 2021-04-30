@@ -37,44 +37,45 @@ public class ChartStyle extends AbstractConfigurationObject {
      * @see #getPlotBackgroundColor()
      *
      * @return The background color of the chart, null if not defined
-     */
+     */ 
     public Color getBackgroundColor() {
         return backgroundColor;
     }
 
-    /**
+    /** 
      * Sets the background color of the outer chart area. May be a gradient.
      * Defaults to "#FFFFFF".
      *
      * @see #setPlotBackgroundColor(Color)
      *
      * @param backgroundColor
-     */
+     */ 
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
 
-    /**
+    /** 
      * @see #setPlotBackgroundColor(Color)
      * @see #getBackgroundColor()
      *
      * @return The background color of the plot, null if not defined
-     */
+     */ 
     public Color getPlotBackgroundColor() {
         return plotBackgroundColor;
     }
 
-    /**
+    /** 
      * Sets the background color of the plot area. May be a gradient. Defaults
-     * to null.
+     * to null. 
      *
      * @see #setBackgroundColor(Color)
      *
      * @param plotBackgroundColor
-     */
+     */ 
     public void setPlotBackgroundColor(Color plotBackgroundColor) {
         this.plotBackgroundColor = plotBackgroundColor;
     }
+
 
     /**
      * @see #setPlotBackgroundImage(String)
@@ -115,21 +116,21 @@ public class ChartStyle extends AbstractConfigurationObject {
         this.plotShadow = plotShadow;
     }
 
-    /**
-     * @see #setPlotBorderWidth(Number)
+    /** 
+     * @see #setPlotBorderWidth(Number) 
      *
      * @return The width of the plot border or null if not defined
-     */
+     */ 
     public Number getPlotBorderWidth() {
         return plotBorderWidth;
     }
 
-    /**
+    /** 
      * Sets the pixel width of the plot area border. Defaults to 0.
      *
      * @param plotBorderWidth
      *            Width of border
-     */
+     */ 
     public void setPlotBorderWidth(Number plotBorderWidth) {
         this.plotBorderWidth = plotBorderWidth;
     }
@@ -151,22 +152,22 @@ public class ChartStyle extends AbstractConfigurationObject {
         this.className = className;
     }
 
-    /**
+    /** 
      * @see #setBorderWidth(Number)
      *
      * @return The width of the chart border, null if not defined
-     */
+     */ 
     public Number getBorderWidth() {
         return borderWidth;
     }
 
-    /**
+    /** 
      * Sets the pixel width of the outer chart border. The border is painted
-     * using vector graphic techniques to allow rounded corners. Defaults to 0.
+     * using vector graphic techniques to allow rounded corners. Defaults to 0. 
      *
      * @param borderWidth
      *            Border width
-     */
+     */ 
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
     }
@@ -190,21 +191,21 @@ public class ChartStyle extends AbstractConfigurationObject {
         this.borderRadius = borderRadius;
     }
 
-    /**
+    /** 
      * @see #setPlotBorderColor(Color)
      * @return The color of the plot border, null if not defined
-     */
+     */ 
     public Color getPlotBorderColor() {
         return plotBorderColor;
     }
 
-    /**
+    /** 
      * Sets the color of the outer chart border. The border is painted using
      * vector graphic techniques to allow rounded corners. Defaults to
      * "#4572A7".
      *
      * @param plotBorderColor
-     */
+     */ 
     public void setPlotBorderColor(Color plotBorderColor) {
         this.plotBorderColor = plotBorderColor;
     }
@@ -238,19 +239,19 @@ public class ChartStyle extends AbstractConfigurationObject {
         this.style = style;
     }
 
-    /**
+    /** 
      * @see #setBorderColor(Color)
      * @return The color of the plot border, null if not defined
-     */
+     */ 
     public Color getBorderColor() {
         return borderColor;
     }
 
-    /**
-     * Sets the color of the outer chart border. Defaults to #4572A7.
+    /** 
+     *Sets the color of the outer chart border. Defaults to #4572A7.
      *
      * @param borderColor
-     */
+     */ 
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
     }

@@ -91,15 +91,15 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract Boolean getColorByPoint();
 
     /**
-     * When using automatic point colors pulled from the global colors or
-     * series-specific plotOptions.column.colors collections, this option
-     * determines whether the chart should receive one color per series or one
-     * color per point.
+     * When using automatic point colors pulled from the global colors
+     * or series-specific plotOptions.column.colors collections,
+     * this option determines whether the chart should receive
+     * one color per series or one color per point.
      * <p>
      * In styled mode, the <code>colors</code> or <code>series.colors</code>
-     * arrays are not supported, and instead this option gives the points
-     * individual color class names on the form
-     * <code>highcharts-color-{n}</code>.
+     * arrays are not supported,
+     * and instead this option gives the points individual color class names
+     * on the form <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorByPoint(Boolean colorByPoint);
 
@@ -109,8 +109,8 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract Number getColorIndex();
 
     /**
-     * A specific color index to use for the series, so its graphic
-     * representations are given the class name
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
@@ -121,10 +121,11 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract String getColorKey();
 
     /**
-     * Determines what data value should be used to calculate point color if
-     * <code>colorAxis</code> is used. Requires to set <code>min</code> and
-     * <code>max</code> if some custom point property is used or if
-     * approximation for data grouping is set to <code>'sum'</code>.
+     * Determines what data value should be used to calculate point color
+     * if <code>colorAxis</code> is used.
+     * Requires to set <code>min</code> and <code>max</code>
+     * if some custom point property is used
+     * or if approximation for data grouping is set to <code>'sum'</code>.
      */
     public abstract void setColorKey(String colorKey);
 
@@ -163,7 +164,8 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract Number getCompareBase();
 
     /**
-     * This option dictates whether to use 0 or 100 as the base of comparison.
+     * This option dictates whether to use 0 or 100 as the
+     * base of comparison.
      */
     public abstract void setCompareBase(Number compareBase);
 
@@ -412,8 +414,7 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * Options for the corresponding navigator series if
      * <code>showInNavigator</code> is <code>true</code> for this series.
      */
-    public abstract void setNavigatorOptions(
-            PlotOptionsSeries navigatorOptions);
+    public abstract void setNavigatorOptions(PlotOptionsSeries navigatorOptions);
 
     /**
      * @see #setOpacity(Number)
@@ -455,8 +456,8 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract IntervalUnit getPointIntervalUnit();
 
     /**
-     * On datetime series, this allows for setting the
-     * <a href="plotOptions.series.pointInterval">pointInterval</a> to irregular
+     * On datetime series, this allows for setting the <a
+     * href="plotOptions.series.pointInterval">pointInterval</a> to irregular
      * time units, <code>day</code>, <code>month</code> and <code>year</code>. A
      * day is usually the same as 24 hours, but pointIntervalUnit also takes the
      * DST crossover into consideration when dealing with local time. Combine
@@ -601,11 +602,9 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract Boolean getSkipKeyboardNavigation();
 
     /**
-     * Whether or not to skip past the points in this series for keyboard
-     * navigation.
+     * Whether or not to skip past the points in this series for keyboard navigation.
      */
-    public abstract void setSkipKeyboardNavigation(
-            Boolean skipKeyboardNavigation);
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setSoftThreshold(Boolean)

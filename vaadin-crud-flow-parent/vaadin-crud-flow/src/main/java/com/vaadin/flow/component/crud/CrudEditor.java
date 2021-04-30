@@ -23,17 +23,16 @@ import java.io.Serializable;
 /**
  * Interface representing a crud editor.
  *
- * @param <E>
- *            the bean type
+ * @param <E> the bean type
  */
 public interface CrudEditor<E> extends Serializable {
 
     /**
-     * Sets an item to be edited. This could be a newly instantiated item or an
-     * existing item from the grid. Initial validation will be skipped.
+     * Sets an item to be edited.
+     * This could be a newly instantiated item or an existing item from the grid.
+     * Initial validation will be skipped.
      *
-     * @param item
-     *            the item to edit
+     * @param item the item to edit
      * @see #setItem(Object, boolean)
      */
     default void setItem(E item) {
@@ -41,13 +40,11 @@ public interface CrudEditor<E> extends Serializable {
     }
 
     /**
-     * Sets an item to be edited. This could be a newly instantiated item or an
-     * existing item from the grid.
+     * Sets an item to be edited.
+     * This could be a newly instantiated item or an existing item from the grid.
      *
-     * @param item
-     *            the item to edit
-     * @param validate
-     *            if true the item will be validated immediately
+     * @param item the item to edit
+     * @param validate if true the item will be validated immediately
      */
     void setItem(E item, boolean validate);
 

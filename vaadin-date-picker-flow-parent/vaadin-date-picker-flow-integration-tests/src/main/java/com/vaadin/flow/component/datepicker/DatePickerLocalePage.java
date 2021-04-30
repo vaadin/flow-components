@@ -35,8 +35,7 @@ public class DatePickerLocalePage extends Div {
 
         add(datePicker, locale, frenchLocale, german);
 
-        DatePicker polandDatePicker = new DatePicker(may3rd,
-                new Locale("pl", "PL"));
+        DatePicker polandDatePicker = new DatePicker(may3rd, new Locale("pl", "PL"));
         polandDatePicker.setId("polish-locale-date-picker");
         add(polandDatePicker);
 

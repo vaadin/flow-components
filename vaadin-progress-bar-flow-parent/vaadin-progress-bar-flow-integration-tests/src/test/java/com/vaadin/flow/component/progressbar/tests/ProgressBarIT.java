@@ -37,8 +37,7 @@ public class ProgressBarIT extends ComponentDemoTest {
 
     @Test
     public void clickOnProgressButtonIncrementsProgressBarValue() {
-        WebElement progressBar = layout
-                .findElement(By.id("custom-progress-bar"));
+        WebElement progressBar = layout.findElement(By.id("custom-progress-bar"));
         WebElement button = layout.findElement(By.id("progress-button"));
         assertThat(valueOf(progressBar), is("20"));
 
