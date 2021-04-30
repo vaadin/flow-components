@@ -39,13 +39,14 @@ public class PreserveOnRefreshPage extends Div {
                 .setHeader(new Span("header")).setFooter(new Span("footer"));
 
         // Add editable column
-        Column<Person> firstNameColumn = grid.addColumn(Person::getFirstName).setHeader("First Name");
+        Column<Person> firstNameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader("First Name");
 
         // define editor & binder for editor
         Binder<Person> binder = new Binder<>(Person.class);
-                Editor<Person> editor = grid.getEditor();
-                editor.setBinder(binder);
-                editor.setBuffered(true);
+        Editor<Person> editor = grid.getEditor();
+        editor.setBinder(binder);
+        editor.setBuffered(true);
 
         // define editor components for columns
         TextField firstNameField = new TextField();
@@ -65,7 +66,7 @@ public class PreserveOnRefreshPage extends Div {
             add(span);
         });
 
-        add(grid,button);
+        add(grid, button);
     }
 
 }
