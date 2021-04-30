@@ -3206,11 +3206,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        if (!getEditor().isBuffered()) {
-            getEditor().closeEditor();
-        } else {
-            getEditor().cancel();
-        }
         if (dataProviderChangeRegistration != null) {
             dataProviderChangeRegistration.remove();
             dataProviderChangeRegistration = null;
@@ -3747,7 +3742,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         try {
             Editor<T> editor = getEditor();
             if (editor != null) {
-                getEditor().closeEditor();
+                if (getEditor().isBuffered()) {
+                    getEditor().cancel();
+                } else {
+                    getEditor().closeEditor();
+                }
             }
         } finally {
             editorFactory = factory;
