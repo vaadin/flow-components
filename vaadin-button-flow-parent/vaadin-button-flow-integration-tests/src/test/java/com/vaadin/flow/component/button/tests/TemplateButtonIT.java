@@ -46,7 +46,6 @@ public class TemplateButtonIT extends AbstractComponentIT {
                 "Button caption should only be the server side caption",
                 "clicked", button.getText());
 
-
         WebElement iconButton = findInShadowRoot(template, By.id("icon-button"))
                 .get(0);
         Assert.assertTrue("Button should have displayed",
@@ -59,11 +58,9 @@ public class TemplateButtonIT extends AbstractComponentIT {
 
         iconButton.click();
 
-        iconButton = findInShadowRoot(template, By.id("icon-button"))
-                .get(0);
+        iconButton = findInShadowRoot(template, By.id("icon-button")).get(0);
 
-        Assert.assertEquals(
-                "Icon button should only have server side caption",
+        Assert.assertEquals("Icon button should only have server side caption",
                 "clicked", iconButton.getText());
         Assert.assertTrue("Button should not contain an icon.",
                 iconButton.findElements(By.tagName("iron-icon")).isEmpty());

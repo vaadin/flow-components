@@ -6,13 +6,15 @@ import org.junit.AfterClass;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-public abstract class TabbedComponentDemoTest extends com.vaadin.flow.demo.TabbedComponentDemoTest {
+public abstract class TabbedComponentDemoTest
+        extends com.vaadin.flow.demo.TabbedComponentDemoTest {
 
     private static SharedBrowser browser = new SharedBrowser();
 
     @Override
     public void setup() throws Exception {
-        browser.setup(super::setup, this::setDriver, this::getDriver, screenshotOnFailure);
+        browser.setup(super::setup, this::setDriver, this::getDriver,
+                screenshotOnFailure);
     }
 
     protected int getDeploymentPort() {

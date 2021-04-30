@@ -54,8 +54,8 @@ public class DateTimePickerPage extends Div {
         button2.addClickListener(event -> picker2
                 .setValue(LocalDateTime.of(2019, 10, 15, 9, 40)));
 
-        NativeButton clearFromServerButton = new NativeButton("Clear from server",
-                e -> picker2.clear());
+        NativeButton clearFromServerButton = new NativeButton(
+                "Clear from server", e -> picker2.clear());
         clearFromServerButton.setId("clear-from-server");
 
         add(new Hr(), picker2, message2, button2, clearFromServerButton);

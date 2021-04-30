@@ -50,7 +50,7 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-                                                  By by) {
+            By by) {
         return getElementFromShadowRoot(shadowRootOwner, by, 0);
     }
 
@@ -59,7 +59,6 @@ public abstract class AbstractTBTest extends ParallelTest {
         WebElement shadowRoot = (WebElement) executeScript(
                 "return arguments[0].shadowRoot", shadowRootOwner);
         assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
-
 
         List<WebElement> elements = shadowRoot.findElements(by);
         if (elements.size() > index) {
@@ -70,19 +69,15 @@ public abstract class AbstractTBTest extends ParallelTest {
                 "Could not find required element in the shadowRoot");
     }
 
-
     public List<DesiredCapabilities> getBrowserConfiguration() {
         if (System.getProperty(PROPERTY_TEST_ALL_BROWSERS) == null) {
             return Arrays.asList(BrowserUtil.chrome());
         }
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
-        return Arrays.asList(
-                BrowserUtil.chrome()
-                
-                
-                
-                );
+        return Arrays.asList(BrowserUtil.chrome()
+
+        );
     }
 
     protected void openTestURL() {

@@ -25,9 +25,7 @@ package com.vaadin.flow.component.details;
  */
 public enum DetailsVariant {
 
-    FILLED("filled"),
-    REVERSE("reverse"),
-    SMALL("small");
+    FILLED("filled"), REVERSE("reverse"), SMALL("small");
 
     private final String variant;
 

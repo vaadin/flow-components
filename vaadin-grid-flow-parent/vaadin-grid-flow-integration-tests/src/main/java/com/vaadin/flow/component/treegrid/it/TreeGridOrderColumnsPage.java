@@ -52,11 +52,14 @@ public class TreeGridOrderColumnsPage extends Div {
 
         treeGrid.setId("testComponent");
 
-        Grid.Column<HierarchicalTestBean> column1 = treeGrid.getColumnByKey("id");
+        Grid.Column<HierarchicalTestBean> column1 = treeGrid
+                .getColumnByKey("id");
         column1.setHeader(COL1_NAME);
-        Grid.Column<HierarchicalTestBean> column2 = treeGrid.getColumnByKey("depth");
+        Grid.Column<HierarchicalTestBean> column2 = treeGrid
+                .getColumnByKey("depth");
         column2.setHeader(COL2_NAME);
-        Grid.Column<HierarchicalTestBean> column3 = treeGrid.getColumnByKey("index");
+        Grid.Column<HierarchicalTestBean> column3 = treeGrid
+                .getColumnByKey("index");
         column3.setHeader(COL3_NAME);
 
         HeaderRow row1 = treeGrid.appendHeaderRow();

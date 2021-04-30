@@ -66,7 +66,8 @@ public class AvatarIT extends AbstractComponentIT {
 
         toggleResource.click();
         getPropsBtn.click();
-        Assert.assertTrue("img url contains file name", resourceBlock.getText().contains("user%2B.png"));
+        Assert.assertTrue("img url contains file name",
+                resourceBlock.getText().contains("user%2B.png"));
 
         checkLogsForErrors(); // would fail if the image resource wasn't hosted
     }

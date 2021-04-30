@@ -165,8 +165,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached IronList"))
-                .getPage().executeJs(
-                        "window.Vaadin.Flow.ironListConnector.initLazy($0)",
+                .getPage()
+                .executeJs("window.Vaadin.Flow.ironListConnector.initLazy($0)",
                         getElement());
     }
 
@@ -181,7 +181,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      *
      * @return the data provider of this list, not {@code null}
      */
-    public DataProvider<T, ?> getDataProvider() { //NOSONAR
+    public DataProvider<T, ?> getDataProvider() { // NOSONAR
         return getDataCommunicator().getDataProvider();
     }
 

@@ -21,7 +21,7 @@ public class HelperTextPage extends Div {
         helperTextComboBox.setId("combobox-helper-text");
 
         NativeButton emptyHelperText = new NativeButton("Clear helper text",
-              e -> helperTextComboBox.setHelperText(""));
+                e -> helperTextComboBox.setHelperText(""));
         emptyHelperText.setId("empty-helper-text");
 
         ComboBox<String> helperComponentCombobox = new ComboBox<>();
@@ -33,11 +33,11 @@ public class HelperTextPage extends Div {
         helperComponentCombobox.setHelperComponent(span);
 
         NativeButton emptyHelperComponent = new NativeButton(
-              "Clear helper component",
-              e -> helperComponentCombobox.setHelperComponent(null));
+                "Clear helper component",
+                e -> helperComponentCombobox.setHelperComponent(null));
         emptyHelperComponent.setId("empty-helper-component");
 
         add(helperTextComboBox, helperComponentCombobox, emptyHelperText,
-              emptyHelperComponent);
+                emptyHelperComponent);
     }
 }

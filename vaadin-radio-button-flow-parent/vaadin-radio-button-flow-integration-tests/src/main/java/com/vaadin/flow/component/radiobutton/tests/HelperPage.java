@@ -21,7 +21,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
-
 @Route("vaadin-radio-button/helper")
 public class HelperPage extends Div {
 
@@ -33,7 +32,7 @@ public class HelperPage extends Div {
         radioButtonGroup.setItems("foo", "bar", "baz");
         Binder<Bean> binder = new Binder<>();
         binder.bind(radioButtonGroup, bean -> bean.choice,
-            (bean, value) -> bean.choice = value);
+                (bean, value) -> bean.choice = value);
         binder.setBean(new Bean());
         add(radioButtonGroup);
     }

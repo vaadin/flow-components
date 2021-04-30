@@ -9,10 +9,11 @@ import com.vaadin.flow.router.Route;
 public class GridOnClientAndSlotPage extends Div {
     public GridOnClientAndSlotPage() {
         GridOnClientAndSlot gridOnClientAndSlot = new GridOnClientAndSlot();
-        
+
         gridOnClientAndSlot.add(createGrid());
-        
-        NativeButton addGridButton = new NativeButton("add grid", e -> gridOnClientAndSlot.add(createGrid()));
+
+        NativeButton addGridButton = new NativeButton("add grid",
+                e -> gridOnClientAndSlot.add(createGrid()));
         addGridButton.setId("add-new-grid-button");
 
         add(gridOnClientAndSlot, addGridButton);

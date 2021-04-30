@@ -297,7 +297,6 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             return els.size() == 7 && "label".equals(els.get(1).getTagName());
         }, 200);
 
-
         executeScript("arguments[0].value=5;", group);
         // It takes a while to update DOM in busy CI
         waitUntil(e -> {
@@ -315,30 +314,36 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void verifyHelper() {
-        RadioButtonGroupElement groupWithHelperText = $(RadioButtonGroupElement.class)
-                .id("group-with-helper-text");
+        RadioButtonGroupElement groupWithHelperText = $(
+                RadioButtonGroupElement.class).id("group-with-helper-text");
         Assert.assertEquals("helperText", groupWithHelperText.getHelperText());
 
-        RadioButtonGroupElement groupWithHelperComponent = $(RadioButtonGroupElement.class)
-                .id("group-with-helper-component");
-        WebElement helperComponent = groupWithHelperComponent.getHelperComponent();
+        RadioButtonGroupElement groupWithHelperComponent = $(
+                RadioButtonGroupElement.class)
+                        .id("group-with-helper-component");
+        WebElement helperComponent = groupWithHelperComponent
+                .getHelperComponent();
         Assert.assertEquals("helperComponent", helperComponent.getText());
-        Assert.assertEquals("helper-component", helperComponent.getAttribute("id"));
+        Assert.assertEquals("helper-component",
+                helperComponent.getAttribute("id"));
     }
 
     @Test
     public void clearHelper() {
-        RadioButtonGroupElement groupWithHelperText = $(RadioButtonGroupElement.class)
-                .id("group-with-helper-text");
+        RadioButtonGroupElement groupWithHelperText = $(
+                RadioButtonGroupElement.class).id("group-with-helper-text");
         Assert.assertEquals("helperText", groupWithHelperText.getHelperText());
 
         $(TestBenchElement.class).id("clear-helper-text-button").click();
         Assert.assertEquals("", groupWithHelperText.getHelperText());
 
-        RadioButtonGroupElement groupWithHelperComponent = $(RadioButtonGroupElement.class)
-                .id("group-with-helper-component");
-        WebElement helperComponent = groupWithHelperComponent.getHelperComponent();
-        Assert.assertEquals("helper-component", helperComponent.getAttribute("id"));
+        RadioButtonGroupElement groupWithHelperComponent = $(
+                RadioButtonGroupElement.class)
+                        .id("group-with-helper-component");
+        WebElement helperComponent = groupWithHelperComponent
+                .getHelperComponent();
+        Assert.assertEquals("helper-component",
+                helperComponent.getAttribute("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(groupWithHelperComponent.getHelperComponent());
@@ -346,8 +351,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     private void verifyGroupInvalid(TestBenchElement group,
             TestBenchElement errorMessage) {
-        Assert.assertEquals("Radio button group is invalid.",
-                true, group.getPropertyBoolean("invalid"));
+        Assert.assertEquals("Radio button group is invalid.", true,
+                group.getPropertyBoolean("invalid"));
         Assert.assertEquals("Error message should be shown.",
                 Boolean.FALSE.toString(),
                 errorMessage.getAttribute("aria-hidden"));
@@ -355,8 +360,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     private void verifyGroupValid(TestBenchElement group,
             TestBenchElement errorMessage) {
-        Assert.assertEquals("Radio button group is not invalid.",
-                false, group.getPropertyBoolean("invalid"));
+        Assert.assertEquals("Radio button group is not invalid.", false,
+                group.getPropertyBoolean("invalid"));
         Assert.assertEquals("Error message should be hidden.",
                 Boolean.TRUE.toString(),
                 errorMessage.getAttribute("aria-hidden"));

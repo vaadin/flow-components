@@ -51,11 +51,11 @@ public class AvatarI18nIT extends AbstractComponentIT {
         setI18n.click();
         getI18n.click();
 
-        Assert.assertEquals(dataTitle.getText(), $(AvatarElement.class)
-                .waitForFirst().getTitle());
+        Assert.assertEquals(dataTitle.getText(),
+                $(AvatarElement.class).waitForFirst().getTitle());
 
-        Assert.assertEquals(dataAriaLabel.getText(), $(AvatarGroupElement.class)
-                .waitForFirst().getAriaLabel());
+        Assert.assertEquals(dataAriaLabel.getText(),
+                $(AvatarGroupElement.class).waitForFirst().getAriaLabel());
     }
 
     private WebElement getTestButton(String id) {

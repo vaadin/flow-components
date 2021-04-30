@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -27,7 +26,8 @@ import com.vaadin.flow.component.charts.Chart;
  * Fired when the mouse moves within the neighborhood of a series
  */
 @DomEvent("series-mouse-over")
-public class SeriesMouseOverEvent extends ComponentEvent<Chart> implements HasSeries {
+public class SeriesMouseOverEvent extends ComponentEvent<Chart>
+        implements HasSeries {
 
     private final int seriesIndex;
 
