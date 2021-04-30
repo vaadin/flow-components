@@ -63,7 +63,7 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
 
     @Test
     public void refresh_editorOpen() {
-        findElement(By.id("edit")).click();
+        findElement(By.id("edit-button")).click();
         getDriver().navigate().refresh();
         WebElement closed = findElement(By.id("closed"));
         Assert.assertEquals(closed.getText(), "Closed");
