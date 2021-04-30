@@ -59,6 +59,14 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
                 CoreMatchers.containsString("<span>footer</span>"));
     }
 
+    @Test
+    public void refresh_editorOpen() {
+        findElement(By.id("edit")).click();
+        getDriver().navigate().refresh();
+        WebElement closed = findElement(By.id("closed"));
+        Assert.assertEquals(closed.getText(),"Closed");
+    }
+
     private GridElement getGrid() {
         return $(GridElement.class).first();
     }
