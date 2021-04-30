@@ -126,6 +126,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.slf4j.LoggerFactory;
 
@@ -3155,7 +3156,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")) {
+            if (sorter.hasKey("direction")
+                    && sorter.get("direction").getType() == JsonType.STRING) {
                 switch (sorter.getString("direction")) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
