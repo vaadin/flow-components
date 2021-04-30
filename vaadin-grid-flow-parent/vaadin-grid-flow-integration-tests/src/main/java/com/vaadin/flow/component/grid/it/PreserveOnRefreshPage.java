@@ -54,7 +54,7 @@ public class PreserveOnRefreshPage extends Div {
         firstNameColumn.setEditorComponent(firstNameField);
 
         Button button = new Button("Edit");
-        button.setId("edit");
+        button.setId("edit-button");
         button.addClickListener(event -> {
             grid.getEditor().editItem(foo);
         });
