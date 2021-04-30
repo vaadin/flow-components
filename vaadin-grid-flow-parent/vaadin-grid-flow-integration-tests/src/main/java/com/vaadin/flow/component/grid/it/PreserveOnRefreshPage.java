@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.editor.Editor;
