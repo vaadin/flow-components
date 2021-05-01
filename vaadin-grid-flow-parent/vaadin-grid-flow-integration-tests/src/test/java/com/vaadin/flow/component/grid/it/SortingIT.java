@@ -146,7 +146,7 @@ public class SortingIT extends AbstractComponentIT {
         TestBenchElement sorter = sorters.get(0);
         Assert.assertEquals("Expected ascending sort order.", "asc",
                 sorter.getAttribute("direction"));
-        Assert.assertEquals(expectedColumnHeader, sorter.getText());
+        Assert.assertTrue(sorter.getText().startsWith(expectedColumnHeader));
     }
 
 }
