@@ -73,7 +73,7 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrder_changeOrderFromServer_sortIndicatorsUpdated() {
         findElement(By.id("sort-by-age")).click();
         assertAscendingSorter("Age");
-        findElement(By.id("reorder-button")).click();        
+        findElement(By.id("reorder-button")).click();
         assertAscendingSorter("Age");
     }
 
