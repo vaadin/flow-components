@@ -91,7 +91,7 @@ public class SortingPage extends Div {
                 });
         button.setId(sortBtnId);
 
-        NativeButton reOrder = new NativeButton("Re-order", e-> {
+        NativeButton reOrder = new NativeButton("Re-order", e -> {
             grid.setColumnOrder(ageColumn, nameColumn);
         });
         reOrder.setId("reorder-button");
