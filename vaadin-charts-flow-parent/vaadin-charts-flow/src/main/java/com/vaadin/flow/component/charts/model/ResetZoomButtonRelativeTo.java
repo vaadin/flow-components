@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-
 /**
  * What frame the button should be placed related to. Can be either "plot" or
  * "chart". Defaults to plot.

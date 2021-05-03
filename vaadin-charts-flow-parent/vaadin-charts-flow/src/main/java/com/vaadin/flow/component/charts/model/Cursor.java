@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * You can set the cursor to POINTER("pointer") if you have click events
  * attached to the series, to signal to the user that the points and lines can

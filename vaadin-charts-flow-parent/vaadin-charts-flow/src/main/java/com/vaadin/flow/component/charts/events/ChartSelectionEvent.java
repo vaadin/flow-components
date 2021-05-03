@@ -24,7 +24,6 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartModel;
 import com.vaadin.flow.component.charts.model.Dimension;
 
-
 /**
  * The ChartSelectionEvent class stores information on selection events on the
  * chart's area.
@@ -47,10 +46,10 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
      * @param valueEnd
      */
     public ChartSelectionEvent(Chart source, boolean fromClient,
-                               @EventData("event.detail.xAxisMin") Double selectionStart,
-                               @EventData("event.detail.xAxisMax") Double selectionEnd,
-                               @EventData("event.detail.yAxisMin") Double valueStart,
-                               @EventData("event.detail.yAxisMax") Double valueEnd) {
+            @EventData("event.detail.xAxisMin") Double selectionStart,
+            @EventData("event.detail.xAxisMax") Double selectionEnd,
+            @EventData("event.detail.yAxisMin") Double valueStart,
+            @EventData("event.detail.yAxisMax") Double valueEnd) {
         super(source, fromClient);
         this.selectionStart = selectionStart;
         this.selectionEnd = selectionEnd;
@@ -60,8 +59,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
 
     /**
      * This value is undefined and shouldn't be considered if
-     * {@link ChartModel#setZoomType(Dimension)}
-     * was set to {@link Dimension#Y}
+     * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#Y}
      * 
      * @return the X coordinate where the selection started if ZoomType is
      *         {@link Dimension#X} or {@link Dimension#XY}.
@@ -72,8 +70,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
 
     /**
      * This value is undefined and shouldn't be considered if
-     * {@link ChartModel#setZoomType(Dimension)}
-     * was set to {@link Dimension#Y}
+     * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#Y}
      * 
      * @return the X coordinate where the selection endedif ZoomType is
      *         {@link Dimension#X} or {@link Dimension#XY}.
@@ -84,8 +81,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
 
     /**
      * This value is undefined and shouldn't be considered if
-     * {@link ChartModel#setZoomType(Dimension)}
-     * was set to {@link Dimension#X}
+     * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#X}
      * 
      * @return the Y coordinate where the selection started if ZoomType is
      *         {@link Dimension#Y} or {@link Dimension#XY}.
@@ -96,8 +92,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
 
     /**
      * This value is undefined and shouldn't be considered if
-     * {@link ChartModel#setZoomType(Dimension)}
-     * was set to {@link Dimension#X}
+     * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#X}
      * 
      * @return the Y coordinate where the selection ended if ZoomType is
      *         {@link Dimension#Y} or {@link Dimension#XY}.

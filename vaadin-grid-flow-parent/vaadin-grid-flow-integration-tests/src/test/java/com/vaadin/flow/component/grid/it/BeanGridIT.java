@@ -30,7 +30,8 @@ public class BeanGridIT extends AbstractComponentIT {
         open();
         GridElement grid = $(GridElement.class).first();
         String text = grid.getText();
-        Assert.assertFalse("Null values should be presented as empty strings", text.contains("null"));
+        Assert.assertFalse("Null values should be presented as empty strings",
+                text.contains("null"));
     }
 
 }

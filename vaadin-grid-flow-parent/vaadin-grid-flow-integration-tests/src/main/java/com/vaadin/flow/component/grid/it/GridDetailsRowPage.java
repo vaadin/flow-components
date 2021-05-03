@@ -32,16 +32,14 @@ public class GridDetailsRowPage extends Div {
         grid.setDataProvider(ldp);
 
         grid.addColumn(Person::getFirstName).setHeader("name");
-        grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> new Button(item.getFirstName())));
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(
+                item -> new Button(item.getFirstName())));
 
-        add(grid,
-                new Button("click to open details", e ->
-                    setFirstAndSecondItemsVisible()
-                )
-        );
+        add(grid, new Button("click to open details",
+                e -> setFirstAndSecondItemsVisible()));
         Button updatePerson3 = new Button("update and refresh person 3", e -> {
             nbUpdates++;
-            person3.setFirstName("Person 3 - updates "+nbUpdates);
+            person3.setFirstName("Person 3 - updates " + nbUpdates);
             grid.getDataProvider().refreshItem(person3);
         });
         updatePerson3.setId("update-button");

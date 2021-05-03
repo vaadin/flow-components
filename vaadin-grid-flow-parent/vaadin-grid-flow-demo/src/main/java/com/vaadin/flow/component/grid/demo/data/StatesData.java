@@ -7,7 +7,7 @@ public class StatesData {
     private static final List<String> STATE_LIST = createStateList();
 
     private static List<String> createStateList() {
-        List<String> stateList= new ArrayList<>();
+        List<String> stateList = new ArrayList<>();
 
         stateList.add("Alabama");
         stateList.add("California");
@@ -23,7 +23,7 @@ public class StatesData {
         return stateList;
     }
 
-    public List<String> getAllStates(){
+    public List<String> getAllStates() {
         return STATE_LIST;
     }
 }

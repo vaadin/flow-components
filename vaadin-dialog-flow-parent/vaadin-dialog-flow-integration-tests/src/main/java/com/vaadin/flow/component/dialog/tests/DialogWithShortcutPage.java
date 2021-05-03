@@ -57,12 +57,14 @@ public class DialogWithShortcutPage extends VerticalLayout {
         final NativeButton dialogWithShortcutListenOnDialogAllowBrowserDefault = new NativeButton(
                 "Dialog with shortcut listenOn(dialog).allowBrowserDefault()",
                 e -> createAndOpenDialog(true, false));
-        dialogWithShortcutListenOnDialogAllowBrowserDefault.setId(LISTEN_ON_DIALOG_ALLOW_DEFAULT);
+        dialogWithShortcutListenOnDialogAllowBrowserDefault
+                .setId(LISTEN_ON_DIALOG_ALLOW_DEFAULT);
         final NativeButton dialogWithShortcutOnUi = new NativeButton(
-                "Dialog with shortcut on UI", e -> createAndOpenDialog(false, true));
+                "Dialog with shortcut on UI",
+                e -> createAndOpenDialog(false, true));
         dialogWithShortcutOnUi.setId(SHORTCUT_ON_UI);
-        final NativeButton reusableDialogButton = new NativeButton("Reusable dialog",
-                event -> {
+        final NativeButton reusableDialogButton = new NativeButton(
+                "Reusable dialog", event -> {
                     if (reusableDialog == null) {
                         reusableDialog = createAndOpenDialog(true, true);
                     } else {
@@ -71,11 +73,12 @@ public class DialogWithShortcutPage extends VerticalLayout {
                 });
         reusableDialogButton.setId(REUSABLE_DIALOG);
         add(modelessWithShortcutOnUi, modelessWithShortcutListenOnDialog,
-                dialogWithShortcutOnUi, dialogWithShortcutListenOnDialog,dialogWithShortcutListenOnDialogAllowBrowserDefault,
+                dialogWithShortcutOnUi, dialogWithShortcutListenOnDialog,
+                dialogWithShortcutListenOnDialogAllowBrowserDefault,
                 reusableDialogButton);
 
-        NativeButton nonDialogButton = new NativeButton("Button on UI with shortcut on UI",
-                this::onEvent);
+        NativeButton nonDialogButton = new NativeButton(
+                "Button on UI with shortcut on UI", this::onEvent);
         nonDialogButton.addClickShortcut(SHORTCUT_KEY);
         nonDialogButton.setId(UI_BUTTON);
 
@@ -88,17 +91,18 @@ public class DialogWithShortcutPage extends VerticalLayout {
         attachEvent.getUI().setId(UI_ID);
     }
 
-    private Dialog createAndOpenDialog(boolean listenOnDialog, boolean preventDefault) {
+    private Dialog createAndOpenDialog(boolean listenOnDialog,
+            boolean preventDefault) {
         int index = dialogCounter++;
         final String dialogId = DIALOG_ID + index;
         NativeButton myDialogButton = createDialogButton();
         myDialogButton.setId(dialogId + "-button");
         final ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setItems("foo","bar","xxx");
-        Dialog dialog = new Dialog(
-                new Div(new Div(new Text("" + index)), myDialogButton,
-                        new Input(), comboBox));
-        NativeButton closeButton = new NativeButton("Close", buttonClickEvent -> dialog.close());
+        comboBox.setItems("foo", "bar", "xxx");
+        Dialog dialog = new Dialog(new Div(new Div(new Text("" + index)),
+                myDialogButton, new Input(), comboBox));
+        NativeButton closeButton = new NativeButton("Close",
+                buttonClickEvent -> dialog.close());
         dialog.add(closeButton);
         dialog.setDraggable(true);
         dialog.open();

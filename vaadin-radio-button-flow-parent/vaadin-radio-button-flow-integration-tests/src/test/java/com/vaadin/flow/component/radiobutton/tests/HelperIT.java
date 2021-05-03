@@ -25,10 +25,8 @@ import org.junit.Test;
 public class HelperIT extends AbstractComponentIT {
 
     /**
-     * Assert that helper component exists after
-     * setItems.
-     * This issue is similar to
-     * https://github.com/vaadin/vaadin-checkbox/issues/191
+     * Assert that helper component exists after setItems. This issue is similar
+     * to https://github.com/vaadin/vaadin-checkbox/issues/191
      */
     @Test
     public void assertHelperComponentExists() {
@@ -36,7 +34,7 @@ public class HelperIT extends AbstractComponentIT {
         TestBenchElement radioGroup = $("vaadin-radio-group").first();
 
         TestBenchElement helperComponent = radioGroup.$("span")
-            .attributeContains("slot", "helper").first();
+                .attributeContains("slot", "helper").first();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
     }

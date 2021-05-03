@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * The loading options control the appearance of the loading screen that covers
  * the plot area on chart operations. This screen only appears after an explicit
@@ -29,41 +28,41 @@ package com.vaadin.flow.component.charts.model;
  */
 public class Loading extends AbstractConfigurationObject {
 
-	private Number hideDuration;
-	private Number showDuration;
+    private Number hideDuration;
+    private Number showDuration;
 
-	public Loading() {
-	}
+    public Loading() {
+    }
 
-	/**
-	 * @see #setHideDuration(Number)
-	 */
-	public Number getHideDuration() {
-		return hideDuration;
-	}
+    /**
+     * @see #setHideDuration(Number)
+     */
+    public Number getHideDuration() {
+        return hideDuration;
+    }
 
-	/**
-	 * The duration in milliseconds of the fade out effect.
-	 * <p>
-	 * Defaults to: 100
-	 */
-	public void setHideDuration(Number hideDuration) {
-		this.hideDuration = hideDuration;
-	}
+    /**
+     * The duration in milliseconds of the fade out effect.
+     * <p>
+     * Defaults to: 100
+     */
+    public void setHideDuration(Number hideDuration) {
+        this.hideDuration = hideDuration;
+    }
 
-	/**
-	 * @see #setShowDuration(Number)
-	 */
-	public Number getShowDuration() {
-		return showDuration;
-	}
+    /**
+     * @see #setShowDuration(Number)
+     */
+    public Number getShowDuration() {
+        return showDuration;
+    }
 
-	/**
-	 * The duration in milliseconds of the fade in effect.
-	 * <p>
-	 * Defaults to: 100
-	 */
-	public void setShowDuration(Number showDuration) {
-		this.showDuration = showDuration;
-	}
+    /**
+     * The duration in milliseconds of the fade in effect.
+     * <p>
+     * Defaults to: 100
+     */
+    public void setShowDuration(Number showDuration) {
+        this.showDuration = showDuration;
+    }
 }

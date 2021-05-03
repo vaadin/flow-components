@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
@@ -32,41 +31,41 @@ import com.vaadin.flow.component.charts.model.style.Color;
  */
 public class Side extends AbstractConfigurationObject {
 
-	private Color color;
-	private Number size;
+    private Color color;
+    private Number size;
 
-	public Side() {
-	}
+    public Side() {
+    }
 
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
+    /**
+     * @see #setColor(Color)
+     */
+    public Color getColor() {
+        return color;
+    }
 
-	/**
-	 * The color of the panel.
-	 * <p>
-	 * Defaults to: transparent
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
+    /**
+     * The color of the panel.
+     * <p>
+     * Defaults to: transparent
+     */
+    public void setColor(Color color) {
+        this.color = color;
+    }
 
-	/**
-	 * @see #setSize(Number)
-	 */
-	public Number getSize() {
-		return size;
-	}
+    /**
+     * @see #setSize(Number)
+     */
+    public Number getSize() {
+        return size;
+    }
 
-	/**
-	 * The thickness of the panel.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setSize(Number size) {
-		this.size = size;
-	}
+    /**
+     * The thickness of the panel.
+     * <p>
+     * Defaults to: 1
+     */
+    public void setSize(Number size) {
+        this.size = size;
+    }
 }

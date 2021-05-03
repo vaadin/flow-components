@@ -21,6 +21,7 @@ package com.vaadin.flow.component.combobox.osgi;
 import java.io.Serializable;
 import org.osgi.service.component.annotations.Component;
 import com.vaadin.flow.osgi.support.OsgiVaadinStaticResource;
+
 /**
  *
  * Combo box connector resource registration.
@@ -35,6 +36,7 @@ public class ComboBoxConnectorResource
     public String getPath() {
         return "/META-INF/resources/frontend/comboBoxConnector.js";
     }
+
     @Override
     public String getAlias() {
         return "/frontend/comboBoxConnector.js";

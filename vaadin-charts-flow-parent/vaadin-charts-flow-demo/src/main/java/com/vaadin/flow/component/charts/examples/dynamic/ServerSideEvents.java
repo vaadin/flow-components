@@ -233,5 +233,6 @@ public class ServerSideEvents extends AbstractChartExample {
     }
 
     @JsonIgnoreType
-    static class JacksonMixinForIgnoreCommand { }
+    static class JacksonMixinForIgnoreCommand {
+    }
 }

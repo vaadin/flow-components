@@ -77,7 +77,8 @@ public class DialogView extends DemoView {
         // begin-source-example
         // source-example-heading: Confirmation dialog
         Dialog dialog = new Dialog();
-        dialog.add(new Text("You have unsaved changes that will be discarded if you navigate away."));
+        dialog.add(new Text(
+                "You have unsaved changes that will be discarded if you navigate away."));
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
         Span message = new Span();
@@ -96,7 +97,7 @@ public class DialogView extends DemoView {
             dialog.close();
         }, Key.ESCAPE);
 
-        dialog.add(new Div( confirmButton, cancelButton));
+        dialog.add(new Div(confirmButton, cancelButton));
         // end-source-example
         button.addClickListener(event -> dialog.open());
         confirmButton.getStyle().set("margin-right", "15px");
@@ -197,19 +198,15 @@ public class DialogView extends DemoView {
         // begin-source-example
         // source-example-heading: Modeless Draggable Resizable Dialog
         Dialog firstDialog = new Dialog();
-        firstDialog.add(
-            new Text("This is the first dialog"),
-            new Button("Close", e -> firstDialog.close())
-        );
+        firstDialog.add(new Text("This is the first dialog"),
+                new Button("Close", e -> firstDialog.close()));
         firstDialog.setModal(false);
         firstDialog.setDraggable(true);
         firstDialog.setResizable(true);
-        
+
         Dialog secondDialog = new Dialog();
-        secondDialog.add(
-            new Text("This is the second dialog"),
-            new Button("Close", e -> secondDialog.close())
-        );
+        secondDialog.add(new Text("This is the second dialog"),
+                new Button("Close", e -> secondDialog.close()));
         secondDialog.setModal(false);
         secondDialog.setDraggable(true);
         secondDialog.setResizable(true);
@@ -218,6 +215,7 @@ public class DialogView extends DemoView {
         openSecondDialog.addClickListener(e -> secondDialog.open());
         // end-source-example
 
-        addCard("Modeless Draggable Resizable Dialog", openDialog, openSecondDialog, firstDialog);
+        addCard("Modeless Draggable Resizable Dialog", openDialog,
+                openSecondDialog, firstDialog);
     }
 }

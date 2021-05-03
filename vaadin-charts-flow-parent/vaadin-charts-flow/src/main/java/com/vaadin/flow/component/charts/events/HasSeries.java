@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import java.io.Serializable;
 
 import com.vaadin.flow.component.charts.Chart;
@@ -43,6 +42,7 @@ public interface HasSeries extends Serializable {
      * @return
      */
     default Series getSeries() {
-        return getSource().getConfiguration().getSeries().get(getSeriesItemIndex());
+        return getSource().getConfiguration().getSeries()
+                .get(getSeriesItemIndex());
     }
 }

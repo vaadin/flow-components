@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
  * A predefined shape or symbol for the marker. When null, the symbol is pulled
  * from options.symbols. Other possible values are "circle", "square",

@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-
 /**
  * The position of the tick marks relative to the axis line. Can be one of
  * INSIDE and OUTSIDE. Defaults to OUTSIDE.

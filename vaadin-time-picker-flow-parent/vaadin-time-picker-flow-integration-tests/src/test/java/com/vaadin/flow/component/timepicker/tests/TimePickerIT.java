@@ -123,7 +123,7 @@ public class TimePickerIT extends AbstractComponentIT {
     @Test
     public void timePickerHelperText() {
         TimePickerElement picker = $(TimePickerElement.class)
-              .id("time-picker-helper-text");
+                .id("time-picker-helper-text");
         Assert.assertEquals("Helper text", picker.getHelperText());
 
         $("button").id("button-clear-helper-text").click();
@@ -133,9 +133,9 @@ public class TimePickerIT extends AbstractComponentIT {
     @Test
     public void timePickerHelperComponent() {
         TimePickerElement picker = $(TimePickerElement.class)
-              .id("time-picker-helper-component");
+                .id("time-picker-helper-component");
         Assert.assertEquals("helper-component",
-              picker.getHelperComponent().getAttribute("id"));
+                picker.getHelperComponent().getAttribute("id"));
 
         $("button").id("button-clear-helper-component").click();
         Assert.assertNull(picker.getHelperComponent());

@@ -172,7 +172,8 @@ public class DateTimePickerView extends DemoView {
         // source-example-heading: Auto open disabled
         DateTimePicker dateTimePicker = new DateTimePicker();
 
-        // Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.
+        // Dropdown is only opened when clicking the toggle button or pressing
+        // Up or Down arrow keys.
         dateTimePicker.setAutoOpen(false);
         // end-source-example
 
@@ -183,15 +184,13 @@ public class DateTimePickerView extends DemoView {
         Div div = new Div();
         // begin-source-example
         // source-example-heading: Helper text and helper component
-        DateTimePicker dateTimePicker = new DateTimePicker(
-              "Pick-up time");
-        dateTimePicker
-              .setHelperText("Please, select the most suitable time");
+        DateTimePicker dateTimePicker = new DateTimePicker("Pick-up time");
+        dateTimePicker.setHelperText("Please, select the most suitable time");
 
         DateTimePicker dateTimePickerHelperComponent = new DateTimePicker(
-              "Arrival time");
+                "Arrival time");
         dateTimePickerHelperComponent
-              .setHelperComponent(new Span("Select your arrival time"));
+                .setHelperComponent(new Span("Select your arrival time"));
 
         add(dateTimePicker, dateTimePickerHelperComponent);
         // end-source-example

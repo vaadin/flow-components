@@ -46,7 +46,7 @@ public class SharedBrowser {
     }
 
     TestBenchDriverProxy getDriver(DriverSupplier driverSupplier)
-        throws Exception {
+            throws Exception {
         if (driver == null) {
             synchronized (this) {
                 if (driver == null) {
@@ -63,8 +63,8 @@ public class SharedBrowser {
         if (driver == null) {
             return;
         }
-        logger.log(Level.FINE, String
-            .format("Clearing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String.format(
+                "Clearing driver for session %s\turl %s", sessionId, url));
         driver.quit();
         driver = null;
         sessionId = null;
@@ -97,7 +97,7 @@ public class SharedBrowser {
     }
 
     private TestBenchDriverProxy createDriverFromSession(
-        final SessionId sessionId, URL command_executor) {
+            final SessionId sessionId, URL command_executor) {
         CommandExecutor executor = new HttpCommandExecutor(command_executor) {
 
             @Override
@@ -115,17 +115,17 @@ public class SharedBrowser {
                     response = new Response();
                     response.setSessionId(sessionId.toString());
                     response.setStatus(0);
-                    response.setValue(Collections.<String, String>emptyMap());
+                    response.setValue(Collections.<String, String> emptyMap());
 
                     try {
                         Field commandCodec = this.getClass().getSuperclass()
-                            .getDeclaredField("commandCodec");
+                                .getDeclaredField("commandCodec");
                         commandCodec.setAccessible(true);
                         commandCodec.set(this, new W3CHttpCommandCodec());
 
                         Field responseCodec = null;
                         responseCodec = this.getClass().getSuperclass()
-                            .getDeclaredField("responseCodec");
+                                .getDeclaredField("responseCodec");
                         responseCodec.setAccessible(true);
                         responseCodec.set(this, new W3CHttpResponseCodec());
                     } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -138,11 +138,11 @@ public class SharedBrowser {
                 return response;
             }
         };
-        logger.log(Level.FINE, String
-            .format("Reusing driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String.format(
+                "Reusing driver for session %s\turl %s", sessionId, url));
 
         RemoteWebDriver driver = new RemoteWebDriver(executor,
-            new DesiredCapabilities());
+                new DesiredCapabilities());
         return TestBench.createDriver(driver);
     }
 
@@ -150,11 +150,11 @@ public class SharedBrowser {
         driver = (TestBenchDriverProxy) currentDriver;
         RemoteWebDriver webDriver = (RemoteWebDriver) driver.getWrappedDriver();
         HttpCommandExecutor executor = (HttpCommandExecutor) webDriver
-            .getCommandExecutor();
+                .getCommandExecutor();
         url = executor.getAddressOfRemoteServer();
         sessionId = webDriver.getSessionId();
-        logger.log(Level.FINE, String
-            .format("Creating driver for session %s\turl %s", sessionId, url));
+        logger.log(Level.FINE, String.format(
+                "Creating driver for session %s\turl %s", sessionId, url));
     }
 
     public Optional<List<DesiredCapabilities>> getGridBrowsers() {
@@ -174,7 +174,7 @@ public class SharedBrowser {
     interface DriverSupplier {
         WebDriver getDriver() throws Exception;
     }
-    
+
     @FunctionalInterface
     interface DriverConsumer {
         void setDriver(WebDriver driver) throws Exception;
