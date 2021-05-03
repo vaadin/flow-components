@@ -1248,16 +1248,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Grid(Class<T> beanType, boolean autoCreateColumns) {
         this();
-        Objects.requireNonNull(beanType, "Bean type can't be null");
-        this.beanType = beanType;
-        propertySet = BeanPropertySet.get(beanType);
-        if (autoCreateColumns) {
-            propertySet.getProperties()
-                    .filter(property -> !property.isSubProperty())
-                    .sorted((prop1, prop2) -> prop1.getName()
-                            .compareTo(prop2.getName()))
-                    .forEach(this::addColumn);
-        }
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -3427,6 +3418,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         return compareComparables(Objects.toString(a, ""),
                 Objects.toString(b, ""));
+    }
+
+    /**
+     * Sets the bean type this grid is bound to and optionally adds a set of
+     * columns for each of the bean's properties.
+     * 
+     * The property-values of the bean will be converted to Strings. Full names
+     * of the properties will be used as the {@link Column#setKey(String) column
+     * keys} and the property captions will be used as the
+     * {@link Column#setHeader(String) column headers}. The generated columns
+     * will be sortable by default, if the property is {@link Comparable}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included and they will be in alphabetical order. Use
+     * {@link Grid#setColumns(String...)} to define which properties to include
+     * and in which order. You can also add a column for an individual property
+     * with {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
+     * <p>
+     * This method can only be called for a newly instanced Grid without any
+     * beanType or columns set.
+     * 
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    public void configureBeanType(Class<T> beanType,
+            boolean autoCreateColumns) {
+        Objects.requireNonNull(beanType, "Bean type can't be null");
+
+        if (this.beanType != null) {
+            throw new IllegalStateException(
+                    "configureBeanType can only be called for a Grid without a beanType set");
+        }
+        if (!this.getColumns().isEmpty()) {
+            throw new IllegalStateException(
+                    "configureBeanType can only be called for a Grid without any columns");
+        }
+        this.beanType = beanType;
+        propertySet = BeanPropertySet.get(beanType);
+        if (autoCreateColumns) {
+            propertySet.getProperties()
+                    .filter(property -> !property.isSubProperty())
+                    .sorted((prop1, prop2) -> prop1.getName()
+                            .compareTo(prop2.getName()))
+                    .forEach(this::addColumn);
+        }
+
     }
 
     /**
