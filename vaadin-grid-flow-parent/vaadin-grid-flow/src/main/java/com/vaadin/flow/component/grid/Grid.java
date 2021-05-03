@@ -126,6 +126,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha6")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -3155,7 +3156,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")) {
+            if (sorter.hasKey("direction")
+                    && sorter.get("direction").getType() == JsonType.STRING) {
                 switch (sorter.getString("direction")) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
@@ -3612,7 +3614,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see Column#setAutoWidth(boolean)
      */
     public void recalculateColumnWidths() {
-        getElement().callJsFunction("recalculateColumnWidths");
+        // Defer column width recalculation to occur after the data was
+        // refreshed. The data communicator will insert the JS call to refresh
+        // the client side grid in the beforeClientResponse hook, we need to
+        // match this here so that the column width recalculation runs after the
+        // data was updated.
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                ctx -> getElement().callJsFunction("recalculateColumnWidths")));
     }
 
     /**
