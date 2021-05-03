@@ -70,8 +70,8 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
 
         // Test that editor still works after refresh
         findElement(By.id("edit-button")).click();
-        WebElement closed = findElement(By.id("open-2"));
-        Assert.assertEquals(closed.getText(), "Open: 2");
+        WebElement open = findElement(By.id("open-2"));
+        Assert.assertEquals(open.getText(), "Open: 2");
     }
 
     private GridElement getGrid() {
