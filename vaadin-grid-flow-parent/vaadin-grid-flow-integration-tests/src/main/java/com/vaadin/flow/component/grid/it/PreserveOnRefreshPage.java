@@ -72,10 +72,10 @@ public class PreserveOnRefreshPage extends Div {
         // refresh
         grid.getEditor().addOpenListener(event -> {
             count++;
-            Span open = new Span("Open: "+count);
-            open.setId("open-"+count);
+            Span open = new Span("Open: " + count);
+            open.setId("open-" + count);
             add(open);
-        });        
+        });
         add(grid, button);
     }
 
