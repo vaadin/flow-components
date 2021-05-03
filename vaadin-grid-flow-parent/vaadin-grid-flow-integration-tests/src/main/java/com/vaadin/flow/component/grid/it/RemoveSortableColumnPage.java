@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-@Route("remove-sortable-column")
+@Route("vaadin-grid/remove-sortable-column")
 public class RemoveSortableColumnPage extends VerticalLayout {
 
     private MyGrid grid;
@@ -116,7 +116,7 @@ public class RemoveSortableColumnPage extends VerticalLayout {
     public void onAttach(AttachEvent attachEvent) {
         attachEvent.getUI().getSession().setErrorHandler(handler -> {
             Span text = new Span("Error");
-            text.setId("error");
+            text.setId("error-handler-message");
             add(text);
         });
     }

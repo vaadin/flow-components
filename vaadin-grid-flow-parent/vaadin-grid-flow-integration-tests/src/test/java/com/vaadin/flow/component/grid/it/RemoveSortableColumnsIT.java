@@ -21,16 +21,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.flow.component.select.testbench.SelectElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
+@TestPath("vaadin-grid/remove-sortable-column")
 public class RemoveSortableColumnsIT extends AbstractComponentIT {
 
-    @Test(expected = NoSuchElementException.class)
-    public void removeSortableColumn() {
+    @Test
+    public void removeSortableColumn_shouldNotGenerateAnException() {
         open();
         findElement(By.id("sort")).click();
         SelectElement select = $(SelectElement.class).first();
         select.selectItemByIndex(2);
-        findElement(By.id("error"));
+        Assert.assertThrows(NoSuchElementException.class,
+                () -> findElement(By.id("error-handler-message")));
     }
+}
