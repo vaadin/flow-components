@@ -31,6 +31,8 @@ import com.vaadin.flow.router.Route;
 @PreserveOnRefresh
 public class PreserveOnRefreshPage extends Div {
 
+    int count = 0;
+
     public PreserveOnRefreshPage() {
         Grid<Person> grid = new Grid<>();
         Person foo = new Person("foo", 20);
@@ -61,11 +63,19 @@ public class PreserveOnRefreshPage extends Div {
 
         // Grid editor will fire close event, this will be tested
         grid.getEditor().addCloseListener(event -> {
-            Span span = new Span("Closed");
-            span.setId("closed");
-            add(span);
+            Span close = new Span("Closed");
+            close.setId("closed");
+            add(close);
         });
 
+        // Grid editor will fire open event, this will be tested after
+        // refresh
+        grid.getEditor().addOpenListener(event -> {
+            count++;
+            Span open = new Span("Open: "+count);
+            open.setId("open-"+count);
+            add(open);
+        });        
         add(grid, button);
     }
 
