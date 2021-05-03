@@ -10,7 +10,8 @@ public class SetItemsLaterPage extends VerticalLayout {
 
     public SetItemsLaterPage() {
         ComboBox<String> comboBox = new ComboBox<>();
-        NativeButton button = new NativeButton("Click me to add items to the combobox",
+        NativeButton button = new NativeButton(
+                "Click me to add items to the combobox",
                 event -> comboBox.setItems("foo", "bar"));
         button.setId("set-items-button");
         add(comboBox, button);

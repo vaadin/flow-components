@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -39,13 +38,13 @@ public class PointUpdateEvent extends ComponentEvent<Chart> implements HasItem {
     private final int pointIndex;
 
     public PointUpdateEvent(Chart source, boolean fromClient,
-                            @EventData("event.detail.originalEvent.target.series.index") int seriesIndex,
-                            @EventData("event.detail.originalEvent.target.category") String category,
-                            @EventData("event.detail.originalEvent.target.index") int pointIndex,
-                            @EventData("event.detail.originalEvent.target.x") Double oldXValue,
-                            @EventData("event.detail.originalEvent.target.y") Double oldYValue,
-                            @EventData("event.detail.originalEvent.options.x") Double newXValue,
-                            @EventData("event.detail.originalEvent.options.y") Double newYValue) {
+            @EventData("event.detail.originalEvent.target.series.index") int seriesIndex,
+            @EventData("event.detail.originalEvent.target.category") String category,
+            @EventData("event.detail.originalEvent.target.index") int pointIndex,
+            @EventData("event.detail.originalEvent.target.x") Double oldXValue,
+            @EventData("event.detail.originalEvent.target.y") Double oldYValue,
+            @EventData("event.detail.originalEvent.options.x") Double newXValue,
+            @EventData("event.detail.originalEvent.options.y") Double newYValue) {
         super(source, fromClient);
         this.seriesIndex = seriesIndex;
         this.category = category;

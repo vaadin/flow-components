@@ -77,21 +77,23 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-        dataProviderListenerRegistration = dataProvider.addDataProviderListener(event -> {
-            if (event instanceof DataRefreshEvent) {
-                refresh(((DataRefreshEvent<ITEM>) event).getItem());
-            } else {
-                clear();
-                rebuild();
-            }
-        });
+        dataProviderListenerRegistration = dataProvider
+                .addDataProviderListener(event -> {
+                    if (event instanceof DataRefreshEvent) {
+                        refresh(((DataRefreshEvent<ITEM>) event).getItem());
+                    } else {
+                        clear();
+                        rebuild();
+                    }
+                });
         rebuild();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
     }
@@ -99,11 +101,11 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         if (dataProviderListenerRegistration != null) {
-        	dataProviderListenerRegistration.remove();
-        	dataProviderListenerRegistration = null;
+            dataProviderListenerRegistration.remove();
+            dataProviderListenerRegistration = null;
         }
         super.onDetach(detachEvent);
-    }	
+    }
 
     /**
      * Gets the data provider.

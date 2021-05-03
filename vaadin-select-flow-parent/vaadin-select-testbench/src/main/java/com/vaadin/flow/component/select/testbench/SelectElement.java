@@ -35,7 +35,7 @@ import org.openqa.selenium.WebElement;
  */
 @Element("vaadin-select")
 public class SelectElement extends TestBenchElement
-      implements HasSelectByText, HasLabel, HasPlaceholder, HasHelper {
+        implements HasSelectByText, HasLabel, HasPlaceholder, HasHelper {
 
     @Element("vaadin-item")
     public static class ItemElement extends TestBenchElement {
@@ -74,14 +74,15 @@ public class SelectElement extends TestBenchElement
 
     public Stream<ItemElement> getItemsStream() {
         openPopup();
-        List<WebElement> elements = getDriver().findElement(By.tagName("vaadin-select-overlay"))
+        List<WebElement> elements = getDriver()
+                .findElement(By.tagName("vaadin-select-overlay"))
                 .findElement(By.tagName("vaadin-list-box"))
                 .findElements(By.tagName("vaadin-item"));
         if (elements.size() == 0) {
-            return Stream.<ItemElement>builder().build();
+            return Stream.<ItemElement> builder().build();
         }
-        return elements
-                .stream().map(item -> new ItemElement(item, getCommandExecutor()));
+        return elements.stream()
+                .map(item -> new ItemElement(item, getCommandExecutor()));
     }
 
     public List<ItemElement> getItems() {
@@ -90,7 +91,8 @@ public class SelectElement extends TestBenchElement
 
     @Override
     public void selectByText(String text) {
-        getItemsStream().filter(item -> text.equals(item.getText())).findFirst().get().click();
+        getItemsStream().filter(item -> text.equals(item.getText())).findFirst()
+                .get().click();
     }
 
     @Override
@@ -100,14 +102,17 @@ public class SelectElement extends TestBenchElement
 
     public ItemElement getSelectedOptionItem() {
         return getItemsStream()
-                .filter(element -> element.hasAttribute("selected"))
-                .findAny().orElseThrow(() -> new NoSuchElementException("No item selected from popup"));
+                .filter(element -> element.hasAttribute("selected")).findAny()
+                .orElseThrow(() -> new NoSuchElementException(
+                        "No item selected from popup"));
     }
 
     public ItemElement getSelectedItem() {
-        TestBenchElement textFieldElement = $("vaadin-select-text-field").first();
-        TestBenchElement itemSlotElement = wrapElement(textFieldElement
-                .findElement(By.xpath("div[@part=\"value\"]")), getCommandExecutor());
+        TestBenchElement textFieldElement = $("vaadin-select-text-field")
+                .first();
+        TestBenchElement itemSlotElement = wrapElement(
+                textFieldElement.findElement(By.xpath("div[@part=\"value\"]")),
+                getCommandExecutor());
         return itemSlotElement.$(ItemElement.class).first();
     }
 }

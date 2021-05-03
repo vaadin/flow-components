@@ -70,8 +70,7 @@ public class FlexLayoutTest {
     @Test
     public void testFlexLayout_setAndUnsetAlignContent() {
         FlexLayout layout = new FlexLayout();
-        FlexLayout.ContentAlignment contentAlignment =
-                FlexLayout.ContentAlignment.CENTER;
+        FlexLayout.ContentAlignment contentAlignment = FlexLayout.ContentAlignment.CENTER;
         layout.setAlignContent(contentAlignment);
 
         Assert.assertEquals("should set align-content",
@@ -89,8 +88,8 @@ public class FlexLayoutTest {
         layout.add(div);
         layout.setFlexBasis("10px", div);
 
-        Assert.assertEquals("should set flex-basis",
-                layout.getFlexBasis(div), "10px");
+        Assert.assertEquals("should set flex-basis", layout.getFlexBasis(div),
+                "10px");
 
         layout.setFlexBasis(null, div);
         Assert.assertNull("should remove flex-basis from component",
@@ -118,8 +117,8 @@ public class FlexLayoutTest {
         layout.add(div);
         layout.setFlexShrink(2, div);
 
-        Assert.assertEquals("should set flex-shrink",
-                layout.getFlexShrink(div), 2, 0);
+        Assert.assertEquals("should set flex-shrink", layout.getFlexShrink(div),
+                2, 0);
     }
 
     @Test
@@ -150,11 +149,9 @@ public class FlexLayoutTest {
                 layout.getOrder(div), 0);
 
         layout.setOrder(1, div);
-        Assert.assertEquals("should set order",
-                layout.getOrder(div), 1);
+        Assert.assertEquals("should set order", layout.getOrder(div), 1);
 
         layout.setOrder(0, div);
-        Assert.assertEquals("should unset order",
-                layout.getOrder(div), 0);
+        Assert.assertEquals("should unset order", layout.getOrder(div), 0);
     }
 }

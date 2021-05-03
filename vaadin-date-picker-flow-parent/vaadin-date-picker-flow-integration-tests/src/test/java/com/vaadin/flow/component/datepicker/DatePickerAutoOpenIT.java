@@ -19,7 +19,8 @@ public class DatePickerAutoOpenIT extends AbstractComponentIT {
     public void testSettingAutoOpenOnServerSide() {
         open();
         $(TestBenchElement.class).id("enable-button").click();
-        final DatePickerElement datePickerElement = $(DatePickerElement.class).first();
+        final DatePickerElement datePickerElement = $(DatePickerElement.class)
+                .first();
         assertTrue(datePickerElement.isAutoOpen());
         $(TestBenchElement.class).id("disable-button").click();
         assertFalse(datePickerElement.isAutoOpen());

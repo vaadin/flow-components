@@ -54,6 +54,7 @@ public class GridProConnectorResource
     public String getPath() {
         return "/META-INF/resources/frontend/gridProConnector.js";
     }
+
     @Override
     public String getAlias() {
         return "/frontend/gridProConnector.js";

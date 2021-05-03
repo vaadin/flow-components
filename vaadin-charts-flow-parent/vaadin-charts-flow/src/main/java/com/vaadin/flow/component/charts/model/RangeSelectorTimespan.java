@@ -17,15 +17,13 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
-
 /**
  * Possible timespan values for range selector buttons
  */
 public enum RangeSelectorTimespan implements ChartEnum {
-    MILLISECOND("millisecond"), SECOND("second"), MINUTE("minute"), DAY("day"), WEEK(
-            "week"), MONTH("month"), YEAR_TO_DATE("ytd"), YEAR("year"), ALL(
-            "all");
+    MILLISECOND("millisecond"), SECOND("second"), MINUTE("minute"), DAY(
+            "day"), WEEK("week"), MONTH(
+                    "month"), YEAR_TO_DATE("ytd"), YEAR("year"), ALL("all");
 
     private String name;
 

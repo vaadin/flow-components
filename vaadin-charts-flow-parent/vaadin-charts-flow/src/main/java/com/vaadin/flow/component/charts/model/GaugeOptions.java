@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 public abstract class GaugeOptions extends AbstractPlotOptions {
 
     /**

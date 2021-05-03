@@ -50,16 +50,26 @@ public class ThemableLayoutTest {
         checkThemeToggling("spacing", layout::isSpacing, layout::setSpacing);
     }
 
-    private void checkThemeToggling(String themeName, Supplier<Boolean> themeGetter, Consumer<Boolean> themeSetter) {
-        assertFalse(String.format("Expected no '%s' theme applied initially to layout", themeName), themeGetter.get());
-        themeSetter.accept( true);
-        assertTrue(String.format("Expected '%s' theme applied after setting it", themeName), themeGetter.get());
+    private void checkThemeToggling(String themeName,
+            Supplier<Boolean> themeGetter, Consumer<Boolean> themeSetter) {
+        assertFalse(String.format(
+                "Expected no '%s' theme applied initially to layout",
+                themeName), themeGetter.get());
         themeSetter.accept(true);
-        assertTrue(String.format("Expected '%s' theme applied after setting it twice", themeName), themeGetter.get());
+        assertTrue(String.format("Expected '%s' theme applied after setting it",
+                themeName), themeGetter.get());
+        themeSetter.accept(true);
+        assertTrue(String.format(
+                "Expected '%s' theme applied after setting it twice",
+                themeName), themeGetter.get());
 
         themeSetter.accept(false);
-        assertFalse(String.format("Expected no '%s' theme applied after removing it", themeName), themeGetter.get());
+        assertFalse(String.format(
+                "Expected no '%s' theme applied after removing it", themeName),
+                themeGetter.get());
         themeSetter.accept(false);
-        assertFalse(String.format("Expected no '%s' theme applied after removing it twice", themeName), themeGetter.get());
+        assertFalse(String.format(
+                "Expected no '%s' theme applied after removing it twice",
+                themeName), themeGetter.get());
     }
 }

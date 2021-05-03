@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model.style;
  * #L%
  */
 
-
 import com.vaadin.flow.component.charts.model.ChartEnum;
 
 /**

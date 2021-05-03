@@ -20,7 +20,6 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-checkbox-group-test-demo")
 public class CheckboxGroupDemoPage extends DemoView {
 
-
     public static class Person {
 
         private String name;
@@ -181,16 +180,17 @@ public class CheckboxGroupDemoPage extends DemoView {
         // end-source-example
 
         addVariantsDemo(() -> {
-                    return group;
-                }, GeneratedVaadinCheckboxGroup::addThemeVariants,
+            return group;
+        }, GeneratedVaadinCheckboxGroup::addThemeVariants,
                 GeneratedVaadinCheckboxGroup::removeThemeVariants,
                 CheckboxGroupVariant::getVariantName,
                 CheckboxGroupVariant.LUMO_VERTICAL);
     }
 
-    private void addHelperCheckboxGroup(){
+    private void addHelperCheckboxGroup() {
         // begin-source-example
-        // source-example-heading: CheckboxGroup with helper text and helper component
+        // source-example-heading: CheckboxGroup with helper text and helper
+        // component
         CheckboxGroup<String> groupHelperText = new CheckboxGroup<>();
         groupHelperText.setItems("foo", "bar", "baz");
         groupHelperText.setHelperText("Helper text");
@@ -205,9 +205,9 @@ public class CheckboxGroupDemoPage extends DemoView {
         groupHelperComponent.setHelperComponent(span);
 
         NativeButton clearHelperComponent = new NativeButton(
-              "Clear helper text", e -> {
-            groupHelperComponent.setHelperComponent(null);
-        });
+                "Clear helper text", e -> {
+                    groupHelperComponent.setHelperComponent(null);
+                });
 
         // end-source-example
         groupHelperText.setId("checkbox-helper-text");
@@ -217,10 +217,9 @@ public class CheckboxGroupDemoPage extends DemoView {
         clearHelperComponent.setId("button-clear-component");
 
         addCard("CheckboxGroup with helper text and helper component",
-              groupHelperText, clearHelper, groupHelperComponent,
-              clearHelperComponent);
+                groupHelperText, clearHelper, groupHelperComponent,
+                clearHelperComponent);
     }
-
 
     private String toString(Set<String> value) {
         return value.stream().sorted().collect(Collectors.toList()).toString();

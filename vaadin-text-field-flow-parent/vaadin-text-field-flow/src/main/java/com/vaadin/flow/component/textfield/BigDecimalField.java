@@ -342,7 +342,8 @@ public class BigDecimalField
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      *
      * @return the {@code title} property from the webcomponent
      */

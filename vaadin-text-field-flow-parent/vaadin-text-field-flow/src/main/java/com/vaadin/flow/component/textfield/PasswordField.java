@@ -175,8 +175,8 @@ public class PasswordField
     }
 
     private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(), getValueChangeTimeout(),
-                getSynchronizationRegistration());
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
     @Override
@@ -332,7 +332,8 @@ public class PasswordField
     }
 
     /**
-     * The text usually displayed in a tooltip popup when the mouse is over the field.
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
      *
      * @return the {@code title} property from the webcomponent
      */
@@ -369,8 +370,8 @@ public class PasswordField
     }
 
     /**
-     * Specifies if the field value gets automatically selected when
-     * the field gains focus.
+     * Specifies if the field value gets automatically selected when the field
+     * gains focus.
      *
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
@@ -384,8 +385,8 @@ public class PasswordField
      * selected when the field gains focus, <code>false</code> otherwise.
      *
      * @param autoselect
-     *            <code>true</code> to set auto select on,
-     *            <code>false</code> otherwise
+     *            <code>true</code> to set auto select on, <code>false</code>
+     *            otherwise
      */
     @Override
     public void setAutoselect(boolean autoselect) {
@@ -393,8 +394,7 @@ public class PasswordField
     }
 
     /**
-     * Gets the visibility   state of the button which clears the password
-     * field.
+     * Gets the visibility state of the button which clears the password field.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
@@ -404,8 +404,8 @@ public class PasswordField
     }
 
     /**
-     * Set to <code>false</code> to hide the clear button which clears the password
-     * field.
+     * Set to <code>false</code> to hide the clear button which clears the
+     * password field.
      *
      * @param clearButtonVisible
      *            <code>true</code> to set the button visible,
