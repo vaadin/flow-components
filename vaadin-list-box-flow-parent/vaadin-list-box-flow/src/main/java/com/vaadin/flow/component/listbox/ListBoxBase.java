@@ -69,6 +69,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Override
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider = Objects.requireNonNull(dataProvider);
+        clear();
         setupDataProviderListener(dataProvider);
     }
 
@@ -80,6 +81,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             if (event instanceof DataRefreshEvent) {
                 refresh(((DataRefreshEvent<ITEM>) event).getItem());
             } else {
+                clear();
                 rebuild();
             }
         });
@@ -178,7 +180,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     private void rebuild() {
-        clear();
         removeAll();
         items = getDataProvider().fetch(new Query<>())
                 .collect(Collectors.toList());
