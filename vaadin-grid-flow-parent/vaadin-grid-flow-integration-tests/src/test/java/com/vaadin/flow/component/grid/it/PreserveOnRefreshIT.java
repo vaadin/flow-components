@@ -23,6 +23,8 @@ import org.junit.Test;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-grid/preserve-on-refresh")
 public class PreserveOnRefreshIT extends AbstractComponentIT {
@@ -57,6 +59,19 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
                 "Unexpected footer content after refreshing with @PreserveOnRefresh.",
                 getGrid().getFooterCell(0).getInnerHTML(),
                 CoreMatchers.containsString("<span>footer</span>"));
+    }
+
+    @Test
+    public void refresh_editorOpen() {
+        findElement(By.id("edit-button")).click();
+        getDriver().navigate().refresh();
+        WebElement closed = findElement(By.id("closed"));
+        Assert.assertEquals(closed.getText(), "Closed");
+
+        // Test that editor still works after refresh
+        findElement(By.id("edit-button")).click();
+        WebElement open = findElement(By.id("open-2"));
+        Assert.assertEquals(open.getText(), "Open: 2");
     }
 
     private GridElement getGrid() {
