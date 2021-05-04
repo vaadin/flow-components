@@ -136,6 +136,8 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("setImageAsStreamResource");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
         MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
-        checkLogsForErrors(); // would fail if the image wasn't hosted
+
+        // the following would fail if the image wasn't hosted
+        checkLogsForErrors(msg -> !msg.contains("VAADIN/dynamic"));
     }
 }
