@@ -27,7 +27,8 @@ import com.vaadin.flow.router.WildcardParameter;
 @Route("vaadin-charts")
 @StyleSheet("context://styles.css")
 public class MainView extends Div implements HasUrlParameter<String> {
-    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.examples.";
+
+    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.demo.examples.";
 
     @Override
     public void setParameter(BeforeEvent event,
