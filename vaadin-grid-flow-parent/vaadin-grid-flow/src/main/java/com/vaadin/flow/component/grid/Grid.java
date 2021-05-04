@@ -127,6 +127,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import elemental.json.JsonType;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -139,7 +140,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "6.0.1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "6.0.2")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -3155,7 +3156,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")) {
+            if (sorter.hasKey("direction")
+                    && sorter.get("direction").getType() == JsonType.STRING) {
                 switch (sorter.getString("direction")) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
