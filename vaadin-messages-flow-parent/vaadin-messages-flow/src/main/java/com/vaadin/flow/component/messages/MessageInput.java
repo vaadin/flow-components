@@ -28,7 +28,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
