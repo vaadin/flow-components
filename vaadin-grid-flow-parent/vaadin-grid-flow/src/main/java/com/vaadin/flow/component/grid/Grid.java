@@ -3717,7 +3717,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         try {
             Editor<T> editor = getEditor();
             if (editor != null) {
-                getEditor().closeEditor();
+                if (getEditor().isBuffered()) {
+                    getEditor().cancel();
+                } else {
+                    getEditor().closeEditor();
+                }
             }
         } finally {
             editorFactory = factory;
