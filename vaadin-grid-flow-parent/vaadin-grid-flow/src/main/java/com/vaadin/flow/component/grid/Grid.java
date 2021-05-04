@@ -140,7 +140,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-beta1")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -3795,7 +3795,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         try {
             Editor<T> editor = getEditor();
             if (editor != null) {
-                getEditor().closeEditor();
+                if (getEditor().isBuffered()) {
+                    getEditor().cancel();
+                } else {
+                    getEditor().closeEditor();
+                }
             }
         } finally {
             editorFactory = factory;
