@@ -29,9 +29,9 @@ public class ListBoxRetainValueIT extends AbstractComponentIT {
     @Test
     public void listBoxRetainValueWhenRemovedAndAdded() {
         open();
-        WebElement value = findElement(By.id("value"));
+        WebElement value = findElement(By.id("list-box-value"));
         Assert.assertEquals(value.getText(), "2");
-        findElement(By.id("button")).click();
+        findElement(By.id("add-button")).click();
         Assert.assertEquals(value.getText(), "2");
     }
 }
