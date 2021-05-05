@@ -2,9 +2,10 @@ package com.vaadin.tests;
 
 import java.io.File;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 public abstract class ParallelTest
         extends com.vaadin.testbench.parallel.ParallelTest {
@@ -13,10 +14,14 @@ public abstract class ParallelTest
 
     @BeforeClass
     public static void setupClass() {
-        String driver = System.getProperty("webdriver.chrome.driver");
-        if (driver == null || !new File(driver).exists()) {
-            WebDriverManager.chromedriver().setup();
-        }
+        String sauceKey = System.getProperty("sauce.sauceAccessKey");
+        String hubHost = System.getProperty("com.vaadin.testbench.Parameters.hubHostname");
+        if ((sauceKey == null || sauceKey.isEmpty()) && (hubHost == null || hubHost.isEmpty())) {
+            String driver = System.getProperty("webdriver.chrome.driver");
+            if (driver == null || !new File(driver).exists()) {
+                WebDriverManager.chromedriver().setup();
+            }
+        }        
     }
 
     @Override

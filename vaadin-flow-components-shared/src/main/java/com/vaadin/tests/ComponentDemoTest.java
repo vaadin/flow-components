@@ -1,12 +1,10 @@
 package com.vaadin.tests;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import java.util.List;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.openqa.selenium.remote.DesiredCapabilities;
-
-import java.io.File;
-import java.util.List;
 
 public abstract class ComponentDemoTest
         extends com.vaadin.flow.demo.ComponentDemoTest {
@@ -15,10 +13,7 @@ public abstract class ComponentDemoTest
 
     @BeforeClass
     public static void setupClass() {
-        String driver = System.getProperty("webdriver.chrome.driver");
-        if (driver == null || !new File(driver).exists()) {
-            WebDriverManager.chromedriver().setup();
-        }
+        ParallelTest.setupClass();
     }
 
     @Override
