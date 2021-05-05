@@ -54,7 +54,7 @@ mergeITs() {
   [ ! -d node_modules ] && npm install
   pom=integration-tests/pom.xml
   modified=`[ -f $pom ] && find vaadin*parent/*integration-tests/src -mnewer $pom`
-  [ -f $pom -a -z "$modified" ] || node ./scripts/mergeITs.js
+  [ -f $pom -a -z "$modified" ] || node ./scripts/mergeITs.js $MODULES
 }
 ## Ask whether to run dev-server before running ITs
 askJetty() {
