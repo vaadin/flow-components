@@ -73,6 +73,8 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrder_changeOrderFromServer_sortIndicatorsUpdated() {
         findElement(By.id("sort-by-age")).click();
         assertAscendingSorter("Age");
+        findElement(By.id("reorder-button")).click();
+        assertAscendingSorter("Age");
     }
 
     @Test
@@ -144,7 +146,7 @@ public class SortingIT extends AbstractComponentIT {
         TestBenchElement sorter = sorters.get(0);
         Assert.assertEquals("Expected ascending sort order.", "asc",
                 sorter.getAttribute("direction"));
-        Assert.assertEquals(expectedColumnHeader, sorter.getText());
+        Assert.assertTrue(sorter.getText().startsWith(expectedColumnHeader));
     }
 
 }
