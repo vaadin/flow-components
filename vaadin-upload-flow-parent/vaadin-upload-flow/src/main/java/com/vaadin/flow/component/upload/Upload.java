@@ -88,8 +88,12 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         DomEventListener allFinishedListener = e -> {
             JsonArray files = e.getEventData().getArray(elementFiles);
 
-            boolean isUploading = IntStream.range(0, files.length()).anyMatch(
-                    index -> files.getObject(index).getBoolean("uploading"));
+            boolean isUploading = IntStream.range(0, files.length())
+                    .anyMatch(index -> {
+                        final String KEY = "uploading";
+                        JsonObject object = files.getObject(index);
+                        return object.hasKey(KEY) && object.getBoolean(KEY);
+                    });
 
             if (this.uploading && !isUploading) {
                 this.fireAllFinish();
