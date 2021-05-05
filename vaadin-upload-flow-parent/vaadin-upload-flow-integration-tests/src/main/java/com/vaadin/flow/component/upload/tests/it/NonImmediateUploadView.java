@@ -23,10 +23,9 @@ public class NonImmediateUploadView extends Div {
 
     @Override
     public void onAttach(AttachEvent attachEvent) {
-        attachEvent.getUI().getSession()
-                .setErrorHandler(event -> {
-                  result.setText("There was an error");
-                  event.getThrowable().printStackTrace();
-                });
+        attachEvent.getUI().getSession().setErrorHandler(event -> {
+            result.setText("There was an error");
+            event.getThrowable().printStackTrace();
+        });
     }
 }
