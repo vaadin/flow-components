@@ -48,10 +48,9 @@ function setDependenciesVersion(dependencies) {
 }
 
 function mergePlugins(build1, build2) {
-  return [
-    ... (build1 && build1[0] && build1[0].plugins && build1[0].plugins[0] && build1[0].plugins[0].plugin || []),
-    ... (build2 && build2[0] && build2[0].plugins && build2[0].plugins[0] && build2[0].plugins[0].plugin || [])
-  ]
+  const arr1 = build1 && build1[0] && build1[0].plugins && build1[0].plugins[0] && build1[0].plugins[0].plugin || [];
+  const arr2 = build2 && build2[0] && build2[0].plugins && build2[0].plugins[0] && build2[0].plugins[0].plugin || [];
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
 }
 
 async function consolidate(template, pom, cb) {
@@ -59,7 +58,9 @@ async function consolidate(template, pom, cb) {
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   await renameBase(tplJs);
+
   tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
+
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
 
   cb && cb(tplJs, pomJs);
@@ -93,14 +94,15 @@ async function consolidatePomFlow() {
 }
 async function consolidatePomTB() {
   const tbPom = `${mod}/${name}-testbench/pom.xml`;
-  fs.existsSync(tbPom) && await consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
+  fs.existsSync(tbPom) && await consolidate('pom-testbench.xml', tbPom)
 }
 async function consolidatePomDemo() {
   const demoPom = `${mod}/${name}-flow-demo/pom.xml`;
   fs.existsSync(demoPom) && await consolidate('pom-demo.xml', demoPom);
 }
 async function consolidatePomIT() {
-  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
+  const itPom = `${mod}/${name}-flow-integration-tests/pom.xml`;
+  consolidate('pom-integration-tests.xml', itPom);
 }
 
 consolidatePomParent();
