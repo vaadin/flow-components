@@ -48,7 +48,7 @@ public class CookieConsentView extends DemoView {
         button.addClickListener(e -> {
             clearCookieConsent();
             this.cookieConsent = cookieConsent;
-            add(cookieConsent);
+            this.getElement().appendChild(cookieConsent.getElement());
             getUI().get().getPage().executeJavaScript("$0._show()",
                     cookieConsent.getElement());
         });
