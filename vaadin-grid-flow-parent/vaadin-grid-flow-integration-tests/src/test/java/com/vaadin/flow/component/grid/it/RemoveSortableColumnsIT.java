@@ -23,14 +23,18 @@ import org.openqa.selenium.NoSuchElementException;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @TestPath("vaadin-grid/remove-sortable-column")
 public class RemoveSortableColumnsIT extends AbstractComponentIT {
 
     @Test
     public void removeSortableColumn_shouldNotGenerateAnException() {
+        By buttonLocator = By.id(RemoveSortableColumnPage.ID_SORT_BUTTON);
+
         open();
-        findElement(By.id("sort")).click();
+        waitUntil(ExpectedConditions.elementToBeClickable(buttonLocator));
+        findElement(buttonLocator).click();
         SelectElement select = $(SelectElement.class).first();
         select.selectItemByIndex(2);
         Assert.assertThrows(NoSuchElementException.class,

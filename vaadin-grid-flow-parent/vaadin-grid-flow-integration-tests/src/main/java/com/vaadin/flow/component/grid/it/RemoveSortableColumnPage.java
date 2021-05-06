@@ -37,6 +37,8 @@ import java.util.function.Function;
 @Route("vaadin-grid/remove-sortable-column")
 public class RemoveSortableColumnPage extends VerticalLayout {
 
+    public static final String ID_SORT_BUTTON = "sort-button";
+
     private MyGrid grid;
     private Select<String>[] selects;
 
@@ -140,10 +142,9 @@ public class RemoveSortableColumnPage extends VerticalLayout {
         grid.setHeaderGenerator(getHeaderGenerator());
 
         add(grid);
-        grid.redraw();
 
         Button sort = new Button("Sort");
-        sort.setId("sort");
+        sort.setId(ID_SORT_BUTTON);
         sort.addClickListener(event -> {
             GridSortOrderBuilder<Person> sortOrderBuilder = new GridSortOrderBuilder<>();
             sortOrderBuilder.thenAsc(grid.getColumns().get(0));
