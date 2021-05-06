@@ -110,10 +110,10 @@ public class ConfigurationJSONSerializationTest {
     @Test
     public void configurationJSONSerialization_setSeriesAddSeries_noExceptions() {
         Configuration conf = new Configuration();
-        conf.setSeries(new ListSeries(),new ListSeries());
+        conf.setSeries(new ListSeries(), new ListSeries());
         conf.addSeries(new ListSeries());
         assertEquals(
-          "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[{\"data\":[]},{\"data\":[]},{\"data\":[]}],\"exporting\":{\"enabled\":false}}",
-          toJSON(conf));
+                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[{\"data\":[]},{\"data\":[]},{\"data\":[]}],\"exporting\":{\"enabled\":false}}",
+                toJSON(conf));
     }
 }
