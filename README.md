@@ -28,7 +28,7 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 - `mvn -am -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-demo -Pwar jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
+Then navigate to `http://localhost:8080/vaadin-checkbox` to see the demo.
 
 ## Running ITs of one component
 
