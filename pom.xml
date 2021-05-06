@@ -36,17 +36,6 @@
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.149</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <osgi.bundle.import.package>*</osgi.bundle.import.package>
-        <osgi.bundle.export.package>com.vaadin.flow.component.*;-noimport:=true</osgi.bundle.export.package>
-        <osgi.bundle.required.execution.environment>JavaSE-1.8</osgi.bundle.required.execution.environment>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
-        <osgi.bundle.name>${project.artifactId}</osgi.bundle.name>
-        <osgi.bundle.symbolic.name>${project.groupId}.flow.component.${component.package.name}</osgi.bundle.symbolic.name>
-        <osgi.bundle.package.private/>
-        <osgi.bundle.bundle.activator/>
-        <osgi.bundle.description/>
-        <osgi.bundle.title>${project.name}</osgi.bundle.title>
-        <osgi.vaadin.package.version>1</osgi.vaadin.package.version>
     </properties>
     <modules>
         <module>vaadin-flow-components-shared</module>
@@ -247,37 +236,40 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <version>4.1.0</version>
-                    <extensions>true</extensions>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>5.3.0</version>
+                    <configuration>
+                        <bnd><![CDATA[
+                          regexArtifactId: vaadin-(.*)-flow(-.*)?
+                          replacementPattern: $1
+                          packageNameDash: ${replacestring;${project.artifactId};${regexArtifactId};${replacementPattern}}
+                          packageNameTmp: ${replacestring;${packageNameDash};'-'}
+
+                          isDemoPattern: .*-flow-demo
+                          isDemo: ${matches;${project.artifactId};${isDemoPattern}}
+                          packageName: ${packageNameTmp}${if;${isDemo};.demo}
+
+                          Bundle-Name: ${project.artifactId}
+                          Bundle-SymbolicName: ${project.groupId}.flow.component.${packageName}
+                          Import-Package: *
+                          Export-Package: ${project.groupId}.flow.component.${packageName}.*;-noimport:=true
+                          Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
+                          Implementation-Title: ${project.name}
+                          Vaadin-Package-Version: 1
+                          -includeresource.resources: -src/main/resources
+
+                          //if profile war is used in demos
+                          -fixupmessages: "Classes found in the wrong directory";is:=warning
+                          ]]></bnd>
+                    </configuration>
                     <executions>
                         <execution>
-                            <id>bundle-manifest</id>
-                            <phase>process-classes</phase>
                             <goals>
-                                <goal>manifest</goal>
+                                <goal>bnd-process</goal>
                             </goals>
                         </execution>
                     </executions>
-                    <configuration>
-                        <exportScr>true</exportScr>
-                        <instructions>
-                            <Bundle-Name>${osgi.bundle.name}</Bundle-Name>
-                            <Bundle-SymbolicName>${osgi.bundle.symbolic.name}</Bundle-SymbolicName>
-                            <Import-Package>${osgi.bundle.import.package}</Import-Package>
-                            <Export-Package>${osgi.bundle.export.package}</Export-Package>
-                            <Private-Package>${osgi.bundle.package.private}</Private-Package>
-                            <Bundle-Activator>${osgi.bundle.bundle.activator}</Bundle-Activator>
-                            <Bundle-License>${osgi.bundle.license}</Bundle-License>
-                            <Bundle-Description>${osgi.bundle.description}</Bundle-Description>
-                            <Implementation-Title>${osgi.bundle.title}</Implementation-Title>
-                            <Vaadin-Package-Version>${osgi.vaadin.package.version}</Vaadin-Package-Version>
-                            <_removeheaders>Built-By</_removeheaders>
-                            <_dsannotations>*</_dsannotations>
-                            <_metatypeannotations>*</_metatypeannotations>
-                        </instructions>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.googlecode.maven-download-plugin</groupId>
@@ -429,45 +421,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.0.0</version>
-                    <executions>
-                        <execution>
-                            <id>extract-component-name</id>
-                            <goals>
-                                <goal>regex-property</goal>
-                            </goals>
-                            <configuration>
-                                <name>component.name</name>
-                                <regex>vaadin-(\w+(-\w+)*)-flow</regex>
-                                <value>${project.artifactId}</value>
-                                <replacement>$1</replacement>
-                                <failIfNoMatch>false</failIfNoMatch>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>extract-component-package-name</id>
-                            <goals>
-                                <goal>regex-property</goal>
-                            </goals>
-                            <configuration>
-                                <name>component.package.name</name>
-                                <regex>-</regex>
-                                <value>${component.name}</value>
-                                <replacement/>
-                                <failIfNoMatch>false</failIfNoMatch>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>parse-version</id>
-                            <goals>
-                                <goal>parse-version</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>com.lazerycode.selenium</groupId>
                     <artifactId>driver-binary-downloader-maven-plugin</artifactId>
                     <version>${driver.binary.downloader.maven.plugin.version}</version>
@@ -593,14 +546,13 @@
                         <skipHtmlFormatting>true</skipHtmlFormatting>
                 </configuration>
                 <dependencies>
-                        <dependency>
-                                <!-- It brings the config file VaadinJavaConventions.xml    -->
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>flow-buildtools</artifactId>
-                                <version>${flow.version}</version>
-                        </dependency>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>flow-buildtools</artifactId>
+                        <version>${flow.version}</version>
+                    </dependency>
                 </dependencies>
-        </plugin>
+            </plugin>
         </plugins>
     </build>
     <dependencyManagement>
