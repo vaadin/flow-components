@@ -109,7 +109,10 @@ echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile
 build=.,vaadin-flow-components-shared
 for i in $modules
 do
-  [ -d "$i" -o -d "$i-flow-parent" ] && build=$build,$i-flow-parent,$i-flow-parent/$i-flow,$i-flow-parent/$i-testbench,$i-flow-parent/$i-flow-demo
+  [ -d "$i" -o -d "$i-flow-parent" ] \
+    && build=$build,$i-flow-parent,$i-flow-parent/$i-flow \
+    && [ -d "$i-flow-parent/$i-testbench" ] && build=$build,$i-flow-parent/$i-testbench \
+    && [ -d "$i-flow-parent/$i-flow-demo" ] && build=$build,$i-flow-parent/$i-flow-demo
 done
 
 ## Inform TC about computed parameters
