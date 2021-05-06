@@ -185,7 +185,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/vaadin-select", version = "20.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "21.0.0-alpha0.29f1db3de")
 @JsModule("@vaadin/vaadin-select/src/vaadin-select.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

@@ -140,7 +140,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha0.29f1db3de")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -3425,7 +3425,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets the bean type this grid is bound to and optionally adds a set of
      * columns for each of the bean's properties.
-     * 
+     *
      * The property-values of the bean will be converted to Strings. Full names
      * of the properties will be used as the {@link Column#setKey(String) column
      * keys} and the property captions will be used as the
@@ -3442,7 +3442,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * This method can only be called for a newly instanced Grid without any
      * beanType or columns set.
-     * 
+     *
      * @param beanType
      *            the bean type to use, not <code>null</code>
      * @param autoCreateColumns
