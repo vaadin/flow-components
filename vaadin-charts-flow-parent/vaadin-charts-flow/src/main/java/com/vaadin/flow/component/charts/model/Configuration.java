@@ -159,7 +159,7 @@ public class Configuration extends AbstractConfigurationObject
      * @param series
      */
     public void setSeries(Series... series) {
-        setSeries(Arrays.asList(series));
+        setSeries(new ArrayList<>(Arrays.asList(series)));
     }
 
     /**
