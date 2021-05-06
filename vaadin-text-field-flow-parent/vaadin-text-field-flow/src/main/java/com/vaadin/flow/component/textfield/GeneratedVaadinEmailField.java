@@ -45,7 +45,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "20.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "21.0.0-alpha0.b163d3a8c")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-email-field.js")
 public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
