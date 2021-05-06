@@ -36,6 +36,7 @@
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.149</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
+        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
     </properties>
     <modules>
         <module>vaadin-flow-components-shared</module>
@@ -254,7 +255,7 @@
                           Bundle-SymbolicName: ${project.groupId}.flow.component.${packageName}
                           Import-Package: *
                           Export-Package: ${project.groupId}.flow.component.${packageName}.*;-noimport:=true
-                          Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
+                          Bundle-License: ${osgi.bundle.license}
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
                           -includeresource.resources: -src/main/resources
