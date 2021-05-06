@@ -33,13 +33,14 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
         UploadElement upload = $(UploadElement.class).waitForFirst();
         WebElement input = getInput(upload);
         fillPathToUploadInput(input, file1.getPath(), file2.getPath());
-        WebElement button = getButton(upload, buttonType);
+        WebElement button = findButtonInVaadinUploadFile(upload, buttonType);
         button.click();
         TestBenchElement element = $("span").id("error-handler-message");
         Assert.assertEquals("No errors", element.getText());
     }
 
-    private WebElement getButton(UploadElement upload, String buttonType) {
+    private WebElement findButtonInVaadinUploadFile(UploadElement upload,
+            String buttonType) {
         final String QUERY = String.format(
                 "return arguments[0]"
                         + ".shadowRoot.querySelector('vaadin-upload-file')"
