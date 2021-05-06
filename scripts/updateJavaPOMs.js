@@ -102,7 +102,7 @@ async function consolidatePomDemo() {
 }
 async function consolidatePomIT() {
   const itPom = `${mod}/${name}-flow-integration-tests/pom.xml`;
-  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
+  consolidate('pom-integration-tests.xml', itPom);
 }
 
 consolidatePomParent();
