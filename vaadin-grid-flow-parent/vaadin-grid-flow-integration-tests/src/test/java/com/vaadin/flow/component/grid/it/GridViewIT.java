@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import static org.junit.Assert.assertThat;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -38,8 +40,6 @@ import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Integration tests for the {@link GridView}.

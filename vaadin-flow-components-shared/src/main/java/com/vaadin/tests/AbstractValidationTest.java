@@ -1,9 +1,9 @@
 package com.vaadin.tests;
 
+import java.util.List;
+
 import org.junit.AfterClass;
 import org.openqa.selenium.remote.DesiredCapabilities;
-
-import java.util.List;
 
 public abstract class AbstractValidationTest
         extends com.vaadin.flow.testutil.AbstractValidationTest {
