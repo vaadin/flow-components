@@ -4,8 +4,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.other.DynamicChangingChart;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.examples.other.DynamicChangingChart;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 public class DynamicChangingChartIT extends AbstractTBTest {
