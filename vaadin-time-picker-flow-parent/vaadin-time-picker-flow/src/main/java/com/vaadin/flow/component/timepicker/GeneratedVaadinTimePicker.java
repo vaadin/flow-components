@@ -124,7 +124,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "20.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "21.0.0-alpha1")
 @JsModule("@vaadin/vaadin-time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
