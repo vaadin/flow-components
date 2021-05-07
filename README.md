@@ -86,10 +86,6 @@ The `./scripts/build.sh` script is though to be run in CI, it compiles all modul
 It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
 
-## Update package version for `@NpmPackage` in all files
-There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
-- `./scripts/updateNpmVer.js`
-
 ## Using the component in a Flow application
 To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
@@ -108,6 +104,28 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
 - [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
 - Wait for response from one of Vaadin Flow team members
+
+### Update package version for `@NpmPackage` in all files
+There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
+
+- `./scripts/updateNpmVer.js`
+
+### Modify `pom.xml` files in modules
+
+In order to align all component buids, maven pom files are generated from templates placed in `scripts/templates`.
+
+If you need to make any modification in a component, consider whether it is convenient to add the same to all components, then modify files under the template and run:
+
+- `./scripts/updateJavaPOMs.sh` script.
+
+
+### Formatting
+
+Run `mvn formatter:format` before pushing your code.
+
+## Bug and enhancement tickets
+- Bug tickets and enhancement requests that are specific to a certain Vaadin component should be posted in the component's Web Component repostory (e.g. https://github.com/vaadin/vaadin-button for Button).
+- Issues that are not component-specific (e.g. requests for new components) or encompass multiple components should be posted in this repository.
 
 ## LICENSE
 For specific module(s), check the LICENSE file under the parent module.
