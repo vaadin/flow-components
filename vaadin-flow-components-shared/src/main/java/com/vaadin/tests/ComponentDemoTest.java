@@ -1,14 +1,20 @@
 package com.vaadin.tests;
 
-import org.junit.AfterClass;
-import org.openqa.selenium.remote.DesiredCapabilities;
-
 import java.util.List;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 public abstract class ComponentDemoTest
         extends com.vaadin.flow.demo.ComponentDemoTest {
 
     private static SharedBrowser browser = new SharedBrowser();
+
+    @BeforeClass
+    public static void setupClass() {
+        ParallelTest.setupClass();
+    }
 
     @Override
     public void setup() throws Exception {
