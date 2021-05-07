@@ -24,8 +24,6 @@
         <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-        <driver.binary.downloader.maven.plugin.version>1.0.18
-                </driver.binary.downloader.maven.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -36,6 +34,7 @@
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.149</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
+        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
     </properties>
     <modules>
         <module>vaadin-lumo-theme-flow-parent</module>
@@ -184,7 +183,7 @@
                           Bundle-SymbolicName: ${project.groupId}.flow.component.${packageName}
                           Import-Package: *
                           Export-Package: ${project.groupId}.flow.component.${packageName}.*;-noimport:=true
-                          Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
+                          Bundle-License: ${osgi.bundle.license}
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
                           -includeresource.resources: -src/main/resources
@@ -198,24 +197,6 @@
                             <goals>
                                 <goal>bnd-process</goal>
                             </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>com.googlecode.maven-download-plugin</groupId>
-                    <artifactId>download-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                    <executions>
-                        <execution>
-                            <phase>process-resources</phase>
-                            <goals>
-                                <goal>wget</goal>
-                            </goals>
-                            <configuration>
-                                <url>https://raw.githubusercontent.com/vaadin/flow/master/drivers.xml</url>
-                                <outputFileName>drivers.xml</outputFileName>
-                                <outputDirectory>${project.build.directory}</outputDirectory>
-                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -281,7 +262,6 @@
                         <reuseForks>true</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
-                            <useLocalWebDriver>${useLocalWebDriver}</useLocalWebDriver>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
                             <com.vaadin.testbench.Parameters.testsInParallel>${com.vaadin.testbench.Parameters.testsInParallel}</com.vaadin.testbench.Parameters.testsInParallel>
@@ -347,25 +327,6 @@
                                     </resource>
                                 </resources>
                             </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>com.lazerycode.selenium</groupId>
-                    <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-                    <version>${driver.binary.downloader.maven.plugin.version}</version>
-                    <configuration>
-                        <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
-                        <rootStandaloneServerDirectory>${project.build.directory}/driver</rootStandaloneServerDirectory>
-                        <downloadedZipFileDirectory>${project.build.directory}/driver_zips</downloadedZipFileDirectory>
-                        <customRepositoryMap>${project.build.directory}/drivers.xml</customRepositoryMap>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>pre-integration-test</phase>
-                            <goals>
-                                <goal>selenium</goal>
-                            </goals>
                         </execution>
                     </executions>
                 </plugin>

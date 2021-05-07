@@ -43,7 +43,10 @@ public class IronListIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitUntil(driver -> findElements(By.tagName("iron-list")).size() > 0);
+        WebElement loadingIndicator = findElement(
+                By.className("v-loading-indicator"));
+        waitUntil(driver -> !loadingIndicator.isDisplayed()
+                && findElements(By.tagName("iron-list")).size() > 0);
     }
 
     @Test
