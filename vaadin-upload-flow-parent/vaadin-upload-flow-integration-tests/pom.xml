@@ -81,6 +81,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-polymer-template</artifactId>
         </dependency>
+ 		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
     </dependencies>
     <build>
         <plugins>
