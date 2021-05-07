@@ -73,11 +73,9 @@ async function consolidate(template, pom, cb) {
 
   cb && cb(tplJs, pomJs);
 
-  const xml = new xml2js.Builder().buildObject(tplJs);
+  const xml = new xml2js.Builder({renderOpts: {pretty: true, indent: '    '}}).buildObject(tplJs);
   console.log(`writing ${pom}`);
-  fs.writeFileSync(pom, xml
-    // ident using 4 spaces to make sonar happy
-    .replace(/\n( +)</g, '\n$1$1<') + '\n', 'utf8');
+  fs.writeFileSync(pom, xml + '\n', 'utf8');
 }
 
 async function consolidatePomParent() {
