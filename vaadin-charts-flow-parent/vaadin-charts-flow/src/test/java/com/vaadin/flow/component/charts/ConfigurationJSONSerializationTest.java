@@ -15,6 +15,7 @@ import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.YAxis;
 
 /**
@@ -103,6 +104,16 @@ public class ConfigurationJSONSerializationTest {
         conf.getChart().setStyledMode(true);
         assertEquals(
                 "{\"chart\":{\"styledMode\":true},\"plotOptions\":{},\"series\":[],\"exporting\":{\"enabled\":false}}",
+                toJSON(conf));
+    }
+
+    @Test
+    public void configurationJSONSerialization_setSeriesAddSeries_noExceptions() {
+        Configuration conf = new Configuration();
+        conf.setSeries(new ListSeries(), new ListSeries());
+        conf.addSeries(new ListSeries());
+        assertEquals(
+                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[{\"data\":[]},{\"data\":[]},{\"data\":[]}],\"exporting\":{\"enabled\":false}}",
                 toJSON(conf));
     }
 }
