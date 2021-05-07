@@ -22,9 +22,9 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.flow.component.charts.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
-
+import com.vaadin.flow.component.charts.ui.MainView;
 import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.DefaultBrowserFactory;
@@ -101,8 +101,7 @@ public abstract class AbstractTBTest extends ParallelTest {
      */
     protected String getDeploymentPath() {
         return "/" + getTestView().getCanonicalName()
-                .replace("com.vaadin.flow.component.charts.examples.",
-                        "vaadin-charts/")
+                .replace(MainView.EXAMPLE_BASE_PACKAGE, "vaadin-charts/")
                 .replace(".", "/");
     }
 
