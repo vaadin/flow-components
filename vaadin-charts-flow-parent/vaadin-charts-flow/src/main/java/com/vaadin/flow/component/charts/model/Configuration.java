@@ -147,7 +147,7 @@ public class Configuration extends AbstractConfigurationObject
      * @param series
      */
     public void setSeries(List<Series> series) {
-        this.series = series;
+        this.series = new ArrayList<>(series);
         for (Series s : series) {
             s.setConfiguration(this);
             addSeriesToDrilldownConfiguration(s);
@@ -159,7 +159,7 @@ public class Configuration extends AbstractConfigurationObject
      * @param series
      */
     public void setSeries(Series... series) {
-        setSeries(new ArrayList<>(Arrays.asList(series)));
+        setSeries(Arrays.asList(series));
     }
 
     /**
