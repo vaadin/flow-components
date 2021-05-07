@@ -80,6 +80,14 @@ For running all merged components execute:
 
 - `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
 
+## Bumping version for all Maven modules
+
+To update the version for all modules for a new major or minor, run the following command:
+```
+mvn versions:set -DnewVersion=<next-version> -DprocessAllModules=true -DgenerateBackupPoms=false
+```
+where you replace `<next-version>` with the version that you want to set.
+
 ## Build script
 
 The `./scripts/build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
