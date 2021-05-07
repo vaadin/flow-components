@@ -148,9 +148,10 @@ public class Configuration extends AbstractConfigurationObject
      * <br />
      * <br />
      * 
-     * If the chart is already rendered on the client, {@link Chart#drawChart(boolean)}
-     * needs to be called with <code>true</code> as parameter so the configuration
-     * object is resent to the client.
+     * If the chart is already rendered on the client,
+     * {@link Chart#drawChart(boolean)} needs to be called with
+     * <code>true</code> as parameter so the configuration object is resent to
+     * the client.
      * 
      * @param series
      */
