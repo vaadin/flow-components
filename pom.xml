@@ -331,45 +331,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.0.0</version>
-                    <executions>
-                        <execution>
-                            <id>extract-component-name</id>
-                            <goals>
-                                <goal>regex-property</goal>
-                            </goals>
-                            <configuration>
-                                <name>component.name</name>
-                                <regex>vaadin-(\w+(-\w+)*)-flow</regex>
-                                <value>${project.artifactId}</value>
-                                <replacement>$1</replacement>
-                                <failIfNoMatch>false</failIfNoMatch>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>extract-component-package-name</id>
-                            <goals>
-                                <goal>regex-property</goal>
-                            </goals>
-                            <configuration>
-                                <name>component.package.name</name>
-                                <regex>-</regex>
-                                <value>${component.name}</value>
-                                <replacement/>
-                                <failIfNoMatch>false</failIfNoMatch>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>parse-version</id>
-                            <goals>
-                                <goal>parse-version</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
                     <version>1.0.0</version>
