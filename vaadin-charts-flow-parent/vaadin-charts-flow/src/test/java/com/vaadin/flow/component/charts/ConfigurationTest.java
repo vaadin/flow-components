@@ -24,7 +24,7 @@ public class ConfigurationTest {
 
         conf.setSeries(Arrays.asList(new ListSeries()));
         conf.addSeries(new ListSeries());
-        
+
         assertEquals(conf.getSeries().size(), 2);
     }
 
@@ -34,7 +34,7 @@ public class ConfigurationTest {
 
         List<Series> series = new ArrayList<>();
         conf.setSeries(series);
-        
+
         series.add(new ListSeries());
 
         assertEquals(conf.getSeries().size(), 0);
