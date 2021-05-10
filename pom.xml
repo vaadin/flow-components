@@ -186,7 +186,7 @@
                           Bundle-Name: ${project.artifactId}
                           Bundle-SymbolicName: ${project.groupId}.flow.component.${packageName}
                           Import-Package: *
-                          Export-Package: ${project.groupId}.flow.component.${packageName}.*;-noimport:=true
+                          Export-Package: ${project.groupId}.flow.component.*${packageName}.*;-noimport:=true
                           Bundle-License: ${osgi.bundle.license}
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
