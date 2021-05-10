@@ -21,35 +21,23 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-select/override-client-validation")
 public class OverrideClientValidationPage extends Div {
     public OverrideClientValidationPage() {
-        Select<Integer> select = new Select<>(1, 2, 3, 4, 5);
-
-        NumberContainer numberContainer = new NumberContainer();
-        Binder<NumberContainer> binder = new Binder<>(NumberContainer.class);
-        binder.forField(select).asRequired("Please select a number")
-                .bind(model -> model.number, (model, value) -> model.number = value);
-        binder.readBean(numberContainer);
-
+        Select<String> select = new Select<>("a", "b", "c");
         Span validationStateSpan = new Span();
         validationStateSpan.setId("validation-state-span");
 
-        NativeButton validateButton = new NativeButton("Validate",
-                e -> binder.validate());
-        validateButton.setId("validate-button");
+        NativeButton setInvalidButton = new NativeButton("Set invalid",
+                e -> select.setInvalid(true));
+        setInvalidButton.setId("set-invalid-button");
 
         NativeButton logValidationStateButton = new NativeButton("Log validation state",
                 e -> validationStateSpan.setText(select.isInvalid() ? "invalid" : "valid"));
         logValidationStateButton.setId("log-validation-state-button");
 
-        add(select, validationStateSpan, validateButton, logValidationStateButton);
-    }
-
-    static class NumberContainer {
-        public Integer number;
+        add(select, validationStateSpan, setInvalidButton, logValidationStateButton);
     }
 }

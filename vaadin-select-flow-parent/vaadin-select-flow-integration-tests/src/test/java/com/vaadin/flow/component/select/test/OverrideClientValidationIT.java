@@ -32,10 +32,10 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
     @Test
     public void testTriggeringClientValidationShouldNotOverrideBinderValidationResults() {
         open();
-        WebElement validateButton = findElement(By.id("validate-button"));
+        WebElement setInvalidButton = findElement(By.id("set-invalid-button"));
 
-        // Trigger binder validation and assert invalid state
-        validateButton.click();
+        // Set server state to invalid
+        setInvalidButton.click();
         getCommandExecutor().waitForVaadin();
         assertClientSideSelectValidationState(false);
         // Trigger client side validation
@@ -47,14 +47,14 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
     @Test
     public void testModifyingClientSideValidationStateShouldNotAffectServerSideValidationState() {
         open();
-        WebElement validateButton = findElement(By.id("validate-button"));
+        WebElement setInvalidButton = findElement(By.id("set-invalid-button"));
         WebElement logValidationStateButton = findElement(
                 By.id("log-validation-state-button"));
         WebElement validationStateSpan = findElement(
                 By.id("validation-state-span"));
 
-        // Trigger binder validation and assert invalid state
-        validateButton.click();
+        // Set server state to invalid
+        setInvalidButton.click();
         getCommandExecutor().waitForVaadin();
         logValidationStateButton.click();
         getCommandExecutor().waitForVaadin();
