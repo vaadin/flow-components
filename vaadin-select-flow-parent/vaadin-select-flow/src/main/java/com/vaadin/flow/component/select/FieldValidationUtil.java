@@ -18,8 +18,7 @@ package com.vaadin.flow.component.select;
 import com.vaadin.flow.internal.StateNode;
 
 /**
- * Utility class for select Flow component to disable client side
- * validation.
+ * Utility class for select Flow component to disable client side validation.
  *
  * @author Vaadin Ltd
  */
@@ -52,7 +51,8 @@ final class FieldValidationUtil {
     }
 
     private static void overrideClientValidation(Select component) {
-        // Overwrite client validation method to simply return validation state set from server
+        // Overwrite client validation method to simply return validation state
+        // set from server
         StringBuilder expression = new StringBuilder(
                 "this.validate = function () {return !this.invalid;};");
 
