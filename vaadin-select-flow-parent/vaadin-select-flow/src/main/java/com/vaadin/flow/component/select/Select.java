@@ -746,6 +746,20 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+
+        // TODO: Refactor: Override client validation
+        StringBuilder expression = new StringBuilder(
+                "this.validate = function () {};");
+
+        if (this.isInvalid()) {
+            /*
+             * By default the invalid flag is set to false. Workaround the case
+             * where the client side validation overrides the invalid state
+             * before the validation function itself is overridden above.
+             */
+            expression.append("this.invalid = true;");
+        }
+        this.getElement().executeJs(expression.toString());
     }
 
     /**
