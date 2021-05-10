@@ -173,7 +173,7 @@
                           regexArtifactId: vaadin-(.*)-flow(-.*)?
                           replacementPattern: $1
                           packageNameDash: ${replacestring;${project.artifactId};${regexArtifactId};${replacementPattern}}
-                          packageNameTmp: ${replacestring;${packageNameDash};'-'}
+                          packageNameTmp: ${replacestring;${packageNameDash};-;}
 
                           isDemoPattern: .*-flow-demo
                           isDemo: ${matches;${project.artifactId};${isDemoPattern}}
