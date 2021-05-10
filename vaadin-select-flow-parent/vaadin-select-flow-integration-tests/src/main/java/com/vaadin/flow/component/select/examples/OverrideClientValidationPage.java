@@ -25,19 +25,25 @@ import com.vaadin.flow.router.Route;
 
 @Route("vaadin-select/override-client-validation")
 public class OverrideClientValidationPage extends Div {
+
+    public static final String ID_SET_INVALID_BUTTON = "set-invalid-button";
+    public static final String ID_LOG_BUTTON = "log-button";
+    public static final String ID_RESULT_SPAN = "result-span";
+
     public OverrideClientValidationPage() {
         Select<String> select = new Select<>("a", "b", "c");
-        Span validationStateSpan = new Span();
-        validationStateSpan.setId("validation-state-span");
+        Span resultSpan = new Span();
+        resultSpan.setId(ID_RESULT_SPAN);
 
         NativeButton setInvalidButton = new NativeButton("Set invalid",
                 e -> select.setInvalid(true));
-        setInvalidButton.setId("set-invalid-button");
+        setInvalidButton.setId(ID_SET_INVALID_BUTTON);
 
-        NativeButton logValidationStateButton = new NativeButton("Log validation state",
-                e -> validationStateSpan.setText(select.isInvalid() ? "invalid" : "valid"));
-        logValidationStateButton.setId("log-validation-state-button");
+        NativeButton logButton = new NativeButton("Log validation state",
+                e -> resultSpan
+                        .setText(select.isInvalid() ? "invalid" : "valid"));
+        logButton.setId(ID_LOG_BUTTON);
 
-        add(select, validationStateSpan, setInvalidButton, logValidationStateButton);
+        add(select, resultSpan, setInvalidButton, logButton);
     }
 }

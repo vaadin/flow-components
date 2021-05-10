@@ -17,27 +17,39 @@
 
 package com.vaadin.flow.component.select.test;
 
+import com.vaadin.flow.component.select.examples.OverrideClientValidationPage;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-select/override-client-validation")
 public class OverrideClientValidationIT extends AbstractComponentIT {
 
-    @Test
-    public void testTriggeringClientValidationShouldNotOverrideBinderValidationResults() {
-        open();
-        WebElement setInvalidButton = findElement(By.id("set-invalid-button"));
+    private SelectElement selectElement;
+    private TestBenchElement setInvalidButton;
+    private TestBenchElement logButton;
+    private TestBenchElement resultSpan;
 
+    @Before
+    public void setUp() {
+        open();
+        selectElement = $(SelectElement.class).first();
+        setInvalidButton = $("button")
+                .id(OverrideClientValidationPage.ID_SET_INVALID_BUTTON);
+        logButton = $("button").id(OverrideClientValidationPage.ID_LOG_BUTTON);
+        resultSpan = $("span").id(OverrideClientValidationPage.ID_RESULT_SPAN);
+    }
+
+    @Test
+    public void testTriggeringClientValidationShouldNotOverrideClientValidationState() {
         // Set server state to invalid
         setInvalidButton.click();
-        getCommandExecutor().waitForVaadin();
         assertClientSideSelectValidationState(false);
+
         // Trigger client side validation
         triggerClientSideValidation();
         // Client side state should still be invalid
@@ -46,29 +58,19 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
 
     @Test
     public void testModifyingClientSideValidationStateShouldNotAffectServerSideValidationState() {
-        open();
-        WebElement setInvalidButton = findElement(By.id("set-invalid-button"));
-        WebElement logValidationStateButton = findElement(
-                By.id("log-validation-state-button"));
-        WebElement validationStateSpan = findElement(
-                By.id("validation-state-span"));
-
         // Set server state to invalid
         setInvalidButton.click();
-        getCommandExecutor().waitForVaadin();
-        logValidationStateButton.click();
-        getCommandExecutor().waitForVaadin();
-        Assert.assertEquals("invalid", validationStateSpan.getText());
+        logButton.click();
+        Assert.assertEquals("invalid", resultSpan.getText());
+
         // Overwrite client side validation state to be valid
         overwriteClientSideValidationState(true);
-        getCommandExecutor().waitForVaadin();
         // Server state should still be invalid
-        logValidationStateButton.click();
-        Assert.assertEquals("invalid", validationStateSpan.getText());
+        logButton.click();
+        Assert.assertEquals("invalid", resultSpan.getText());
     }
 
     private void assertClientSideSelectValidationState(boolean valid) {
-        SelectElement selectElement = getSelectElement();
         Boolean validationState = selectElement.getPropertyBoolean("invalid");
 
         Assert.assertEquals("Validation state did not match", !valid,
@@ -76,22 +78,13 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
     }
 
     private void triggerClientSideValidation() {
-        SelectElement selectElement = getSelectElement();
         selectElement.getCommandExecutor()
                 .executeScript("arguments[0].validate()", selectElement);
         getCommandExecutor().waitForVaadin();
     }
 
     private void overwriteClientSideValidationState(boolean valid) {
-        SelectElement selectElement = getSelectElement();
         selectElement.setProperty("invalid", !valid);
-    }
-
-    private SelectElement getSelectElement() {
-        SelectElement selectElement = $(SelectElement.class).first();
-        if (selectElement == null) {
-            throw new NoSuchElementException("Can not find select");
-        }
-        return selectElement;
+        getCommandExecutor().waitForVaadin();
     }
 }
