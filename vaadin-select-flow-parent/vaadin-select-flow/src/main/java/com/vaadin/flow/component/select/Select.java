@@ -15,14 +15,6 @@
  */
 package com.vaadin.flow.component.select;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -58,6 +50,14 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 /**
  * A customizable drop-down select component similar to a native browser select.
@@ -746,20 +746,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-
-        // TODO: Refactor: Override client validation
-        StringBuilder expression = new StringBuilder(
-                "this.validate = function () {};");
-
-        if (this.isInvalid()) {
-            /*
-             * By default the invalid flag is set to false. Workaround the case
-             * where the client side validation overrides the invalid state
-             * before the validation function itself is overridden above.
-             */
-            expression.append("this.invalid = true;");
-        }
-        this.getElement().executeJs(expression.toString());
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
