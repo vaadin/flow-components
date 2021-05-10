@@ -171,10 +171,13 @@
                     <configuration>
                         <bnd><![CDATA[
                           regexArtifactId: vaadin-(.*)-flow(-.*)?
-                          dash: -
                           replacementPattern: $1
-                          packageNameDash: ${replacestring;${project.artifactId};${regexArtifactId};${replacementPattern}}
-                          packageNameTmp: ${replacestring;${packageNameDash};${dash}}
+                          packageNameWithDash: ${replacestring;${project.artifactId};${regexArtifactId};${replacementPattern}}
+
+                          dash: -
+                          packageNameWithoutDash: ${replacestring;${packageNameWithDash};${dash};}
+
+                          packageNameTmp: ${replacestring;${packageNameWithoutDash};icons;icon}
 
                           isDemoPattern: .*-flow-demo
                           isDemo: ${matches;${project.artifactId};${isDemoPattern}}
