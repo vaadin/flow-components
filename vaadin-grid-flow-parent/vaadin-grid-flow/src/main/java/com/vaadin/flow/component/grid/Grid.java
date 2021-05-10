@@ -2793,6 +2793,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Objects.requireNonNull(column, "column should not be null");
 
         ensureOwner(column);
+        List<GridSortOrder<T>> order = new ArrayList<>();
+        setSortOrder(order, false);
         removeColumnAndColumnGroupsIfNeeded(column);
         column.destroyDataGenerators();
         keyToColumnMap.remove(column.getKey());
