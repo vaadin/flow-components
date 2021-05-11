@@ -18,9 +18,14 @@ package com.vaadin.flow.component.messages;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -57,6 +62,8 @@ public class MessageListItem implements Serializable {
     private Registration pendingRegistration;
     private Command pendingHandle;
     private AbstractStreamResource imageResource;
+
+    private Set<String> themeNames = new LinkedHashSet<>();
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -280,6 +287,40 @@ public class MessageListItem implements Serializable {
     public void setUserColorIndex(Integer userColorIndex) {
         this.userColorIndex = userColorIndex;
         propsChanged();
+    }
+
+    /**
+     * Adds one or more theme names to this message. Multiple theme names can be
+     * specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be added to the message
+     */
+    public void addThemeNames(String... themeNames) {
+        this.themeNames.addAll(Arrays.asList(themeNames));
+        propsChanged();
+    }
+
+    /**
+     * Removes one or more theme names from this message. Multiple theme names
+     * can be specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be removed from the message
+     */
+    public void removeThemeNames(String... themeNames) {
+        this.themeNames.removeAll(Arrays.asList(themeNames));
+        propsChanged();
+    }
+
+    // Used only for Jackson serialization
+    @JsonGetter
+    private String getTheme() {
+        if (themeNames.isEmpty()) {
+            return null;
+        } else {
+            return themeNames.stream().collect(Collectors.joining(" "));
+        }
     }
 
     /**

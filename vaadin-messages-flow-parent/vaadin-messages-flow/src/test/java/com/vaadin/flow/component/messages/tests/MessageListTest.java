@@ -29,7 +29,11 @@ import org.junit.Test;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.StreamResource;
+
+import elemental.json.JsonType;
+import elemental.json.JsonValue;
 
 public class MessageListTest {
 
@@ -90,5 +94,41 @@ public class MessageListTest {
                 () -> getClass().getResourceAsStream("baz/qux")));
         item1.setUserImage("foo/bar");
         Assert.assertNull(item1.getUserImageResource());
+    }
+
+    @Test
+    public void addThemeNames_serialize_separatedBySpaces() {
+        item1.addThemeNames("foo", "bar");
+        item1.addThemeNames("baz");
+        Assert.assertEquals("foo bar baz", getSerializedThemeProperty(item1));
+    }
+
+    @Test
+    public void addThemeNames_serialize_noDuplicates() {
+        item1.addThemeNames("foo", "foo");
+        Assert.assertEquals("foo", getSerializedThemeProperty(item1));
+    }
+
+    @Test
+    public void removeThemeNames_serialize_themeNamesRemoved() {
+        item1.addThemeNames("foo", "bar", "baz");
+        item1.removeThemeNames("foo", "bar", "qux");
+        Assert.assertEquals("baz", getSerializedThemeProperty(item1));
+    }
+
+    @Test
+    public void clearThemeNames_serialize_nullProperty() {
+        item1.addThemeNames("foo");
+        item1.removeThemeNames("foo");
+        Assert.assertNull(getSerializedThemeProperty(item1));
+    }
+
+    private String getSerializedThemeProperty(MessageListItem item) {
+        JsonValue theme = JsonUtils.beanToJson(item).get("theme");
+        if (theme.getType() == JsonType.NULL) {
+            return null;
+        } else {
+            return theme.asString();
+        }
     }
 }
