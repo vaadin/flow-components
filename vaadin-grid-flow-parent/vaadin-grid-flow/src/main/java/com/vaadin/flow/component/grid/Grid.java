@@ -141,10 +141,12 @@ import org.slf4j.LoggerFactory;
  */
 @Tag("vaadin-grid")
 @NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha1")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
+@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
