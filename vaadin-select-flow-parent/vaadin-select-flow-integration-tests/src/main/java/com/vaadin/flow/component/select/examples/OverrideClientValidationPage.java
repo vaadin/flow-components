@@ -28,6 +28,8 @@ public class OverrideClientValidationPage extends Div {
 
     public static final String ID_SET_INVALID_BUTTON = "set-invalid-button";
     public static final String ID_LOG_BUTTON = "log-button";
+    public static final String ID_DETACH_BUTTON = "detach-button";
+    public static final String ID_REATTACH_BUTTON = "reattach-button";
     public static final String ID_RESULT_SPAN = "result-span";
 
     public OverrideClientValidationPage() {
@@ -44,6 +46,15 @@ public class OverrideClientValidationPage extends Div {
                         .setText(select.isInvalid() ? "invalid" : "valid"));
         logButton.setId(ID_LOG_BUTTON);
 
-        add(select, resultSpan, setInvalidButton, logButton);
+        NativeButton detachButton = new NativeButton("Detach select",
+                e -> this.remove(select));
+        detachButton.setId(ID_DETACH_BUTTON);
+
+        NativeButton reattachButton = new NativeButton("Reattach select",
+                e -> this.addComponentAsFirst(select));
+        reattachButton.setId(ID_REATTACH_BUTTON);
+
+        add(select, resultSpan, setInvalidButton, logButton, detachButton,
+                reattachButton);
     }
 }

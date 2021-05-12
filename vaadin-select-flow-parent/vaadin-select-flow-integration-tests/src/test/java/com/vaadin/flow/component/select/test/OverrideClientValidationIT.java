@@ -32,6 +32,8 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
     private SelectElement selectElement;
     private TestBenchElement setInvalidButton;
     private TestBenchElement logButton;
+    private TestBenchElement detachButton;
+    private TestBenchElement reattachButton;
     private TestBenchElement resultSpan;
 
     @Before
@@ -41,6 +43,10 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
         setInvalidButton = $("button")
                 .id(OverrideClientValidationPage.ID_SET_INVALID_BUTTON);
         logButton = $("button").id(OverrideClientValidationPage.ID_LOG_BUTTON);
+        detachButton = $("button")
+                .id(OverrideClientValidationPage.ID_DETACH_BUTTON);
+        reattachButton = $("button")
+                .id(OverrideClientValidationPage.ID_REATTACH_BUTTON);
         resultSpan = $("span").id(OverrideClientValidationPage.ID_RESULT_SPAN);
     }
 
@@ -68,6 +74,27 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
         // Server state should still be invalid
         logButton.click();
         Assert.assertEquals("invalid", resultSpan.getText());
+    }
+
+    @Test
+    public void testDetachingAndReattachingShouldStillOverrideClientValidation() {
+        // Set server state to invalid
+        setInvalidButton.click();
+        assertClientSideSelectValidationState(false);
+
+        // Detach and reattach
+        detachButton.click();
+        reattachButton.click();
+        selectElement = $(SelectElement.class).first();
+
+        // Client side state should still be invalid after reattaching
+        assertClientSideSelectValidationState(false);
+
+        // Trigger client side validation after reattaching
+        triggerClientSideValidation();
+        // Client side state should still be invalid after reattaching and
+        // triggering validation
+        assertClientSideSelectValidationState(false);
     }
 
     private void assertClientSideSelectValidationState(boolean valid) {
