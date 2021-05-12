@@ -313,6 +313,18 @@ public class MessageListItem implements Serializable {
         propsChanged();
     }
 
+    /**
+     * Checks if the message has the given theme name.
+     *
+     * @param themeName
+     *            the theme name to check for
+     * @return <code>true</code> if the message has the given theme name,
+     *         <code>false</code> otherwise
+     */
+    public boolean hasThemeName(String themeName) {
+        return themeNames.contains(themeName);
+    }
+
     // Used only for Jackson serialization
     @JsonGetter
     private String getTheme() {

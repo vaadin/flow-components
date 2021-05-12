@@ -123,6 +123,17 @@ public class MessageListTest {
         Assert.assertNull(getSerializedThemeProperty(item1));
     }
 
+    @Test
+    public void hasThemeName_falseForNonExistingThemeName() {
+        Assert.assertFalse(item1.hasThemeName("foo"));
+    }
+
+    @Test
+    public void hasThemeName_trueForExistingThemeName() {
+        item1.addThemeNames("foo");
+        Assert.assertTrue(item1.hasThemeName("foo"));
+    }
+
     private String getSerializedThemeProperty(MessageListItem item) {
         JsonValue theme = JsonUtils.beanToJson(item).get("theme");
         if (theme.getType() == JsonType.NULL) {
