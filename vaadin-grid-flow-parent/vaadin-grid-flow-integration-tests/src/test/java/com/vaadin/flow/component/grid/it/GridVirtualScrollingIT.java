@@ -33,11 +33,10 @@ public class GridVirtualScrollingIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName("vaadin-grid"));
         WebElement grid = findElement(By.tagName("vaadin-grid"));
 
-        executeScript("arguments[0]._scrollToIndex(1000000);", grid);
+        executeScript("arguments[0].scrollToIndex(1000000);", grid);
 
         long firstVisible = (long) executeScript(
-                "return arguments[0]._firstVisibleIndex+arguments[0]._vidxOffset",
-                grid);
+                "return arguments[0]._firstVisibleIndex", grid);
         Assert.assertEquals(1000000L, firstVisible);
     }
 

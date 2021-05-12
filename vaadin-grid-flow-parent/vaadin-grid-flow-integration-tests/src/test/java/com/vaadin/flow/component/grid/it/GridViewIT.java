@@ -1087,9 +1087,13 @@ public class GridViewIT extends GridViewBase {
     }
 
     private void waitUntilCellHasText(WebElement grid, String text) {
-        waitUntil(driver -> getCells(grid).stream()
-                .filter(cell -> text.equals(cell.getText())).findFirst()
-                .isPresent());
+        waitUntil(driver -> {
+            List<?> cellContentTexts = (List<?>) getCommandExecutor()
+                    .executeScript(
+                            "return Array.from(arguments[0].querySelectorAll('vaadin-grid-cell-content')).map(cell => cell.textContent)",
+                            grid);
+            return cellContentTexts.contains(text);
+        });
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {
