@@ -46,10 +46,14 @@ public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
         // Checks that all header and body cells have text content
         List<TestBenchElement> allCellContents = grid
                 .$("vaadin-grid-cell-content").all();
+        List<TestBenchElement> headerSlots = grid.$("thead slot").all();
+        List<TestBenchElement> bodySlots = grid.$("tbody slot").all();
+        Assert.assertTrue(headerSlots.size() > 0);
+        Assert.assertTrue(bodySlots.size() > 0);
+
         allCellContents.forEach(vgcc -> {
-            String slotName = vgcc.getAttribute("slot")
-                    .replace("vaadin-grid-cell-content-", "");
-            if (Integer.parseInt(slotName) <= 180) {
+            TestBenchElement slot = vgcc.getPropertyElement("assignedSlot");
+            if (headerSlots.contains(slot) || bodySlots.contains(slot)) {
                 Assert.assertTrue(
                         "A grid cell was expected to have text content but had none.",
                         StringUtils.isNotBlank(vgcc.getText()));

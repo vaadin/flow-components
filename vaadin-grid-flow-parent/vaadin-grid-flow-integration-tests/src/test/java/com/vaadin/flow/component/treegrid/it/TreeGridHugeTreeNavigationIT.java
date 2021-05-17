@@ -68,6 +68,9 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
 
         // Should collapse "Dad 1/1"
         new Actions(getDriver()).sendKeys(Keys.SPACE).perform();
+        // Make sure the "Dad 1/1" still has focus after collapsing (iron-list
+        // regression)
+        getTreeGrid().getCell(3, 0).focus();
         assertCellTexts(0, 0, "Granddad 0", "Granddad 1", "Dad 1/0", "Dad 1/1",
                 "Dad 1/2", "Granddad 2");
 
