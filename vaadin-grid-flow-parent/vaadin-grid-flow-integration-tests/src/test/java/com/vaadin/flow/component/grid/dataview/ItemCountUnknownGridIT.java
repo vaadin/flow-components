@@ -97,7 +97,8 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
         // size has been increased again by default size
         doScroll(1000, 1200, 6, 950, 1100);
 
-        Assert.assertEquals(1000 + VIEWPORT_ITEM_CAPACITY, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(1000 + VIEWPORT_ITEM_CAPACITY,
+                grid.getLastVisibleRowIndex());
     }
 
     // @Test TODO
