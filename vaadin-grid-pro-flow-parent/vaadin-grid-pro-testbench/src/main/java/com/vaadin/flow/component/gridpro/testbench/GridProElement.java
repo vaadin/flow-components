@@ -38,7 +38,7 @@ public class GridProElement extends TestBenchElement {
      *            the row to scroll to
      */
     public void scrollToRow(int row) {
-        callFunction("_scrollToIndex", row);
+        callFunction("scrollToIndex", row);
     }
 
     /**
@@ -47,8 +47,7 @@ public class GridProElement extends TestBenchElement {
      * @return the index of the first visible row
      */
     public int getFirstVisibleRowIndex() {
-        return ((Long) executeScript(
-                "return arguments[0]._firstVisibleIndex+arguments[0]._vidxOffset",
+        return ((Long) executeScript("return arguments[0]._firstVisibleIndex",
                 this)).intValue();
     }
 
@@ -97,8 +96,7 @@ public class GridProElement extends TestBenchElement {
      */
     public int getLastVisibleRowIndex() {
         // Private for now because this seems to be slightly incorrect
-        return ((Long) executeScript(
-                "return arguments[0]._lastVisibleIndex+arguments[0]._vidxOffset",
+        return ((Long) executeScript("return arguments[0]._lastVisibleIndex",
                 this)).intValue();
     }
 

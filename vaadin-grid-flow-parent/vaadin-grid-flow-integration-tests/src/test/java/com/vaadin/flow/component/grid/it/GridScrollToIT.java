@@ -46,7 +46,7 @@ public class GridScrollToIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "Last visible index did not equal last item index after scroll to end.",
-                1000L, grid.getProperty("lastVisibleIndex"));
+                1000L, grid.getLastVisibleRowIndex());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class GridScrollToIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "First visible index did not equal scrollToIndex parameter.",
-                500L, grid.getProperty("firstVisibleIndex"));
+                500L, grid.getFirstVisibleRowIndex());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class GridScrollToIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "First visible index did not equal 0 after scroll to start.",
-                0L, grid.getProperty("firstVisibleIndex"));
+                0L, grid.getFirstVisibleRowIndex());
     }
 
     @Test
