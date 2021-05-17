@@ -36,7 +36,7 @@ async function computeModules() {
 }
 
 // Add a dependency to the array, if not already present
-function addDependency(arr, groupId, artifactId, version, scope) {
+function addDependency(arr, groupId, artifactId, version, scope, exclusions) {
   if (!arr.find(e => e.groupId[0] === groupId && e.artifactId[0] === artifactId)) {
     const obj = {
       groupId: [groupId],
@@ -44,6 +44,7 @@ function addDependency(arr, groupId, artifactId, version, scope) {
     }
     version && (obj.version = [version]);
     scope && (obj.scope = [scope]);
+    exclusions && (obj.exclusions = exclusions);
     arr.push(obj);
   }
 }
@@ -72,7 +73,7 @@ async function createPom() {
     const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'));
     // Read original IT dependencies of module
     js.project.dependencies[0].dependency.forEach(dep => {
-      addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0]);
+      addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0], dep.exclusions);
     });
     return prev;
   }, Promise.resolve([
@@ -191,7 +192,7 @@ async function copySources() {
       const dir = `${itFolder}/${f}`;
       if (fs.existsSync(dir)) {
         console.log(`removing ${dir}`);
-        fs.rmdirSync(`${dir}`, { recursive: true } );
+        fs.rmSync(`${dir}`, { recursive: true } );
       }
     });
 

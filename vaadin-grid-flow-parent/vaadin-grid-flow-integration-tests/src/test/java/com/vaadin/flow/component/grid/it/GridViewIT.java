@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import static org.junit.Assert.assertThat;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -38,8 +40,6 @@ import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Integration tests for the {@link GridView}.
@@ -1087,9 +1087,13 @@ public class GridViewIT extends GridViewBase {
     }
 
     private void waitUntilCellHasText(WebElement grid, String text) {
-        waitUntil(driver -> getCells(grid).stream()
-                .filter(cell -> text.equals(cell.getText())).findFirst()
-                .isPresent());
+        waitUntil(driver -> {
+            List<?> cellContentTexts = (List<?>) getCommandExecutor()
+                    .executeScript(
+                            "return Array.from(arguments[0].querySelectorAll('vaadin-grid-cell-content')).map(cell => cell.textContent)",
+                            grid);
+            return cellContentTexts.contains(text);
+        });
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {

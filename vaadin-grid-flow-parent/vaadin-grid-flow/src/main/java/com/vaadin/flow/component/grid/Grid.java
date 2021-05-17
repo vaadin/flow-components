@@ -126,6 +126,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.slf4j.LoggerFactory;
 
@@ -139,11 +140,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha2")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
+@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
@@ -1247,16 +1250,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Grid(Class<T> beanType, boolean autoCreateColumns) {
         this();
-        Objects.requireNonNull(beanType, "Bean type can't be null");
-        this.beanType = beanType;
-        propertySet = BeanPropertySet.get(beanType);
-        if (autoCreateColumns) {
-            propertySet.getProperties()
-                    .filter(property -> !property.isSubProperty())
-                    .sorted((prop1, prop2) -> prop1.getName()
-                            .compareTo(prop2.getName()))
-                    .forEach(this::addColumn);
-        }
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -2932,6 +2926,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(column, "column should not be null");
 
         ensureOwner(column);
+        List<GridSortOrder<T>> order = new ArrayList<>();
+        setSortOrder(order, false);
         removeColumnAndColumnGroupsIfNeeded(column);
         column.destroyDataGenerators();
         keyToColumnMap.remove(column.getKey());
@@ -3155,7 +3151,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")) {
+            if (sorter.hasKey("direction")
+                    && sorter.get("direction").getType() == JsonType.STRING) {
                 switch (sorter.getString("direction")) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
@@ -3428,6 +3425,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets the bean type this grid is bound to and optionally adds a set of
+     * columns for each of the bean's properties.
+     *
+     * The property-values of the bean will be converted to Strings. Full names
+     * of the properties will be used as the {@link Column#setKey(String) column
+     * keys} and the property captions will be used as the
+     * {@link Column#setHeader(String) column headers}. The generated columns
+     * will be sortable by default, if the property is {@link Comparable}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included and they will be in alphabetical order. Use
+     * {@link Grid#setColumns(String...)} to define which properties to include
+     * and in which order. You can also add a column for an individual property
+     * with {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
+     * <p>
+     * This method can only be called for a newly instanced Grid without any
+     * beanType or columns set.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    public void configureBeanType(Class<T> beanType,
+            boolean autoCreateColumns) {
+        Objects.requireNonNull(beanType, "Bean type can't be null");
+
+        if (this.beanType != null) {
+            throw new IllegalStateException(
+                    "configureBeanType can only be called for a Grid without a beanType set");
+        }
+        if (!this.getColumns().isEmpty()) {
+            throw new IllegalStateException(
+                    "configureBeanType can only be called for a Grid without any columns");
+        }
+        this.beanType = beanType;
+        propertySet = BeanPropertySet.get(beanType);
+        if (autoCreateColumns) {
+            propertySet.getProperties()
+                    .filter(property -> !property.isSubProperty())
+                    .sorted((prop1, prop2) -> prop1.getName()
+                            .compareTo(prop2.getName()))
+                    .forEach(this::addColumn);
+        }
+
+    }
+
+    /**
      * Returns the Class of bean this Grid is constructed with via
      * {@link #Grid(Class)}. Or null if not constructed from a bean type.
      *
@@ -3612,7 +3660,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see Column#setAutoWidth(boolean)
      */
     public void recalculateColumnWidths() {
-        getElement().callJsFunction("recalculateColumnWidths");
+        // Defer column width recalculation to occur after the data was
+        // refreshed. The data communicator will insert the JS call to refresh
+        // the client side grid in the beforeClientResponse hook, we need to
+        // match this here so that the column width recalculation runs after the
+        // data was updated.
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                ctx -> getElement().callJsFunction("recalculateColumnWidths")));
     }
 
     /**
@@ -3742,7 +3797,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         try {
             Editor<T> editor = getEditor();
             if (editor != null) {
-                getEditor().closeEditor();
+                if (getEditor().isBuffered()) {
+                    getEditor().cancel();
+                } else {
+                    getEditor().closeEditor();
+                }
             }
         } finally {
             editorFactory = factory;
@@ -4109,6 +4168,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
+        updateClientSideSorterIndicators(sortOrder);
         fireColumnReorderEvent(getColumns());
     }
 

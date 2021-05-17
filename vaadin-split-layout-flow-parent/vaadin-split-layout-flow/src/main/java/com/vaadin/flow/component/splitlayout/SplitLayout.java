@@ -140,7 +140,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "20.0.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "21.0.0-alpha2")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -205,7 +205,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * client side, so the returned value may not be the same as in client side.
      * </p>
      *
-     * 
+     *
      * @return the {@code orientation} property of the SplitLayout.
      */
     public Orientation getOrientation() {

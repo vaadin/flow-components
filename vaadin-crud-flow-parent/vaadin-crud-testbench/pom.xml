@@ -13,6 +13,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
+            <version>${testbench.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -33,7 +34,7 @@
     </dependencies>
     <build>
         <plugins>
-                </plugins>
+        </plugins>
     </build>
     <profiles>
         <profile>

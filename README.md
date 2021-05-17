@@ -28,7 +28,7 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 - `mvn -am -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-demo -Pwar jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
+Then navigate to `http://localhost:8080/vaadin-checkbox` to see the demo.
 
 ## Running ITs of one component
 
@@ -79,6 +79,14 @@ For testing one component run:
 For running all merged components execute:
 
 - `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
+
+## Bumping version for all Maven modules
+
+To update the version for all modules for a new major or minor, run the following command:
+```
+mvn versions:set -DnewVersion=<next-version> -DprocessAllModules=true -DgenerateBackupPoms=false
+```
+where you replace `<next-version>` with the version that you want to set.
 
 ## Build script
 
