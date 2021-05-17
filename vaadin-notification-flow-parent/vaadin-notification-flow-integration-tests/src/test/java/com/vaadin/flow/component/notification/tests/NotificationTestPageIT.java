@@ -220,7 +220,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         waitForElementPresent(By.id("notification-add-component-at-index"));
         assertButtonNumberInNotification(initialNumber);
         findElement(By.id("close-notification-add-component-at-index")).click();
-        waitForElementNotPresent(By.id(NOTIFICATION_CARD_TAG));
+        waitForElementNotPresent(By.tagName(NOTIFICATION_CARD_TAG));
     }
 
     private void assertButtonNumberInNotification(int expectedButtonNumber) {
