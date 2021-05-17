@@ -17,6 +17,7 @@
 
 package com.vaadin.flow.component.select.test;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.select.examples.OverrideClientValidationPage;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -29,17 +30,19 @@ import org.junit.Test;
 @TestPath("vaadin-select/override-client-validation")
 public class OverrideClientValidationIT extends AbstractComponentIT {
 
-    private SelectElement selectElement;
+    private SelectElement basicSelectElement;
     private TestBenchElement setInvalidButton;
     private TestBenchElement logButton;
     private TestBenchElement detachButton;
     private TestBenchElement reattachButton;
-    private TestBenchElement resultSpan;
+    private TestBenchElement basicSelectResultSpan;
+    private SelectElement selectInGridElement;
 
     @Before
     public void setUp() {
         open();
-        selectElement = $(SelectElement.class).first();
+        basicSelectElement = $(SelectElement.class)
+                .id(OverrideClientValidationPage.ID_BASIC_SELECT);
         setInvalidButton = $("button")
                 .id(OverrideClientValidationPage.ID_SET_INVALID_BUTTON);
         logButton = $("button").id(OverrideClientValidationPage.ID_LOG_BUTTON);
@@ -47,19 +50,22 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
                 .id(OverrideClientValidationPage.ID_DETACH_BUTTON);
         reattachButton = $("button")
                 .id(OverrideClientValidationPage.ID_REATTACH_BUTTON);
-        resultSpan = $("span").id(OverrideClientValidationPage.ID_RESULT_SPAN);
+        basicSelectResultSpan = $("span")
+                .id(OverrideClientValidationPage.ID_BASIC_SELECT_RESULT_SPAN);
+        GridElement gridElement = $(GridElement.class).first();
+        selectInGridElement = gridElement.$(SelectElement.class).first();
     }
 
     @Test
     public void testTriggeringClientValidationShouldNotOverrideClientValidationState() {
         // Set server state to invalid
         setInvalidButton.click();
-        assertClientSideSelectValidationState(false);
+        assertClientSideSelectValidationState(basicSelectElement, false);
 
         // Trigger client side validation
-        triggerClientSideValidation();
+        triggerClientSideValidation(basicSelectElement);
         // Client side state should still be invalid
-        assertClientSideSelectValidationState(false);
+        assertClientSideSelectValidationState(basicSelectElement, false);
     }
 
     @Test
@@ -67,50 +73,65 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
         // Set server state to invalid
         setInvalidButton.click();
         logButton.click();
-        Assert.assertEquals("invalid", resultSpan.getText());
+        Assert.assertEquals("invalid", basicSelectResultSpan.getText());
 
         // Overwrite client side validation state to be valid
-        overwriteClientSideValidationState(true);
+        overwriteClientSideValidationState(basicSelectElement, true);
         // Server state should still be invalid
         logButton.click();
-        Assert.assertEquals("invalid", resultSpan.getText());
+        Assert.assertEquals("invalid", basicSelectResultSpan.getText());
     }
 
     @Test
     public void testDetachingAndReattachingShouldStillOverrideClientValidation() {
         // Set server state to invalid
         setInvalidButton.click();
-        assertClientSideSelectValidationState(false);
+        assertClientSideSelectValidationState(basicSelectElement, false);
 
         // Detach and reattach
         detachButton.click();
         reattachButton.click();
-        selectElement = $(SelectElement.class).first();
+        // Need to refresh Selenium reference
+        basicSelectElement = $(SelectElement.class)
+                .id(OverrideClientValidationPage.ID_BASIC_SELECT);
 
         // Client side state should still be invalid after reattaching
-        assertClientSideSelectValidationState(false);
+        assertClientSideSelectValidationState(basicSelectElement, false);
 
         // Trigger client side validation after reattaching
-        triggerClientSideValidation();
+        triggerClientSideValidation(basicSelectElement);
         // Client side state should still be invalid after reattaching and
         // triggering validation
-        assertClientSideSelectValidationState(false);
+        assertClientSideSelectValidationState(basicSelectElement, false);
     }
 
-    private void assertClientSideSelectValidationState(boolean valid) {
+    @Test
+    public void testTriggeringClientValidationShouldNotOverrideClientValidationStateWhenUsedInComponentRenderer() {
+        // Set server state to invalid
+        setInvalidButton.click();
+        assertClientSideSelectValidationState(selectInGridElement, false);
+
+        triggerClientSideValidation(selectInGridElement);
+
+        assertClientSideSelectValidationState(selectInGridElement, false);
+    }
+
+    private void assertClientSideSelectValidationState(
+            SelectElement selectElement, boolean valid) {
         Boolean validationState = selectElement.getPropertyBoolean("invalid");
 
         Assert.assertEquals("Validation state did not match", !valid,
                 validationState);
     }
 
-    private void triggerClientSideValidation() {
+    private void triggerClientSideValidation(SelectElement selectElement) {
         selectElement.getCommandExecutor()
                 .executeScript("arguments[0].validate()", selectElement);
         getCommandExecutor().waitForVaadin();
     }
 
-    private void overwriteClientSideValidationState(boolean valid) {
+    private void overwriteClientSideValidationState(SelectElement selectElement,
+            boolean valid) {
         selectElement.setProperty("invalid", !valid);
         getCommandExecutor().waitForVaadin();
     }
