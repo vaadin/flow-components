@@ -8,7 +8,6 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
@@ -16,7 +15,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "3.0.2")
 @Route("vaadin-dialog/shortcuts")
 public class DialogWithShortcutPage extends VerticalLayout {
 
