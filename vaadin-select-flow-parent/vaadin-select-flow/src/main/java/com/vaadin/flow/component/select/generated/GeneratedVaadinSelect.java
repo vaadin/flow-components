@@ -394,13 +394,12 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * Set to true if the value is invalid.
      * <p>
-     * This property is synchronized automatically from client side when a
-     * 'invalid-changed' event happens.
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
      * </p>
      * 
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
