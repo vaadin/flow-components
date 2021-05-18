@@ -289,6 +289,13 @@ public class MessageListItem implements Serializable {
         propsChanged();
     }
 
+    /*
+     * The following theme-related methods are copied from the HasTheme
+     * interface, because the interface is compatible only with components. For
+     * more detailed reasoning, see the discussion in:
+     * https://github.com/vaadin/flow-components/pull/979#discussion_r634097080
+     */
+
     /**
      * Adds one or more theme names to this message. Multiple theme names can be
      * specified by using multiple parameters.
