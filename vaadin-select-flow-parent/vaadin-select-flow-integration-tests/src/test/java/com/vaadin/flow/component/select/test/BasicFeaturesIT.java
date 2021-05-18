@@ -9,6 +9,11 @@ import org.openqa.selenium.By;
 public class BasicFeaturesIT extends AbstractSelectIT {
 
     @Test
+    public void test_initialClientValue() {
+        Assert.assertEquals("", selectElement.getProperty("value"));
+    }
+
+    @Test
     public void testEnabled_disabling_userCannotSelect() {
         page.toggleEnabled(false);
         verify.selectDisabled();
