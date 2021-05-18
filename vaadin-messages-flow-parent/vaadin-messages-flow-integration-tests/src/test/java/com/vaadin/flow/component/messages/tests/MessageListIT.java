@@ -93,6 +93,14 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("setUserColorIndex");
         Assert.assertEquals("Unexpected userColorIndex prop", 2,
                 msg.getUserColorIndex());
+
+        clickElementWithJs("addThemeNames");
+        Assert.assertEquals("Unexpected theme prop after adding theme names",
+                "foo bar", msg.getTheme());
+
+        clickElementWithJs("removeThemeNames");
+        Assert.assertEquals("Unexpected theme prop after removing theme names",
+                null, msg.getTheme());
     }
 
     @Test
