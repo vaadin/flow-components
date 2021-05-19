@@ -259,6 +259,10 @@ public class CheckboxGroup<T>
                 "Cannot set a null value to checkbox group. "
                         + "Use the clear-method to reset the component's value to an empty set.");
         super.setValue(value);
+    }
+
+    @Override
+    public void setPresentationValue(Set<T> newPresentationValue) {
         refreshCheckboxes();
     }
 
