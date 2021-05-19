@@ -17,21 +17,18 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.List;
 
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.tests.ComponentDemoTest;
-
-public class CheckboxGroupDisabledItemIT extends ComponentDemoTest {
-
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-checkbox-group-disabled-item";
-    }
+@TestPath("vaadin-checkbox-group-disabled-item")
+public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
 
     @Test
     public void disabledGroupItemChecked() {
+        open();
         TestBenchElement group = $(TestBenchElement.class)
                 .id("checkbox-group-disabled-item");
 
