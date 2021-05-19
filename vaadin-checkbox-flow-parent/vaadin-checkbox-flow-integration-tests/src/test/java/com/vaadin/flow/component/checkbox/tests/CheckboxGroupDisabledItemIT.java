@@ -29,7 +29,7 @@ public class CheckboxGroupDisabledItemIT extends ComponentDemoTest {
     protected String getTestPath() {
         return "/vaadin-checkbox-group-disabled-item";
     }
-  
+
     @Test
     public void disabledGroupItemChecked() {
         TestBenchElement group = $(TestBenchElement.class)
