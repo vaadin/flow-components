@@ -110,7 +110,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-spreadsheet-component</artifactId>
+            <artifactId>vaadin-spreadsheet-flow</artifactId>
             <version>3.0-SNAPSHOT</version>
         </dependency>
 
