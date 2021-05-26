@@ -18,9 +18,8 @@ package com.vaadin.flow.component.button.tests;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.helger.commons.mutable.MutableBoolean;
-import org.easymock.Capture;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -207,14 +206,14 @@ public class ButtonTest {
     @Test
     public void testFireClick() {
         button = new Button();
-        MutableBoolean clicked = new MutableBoolean(false);
+        AtomicBoolean clicked = new AtomicBoolean(false);
         button.addClickListener(e -> {
             clicked.set(true);
         });
 
-        Assert.assertFalse(clicked.booleanValue());
+        Assert.assertFalse(clicked.get());
         button.click();
-        Assert.assertTrue(clicked.booleanValue());
+        Assert.assertTrue(clicked.get());
     }
 
     @Test
@@ -255,16 +254,16 @@ public class ButtonTest {
 
     @Test
     public void disableOnClick_click_disablesComponent() {
-        Capture<Boolean> disabledCapture = new Capture<>();
-        button = new Button("foo", event -> disabledCapture
-                .setValue(event.getSource().isEnabled()));
-        button.setDisableOnClick(true);
+        AtomicBoolean buttonIsEnabled = new AtomicBoolean(true);
 
+        button = new Button("foo",
+                event -> buttonIsEnabled.set(event.getSource().isEnabled()));
+        button.setDisableOnClick(true);
         button.click();
 
         Assert.assertFalse(
                 "Button should have been disabled when event has been fired",
-                disabledCapture.getValue());
+                buttonIsEnabled.get());
     }
 
     @Test
