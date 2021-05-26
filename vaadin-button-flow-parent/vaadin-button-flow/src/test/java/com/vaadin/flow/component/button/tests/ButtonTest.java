@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.helger.commons.mutable.MutableBoolean;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -208,14 +206,14 @@ public class ButtonTest {
     @Test
     public void testFireClick() {
         button = new Button();
-        MutableBoolean clicked = new MutableBoolean(false);
+        AtomicBoolean clicked = new AtomicBoolean(false);
         button.addClickListener(e -> {
             clicked.set(true);
         });
 
-        Assert.assertFalse(clicked.booleanValue());
+        Assert.assertFalse(clicked.get());
         button.click();
-        Assert.assertTrue(clicked.booleanValue());
+        Assert.assertTrue(clicked.get());
     }
 
     @Test
