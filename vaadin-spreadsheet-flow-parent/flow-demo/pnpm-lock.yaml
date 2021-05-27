@@ -47,6 +47,7 @@ dependencies:
   '@vaadin/vaadin-text-field': 3.0.2
   '@vaadin/vaadin-time-picker': 3.0.0
   '@vaadin/vaadin-upload': 5.0.0
+  code-prettify: 0.1.0
   construct-style-sheets-polyfill: 2.4.16
   lit-element: 2.5.1
   lit-html: 1.4.1
@@ -3421,6 +3422,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-neHB9xuzh/wk0dIHweyAXv2aPGZIVk3pLMe+/RNzINf17fe0OG96QroktYAUm7SM1PBnzTabaLboqqxDyMU+SQ==
+  /code-prettify/0.1.0:
+    dev: false
+    resolution:
+      integrity: sha1-RocMyMGlDQm61TmzOpg9vUqjSx4=
   /collection-visit/1.0.0:
     dependencies:
       map-visit: 1.0.0
@@ -8747,6 +8752,7 @@ specifiers:
   '@vaadin/vaadin-time-picker': 3.0.0
   '@vaadin/vaadin-upload': 5.0.0
   chokidar: ^3.5.0
+  code-prettify: 0.1.0
   compression-webpack-plugin: 4.0.1
   construct-style-sheets-polyfill: 2.4.16
   css-loader: 4.2.1
