@@ -89,6 +89,7 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-test-generic</artifactId>
       <version>${flow.version}</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>

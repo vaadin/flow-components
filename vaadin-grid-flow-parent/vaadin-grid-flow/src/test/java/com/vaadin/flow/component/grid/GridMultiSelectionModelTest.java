@@ -35,6 +35,7 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.data.selection.SelectionEvent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -66,8 +67,7 @@ public class GridMultiSelectionModelTest {
         events = new AtomicInteger();
 
         selectionModel.addMultiSelectionListener(event -> {
-            currentSelectionCapture
-                    .set(new ArrayList<>(event.getNewSelection()));
+            currentSelectionCapture.set(new ArrayList<>(event.getValue()));
             oldSelectionCapture.set(new ArrayList<>(event.getOldSelection()));
             events.incrementAndGet();
         });
@@ -489,11 +489,15 @@ public class GridMultiSelectionModelTest {
             assertNull(event.get());
             event.set(evt);
         };
-        GridMultiSelectionModel<String> model = (GridMultiSelectionModel<String>) grid
-                .setSelectionMode(SelectionMode.MULTI);
 
+        GridMultiSelectionModel<String> model = new AbstractGridMultiSelectionModel<String>(
+                grid) {
+            @Override
+            protected void fireSelectionEvent(
+                    SelectionEvent<Grid<String>, String> event) {
+            }
+        };
         model = Mockito.spy(model);
-
         Mockito.when(model.getSelectedItems())
                 .thenReturn(new LinkedHashSet<>(Arrays.asList(value)));
 
