@@ -1,76 +1,144 @@
 package com.vaadin.flow.component.charts.export;
 
-import java.io.File;
-import java.io.FileOutputStream;
+/*-
+ * #%L
+ * Vaadin Charts for Flow
+ * %%
+ * Copyright (C) 2021 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
+ *
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
+ */
+
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.LoggerFactory;
+import java.util.Objects;
 
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
-import com.vaadin.flow.server.frontend.FrontendTools;
-import com.vaadin.flow.server.frontend.FrontendUtils;
 
-public class SVGGenerator {
+/**
+ * <p>
+ * Use instances of this class to generate SVG strings from chart
+ * {@link Configuration} instances. You <b>must close the generator</b> when
+ * you're done with it. You can use a try-with-resources block to close it
+ * automatically.
+ * </p>
+ * <br />
+ * <p>Example usage:</p>
+ * <pre><code>
+ *     Configuration configuration = new Configuration();
+ *     // ...
+ *     try (SVGGenerator generator = new SVGGenerator()) {
+ *         String svg = generator.generate(configuration);
+ *     }
+ * </code></pre>
+ *
+ * @since Vaadin 21.0
+ */
+public class SVGGenerator implements AutoCloseable {
 
-    public static String generateSVG(Configuration chartConfiguration) {
-        assert chartConfiguration != null;
-        String chartConfigurationString = ChartSerialization
-                .toJSON(chartConfiguration);
+    /**
+     * Pathname to the internal exporter bundle file. We use it to copy
+     * its contents to a temporary file that can be then accessed by a NodeJS
+     * process.
+     */
+    private final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js".replace("/", FileSystems.getDefault().getSeparator());
+    /**
+     * String template for the script to be run with NodeJS to generate an svg
+     * file which contents can be then read by this class.
+     */
+    private final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
+            + "exporter({\n"
+            + "options: %s,\n"
+            + "outfile: '%s',\n"
+            + "})";
 
+    /**
+     * Path to the temporary directory used to hold the temporary bundle file
+     * and the temporary chart svg file.
+     */
+    private final Path tempDirPath;
+    /**
+     * Path to the temporary Javascript bundle file which contents are a copy of
+     * the internal bundle file. This file can then be accessed by a NodeJS
+     * process.
+     */
+    private final Path bundleTempPath;
+
+    /**
+     * Creates a new instance of {@link SVGGenerator} which allocates resources
+     * used to transform a {@link Configuration} object to an SVG string.
+     *
+     * @throws IOException if there's any issue allocating resources needed.
+     */
+    public SVGGenerator() throws IOException {
+        tempDirPath = Files.createTempDirectory("svg-export");
+        bundleTempPath = tempDirPath.resolve("export-svg-bundle.js");
         try {
-            Path tempDirPath = Files.createTempDirectory("svg-export");
-            File bundleTempFile = Files
-                    .createFile(tempDirPath.resolve("export-svg-bundle.js"))
-                    .toFile();
-
-            tempDirPath.toFile().deleteOnExit();
-            try (FileOutputStream out = new FileOutputStream(bundleTempFile)) {
-                IOUtils.copy(SVGGenerator.class.getResourceAsStream(
-                        "/META-INF/frontend/generated/jsdom-exporter-bundle.js"),
-                        out);
-
-                String command = String.format(
-                        "const hc = require('%s');\n" + "hc({\n"
-                                + "options: %s,\n" + "outfile: 'chart.svg',\n"
-                                + "})",
-                        bundleTempFile.getAbsolutePath().replace("\\", "/"),
-                        chartConfigurationString);
-
-                runNodeScript(command);
-
-                Path chart = Paths.get(tempDirPath.toString() + "/chart.svg");
-                return Files.readAllLines(chart).get(0);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                LoggerFactory.getLogger(SVGGenerator.class).info("error");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            LoggerFactory.getLogger(SVGGenerator.class)
-                    .error("Unable to create temp file for bundle", e);
+            Path internalBundlePath = Paths.get(getClass().getResource(INTERNAL_BUNDLE_PATH).toURI());
+            Files.copy(internalBundlePath, bundleTempPath);
+        } catch (URISyntaxException e) {
+            // TODO the str used to build the URI is a constant we know is valid
+            // TODO What to do if it suddenly becomes invalid?
         }
-        return "";
     }
 
-    private static int runNodeScript(String script)
-            throws InterruptedException, IOException {
-        FrontendTools tools = new FrontendTools("",
-                () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
-        String node = tools.getNodeExecutable();
-        List<String> command = new ArrayList<>();
-        command.add(node);
-        command.add("-e");
-        command.add(script);
-        ProcessBuilder builder = FrontendUtils.createProcessBuilder(command);
-        builder.inheritIO();
-        Process process = builder.start();
-        return process.waitFor();
+    @Override
+    public void close() throws IOException {
+        // cleanup by deleting all temp files
+        Files.delete(bundleTempPath);
+        Files.delete(tempDirPath);
+    }
+
+    /**
+     * Generate an SVG string that can be used to render a chart with data from
+     * a {@link Configuration} instance.
+     *
+     * @param chartConfiguration the {@link Configuration} with the chart's data.
+     * @return an SVG string resulting from the {@link Configuration}.
+     * @throws NullPointerException  when passing a <code>null</code> configuration.
+     * @throws IllegalStateException when called on a closed generator.
+     * @throws IOException           if anything happens using or allocating resources to
+     *                               virtually render the chart.
+     * @throws InterruptedException  if the rendering process gets interrupted.
+     */
+    public String generate(Configuration chartConfiguration) throws IllegalStateException, IOException, InterruptedException {
+        if (isClosed()) {
+            throw new IllegalStateException("This generator is already closed.");
+        }
+        Configuration config = Objects.requireNonNull(chartConfiguration, "Chart configuration must not be null.");
+        String jsonConfig = ChartSerialization.toJSON(config);
+        // FIXME auto generate unique chart name
+        String chartFileName = "chart.svg";
+        String command = String.format(SCRIPT_TEMPLATE, bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName);
+
+        NodeRunner nodeRunner = new NodeRunner();
+        nodeRunner.runJavascript(command);
+        // when script completes, chart.svg file should exist
+        Path chartPath = Paths.get(tempDirPath.toString(), chartFileName);
+        try {
+            return new String(Files.readAllBytes(chartPath));
+        } finally {
+            Files.delete(chartPath);
+        }
+    }
+
+    // TODO overload generate(Configuration) method to provide custom theme and other extras
+
+    /**
+     * <p>Check if this generator is closed.</p>
+     *
+     * @return <code>true</code> if the generator is closed, <code>false</code> otherwise.
+     */
+    public boolean isClosed() {
+        return !Files.exists(tempDirPath);
     }
 }

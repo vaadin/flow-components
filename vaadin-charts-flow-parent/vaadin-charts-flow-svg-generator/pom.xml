@@ -20,6 +20,11 @@
             <artifactId>vaadin-charts-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-generic</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
