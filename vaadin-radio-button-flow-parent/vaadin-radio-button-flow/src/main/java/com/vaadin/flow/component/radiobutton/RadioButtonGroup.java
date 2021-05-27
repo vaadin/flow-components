@@ -199,6 +199,10 @@ public class RadioButtonGroup<T>
     /**
      * Sets the item renderer for this radio button group. The renderer is
      * applied to each item to create a component which represents the item.
+     * <p>
+     * Note: Component acts as a label to the button and clicks on it trigger
+     * the radio button. Hence interactive components like DatePicker or
+     * ComboBox cannot be used.
      *
      * @param renderer
      *            the item renderer, not {@code null}
