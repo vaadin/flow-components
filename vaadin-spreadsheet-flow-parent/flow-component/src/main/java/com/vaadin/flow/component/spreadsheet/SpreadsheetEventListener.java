@@ -18,7 +18,6 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
     public void onComponentEvent(Spreadsheet.SpreadsheetEvent event) {
         System.out.println("received " + event.getMessage() + ": " + event.getPayload());
         List<String> tokens = parse(event.getPayload());
-        tokens.forEach(s -> System.out.println("-->" + s));
         if ("onConnectorInit".equals(event.getMessage())) {
             handler.onConnectorInit();
         } else if ("contextMenuOpenOnSelection".equals(event.getMessage())) {

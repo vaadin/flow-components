@@ -307,7 +307,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         return (SpreadsheetState) super.getState();
     }
 
-    //spreadsheet: default does not work
     @Override
     protected SharedState createState() {
         return new SpreadsheetState();
@@ -335,7 +334,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             });
         } else if (state.reload) {
             loadInitialStateDataToWidget(stateChangeEvent);
-            state.reload = false; //miguel
+            state.reload = false;
         } else {
             if (stateChangeEvent.hasPropertyChanged("sheetNames")
                     || stateChangeEvent.hasPropertyChanged("sheetIndex")) {

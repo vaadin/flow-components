@@ -216,7 +216,7 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   disconnectedCallback() {
-    this.api.disconnected();
+    super.disconnectedCallback();
     console.log('disconnected')
   }
 

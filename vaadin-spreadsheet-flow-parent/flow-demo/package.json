@@ -22,7 +22,7 @@
       "@vaadin/vaadin-app-layout": "2.2.0",
       "@vaadin/vaadin-item": "3.0.0",
       "@vaadin/vaadin-board": "3.0.0",
-      "spreadsheet-lit-element": "^0.0.116",
+      "spreadsheet-lit-element": "^0.0.122",
       "@vaadin/vaadin-notification": "1.6.1",
       "@vaadin/vaadin-charts": "8.0.2",
       "@vaadin/vaadin-grid-pro": "3.0.1",
@@ -80,7 +80,7 @@
       "extract-loader": "5.1.0",
       "workbox-webpack-plugin": "5.1.4"
     },
-    "hash": "cb703d15d667d7a415c55917bb1e1f3a8815e8d2118d7fb38cee4ec1086497f8"
+    "hash": "7a48b0081aa4b130b87cd4afc907e96a67011729ab4fa579ee32cf6c88762f76"
   },
   "dependencies": {
     "lit-element": "2.5.1",
@@ -104,7 +104,7 @@
     "@vaadin/vaadin-app-layout": "2.2.0",
     "@vaadin/vaadin-item": "3.0.0",
     "@vaadin/vaadin-board": "3.0.0",
-    "spreadsheet-lit-element": "^0.0.116",
+    "spreadsheet-lit-element": "^0.0.122",
     "@vaadin/vaadin-notification": "1.6.1",
     "@vaadin/vaadin-charts": "8.0.2",
     "@vaadin/vaadin-grid-pro": "3.0.1",

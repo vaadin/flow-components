@@ -52,14 +52,7 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     private Consumer<String> actionOnColumnHeaderCallback;
 
     public SpreadsheetServerRpcImpl() {
-        consoleLog("instantiated");
-        //debugger();
     }
-
-    native void debugger() /*-{
-      debugger;
-  }-*/;
-
 
     public void setGroupingCollapsedCallback(Consumer<String> callback) {
         groupingCollapsedCallback = callback;

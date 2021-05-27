@@ -479,10 +479,6 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             cell.setCellComment(comment);
         }
         comment.setString(str);
-        /* miguel
-        spreadsheet.getActiveSheet().getCellComment(new CellAddress(row - 1, col - 1))
-                .setString(str);
-         */
     }
 
     public Cell getOrCreateCell(Sheet sheet, int rowIdx, int colIdx) {

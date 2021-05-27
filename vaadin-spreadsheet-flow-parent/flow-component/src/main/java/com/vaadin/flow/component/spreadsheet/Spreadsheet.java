@@ -115,7 +115,7 @@ import com.vaadin.flow.server.StreamResource;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.116")
+@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.122")
 //@JsModule("my-element/my-element.js")
 @JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
@@ -893,77 +893,64 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     private Map<CellReference, Integer> autofittedColumnWidths = new WeakHashMap<>();
 
-    //miguel
     private SpreadsheetClientRpc clientRpc = new SpreadsheetClientRpc() {
         @Override
         public void updateBottomRightCellValues(ArrayList<CellData> cellData) {
-            System.out.println("==>updateBottomRightCellValues(" + Serializer.serialize(cellData) + ")");
             getElement().callJsFunction("updateBottomRightCellValues", Serializer.serialize(cellData));
         }
 
         @Override
         public void updateTopLeftCellValues(ArrayList<CellData> cellData) {
-            System.out.println("==>updateTopLeftCellValues(" + Serializer.serialize(cellData) + ")");
             getElement().callJsFunction("updateTopLeftCellValues", Serializer.serialize(cellData));
         }
 
         @Override
         public void updateTopRightCellValues(ArrayList<CellData> cellData) {
-            System.out.println("==>updateTopRightCellValues(" + Serializer.serialize(cellData) + ")");
             getElement().callJsFunction("updateTopRightCellValues", Serializer.serialize(cellData));
         }
 
         @Override
         public void updateBottomLeftCellValues(ArrayList<CellData> cellData) {
-            System.out.println("==>updateBottomLeftCellValues(" + Serializer.serialize(cellData) + ")");
             getElement().callJsFunction("updateBottomLeftCellValues", Serializer.serialize(cellData));
         }
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            System.out.println("==>updateFormulaBar(" + possibleName + "," + col + "," + row + ")");
             getElement().callJsFunction("updateFormulaBar", possibleName, col, row);
         }
 
         @Override
         public void invalidCellAddress() {
-            System.out.println("==>invalidCellAddress()");
             getElement().callJsFunction("invalidCellAddress");
         }
 
         @Override
         public void showSelectedCell(String name, int col, int row, String cellValue, boolean function, boolean locked, boolean initialSelection) {
-            System.out.println("==>showSelectedCell(" + name + "," + col + "," + row + "," + cellValue + "," + function + "," + locked + "," + initialSheetSelection + ")");
             getElement().callJsFunction("showSelectedCell", name, col, row, cellValue, function, locked, initialSelection);
         }
 
         @Override
         public void showActions(ArrayList<SpreadsheetActionDetails> actionDetails) {
-            System.out.println("==>showActions(" + Serializer.serialize(actionDetails) + ")");
             getElement().callJsFunction("showActions", Serializer.serialize(actionDetails));
         }
 
         @Override
         public void setSelectedCellAndRange(String name, int col, int row, int c1, int c2, int r1, int r2, boolean scroll) {
-            System.out.println("==>setSelectedCellAndRange(" + name + "," + col + "," + row + "," + c1 + "," + c2 + "," + r1 + "," + r2 + "," + scroll + ")");
             getElement().callJsFunction("setSelectedCellAndRange", name, col, row, c1, c2, r1, r2, scroll);
         }
 
         @Override
         public void cellsUpdated(ArrayList<CellData> updatedCellData) {
-            System.out.println("==>cellsUpdated(" + Serializer.serialize(updatedCellData) + ")");
             getElement().callJsFunction("cellsUpdated", Serializer.serialize(updatedCellData));
         }
 
         @Override
         public void refreshCellStyles() {
-            System.out.println("==>refreshCellStyles()");
             getElement().callJsFunction("refreshCellStyles");
         }
 
         @Override
         public void editCellComment(int col, int row) {
-            System.out.println("==>editCellComment(" + col + "," + row + ")");
             getElement().callJsFunction("editCellComment", col, row);
         }
     };
@@ -1277,6 +1264,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      *            Default column count for new sheets
      */
     public Spreadsheet(int defaultRowCount, int defaultColumnCount) {
+        //getUI().ifPresent(ui -> ui.getPage().addDynamicImport("spreadsheet-lit-element/vaadin-spreadsheet.js"));
         init();
         setDefaultRowCount(defaultRowCount);
         setDefaultColumnCount(defaultColumnCount);
@@ -1334,7 +1322,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
-        //miguel
         setId(UUID.randomUUID().toString());
         customInit();
     }
@@ -5109,7 +5096,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
 
         public ValueChangeEvent(Component source,
                 Set<CellReference> changedCells) {
-            super(source, false); //miguel
+            super(source, false);
             this.changedCells = changedCells;
         }
 
@@ -5171,7 +5158,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 List<CellReference> individualSelectedCells,
                 CellRangeAddress selectedCellMergedRegion,
                 List<CellRangeAddress> cellRangeAddresses) {
-            super(source, false); //miguel
+            super(source, false);
             this.selectedCellReference = selectedCellReference;
             this.individualSelectedCells = individualSelectedCells;
             this.selectedCellMergedRegion = selectedCellMergedRegion;
@@ -5380,7 +5367,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     public static class ProtectedEditEvent extends ComponentEvent<Component> {
 
         public ProtectedEditEvent(Component source) {
-            //miguel
             super(source, false);
         }
     }
@@ -5513,7 +5499,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         public SheetChangeEvent(Component source, Sheet newSheet,
                 Sheet previousSheet, int newSheetVisibleIndex,
                 int newSheetPOIIndex) {
-            //miguel
             super(source, false);
             this.newSheet = newSheet;
             this.previousSheet = previousSheet;
