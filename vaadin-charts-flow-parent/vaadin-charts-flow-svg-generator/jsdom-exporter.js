@@ -131,14 +131,50 @@ doc.createElementNS = (ns, tagName) => {
     return elem;
 };
 
-module.exports = ({
-    isTimeline = false,
-    options,
-    outfile = 'chart.svg'
-}) => {
+/**
+ * ExportOptions
+ *
+ * @typedef ExportOptions
+ *
+ * @property {object} theme
+ * @property {object} lang
+ * @property {string} width
+ * @property {string} height
+ */
+
+/**
+ * ExportConfiguration
+ *
+ * @typedef ExportConfiguration
+ *
+ * @property {boolean} isTimeline
+ * @property {object} options
+ * @property {string} outfile
+ * @property {ExportOptions} exportOptions
+ */
+
+/**
+ * SVGResult
+ *
+ * @typedef SVGResult
+ *
+ * @property {string} svgString
+ * @property {length} bytes
+ * @property {string} outfile
+ * @property {string} time
+ */
+
+/**
+ * Function to export SVG a string containing a chart based
+ * on the configuration provided
+ *
+ * @param {ExportConfiguration} configuration
+ *
+ * @returns {Promise<SVGResult>} Object with the result of the export
+ */
+const jsdomExporter = (configuration) => {
     return new Promise((resolve, reject) => {
-
-
+        const { isTimeline = false, options, outfile = 'chart.svg', exportOptions } = configuration;
 
         // Disable all animation
         Highcharts.setOptions({
@@ -152,6 +188,24 @@ module.exports = ({
             }
         });
 
+        if (exportOptions) {
+            if (exportOptions.theme) {
+                Highcharts.setOptions(exportOptions.theme);
+            }
+
+            if (exportOptions.lang) {
+                Highcharts.setOptions({ lang: exportOptions.lang })
+            }
+
+            if (exportOptions.height || exportOptions.width) {
+                const chartOptions = {
+                    ...exportOptions.height && { height: exportOptions.height },
+                    ...exportOptions.width && { width: exportOptions.width },
+                };
+                options.chart = { ...options.chart, ...chartOptions };
+            }
+        }
+
         let chart;
 
         // Generate the chart into the container
@@ -163,6 +217,7 @@ module.exports = ({
                 { ...options, exporting: { enabled: false } }
             );
         } catch (e) {
+            console.log('error')
             reject(e);
         }
         let time = Date.now() - start;
@@ -185,3 +240,5 @@ module.exports = ({
         });
     });
 };
+
+module.exports = jsdomExporter;
