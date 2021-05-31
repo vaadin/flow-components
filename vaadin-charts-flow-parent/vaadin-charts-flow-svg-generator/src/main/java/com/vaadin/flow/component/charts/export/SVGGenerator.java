@@ -1,5 +1,3 @@
-package com.vaadin.flow.component.charts.export;
-
 /*-
  * #%L
  * Vaadin Charts for Flow
@@ -12,6 +10,8 @@ package com.vaadin.flow.component.charts.export;
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
+
+package com.vaadin.flow.component.charts.export;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -41,7 +41,7 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  *     }
  * </code></pre>
  *
- * @since Vaadin 21.0
+ * @since 21.0
  */
 public class SVGGenerator implements AutoCloseable {
 
@@ -94,8 +94,8 @@ public class SVGGenerator implements AutoCloseable {
     @Override
     public void close() throws IOException {
         // cleanup by deleting all temp files
-        Files.delete(bundleTempPath);
-        Files.delete(tempDirPath);
+        Files.deleteIfExists(bundleTempPath);
+        Files.deleteIfExists(tempDirPath);
     }
 
     /**
