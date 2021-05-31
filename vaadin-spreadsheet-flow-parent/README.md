@@ -2,9 +2,32 @@
 [![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-spreadsheet.svg)](https://vaadin.com/directory/component/vaadin-spreadsheet)
 
 
-# Vaadin Spreadsheet
+# Vaadin Spreadsheet for Flow
 
-Vaadin Spreadsheet is a UI component add-on for Vaadin 7 which provides means to view and edit Excel spreadsheets in Vaadin applications.
+Vaadin Spreadsheet is a UI component add-on for Vaadin Flow which provides means to view and edit Excel spreadsheets in Vaadin applications.
+
+Currently a pre-release version is available by using following "Maven coordinates":
+
+    <repositories>
+		  <repository>
+			  <id>vaadin-prereleases</id>
+			  <name>Vaadin Pre-releases</name>
+			  <url>https://maven.vaadin.com/vaadin-prereleases</url>
+		  </repository>
+    </repositories>
+
+    <dependencies>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-spreadsheet-flow</artifactId>
+        <version>1.0.0.alpha1</version>
+      </dependency>
+    </dependencies>
+
+
+## Request for early feedback
+
+The add-on is a port of the original Vaadin Spreadsheet add-on for Vaadin Framework 7 & 8. Most of the functionality is already there, but you can't yet for example add Vaadin components to cells. We'd really appreciate feedback about this new version. Use the Issues tab in this GitHub project (preferred) or use the feedback from in vaadin.com. Share the version of Vaadin and the version of the add-on in your feedback. Thanks in advance!
 
 ## License & Author
 
