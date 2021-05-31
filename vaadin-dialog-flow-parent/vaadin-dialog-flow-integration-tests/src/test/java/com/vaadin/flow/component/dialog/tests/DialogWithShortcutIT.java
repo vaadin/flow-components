@@ -9,6 +9,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -32,6 +33,7 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
 
     // #7799
     @Test
+    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void dialogOpenedWithListenOnShortcut_sameShortcutListeningOnUi_focusDecidesWhichIsExecuted() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.LISTEN_ON_DIALOG);
@@ -51,6 +53,7 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void dialogOpenedWithShortcutNoListenOn_sameShortcutListeningOnUi_bothExecuted() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.SHORTCUT_ON_UI);
@@ -70,6 +73,7 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void dialogOpenedWithListenOnShortcut_dialogReopened_oldShortcutStillWorks() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.REUSABLE_DIALOG);
@@ -98,6 +102,7 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
 
     // vaadin/vaadin-dialog#229
     @Test
+    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void twoModelessDialogsOpenedWithSameShortcutKeyOnListenOn_dialogWithFocusExecuted() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.MODELESS_SHORTCUT_LISTEN_ON_DIALOG);
