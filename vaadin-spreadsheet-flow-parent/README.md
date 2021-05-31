@@ -9,11 +9,11 @@ Vaadin Spreadsheet is a UI component add-on for Vaadin Flow which provides means
 Currently a pre-release version is available by using following "Maven coordinates":
 
     <repositories>
-		  <repository>
-			  <id>vaadin-prereleases</id>
-			  <name>Vaadin Pre-releases</name>
-			  <url>https://maven.vaadin.com/vaadin-prereleases</url>
-		  </repository>
+      <repository>
+        <id>vaadin-prereleases</id>
+        <name>Vaadin Pre-releases</name>
+        <url>https://maven.vaadin.com/vaadin-prereleases</url>
+      </repository>
     </repositories>
 
     <dependencies>
