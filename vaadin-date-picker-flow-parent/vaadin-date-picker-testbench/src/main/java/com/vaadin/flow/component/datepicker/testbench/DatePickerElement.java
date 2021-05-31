@@ -95,9 +95,9 @@ public class DatePickerElement extends TestBenchElement
      * triggering an update of the value property.
      */
     public void setInputValue(String value) {
-        executeScript("arguments[0].open();", this);
+        this.open();
         setProperty("_inputValue", value);
-        executeScript("arguments[0].close();", this);
+        this.close();
     }
 
     /**
@@ -119,5 +119,19 @@ public class DatePickerElement extends TestBenchElement
      */
     public boolean isAutoOpen() {
         return !getPropertyBoolean("autoOpenDisabled");
+    }
+
+    /**
+     * Opens the date picker overlay
+     */
+    public void open() {
+        executeScript("arguments[0].open();", this);
+    }
+
+    /**
+     * Closes the date picker overlay
+     */
+    public void close() {
+        executeScript("arguments[0].close();", this);
     }
 }

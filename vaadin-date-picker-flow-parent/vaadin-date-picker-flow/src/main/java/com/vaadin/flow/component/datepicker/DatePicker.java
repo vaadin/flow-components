@@ -35,6 +35,7 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * Server-side component that encapsulates the functionality of the
@@ -372,10 +373,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private void setI18nWithJS() {
         runBeforeClientResponse(ui -> {
             JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
-            for (String key : i18nObject.keys()) {
-                getElement().executeJs("this.set('i18n." + key + "', $0)",
-                        i18nObject.get(key));
+            // Remove null values to prevent errors
+            for(String key : i18nObject.keys()) {
+                if(i18nObject.get(key).getType() == JsonType.NULL) {
+                    i18nObject.remove(key);
+                }
             }
+            // Assign new I18N object to WC, keep current values if they are not defined in the new object
+            getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);", i18nObject);
         });
     }
 
