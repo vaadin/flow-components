@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "21.0.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "21.0.0-alpha3")
 public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
 
     /**
