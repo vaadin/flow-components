@@ -147,31 +147,36 @@ public class VirtualListIT extends AbstractComponentIT {
 
     @Test
     public void firstVisibleRowIndex() {
-        VirtualListElement list = $(VirtualListElement.class).id("component-renderer");
+        VirtualListElement list = $(VirtualListElement.class)
+                .id("component-renderer");
         Assert.assertEquals(0, list.getFirstVisibleRowIndex());
     }
 
     @Test
     public void lastVisibleRowIndex() {
-        VirtualListElement list = $(VirtualListElement.class).id("component-renderer");
+        VirtualListElement list = $(VirtualListElement.class)
+                .id("component-renderer");
         Assert.assertEquals(5, list.getLastVisibleRowIndex());
     }
 
     @Test
     public void rowIndexInView() {
-        VirtualListElement list = $(VirtualListElement.class).id("component-renderer");
+        VirtualListElement list = $(VirtualListElement.class)
+                .id("component-renderer");
         Assert.assertTrue(list.isRowInView(3));
     }
 
     @Test
     public void rowIndexNotInView() {
-        VirtualListElement list = $(VirtualListElement.class).id("component-renderer");
+        VirtualListElement list = $(VirtualListElement.class)
+                .id("component-renderer");
         Assert.assertFalse(list.isRowInView(6));
     }
 
     @Test
     public void rowCount() {
-        VirtualListElement list = $(VirtualListElement.class).id("component-renderer");
+        VirtualListElement list = $(VirtualListElement.class)
+                .id("component-renderer");
         Assert.assertEquals(100, list.getRowCount());
     }
 
