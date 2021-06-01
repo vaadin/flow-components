@@ -21,7 +21,7 @@ describe('jsdom-exporter', () => {
   afterEach(() => mock.restore());
 
   it('should render based on Highchart options', async () => {
-    const result = await jsdomExporter({ options: { title: { text: 'TITLE' } } });
+    const result = await jsdomExporter({ chartConfiguration: { title: { text: 'TITLE' } } });
     const document = parseSVG(result.svgString);
 
     expect(document.querySelector('svg')).to.be.not.null;
@@ -29,19 +29,19 @@ describe('jsdom-exporter', () => {
   });
 
   it('should use default filename to write svg file', async () => {
-    const result = await jsdomExporter({ options: { } });
+    const result = await jsdomExporter({ chartConfiguration: { } });
 
-    expect(result.outfile).to.contain('chart.svg');
+    expect(result.outFile).to.contain('chart.svg');
   });
 
   it('should accept outfile name to write svg file', async () => {
-    const result = await jsdomExporter({ options: { }, outfile: 'custom-file.svg' });
+    const result = await jsdomExporter({ chartConfiguration: { }, outFile: 'custom-file.svg' });
 
-    expect(result.outfile).to.contain('custom-file.svg');
+    expect(result.outFile).to.contain('custom-file.svg');
   });
 
   it('should accept width/height as exporting options', async () => {
-    const configuration = { options: {}, exportOptions: { width: 100, height: 100 } };
+    const configuration = { chartConfiguration: {}, exportOptions: { width: 100, height: 100 } };
     const result = await jsdomExporter(configuration);
 
     const document = parseSVG(result.svgString);
@@ -53,7 +53,7 @@ describe('jsdom-exporter', () => {
 
   it('should accept theme as exporting options', async () => {
     const configuration = {
-      options: {}, exportOptions: {
+      chartConfiguration: {}, exportOptions: {
         theme: {
           chart: {
             backgroundColor: "red"
@@ -69,7 +69,7 @@ describe('jsdom-exporter', () => {
   });
 
   it('should accept lang as exporting options', async () => {
-    const configuration = { options: {}, exportOptions: { lang: { noData: 'custom message' } } };
+    const configuration = { chartConfiguration: {}, exportOptions: { lang: { noData: 'custom message' } } };
     const result = await jsdomExporter(configuration);
     const document = parseSVG(result.svgString);
 
@@ -83,7 +83,7 @@ describe('timeline', () => {
   afterEach(() => mock.restore());
 
   it('should render stock chart if isTimeline is set to `true`', async () => {
-    const result = await jsdomExporter({ options: { }, isTimeline: true });
+    const result = await jsdomExporter({ chartConfiguration: { }, isTimeline: true });
     const document = parseSVG(result.svgString);
 
     expect(document.querySelector('.highcharts-navigator')).to.be.not.null;

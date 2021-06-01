@@ -148,8 +148,8 @@ doc.createElementNS = (ns, tagName) => {
  * @typedef ExportConfiguration
  *
  * @property {boolean} isTimeline
- * @property {object} options
- * @property {string} outfile
+ * @property {object} chartConfiguration
+ * @property {string} outFile
  * @property {ExportOptions} exportOptions
  */
 
@@ -159,9 +159,7 @@ doc.createElementNS = (ns, tagName) => {
  * @typedef SVGResult
  *
  * @property {string} svgString
- * @property {length} bytes
- * @property {string} outfile
- * @property {string} time
+ * @property {string} outFile
  */
 
 /**
@@ -172,9 +170,8 @@ doc.createElementNS = (ns, tagName) => {
  *
  * @returns {Promise<SVGResult>} Object with the result of the export
  */
-const jsdomExporter = (configuration) => {
+const jsdomExporter = ({ isTimeline = false, chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
     return new Promise((resolve, reject) => {
-        const { isTimeline = false, options, outfile = 'chart.svg', exportOptions } = configuration;
 
         // Disable all animation
         Highcharts.setOptions({
@@ -202,40 +199,34 @@ const jsdomExporter = (configuration) => {
                     ...exportOptions.height && { height: exportOptions.height },
                     ...exportOptions.width && { width: exportOptions.width },
                 };
-                options.chart = { ...options.chart, ...chartOptions };
+                chartConfiguration.chart = { ...chartConfiguration.chart, ...chartOptions };
             }
         }
 
         let chart;
 
         // Generate the chart into the container
-        let start = Date.now();
         try {
             const constr = isTimeline ? 'stockChart' : 'chart';
             chart = Highcharts[constr](
                 'container',
-                { ...options, exporting: { enabled: false } }
+                { ...chartConfiguration, exporting: { enabled: false } }
             );
         } catch (e) {
-            console.log('error')
             reject(e);
         }
-        let time = Date.now() - start;
 
         let svg = chart.sanitizeSVG(
             chart.container.innerHTML
         );
-        fs.writeFile(__dirname + '/' + outfile, svg, function (err) {
-
+        fs.writeFile(__dirname + '/' + outFile, svg, function (err) {
             if (err) {
                 reject(err);
             }
 
             resolve({
                 svgString: svg,
-                bytes: svg.length,
-                outfile: __dirname + '/' + outfile,
-                time: time
+                outFile: __dirname + '/' + outFile
             });
         });
     });
