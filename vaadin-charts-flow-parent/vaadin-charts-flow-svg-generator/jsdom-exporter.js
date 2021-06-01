@@ -131,14 +131,47 @@ doc.createElementNS = (ns, tagName) => {
     return elem;
 };
 
-module.exports = ({
-    isTimeline = false,
-    options,
-    outfile = 'chart.svg'
-}) => {
+/**
+ * ExportOptions
+ *
+ * @typedef ExportOptions
+ *
+ * @property {object} theme
+ * @property {object} lang
+ * @property {string} width
+ * @property {string} height
+ * @property {boolean} isTimeline
+ */
+
+/**
+ * ExportConfiguration
+ *
+ * @typedef ExportConfiguration
+ *
+ * @property {object} chartConfiguration
+ * @property {string} outFile
+ * @property {ExportOptions} exportOptions
+ */
+
+/**
+ * SVGResult
+ *
+ * @typedef SVGResult
+ *
+ * @property {string} svgString
+ * @property {string} outFile
+ */
+
+/**
+ * Function to export SVG a string containing a chart based
+ * on the configuration provided
+ *
+ * @param {ExportConfiguration} configuration
+ *
+ * @returns {Promise<SVGResult>} Object with the result of the export
+ */
+const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
     return new Promise((resolve, reject) => {
-
-
 
         // Disable all animation
         Highcharts.setOptions({
@@ -152,36 +185,54 @@ module.exports = ({
             }
         });
 
+        let isTimeline = false;
+        if (exportOptions) {
+            if (exportOptions.theme) {
+                Highcharts.setOptions(exportOptions.theme);
+            }
+
+            if (exportOptions.lang) {
+                Highcharts.setOptions({ lang: exportOptions.lang })
+            }
+
+            if (exportOptions.height || exportOptions.width) {
+                const chartOptions = {
+                    ...exportOptions.height && { height: exportOptions.height },
+                    ...exportOptions.width && { width: exportOptions.width },
+                };
+                chartConfiguration.chart = { ...chartConfiguration.chart, ...chartOptions };
+            }
+
+            isTimeline = exportOptions.isTimeline;
+        }
+
         let chart;
 
         // Generate the chart into the container
-        let start = Date.now();
         try {
             const constr = isTimeline ? 'stockChart' : 'chart';
             chart = Highcharts[constr](
                 'container',
-                { ...options, exporting: { enabled: false } }
+                { ...chartConfiguration, exporting: { enabled: false } }
             );
         } catch (e) {
             reject(e);
         }
-        let time = Date.now() - start;
 
         let svg = chart.sanitizeSVG(
             chart.container.innerHTML
         );
-        fs.writeFile(__dirname + '/' + outfile, svg, function (err) {
-
+        fs.writeFile(__dirname + '/' + outFile, svg, function (err) {
             if (err) {
                 reject(err);
             }
 
             resolve({
                 svgString: svg,
-                bytes: svg.length,
-                outfile: __dirname + '/' + outfile,
-                time: time
+                outFile: __dirname + '/' + outFile
             });
         });
     });
 };
+
+module.exports = jsdomExporter;
