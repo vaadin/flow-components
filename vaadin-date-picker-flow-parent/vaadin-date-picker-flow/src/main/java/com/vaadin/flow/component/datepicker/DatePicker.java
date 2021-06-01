@@ -374,13 +374,16 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         runBeforeClientResponse(ui -> {
             JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
             // Remove null values to prevent errors
-            for(String key : i18nObject.keys()) {
-                if(i18nObject.get(key).getType() == JsonType.NULL) {
+            for (String key : i18nObject.keys()) {
+                if (i18nObject.get(key).getType() == JsonType.NULL) {
                     i18nObject.remove(key);
                 }
             }
-            // Assign new I18N object to WC, keep current values if they are not defined in the new object
-            getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);", i18nObject);
+            // Assign new I18N object to WC, keep current values if they are not
+            // defined in the new object
+            getElement().executeJs(
+                    "this.i18n = Object.assign({}, this.i18n, $0);",
+                    i18nObject);
         });
     }
 

@@ -17,17 +17,17 @@
 
 package com.vaadin.flow.component.datepicker;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @TestPath("vaadin-date-picker/date-picker-i18n")
 public class DatePickerI18nIT extends AbstractComponentIT {
@@ -55,40 +55,54 @@ public class DatePickerI18nIT extends AbstractComponentIT {
         assertI18n(datePicker, TestI18N.FINNISH);
     }
 
-    private void assertI18n(DatePickerElement datePicker, DatePicker.DatePickerI18n i18n) {
-        // Set to date in January
+    private void assertI18n(DatePickerElement datePicker,
+            DatePicker.DatePickerI18n i18n) {
+
+        // Set to date in January and open
         datePicker.setDate(LocalDate.of(2021, 1, 1));
         datePicker.open();
 
+        DatePickerElement.OverlayContentElement overlayContent = datePicker
+                .getOverlayContent();
+        List<DatePickerElement.MonthCalendarElement> visibleMonthCalendars = overlayContent
+                .getVisibleMonthCalendars();
+
         // Look for translation for January
         String januaryText = i18n.getMonthNames().get(0);
-        WebElement januaryMonthCalender = getMonthCalendarWithName(
-                getVisibleMonthCalendars(), januaryText);
+        Optional<DatePickerElement.MonthCalendarElement> maybeJanuaryMonthCalender = getMonthCalendarWithName(
+                visibleMonthCalendars, januaryText);
 
-        Assert.assertNotNull(
+        Assert.assertTrue(
                 String.format("Can not find month with name: %s", januaryText),
-                januaryMonthCalender);
+                maybeJanuaryMonthCalender.isPresent());
 
         // Verify week days translations
-        List<WebElement> weekdays = getWeekdays(januaryMonthCalender);
+        DatePickerElement.MonthCalendarElement januaryMonthCalender = maybeJanuaryMonthCalender
+                .get();
+        List<DatePickerElement.WeekdayElement> weekdays = januaryMonthCalender
+                .getWeekdays();
 
         for (String weekdayShortName : i18n.getWeekdaysShort()) {
-            WebElement weekday = getWeekdayByName(weekdays, weekdayShortName);
+            Optional<DatePickerElement.WeekdayElement> weekday = getWeekdayByName(
+                    weekdays, weekdayShortName);
 
-            Assert.assertNotNull(
+            Assert.assertTrue(
                     String.format("Can not find week day with short name: %s",
-                            weekdayShortName), weekday);
+                            weekdayShortName),
+                    weekday.isPresent());
         }
 
         // Verify buttons
-        WebElement todayButton = getTodayButton();
-        WebElement cancelButton = getCancelButton();
+        ButtonElement todayButton = overlayContent.getTodayButton();
+        ButtonElement cancelButton = overlayContent.getCancelButton();
 
-        Assert.assertTrue(String.format("Today button does not contain: %s",
-                i18n.getToday()),
+        Assert.assertTrue(
+                String.format("Today button does not contain: %s",
+                        i18n.getToday()),
                 todayButton.getText().contains(i18n.getToday()));
-        Assert.assertTrue(String.format("Cancel button does not contain: %s",
-                i18n.getCancel()),
+        Assert.assertTrue(
+                String.format("Cancel button does not contain: %s",
+                        i18n.getCancel()),
                 cancelButton.getText().contains(i18n.getCancel()));
     }
 
@@ -106,48 +120,17 @@ public class DatePickerI18nIT extends AbstractComponentIT {
         return $("button").id(DatePickerI18nPage.ID_SET_FINNISH_BUTTON);
     }
 
-    private WebElement getOverlayContent() {
-        TestBenchElement overlay = $("vaadin-date-picker-overlay")
-                .waitForFirst();
-        WebElement content = findInShadowRoot(overlay, By.id("content")).get(0);
-        WebElement overlayContent = findInShadowRoot(content,
-                By.id("overlay-content")).get(0);
-
-        return overlayContent;
-    }
-
-    private List<WebElement> getVisibleMonthCalendars() {
-        return findInShadowRoot(getOverlayContent(),
-                By.tagName("vaadin-month-calendar"));
-    }
-
-    private WebElement getMonthCalendarWithName(List<WebElement> monthCalendars,
+    private Optional<DatePickerElement.MonthCalendarElement> getMonthCalendarWithName(
+            List<DatePickerElement.MonthCalendarElement> monthCalendars,
             String monthName) {
-        return monthCalendars.stream().filter(month -> {
-            WebElement header = findInShadowRoot(month,
-                    By.cssSelector("[part=month-header]")).get(0);
-            return header.getText().contains(monthName);
-        }).findFirst().orElse(null);
+        return monthCalendars.stream()
+                .filter(month -> month.getHeaderText().contains(monthName))
+                .findFirst();
     }
 
-    private List<WebElement> getWeekdays(WebElement monthCalendar) {
-        return findInShadowRoot(monthCalendar,
-                By.cssSelector("[part=weekday]"));
-    }
-
-    private WebElement getWeekdayByName(List<WebElement> weekdays,
-            String name) {
+    private Optional<DatePickerElement.WeekdayElement> getWeekdayByName(
+            List<DatePickerElement.WeekdayElement> weekdays, String name) {
         return weekdays.stream().filter(e -> e.getText().contains(name))
-                .findFirst().orElse(null);
-    }
-
-    private WebElement getTodayButton() {
-        return findInShadowRoot(getOverlayContent(),
-                By.cssSelector("[part=today-button]")).get(0);
-    }
-
-    private WebElement getCancelButton() {
-        return findInShadowRoot(getOverlayContent(),
-                By.cssSelector("[part=cancel-button]")).get(0);
+                .findFirst();
     }
 }
