@@ -140,6 +140,7 @@ doc.createElementNS = (ns, tagName) => {
  * @property {object} lang
  * @property {string} width
  * @property {string} height
+ * @property {boolean} isTimeline
  */
 
 /**
@@ -147,7 +148,6 @@ doc.createElementNS = (ns, tagName) => {
  *
  * @typedef ExportConfiguration
  *
- * @property {boolean} isTimeline
  * @property {object} chartConfiguration
  * @property {string} outFile
  * @property {ExportOptions} exportOptions
@@ -170,7 +170,7 @@ doc.createElementNS = (ns, tagName) => {
  *
  * @returns {Promise<SVGResult>} Object with the result of the export
  */
-const jsdomExporter = ({ isTimeline = false, chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
+const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
     return new Promise((resolve, reject) => {
 
         // Disable all animation
@@ -185,6 +185,7 @@ const jsdomExporter = ({ isTimeline = false, chartConfiguration, outFile = 'char
             }
         });
 
+        let isTimeline = false;
         if (exportOptions) {
             if (exportOptions.theme) {
                 Highcharts.setOptions(exportOptions.theme);
@@ -201,6 +202,8 @@ const jsdomExporter = ({ isTimeline = false, chartConfiguration, outFile = 'char
                 };
                 chartConfiguration.chart = { ...chartConfiguration.chart, ...chartOptions };
             }
+
+            isTimeline = exportOptions.isTimeline;
         }
 
         let chart;

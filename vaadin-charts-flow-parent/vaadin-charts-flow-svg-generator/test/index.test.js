@@ -83,7 +83,7 @@ describe('timeline', () => {
   afterEach(() => mock.restore());
 
   it('should render stock chart if isTimeline is set to `true`', async () => {
-    const result = await jsdomExporter({ chartConfiguration: { }, isTimeline: true });
+    const result = await jsdomExporter({ chartConfiguration: { }, exportOptions: { isTimeline: true } });
     const document = parseSVG(result.svgString);
 
     expect(document.querySelector('.highcharts-navigator')).to.be.not.null;
