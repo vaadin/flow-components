@@ -38,15 +38,13 @@ public class DatePickerI18nPage extends VerticalLayout {
         DatePicker dynamicI18nDatePicker = new DatePicker();
         dynamicI18nDatePicker.setId(ID_DYNAMIC_I18N_DATE_PICKER);
 
-        NativeButton setFinnishButton = new NativeButton("Set Finnish", e -> {
-            dynamicI18nDatePicker.setI18n(TestI18N.FINNISH);
-        });
+        NativeButton setFinnishButton = new NativeButton("Set Finnish",
+                e -> dynamicI18nDatePicker.setI18n(TestI18N.FINNISH));
         setFinnishButton.setId(ID_SET_FINNISH_BUTTON);
 
         NativeButton setPartialI18nButton = new NativeButton(
-                "Set partial I18N config", e -> {
-                    dynamicI18nDatePicker.setI18n(TestI18N.FINNISH_PARTIAL);
-                });
+                "Set partial I18N config",
+                e -> dynamicI18nDatePicker.setI18n(TestI18N.FINNISH_PARTIAL));
         setPartialI18nButton.setId(ID_SET_PARTIAL_I18N_BUTTON);
 
         add(new H1("Initial I18N"), initialI18nDatePicker);

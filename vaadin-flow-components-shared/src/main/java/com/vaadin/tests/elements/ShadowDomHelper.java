@@ -80,9 +80,9 @@ public class ShadowDomHelper {
         ShadowDomElementWrapper wrapper = new ShadowDomElementWrapper(
                 webComponent, this.commandExecutor);
 
-        wrapper.waitUntil((driver) -> wrapper.getCommandExecutor()
-                .executeScript("return arguments[0].shadowRoot",
-                        new Object[] { wrapper }) != null);
+        wrapper.waitUntil(driver -> wrapper.getCommandExecutor().executeScript(
+                "return arguments[0].shadowRoot",
+                new Object[] { wrapper }) != null);
         TestBenchElement shadowRoot = (TestBenchElement) wrapper
                 .getCommandExecutor()
                 .executeScript("return arguments[0].shadowRoot",
@@ -101,6 +101,7 @@ public class ShadowDomHelper {
             super(webElement, commandExecutor);
         }
 
+        @Override
         protected <T> T waitUntil(ExpectedCondition<T> condition) {
             return super.waitUntil(condition);
         }
