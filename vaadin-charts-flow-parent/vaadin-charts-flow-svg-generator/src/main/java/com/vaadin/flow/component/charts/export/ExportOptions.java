@@ -1,25 +1,23 @@
 package com.vaadin.flow.component.charts.export;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 
 /**
- * <p>Configuration settings for exporting charts in the server.</p>
+ * <p>Optional settings for exporting charts in the server.</p>
  *
  * @since 21.0
  */
-public class ExportConfiguration extends AbstractConfigurationObject {
+public class ExportOptions extends AbstractConfigurationObject {
 
-    @JsonUnwrapped
     private Theme theme;
     private Lang lang;
-    private Number height;
     private Number width;
+    private Number height;
+    private boolean timeline;
 
-    public ExportConfiguration() {
+    public ExportOptions() {
         super();
     }
 
@@ -28,7 +26,7 @@ public class ExportConfiguration extends AbstractConfigurationObject {
         return theme;
     }
 
-    public ExportConfiguration theme(Theme theme) {
+    public ExportOptions theme(Theme theme) {
         this.theme = theme;
         return this;
     }
@@ -41,7 +39,7 @@ public class ExportConfiguration extends AbstractConfigurationObject {
         return lang;
     }
 
-    public ExportConfiguration lang(Lang lang) {
+    public ExportOptions lang(Lang lang) {
         this.lang = lang;
         return this;
     }
@@ -50,11 +48,24 @@ public class ExportConfiguration extends AbstractConfigurationObject {
         this.lang = lang;
     }
 
+    public Number getWidth() {
+        return width;
+    }
+
+    public ExportOptions width(Number width) {
+        this.width = width;
+        return this;
+    }
+
+    public void setWidth(Number width) {
+        this.width = width;
+    }
+
     public Number getHeight() {
         return height;
     }
 
-    public ExportConfiguration height(Number height) {
+    public ExportOptions height(Number height) {
         this.height = height;
         return this;
     }
@@ -63,17 +74,17 @@ public class ExportConfiguration extends AbstractConfigurationObject {
         this.height = height;
     }
 
-    public Number getWidth() {
-        return width;
+    public boolean isTimeline() {
+        return timeline;
     }
 
-    public ExportConfiguration width(Number width) {
-        this.width = width;
+    public ExportOptions withTimeline(boolean withTimeline) {
+        this.timeline = withTimeline;
         return this;
     }
 
-    public void setWidth(Number width) {
-        this.width = width;
+    public void setTimeline(boolean timeline) {
+        this.timeline = timeline;
     }
-    //</editor-fold>
+//</editor-fold>
 }

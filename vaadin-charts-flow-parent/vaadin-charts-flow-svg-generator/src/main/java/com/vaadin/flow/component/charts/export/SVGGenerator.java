@@ -57,8 +57,9 @@ public class SVGGenerator implements AutoCloseable {
      */
     private final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
             + "exporter({\n"
-            + "options: %s,\n"
+            + "chartConfiguration: %s,\n"
             + "outfile: '%s',\n"
+            + "exportOptions: %s,\n"
             + "})";
 
     /**
@@ -111,34 +112,32 @@ public class SVGGenerator implements AutoCloseable {
      * @throws InterruptedException  if the rendering process gets interrupted.
      */
     public String generate(Configuration chartConfiguration) throws IllegalStateException, IOException, InterruptedException {
-        ExportConfiguration defaultExportConfiguration = new ExportConfiguration();
-        // TODO setup default exporting configurations
-        return generate(chartConfiguration, defaultExportConfiguration);
+        return generate(chartConfiguration, null);
     }
 
     /**
      * Generate an SVG string that can be used to render a chart with data from
      * a {@link Configuration} instance.
      *
-     * @param chartConfiguration
-     * @param exportConfiguration
-     * @return
+     * @param chartConfiguration the {@link Configuration} with the chart's data.
+     * @param exportOptions      optional exporting options to customize the result.
+     * @return an SVG string resulting from the {@link Configuration}, customized as per the {@link ExportOptions}.
      * @throws NullPointerException  when passing a <code>null</code> configuration.
      * @throws IllegalStateException when called on a closed generator.
      * @throws IOException           if anything happens using or allocating resources to
      *                               virtually render the chart.
      * @throws InterruptedException  if the rendering process gets interrupted.
      */
-    public String generate(Configuration chartConfiguration, ExportConfiguration exportConfiguration) throws IllegalStateException, IOException, InterruptedException {
-        // TODO use exportConfiguration to handle customizable properties
+    public String generate(Configuration chartConfiguration, ExportOptions exportOptions) throws IllegalStateException, IOException, InterruptedException {
         if (isClosed()) {
             throw new IllegalStateException("This generator is already closed.");
         }
         Configuration config = Objects.requireNonNull(chartConfiguration, "Chart configuration must not be null.");
         String jsonConfig = ChartSerialization.toJSON(config);
+        String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
-        String command = String.format(SCRIPT_TEMPLATE, bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName);
+        String command = String.format(SCRIPT_TEMPLATE, bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName, jsonExportOptions);
 
         NodeRunner nodeRunner = new NodeRunner();
         nodeRunner.runJavascript(command);

@@ -9,7 +9,6 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class NodeRunner {
 
-    // TODO how to test this?
     public int runJavascript(String script) throws InterruptedException, IOException {
         FrontendTools tools = new FrontendTools("", () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
         String node = tools.getNodeExecutable();
