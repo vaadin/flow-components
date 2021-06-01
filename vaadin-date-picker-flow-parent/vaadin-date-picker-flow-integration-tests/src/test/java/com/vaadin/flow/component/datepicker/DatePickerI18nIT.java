@@ -20,10 +20,10 @@ package com.vaadin.flow.component.datepicker;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,10 +49,23 @@ public class DatePickerI18nIT extends AbstractComponentIT {
         datePicker.close();
 
         // Then override settings and assert that overlay has updated
-        WebElement setFinnishButton = getSetFinnishButton();
+        TestBenchElement setFinnishButton = getSetFinnishButton();
         setFinnishButton.click();
 
         assertI18n(datePicker, TestI18N.FINNISH);
+    }
+
+    @Test
+    public void testSetPartialI18nConfigShouldNotResultInError() {
+        open();
+
+        TestBenchElement setPartialI18nButton = getSetPartialI18nButton();
+        setPartialI18nButton.click();
+
+        DatePickerElement datePicker = getDynamicI18nDatePicker();
+        datePicker.open();
+
+        checkLogsForErrors();
     }
 
     private void assertI18n(DatePickerElement datePicker,
@@ -116,8 +129,12 @@ public class DatePickerI18nIT extends AbstractComponentIT {
                 .id(DatePickerI18nPage.ID_DYNAMIC_I18N_DATE_PICKER);
     }
 
-    private WebElement getSetFinnishButton() {
+    private TestBenchElement getSetFinnishButton() {
         return $("button").id(DatePickerI18nPage.ID_SET_FINNISH_BUTTON);
+    }
+
+    private TestBenchElement getSetPartialI18nButton() {
+        return $("button").id(DatePickerI18nPage.ID_SET_PARTIAL_I18N_BUTTON);
     }
 
     private Optional<DatePickerElement.MonthCalendarElement> getMonthCalendarWithName(
