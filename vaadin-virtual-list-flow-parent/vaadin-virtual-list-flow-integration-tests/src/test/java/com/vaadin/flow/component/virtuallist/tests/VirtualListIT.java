@@ -218,7 +218,7 @@ public class VirtualListIT extends AbstractComponentIT {
 
         for (int i = 0; i < items.size(); i++) {
             WebElement item = items.get(i);
-            Assert.assertEquals("label", item.getTagName());
+            Assert.assertEquals("div", item.getTagName());
             Assert.assertEquals("Item " + (i + 1),
                     item.getAttribute("innerHTML"));
         }

@@ -27,9 +27,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.javafaker.Faker;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -117,8 +117,8 @@ public class VirtualListViewPage extends Div {
             pictureContainer.setWidth("40px");
             pictureContainer.setHeight("40px");
 
-            Label name = new Label();
-            Label email = new Label();
+            Div name = new Div();
+            Div email = new Div();
             email.getStyle().set("fontSize", "13px");
 
 
@@ -173,7 +173,7 @@ public class VirtualListViewPage extends Div {
         list.setDataProvider(dataProvider);
 
         list.setId("list-of-strings-with-dataprovider");
-        add(new Label("List of books lazy loaded from the database"), list);
+        add(new Div(new Text("List of books lazy loaded from the database")), list);
     }
 
     private void createChuckNorrisFacts() {
@@ -277,8 +277,8 @@ public class VirtualListViewPage extends Div {
                 }));
 
         list.setId("using-events-with-templates");
-        add(new Label(
-                "Rank up/down your favorite Lord of the Rings characters"),
+        add(new Div(new Text(
+                "Rank up/down your favorite Lord of the Rings characters")),
                 list, new NativeButton("Reset", evt -> {
                     items.clear();
                     items.addAll(getLordOfTheRingsCharacters());
@@ -323,8 +323,8 @@ public class VirtualListViewPage extends Div {
         list.setId("disabled-list-with-templates");
         switchEnabled.setId("switch-enabled-state-string-list");
         add(
-                new Label(
-                        "Rank up/down your favorite Lord of the Rings characters"),
+                new Div(new Text(
+                        "Rank up/down your favorite Lord of the Rings characters")),
                 list, removalResult, switchEnabled);
     }
 
@@ -353,7 +353,7 @@ public class VirtualListViewPage extends Div {
         list.setId("list-of-people-with-dataprovider-and-component-renderer");
         switchEnabled.setId("switch-enabled-people-list");
         add(
-                new Label("List of people with grid layout"), list,
+                new Div(new Text("List of people with grid layout")), list,
                 switchEnabled);
     }
 

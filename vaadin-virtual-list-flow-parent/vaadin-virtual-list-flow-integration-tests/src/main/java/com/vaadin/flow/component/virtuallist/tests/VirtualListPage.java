@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -216,7 +216,7 @@ public class VirtualListPage extends Div {
         VirtualList<String> list = new VirtualList<>();
         list.setHeight("100px");
 
-        Label message = new Label();
+        Div message = new Div();
 
         DataProvider<String, ?> dataProvider = DataProvider
                 .fromCallbacks(query -> {
@@ -237,7 +237,7 @@ public class VirtualListPage extends Div {
         VirtualList<String> list = new VirtualList<>();
         list.setHeight("100px");
 
-        Label message = new Label();
+        Div message = new Div();
 
         List<String> items = new ArrayList<>(Arrays.asList("Clickable item 1",
                 "Clickable item 2", "Clickable item 3"));
@@ -266,9 +266,10 @@ public class VirtualListPage extends Div {
                 .collect(Collectors.toList());
 
         list.setRenderer(new ComponentRenderer<>(item -> {
-            Label label = new Label(item);
-            label.addClassName("component-rendered");
-            return label;
+            Div text = new Div(new Text(item));
+            text.addClassName("component-rendered");
+            text.setHeight("18px");
+            return text;
         }));
 
         list.setItems(items);
@@ -283,10 +284,10 @@ public class VirtualListPage extends Div {
 
         List<Person> people = createPeople(100);
 
-        list.setRenderer(new ComponentRenderer<Label, Person>(person -> {
-            Label label = new Label(person.getName());
-            label.addClassName("component-rendered");
-            return label;
+        list.setRenderer(new ComponentRenderer<Div, Person>(person -> {
+            Div text = new Div(new Text(person.getName()));
+            text.addClassName("component-rendered");
+            return text;
         }));
 
         list.setItems(people);
@@ -300,9 +301,9 @@ public class VirtualListPage extends Div {
     }
 
     private void createDetachableList() {
-        Div container1 = new Div(new Label("Container 1"));
+        Div container1 = new Div(new Text("Container 1"));
         container1.setId("detachable-list-container-1");
-        Div container2 = new Div(new Label("Container 2"));
+        Div container2 = new Div(new Text("Container 2"));
         container2.setId("detachable-list-container-2");
 
         VirtualList<Person> list = new VirtualList<>();
