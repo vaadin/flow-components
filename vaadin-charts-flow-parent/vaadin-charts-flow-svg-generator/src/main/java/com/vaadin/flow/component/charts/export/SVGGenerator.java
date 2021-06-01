@@ -21,6 +21,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
@@ -87,8 +90,7 @@ public class SVGGenerator implements AutoCloseable {
             Path internalBundlePath = Paths.get(getClass().getResource(INTERNAL_BUNDLE_PATH).toURI());
             Files.copy(internalBundlePath, bundleTempPath);
         } catch (URISyntaxException e) {
-            // TODO the str used to build the URI is a constant we know is valid
-            // TODO What to do if it suddenly becomes invalid?
+            // TODO this should never happen, what to do here, maybe a log message?
         }
     }
 
