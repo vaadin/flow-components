@@ -111,27 +111,44 @@ public class SVGGenerator implements AutoCloseable {
      * @throws InterruptedException  if the rendering process gets interrupted.
      */
     public String generate(Configuration chartConfiguration) throws IllegalStateException, IOException, InterruptedException {
+        ExportConfiguration defaultExportConfiguration = new ExportConfiguration();
+        // TODO setup default exporting configurations
+        return generate(chartConfiguration, defaultExportConfiguration);
+    }
+
+    /**
+     * Generate an SVG string that can be used to render a chart with data from
+     * a {@link Configuration} instance.
+     *
+     * @param chartConfiguration
+     * @param exportConfiguration
+     * @return
+     * @throws NullPointerException  when passing a <code>null</code> configuration.
+     * @throws IllegalStateException when called on a closed generator.
+     * @throws IOException           if anything happens using or allocating resources to
+     *                               virtually render the chart.
+     * @throws InterruptedException  if the rendering process gets interrupted.
+     */
+    public String generate(Configuration chartConfiguration, ExportConfiguration exportConfiguration) throws IllegalStateException, IOException, InterruptedException {
+        // TODO use exportConfiguration to handle customizable properties
         if (isClosed()) {
             throw new IllegalStateException("This generator is already closed.");
         }
         Configuration config = Objects.requireNonNull(chartConfiguration, "Chart configuration must not be null.");
         String jsonConfig = ChartSerialization.toJSON(config);
-        // FIXME auto generate unique chart name
-        String chartFileName = "chart.svg";
+        Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
+        String chartFileName = chartFilePath.toFile().getName();
         String command = String.format(SCRIPT_TEMPLATE, bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName);
 
         NodeRunner nodeRunner = new NodeRunner();
         nodeRunner.runJavascript(command);
-        // when script completes, chart.svg file should exist
-        Path chartPath = Paths.get(tempDirPath.toString(), chartFileName);
+        // when script completes, the chart svg file should exist
         try {
-            return new String(Files.readAllBytes(chartPath));
+            return new String(Files.readAllBytes(chartFilePath));
         } finally {
-            Files.delete(chartPath);
+            Files.delete(chartFilePath);
         }
     }
-
-    // TODO overload generate(Configuration) method to provide custom theme and other extras
 
     /**
      * <p>Check if this generator is closed.</p>

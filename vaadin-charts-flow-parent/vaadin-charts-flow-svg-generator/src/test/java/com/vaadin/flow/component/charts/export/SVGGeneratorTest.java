@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -57,7 +58,7 @@ public class SVGGeneratorTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throwExceptionOnClosedGenerator() throws IOException, InterruptedException {
+    public void throwIllegalStateExceptionOnClosedGenerator() throws IOException, InterruptedException {
         svgGenerator.close();
         // it should check to see if the generator is closed before it checks if the config is null
         svgGenerator.generate(null);
@@ -87,6 +88,14 @@ public class SVGGeneratorTest {
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
     }
+
+    @Test
+    @Ignore
+    public void exportWithDefaultConfiguration() {}
+
+    @Test
+    @Ignore
+    public void exportWithCustomExportConfiguration() {}
 
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();
@@ -121,11 +130,11 @@ public class SVGGeneratorTest {
     }
 
     /**
-     * Generated SVG documents have some elements with an "id" attribute which
-     * is hard to match to a specific expected value. This method replaces those
-     * Ids with simple, predictable values. First one will be replaced by "id-0"
-     * and all others just add 1 from the previous. All mentions of the same id
-     * will also be replaced.
+     * Generated SVG documents have some elements with an "id" attribute having
+     * a value that is hard to predict and match to any specific expected value.
+     * This method replaces those Ids with simple, predictable values. First one
+     * will be replaced by "id-0" and all others just add 1 from the previous.
+     * All mentions of the same id will also be replaced.
      *
      * @param svg the string representation of the svg with Ids to replace.
      * @return the same svg string but with all ids replaced with a predictable
