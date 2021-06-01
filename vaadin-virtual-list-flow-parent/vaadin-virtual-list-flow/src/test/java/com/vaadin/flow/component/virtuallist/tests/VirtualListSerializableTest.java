@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.ironlist.tests;
+package com.vaadin.flow.component.virtuallist.tests;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
