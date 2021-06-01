@@ -21,9 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
@@ -35,35 +32,38 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  * automatically.
  * </p>
  * <br />
- * <p>Example usage:</p>
- * <pre><code>
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <pre>
+ * <code>
  *     Configuration configuration = new Configuration();
  *     // ...
  *     try (SVGGenerator generator = new SVGGenerator()) {
  *         String svg = generator.generate(configuration);
  *     }
- * </code></pre>
+ * </code>
+ * </pre>
  *
  * @since 21.0
  */
 public class SVGGenerator implements AutoCloseable {
 
     /**
-     * Pathname to the internal exporter bundle file. We use it to copy
-     * its contents to a temporary file that can be then accessed by a NodeJS
+     * Pathname to the internal exporter bundle file. We use it to copy its
+     * contents to a temporary file that can be then accessed by a NodeJS
      * process.
      */
-    private final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js".replace("/", FileSystems.getDefault().getSeparator());
+    private final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js"
+            .replace("/", FileSystems.getDefault().getSeparator());
     /**
      * String template for the script to be run with NodeJS to generate an svg
      * file which contents can be then read by this class.
      */
     private final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
-            + "exporter({\n"
-            + "chartConfiguration: %s,\n"
-            + "outfile: '%s',\n"
-            + "exportOptions: %s,\n"
-            + "})";
+            + "exporter({\n" + "chartConfiguration: %s,\n" + "outfile: '%s',\n"
+            + "exportOptions: %s,\n" + "})";
 
     /**
      * Path to the temporary directory used to hold the temporary bundle file
@@ -81,16 +81,19 @@ public class SVGGenerator implements AutoCloseable {
      * Creates a new instance of {@link SVGGenerator} which allocates resources
      * used to transform a {@link Configuration} object to an SVG string.
      *
-     * @throws IOException if there's any issue allocating resources needed.
+     * @throws IOException
+     *             if there's any issue allocating resources needed.
      */
     public SVGGenerator() throws IOException {
         tempDirPath = Files.createTempDirectory("svg-export");
         bundleTempPath = tempDirPath.resolve("export-svg-bundle.js");
         try {
-            Path internalBundlePath = Paths.get(getClass().getResource(INTERNAL_BUNDLE_PATH).toURI());
+            Path internalBundlePath = Paths
+                    .get(getClass().getResource(INTERNAL_BUNDLE_PATH).toURI());
             Files.copy(internalBundlePath, bundleTempPath);
         } catch (URISyntaxException e) {
-            // TODO this should never happen, what to do here, maybe a log message?
+            // TODO this should never happen, what to do here, maybe a log
+            // message?
         }
     }
 
@@ -105,15 +108,21 @@ public class SVGGenerator implements AutoCloseable {
      * Generate an SVG string that can be used to render a chart with data from
      * a {@link Configuration} instance.
      *
-     * @param chartConfiguration the {@link Configuration} with the chart's data.
+     * @param chartConfiguration
+     *            the {@link Configuration} with the chart's data.
      * @return an SVG string resulting from the {@link Configuration}.
-     * @throws NullPointerException  when passing a <code>null</code> configuration.
-     * @throws IllegalStateException when called on a closed generator.
-     * @throws IOException           if anything happens using or allocating resources to
-     *                               virtually render the chart.
-     * @throws InterruptedException  if the rendering process gets interrupted.
+     * @throws NullPointerException
+     *             when passing a <code>null</code> configuration.
+     * @throws IllegalStateException
+     *             when called on a closed generator.
+     * @throws IOException
+     *             if anything happens using or allocating resources to
+     *             virtually render the chart.
+     * @throws InterruptedException
+     *             if the rendering process gets interrupted.
      */
-    public String generate(Configuration chartConfiguration) throws IllegalStateException, IOException, InterruptedException {
+    public String generate(Configuration chartConfiguration)
+            throws IllegalStateException, IOException, InterruptedException {
         return generate(chartConfiguration, null);
     }
 
@@ -121,25 +130,38 @@ public class SVGGenerator implements AutoCloseable {
      * Generate an SVG string that can be used to render a chart with data from
      * a {@link Configuration} instance.
      *
-     * @param chartConfiguration the {@link Configuration} with the chart's data.
-     * @param exportOptions      optional exporting options to customize the result.
-     * @return an SVG string resulting from the {@link Configuration}, customized as per the {@link ExportOptions}.
-     * @throws NullPointerException  when passing a <code>null</code> configuration.
-     * @throws IllegalStateException when called on a closed generator.
-     * @throws IOException           if anything happens using or allocating resources to
-     *                               virtually render the chart.
-     * @throws InterruptedException  if the rendering process gets interrupted.
+     * @param chartConfiguration
+     *            the {@link Configuration} with the chart's data.
+     * @param exportOptions
+     *            optional exporting options to customize the result.
+     * @return an SVG string resulting from the {@link Configuration},
+     *         customized as per the {@link ExportOptions}.
+     * @throws NullPointerException
+     *             when passing a <code>null</code> configuration.
+     * @throws IllegalStateException
+     *             when called on a closed generator.
+     * @throws IOException
+     *             if anything happens using or allocating resources to
+     *             virtually render the chart.
+     * @throws InterruptedException
+     *             if the rendering process gets interrupted.
      */
-    public String generate(Configuration chartConfiguration, ExportOptions exportOptions) throws IllegalStateException, IOException, InterruptedException {
+    public String generate(Configuration chartConfiguration,
+            ExportOptions exportOptions)
+            throws IllegalStateException, IOException, InterruptedException {
         if (isClosed()) {
-            throw new IllegalStateException("This generator is already closed.");
+            throw new IllegalStateException(
+                    "This generator is already closed.");
         }
-        Configuration config = Objects.requireNonNull(chartConfiguration, "Chart configuration must not be null.");
+        Configuration config = Objects.requireNonNull(chartConfiguration,
+                "Chart configuration must not be null.");
         String jsonConfig = ChartSerialization.toJSON(config);
         String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
-        String command = String.format(SCRIPT_TEMPLATE, bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName, jsonExportOptions);
+        String command = String.format(SCRIPT_TEMPLATE,
+                bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName,
+                jsonExportOptions);
 
         NodeRunner nodeRunner = new NodeRunner();
         nodeRunner.runJavascript(command);
@@ -152,9 +174,12 @@ public class SVGGenerator implements AutoCloseable {
     }
 
     /**
-     * <p>Check if this generator is closed.</p>
+     * <p>
+     * Check if this generator is closed.
+     * </p>
      *
-     * @return <code>true</code> if the generator is closed, <code>false</code> otherwise.
+     * @return <code>true</code> if the generator is closed, <code>false</code>
+     *         otherwise.
      */
     public boolean isClosed() {
         return !Files.exists(tempDirPath);

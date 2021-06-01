@@ -5,7 +5,9 @@ import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 
 /**
- * <p>Optional settings for exporting charts in the server.</p>
+ * <p>
+ * Optional settings for exporting charts in the server.
+ * </p>
  *
  * @since 21.0
  */
@@ -21,7 +23,7 @@ public class ExportOptions extends AbstractConfigurationObject {
         super();
     }
 
-    //<editor-fold desc="Getters and setters">
+    // <editor-fold desc="Getters and setters">
     public Theme getTheme() {
         return theme;
     }
@@ -86,5 +88,5 @@ public class ExportOptions extends AbstractConfigurationObject {
     public void setTimeline(boolean timeline) {
         this.timeline = timeline;
     }
-//</editor-fold>
+    // </editor-fold>
 }

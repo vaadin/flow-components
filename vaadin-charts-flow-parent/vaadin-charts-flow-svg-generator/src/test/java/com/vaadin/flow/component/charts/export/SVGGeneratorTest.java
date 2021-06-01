@@ -53,14 +53,17 @@ public class SVGGeneratorTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void chartConfigurationMustNotBeNull() throws IOException, InterruptedException {
+    public void chartConfigurationMustNotBeNull()
+            throws IOException, InterruptedException {
         svgGenerator.generate(null);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throwIllegalStateExceptionOnClosedGenerator() throws IOException, InterruptedException {
+    public void throwIllegalStateExceptionOnClosedGenerator()
+            throws IOException, InterruptedException {
         svgGenerator.close();
-        // it should check to see if the generator is closed before it checks if the config is null
+        // it should check to see if the generator is closed before it checks if
+        // the config is null
         svgGenerator.generate(null);
     }
 
@@ -72,16 +75,20 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void generateSVGFromAnEmptyConfiguration() throws IOException, InterruptedException {
+    public void generateSVGFromAnEmptyConfiguration()
+            throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
         String svg = svgGenerator.generate(configuration);
-        Path emptyConfigChart = Paths.get("src", "test", "resources", "empty.svg");
-        String emptyChartContent = new String(Files.readAllBytes(emptyConfigChart));
+        Path emptyConfigChart = Paths.get("src", "test", "resources",
+                "empty.svg");
+        String emptyChartContent = new String(
+                Files.readAllBytes(emptyConfigChart));
         assertTrue(replaceIds(emptyChartContent).contains(replaceIds(svg)));
     }
 
     @Test
-    public void generateSVGFromValidConfiguration() throws IOException, InterruptedException {
+    public void generateSVGFromValidConfiguration()
+            throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         String svg = svgGenerator.generate(conf);
         Path pieChartPath = Paths.get("src", "test", "resources", "pie.svg");
@@ -91,11 +98,13 @@ public class SVGGeneratorTest {
 
     @Test
     @Ignore
-    public void exportWithDefaultConfiguration() {}
+    public void exportWithDefaultConfiguration() {
+    }
 
     @Test
     @Ignore
-    public void exportWithCustomExportConfiguration() {}
+    public void exportWithCustomExportConfiguration() {
+    }
 
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();
@@ -136,9 +145,10 @@ public class SVGGeneratorTest {
      * will be replaced by "id-0" and all others just add 1 from the previous.
      * All mentions of the same id will also be replaced.
      *
-     * @param svg the string representation of the svg with Ids to replace.
+     * @param svg
+     *            the string representation of the svg with Ids to replace.
      * @return the same svg string but with all ids replaced with a predictable
-     * pattern.
+     *         pattern.
      */
     private String replaceIds(String svg) {
         String regex = "id=\"[\\w-]+\"";
@@ -147,7 +157,8 @@ public class SVGGeneratorTest {
         int index = 0;
         while (matcher.find()) {
             String group = matcher.group();
-            svg = svg.replaceAll(group.substring(4, group.length() - 1), "id-" + index++);
+            svg = svg.replaceAll(group.substring(4, group.length() - 1),
+                    "id-" + index++);
         }
         return svg;
     }
