@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -155,6 +156,10 @@ public class SVGGeneratorTest {
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
     }
+
+    @Test
+    @Ignore
+    public void exportWithEnabledFunctions() {}
 
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();

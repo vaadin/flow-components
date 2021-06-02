@@ -17,7 +17,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     private Lang lang;
     private Number width;
     private Number height;
-    private boolean timeline;
+    private Boolean timeline;
+    private Boolean executeFunctions;
 
     public ExportOptions() {
         super();
@@ -28,22 +29,12 @@ public class ExportOptions extends AbstractConfigurationObject {
         return theme;
     }
 
-    public ExportOptions theme(Theme theme) {
-        this.theme = theme;
-        return this;
-    }
-
     public void setTheme(Theme theme) {
         this.theme = theme;
     }
 
     public Lang getLang() {
         return lang;
-    }
-
-    public ExportOptions lang(Lang lang) {
-        this.lang = lang;
-        return this;
     }
 
     public void setLang(Lang lang) {
@@ -54,11 +45,6 @@ public class ExportOptions extends AbstractConfigurationObject {
         return width;
     }
 
-    public ExportOptions width(Number width) {
-        this.width = width;
-        return this;
-    }
-
     public void setWidth(Number width) {
         this.width = width;
     }
@@ -67,26 +53,24 @@ public class ExportOptions extends AbstractConfigurationObject {
         return height;
     }
 
-    public ExportOptions height(Number height) {
-        this.height = height;
-        return this;
-    }
-
     public void setHeight(Number height) {
         this.height = height;
     }
 
-    public boolean isTimeline() {
+    public Boolean getTimeline() {
         return timeline;
     }
 
-    public ExportOptions withTimeline(boolean withTimeline) {
-        this.timeline = withTimeline;
-        return this;
+    public void setTimeline(Boolean timeline) {
+        this.timeline = timeline;
     }
 
-    public void setTimeline(boolean timeline) {
-        this.timeline = timeline;
+    public boolean getExecuteFunctions() {
+        return executeFunctions;
+    }
+
+    public void setExecuteFunctions(boolean executeFunctions) {
+        this.executeFunctions = executeFunctions;
     }
     // </editor-fold>
 }

@@ -114,7 +114,7 @@ public class SVGGenerator implements AutoCloseable {
      *             if the rendering process gets interrupted.
      */
     public String generate(Configuration chartConfiguration)
-            throws IllegalStateException, IOException, InterruptedException {
+            throws IOException, InterruptedException {
         return generate(chartConfiguration, null);
     }
 
@@ -139,8 +139,7 @@ public class SVGGenerator implements AutoCloseable {
      *             if the rendering process gets interrupted.
      */
     public String generate(Configuration chartConfiguration,
-            ExportOptions exportOptions) throws NullPointerException,
-            IllegalStateException, IOException, InterruptedException {
+            ExportOptions exportOptions) throws IOException, InterruptedException {
         if (isClosed()) {
             throw new IllegalStateException(
                     "This generator is already closed.");
