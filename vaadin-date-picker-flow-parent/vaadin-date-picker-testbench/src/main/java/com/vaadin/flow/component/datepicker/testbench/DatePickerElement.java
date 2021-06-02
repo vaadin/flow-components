@@ -15,19 +15,15 @@
  */
 package com.vaadin.flow.component.datepicker.testbench;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 import com.vaadin.testbench.elementsbase.Element;
-import com.vaadin.tests.elements.ShadowDomHelper;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import com.vaadin.flow.component.button.testbench.ButtonElement;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
@@ -38,91 +34,62 @@ public class DatePickerElement extends TestBenchElement
         implements HasLabel, HasHelper {
 
     public static class OverlayContentElement extends TestBenchElement {
-        public OverlayContentElement(WebElement webElement,
-                TestBenchCommandExecutor commandExecutor) {
-            super(webElement, commandExecutor);
-        }
-
         /**
          * Gets all visible month calendars that are currently rendered by the
          * infinite scroller in the overlay.
-         * 
+         *
          * @return
          */
         public List<MonthCalendarElement> getVisibleMonthCalendars() {
-            return new ShadowDomHelper(this.getCommandExecutor())
-                    .findElementsInShadowRoot(this,
-                            By.tagName("vaadin-month-calendar"))
-                    .stream()
-                    .map(el -> new MonthCalendarElement(el,
-                            this.getCommandExecutor()))
+            return this.$("vaadin-month-calendar").all().stream()
+                    .map(el -> el.wrap(MonthCalendarElement.class))
                     .collect(Collectors.toList());
         }
 
         /**
          * Gets the today button from the overlays toolbar
-         * 
+         *
          * @return
          */
         public ButtonElement getTodayButton() {
-            return new ShadowDomHelper(this.getCommandExecutor())
-                    .findElementInShadowRoot(this,
-                            By.cssSelector("[part=today-button]"))
-                    .wrap(ButtonElement.class);
+            return this.$(ButtonElement.class).attribute("part", "today-button")
+                    .first();
         }
 
         /**
          * Gets the cancel button from the overlays toolbar
-         * 
+         *
          * @return
          */
         public ButtonElement getCancelButton() {
-            return new ShadowDomHelper(this.getCommandExecutor())
-                    .findElementInShadowRoot(this,
-                            By.cssSelector("[part=cancel-button]"))
-                    .wrap(ButtonElement.class);
+            return this.$(ButtonElement.class)
+                    .attribute("part", "cancel-button").first();
         }
     }
 
     public static class MonthCalendarElement extends TestBenchElement {
-        public MonthCalendarElement(WebElement webElement,
-                TestBenchCommandExecutor commandExecutor) {
-            super(webElement, commandExecutor);
-        }
-
         /**
          * Gets the header text of the month calendar, e.g. `January 1999`
-         * 
+         *
          * @return
          */
         public String getHeaderText() {
-            return new ShadowDomHelper(this.getCommandExecutor())
-                    .findElementInShadowRoot(this,
-                            By.cssSelector("[part=month-header]"))
-                    .getText();
+            return this.$(TestBenchElement.class)
+                    .attribute("part", "month-header").first().getText();
         }
 
         /**
          * Gets the weekday headers that are rendered by the month calendar
-         * 
+         *
          * @return
          */
         public List<WeekdayElement> getWeekdays() {
-            return new ShadowDomHelper(this.getCommandExecutor())
-                    .findElementsInShadowRoot(this,
-                            By.cssSelector("[part=weekday]"))
-                    .stream()
-                    .map(el -> new WeekdayElement(el,
-                            this.getCommandExecutor()))
-                    .collect(Collectors.toList());
+            return this.$(WeekdayElement.class).attribute("part", "weekday")
+                    .all();
         }
     }
 
     public static class WeekdayElement extends TestBenchElement {
-        public WeekdayElement(WebElement webElement,
-                TestBenchCommandExecutor commandExecutor) {
-            super(webElement, commandExecutor);
-        }
     }
 
     /**
@@ -234,21 +201,12 @@ public class DatePickerElement extends TestBenchElement
      * Gets the content of the first date picker overlay on the page Should only
      * be used with a single date picker at a time, there is no check that the
      * overlay belongs to this specific date picker
-     * 
+     *
      * @return
      */
     public OverlayContentElement getOverlayContent() {
-        ShadowDomHelper shadowDomHelper = new ShadowDomHelper(
-                this.getCommandExecutor());
-
-        TestBenchElement overlay = this.$("vaadin-date-picker-overlay").onPage()
-                .waitForFirst();
-        WebElement content = shadowDomHelper.findElementInShadowRoot(overlay,
-                By.id("content"));
-        WebElement overlayContent = shadowDomHelper
-                .findElementInShadowRoot(content, By.id("overlay-content"));
-
-        return new OverlayContentElement(overlayContent,
-                this.getCommandExecutor());
+        return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
+                .$(TestBenchElement.class).id("content")
+                .$(OverlayContentElement.class).id("overlay-content");
     }
 }

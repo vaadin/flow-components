@@ -77,21 +77,22 @@ public class DatePickerI18nIT extends AbstractComponentIT {
 
         DatePickerElement.OverlayContentElement overlayContent = datePicker
                 .getOverlayContent();
-        List<DatePickerElement.MonthCalendarElement> visibleMonthCalendars = overlayContent
-                .getVisibleMonthCalendars();
 
         // Look for translation for January
         String januaryText = i18n.getMonthNames().get(0);
-        Optional<DatePickerElement.MonthCalendarElement> maybeJanuaryMonthCalender = getMonthCalendarWithName(
-                visibleMonthCalendars, januaryText);
 
-        Assert.assertTrue(
-                String.format("Can not find month with name: %s", januaryText),
-                maybeJanuaryMonthCalender.isPresent());
+        List<DatePickerElement.MonthCalendarElement> visibleMonthCalendars = overlayContent
+                .getVisibleMonthCalendars();
+
+        waitUntil((c) -> {
+            Optional<DatePickerElement.MonthCalendarElement> maybeJanuaryMonthCalender = getMonthCalendarWithName(
+                    visibleMonthCalendars, januaryText);
+            return maybeJanuaryMonthCalender.isPresent();
+        });
 
         // Verify week days translations
-        DatePickerElement.MonthCalendarElement januaryMonthCalender = maybeJanuaryMonthCalender
-                .get();
+        DatePickerElement.MonthCalendarElement januaryMonthCalender = getMonthCalendarWithName(
+                visibleMonthCalendars, januaryText).get();
         List<DatePickerElement.WeekdayElement> weekdays = januaryMonthCalender
                 .getWeekdays();
 
