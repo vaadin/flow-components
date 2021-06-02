@@ -29,7 +29,7 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  * Use instances of this class to generate SVG strings from chart
  * {@link Configuration} instances. You <b>must close the generator</b> when
  * you're done with it. You can use a try-with-resources block to close it
- * automatically.
+ * automatically. <b>You must have NodeJS installed for this to work</b>.
  * </p>
  * <br />
  * <p>
@@ -87,14 +87,8 @@ public class SVGGenerator implements AutoCloseable {
     public SVGGenerator() throws IOException {
         tempDirPath = Files.createTempDirectory("svg-export");
         bundleTempPath = tempDirPath.resolve("export-svg-bundle.js");
-        try {
-            Path internalBundlePath = Paths
-                    .get(getClass().getResource(INTERNAL_BUNDLE_PATH).toURI());
-            Files.copy(internalBundlePath, bundleTempPath);
-        } catch (URISyntaxException e) {
-            // TODO this should never happen, what to do here, maybe a log
-            // message?
-        }
+        Files.copy(getClass().getResourceAsStream(INTERNAL_BUNDLE_PATH), bundleTempPath);
+
     }
 
     @Override
@@ -182,6 +176,6 @@ public class SVGGenerator implements AutoCloseable {
      *         otherwise.
      */
     public boolean isClosed() {
-        return !Files.exists(tempDirPath);
+        return !tempDirPath.toFile().exists();
     }
 }
