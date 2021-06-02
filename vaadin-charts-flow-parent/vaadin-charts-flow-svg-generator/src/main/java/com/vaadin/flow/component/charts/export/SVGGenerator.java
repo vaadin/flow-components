@@ -14,11 +14,9 @@
 package com.vaadin.flow.component.charts.export;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -55,13 +53,13 @@ public class SVGGenerator implements AutoCloseable {
      * contents to a temporary file that can be then accessed by a NodeJS
      * process.
      */
-    private final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js"
+    private static final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js"
             .replace("/", FileSystems.getDefault().getSeparator());
     /**
      * String template for the script to be run with NodeJS to generate an svg
      * file which contents can be then read by this class.
      */
-    private final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
+    private static final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
             + "exporter({\n" + "chartConfiguration: %s,\n" + "outFile: '%s',\n"
             + "exportOptions: %s,\n" + "})";
 
@@ -88,7 +86,6 @@ public class SVGGenerator implements AutoCloseable {
         tempDirPath = Files.createTempDirectory("svg-export");
         bundleTempPath = tempDirPath.resolve("export-svg-bundle.js");
         Files.copy(getClass().getResourceAsStream(INTERNAL_BUNDLE_PATH), bundleTempPath);
-
     }
 
     @Override
@@ -142,7 +139,7 @@ public class SVGGenerator implements AutoCloseable {
      */
     public String generate(Configuration chartConfiguration,
             ExportOptions exportOptions)
-            throws IllegalStateException, IOException, InterruptedException {
+            throws NullPointerException, IllegalStateException, IOException, InterruptedException {
         if (isClosed()) {
             throw new IllegalStateException(
                     "This generator is already closed.");
