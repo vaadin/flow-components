@@ -104,46 +104,54 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithCustomWidth() throws IOException, InterruptedException {
+    public void exportWithCustomWidth()
+            throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         ExportOptions options = new ExportOptions();
         options.setWidth(999);
         String svg = svgGenerator.generate(conf, options);
-        Path pieChartPath = Paths.get("src", "test", "resources", "custom-width.svg");
+        Path pieChartPath = Paths.get("src", "test", "resources",
+                "custom-width.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
     }
 
     @Test
-    public void exportWithCustomHeight() throws IOException, InterruptedException {
+    public void exportWithCustomHeight()
+            throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         ExportOptions options = new ExportOptions();
         options.setHeight(999);
         String svg = svgGenerator.generate(conf, options);
-        Path pieChartPath = Paths.get("src", "test", "resources", "custom-height.svg");
+        Path pieChartPath = Paths.get("src", "test", "resources",
+                "custom-height.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
     }
 
     @Test
-    public void exportWithCustomTheme() throws IOException, InterruptedException {
+    public void exportWithCustomTheme()
+            throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         ExportOptions options = new ExportOptions();
         options.setTheme(new LumoDarkTheme());
         String svg = svgGenerator.generate(conf, options);
-        Path pieChartPath = Paths.get("src", "test", "resources", "lumo-dark.svg");
+        Path pieChartPath = Paths.get("src", "test", "resources",
+                "lumo-dark.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
     }
 
     @Test
-    public void exportWithCustomLang() throws IOException, InterruptedException {
+    public void exportWithCustomLang()
+            throws IOException, InterruptedException {
         Configuration conf = createAreaChartConfiguration();
         ExportOptions options = new ExportOptions();
         Lang lang = createLang();
         options.setLang(lang);
         String svg = svgGenerator.generate(conf, options);
-        Path pieChartPath = Paths.get("src", "test", "resources", "custom-lang.svg");
+        Path pieChartPath = Paths.get("src", "test", "resources",
+                "custom-lang.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
     }
@@ -192,10 +200,10 @@ public class SVGGeneratorTest {
         options.setPointStart(0);
         options.setPointIntervalUnit(IntervalUnit.DAY);
         configuration.setPlotOptions(options);
-        configuration.addSeries(new ListSeries("Tokyo", 20, 12, 34, 23, 65,
-                8, 4, 7, 76, 19, 20, 8));
-        configuration.addSeries(new ListSeries("Miami", 34, 29, 23, 65, 8,
-                4, 7, 7, 59, 8, 9, 19));
+        configuration.addSeries(new ListSeries("Tokyo", 20, 12, 34, 23, 65, 8,
+                4, 7, 76, 19, 20, 8));
+        configuration.addSeries(new ListSeries("Miami", 34, 29, 23, 65, 8, 4, 7,
+                7, 59, 8, 9, 19));
 
         XAxis x = new XAxis();
         x.setType(AxisType.DATETIME);
@@ -210,9 +218,9 @@ public class SVGGeneratorTest {
 
     private Lang createLang() {
         Lang lang = new Lang();
-        lang.setShortMonths(new String[] { "Tammi", "Helmi", "Maalis",
-                "Huhti", "Touko", "Kesä", "Heinä", "Elo", "Syys", "Loka",
-                "Marras", "Joulu" });
+        lang.setShortMonths(new String[] { "Tammi", "Helmi", "Maalis", "Huhti",
+                "Touko", "Kesä", "Heinä", "Elo", "Syys", "Loka", "Marras",
+                "Joulu" });
         lang.setMonths(new String[] { "Tammikuu", "Helmikuu", "Maaliskuu",
                 "Huhtikuu", "Toukokuu", "Kesäkuu", "Heinäkuu", "Elokuu",
                 "Syyskuu", "Lokakuu", "Marraskuu", "Joulukuu" });

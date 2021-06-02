@@ -85,7 +85,8 @@ public class SVGGenerator implements AutoCloseable {
     public SVGGenerator() throws IOException {
         tempDirPath = Files.createTempDirectory("svg-export");
         bundleTempPath = tempDirPath.resolve("export-svg-bundle.js");
-        Files.copy(getClass().getResourceAsStream(INTERNAL_BUNDLE_PATH), bundleTempPath);
+        Files.copy(getClass().getResourceAsStream(INTERNAL_BUNDLE_PATH),
+                bundleTempPath);
     }
 
     @Override
@@ -138,8 +139,8 @@ public class SVGGenerator implements AutoCloseable {
      *             if the rendering process gets interrupted.
      */
     public String generate(Configuration chartConfiguration,
-            ExportOptions exportOptions)
-            throws NullPointerException, IllegalStateException, IOException, InterruptedException {
+            ExportOptions exportOptions) throws NullPointerException,
+            IllegalStateException, IOException, InterruptedException {
         if (isClosed()) {
             throw new IllegalStateException(
                     "This generator is already closed.");
