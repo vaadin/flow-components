@@ -32,6 +32,15 @@ public class TestI18N {
             .setWeekdaysShort(
                     Arrays.asList("su", "ma", "ti", "ke", "to", "pe", "la"));
 
+    /**
+     * Intentionally leaves some fields in the initial / null state
+     */
+    public static final DatePickerI18n FINNISH_PARTIAL = new DatePickerI18n()
+            .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
+                    "keskiviikko", "torstai", "perjantai", "lauantai"))
+            .setWeekdaysShort(
+                    Arrays.asList("su", "ma", "ti", "ke", "to", "pe", "la"));
+
     private TestI18N() {
     }
 }
