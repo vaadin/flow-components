@@ -131,6 +131,23 @@ doc.createElementNS = (ns, tagName) => {
     return elem;
 };
 
+const inflateFunctions = (jsonConfiguration) => {
+    Object.entries(jsonConfiguration).forEach(([attr, targetProperty]) => {
+        if (attr.indexOf('_fn_') === 0 && (typeof targetProperty === 'string' || targetProperty instanceof String)) {
+            const property = attr.replace('_fn_','');
+            const jsFunction = Function(`'use strict'; return ${targetProperty}`);
+            if (targetProperty.trim().startsWith('function')) {
+                jsonConfiguration[property] = jsFunction();
+            } else {
+                jsonConfiguration[property] = jsFunction;
+            }
+          delete jsonConfiguration[attr];
+        } else if (targetProperty instanceof Object) {
+          inflateFunctions(targetProperty);
+        }
+    });
+  }
+
 /**
  * ExportOptions
  *
@@ -141,6 +158,7 @@ doc.createElementNS = (ns, tagName) => {
  * @property {string} width
  * @property {string} height
  * @property {boolean} isTimeline
+ * @property {boolean} executeFunctions
  */
 
 /**
@@ -204,6 +222,10 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
             }
 
             isTimeline = exportOptions.isTimeline;
+
+            if(exportOptions.executeFunctions) {
+                inflateFunctions(chartConfiguration);
+            }
         }
 
         let chart;

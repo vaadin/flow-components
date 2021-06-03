@@ -29,13 +29,13 @@ describe('jsdom-exporter', () => {
   });
 
   it('should use default filename to write svg file', async () => {
-    const result = await jsdomExporter({ chartConfiguration: { } });
+    const result = await jsdomExporter({ chartConfiguration: {} });
 
     expect(result.outFile).to.contain('chart.svg');
   });
 
   it('should accept outfile name to write svg file', async () => {
-    const result = await jsdomExporter({ chartConfiguration: { }, outFile: 'custom-file.svg' });
+    const result = await jsdomExporter({ chartConfiguration: {}, outFile: 'custom-file.svg' });
 
     expect(result.outFile).to.contain('custom-file.svg');
   });
@@ -75,6 +75,60 @@ describe('jsdom-exporter', () => {
 
     expect(document.querySelector('.highcharts-no-data').textContent).to.be.equal('custom message');
   });
+
+  it('should not inflate functions if "executeFunctions" is not enabled', async () => {
+    const result = await jsdomExporter({
+      chartConfiguration: {
+        xAxis: {
+          min: 0,
+          max: 360,
+          labels: {
+            _fn_formatter: `function () { return this.value + 'CUSTOM_LABEL'; }`
+          },
+          tickInterval: 45
+        },
+        series: [1]
+      }
+    });
+    const document = parseSVG(result.svgString);
+    expect(document.querySelector('.highcharts-xaxis-labels text').textContent).to.not.contain('CUSTOM_LABEL');
+  });
+
+  it('should inflate functions if "executeFunctions" is enabled', async () => {
+    const result = await jsdomExporter({
+      chartConfiguration: {
+        xAxis: {
+          min: 0,
+          max: 360,
+          labels: {
+            _fn_formatter: `function () { return this.value + 'CUSTOM_LABEL'; }`
+          },
+          tickInterval: 45
+        },
+        series: [1]
+      }, exportOptions: { executeFunctions: true }
+    });
+    const document = parseSVG(result.svgString);
+    expect(document.querySelector('.highcharts-xaxis-labels text').textContent).to.contain('CUSTOM_LABEL');
+  });
+
+  it('should inflate js expression if "executeFunctions" is enabled', async () => {
+    const result = await jsdomExporter({
+      chartConfiguration: {
+        xAxis: {
+          min: 0,
+          max: 360,
+          labels: {
+            _fn_formatter: `this.value + 'CUSTOM_LABEL'`
+          },
+          tickInterval: 45
+        },
+        series: [1]
+      }, exportOptions: { executeFunctions: true }
+    });
+    const document = parseSVG(result.svgString);
+    expect(document.querySelector('.highcharts-xaxis-labels text').textContent).to.contain('CUSTOM_LABEL');
+  });
 });
 
 describe('timeline', () => {
@@ -83,7 +137,7 @@ describe('timeline', () => {
   afterEach(() => mock.restore());
 
   it('should render stock chart if isTimeline is set to `true`', async () => {
-    const result = await jsdomExporter({ chartConfiguration: { }, exportOptions: { isTimeline: true } });
+    const result = await jsdomExporter({ chartConfiguration: {}, exportOptions: { isTimeline: true } });
     const document = parseSVG(result.svgString);
 
     expect(document.querySelector('.highcharts-navigator')).to.be.not.null;
