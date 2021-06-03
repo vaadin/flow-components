@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,16 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ironlist.testbench;
+package com.vaadin.flow.component.virtuallist.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing an <code>&lt;iron-list&gt;</code> element.
+ * A TestBench element representing an <code>&lt;vaadin-virtual-list&gt;</code>
+ * element.
  */
-@Element("iron-list")
-public class IronListElement extends TestBenchElement {
+@Element("vaadin-virtual-list")
+public class VirtualListElement extends TestBenchElement {
 
     /**
      * Scrolls to the row with the given index.
@@ -40,6 +41,7 @@ public class IronListElement extends TestBenchElement {
      * @return the index of the first visible row
      */
     public int getFirstVisibleRowIndex() {
+        executeScript("arguments[0].__requestDebounce.flush();", this);
         return getPropertyInteger("firstVisibleIndex");
     }
 
@@ -49,6 +51,7 @@ public class IronListElement extends TestBenchElement {
      * @return the index of the last visible row
      */
     public int getLastVisibleRowIndex() {
+        executeScript("arguments[0].__requestDebounce.flush();", this);
         return getPropertyInteger("lastVisibleIndex");
     }
 
@@ -71,7 +74,7 @@ public class IronListElement extends TestBenchElement {
      * @return the number of rows
      */
     public int getRowCount() {
-        return getPropertyInteger("_virtualRowCount");
+        return getPropertyInteger("items", "length");
     }
 
 }
