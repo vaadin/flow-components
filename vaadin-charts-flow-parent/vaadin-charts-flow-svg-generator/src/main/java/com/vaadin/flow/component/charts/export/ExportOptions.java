@@ -23,8 +23,9 @@ import com.vaadin.flow.component.charts.model.style.Theme;
  * </ul>
  * </p>
  *
- * @since 21.0
  * @see SVGGenerator
+ * 
+ * @since 21.0
  */
 public class ExportOptions extends AbstractConfigurationObject {
 
