@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -158,8 +157,36 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    @Ignore
-    public void exportWithEnabledFunctions() {}
+    public void exportWithTimeline() throws IOException, InterruptedException {
+        Configuration configuration = new Configuration();
+        configuration.getChart().setType(ChartType.AREASPLINERANGE);
+        configuration.getTitle().setText("Temperature variation by day");
+        Tooltip tooltip = configuration.getTooltip();
+        tooltip.setValueSuffix("°C");
+        DataSeries dataSeries = new DataSeries("Temperatures");
+        for (StockPrices.RangeData data : StockPrices.fetchDailyTempRanges()) {
+            dataSeries.add(new DataSeriesItem(data.getDate(), data.getMin(), data.getMax()));
+        }
+        configuration.setSeries(dataSeries);
+        ExportOptions options = new ExportOptions();
+        options.setTimeline(true);
+        String actualSVG = svgGenerator.generate(configuration, options);
+        String expectedSVG = null;
+        assertTrue(replaceIds(expectedSVG).contains(replaceIds(actualSVG)));
+    }
+
+    @Test
+    public void exportWithEnabledFunctions() throws IOException, InterruptedException {
+        Configuration configuration = createAreaChartConfiguration();
+        configuration.getyAxis().getLabels().setFormatter("function () { return this.value +' formatted'; }");
+        ExportOptions options = new ExportOptions();
+        options.setExecuteFunctions(true);
+        String actualSVG = svgGenerator.generate(configuration, options);
+        Path expectedResultPath = Paths.get("src", "test", "resources",
+                "enabled-functions.svg");
+        String expectedSVG = new String(Files.readAllBytes(expectedResultPath));
+        assertTrue(replaceIds(expectedSVG).contains(replaceIds(actualSVG)));
+    }
 
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();

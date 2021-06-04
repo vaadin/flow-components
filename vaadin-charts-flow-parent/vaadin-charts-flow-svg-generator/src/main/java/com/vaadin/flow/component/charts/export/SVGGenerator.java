@@ -33,16 +33,16 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  * <p>
  * Example usage:
  * </p>
- * 
- * <pre>
+ *
  * <code>
- *     Configuration configuration = new Configuration();
- *     // ...
- *     try (SVGGenerator generator = new SVGGenerator()) {
- *         String svg = generator.generate(configuration);
- *     }
+ *  <pre>
+ *  Configuration configuration = new Configuration();
+ *  // ...
+ *  try (SVGGenerator generator = new SVGGenerator()) {
+ *      String svg = generator.generate(configuration);
+ *  }
+ *  </pre>
  * </code>
- * </pre>
  *
  * @since 21.0
  */
@@ -139,7 +139,8 @@ public class SVGGenerator implements AutoCloseable {
      *             if the rendering process gets interrupted.
      */
     public String generate(Configuration chartConfiguration,
-            ExportOptions exportOptions) throws IOException, InterruptedException {
+            ExportOptions exportOptions)
+            throws IOException, InterruptedException {
         if (isClosed()) {
             throw new IllegalStateException(
                     "This generator is already closed.");
