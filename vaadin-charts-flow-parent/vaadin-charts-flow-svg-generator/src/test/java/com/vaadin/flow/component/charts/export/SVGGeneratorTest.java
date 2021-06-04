@@ -170,7 +170,7 @@ public class SVGGeneratorTest {
         }
         configuration.setSeries(dataSeries);
         ExportOptions options = new ExportOptions();
-        options.setIsTimeline(true);
+        options.setTimeline(true);
         Path expectedFilePath = Paths.get("src", "test", "resources",
                 "timeline.svg");
         String expectedSVG = new String(Files.readAllBytes(expectedFilePath));

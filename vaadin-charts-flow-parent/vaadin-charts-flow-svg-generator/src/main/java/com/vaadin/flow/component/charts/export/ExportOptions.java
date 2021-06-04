@@ -24,7 +24,7 @@ import com.vaadin.flow.component.charts.model.style.Theme;
  * </p>
  *
  * @see SVGGenerator
- * 
+ *
  * @since 21.0
  */
 public class ExportOptions extends AbstractConfigurationObject {
@@ -33,7 +33,7 @@ public class ExportOptions extends AbstractConfigurationObject {
     private Lang lang;
     private Number width;
     private Number height;
-    private Boolean isTimeline;
+    private Boolean timeline;
     private Boolean executeFunctions;
 
     public ExportOptions() {
@@ -127,18 +127,18 @@ public class ExportOptions extends AbstractConfigurationObject {
      * @return <code>true</code> if generated chart will be in timeline mode,
      *         <code>false</code> otherwise.
      */
-    public Boolean getIsTimeline() {
-        return isTimeline;
+    public Boolean getTimeline() {
+        return timeline;
     }
 
     /**
      * Set flag to mark the generated chart in timeline mode.
      *
-     * @param isTimeline
+     * @param timeline
      *            if the generated chart should be in timeline mode.
      */
-    public void setIsTimeline(Boolean isTimeline) {
-        this.isTimeline = isTimeline;
+    public void setTimeline(Boolean timeline) {
+        this.timeline = timeline;
     }
 
     /**
