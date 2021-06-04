@@ -16,7 +16,7 @@ import com.vaadin.flow.component.charts.model.style.Theme;
  *         <li>height: Height of the exported image.</li>
  *         <li>theme: Theme used to style the chart. For example: {@link com.vaadin.flow.component.charts.themes.LumoDarkTheme}</li>
  *         <li>lang: Lang specifications for internationalization purposes.</li>
- *         <li>timeline: Determines if the generated chart is in timeline mode.</li>
+ *         <li>isTimeline: Determines if the generated chart is in timeline mode.</li>
  *         <li>executeFunctions: execute JavaScript functions (for example: formatter functions)</li>
  *     </ul>
  * </p>
@@ -30,7 +30,7 @@ public class ExportOptions extends AbstractConfigurationObject {
     private Lang lang;
     private Number width;
     private Number height;
-    private Boolean timeline;
+    private Boolean isTimeline;
     private Boolean executeFunctions;
 
     public ExportOptions() {
@@ -118,17 +118,17 @@ public class ExportOptions extends AbstractConfigurationObject {
      *
      * @return <code>true</code> if generated chart will be in timeline mode, <code>false</code> otherwise.
      */
-    public Boolean getTimeline() {
-        return timeline;
+    public Boolean getIsTimeline() {
+        return isTimeline;
     }
 
     /**
      * Set flag to mark the generated chart in timeline mode.
      *
-     * @param timeline if the generated chart should be in timeline mode.
+     * @param isTimeline if the generated chart should be in timeline mode.
      */
-    public void setTimeline(Boolean timeline) {
-        this.timeline = timeline;
+    public void setIsTimeline(Boolean isTimeline) {
+        this.isTimeline = isTimeline;
     }
 
     /**

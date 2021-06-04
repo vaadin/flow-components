@@ -169,9 +169,11 @@ public class SVGGeneratorTest {
         }
         configuration.setSeries(dataSeries);
         ExportOptions options = new ExportOptions();
-        options.setTimeline(true);
+        options.setIsTimeline(true);
+        Path expectedFilePath = Paths.get("src", "test", "resources",
+                "timeline.svg");
+        String expectedSVG = new String(Files.readAllBytes(expectedFilePath));
         String actualSVG = svgGenerator.generate(configuration, options);
-        String expectedSVG = null;
         assertTrue(replaceIds(expectedSVG).contains(replaceIds(actualSVG)));
     }
 
