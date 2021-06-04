@@ -157,7 +157,7 @@ const inflateFunctions = (jsonConfiguration) => {
  * @property {object} lang
  * @property {string} width
  * @property {string} height
- * @property {boolean} isTimeline
+ * @property {boolean} timeline
  * @property {boolean} executeFunctions
  */
 
@@ -221,7 +221,7 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
                 chartConfiguration.chart = { ...chartConfiguration.chart, ...chartOptions };
             }
 
-            isTimeline = exportOptions.isTimeline;
+            isTimeline = exportOptions.timeline;
 
             if(exportOptions.executeFunctions) {
                 inflateFunctions(chartConfiguration);
