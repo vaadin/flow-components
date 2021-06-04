@@ -158,7 +158,7 @@ public class ExportOptions extends AbstractConfigurationObject {
      * @param executeFunctions
      *            if the generator should execute JS functions.
      */
-    public void setExecuteFunctions(boolean executeFunctions) {
+    public void setExecuteFunctions(Boolean executeFunctions) {
         this.executeFunctions = executeFunctions;
     }
     // </editor-fold>
