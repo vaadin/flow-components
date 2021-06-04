@@ -40,7 +40,7 @@ public class IronListElement extends TestBenchElement {
      * @return the index of the first visible row
      */
     public int getFirstVisibleRowIndex() {
-        return getPropertyInteger("_firstVisibleIndex");
+        return getPropertyInteger("firstVisibleIndex");
     }
 
     /**
@@ -49,7 +49,7 @@ public class IronListElement extends TestBenchElement {
      * @return the index of the last visible row
      */
     public int getLastVisibleRowIndex() {
-        return getPropertyInteger("_firstVisibleIndex");
+        return getPropertyInteger("lastVisibleIndex");
     }
 
     /**
