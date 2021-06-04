@@ -165,7 +165,8 @@ public class SVGGeneratorTest {
         tooltip.setValueSuffix("°C");
         DataSeries dataSeries = new DataSeries("Temperatures");
         for (StockPrices.RangeData data : StockPrices.fetchDailyTempRanges()) {
-            dataSeries.add(new DataSeriesItem(data.getDate(), data.getMin(), data.getMax()));
+            dataSeries.add(new DataSeriesItem(data.getDate(), data.getMin(),
+                    data.getMax()));
         }
         configuration.setSeries(dataSeries);
         ExportOptions options = new ExportOptions();
@@ -178,9 +179,11 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithEnabledFunctions() throws IOException, InterruptedException {
+    public void exportWithEnabledFunctions()
+            throws IOException, InterruptedException {
         Configuration configuration = createAreaChartConfiguration();
-        configuration.getyAxis().getLabels().setFormatter("function () { return this.value +' formatted'; }");
+        configuration.getyAxis().getLabels().setFormatter(
+                "function () { return this.value +' formatted'; }");
         ExportOptions options = new ExportOptions();
         options.setExecuteFunctions(true);
         String actualSVG = svgGenerator.generate(configuration, options);

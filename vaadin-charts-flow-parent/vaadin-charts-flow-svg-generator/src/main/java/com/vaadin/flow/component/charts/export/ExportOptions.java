@@ -6,19 +6,21 @@ import com.vaadin.flow.component.charts.model.style.Theme;
 
 /**
  * <p>
- *     Optional settings for exporting charts in the server.
+ * Optional settings for exporting charts in the server.
  * </p>
  *
  * <p>
  * Options include:
- *     <ul>
- *         <li>width: Width of the exported image.</li>
- *         <li>height: Height of the exported image.</li>
- *         <li>theme: Theme used to style the chart. For example: {@link com.vaadin.flow.component.charts.themes.LumoDarkTheme}</li>
- *         <li>lang: Lang specifications for internationalization purposes.</li>
- *         <li>isTimeline: Determines if the generated chart is in timeline mode.</li>
- *         <li>executeFunctions: execute JavaScript functions (for example: formatter functions)</li>
- *     </ul>
+ * <ul>
+ * <li>width: Width of the exported image.</li>
+ * <li>height: Height of the exported image.</li>
+ * <li>theme: Theme used to style the chart. For example:
+ * {@link com.vaadin.flow.component.charts.themes.LumoDarkTheme}</li>
+ * <li>lang: Lang specifications for internationalization purposes.</li>
+ * <li>isTimeline: Determines if the generated chart is in timeline mode.</li>
+ * <li>executeFunctions: execute JavaScript functions (for example: formatter
+ * functions)</li>
+ * </ul>
  * </p>
  *
  * @since 21.0
@@ -51,7 +53,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Set the {@link Theme} used to style the chart.
      *
-     * @param theme the theme to use when styling the chart.
+     * @param theme
+     *            the theme to use when styling the chart.
      * @see com.vaadin.flow.component.charts.themes.LumoLightTheme
      * @see com.vaadin.flow.component.charts.themes.LumoDarkTheme
      */
@@ -71,7 +74,9 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Set the {@link Lang} object used to add i18n features to the chart.
      *
-     * @param lang the {@link Lang} object used to provide the i18n features of the chart.
+     * @param lang
+     *            the {@link Lang} object used to provide the i18n features of
+     *            the chart.
      */
     public void setLang(Lang lang) {
         this.lang = lang;
@@ -89,7 +94,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Set the width the resulting chart will have.
      *
-     * @param width the width the resulting chart will have.
+     * @param width
+     *            the width the resulting chart will have.
      */
     public void setWidth(Number width) {
         this.width = width;
@@ -107,7 +113,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Get the height the resulting chart will have.
      *
-     * @param height the height the resulting chart will have.
+     * @param height
+     *            the height the resulting chart will have.
      */
     public void setHeight(Number height) {
         this.height = height;
@@ -116,7 +123,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Check flag to see if the generated chart will be in timeline mode.
      *
-     * @return <code>true</code> if generated chart will be in timeline mode, <code>false</code> otherwise.
+     * @return <code>true</code> if generated chart will be in timeline mode,
+     *         <code>false</code> otherwise.
      */
     public Boolean getIsTimeline() {
         return isTimeline;
@@ -125,7 +133,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Set flag to mark the generated chart in timeline mode.
      *
-     * @param isTimeline if the generated chart should be in timeline mode.
+     * @param isTimeline
+     *            if the generated chart should be in timeline mode.
      */
     public void setIsTimeline(Boolean isTimeline) {
         this.isTimeline = isTimeline;
@@ -133,10 +142,11 @@ public class ExportOptions extends AbstractConfigurationObject {
 
     /**
      * Check flag to see if generators will execute JavaScript functions when
-     * using a {@link com.vaadin.flow.component.charts.model.Configuration} with JS functions.
+     * using a {@link com.vaadin.flow.component.charts.model.Configuration} with
+     * JS functions.
      *
      * @return <code>true</code> if the generator will execute JavaScript
-     * functions, <code>false</code> otherwise.
+     *         functions, <code>false</code> otherwise.
      */
     public boolean getExecuteFunctions() {
         return executeFunctions;
@@ -145,7 +155,8 @@ public class ExportOptions extends AbstractConfigurationObject {
     /**
      * Set flag to execute JS functions when exporting charts.
      *
-     * @param executeFunctions if the generator should execute JS functions.
+     * @param executeFunctions
+     *            if the generator should execute JS functions.
      */
     public void setExecuteFunctions(boolean executeFunctions) {
         this.executeFunctions = executeFunctions;

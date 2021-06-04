@@ -68,7 +68,7 @@ public class StockPrices {
         private double close;
 
         private OhlcData(long date, double open, double high, double low,
-                         double close) {
+                double close) {
             super(date);
             this.open = open;
             this.high = high;
