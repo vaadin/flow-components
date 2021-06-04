@@ -1,0 +1,23 @@
+{
+  "name": "vaadin-charts-flow-svg-generator",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "mocha",
+    "test:watch": "mocha --watch",
+    "postinstall": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "highcharts": "^8.2.2",
+    "jsdom": "^16.5.3"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^8.4.0",
+    "mock-fs": "^5.0.0",
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0"
+  },
+  "author": "Vaadin Ltd",
+  "license": "SEE LICENSE IN LICENSE.txt"
+}
