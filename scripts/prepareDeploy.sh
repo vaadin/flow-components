@@ -112,7 +112,8 @@ do
   [ -d "$i" -o -d "$i-flow-parent" ] \
     && build=$build,$i-flow-parent,$i-flow-parent/$i-flow \
     && [ -d "$i-flow-parent/$i-testbench" ] && build=$build,$i-flow-parent/$i-testbench \
-    && [ -d "$i-flow-parent/$i-flow-demo" ] && build=$build,$i-flow-parent/$i-flow-demo
+    && [ -d "$i-flow-parent/$i-flow-demo" ] && build=$build,$i-flow-parent/$i-flow-demo \
+    && [ -d "$i-flow-parent/$i-flow-svg-generator" ] && build=$build,$i-flow-parent/$i-flow-svg-generator
 done
 
 ## Inform TC about computed parameters
