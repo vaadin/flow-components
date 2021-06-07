@@ -34,6 +34,12 @@
           <groupId>com.vaadin</groupId>
         </exclusion>
       </exclusions>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>LATEST</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>

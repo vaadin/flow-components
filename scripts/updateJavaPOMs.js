@@ -53,6 +53,12 @@ function mergePlugins(build1, build2) {
   return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
 }
 
+function mergeDependencies(prj1, prj2) {
+  const arr1 = prj1 && prj1.dependencies && prj1.dependencies[0] && prj1.dependencies[0].dependency || [];
+  const arr2 = prj2 && prj2.dependencies && prj2.dependencies[0] && prj2.dependencies[0].dependency || [];
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
+}
+
 async function consolidate(template, pom, cb) {
   const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/${template}`, 'utf8'));
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
@@ -60,6 +66,8 @@ async function consolidate(template, pom, cb) {
   await renameBase(tplJs);
 
   tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
+
+  pomJs.project.dependencies[0] = {dependency: mergeDependencies(tplJs.project, pomJs.project)};
 
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
 

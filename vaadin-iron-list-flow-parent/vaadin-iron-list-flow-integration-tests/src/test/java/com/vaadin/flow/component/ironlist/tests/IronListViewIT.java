@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -42,6 +43,15 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd.
  */
 public class IronListViewIT extends TabbedComponentDemoTest {
+
+    @Before
+    public void init() {
+        open();
+        WebElement loadingIndicator = findElement(
+                By.className("v-loading-indicator"));
+        waitUntil(driver -> !loadingIndicator.isDisplayed()
+                && findElements(By.tagName("iron-list")).size() > 0);
+    }
 
     @Override
     protected String getTestPath() {
