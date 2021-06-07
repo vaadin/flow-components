@@ -72,6 +72,8 @@ import elemental.json.JsonValue;
  * @see <a href=
  *      "https://www.webcomponents.org/element/PolymerElements/iron-list">iron-list
  *      webcomponent documentation</a>
+ *
+ * @deprecated {@code IronList} is deprecated in favor of {@code VirtualList}
  */
 @Tag("iron-list")
 @NpmPackage(value = "@polymer/iron-list", version = "3.1.0")
@@ -79,6 +81,7 @@ import elemental.json.JsonValue;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./ironListConnector.js")
 @JsModule("./ironListStyles.js")
+@Deprecated
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
 
