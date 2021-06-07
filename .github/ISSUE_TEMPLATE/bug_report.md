@@ -21,23 +21,23 @@ Describe the issue that you're seeing.
 
 ### Expected outcome
 
-What should happen?
+What did you expect to happen?
 
 <!-- Example: No scrolling should happen. -->
 
 ### Actual outcome
 
-What happened.
+What happened instead.
 
 <!-- Example: Grid content occasionally gets scrolled. -->
 
-### Live Demo
+### Live Demo (optional)
 
 A screenshot or video with issue reproduced.
 
 ### Minimal reproducible example
 
-**Please** provide a code snippet with issue reproduction, this makes your issue _much_ easier to diagnose.
+<!-- **Please** provide a demo project or code snippet that reproduces the issue, this _greatly_ increases the chance that we will be able to identify and fix the issue.
 
 <!--
 ```
@@ -61,7 +61,7 @@ Clear steps describing how to reproduce the issue.
 
 ### Environment
 
-- Version of the component / platform.
+- Version of the component / Vaadin platform.
 - OS.
 
 <!-- Example:
