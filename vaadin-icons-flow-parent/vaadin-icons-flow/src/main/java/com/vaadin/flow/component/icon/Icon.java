@@ -31,13 +31,16 @@ import com.vaadin.flow.dom.ElementConstants;
  * @author Vaadin Ltd
  * @see VaadinIcon
  */
-@Tag("iron-icon")
+@Tag("vaadin-icon")
 @NpmPackage(value = "@vaadin/vaadin-icons", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-icons/vaadin-icons.js")
+@JsModule("@vaadin/vaadin-icons/vaadin-iconset.js")
+@NpmPackage(value = "@vaadin/vaadin-icon", version = "21.0.0-alpha6")
+@JsModule("@vaadin/vaadin-icon/vaadin-icon.js")
 public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
     private static final String ICON_COLLECTION_NAME = "vaadin";
+    private static final String STYLE_FILL = "fill";
 
     /**
      * Creates an Icon component that displays a Vaadin logo.
@@ -119,9 +122,9 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      */
     public void setColor(String color) {
         if (color == null) {
-            getStyle().remove(ElementConstants.STYLE_COLOR);
+            getStyle().remove(STYLE_FILL);
         } else {
-            getStyle().set(ElementConstants.STYLE_COLOR, color);
+            getStyle().set(STYLE_FILL, color);
         }
     }
 
@@ -132,6 +135,6 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *         not been set
      */
     public String getColor() {
-        return getStyle().get(ElementConstants.STYLE_COLOR);
+        return getStyle().get(STYLE_FILL);
     }
 }

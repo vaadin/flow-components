@@ -45,8 +45,7 @@ public class IconIT extends ComponentDemoTest {
         assertCssValue(icon, "width", "100px");
         assertCssValue(icon, "height", "100px");
 
-        // Selenium returns the color in rgba-format for some reason
-        assertCssValue(icon, "color", "rgba(255, 165, 0, 1)");
+        assertCssValue(icon, "fill", "rgb(255, 165, 0)");
     }
 
     @Test
@@ -71,7 +70,7 @@ public class IconIT extends ComponentDemoTest {
     public void allAvailableIcons() {
         WebElement allIcons = layout.findElement(By.id("all-icons"));
         List<WebElement> labels = allIcons.findElements(By.tagName("label"));
-        List<WebElement> icons = allIcons.findElements(By.tagName("iron-icon"));
+        List<WebElement> icons = allIcons.findElements(By.tagName("vaadin-icon"));
 
         Assert.assertEquals(VaadinIcon.values().length, labels.size());
         Assert.assertEquals(VaadinIcon.values().length, icons.size());
