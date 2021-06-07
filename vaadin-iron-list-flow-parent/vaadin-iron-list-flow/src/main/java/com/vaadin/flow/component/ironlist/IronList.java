@@ -73,7 +73,8 @@ import elemental.json.JsonValue;
  *      "https://www.webcomponents.org/element/PolymerElements/iron-list">iron-list
  *      webcomponent documentation</a>
  *
- * @deprecated since Vaadin 21, {@code IronList} is deprecated in favor of {@code VirtualList}
+ * @deprecated since Vaadin 21, {@code IronList} is deprecated in favor of
+ *             {@code VirtualList}
  */
 @Tag("iron-list")
 @NpmPackage(value = "@polymer/iron-list", version = "3.1.0")
