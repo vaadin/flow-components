@@ -14,7 +14,6 @@
 package com.vaadin.flow.component.charts.export;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -53,8 +52,7 @@ public class SVGGenerator implements AutoCloseable {
      * contents to a temporary file that can be then accessed by a NodeJS
      * process.
      */
-    private static final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js"
-            .replace("/", FileSystems.getDefault().getSeparator());
+    private static final String INTERNAL_BUNDLE_PATH = "/META-INF/frontend/generated/jsdom-exporter-bundle.js";
     /**
      * String template for the script to be run with NodeJS to generate an svg
      * file which contents can be then read by this class.
