@@ -129,6 +129,10 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>&#xD;
+        </plugins>
+  </build>
   <profiles>
     <profile>
       <id>attach-docs</id>
@@ -160,9 +164,9 @@
             <artifactId>maven-jar-plugin</artifactId>
             <configuration>
               <archive>
-                <manifestFile>
-                  ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                </manifestFile>
+                <manifestFile>&#xD;
+                                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
+                                </manifestFile>
                 <manifestEntries>
                   <Built-By/>
                 </manifestEntries>

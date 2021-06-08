@@ -22,7 +22,7 @@
     </dependency>
   </dependencies>
   <build>
-    <plugins>
+    <plugins>&#xD;
         </plugins>
   </build>
   <profiles>
