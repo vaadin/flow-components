@@ -129,6 +129,10 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+        </plugins>
+  </build>
   <profiles>
     <profile>
       <id>attach-docs</id>
@@ -161,8 +165,8 @@
             <configuration>
               <archive>
                 <manifestFile>
-                  ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                </manifestFile>
+                                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                                </manifestFile>
                 <manifestEntries>
                   <Built-By/>
                 </manifestEntries>
