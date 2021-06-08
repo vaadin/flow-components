@@ -45,7 +45,7 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  *
  * @since 21.0
  */
-public class SVGGenerator implements AutoCloseable {
+public final class SVGGenerator implements AutoCloseable {
 
     /**
      * Pathname to the internal exporter bundle file. We use it to copy its
@@ -149,8 +149,8 @@ public class SVGGenerator implements AutoCloseable {
         String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
-        String command = String.format(SCRIPT_TEMPLATE,
-                bundleTempPath.toAbsolutePath(), jsonConfig, chartFileName,
+        String script = String.format(SCRIPT_TEMPLATE,
+                bundleTempPath.toFile().getAbsolutePath().replaceAll("\\\\", "/"), jsonConfig, chartFileName,
                 jsonExportOptions);
 
         NodeRunner nodeRunner = new NodeRunner();
