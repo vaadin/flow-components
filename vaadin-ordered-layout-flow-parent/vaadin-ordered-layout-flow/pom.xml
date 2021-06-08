@@ -76,7 +76,7 @@
     </dependency>
   </dependencies>
   <build>
-    <plugins>;
+    <plugins>
         </plugins>
   </build>
   <profiles>
@@ -110,7 +110,7 @@
             <artifactId>maven-jar-plugin</artifactId>
             <configuration>
               <archive>
-                <manifestFile>;
+                <manifestFile>
                                     ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                                 </manifestFile>
                 <manifestEntries>
