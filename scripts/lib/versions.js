@@ -51,7 +51,7 @@ async function getPlatformVersions(branch) {
 }
 
 async function getVersions() {
-  const branch = currentBranch();
+  const branch = await currentBranch();
   return getPlatformVersions(branch).then(json => {
     return ['core', 'vaadin'].reduce((prev, k) => {
       return prev.concat(Object.keys(json[k]).filter(pkg => json[k][pkg].npmName || json[k][pkg].javaVersion).map(pkg => {

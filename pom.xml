@@ -100,26 +100,23 @@
         <module>integration-tests</module>
       </modules>
       <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>com.vaadin</groupId>
-              <artifactId>flow-maven-plugin</artifactId>
-              <version>${flow.version}</version>
-              <configuration>
-                <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
-              </configuration>
-              <executions>
-                <execution>
-                  <goals>
-                    <goal>prepare-frontend</goal>
-                    <goal>build-frontend</goal>
-                  </goals>
-                </execution>
-              </executions>
-            </plugin>
-          </plugins>
-        </pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-maven-plugin</artifactId>
+            <configuration>
+              <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-frontend</goal>
+                  <goal>build-frontend</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
     </profile>
     <profile>
@@ -143,7 +140,6 @@
           <plugin>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-maven-plugin</artifactId>
-            <version>${flow.version}</version>
             <executions>
               <execution>
                 <goals>
@@ -210,6 +206,11 @@
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>com.vaadin</groupId>
+          <artifactId>flow-maven-plugin</artifactId>
+          <version>${flow.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
