@@ -45,7 +45,7 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  *
  * @since 21.0
  */
-public final class SVGGenerator implements AutoCloseable {
+public class SVGGenerator implements AutoCloseable {
 
     /**
      * Pathname to the internal exporter bundle file. We use it to copy its
