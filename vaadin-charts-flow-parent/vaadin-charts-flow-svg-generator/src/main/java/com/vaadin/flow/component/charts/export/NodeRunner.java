@@ -23,8 +23,7 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 
 class NodeRunner {
 
-    int runJavascript(String script)
-            throws InterruptedException, IOException {
+    int runJavascript(String script) throws InterruptedException, IOException {
         FrontendTools tools = new FrontendTools("",
                 () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
         String node = tools.getNodeExecutable();
@@ -38,8 +37,7 @@ class NodeRunner {
         return process.waitFor();
     }
 
-    int runJavascript(Path script)
-            throws InterruptedException, IOException {
+    int runJavascript(Path script) throws InterruptedException, IOException {
         FrontendTools tools = new FrontendTools("",
                 () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
         String node = tools.getNodeExecutable();
