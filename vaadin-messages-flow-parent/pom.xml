@@ -12,6 +12,7 @@
     <modules>
         <module>vaadin-messages-flow</module>
         <module>vaadin-messages-testbench</module>
+        <module>vaadin-messages-flow-demo</module>
     </modules>
     <profiles>
         <profile>
@@ -23,6 +24,7 @@
             </activation>
             <modules>
                 <module>vaadin-messages-flow-integration-tests</module>
+                <module>vaadin-messages-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
