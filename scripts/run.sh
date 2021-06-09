@@ -7,7 +7,7 @@
 ## by default 4 forks are used (set in pom), but it can be changed
 [ -n "$FORKS" ] && args="-Dfailsafe.forkCount=$FORKS";
 ## bu default local tests are runn in headless, but can be disabled
-[ "$HEADLESS" = false ] && args="$args -DdisableHeadless"
+[ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="" || quiet="-q"
 ## run bower mode or npm
 [ -n "$BOWER" ] && it=bower-it || it=npm-it
 
@@ -56,7 +56,7 @@ mergeITs() {
   [ ! -d node_modules ] && npm install
   pom=integration-tests/pom.xml
   modified=`[ -f $pom ] && find vaadin*parent/*integration-tests/src -mnewer $pom`
-  [ -f $pom -a -z "$modified" ] || node ./scripts/mergeITs.js
+  [ -f $pom -a -z "$modified" ] || node ./scripts/mergeITs.js $MODULES
 }
 ## Ask whether to run dev-server before running ITs
 askJetty() {
@@ -91,16 +91,16 @@ printf "Your option:  "
 read option
 ## compose the mvn cli command based on the selected option
 case $option in
-   1) askModule; cmd="mvn clean test-compile -amd -B -q -DskipFrontend -pl $module-flow-parent";;
-   2) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-demo -Pwar"; browser=true;;
-   3) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -q -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
-   4) askModule; cmd="mvn jetty:run -am -B -q -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
-   5) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
-   6) cmd="mvn clean test-compile -DskipFrontend -B -q -T 1C";;
+   1) askModule; cmd="mvn clean test-compile -amd -B $quiet -DskipFrontend -pl $module-flow-parent";;
+   2) askModule; cmd="mvn jetty:run -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-demo -Pwar"; browser=true;;
+   3) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
+   4) askModule; cmd="mvn jetty:run -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
+   5) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B $quiet -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   6) cmd="mvn clean test-compile -DskipFrontend -B $quiet -T 1C";;
    7) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
-   8) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -q -am -B -D$it -pl integration-tests $utests $itests $frontend $jetty $args";;
-   9) mergeITs; cmd="mvn jetty:run -am -B -q -DskipTests -D$it -pl integration-tests"; browser=true;;
-   10) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B -q -pl integration-tests -D$it $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   8) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify $quiet -am -B -D$it -pl integration-tests $utests $itests $frontend $jetty $args";;
+   9) mergeITs; cmd="mvn jetty:run -am -B $quiet -DskipTests -D$it -pl integration-tests"; browser=true;;
+   10) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B $quiet -pl integration-tests -D$it $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
 esac
 
 ## execute mvn command and check error status

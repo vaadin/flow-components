@@ -58,6 +58,12 @@ async function readRootPoms() {
   }
 }
 
+function mergeDependencies(prj1, prj2) {
+  const arr1 = prj1 && prj1.dependencies && prj1.dependencies[0] && prj1.dependencies[0].dependency || [];
+  const arr2 = prj2 && prj2.dependencies && prj2.dependencies[0] && prj2.dependencies[0].dependency || [];
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
+}
+
 function renameComponent(array, name) {
   for(let i = 0; array && i < array.length; i++) {
     array[i] = array[i].replace(/^component/, name);
@@ -89,11 +95,20 @@ function setDependenciesVersion(dependencies) {
   return dependencies;
 }
 
+function mergePlugins(build1, build2) {
+  return [
+    ... (build1 && build1[0] && build1[0].plugins && build1[0].plugins[0] && build1[0].plugins[0].plugin || []),
+    ... (build2 && build2[0] && build2[0].plugins && build2[0].plugins[0] && build2[0].plugins[0].plugin || [])
+  ]
+}
+
 async function consolidate(template, pom, cb) {
   const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/${template}`, 'utf8'));
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   await renameBase(tplJs);
+
+  pomJs.project.dependencies[0] = {dependency: mergeDependencies(tplJs.project, pomJs.project)};
 
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
   tplJs.project.parent[0].version = [rootVersion];
@@ -102,17 +117,22 @@ async function consolidate(template, pom, cb) {
   } else {
     delete tplJs.project.version;
   }
-  cb && cb(tplJs);
+  cb && cb(tplJs, pomJs);
 
   const xml = new xml2js.Builder().buildObject(tplJs);
   console.log(`writing ${pom}`);
-  fs.writeFileSync(pom, xml + '\n', 'utf8');
+  fs.writeFileSync(pom, xml
+    // ident using 4 spaces to make sonar happy
+    .replace(/\n( +)</g, '\n$1$1<') + '\n', 'utf8');
 }
 
 async function consolidatePomParent() {
   const template = proComponents.includes(componentName) ? 'pom-parent-pro.xml' : 'pom-parent.xml';
   await consolidate(template, `${mod}/pom.xml`, js => {
     renameComponent(js.project.modules[0].module, name);
+    if (fs.existsSync(`${mod}/${name}-flow-demo/pom.xml`)) {
+      js.project.modules[0].module.push(`${name}-flow-demo`);
+    }
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
     js.project.parent[0].version = [rootVersion];
     delete js.project.version;
@@ -120,13 +140,16 @@ async function consolidatePomParent() {
 }
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
-  await consolidate(template, `${mod}/${name}-flow/pom.xml`);
+  consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
+      tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
+    });
 }
 async function consolidatePomTB() {
   await consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
 }
 async function consolidatePomDemo() {
-  await consolidate('pom-demo.xml', `${mod}/${name}-flow-demo/pom.xml`)
+  const demoPom = `${mod}/${name}-flow-demo/pom.xml`;
+  fs.existsSync(demoPom) && consolidate('pom-demo.xml', demoPom);
 }
 async function consolidatePomIT() {
   await consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
@@ -159,4 +182,3 @@ async function main() {
 }
 
 main()
-
