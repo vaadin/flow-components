@@ -95,7 +95,6 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
 
       const checked = this.selectAll;
       checkbox.hidden = this.selectAllHidden;
-      checkbox.__rendererChecked = checked;
       checkbox.checked = checked;
     }
 
@@ -114,7 +113,6 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
       }
 
       checkbox.__item = item;
-      checkbox.__rendererChecked = selected;
       checkbox.checked = selected;
     }
 
