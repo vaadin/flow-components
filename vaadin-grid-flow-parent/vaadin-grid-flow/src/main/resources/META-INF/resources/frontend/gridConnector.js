@@ -445,8 +445,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         if (!row.hidden) {
           // make sure that component renderers are updated
           Array.from(row.children).forEach(cell => {
-            if (cell._instance && cell._instance.children) {
-              Array.from(cell._instance.children).forEach(content => {
+            if (cell._content && cell._content.__templateInstance && cell._content.__templateInstance.children) {
+              Array.from(cell._content.__templateInstance.children).forEach(content => {
                 if(content._attachRenderedComponentIfAble) {
                   content._attachRenderedComponentIfAble();
                 }
