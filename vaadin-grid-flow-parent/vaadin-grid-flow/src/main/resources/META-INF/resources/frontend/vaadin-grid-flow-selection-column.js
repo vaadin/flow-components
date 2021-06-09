@@ -1,20 +1,7 @@
 import '@vaadin/vaadin-grid/vaadin-grid-column.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
 {
   class GridFlowSelectionColumnElement extends GridColumnElement {
-    static get template() {
-      return html`
-    <template class="header" id="defaultHeaderTemplate">
-      <vaadin-checkbox id="selectAllCheckbox" aria-label="Select All" hidden\$="[[selectAllHidden]]" on-click="_onSelectAllClick" checked="[[selectAll]]">
-      </vaadin-checkbox>
-    </template>
-    <template id="defaultBodyTemplate">
-      <vaadin-checkbox aria-label="Select Row" checked="[[selected]]" on-click="_onSelectClick">
-      </vaadin-checkbox>
-    </template>
-`;
-    }
 
     static get is() {
       return 'vaadin-grid-flow-selection-column';
@@ -66,12 +53,10 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
       this._boundOnDeselectEvent = this._onDeselectEvent.bind(this);
     }
 
-    _prepareHeaderTemplate() {
-      return this._prepareTemplatizer(this.$.defaultHeaderTemplate);
-    }
-
-    _prepareBodyTemplate() {
-      return this._prepareTemplatizer(this.$.defaultBodyTemplate);
+    static get observers() {
+      return [
+        '_onHeaderRendererOrBindingChanged(_headerRenderer, _headerCell, path, header, selectAll, selectAllHidden)'
+      ];
     }
 
     /** @private */
@@ -89,25 +74,52 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
       if (this._grid) {
         this._grid.removeEventListener('select', this._boundOnSelectEvent);
         this._grid.removeEventListener('deselect', this._boundOnDeselectEvent);
-
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        if (isSafari && window.ShadyDOM && this.parentElement) {
-          // Detach might have been caused by order change.
-          // Shady on safari doesn't restore isAttached so we'll need to do it manually.
-          const parent = this.parentElement;
-          const nextSibling = this.nextElementSibling;
-          parent.removeChild(this);
-          if (nextSibling) {
-            parent.insertBefore(this, nextSibling);
-          } else {
-            parent.appendChild(this);
-          }
-        }
       }
     }
 
+    /**
+     * Renders the Select All checkbox to the header cell.
+     *
+     * @override
+     */
+    _defaultHeaderRenderer(root, _column) {
+      let checkbox = root.firstElementChild;
+      if (!checkbox) {
+        checkbox = document.createElement('vaadin-checkbox');
+        checkbox.id = 'selectAllCheckbox';
+        checkbox.setAttribute('aria-label', 'Select All');
+        checkbox.classList.add('vaadin-grid-select-all-checkbox');
+        checkbox.addEventListener('click', this._onSelectAllClick.bind(this));
+        root.appendChild(checkbox);
+      }
+
+      const checked = this.selectAll;
+      checkbox.hidden = this.selectAllHidden;
+      checkbox.__rendererChecked = checked;
+      checkbox.checked = checked;
+    }
+
+    /**
+     * Renders the Select Row checkbox to the body cell.
+     *
+     * @override
+     */
+    _defaultRenderer(root, _column, { item, selected }) {
+      let checkbox = root.firstElementChild;
+      if (!checkbox) {
+        checkbox = document.createElement('vaadin-checkbox');
+        checkbox.setAttribute('aria-label', 'Select Row');
+        checkbox.addEventListener('click', this._onSelectClick.bind(this));
+        root.appendChild(checkbox);
+      }
+
+      checkbox.__item = item;
+      checkbox.__rendererChecked = selected;
+      checkbox.checked = selected;
+    }
+
     _onSelectClick(e) {
-      e.target.checked ? this._grid.$connector.doDeselection([e.model.item], true) : this._grid.$connector.doSelection([e.model.item], true);
+      e.target.checked ? this._grid.$connector.doDeselection([e.target.__item], true) : this._grid.$connector.doSelection([e.target.__item], true);
       e.target.checked = !e.target.checked;
     }
 
