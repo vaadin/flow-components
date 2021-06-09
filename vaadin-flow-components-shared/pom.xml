@@ -24,6 +24,12 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-component-demo-helpers</artifactId>
       <scope>compile</scope>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>LATEST</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>
