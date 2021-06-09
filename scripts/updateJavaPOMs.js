@@ -153,6 +153,11 @@ async function consolidatePomIT() {
   await consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
 }
 
+async function consolidatePomBowerIT() {
+ const bowerITPom = `${mod}/${name}-flow-integration-tests/pom-bower-mode.xml`;
+ fs.existsSync(bowerITPom) && consolidate('pom-bower-mode.xml', bowerITPom);
+}
+
 async function saveRootPom() {
   if (oldVersionSchema) {
     console.log(`updating ${propertyName} = ${originalVersion} in root pom.xml`);
@@ -176,6 +181,7 @@ async function main() {
   await consolidatePomTB();
   await consolidatePomDemo();
   await consolidatePomIT();
+  await consolidatePomBowerIT();
   await saveRootPom();
 }
 
