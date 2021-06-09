@@ -134,19 +134,19 @@ doc.createElementNS = (ns, tagName) => {
 const inflateFunctions = (jsonConfiguration) => {
     Object.entries(jsonConfiguration).forEach(([attr, targetProperty]) => {
         if (attr.indexOf('_fn_') === 0 && (typeof targetProperty === 'string' || targetProperty instanceof String)) {
-            const property = attr.replace('_fn_','');
+            const property = attr.replace('_fn_', '');
             const jsFunction = Function(`'use strict'; return ${targetProperty}`);
             if (targetProperty.trim().startsWith('function')) {
                 jsonConfiguration[property] = jsFunction();
             } else {
                 jsonConfiguration[property] = jsFunction;
             }
-          delete jsonConfiguration[attr];
+            delete jsonConfiguration[attr];
         } else if (targetProperty instanceof Object) {
-          inflateFunctions(targetProperty);
+            inflateFunctions(targetProperty);
         }
     });
-  }
+}
 
 /**
  * ExportOptions
@@ -200,7 +200,9 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
                         defer: false
                     }
                 }
-            }
+            },
+            credits: { enabled: false },
+            exporting: { enabled: false }
         });
 
         let isTimeline = false;
@@ -223,7 +225,7 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
 
             isTimeline = exportOptions.timeline;
 
-            if(exportOptions.executeFunctions) {
+            if (exportOptions.executeFunctions) {
                 inflateFunctions(chartConfiguration);
             }
         }
@@ -235,7 +237,7 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
             const constr = isTimeline ? 'stockChart' : 'chart';
             chart = Highcharts[constr](
                 'container',
-                { ...chartConfiguration, exporting: { enabled: false } }
+                chartConfiguration
             );
         } catch (e) {
             reject(e);
