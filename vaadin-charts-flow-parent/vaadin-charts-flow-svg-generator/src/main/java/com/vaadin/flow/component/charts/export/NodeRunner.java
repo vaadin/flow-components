@@ -14,7 +14,6 @@
 package com.vaadin.flow.component.charts.export;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,19 +36,6 @@ class NodeRunner {
         } else {
             command.add(script);
         }
-        ProcessBuilder builder = FrontendUtils.createProcessBuilder(command);
-        builder.inheritIO();
-        Process process = builder.start();
-        return process.waitFor();
-    }
-
-    int runJavascript(Path script) throws InterruptedException, IOException {
-        FrontendTools tools = new FrontendTools("",
-                () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
-        String node = tools.getNodeExecutable();
-        List<String> command = new ArrayList<>();
-        command.add(node);
-        command.add(script.toFile().getAbsolutePath());
         ProcessBuilder builder = FrontendUtils.createProcessBuilder(command);
         builder.inheritIO();
         Process process = builder.start();
