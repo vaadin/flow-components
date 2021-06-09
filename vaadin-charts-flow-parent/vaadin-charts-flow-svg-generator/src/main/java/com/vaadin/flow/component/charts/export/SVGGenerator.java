@@ -153,16 +153,13 @@ public class SVGGenerator implements AutoCloseable {
                 SCRIPT_TEMPLATE, bundleTempPath.toFile().getAbsolutePath()
                         .replaceAll("\\\\", "/"),
                 jsonConfig, chartFileName, jsonExportOptions);
-        Path scriptPath = Files.createTempFile(tempDirPath, "script", ".js");
-        Files.write(scriptPath, script.getBytes());
         NodeRunner nodeRunner = new NodeRunner();
-        nodeRunner.runJavascript(scriptPath);
+        nodeRunner.runJavascript(script);
         // when script completes, the chart svg file should exist
         try {
             return new String(Files.readAllBytes(chartFilePath));
         } finally {
             Files.delete(chartFilePath);
-            Files.deleteIfExists(scriptPath);
         }
     }
 

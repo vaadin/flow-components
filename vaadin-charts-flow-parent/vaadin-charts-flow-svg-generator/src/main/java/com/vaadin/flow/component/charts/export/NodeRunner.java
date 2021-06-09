@@ -30,7 +30,13 @@ class NodeRunner {
         List<String> command = new ArrayList<>();
         command.add(node);
         command.add("-e");
-        command.add(script);
+        // this check is necessary since running a script on windows eats up
+        // double quotes
+        if (FrontendUtils.isWindows()) {
+            command.add(script.replace("\"", "\\\""));
+        } else {
+            command.add(script);
+        }
         ProcessBuilder builder = FrontendUtils.createProcessBuilder(command);
         builder.inheritIO();
         Process process = builder.start();
