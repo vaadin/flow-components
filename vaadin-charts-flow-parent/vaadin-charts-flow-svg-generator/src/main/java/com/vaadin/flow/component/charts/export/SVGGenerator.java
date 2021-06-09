@@ -158,7 +158,8 @@ public class SVGGenerator implements AutoCloseable {
         nodeRunner.runJavascript(script);
         // when script completes, the chart svg file should exist
         try {
-            return new String(Files.readAllBytes(chartFilePath), StandardCharsets.UTF_8);
+            return new String(Files.readAllBytes(chartFilePath),
+                    StandardCharsets.UTF_8);
         } finally {
             Files.delete(chartFilePath);
         }
