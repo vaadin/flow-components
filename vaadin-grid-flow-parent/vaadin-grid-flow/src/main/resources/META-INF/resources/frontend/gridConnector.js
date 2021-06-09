@@ -445,8 +445,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         if (!row.hidden) {
           // make sure that component renderers are updated
           Array.from(row.children).forEach(cell => {
-            if (cell._instance && cell._instance.children) {
-              Array.from(cell._instance.children).forEach(content => {
+            if (cell._content && cell._content.__templateInstance && cell._content.__templateInstance.children) {
+              Array.from(cell._content.__templateInstance.children).forEach(content => {
                 if(content._attachRenderedComponentIfAble) {
                   content._attachRenderedComponentIfAble();
                 }
@@ -465,16 +465,15 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         }
       })
 
-      grid._expandedInstanceChangedCallback = tryCatchWrapper(function(inst, value) {
+      const itemExpandedChanged = tryCatchWrapper(function(item, expanded) {
         // method available only for the TreeGrid server-side component
-        if (inst.item == undefined || grid.$server.updateExpandedState == undefined) {
+        if (item == undefined || grid.$server.updateExpandedState == undefined) {
           return;
         }
-        let parentKey = grid.getItemId(inst.item);
-        grid.$server.updateExpandedState(parentKey, value);
-        if (value) {
-          this.expandItem(inst.item);
-        } else {
+        let parentKey = grid.getItemId(item);
+        grid.$server.updateExpandedState(parentKey, expanded);
+
+        if (!expanded) {
           delete cache[parentKey];
           let parentCache = grid.$connector.getCacheByKey(parentKey);
           if (parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
@@ -486,9 +485,20 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
                 .forEach(idx => delete parentCache.itemCaches[idx]);
           }
           delete lastRequestedRanges[parentKey];
-          this.collapseItem(inst.item);
         }
-      })
+      });
+
+      // Patch grid.expandItem and grid.collapseItem to have
+      // itemExpandedChanged run when either happens.
+      grid.expandItem = tryCatchWrapper(function(item) {
+        itemExpandedChanged(item, true);
+        GridElement.prototype.expandItem.call(grid, item);
+      });
+
+      grid.collapseItem = tryCatchWrapper(function(item) {
+        itemExpandedChanged(item, false);
+        GridElement.prototype.collapseItem.call(grid, item);
+      });
 
       const itemsUpdated = function(items) {
         if (!items || !Array.isArray(items)) {
