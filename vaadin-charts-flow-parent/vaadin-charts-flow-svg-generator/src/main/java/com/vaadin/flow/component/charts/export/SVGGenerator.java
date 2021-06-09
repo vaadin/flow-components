@@ -14,6 +14,7 @@
 package com.vaadin.flow.component.charts.export;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -157,7 +158,7 @@ public class SVGGenerator implements AutoCloseable {
         nodeRunner.runJavascript(script);
         // when script completes, the chart svg file should exist
         try {
-            return new String(Files.readAllBytes(chartFilePath));
+            return new String(Files.readAllBytes(chartFilePath), StandardCharsets.UTF_8);
         } finally {
             Files.delete(chartFilePath);
         }
