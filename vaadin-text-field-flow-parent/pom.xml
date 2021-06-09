@@ -13,7 +13,6 @@
         <module>vaadin-text-field-flow</module>
         <module>vaadin-text-field-testbench</module>
         <module>vaadin-text-field-flow-demo</module>
-        <module>vaadin-text-field-flow-demo</module>
     </modules>
     <profiles>
         <profile>

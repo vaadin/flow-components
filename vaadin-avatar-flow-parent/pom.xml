@@ -13,7 +13,6 @@
         <module>vaadin-avatar-flow</module>
         <module>vaadin-avatar-testbench</module>
         <module>vaadin-avatar-flow-demo</module>
-        <module>vaadin-avatar-flow-demo</module>
     </modules>
     <profiles>
         <profile>

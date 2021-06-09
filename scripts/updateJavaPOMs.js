@@ -130,9 +130,7 @@ async function consolidatePomParent() {
   const template = proComponents.includes(componentName) ? 'pom-parent-pro.xml' : 'pom-parent.xml';
   await consolidate(template, `${mod}/pom.xml`, js => {
     renameComponent(js.project.modules[0].module, name);
-    if (fs.existsSync(`${mod}/${name}-flow-demo/pom.xml`)) {
-      js.project.modules[0].module.push(`${name}-flow-demo`);
-    }
+  
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
     js.project.parent[0].version = [rootVersion];
     delete js.project.version;

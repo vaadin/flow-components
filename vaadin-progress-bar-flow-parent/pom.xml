@@ -13,7 +13,6 @@
         <module>vaadin-progress-bar-flow</module>
         <module>vaadin-progress-bar-testbench</module>
         <module>vaadin-progress-bar-flow-demo</module>
-        <module>vaadin-progress-bar-flow-demo</module>
     </modules>
     <profiles>
         <profile>

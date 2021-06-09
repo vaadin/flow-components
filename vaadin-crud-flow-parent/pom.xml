@@ -19,7 +19,6 @@
         <module>vaadin-crud-flow</module>
         <module>vaadin-crud-testbench</module>
         <module>vaadin-crud-flow-demo</module>
-        <module>vaadin-crud-flow-demo</module>
     </modules>
     <profiles>
         <profile>

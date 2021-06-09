@@ -13,7 +13,6 @@
         <module>vaadin-button-flow</module>
         <module>vaadin-button-testbench</module>
         <module>vaadin-button-flow-demo</module>
-        <module>vaadin-button-flow-demo</module>
     </modules>
     <profiles>
         <profile>

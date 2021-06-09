@@ -19,7 +19,6 @@
         <module>vaadin-board-flow</module>
         <module>vaadin-board-testbench</module>
         <module>vaadin-board-flow-demo</module>
-        <module>vaadin-board-flow-demo</module>
     </modules>
     <profiles>
         <profile>

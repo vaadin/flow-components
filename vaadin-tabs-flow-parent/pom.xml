@@ -13,7 +13,6 @@
         <module>vaadin-tabs-flow</module>
         <module>vaadin-tabs-testbench</module>
         <module>vaadin-tabs-flow-demo</module>
-        <module>vaadin-tabs-flow-demo</module>
     </modules>
     <profiles>
         <profile>

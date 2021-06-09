@@ -13,7 +13,6 @@
         <module>vaadin-form-layout-flow</module>
         <module>vaadin-form-layout-testbench</module>
         <module>vaadin-form-layout-flow-demo</module>
-        <module>vaadin-form-layout-flow-demo</module>
     </modules>
     <profiles>
         <profile>

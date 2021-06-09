@@ -13,7 +13,6 @@
         <module>vaadin-custom-field-flow</module>
         <module>vaadin-custom-field-testbench</module>
         <module>vaadin-custom-field-flow-demo</module>
-        <module>vaadin-custom-field-flow-demo</module>
     </modules>
     <profiles>
         <profile>

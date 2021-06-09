@@ -13,7 +13,6 @@
         <module>vaadin-date-time-picker-flow</module>
         <module>vaadin-date-time-picker-testbench</module>
         <module>vaadin-date-time-picker-flow-demo</module>
-        <module>vaadin-date-time-picker-flow-demo</module>
     </modules>
     <profiles>
         <profile>

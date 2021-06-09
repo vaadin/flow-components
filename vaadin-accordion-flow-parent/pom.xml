@@ -13,7 +13,6 @@
         <module>vaadin-accordion-flow</module>
         <module>vaadin-accordion-testbench</module>
         <module>vaadin-accordion-flow-demo</module>
-        <module>vaadin-accordion-flow-demo</module>
     </modules>
     <profiles>
         <profile>

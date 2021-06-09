@@ -13,7 +13,6 @@
         <module>vaadin-select-flow</module>
         <module>vaadin-select-testbench</module>
         <module>vaadin-select-flow-demo</module>
-        <module>vaadin-select-flow-demo</module>
     </modules>
     <profiles>
         <profile>

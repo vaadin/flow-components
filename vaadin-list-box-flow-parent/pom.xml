@@ -13,7 +13,6 @@
         <module>vaadin-list-box-flow</module>
         <module>vaadin-list-box-testbench</module>
         <module>vaadin-list-box-flow-demo</module>
-        <module>vaadin-list-box-flow-demo</module>
     </modules>
     <profiles>
         <profile>

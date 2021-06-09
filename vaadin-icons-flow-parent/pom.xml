@@ -13,7 +13,6 @@
         <module>vaadin-icons-flow</module>
         <module>vaadin-icons-testbench</module>
         <module>vaadin-icons-flow-demo</module>
-        <module>vaadin-icons-flow-demo</module>
     </modules>
     <profiles>
         <profile>
