@@ -129,6 +129,20 @@ describe('jsdom-exporter', () => {
     const document = parseSVG(result.svgString);
     expect(document.querySelector('.highcharts-xaxis-labels text').textContent).to.contain('CUSTOM_LABEL');
   });
+
+  it('should not have credits on generated SVG', async () => {
+    const result = await jsdomExporter({ chartConfiguration: { title: { text: 'TITLE' } } });
+    const document = parseSVG(result.svgString);
+
+    expect(document.querySelector('.highcharts-credits')).to.be.null;
+  });
+
+  it('should not have exporting menu on generated SVG', async () => {
+    const result = await jsdomExporter({ chartConfiguration: { title: { text: 'TITLE' } } });
+    const document = parseSVG(result.svgString);
+
+    expect(document.querySelector('.highcharts-exporting-group')).to.be.null;
+  });
 });
 
 describe('timeline', () => {
