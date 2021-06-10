@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +34,7 @@ public class BigDecimalFieldTest extends TextFieldTest {
     @Before
     public void init() {
         field = new BigDecimalField();
+        field.setLocale(Locale.US);
     }
 
     @Override
