@@ -20,6 +20,18 @@
   </properties>
 
   <dependencies>
+      <dependency>
+          <groupId>io.github.bonigarcia</groupId>
+          <artifactId>webdrivermanager</artifactId>
+          <version>LATEST</version>
+          <scope>test</scope>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.jsoup</groupId>
+                  <artifactId>jsoup</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
   </dependencies>
 
   <build>
@@ -159,29 +171,5 @@
               </plugins>
           </build>
       </profile>
-    <profile>
-	  <id>local-run</id>
-      <activation>
-        <property>
-          <name>!test.use.hub</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.googlecode.maven-download-plugin</groupId>
-            <artifactId>download-maven-plugin</artifactId>
-          </plugin>
-          <plugin>
-            <groupId>com.lazerycode.selenium</groupId>
-            <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 </project>
