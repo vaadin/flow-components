@@ -80,14 +80,8 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *            the icon collection
      * @param icon
      *            the icon name
-     * @deprecated Use either {@link #Icon(String)} or
-     *             {@link IronIcon#IronIcon(String,String)
-     *             IronIcon(String,String)}
      */
-    @Deprecated
     public Icon(String collection, String icon) {
-        // iron-icon's icon-attribute uses the format "collection:name",
-        // e.g. icon="vaadin:arrow-down"
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
     }
 
