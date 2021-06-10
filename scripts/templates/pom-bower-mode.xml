@@ -20,6 +20,18 @@
   </properties>
 
   <dependencies>
+      <dependency>
+          <groupId>io.github.bonigarcia</groupId>
+          <artifactId>webdrivermanager</artifactId>
+          <version>LATEST</version>
+          <scope>test</scope>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.jsoup</groupId>
+                  <artifactId>jsoup</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
   </dependencies>
 
   <build>
