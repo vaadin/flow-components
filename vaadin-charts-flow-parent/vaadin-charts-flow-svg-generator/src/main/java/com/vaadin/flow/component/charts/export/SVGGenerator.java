@@ -31,6 +31,10 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  * </p>
  * <br />
  * <p>
+ *     CSS styling is not supported.
+ * </p>
+ * <br />
+ * <p>
  * Example usage:
  * </p>
  *
