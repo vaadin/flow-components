@@ -34,7 +34,7 @@ public enum VaadinIcon implements IconFactory {
      * Creates a new {@link Iron} instance with the icon determined by the name
      * of this instance.
      *
-     * @return a new instance of {@link Iron} component
+     * @return a new instance of {@link Icon} component
      */
     public Icon create() {
         return new Icon(this);
