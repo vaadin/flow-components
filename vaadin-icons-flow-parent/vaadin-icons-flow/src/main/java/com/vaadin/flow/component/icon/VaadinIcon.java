@@ -19,9 +19,8 @@ package com.vaadin.flow.component.icon;
  * Enumeration of all icons in the <a href="https://vaadin.com/icons">Vaadin
  * Icons</a> collection.
  * <p>
- * These instances can be used to create {@link Icon} components either by
- * using their {@link #create()} method or by passing them to Icon's
- * constructor.
+ * These instances can be used to create {@link Icon} components either by using
+ * their {@link #create()} method or by passing them to Icon's constructor.
  *
  * @author Vaadin Ltd
  *
