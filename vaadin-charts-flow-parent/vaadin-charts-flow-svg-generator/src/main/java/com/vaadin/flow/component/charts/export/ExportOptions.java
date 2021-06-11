@@ -30,7 +30,7 @@ import com.vaadin.flow.component.charts.model.style.Theme;
  * <li>theme: Theme used to style the chart. For example:
  * {@link com.vaadin.flow.component.charts.themes.LumoDarkTheme}</li>
  * <li>lang: Lang specifications for internationalization purposes.</li>
- * <li>isTimeline: Determines if the generated chart is in timeline mode.</li>
+ * <li>timeline: Determines if the generated chart is in timeline mode.</li>
  * <li>executeFunctions: execute JavaScript functions (for example: formatter
  * functions)</li>
  * </ul>
