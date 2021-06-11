@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.icon.demo;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
@@ -33,6 +34,8 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-icons/icon-view")
+// Import the iron-iconset-svg based icons for IronIcon
+@JsModule("@vaadin/vaadin-lumo-styles/iconset.js")
 public class IconView extends Div {
 
     public IconView() {
