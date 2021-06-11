@@ -79,8 +79,14 @@ public class SVGGenerator implements AutoCloseable {
     private final Path bundleTempPath;
 
     /**
-     * Creates a new instance of {@link SVGGenerator} which allocates resources
+     * <p>
+     *     Creates a new instance of {@link SVGGenerator} which allocates resources
      * used to transform a {@link Configuration} object to an SVG string.
+     * </p>
+     * <p>
+     *     <b>You must close the generator when you're done using it.</b>
+     *     Use a <code>try-with-resources</code> block or call the {@link SVGGenerator#close()} method.
+     * </p>
      *
      * @throws IOException
      *             if there's any issue allocating resources needed.
