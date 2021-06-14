@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-component-demo-helpers</artifactId>
+            <artifactId>flow-html-components</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -56,7 +56,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-icons-flow-demo</artifactId>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
