@@ -40,6 +40,7 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -90,7 +91,7 @@ public class SVGGeneratorTest {
                 "empty.svg");
         String emptyChartContent = new String(
                 Files.readAllBytes(emptyConfigChart));
-        assertTrue(replaceIds(emptyChartContent).contains(replaceIds(svg)));
+        assertEquals(replaceIds(emptyChartContent), replaceIds(svg));
     }
 
     @Test
@@ -100,7 +101,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(conf);
         Path pieChartPath = Paths.get("src", "test", "resources", "pie.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
     @Test
@@ -113,7 +114,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-width.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-height.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
     @Test
@@ -139,7 +140,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "lumo-dark.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
     @Test
@@ -153,7 +154,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-lang.svg");
         String expectedSVG = new String(Files.readAllBytes(pieChartPath));
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(svg)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
     @Test
@@ -175,7 +176,7 @@ public class SVGGeneratorTest {
                 "timeline.svg");
         String expectedSVG = new String(Files.readAllBytes(expectedFilePath));
         String actualSVG = svgGenerator.generate(configuration, options);
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(actualSVG)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class SVGGeneratorTest {
         Path expectedResultPath = Paths.get("src", "test", "resources",
                 "enabled-functions.svg");
         String expectedSVG = new String(Files.readAllBytes(expectedResultPath));
-        assertTrue(replaceIds(expectedSVG).contains(replaceIds(actualSVG)));
+        assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
     }
 
     private Configuration createPieChartConfiguration() {
