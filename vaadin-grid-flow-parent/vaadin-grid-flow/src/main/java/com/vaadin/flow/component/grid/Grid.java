@@ -3381,10 +3381,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * are fetched from the {@link DataProvider}, and the Grid shows no vertical
      * scroll bar.
      * <p>
-     * Note: <code>setAllRowsVisible</code> disables the grid's virtual scrolling
-     * so that all the rows are rendered in the DOM at once. If the grid has a
-     * large number of items, using the feature is discouraged to avoid
-     * performance issues.
+     * Note: <code>setAllRowsVisible</code> disables the grid's virtual
+     * scrolling so that all the rows are rendered in the DOM at once. If the
+     * grid has a large number of items, using the feature is discouraged to
+     * avoid performance issues.
      *
      * @param allRowsVisible
      *            <code>true</code> to make Grid compute its height by the
@@ -3402,8 +3402,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     @Synchronize("all-rows-visible-changed")
     public boolean isAllRowsVisible() {
-        return getElement().getProperty("heightByRows", false) ||
-                getElement().getProperty("allRowsVisible", false);
+        return getElement().getProperty("heightByRows", false)
+                || getElement().getProperty("allRowsVisible", false);
     }
 
     @Override
