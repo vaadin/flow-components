@@ -61,4 +61,39 @@ public class GridTest {
         Assert.assertTrue(grid.getSelectedItems().contains("foo"));
     }
 
+    @Test
+    public void make_all_rows_visible_by_setHeightByRows() {
+        final Grid<String> grid = new Grid<>();
+
+        Assert.assertEquals(null, grid.getElement().getProperty("heightByRows"));
+        grid.setHeightByRows(true);
+        Assert.assertEquals("true", grid.getElement().getProperty("heightByRows"));
+    }
+
+    @Test
+    public void make_all_rows_visible_by_setAllRowsVisible() {
+        final Grid<String> grid = new Grid<>();
+
+        Assert.assertEquals(null, grid.getElement().getProperty("allRowsVisible"));
+        grid.setAllRowsVisible(true);
+        Assert.assertEquals("true", grid.getElement().getProperty("allRowsVisible"));
+    }
+
+    @Test
+    public void check_if_all_rows_visible_with_heightByRows_property() {
+        final Grid<String> grid = new Grid<>();
+        grid.getElement().setProperty("heightByRows", true);
+
+        Assert.assertTrue(grid.isHeightByRows());
+        Assert.assertTrue(grid.isAllRowsVisible());
+    }
+
+    @Test
+    public void check_if_all_rows_visible_with_allRowsVisible_property() {
+        final Grid<String> grid = new Grid<>();
+        grid.getElement().setProperty("allRowsVisible", true);
+
+        Assert.assertTrue(grid.isAllRowsVisible());
+        Assert.assertTrue(grid.isHeightByRows());
+    }
 }
