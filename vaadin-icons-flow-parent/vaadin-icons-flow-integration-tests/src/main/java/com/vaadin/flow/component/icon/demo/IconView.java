@@ -21,7 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -34,8 +33,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-icons/icon-view")
-// Import the iron-iconset-svg based icons for IronIcon
-@JsModule("@vaadin/vaadin-lumo-styles/iconset.js")
+@JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
 public class IconView extends Div {
 
     public IconView() {
@@ -52,7 +50,7 @@ public class IconView extends Div {
         Icon close = new Icon(VaadinIcon.CLOSE);
 
         // Creating an icon from the Lumo icons collection
-        IronIcon clock = new IronIcon("lumo", "clock");
+        Icon clock = new Icon("lumo", "clock");
 
         // end-source-example
 
