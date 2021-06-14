@@ -29,10 +29,14 @@ import com.vaadin.flow.dom.ElementConstants;
  * to display an icon.
  *
  * @author Vaadin Ltd
+ *
+ * @deprecated since Vaadin 21, {@code IronIcon} is deprecated in favor of
+ *             {@link Icon}
  */
 @Tag("iron-icon")
 @NpmPackage(value = "@polymer/iron-icon", version = "3.0.1")
 @JsModule("@polymer/iron-icon/iron-icon.js")
+@Deprecated
 public class IronIcon extends Component
         implements HasStyle, ClickNotifier<IronIcon> {
     private static final String ICON_ATTRIBUTE_NAME = "icon";
