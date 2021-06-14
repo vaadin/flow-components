@@ -98,8 +98,8 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      * Creates an Icon component that displays the given {@code icon} from the
      * given {@code collection}.
      *
-     * If you want to use a custom {@code <vaadin-iconset>} -based icon set,
-     * you also need to add a dependency and an import for it, example:
+     * If you want to use a custom {@code <vaadin-iconset>} -based icon set, you
+     * also need to add a dependency and an import for it, example:
      *
      * <pre>
      * <code>
