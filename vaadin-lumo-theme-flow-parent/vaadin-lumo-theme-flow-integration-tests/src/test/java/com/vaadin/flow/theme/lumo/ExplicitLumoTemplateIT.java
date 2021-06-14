@@ -24,7 +24,7 @@ import com.vaadin.flow.testutil.TestPath;
 
 @TestPath(value = "vaadin-lumo-theme/explicit-template-view")
 public class ExplicitLumoTemplateIT extends AbstractThemedTemplateIT {
-  
+
     @Test
     public void darkVariantIsUsed_htmlElementHasThemeAttribute() {
         open();

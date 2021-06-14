@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-split-layout-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>20.0-SNAPSHOT</version>
+        <version>21.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-split-layout-testbench</artifactId>
     <packaging>jar</packaging>
@@ -19,7 +19,7 @@
     </dependencies>
     <build>
         <plugins>
-                </plugins>
+        </plugins>
     </build>
     <profiles>
         <profile>

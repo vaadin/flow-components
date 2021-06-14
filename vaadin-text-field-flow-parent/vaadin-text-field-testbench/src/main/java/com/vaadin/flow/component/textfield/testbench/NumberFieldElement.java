@@ -35,8 +35,7 @@ public class NumberFieldElement extends TestBenchElement
     @Override
     public void setValue(String string) {
         HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change",
-                Collections.singletonMap("bubbles", true));
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
         dispatchEvent("blur");
     }
 

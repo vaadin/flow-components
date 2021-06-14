@@ -49,7 +49,7 @@ public class GridElement extends TestBenchElement {
      *            the row to scroll to
      */
     public void scrollToRow(int row) {
-        callFunction("_scrollToIndex", row);
+        callFunction("scrollToIndex", row);
         waitUntilLoadingFinished();
     }
 
@@ -68,8 +68,7 @@ public class GridElement extends TestBenchElement {
      * @return the index of the first visible row
      */
     public int getFirstVisibleRowIndex() {
-        return ((Long) executeScript(
-                "return arguments[0]._firstVisibleIndex+arguments[0]._vidxOffset",
+        return ((Long) executeScript("return arguments[0]._firstVisibleIndex",
                 this)).intValue();
     }
 
@@ -158,8 +157,7 @@ public class GridElement extends TestBenchElement {
      */
     public int getLastVisibleRowIndex() {
         // Private for now because this seems to be slightly incorrect
-        return ((Long) executeScript(
-                "return arguments[0]._lastVisibleIndex+arguments[0]._vidxOffset",
+        return ((Long) executeScript("return arguments[0]._lastVisibleIndex",
                 this)).intValue();
     }
 
@@ -388,8 +386,7 @@ public class GridElement extends TestBenchElement {
     }
 
     private void removeActiveItem(GridTRElement row) {
-        final String JS_DEACTIVATE_IF_ACTIVE =
-            "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
+        final String JS_DEACTIVATE_IF_ACTIVE = "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
                 + "arguments[1]._item)) { arguments[0].activeItem=null;}";
         executeScript(JS_DEACTIVATE_IF_ACTIVE, this, row);
     }

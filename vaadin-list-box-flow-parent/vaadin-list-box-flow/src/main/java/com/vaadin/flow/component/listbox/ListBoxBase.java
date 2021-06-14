@@ -63,7 +63,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "21.0.0-alpha6")
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
@@ -71,8 +71,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
         HasDataView<ITEM, Void, ListBoxDataView<ITEM>> {
 
-    private final AtomicReference<DataProvider<ITEM, ?>> dataProvider =
-            new AtomicReference<>(DataProvider.ofItems());
+    private final AtomicReference<DataProvider<ITEM, ?>> dataProvider = new AtomicReference<>(
+            DataProvider.ofItems());
     private List<ITEM> items;
     private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>();
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
@@ -83,9 +83,9 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     private SerializableConsumer<UI> sizeRequest;
 
     <P> ListBoxBase(String propertyName, Class<P> elementPropertyType,
-                    VALUE defaultValue,
-                    SerializableBiFunction<C, P, VALUE> presentationToModel,
-                    SerializableBiFunction<C, VALUE, P> modelToPresentation) {
+            VALUE defaultValue,
+            SerializableBiFunction<C, P, VALUE> presentationToModel,
+            SerializableBiFunction<C, VALUE, P> modelToPresentation) {
         super(propertyName, defaultValue, elementPropertyType,
                 presentationToModel, modelToPresentation);
     }
@@ -99,8 +99,9 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      */
     @Deprecated
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
-        this.dataProvider.set( Objects.requireNonNull(dataProvider) );
+        this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
+        clear();
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -108,20 +109,23 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-        dataProviderListenerRegistration = dataProvider.addDataProviderListener(event -> {
-            if (event instanceof DataRefreshEvent) {
-                refresh(((DataRefreshEvent<ITEM>) event).getItem());
-            } else {
-                rebuild();
-            }
-        });
+        dataProviderListenerRegistration = dataProvider
+                .addDataProviderListener(event -> {
+                    if (event instanceof DataRefreshEvent) {
+                        refresh(((DataRefreshEvent<ITEM>) event).getItem());
+                    } else {
+                        clear();
+                        rebuild();
+                    }
+                });
         rebuild();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
     }
@@ -214,7 +218,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     @SuppressWarnings("unchecked")
     private void rebuild() {
-        clear();
         removeAll();
 
         synchronized (dataProvider) {
@@ -222,11 +225,10 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             items = (List<ITEM>) getDataProvider()
                     .fetch(DataViewUtils.getQuery(this))
                     .collect(Collectors.toList());
-            items.stream().map(this::createItemComponent)
-                    .forEach(component -> {
-                        add(component);
-                        itemCounter.incrementAndGet();
-                    });
+            items.stream().map(this::createItemComponent).forEach(component -> {
+                add(component);
+                itemCounter.incrementAndGet();
+            });
             lastFetchedDataSize = itemCounter.get();
 
             // Ignore new size requests unless the last one has been executed
@@ -253,8 +255,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         getItemComponents().stream()
                 .filter(vaadinItem -> getItemId(vaadinItem.getItem())
                         .equals(getItemId(item)))
-                .findFirst()
-                .ifPresent(this::refresh);
+                .findFirst().ifPresent(this::refresh);
     }
 
     private void refresh(VaadinItem<ITEM> itemComponent) {
@@ -292,7 +293,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     /**
      * Set a generic data provider for the ListBox to use and returns the base
-     * {@link ListBoxDataView} that provides API to get information on the items.
+     * {@link ListBoxDataView} that provides API to get information on the
+     * items.
      * <p>
      * This method should be used only when the data provider type is not either
      * {@link ListDataProvider} or {@link BackEndDataProvider}.
@@ -302,7 +304,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * @return ListBoxDataView providing information on the data
      */
     @Override
-    public ListBoxDataView<ITEM> setItems(DataProvider<ITEM, Void> dataProvider) {
+    public ListBoxDataView<ITEM> setItems(
+            DataProvider<ITEM, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getGenericDataView();
     }
@@ -325,18 +328,17 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         // We don't use DataProvider.withConvertedFilter() here because it's
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<ITEM, Void> convertedDataProvider =
-                new DataProviderWrapper<ITEM, Void, SerializablePredicate<ITEM>>(
-                        inMemoryDataProvider) {
-                    @Override
-                    protected SerializablePredicate<ITEM> getFilter(
-                            Query<ITEM, Void> query) {
-                        // Just ignore the query filter (Void) and apply the
-                        // predicate only
-                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                                .orElse(item -> true);
-                    }
-                };
+        DataProvider<ITEM, Void> convertedDataProvider = new DataProviderWrapper<ITEM, Void, SerializablePredicate<ITEM>>(
+                inMemoryDataProvider) {
+            @Override
+            protected SerializablePredicate<ITEM> getFilter(
+                    Query<ITEM, Void> query) {
+                // Just ignore the query filter (Void) and apply the
+                // predicate only
+                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        .orElse(item -> true);
+            }
+        };
         return setItems(convertedDataProvider);
     }
 
@@ -368,8 +370,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * Gets the list data view for the ListBox. This data view should
-     * only be used when the items are in-memory and set with:
+     * Gets the list data view for the ListBox. This data view should only be
+     * used when the items are in-memory and set with:
      * <ul>
      * <li>{@link #setItems(Collection)}</li>
      * <li>{@link #setItems(Object[])}</li>
@@ -387,9 +389,9 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * Gets the generic data view for the ListBox. This data view should
-     * only be used when {@link #getListDataView()} is not applicable for the
-     * underlying data provider.
+     * Gets the generic data view for the ListBox. This data view should only be
+     * used when {@link #getListDataView()} is not applicable for the underlying
+     * data provider.
      *
      * @return the generic DataView instance implementing
      *         {@link ListBoxDataView}
@@ -418,9 +420,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     @SuppressWarnings("unchecked")
     private IdentifierProvider<ITEM> getIdentifierProvider() {
-        IdentifierProvider<ITEM> identifierProviderObject =
-                (IdentifierProvider<ITEM>) ComponentUtil.getData(this,
-                                                    IdentifierProvider.class);
+        IdentifierProvider<ITEM> identifierProviderObject = (IdentifierProvider<ITEM>) ComponentUtil
+                .getData(this, IdentifierProvider.class);
         if (identifierProviderObject != null)
             return identifierProviderObject;
 

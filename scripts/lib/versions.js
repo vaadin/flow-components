@@ -2,6 +2,8 @@ const https = require("https");
 const xml2js = require('xml2js');
 const fs = require('fs');
 const exec = require('util').promisify(require('child_process').exec);
+const cachedBowerVersions = {};
+const cachedNpmVersions = {};
 
 async function run(cmd) {
   const { stdout, stderr } = await exec(cmd);
@@ -106,24 +108,30 @@ async function getAnnotations(){
 }
 
 async function getLatestNpmVersion(package, version, major, minor) {
-  cmd = `npm view ${package} versions --json`;
-  const json = await JSON.parse(await run(cmd))
-  const versions = json.filter(version => version.startsWith(`${major}.${minor}`));
-  const next =  versions.pop();
-  console.log(`Checking next version for ${package} ${version} ${next}`);
-  return next;
+  if (!cachedNpmVersions[package]) {
+    cmd = `npm view ${package} versions --json`;
+    const json = await JSON.parse(await run(cmd))
+    const versions = json.filter(version => version.startsWith(`${major}.${minor}`));
+    const next =  versions.pop();
+    console.log(`Checking next Npm version for ${package} ${version} ${next}`);
+    cachedNpmVersions[package] = next;
+  }
+  return cachedNpmVersions[package];
 }
 
 async function getLatestBowerVersion(package, version, major, minor) {
-  cmd = `bower info ${package} --json`;
-  const json = await JSON.parse(await run(cmd));
-  const versions = json.versions.filter(version => version.startsWith(`${major}.${minor}`));
-  const next =  versions[0]
-  console.log(`Checking next version for ${package} ${version} ${next}`);
-  return next;
+  if (!cachedBowerVersions[package]) {
+    cmd = `bower info ${package} --json`;
+    const json = await JSON.parse(await run(cmd));
+    const versions = json.versions.filter(version => version.startsWith(`${major}.${minor}`));
+    const next =  versions[0]
+    console.log(`Checking next Bower version for ${package} ${version} ${next}`);
+    cachedBowerVersions[package] = next;
+  }
+  return cachedBowerVersions[package];
 }
 
-async function computeVertionToUpdate(data) {
+async function computeVersionToUpdate(data) {
   return (data['updatedVersion'] = await getLatestNpmVersion(data.package, data.version, data.major, data.minor));
 }
 
@@ -131,7 +139,7 @@ module.exports = {
   getVersions,
   getVersionsCsv,
   getVersionsJson,
-  computeVertionToUpdate,
+  computeVersionToUpdate,
   getLatestNpmVersion,
   getAnnotations,
   checkoutPlatorm,

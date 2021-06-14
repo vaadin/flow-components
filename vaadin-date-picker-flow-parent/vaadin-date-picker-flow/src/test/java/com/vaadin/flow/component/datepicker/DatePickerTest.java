@@ -22,9 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -51,19 +49,6 @@ public class DatePickerTest {
             super(TEST_VALUE, null, String.class, value -> null, value -> null,
                     true);
         }
-    }
-
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -175,12 +160,12 @@ public class DatePickerTest {
     public void setAutoOpenEnabled() {
         DatePicker picker = new DatePicker();
         assertTrue("Auto-open should be enabled by default",
-            picker.isAutoOpen());
+                picker.isAutoOpen());
         picker.setAutoOpen(false);
         assertFalse("Should be possible to disable auto-open",
-            picker.isAutoOpen());
+                picker.isAutoOpen());
         picker.setAutoOpen(true);
         assertTrue("Should be possible to enable auto-open",
-            picker.isAutoOpen());
+                picker.isAutoOpen());
     }
 }

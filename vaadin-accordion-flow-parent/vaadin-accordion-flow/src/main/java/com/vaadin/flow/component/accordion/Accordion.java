@@ -39,7 +39,7 @@ import com.vaadin.flow.shared.Registration;
  * can be opened at a time.
  */
 @Tag("vaadin-accordion")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "21.0.0-alpha6")
 @JsModule("@vaadin/vaadin-accordion/src/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize, HasStyle {
 
@@ -111,7 +111,7 @@ public class Accordion extends Component implements HasSize, HasStyle {
 
         throw new IllegalArgumentException(
                 "The supplied content is not a descendant of this Accordion. "
-                    + "It can be added with the accordion.add.");
+                        + "It can be added with the accordion.add.");
     }
 
     /**

@@ -32,10 +32,11 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Implementation of generic data view for ComboBox. This implementation does
  * not depend on a certain type of data provider, i.e. whether is it of
- * in-memory or backend type. It can be used if the type of data provider
- * is not either {@link ListDataProvider} or {@link BackEndDataProvider}.
+ * in-memory or backend type. It can be used if the type of data provider is not
+ * either {@link ListDataProvider} or {@link BackEndDataProvider}.
  *
- * @param <T> the item type
+ * @param <T>
+ *            the item type
  * @since
  */
 public class ComboBoxDataView<T> extends AbstractDataView<T> {
@@ -62,8 +63,8 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      * ComboBox's server-side.
      * <p>
      * This method does not take into account the ComboBox client-side
-     * filtering, since it doesn't change the item count on the server-side,
-     * but only makes it easier for users to search through the items in the UI.
+     * filtering, since it doesn't change the item count on the server-side, but
+     * only makes it easier for users to search through the items in the UI.
      *
      * @param index
      *            item index number
@@ -85,8 +86,8 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      * Gets the items available on the ComboBox's server-side.
      * <p>
      * This method does not take into account the ComboBox client-side
-     * filtering, since it doesn't change the item count on the server-side,
-     * but only makes it easier for users to search through the items in the UI.
+     * filtering, since it doesn't change the item count on the server-side, but
+     * only makes it easier for users to search through the items in the UI.
      *
      * @return items available on the server-side
      */
@@ -106,13 +107,13 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      * {@inheritDoc}
      * <p>
      * Combo box fires {@link ItemCountChangeEvent} and notifies all the
-     * listeners added by this method, if the items count changed, for
-     * instance, due to adding or removing an item(s).
+     * listeners added by this method, if the items count changed, for instance,
+     * due to adding or removing an item(s).
      * <p>
      * ComboBox's client-side filter change won't fire
-     * {@link ItemCountChangeEvent}, since it doesn't change the item count
-     * on the server-side, but only makes it easier for users to search
-     * through the items in the UI.
+     * {@link ItemCountChangeEvent}, since it doesn't change the item count on
+     * the server-side, but only makes it easier for users to search through the
+     * items in the UI.
      */
     @Override
     public Registration addItemCountChangeListener(

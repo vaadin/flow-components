@@ -74,11 +74,16 @@ public class BeanGridTest {
     }
 
     private static class ExtendedGrid<T> extends Grid<T> {
+        public ExtendedGrid() {
+            super();
+        }
+
         public ExtendedGrid(Class<T> beanType) {
             super(beanType, false);
         }
 
-        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer, String columnId) {
+        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer,
+                String columnId) {
             return new ExtendedColumn<>(this, columnId, renderer);
         }
     }
@@ -91,10 +96,12 @@ public class BeanGridTest {
     @Test
     public void addRegularColumnAndExtendedColumn() {
         Column<Person> regularColumn = extendedGrid.addColumn("name");
-        ExtendedColumn<Person> extendedColumn = extendedGrid.addColumn("born", extendedGrid::createCustomColumn);
+        ExtendedColumn<Person> extendedColumn = extendedGrid.addColumn("born",
+                extendedGrid::createCustomColumn);
 
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
-        assertEqualColumnClasses(extendedColumn.getClass(), ExtendedColumn.class);
+        assertEqualColumnClasses(extendedColumn.getClass(),
+                ExtendedColumn.class);
     }
 
     @Test
@@ -206,7 +213,7 @@ public class BeanGridTest {
         binder.bind(new TextField(), "name");
         binder.bind(new TextField(), "born");
     }
-    
+
     @Test
     public void removeAllColumns() {
         int initialColumnCount = grid.getColumns().size();
@@ -221,4 +228,35 @@ public class BeanGridTest {
         Assert.assertEquals(Person.class, grid.getBeanType());
     }
 
+    @Test
+    public void configureBeanTypeAfterInit() {
+        extendedGrid = new ExtendedGrid();
+        Assert.assertNull(extendedGrid.getBeanType());
+        Assert.assertEquals(0, extendedGrid.getColumns().size());
+        extendedGrid.configureBeanType(Person.class, false);
+        Assert.assertEquals(Person.class, extendedGrid.getBeanType());
+        Assert.assertEquals(0, extendedGrid.getColumns().size());
+    }
+
+    @Test
+    public void configureBeanTypeAndAddColumnsAfterInit() {
+        extendedGrid = new ExtendedGrid();
+        Assert.assertNull(extendedGrid.getBeanType());
+        Assert.assertEquals(0, extendedGrid.getColumns().size());
+        extendedGrid.configureBeanType(Person.class, true);
+        Assert.assertEquals(Person.class, extendedGrid.getBeanType());
+        Assert.assertEquals(5, extendedGrid.getColumns().size());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void configureBeanTypeFailsWhenTypeIsSet() {
+        extendedGrid.configureBeanType(Person.class, true);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void configureBeanTypeFailsWhenColumnsExist() {
+        extendedGrid = new ExtendedGrid();
+        extendedGrid.addColumn((p) -> "hello");
+        extendedGrid.configureBeanType(Person.class, true);
+    }
 }

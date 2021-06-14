@@ -28,7 +28,7 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 - `mvn -am -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-demo -Pwar jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
+Then navigate to `http://localhost:8080/vaadin-checkbox` to see the demo.
 
 ## Running ITs of one component
 
@@ -80,15 +80,19 @@ For running all merged components execute:
 
 - `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
 
+## Bumping version for all Maven modules
+
+To update the version for all modules for a new major or minor, run the following command:
+```
+mvn versions:set -DnewVersion=<next-version> -DprocessAllModules=true -DgenerateBackupPoms=false
+```
+where you replace `<next-version>` with the version that you want to set.
+
 ## Build script
 
 The `./scripts/build.sh` script is though to be run in CI, it compiles all modules, merge IT's and run those.
 It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
-
-## Update package version for `@NpmPackage` in all files
-There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
-- `./scripts/updateNpmVer.js`
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
@@ -108,6 +112,24 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
 - [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
 - Wait for response from one of Vaadin Flow team members
+
+### Update package version for `@NpmPackage` in all files
+There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
+
+- `./scripts/updateNpmVer.js`
+
+### Modify `pom.xml` files in modules
+
+In order to align all component buids, maven pom files are generated from templates placed in `scripts/templates`.
+
+If you need to make any modification in a component, consider whether it is convenient to add the same to all components, then modify files under the template and run:
+
+- `./scripts/updateJavaPOMs.sh` script.
+
+
+### Formatting
+
+Run `mvn formatter:format` before pushing your code.
 
 ## Bug and enhancement tickets
 - Bug tickets and enhancement requests that are specific to a certain Vaadin component should be posted in the component's Web Component repostory (e.g. https://github.com/vaadin/vaadin-button for Button).

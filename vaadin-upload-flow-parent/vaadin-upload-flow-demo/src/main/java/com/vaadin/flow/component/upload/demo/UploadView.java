@@ -114,7 +114,8 @@ public class UploadView extends DemoView {
         upload.setId("test-upload");
         output.setId("test-output");
 
-        addCard("Simple single file upload showing messages when file rejected", upload, output);
+        addCard("Simple single file upload showing messages when file rejected",
+                upload, output);
     }
 
     private void createSimpleMultiFileUpload() {
@@ -267,7 +268,7 @@ public class UploadView extends DemoView {
     private Component createComponent(String mimeType, String fileName,
             InputStream stream) {
         if (mimeType.startsWith("text")) {
-          return createTextComponent(stream);
+            return createTextComponent(stream);
         } else if (mimeType.startsWith("image")) {
             Image image = new Image();
             try {
@@ -304,17 +305,17 @@ public class UploadView extends DemoView {
 
     }
 
-  private Component createTextComponent(InputStream stream) {
-    String text;
-    try {
-        text = IOUtils.toString(stream, StandardCharsets.UTF_8);
-    } catch (IOException e) {
-        text = "exception reading stream";
+    private Component createTextComponent(InputStream stream) {
+        String text;
+        try {
+            text = IOUtils.toString(stream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            text = "exception reading stream";
+        }
+        return new Text(text);
     }
-    return new Text(text);
-  }
 
-  private void showOutput(String text, Component content,
+    private void showOutput(String text, Component content,
             HasComponents outputContainer) {
         HtmlComponent p = new HtmlComponent(Tag.P);
         p.getElement().setText(text);

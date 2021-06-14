@@ -40,7 +40,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
-
 public class RadioButtonGroupTest {
 
     private static final String OUTER_HTML = "<vaadin-radio-button>\n <span>%s</span>\n</vaadin-radio-button>";
@@ -157,6 +156,32 @@ public class RadioButtonGroupTest {
     }
 
     @Test
+    public void disabledItems_itemEnabledProvider_stayDisabled() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("enabled", "disabled");
+        group.setItemEnabledProvider("enabled"::equals);
+
+        List<RadioButton<String>> children = group.getChildren()
+                .map(child -> (RadioButton<String>) child)
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(false);
+        Assert.assertFalse(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(true);
+        Assert.assertTrue(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+
+        group.setEnabled(false);
+        Assert.assertFalse(children.get(0).isEnabled());
+        Assert.assertFalse(children.get(1).isEnabled());
+    }
+
+    @Test
     public void changeItems_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         radioButtonGroup.setItems("Foo", "Bar");
@@ -184,13 +209,13 @@ public class RadioButtonGroupTest {
         ItemHelper item1 = new ItemHelper("foo", "01");
         ItemHelper item2 = new ItemHelper("baz", "02");
 
-        RadioButtonGroupListDataView<ItemHelper> dataView = group.setItems(item1, item2);
+        RadioButtonGroupListDataView<ItemHelper> dataView = group
+                .setItems(item1, item2);
 
         item1.setName("zoo");
         item2.setName("bar");
         dataView.refreshItem(item1);
         dataView.refreshItem(item2);
-
 
         List<Component> components = group.getChildren()
                 .collect(Collectors.toList());
@@ -212,7 +237,8 @@ public class RadioButtonGroupTest {
         ItemHelper item1 = new ItemHelper("foo", "01");
         ItemHelper item2 = new ItemHelper("baz", "02");
 
-        RadioButtonGroupListDataView<ItemHelper> dataView = group.setItems(item1, item2);
+        RadioButtonGroupListDataView<ItemHelper> dataView = group
+                .setItems(item1, item2);
 
         item1.setName("zoo");
         item2.setName("bar");
@@ -258,17 +284,16 @@ public class RadioButtonGroupTest {
     public void dataViewForFaultyDataProvider_throwsException() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(
-                "RadioButtonGroupListDataView only supports 'ListDataProvider' " +
-                        "or it's subclasses, but was given a " +
-                        "'AbstractBackEndDataProvider'");
+                "RadioButtonGroupListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'");
 
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         final RadioButtonGroupListDataView<String> listDataView = radioButtonGroup
                 .setItems(Arrays.asList("one", "two"));
 
         DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> Stream.of("one"),
-                        query -> 1);
+                .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
         radioButtonGroup.setItems(dataProvider);
 
@@ -280,12 +305,12 @@ public class RadioButtonGroupTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
         RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
-        RadioButtonGroupListDataView<CustomItem> listDataView =
-                radioButtonGroup.setItems(items);
+        RadioButtonGroupListDataView<CustomItem> listDataView = radioButtonGroup
+                .setItems(items);
         // Setting the following Identifier Provider makes the component
         // independent from the CustomItem's equals method implementation:
         listDataView.setIdentifierProvider(CustomItem::getId);
@@ -307,7 +332,8 @@ public class RadioButtonGroupTest {
         radioButtonGroup.setValue(new CustomItem(2L));
 
         Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(Long.valueOf(2L), radioButtonGroup.getValue().getId());
+        Assert.assertEquals(Long.valueOf(2L),
+                radioButtonGroup.getValue().getId());
     }
 
     @Test
@@ -315,12 +341,12 @@ public class RadioButtonGroupTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
         RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
-        RadioButtonGroupListDataView<CustomItem> listDataView =
-                radioButtonGroup.setItems(items);
+        RadioButtonGroupListDataView<CustomItem> listDataView = radioButtonGroup
+                .setItems(items);
         // Setting the following Identifier Provider makes the component
         // independent from the CustomItem's equals method implementation:
         listDataView.setIdentifierProvider(CustomItem::getId);
@@ -342,7 +368,8 @@ public class RadioButtonGroupTest {
         radioButtonGroup.setValue(new CustomItem(3L, "Second"));
 
         Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(Long.valueOf(3L), radioButtonGroup.getValue().getId());
+        Assert.assertEquals(Long.valueOf(3L),
+                radioButtonGroup.getValue().getId());
     }
 
     @Test
@@ -350,17 +377,18 @@ public class RadioButtonGroupTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
         RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
-        RadioButtonGroupListDataView<CustomItem> listDataView =
-                radioButtonGroup.setItems(items);
+        RadioButtonGroupListDataView<CustomItem> listDataView = radioButtonGroup
+                .setItems(items);
 
         radioButtonGroup.setValue(new CustomItem(null, "Second"));
 
         Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(Long.valueOf(2L), radioButtonGroup.getValue().getId());
+        Assert.assertEquals(Long.valueOf(2L),
+                radioButtonGroup.getValue().getId());
     }
 
     @Test
@@ -368,12 +396,12 @@ public class RadioButtonGroupTest {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
-        List<CustomItem> items = new ArrayList<>(Arrays.asList(first, second,
-                third));
+        List<CustomItem> items = new ArrayList<>(
+                Arrays.asList(first, second, third));
 
         RadioButtonGroup<CustomItem> radioButtonGroup = new RadioButtonGroup<>();
-        RadioButtonGroupListDataView<CustomItem> listDataView =
-                radioButtonGroup.setItems(items);
+        RadioButtonGroupListDataView<CustomItem> listDataView = radioButtonGroup
+                .setItems(items);
         // Setting the following Identifier Provider makes the component
         // independent from the CustomItem's equals method implementation:
         listDataView.setIdentifierProvider(CustomItem::getId);

@@ -84,14 +84,14 @@ Tab 1
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Tag("vaadin-tab")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "21.0.0-alpha6")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 

@@ -13,8 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
 import com.vaadin.flow.component.charts.events.internal.DataAddedEvent;
@@ -145,10 +145,18 @@ public class Configuration extends AbstractConfigurationObject
      * AbstractPlotOptions, an individual lineWidth can be specified for each
      * series (e.g. to enable each series have different lineWidth).
      * 
+     * <br />
+     * <br />
+     * 
+     * If the chart is already rendered on the client,
+     * {@link Chart#drawChart(boolean)} needs to be called with
+     * <code>true</code> as parameter so the configuration object is resent to
+     * the client.
+     * 
      * @param series
      */
     public void setSeries(List<Series> series) {
-        this.series = series;
+        this.series = new ArrayList<>(series);
         for (Series s : series) {
             s.setConfiguration(this);
             addSeriesToDrilldownConfiguration(s);
@@ -1087,9 +1095,9 @@ public class Configuration extends AbstractConfigurationObject
      * @param listener
      *            Listener to remove.
      */
-     public void removeChangeListener(ConfigurationChangeListener listener) {
+    public void removeChangeListener(ConfigurationChangeListener listener) {
         changeListeners.remove(listener);
-     }
+    }
 
     /**
      * Returns the color axis. This is used in color-based diagrams, like heat

@@ -48,10 +48,15 @@ function setDependenciesVersion(dependencies) {
 }
 
 function mergePlugins(build1, build2) {
-  return [
-    ... (build1 && build1[0] && build1[0].plugins && build1[0].plugins[0] && build1[0].plugins[0].plugin || []),
-    ... (build2 && build2[0] && build2[0].plugins && build2[0].plugins[0] && build2[0].plugins[0].plugin || [])
-  ]
+  const arr1 = build1 && build1[0] && build1[0].plugins && build1[0].plugins[0] && build1[0].plugins[0].plugin || [];
+  const arr2 = build2 && build2[0] && build2[0].plugins && build2[0].plugins[0] && build2[0].plugins[0].plugin || [];
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
+}
+
+function mergeDependencies(prj1, prj2) {
+  const arr1 = prj1 && prj1.dependencies && prj1.dependencies[0] && prj1.dependencies[0].dependency || [];
+  const arr2 = prj2 && prj2.dependencies && prj2.dependencies[0] && prj2.dependencies[0].dependency || [];
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
 }
 
 async function consolidate(template, pom, cb) {
@@ -59,16 +64,18 @@ async function consolidate(template, pom, cb) {
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
 
   await renameBase(tplJs);
+
   tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
+
+  pomJs.project.dependencies[0] = {dependency: mergeDependencies(tplJs.project, pomJs.project)};
+
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
 
   cb && cb(tplJs, pomJs);
 
-  const xml = new xml2js.Builder().buildObject(tplJs);
+  const xml = new xml2js.Builder({renderOpts: {pretty: true, indent: '    '}}).buildObject(tplJs);
   console.log(`writing ${pom}`);
-  fs.writeFileSync(pom, xml
-    // ident using 4 spaces to make sonar happy
-    .replace(/\n( +)</g, '\n$1$1<') + '\n', 'utf8');
+  fs.writeFileSync(pom, xml + '\n', 'utf8');
 }
 
 async function consolidatePomParent() {
@@ -93,14 +100,15 @@ async function consolidatePomFlow() {
 }
 async function consolidatePomTB() {
   const tbPom = `${mod}/${name}-testbench/pom.xml`;
-  fs.existsSync(tbPom) && await consolidate('pom-testbench.xml', `${mod}/${name}-testbench/pom.xml`)
+  fs.existsSync(tbPom) && await consolidate('pom-testbench.xml', tbPom)
 }
 async function consolidatePomDemo() {
   const demoPom = `${mod}/${name}-flow-demo/pom.xml`;
   fs.existsSync(demoPom) && await consolidate('pom-demo.xml', demoPom);
 }
 async function consolidatePomIT() {
-  consolidate('pom-integration-tests.xml', `${mod}/${name}-flow-integration-tests/pom.xml`);
+  const itPom = `${mod}/${name}-flow-integration-tests/pom.xml`;
+  consolidate('pom-integration-tests.xml', itPom);
 }
 
 consolidatePomParent();

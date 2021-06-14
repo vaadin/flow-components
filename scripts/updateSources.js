@@ -176,6 +176,7 @@ async function main() {
     content = ignore_test_method(content, source, 'TreeGridPageSizeIT.treegridWithPageSize10_changeTo80_revertBackTo10');
     content = ignore_test_method(content, source, 'DynamicChangingChartIT.setConfiguration_changes_chart');
     content = ignore_test_method(content, source, 'IronListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
+    content = ignore_test_method(content, source, 'VirtualListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
     content = ignore_test_method(content, source, 'BasicChartIT.Chart_TitleCanBeChanged');
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
     content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');

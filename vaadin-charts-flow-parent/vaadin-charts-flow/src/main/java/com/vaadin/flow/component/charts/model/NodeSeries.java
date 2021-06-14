@@ -34,9 +34,11 @@ public class NodeSeries extends AbstractSeries {
      * Adds a data item. The to and from nodes must also be added using
      * {@link #addNode(Node)}
      *
-     * @param nodeSeriesItem item to be added.
-     * @throws IllegalArgumentException if the nodeSeriesItem is null or if
-     * either to or from nodes null or have null ids.
+     * @param nodeSeriesItem
+     *            item to be added.
+     * @throws IllegalArgumentException
+     *             if the nodeSeriesItem is null or if either to or from nodes
+     *             null or have null ids.
      */
     public void add(NodeSeriesItem nodeSeriesItem) {
         validateNodeSeriesItem(nodeSeriesItem);
@@ -47,8 +49,11 @@ public class NodeSeries extends AbstractSeries {
 
     /**
      * Adds both nodes and links then in the series.
-     * @param from see {@link NodeSeriesItem#setFrom(Node)}
-     * @param to see {@link NodeSeriesItem#setTo(Node)}
+     * 
+     * @param from
+     *            see {@link NodeSeriesItem#setFrom(Node)}
+     * @param to
+     *            see {@link NodeSeriesItem#setTo(Node)}
      * @return {@link NodeSeriesItem} created.
      */
     public NodeSeriesItem add(Node from, Node to) {
@@ -60,8 +65,11 @@ public class NodeSeries extends AbstractSeries {
     /**
      * Adds a node to the chart. To link the added node to other nodes use
      * {@link #add(NodeSeriesItem)}.
-     * @param node {@link Node} to be added. Not null.
-     * @throws IllegalArgumentException if the node is null or if its id is null.
+     * 
+     * @param node
+     *            {@link Node} to be added. Not null.
+     * @throws IllegalArgumentException
+     *             if the node is null or if its id is null.
      */
     public void addNode(Node node) {
         validateNode(node, "Node");
@@ -71,7 +79,9 @@ public class NodeSeries extends AbstractSeries {
     /**
      * Removes the nodeSeriesItem. To remove the to and from nodes, use
      * {@link #remove(Node)}
-     * @param nodeSeriesItem item to be removed.
+     * 
+     * @param nodeSeriesItem
+     *            item to be removed.
      */
     public void remove(NodeSeriesItem nodeSeriesItem) {
         if (data != null) {
@@ -80,11 +90,14 @@ public class NodeSeries extends AbstractSeries {
     }
 
     /**
-     * Removes the node. To remove the links, use {@link #remove(NodeSeriesItem)}
-     * @param node item to be removed.
+     * Removes the node. To remove the links, use
+     * {@link #remove(NodeSeriesItem)}
+     * 
+     * @param node
+     *            item to be removed.
      */
     public void remove(Node node) {
-        if(nodes != null) {
+        if (nodes != null) {
             nodes.remove(node);
         }
     }
@@ -94,10 +107,10 @@ public class NodeSeries extends AbstractSeries {
      * @return The data in this series.
      */
     public List<NodeSeriesItem> getData() {
-       if(data == null)  {
+        if (data == null) {
             return Collections.emptyList();
-       }
-       return Collections.unmodifiableList(data);
+        }
+        return Collections.unmodifiableList(data);
     }
 
     /**
@@ -128,7 +141,7 @@ public class NodeSeries extends AbstractSeries {
 
     private void validateNode(Node node, String description) {
         validate(node, description);
-        validate(node.getId(), description +" id");
+        validate(node.getId(), description + " id");
     }
 
     private void validate(Object object, String description) {

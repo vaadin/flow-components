@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import static org.junit.Assert.assertThat;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -39,7 +41,6 @@ import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.testbench.TestBenchElement;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Integration tests for the {@link GridView}.
  */
@@ -336,7 +337,7 @@ public class GridViewIT extends GridViewBase {
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
         Assert.assertEquals(4l, getCommandExecutor()
-            .executeScript(firstCellHiddenScript, grid));
+                .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
                 grid.getAttribute("columnReorderingAllowed"));
@@ -423,8 +424,7 @@ public class GridViewIT extends GridViewBase {
 
         getCellContent(grid.getCell(1, 2)).click();
         getCellContent(grid.getCell(3, 2)).click();
-        assertThat(
-                "Details should be closed after clicking the button again",
+        assertThat("Details should be closed after clicking the button again",
                 grid.findElement(By.className("custom-details"))
                         .getAttribute("innerHTML"),
                 CoreMatchers.not(CoreMatchers
@@ -1041,13 +1041,14 @@ public class GridViewIT extends GridViewBase {
 
         verifyOpened(1);
 
-        openSubMenu($(OVERLAY_TAG).first().$("vaadin-context-menu-item").get(menuIndex));
+        openSubMenu($(OVERLAY_TAG).first().$("vaadin-context-menu-item")
+                .get(menuIndex));
 
         verifyOpened(2);
 
-        $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item").get(subMenuIndex).click();
+        $(OVERLAY_TAG).all().get(1).$("vaadin-context-menu-item")
+                .get(subMenuIndex).click();
     }
-
 
     private void assertFirstCells(GridElement grid, String... cellContents) {
         IntStream.range(0, cellContents.length).forEach(i -> {
@@ -1086,9 +1087,13 @@ public class GridViewIT extends GridViewBase {
     }
 
     private void waitUntilCellHasText(WebElement grid, String text) {
-        waitUntil(driver -> getCells(grid).stream()
-                .filter(cell -> text.equals(cell.getText())).findFirst()
-                .isPresent());
+        waitUntil(driver -> {
+            List<?> cellContentTexts = (List<?>) getCommandExecutor()
+                    .executeScript(
+                            "return Array.from(arguments[0].querySelectorAll('vaadin-grid-cell-content')).map(cell => cell.textContent)",
+                            grid);
+            return cellContentTexts.contains(text);
+        });
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {

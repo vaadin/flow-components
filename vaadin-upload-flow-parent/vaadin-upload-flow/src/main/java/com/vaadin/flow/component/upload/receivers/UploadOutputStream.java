@@ -23,14 +23,16 @@ import java.io.Serializable;
 /**
  * FileOutputStream with a reference to the output file.
  */
-public class UploadOutputStream extends FileOutputStream implements
-    Serializable {
+public class UploadOutputStream extends FileOutputStream
+        implements Serializable {
     private final File file;
 
     /**
      * @see FileOutputStream#FileOutputStream(File)
-     * @param file File to write.
-     * @throws FileNotFoundException see {@link FileOutputStream#FileOutputStream(File)}
+     * @param file
+     *            File to write.
+     * @throws FileNotFoundException
+     *             see {@link FileOutputStream#FileOutputStream(File)}
      */
     public UploadOutputStream(File file) throws FileNotFoundException {
         super(file);

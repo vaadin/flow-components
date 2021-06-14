@@ -13,7 +13,6 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
-
 import java.io.Serializable;
 
 import com.vaadin.flow.component.charts.util.Util;
@@ -101,7 +100,8 @@ public interface ClickEvent extends Serializable {
     /**
      * Checks if the Shift key was down when the mouse event took place.
      *
-     * @return true if Shift was pressed when the event occurred, false otherwise
+     * @return true if Shift was pressed when the event occurred, false
+     *         otherwise
      */
     default boolean isShiftKey() {
         return getMouseDetails().isShiftKey();

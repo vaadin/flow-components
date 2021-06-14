@@ -72,6 +72,9 @@ import elemental.json.JsonValue;
  * @see <a href=
  *      "https://www.webcomponents.org/element/PolymerElements/iron-list">iron-list
  *      webcomponent documentation</a>
+ *
+ * @deprecated since Vaadin 21, {@code IronList} is deprecated in favor of
+ *             {@code VirtualList}
  */
 @Tag("iron-list")
 @NpmPackage(value = "@polymer/iron-list", version = "3.1.0")
@@ -79,6 +82,7 @@ import elemental.json.JsonValue;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./ironListConnector.js")
 @JsModule("./ironListStyles.js")
+@Deprecated
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
 
@@ -173,7 +177,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      *
      * @return the data provider of this list, not {@code null}
      */
-    public DataProvider<T, ?> getDataProvider() { //NOSONAR
+    public DataProvider<T, ?> getDataProvider() { // NOSONAR
         return getDataCommunicator().getDataProvider();
     }
 
@@ -368,8 +372,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         super.onEnabledStateChanged(enabled);
 
         /*
-         * Rendered component's enabled state needs to be updated via
-         * rendering
+         * Rendered component's enabled state needs to be updated via rendering
          */
         setRenderer(renderer);
     }

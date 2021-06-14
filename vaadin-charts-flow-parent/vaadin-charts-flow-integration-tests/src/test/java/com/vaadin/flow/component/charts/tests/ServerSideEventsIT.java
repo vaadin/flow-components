@@ -21,8 +21,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.events.ChartClickEvent;
 import com.vaadin.flow.component.charts.events.PointClickEvent;
 import com.vaadin.flow.component.charts.events.PointSelectEvent;
@@ -32,7 +33,6 @@ import com.vaadin.flow.component.charts.events.SeriesHideEvent;
 import com.vaadin.flow.component.charts.events.SeriesLegendItemClickEvent;
 import com.vaadin.flow.component.charts.events.SeriesShowEvent;
 import com.vaadin.flow.component.charts.events.YAxesExtremesSetEvent;
-import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
@@ -190,7 +190,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     private void assertLastEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
         getCommandExecutor().waitForVaadin();
-        LabelElement lastEvent = $(LabelElement.class).waitForFirst(); //id("lastEvent");
+        LabelElement lastEvent = $(LabelElement.class).waitForFirst(); // id("lastEvent");
         Assert.assertEquals(expectedEvent.getSimpleName(), lastEvent.getText());
     }
 
@@ -203,7 +203,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
         Assert.assertEquals(expectedEvent.getSimpleName(), eventType);
     }
 
-    private void assertHasEventOfType(Class<? extends ComponentEvent<Chart>> expectedEvent) {
+    private void assertHasEventOfType(
+            Class<? extends ComponentEvent<Chart>> expectedEvent) {
         List<LabelElement> labels = $(LabelElement.class).all();
         String expected = expectedEvent.getSimpleName();
         Optional<String> actual = labels.stream().map(label -> {
@@ -215,9 +216,10 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private void assertNthHistoryEventIsType(
-            Class<? extends ComponentEvent<Chart>> expectedEvent, int historyIndex) {
-        LabelElement lastEvent = $(LabelElement.class).id(
-                "event" + historyIndex);
+            Class<? extends ComponentEvent<Chart>> expectedEvent,
+            int historyIndex) {
+        LabelElement lastEvent = $(LabelElement.class)
+                .id("event" + historyIndex);
         String eventHistory = lastEvent.getText();
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
@@ -226,15 +228,17 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
     private void resetHistory() {
         waitUntil(e -> $(ButtonElement.class).exists());
-        WebElement resetHistoryButton = $(ButtonElement.class).id("resetHistory");
+        WebElement resetHistoryButton = $(ButtonElement.class)
+                .id("resetHistory");
         resetHistoryButton.click();
     }
 
     private SeriesCheckboxClickEvent readCheckboxEventDetails() {
         String detailsJson = $(LabelElement.class).id("eventDetails").getText();
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(Series.class,
-                new DataSeriesDeserializer()).create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Series.class, new DataSeriesDeserializer())
+                .create();
 
         return gson.fromJson(detailsJson, SeriesCheckboxClickEvent.class);
     }
@@ -244,11 +248,13 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findLastDataPointOfTheFirstSeries() {
-        return getElementFromShadowRoot(getChartElement(), By.cssSelector(".highcharts-markers > path"));
+        return getElementFromShadowRoot(getChartElement(),
+                By.cssSelector(".highcharts-markers > path"));
     }
 
     private WebElement findLegendItem() {
-        return getElementFromShadowRoot(getChartElement(), By.className("highcharts-legend-item"));
+        return getElementFromShadowRoot(getChartElement(),
+                By.className("highcharts-legend-item"));
     }
 
     private WebElement findCheckBox() {
@@ -260,7 +266,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findCheckBox(int index) {
-        return getElementFromShadowRoot(getChartElement(), By.cssSelector("input[type=\"checkbox\"]"), index);
+        return getElementFromShadowRoot(getChartElement(),
+                By.cssSelector("input[type=\"checkbox\"]"), index);
     }
 
     private WebElement findDisableVisibityToggle() {
@@ -271,11 +278,11 @@ public class ServerSideEventsIT extends AbstractTBTest {
         return $(ButtonElement.class).id("toggleExtremes");
     }
 
-    private static class DataSeriesDeserializer implements
-            JsonDeserializer<Series> {
+    private static class DataSeriesDeserializer
+            implements JsonDeserializer<Series> {
         @Override
         public Series deserialize(JsonElement series, Type type,
-                                  JsonDeserializationContext jdc) throws JsonParseException {
+                JsonDeserializationContext jdc) throws JsonParseException {
             return new Gson().fromJson(series, DataSeries.class);
         }
     }

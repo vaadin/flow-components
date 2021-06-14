@@ -51,6 +51,8 @@ public class MessageListPage extends Div {
         addButton("setUserImage", () -> foo.setUserImage("/test2.jpg"));
         addButton("setAbbreviation", () -> foo.setUserAbbreviation("CD"));
         addButton("setUserColorIndex", () -> foo.setUserColorIndex(2));
+        addButton("addThemeNames", () -> foo.addThemeNames("foo", "bar"));
+        addButton("removeThemeNames", () -> foo.removeThemeNames("foo", "bar"));
 
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));

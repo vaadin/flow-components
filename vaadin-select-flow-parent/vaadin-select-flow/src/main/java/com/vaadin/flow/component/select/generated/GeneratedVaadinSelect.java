@@ -185,8 +185,10 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/vaadin-select", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "21.0.0-alpha6")
 @JsModule("@vaadin/vaadin-select/src/vaadin-select.js")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
+@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {
@@ -392,13 +394,12 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * Set to true if the value is invalid.
      * <p>
-     * This property is synchronized automatically from client side when a
-     * 'invalid-changed' event happens.
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }

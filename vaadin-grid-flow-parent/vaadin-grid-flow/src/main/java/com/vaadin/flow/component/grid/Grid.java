@@ -126,6 +126,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.slf4j.LoggerFactory;
 
@@ -139,11 +140,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "20.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
+@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
@@ -158,8 +161,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public enum NestedNullBehavior {
         /**
-         * throw a NullPointerException if there is a nested
-         * <code>null</code> value
+         * throw a NullPointerException if there is a nested <code>null</code>
+         * value
          */
         THROW,
         /**
@@ -1247,16 +1250,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Grid(Class<T> beanType, boolean autoCreateColumns) {
         this();
-        Objects.requireNonNull(beanType, "Bean type can't be null");
-        this.beanType = beanType;
-        propertySet = BeanPropertySet.get(beanType);
-        if (autoCreateColumns) {
-            propertySet.getProperties()
-                    .filter(property -> !property.isSubProperty())
-                    .sorted((prop1, prop2) -> prop1.getName()
-                            .compareTo(prop2.getName()))
-                    .forEach(this::addColumn);
-        }
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -1499,16 +1493,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             BiFunction<Renderer<T>, String, C> columnFactory) {
         String columnId = createColumnId(false);
 
-        C column = addColumn(new ColumnPathRenderer<T>(columnId,
-                item -> formatValueToSendToTheClient(
-                        applyValueProvider(valueProvider, item))),
+        C column = addColumn(
+                new ColumnPathRenderer<T>(columnId,
+                        item -> formatValueToSendToTheClient(
+                                applyValueProvider(valueProvider, item))),
                 columnFactory);
         ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
-                applyValueProvider(valueProvider,a), applyValueProvider(valueProvider,b)));
+                applyValueProvider(valueProvider, a),
+                applyValueProvider(valueProvider, b)));
         return column;
     }
 
-    private Object applyValueProvider(ValueProvider<T, ?> valueProvider, T item) {
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
+            T item) {
         Object value;
         try {
             value = valueProvider.apply(item);
@@ -2410,17 +2407,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // We don't use DataProvider.withConvertedFilter() here because it's
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<T, Void> convertedDataProvider =
-                new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
-                        inMemoryDataProvider) {
-                    @Override
-                    protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
-                        // Just ignore the query filter (Void) and apply the
-                        // predicate only
-                        return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                                .orElse(item -> true);
-                    }
-                };
+        DataProvider<T, Void> convertedDataProvider = new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
+                inMemoryDataProvider) {
+            @Override
+            protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
+                // Just ignore the query filter (Void) and apply the
+                // predicate only
+                return Optional.ofNullable(inMemoryDataProvider.getFilter())
+                        .orElse(item -> true);
+            }
+        };
         return setItems(convertedDataProvider);
     }
 
@@ -2930,6 +2926,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(column, "column should not be null");
 
         ensureOwner(column);
+        List<GridSortOrder<T>> order = new ArrayList<>();
+        setSortOrder(order, false);
         removeColumnAndColumnGroupsIfNeeded(column);
         column.destroyDataGenerators();
         keyToColumnMap.remove(column.getKey());
@@ -3101,22 +3099,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable
     private void select(String key) {
-        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::selectFromClient);
+        findByKey(String.valueOf(key))
+                .ifPresent(getSelectionModel()::selectFromClient);
     }
 
     @ClientCallable
     private void deselect(String key) {
-        findByKey(String.valueOf(key)).ifPresent(getSelectionModel()::deselectFromClient);
+        findByKey(String.valueOf(key))
+                .ifPresent(getSelectionModel()::deselectFromClient);
     }
 
     private Optional<T> findByKey(String key) {
         Objects.requireNonNull(key);
-        Optional<T> item = Optional.ofNullable(getDataCommunicator().getKeyMapper().get(key));
+        Optional<T> item = Optional
+                .ofNullable(getDataCommunicator().getKeyMapper().get(key));
         if (!item.isPresent()) {
-            LoggerFactory.getLogger(Grid.class)
-                    .debug("Key not found: %s. "
-                            + "This can happen due to user action while changing"
-                            + " the data provider.", key);
+            LoggerFactory.getLogger(Grid.class).debug("Key not found: %s. "
+                    + "This can happen due to user action while changing"
+                    + " the data provider.", key);
         }
         return item;
     }
@@ -3136,9 +3136,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (key == null) {
             detailsManager.setDetailsVisibleFromClient(Collections.emptySet());
         } else {
-            findByKey(key)
-                .map(Collections::singleton)
-                .ifPresent(detailsManager::setDetailsVisibleFromClient);
+            findByKey(key).map(Collections::singleton)
+                    .ifPresent(detailsManager::setDetailsVisibleFromClient);
         }
     }
 
@@ -3152,7 +3151,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")) {
+            if (sorter.hasKey("direction")
+                    && sorter.get("direction").getType() == JsonType.STRING) {
                 switch (sorter.getString("direction")) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
@@ -3195,7 +3195,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
-        if (getDataProvider() != null && dataProviderChangeRegistration == null) {
+        if (getDataProvider() != null
+                && dataProviderChangeRegistration == null) {
             handleDataProviderChange(getDataProvider());
         }
     }
@@ -3405,8 +3406,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(property);
         Objects.requireNonNull(valueProvider);
 
-        return addDataGenerator((item, data) -> data.put(property,
-                JsonSerializer.toJson(applyValueProvider(valueProvider,item))));
+        return addDataGenerator(
+                (item, data) -> data.put(property, JsonSerializer
+                        .toJson(applyValueProvider(valueProvider, item))));
     }
 
     @Override
@@ -3420,6 +3422,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         return compareComparables(Objects.toString(a, ""),
                 Objects.toString(b, ""));
+    }
+
+    /**
+     * Sets the bean type this grid is bound to and optionally adds a set of
+     * columns for each of the bean's properties.
+     *
+     * The property-values of the bean will be converted to Strings. Full names
+     * of the properties will be used as the {@link Column#setKey(String) column
+     * keys} and the property captions will be used as the
+     * {@link Column#setHeader(String) column headers}. The generated columns
+     * will be sortable by default, if the property is {@link Comparable}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included and they will be in alphabetical order. Use
+     * {@link Grid#setColumns(String...)} to define which properties to include
+     * and in which order. You can also add a column for an individual property
+     * with {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
+     * <p>
+     * This method can only be called for a newly instanced Grid without any
+     * beanType or columns set.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    public void configureBeanType(Class<T> beanType,
+            boolean autoCreateColumns) {
+        Objects.requireNonNull(beanType, "Bean type can't be null");
+
+        if (this.beanType != null) {
+            throw new IllegalStateException(
+                    "configureBeanType can only be called for a Grid without a beanType set");
+        }
+        if (!this.getColumns().isEmpty()) {
+            throw new IllegalStateException(
+                    "configureBeanType can only be called for a Grid without any columns");
+        }
+        this.beanType = beanType;
+        propertySet = BeanPropertySet.get(beanType);
+        if (autoCreateColumns) {
+            propertySet.getProperties()
+                    .filter(property -> !property.isSubProperty())
+                    .sorted((prop1, prop2) -> prop1.getName()
+                            .compareTo(prop2.getName()))
+                    .forEach(this::addColumn);
+        }
+
     }
 
     /**
@@ -3500,6 +3553,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Adds a listener to the grid that will be notified, when a cell has been
+     * focused. <br>
+     * <br>
+     * The listener will be notified, when
+     * <ul>
+     * <li>the navigation focus of a cell gets activated</li>
+     * <li>the focus is restored to the browser if a cell had navigation focus
+     * before the focus was lost</li>
+     * <li>the navigation focus moves between header/body/footer sections</li>
+     * </ul>
+     * <br>
+     * The listener will <b>not</b> be notified, when
+     * <ul>
+     * <li>the focus changes between focusable elements in the Grid cells
+     * ("interaction mode")</li>
+     * <li>on Grid Pro edit mode navigation ("interaction mode")</li>
+     * <li>the focus changes between focusable elements in the cells in Flow
+     * Grid's editor mode ("interaction mode")</li>
+     * </ul>
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Registration addCellFocusListener(
+            ComponentEventListener<CellFocusEvent<T>> listener) {
+        return addListener(CellFocusEvent.class,
+                (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
      * Enables or disables the vertical scrolling on the Grid web component. By
      * default, the scrolling is enabled.
      *
@@ -3575,7 +3660,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see Column#setAutoWidth(boolean)
      */
     public void recalculateColumnWidths() {
-        getElement().callJsFunction("recalculateColumnWidths");
+        // Defer column width recalculation to occur after the data was
+        // refreshed. The data communicator will insert the JS call to refresh
+        // the client side grid in the beforeClientResponse hook, we need to
+        // match this here so that the column width recalculation runs after the
+        // data was updated.
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                ctx -> getElement().callJsFunction("recalculateColumnWidths")));
     }
 
     /**
@@ -3705,7 +3797,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         try {
             Editor<T> editor = getEditor();
             if (editor != null) {
-                getEditor().closeEditor();
+                if (getEditor().isBuffered()) {
+                    getEditor().cancel();
+                } else {
+                    getEditor().closeEditor();
+                }
             }
         } finally {
             editorFactory = factory;
@@ -4072,6 +4168,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
+        updateClientSideSorterIndicators(sortOrder);
         fireColumnReorderEvent(getColumns());
     }
 
@@ -4104,7 +4201,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> getElement().executeJs("this.scrollToIndex(this._effectiveSize)")));
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
@@ -4121,13 +4220,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Set the behavior when facing nested <code>null</code> values. By default the value
-     * is <code>NestedNullBehavior.THROW</code>.
+     * Set the behavior when facing nested <code>null</code> values. By default
+     * the value is <code>NestedNullBehavior.THROW</code>.
      *
-     * @param nestedNullBehavior the behavior when facing nested <code>null</code> values.
+     * @param nestedNullBehavior
+     *            the behavior when facing nested <code>null</code> values.
      */
     public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
-    	this.nestedNullBehavior = nestedNullBehavior;
+        this.nestedNullBehavior = nestedNullBehavior;
     }
 
     /**
@@ -4136,7 +4236,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return The current behavior when facing nested <code>null</code> values.
      */
     public NestedNullBehavior getNestedNullBehavior() {
-    	return nestedNullBehavior;
+        return nestedNullBehavior;
     }
 
     private void onInMemoryFilterOrSortingChange(
@@ -4156,8 +4256,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // the filter slot type into in-memory filter (predicate).
         @SuppressWarnings("unchecked")
         SerializableConsumer<SerializablePredicate<T>> inMemoryFilter = (SerializableConsumer<SerializablePredicate<T>>) filterSlot;
-        inMemoryFilter
-                .accept(componentInMemoryFilter);
+        inMemoryFilter.accept(componentInMemoryFilter);
     }
 
     /**
@@ -4174,12 +4273,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         final SerializableComparator<T> currentClientSorting = createSortingComparator();
         if (componentSorting != null) {
             if (currentClientSorting != null) {
-                getDataCommunicator().setInMemorySorting(
-                        combineSortings(currentClientSorting,
-                                componentSorting));
+                getDataCommunicator().setInMemorySorting(combineSortings(
+                        currentClientSorting, componentSorting));
             } else {
-                getDataCommunicator().setInMemorySorting(
-                        componentSorting);
+                getDataCommunicator().setInMemorySorting(componentSorting);
             }
         } else {
             getDataCommunicator().setInMemorySorting(currentClientSorting);

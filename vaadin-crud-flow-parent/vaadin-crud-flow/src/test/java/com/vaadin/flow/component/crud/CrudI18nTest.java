@@ -15,7 +15,9 @@ public class CrudI18nTest {
         Assert.assertEquals("Edit item", i18n.getEditLabel());
         Assert.assertEquals("New item", i18n.getNewItem());
         Assert.assertEquals("Save", i18n.getSaveItem());
-        Assert.assertEquals("Discard", i18n.getConfirm().getCancel().getButton().getConfirm());
-        Assert.assertEquals("Delete", i18n.getConfirm().getDelete().getButton().getConfirm());
+        Assert.assertEquals("Discard",
+                i18n.getConfirm().getCancel().getButton().getConfirm());
+        Assert.assertEquals("Delete",
+                i18n.getConfirm().getDelete().getButton().getConfirm());
     }
 }

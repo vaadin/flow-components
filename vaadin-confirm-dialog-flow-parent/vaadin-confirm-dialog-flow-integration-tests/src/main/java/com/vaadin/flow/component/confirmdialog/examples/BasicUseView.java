@@ -9,11 +9,13 @@ import com.vaadin.flow.router.Route;
 public class BasicUseView extends Div {
 
     boolean expanded = true;
+
     public BasicUseView() {
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setHeader("My header");
         confirmDialog.setText("Here is my text");
-        Button showDialogButton = new Button("Show dialog", e -> confirmDialog.open());
+        Button showDialogButton = new Button("Show dialog",
+                e -> confirmDialog.open());
         add(confirmDialog, showDialogButton);
     }
 }

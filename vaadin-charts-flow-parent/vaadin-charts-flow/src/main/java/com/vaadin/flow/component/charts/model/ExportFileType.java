@@ -13,18 +13,16 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-
 /**
- * Default MIME type for exporting if chart.exportChart() is called without specifying a type option.
+ * Default MIME type for exporting if chart.exportChart() is called without
+ * specifying a type option.
  *
  * Defaults to image/png.
  */
 public enum ExportFileType implements ChartEnum {
 
-    IMAGE_PNG("image/png"),
-    IMAGE_JPEG("image/jpeg"),
-    APPLICATION_PDF("application/pdf"),
-    IMAGE_SVG_XML("image/svg+xml");
+    IMAGE_PNG("image/png"), IMAGE_JPEG("image/jpeg"), APPLICATION_PDF(
+            "application/pdf"), IMAGE_SVG_XML("image/svg+xml");
 
     private final String type;
 

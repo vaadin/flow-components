@@ -22,9 +22,9 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.flow.component.charts.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
-
+import com.vaadin.flow.component.charts.ui.MainView;
 import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.DefaultBrowserFactory;
@@ -46,7 +46,7 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-                                                  By by) {
+            By by) {
         return getElementFromShadowRoot(shadowRootOwner, by, 0);
     }
 
@@ -55,7 +55,6 @@ public abstract class AbstractTBTest extends ParallelTest {
         WebElement shadowRoot = (WebElement) executeScript(
                 "return arguments[0].shadowRoot", shadowRootOwner);
         assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
-
 
         List<WebElement> elements = shadowRoot.findElements(by);
         if (elements.size() > index) {
@@ -66,15 +65,13 @@ public abstract class AbstractTBTest extends ParallelTest {
                 "Could not find required element in the shadowRoot");
     }
 
-
     public List<DesiredCapabilities> getBrowserConfiguration() {
         if (System.getProperty(PROPERTY_TEST_ALL_BROWSERS) == null) {
             return Arrays.asList(BrowserUtil.chrome());
         }
 
         TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
-        return Arrays.asList(BrowserUtil.chrome()
-            );
+        return Arrays.asList(BrowserUtil.chrome());
     }
 
     protected void openTestURL() {
@@ -103,7 +100,9 @@ public abstract class AbstractTBTest extends ParallelTest {
      * @return The URL path to the UI class to test
      */
     protected String getDeploymentPath() {
-        return "/" + getTestView().getCanonicalName().replace("com.vaadin.flow.component.charts.examples.", "vaadin-charts/").replace(".", "/");
+        return "/" + getTestView().getCanonicalName()
+                .replace(MainView.EXAMPLE_BASE_PACKAGE, "vaadin-charts/")
+                .replace(".", "/");
     }
 
     /**

@@ -35,6 +35,7 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * Server-side component that encapsulates the functionality of the
@@ -107,7 +108,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super(initialDate, null, String.class, PARSER, FORMATTER,
                 isInitialValueOptional);
-        setLocale(UI.getCurrent().getLocale());
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -326,7 +326,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if (languageTag != null) {
+        if (locale == null) {
+            getUI().ifPresent(ui -> setLocale(ui.getLocale()));
+        } else if (languageTag != null) {
             setLocaleWithJS();
         }
         if (i18n != null) {
@@ -371,10 +373,17 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private void setI18nWithJS() {
         runBeforeClientResponse(ui -> {
             JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+            // Remove null values to prevent errors
             for (String key : i18nObject.keys()) {
-                getElement().executeJs("this.set('i18n." + key + "', $0)",
-                        i18nObject.get(key));
+                if (i18nObject.get(key).getType() == JsonType.NULL) {
+                    i18nObject.remove(key);
+                }
             }
+            // Assign new I18N object to WC, keep current values if they are not
+            // defined in the new object
+            getElement().executeJs(
+                    "this.i18n = Object.assign({}, this.i18n, $0);",
+                    i18nObject);
         });
     }
 
@@ -624,22 +633,25 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     /**
-     * When auto open is enabled, the dropdown will open when the field is clicked.
+     * When auto open is enabled, the dropdown will open when the field is
+     * clicked.
      *
-     * @param autoOpen Value for the auto open property,
+     * @param autoOpen
+     *            Value for the auto open property,
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
     }
 
-
     /**
-     * When auto open is enabled, the dropdown will open when the field is clicked.
+     * When auto open is enabled, the dropdown will open when the field is
+     * clicked.
      *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise. Default is {@code true}
+     * @return {@code true} if auto open is enabled. {@code false} otherwise.
+     *         Default is {@code true}
      */
     public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false);
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

@@ -88,8 +88,12 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         DomEventListener allFinishedListener = e -> {
             JsonArray files = e.getEventData().getArray(elementFiles);
 
-            boolean isUploading = IntStream.range(0, files.length()).anyMatch(
-                    index -> files.getObject(index).getBoolean("uploading"));
+            boolean isUploading = IntStream.range(0, files.length())
+                    .anyMatch(index -> {
+                        final String KEY = "uploading";
+                        JsonObject object = files.getObject(index);
+                        return object.hasKey(KEY) && object.getBoolean(KEY);
+                    });
 
             if (this.uploading && !isUploading) {
                 this.fireAllFinish();
@@ -267,8 +271,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * that opens the dialog for choosing the files to be upload.
      *
      * @param uploadButton
-     *            the component to be clicked by the user to open the dialog,
-     *            or <code>null</code> to reset to the default button
+     *            the component to be clicked by the user to open the dialog, or
+     *            <code>null</code> to reset to the default button
      */
     public void setUploadButton(Component uploadButton) {
         removeElementsAtSlot("add-button");
@@ -644,7 +648,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
             if (upload.getReceiver() == null) {
                 throw new IllegalStateException(
                         "Upload cannot be performed without a receiver set. "
-                            + "Please firstly set the receiver implementation with upload.setReceiver");
+                                + "Please firstly set the receiver implementation with upload.setReceiver");
             }
             StreamVariable.StreamingStartEvent event = lastStartedEvent.pop();
             OutputStream receiveUpload = upload.getReceiver()

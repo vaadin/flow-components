@@ -16,7 +16,7 @@ public class Person implements Serializable {
     }
 
     public Person(String name, boolean isSubscriber, String email, int age,
-                  Department department, City city) {
+            Department department, City city) {
         super();
         this.name = name;
         this.isSubscriber = isSubscriber;
@@ -100,15 +100,10 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", age=" + age +
-                ", name='" + name + '\'' +
-                ", isSubscriber=" + isSubscriber +
-                ", email='" + email + '\'' +
-                ", department=" + department +
-                ", city='" + city.getName() +
-                "'}";
+        return "Person{" + "id=" + id + ", age=" + age + ", name='" + name
+                + '\'' + ", isSubscriber=" + isSubscriber + ", email='" + email
+                + '\'' + ", department=" + department + ", city='"
+                + city.getName() + "'}";
     }
 
     @Override
@@ -116,8 +111,8 @@ public class Person implements Serializable {
         try {
             return (Person) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(
-                    "The Person object could not be cloned.", e);
+            throw new RuntimeException("The Person object could not be cloned.",
+                    e);
         }
     }
 }

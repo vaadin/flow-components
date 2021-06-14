@@ -15,14 +15,6 @@
  */
 package com.vaadin.flow.component.select;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -58,6 +50,14 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 /**
  * A customizable drop-down select component similar to a native browser select.
@@ -123,6 +123,10 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         getElement().setProperty("invalid", false);
         getElement().setProperty("opened", false);
+        // Trigger model-to-presentation conversion in constructor, so that
+        // the client side component has a correct initial value of an empty
+        // string
+        setPresentationValue(null);
 
         getElement().appendChild(listBox.getElement());
 
@@ -746,6 +750,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -856,8 +861,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
-            getDataProvider().fetch(DataViewUtils.getQuery(this)).map(item -> createItem((T) item))
-                    .forEach(component -> {
+            getDataProvider().fetch(DataViewUtils.getQuery(this))
+                    .map(item -> createItem((T) item)).forEach(component -> {
                         add((Component) component);
                         itemCounter.incrementAndGet();
                     });
@@ -994,7 +999,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         return getIdentifierProvider().apply(item);
     }
 
-    private void identifierProviderChanged(IdentifierProvider<T> identifierProvider) {
+    private void identifierProviderChanged(
+            IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 

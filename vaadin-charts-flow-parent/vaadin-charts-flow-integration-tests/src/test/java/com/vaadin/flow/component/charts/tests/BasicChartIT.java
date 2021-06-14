@@ -12,11 +12,12 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import com.vaadin.flow.component.charts.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.area.AreaChart;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.examples.area.AreaChart;
 
 import static org.junit.Assert.assertTrue;
 
@@ -34,7 +35,6 @@ public class BasicChartIT extends AbstractTBTest {
                 By.className("highcharts-title"));
         assertTrue(title.getText().contains("First Chart for Flow"));
     }
-
 
     @Test
 

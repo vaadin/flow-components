@@ -112,14 +112,14 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
 
     private void initNavigationLinks() {
         menuBar.add("Open initially with");
-        menuBar.add(
-                new RouterLink("UndefinedSize", ItemCountUnknownGridPage.class));
+        menuBar.add(new RouterLink("UndefinedSize",
+                ItemCountUnknownGridPage.class));
         menuBar.add(new RouterLink("InitialSizeEstimate",
                 ItemCountEstimateGridPage.class));
         menuBar.add(new RouterLink("SizeEstimateCallback",
                 ItemCountEstimateIncreaseGridPage.class));
-        menuBar.add(new RouterLink("DefinedSize",
-                ItemCountCallbackGridPage.class));
+        menuBar.add(
+                new RouterLink("DefinedSize", ItemCountCallbackGridPage.class));
     }
 
     private void initGrid() {
@@ -186,17 +186,17 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
     private void initEstimateOptions() {
         menuBar.add("Item Count Estimate Configuration");
 
-        itemCountEstimateInput = new IntegerField(
-                "setItemCountEstimate",
+        itemCountEstimateInput = new IntegerField("setItemCountEstimate",
                 event -> grid.getLazyDataView()
                         .setItemCountEstimate(event.getValue()));
         itemCountEstimateInput.setId(ITEM_COUNT_ESTIMATE_INPUT);
         itemCountEstimateInput.setWidthFull();
 
         itemCountEstimateIncreaseInput = new IntegerField(
-                "setItemCountEstimateIncrease",
-                event -> grid.getLazyDataView().setItemCountEstimateIncrease(event.getValue()));
-        itemCountEstimateIncreaseInput.setId(ITEM_COUNT_ESTIMATE_INCREASE_INPUT);
+                "setItemCountEstimateIncrease", event -> grid.getLazyDataView()
+                        .setItemCountEstimateIncrease(event.getValue()));
+        itemCountEstimateIncreaseInput
+                .setId(ITEM_COUNT_ESTIMATE_INCREASE_INPUT);
         itemCountEstimateIncreaseInput.setWidthFull();
         menuBar.add(itemCountEstimateInput, itemCountEstimateIncreaseInput);
     }

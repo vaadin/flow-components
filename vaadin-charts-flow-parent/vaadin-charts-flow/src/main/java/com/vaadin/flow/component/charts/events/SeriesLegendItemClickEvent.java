@@ -18,13 +18,13 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
 
-
 /**
  * The SeriesLegendItemClickEvent class stores information on click events on
  * the charts's legend items that correspond to a chart series.
  */
 @DomEvent("series-legend-item-click")
-public class SeriesLegendItemClickEvent extends ComponentEvent<Chart> implements HasSeries {
+public class SeriesLegendItemClickEvent extends ComponentEvent<Chart>
+        implements HasSeries {
 
     private final int seriesIndex;
 

@@ -44,11 +44,12 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 "03/05/2018");
 
         for (LogEntry logEntry : getWarningEntries()) {
-            Assert.assertThat("Expected only [Deprecation] warnings in the logs",
-                    logEntry.getMessage(),
-                    CoreMatchers.containsString("HTML Imports"));
+            Assert.assertThat(
+                    "Expected only [Deprecation] warnings in the logs",
+                    logEntry.getMessage(), CoreMatchers.containsString(
+                            "'lit-element' module entrypoint is deprecated."));
             Assert.assertThat(logEntry.getMessage(),
-                CoreMatchers.containsString("deprecated"));
+                    CoreMatchers.containsString("deprecated"));
         }
 
         localePicker = $(DatePickerElement.class)

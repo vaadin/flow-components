@@ -58,7 +58,8 @@ public class ThemeGradientColorBeanSerializer extends BeanSerializerBase {
 
     @Override
     protected BeanSerializerBase withIgnorals(Set<String> set) {
-        return new ThemeGradientColorBeanSerializer(this, set.toArray(new String[set.size()]));
+        return new ThemeGradientColorBeanSerializer(this,
+                set.toArray(new String[set.size()]));
     }
 
     @Override

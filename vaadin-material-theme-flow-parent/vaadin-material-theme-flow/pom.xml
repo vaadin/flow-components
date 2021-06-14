@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-material-theme-flow-parent</artifactId>
-        <version>20.0-SNAPSHOT</version>
+        <version>21.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-material-theme</artifactId>
     <packaging>jar</packaging>
@@ -17,7 +17,23 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins/>
+        <plugins>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        </manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
     <profiles>
         <profile>
@@ -38,26 +54,8 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                     </plugin>
                     <plugin>
-                        <groupId>biz.aQute.bnd</groupId>
-                        <artifactId>bnd-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <configuration>
-                            <archive>
-                                <manifestFile>
-                                    ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                                                                </manifestFile>
-                                <manifestEntries>
-                                    <Built-By/>
-                                </manifestEntries>
-                            </archive>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -4,8 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import com.vaadin.flow.component.charts.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.column.ColumnWithLazyMultiLevelDrilldown;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.examples.column.ColumnWithLazyMultiLevelDrilldown;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
 
     private WebElement getFirstDrilldownPoint(ChartElement chart) {
         return getElementFromShadowRoot(chart,
-            By.cssSelector(".highcharts-drilldown-point"));
+                By.cssSelector(".highcharts-drilldown-point"));
     }
 
     private WebElement getDrillUpButton(ChartElement chart) {
@@ -43,7 +43,7 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
 
     private void assertLogText(String text) {
         assertTrue(String.format("Couldn't find text '%s' from the log.", text),
-            logContainsText(text));
+                logContainsText(text));
     }
 
     private boolean logContainsText(String string) {

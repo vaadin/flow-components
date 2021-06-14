@@ -23,7 +23,7 @@ fi
 ## compute modules that were modified in this PR
 if [ -z "$modules" -a -n "$PR" ]
 then
-  modified=`curl -s https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR/files \
+  modified=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
     | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
   if [ `echo "$modified" | wc -w` -lt 5 ]
   then
@@ -73,7 +73,7 @@ saveFailedTests() {
 
 computeFastBuild() {
   [ -z "$PR" ] && return 1
-  ghUrl="https://api.github.com/repos/vaadin/vaadin-flow-components/pulls/$PR"
+  ghUrl="https://api.github.com/repos/vaadin/flow-components/pulls/$PR"
   prTitle=`curl -s $ghUrl | jq -r .title`
   echo "$prTitle" | grep -v '\[skip ci\]' >/dev/null || return 0
   prMessages=`curl -s $ghUrl/commits | jq -r '.[] | .commit.message'`

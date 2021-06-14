@@ -712,10 +712,10 @@ public class GridDemo extends DemoView {
 
         // end-source-example
 
-        addVariantsDemo(() -> grid,
-                Grid::addThemeVariants, Grid::removeThemeVariants,
-                GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
-                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        addVariantsDemo(() -> grid, Grid::addThemeVariants,
+                Grid::removeThemeVariants, GridVariant::getVariantName,
+                GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS,
+                GridVariant.LUMO_ROW_STRIPES);
     }
 
     // Lazy Loading Begin
@@ -754,9 +754,8 @@ public class GridDemo extends DemoView {
         final ItemGenerator fakeBackend = new ItemGenerator(12345);
         Grid<Item> grid = new Grid<>();
 
-        GridLazyDataView<Item> lazyDataView = grid
-                .setItems(query -> fakeBackend
-                        .generateItems(query.getOffset(), query.getLimit()));
+        GridLazyDataView<Item> lazyDataView = grid.setItems(query -> fakeBackend
+                .generateItems(query.getOffset(), query.getLimit()));
         /*
          * By default the grid will initially adjust the scrollbar to 200 items
          * and as the user scrolls down it automatically increases the size by
@@ -938,9 +937,8 @@ public class GridDemo extends DemoView {
                 event -> dataView.addItem(new Person(106, "X", "Y", 16,
                         new Address("95632", "New York"), "187-338-588")));
 
-        Button removeButton = new Button("Remove last",
-                event -> dataView.removeItem(
-                        dataView.getItem(dataView.getItemCount() - 1)));
+        Button removeButton = new Button("Remove last", event -> dataView
+                .removeItem(dataView.getItem(dataView.getItemCount() - 1)));
 
         FooterRow footerRow = grid.appendFooterRow();
         footerRow.getCell(firstNameColumn).setComponent(addButton);
@@ -1863,14 +1861,15 @@ public class GridDemo extends DemoView {
         GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
         GridMenuItem<Task> insert = contextMenu.addItem("Insert");
 
-        insert.getSubMenu().addItem("Add a task before", event ->
-                event.getItem().ifPresent(item -> dataView.addItemBefore(
+        insert.getSubMenu().addItem("Add a task before", event -> event
+                .getItem()
+                .ifPresent(item -> dataView.addItemBefore(
                         new Task(100, "New Task",
                                 LocalDate.parse("02/01/2019", formatter)),
                         item)));
         insert.getSubMenu().add(new Hr());
-        insert.getSubMenu().addItem("Add a task after", event ->
-                event.getItem().ifPresent(item -> dataView.addItemAfter(
+        insert.getSubMenu().addItem("Add a task after", event -> event.getItem()
+                .ifPresent(item -> dataView.addItemAfter(
                         new Task(100, "New Task",
                                 LocalDate.parse("02/01/2019", formatter)),
                         item)));

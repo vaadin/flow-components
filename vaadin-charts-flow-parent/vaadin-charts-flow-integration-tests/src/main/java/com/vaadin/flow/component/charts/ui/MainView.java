@@ -15,8 +15,8 @@ package com.vaadin.flow.component.charts.ui;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.charts.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.area.AreaChart;
+import com.vaadin.flow.component.charts.demo.AbstractChartExample;
+import com.vaadin.flow.component.charts.demo.examples.area.AreaChart;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEvent;
@@ -27,10 +27,12 @@ import com.vaadin.flow.router.WildcardParameter;
 @Route("vaadin-charts")
 @StyleSheet("context://styles.css")
 public class MainView extends Div implements HasUrlParameter<String> {
-    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.examples.";
+
+    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.demo.examples.";
 
     @Override
-    public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+    public void setParameter(BeforeEvent event,
+            @WildcardParameter String parameter) {
         removeAll();
         Optional<Component> content = getContentFromParameter(parameter);
         if (content.isPresent()) {

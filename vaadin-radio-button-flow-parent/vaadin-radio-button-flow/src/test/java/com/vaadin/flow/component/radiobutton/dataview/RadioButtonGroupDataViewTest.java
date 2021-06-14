@@ -84,8 +84,8 @@ public class RadioButtonGroupDataViewTest
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        CustomIdentityItemDataProvider customIdentityItemDataProvider =
-                new CustomIdentityItemDataProvider(items);
+        CustomIdentityItemDataProvider customIdentityItemDataProvider = new CustomIdentityItemDataProvider(
+                items);
 
         RadioButtonGroup<Item> component = new RadioButtonGroup<>();
         RadioButtonGroupListDataView<Item> listDataView = component
@@ -128,8 +128,7 @@ public class RadioButtonGroupDataViewTest
         RadioButtonGroup<String> radioButtonGroup = Mockito
                 .spy(new RadioButtonGroup<>());
 
-        InMemoryDataProvider<String> inMemoryDataProvider =
-                new InMemoryDataProvider<String>() {
+        InMemoryDataProvider<String> inMemoryDataProvider = new InMemoryDataProvider<String>() {
 
             private SerializablePredicate<String> filter;
 
