@@ -76,6 +76,17 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      * Creates an Icon component that displays the given {@code icon} from the
      * given {@code collection}.
      *
+     * If you want to use a custom {@code <vaadin-iconset>} -based icon set,
+     * you also need to add a dependency and an import for it, example:
+     *
+     * <pre>
+     * <code>
+     * &#64;NpmPackage(value = "custom-icons", version = "1.0.0")
+     * &#64;JsModule("custom-icons/iconset.js")
+     * public class MyView extends Div {
+     * </code>
+     * </pre>
+     *
      * @param collection
      *            the icon collection
      * @param icon
