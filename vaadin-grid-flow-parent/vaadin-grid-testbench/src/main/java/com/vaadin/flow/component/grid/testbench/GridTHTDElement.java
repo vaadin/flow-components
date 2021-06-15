@@ -43,6 +43,18 @@ public class GridTHTDElement extends TestBenchElement {
         }
     }
 
+    @Override
+    public void click() {
+        // Click cell content in the shadow DOM to prevent Chrome Driver
+        // complaining about the click location not targeting the cell itself
+        TestBenchElement contentElement = (TestBenchElement) this.getContext();
+        // The default TestBench element click implementation just calls
+        // .click() on the element which does not trigger default browser
+        // behaviour, like focus events. Instead use Selenium implementation
+        // which simulates an actual click in the browser UI.
+        contentElement.getWrappedElement().click();
+    }
+
     public String getInnerHTML() {
         // The first child element of a cell is a slot. The following JS finds
         // the elements assigned to that slot and then joins the `innerHTML`
