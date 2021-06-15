@@ -803,7 +803,7 @@ public class GridViewIT extends GridViewBase {
         waitUntil(driver -> grid.getRowCount() == 50);
 
         Assert.assertEquals("Grid should have heightByRows set to true", "true",
-                grid.getAttribute("heightByRows"));
+                grid.getAttribute("allRowsVisible"));
     }
 
     @Test

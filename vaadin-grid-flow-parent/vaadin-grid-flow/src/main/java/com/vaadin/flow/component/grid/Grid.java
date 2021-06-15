@@ -3358,7 +3358,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     @Deprecated
     public void setHeightByRows(boolean heightByRows) {
-        getElement().setProperty("heightByRows", heightByRows);
+        setAllRowsVisible(heightByRows);
     }
 
     /**
@@ -3371,7 +3371,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *         rows, <code>false</code> otherwise
      */
     @Deprecated
-    @Synchronize("height-by-rows-changed")
     public boolean isHeightByRows() {
         return isAllRowsVisible();
     }
@@ -3402,8 +3401,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     @Synchronize("all-rows-visible-changed")
     public boolean isAllRowsVisible() {
-        return getElement().getProperty("heightByRows", false)
-                || getElement().getProperty("allRowsVisible", false);
+        return getElement().getProperty("allRowsVisible", false);
     }
 
     @Override
