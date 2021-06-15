@@ -123,6 +123,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         getElement().setProperty("invalid", false);
         getElement().setProperty("opened", false);
+        getElement().setAttribute("suppress-template-warning", true);
         // Trigger model-to-presentation conversion in constructor, so that
         // the client side component has a correct initial value of an empty
         // string
