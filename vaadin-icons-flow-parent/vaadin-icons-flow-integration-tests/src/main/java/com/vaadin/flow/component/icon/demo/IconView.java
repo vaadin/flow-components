@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.icon.demo;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -31,11 +32,11 @@ import com.vaadin.flow.router.Route;
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-icons")
-public class IconView extends DemoView {
+@Route("vaadin-icons/icon-view")
+@JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
+public class IconView extends Div {
 
-    @Override
-    public void initView() {
+    public IconView() {
         createBasicIconsView();
         createStyledIconView();
         createClickableIconsView();
@@ -49,7 +50,7 @@ public class IconView extends DemoView {
         Icon close = new Icon(VaadinIcon.CLOSE);
 
         // Creating an icon from the Lumo icons collection
-        IronIcon clock = new IronIcon("lumo", "clock");
+        Icon clock = new Icon("lumo", "clock");
 
         // end-source-example
 
@@ -118,5 +119,13 @@ public class IconView extends DemoView {
 
         iconLayout.setId("all-icons");
         addCard("All available icons", iconLayout);
+    }
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }

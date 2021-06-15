@@ -68,7 +68,7 @@ public class AppLayoutIT extends AbstractParallelTest {
                 .id(CUSTOM_TOGGLE_ID);
         Assert.assertTrue(customToggle.isDisplayed());
 
-        TestBenchElement iconElement = customToggle.$("iron-icon")
+        TestBenchElement iconElement = customToggle.$("vaadin-icon")
                 .id(CUSTOM_ICON_ID);
         Assert.assertTrue(iconElement.isDisplayed());
     }
