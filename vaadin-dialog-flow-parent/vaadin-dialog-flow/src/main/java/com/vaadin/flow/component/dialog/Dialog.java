@@ -64,6 +64,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Creates an empty dialog.
      */
     public Dialog() {
+        getElement().setAttribute("suppress-template-warning", true);
+
         template = new Element("template");
         getElement().appendChild(template);
 
