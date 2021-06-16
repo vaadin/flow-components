@@ -59,7 +59,8 @@ public class IconView extends Div {
         // end-source-example
 
         close.getStyle().set("marginRight", "5px");
-        addCard("Creating a new icon", new HorizontalLayout(close, clock, ironIcon));
+        addCard("Creating a new icon",
+                new HorizontalLayout(close, clock, ironIcon));
 
         close.setId("close-icon");
         clock.setId("clock-icon");
