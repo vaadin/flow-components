@@ -62,7 +62,7 @@ public class GridTest {
     }
 
     @Test
-    public void make_all_rows_visible_by_setHeightByRows() {
+    public void setHeightByRows_allRowsAreVisible() {
         final Grid<String> grid = new Grid<>();
 
         Assert.assertEquals(null,
@@ -74,7 +74,7 @@ public class GridTest {
     }
 
     @Test
-    public void make_all_rows_visible_by_setAllRowsVisible() {
+    public void setAllRowsVisible_allRowsAreVisible() {
         final Grid<String> grid = new Grid<>();
 
         Assert.assertEquals(null,
@@ -86,7 +86,7 @@ public class GridTest {
     }
 
     @Test
-    public void check_if_all_rows_visible() {
+    public void setAllRowsVisibleProperty_isHeightByRowsAndIsAllRowsVisibleWork() {
         final Grid<String> grid = new Grid<>();
         grid.getElement().setProperty("allRowsVisible", true);
 
