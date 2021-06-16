@@ -135,6 +135,14 @@ public class NotificationTest {
         }
     }
 
+    @Test
+    public void templateWarningSuppressed() {
+        Notification notification = new Notification();
+
+        Assert.assertTrue("Template warning is not suppressed", notification
+                .getElement().hasAttribute("suppress-template-warning"));
+    }
+
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUiInstance() {
         UI.setCurrent(null);
@@ -165,7 +173,7 @@ public class NotificationTest {
     }
 
     @Test
-    public void setText_notifictionHasAddedComponents_innerHtmlIsTextValue() {
+    public void setText_notificationHasAddedComponents_innerHtmlIsTextValue() {
         Notification notification = new Notification();
 
         notification.add(new Div());
@@ -183,7 +191,7 @@ public class NotificationTest {
     }
 
     @Test
-    public void add_notifictionHasText_innerHtmlIsTemplateValue() {
+    public void add_notificationHasText_innerHtmlIsTemplateValue() {
         Notification notification = new Notification();
 
         notification.setText("foo");
