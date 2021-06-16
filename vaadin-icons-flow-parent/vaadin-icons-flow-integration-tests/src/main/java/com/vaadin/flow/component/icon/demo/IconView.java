@@ -21,6 +21,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -52,13 +53,17 @@ public class IconView extends Div {
         // Creating an icon from the Lumo icons collection
         Icon clock = new Icon("lumo", "clock");
 
+        // Creating an IronIcon with an icon from the Vaadin icons collection
+        IronIcon ironIcon = new IronIcon("vaadin", "palette");
+
         // end-source-example
 
         close.getStyle().set("marginRight", "5px");
-        addCard("Creating a new icon", new HorizontalLayout(close, clock));
+        addCard("Creating a new icon", new HorizontalLayout(close, clock, ironIcon));
 
         close.setId("close-icon");
         clock.setId("clock-icon");
+        ironIcon.setId("iron-icon");
     }
 
     private void createStyledIconView() {
