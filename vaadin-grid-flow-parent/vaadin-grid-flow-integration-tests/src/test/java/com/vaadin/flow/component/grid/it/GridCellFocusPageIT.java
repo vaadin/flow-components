@@ -35,21 +35,21 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
     public void focusBodyCell() {
         open();
 
-        getGrid().getCell(0, 0).click();
+        getGrid().getCell(0, 0).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "A");
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_FIRST_COLUMN);
         assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
                 CellFocusEvent.GridSection.BODY.getClientSideName());
 
-        getGrid().getCell(1, 0).click();
+        getGrid().getCell(1, 0).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "B");
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_FIRST_COLUMN);
         assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
                 CellFocusEvent.GridSection.BODY.getClientSideName());
 
-        getGrid().getCell(2, 1).click();
+        getGrid().getCell(2, 1).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "C");
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
                 GridCellFocusPage.KEY_SECOND_COLUMN);
@@ -61,7 +61,7 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
     public void focusHeaderCell() {
         open();
 
-        getGrid().getHeaderCell(0).click();
+        getGrid().getHeaderCell(0).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
@@ -69,7 +69,7 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
         assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
                 CellFocusEvent.GridSection.HEADER.getClientSideName());
 
-        getGrid().getHeaderCell(1).click();
+        getGrid().getHeaderCell(1).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
@@ -82,7 +82,7 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
     public void focusFooterCell() {
         open();
 
-        getGrid().getFooterCell(0).click();
+        getGrid().getFooterCell(0).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
@@ -90,7 +90,7 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
         assertTextResult(GridCellFocusPage.ID_SECTION_RESULT,
                 CellFocusEvent.GridSection.FOOTER.getClientSideName());
 
-        getGrid().getFooterCell(1).click();
+        getGrid().getFooterCell(1).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT,
                 GridCellFocusPage.NO_ITEM);
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
