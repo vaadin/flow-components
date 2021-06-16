@@ -41,7 +41,7 @@ public class ColumnResizeEventPage extends Div {
 
     public ColumnResizeEventPage() {
         Grid<Person> grid = new Grid<>();
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
         grid.setId(GRID_ID);
 
         grid.setItems(new Person("Jorma", "Testaaja", "jorma@testaaja.com",
