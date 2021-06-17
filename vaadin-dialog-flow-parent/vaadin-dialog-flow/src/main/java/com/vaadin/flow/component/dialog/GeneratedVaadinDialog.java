@@ -49,8 +49,8 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/vaadin-dialog", version = "21.0.0-alpha6")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-dialog", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha8")
 @JsModule("@vaadin/vaadin-dialog/src/vaadin-dialog.js")
 @JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
