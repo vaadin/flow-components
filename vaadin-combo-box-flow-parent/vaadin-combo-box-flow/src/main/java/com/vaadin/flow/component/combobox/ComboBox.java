@@ -292,6 +292,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         addAttachListener(e -> initConnector());
 
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        getElement().setAttribute("suppress-template-warning", true);
     }
 
     /**

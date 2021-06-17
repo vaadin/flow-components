@@ -19,7 +19,7 @@ public class TreeGridInitialExpandPage extends Div {
         data.addItem(null, "parent2");
         data.addItem("parent2", "parent2-child2");
         treeGrid.setDataProvider(new TreeDataProvider<>(data));
-        treeGrid.setHeightByRows(true);
+        treeGrid.setAllRowsVisible(true);
         treeGrid.expand("parent1");
         treeGrid.expand("parent2");
         add(treeGrid);
