@@ -137,6 +137,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * Creates an empty list.
      */
     public VirtualList() {
+        getElement().setAttribute("suppress-template-warning", true);
+
         dataGenerator.addDataGenerator(
                 (item, jsonObject) -> renderer.getValueProviders()
                         .forEach((property, provider) -> jsonObject.put(
