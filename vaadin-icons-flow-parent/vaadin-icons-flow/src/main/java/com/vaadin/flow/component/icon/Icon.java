@@ -57,8 +57,8 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *            the icon to display
      */
     public Icon(VaadinIcon icon) {
-        this(ICON_COLLECTION_NAME, icon.name()
-                .toLowerCase(Locale.ENGLISH).replace('_', '-'));
+        this(ICON_COLLECTION_NAME,
+                icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
     }
 
     /**

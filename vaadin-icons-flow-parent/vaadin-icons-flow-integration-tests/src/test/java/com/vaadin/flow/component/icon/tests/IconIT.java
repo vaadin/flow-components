@@ -90,7 +90,7 @@ public class IconIT extends AbstractComponentIT {
             String enumName = VaadinIcon.values()[i].name();
             Assert.assertEquals(enumName, label.getText());
             assertIconProperty(icon, "vaadin",
-                enumName.toLowerCase().replace('_', '-'));
+                    enumName.toLowerCase().replace('_', '-'));
         }
     }
 
