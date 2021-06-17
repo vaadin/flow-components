@@ -128,7 +128,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.7.13")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.8.0")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -2740,7 +2740,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
-     * 
+     *
      * @param internalId
      *            the internal identifier of the column to get
      * @return the column corresponding to the given column identifier, or
@@ -3982,7 +3982,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Set the behavior when facing nested <code>null</code> values. By default
      * the value is <code>NestedNullBehavior.THROW</code>.
-     * 
+     *
      * @param nestedNullBehavior
      *            the behavior when facing nested <code>null</code> values.
      */
@@ -3992,7 +3992,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Get the behavior when facing nested <code>null</code> values.
-     * 
+     *
      * @return The current behavior when facing nested <code>null</code> values.
      */
     public NestedNullBehavior getNestedNullBehavior() {
