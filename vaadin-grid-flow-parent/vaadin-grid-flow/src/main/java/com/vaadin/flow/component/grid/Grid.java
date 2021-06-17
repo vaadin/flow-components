@@ -391,6 +391,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
+
+            getElement().setAttribute("suppress-template-warning", true);
         }
 
         protected void destroyDataGenerators() {
@@ -1366,6 +1368,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
+
+        getElement().setAttribute("suppress-template-warning", true);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
