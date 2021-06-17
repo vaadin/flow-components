@@ -330,13 +330,13 @@ public class GridViewIT extends GridViewBase {
         WebElement toggleIdColumnVisibility = findElement(
                 By.id("toggle-id-column-visibility"));
         String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('tr')[1].querySelectorAll('td').length;";
-        Assert.assertEquals(4l, getCommandExecutor()
+        Assert.assertEquals(4L, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(3l, getCommandExecutor()
+        waitUntil(c -> 3L == (long) getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(4l, getCommandExecutor()
+        waitUntil(c -> 4L == (long) getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",

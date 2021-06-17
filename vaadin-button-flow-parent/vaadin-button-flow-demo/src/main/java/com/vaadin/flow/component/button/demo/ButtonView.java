@@ -210,7 +210,7 @@ public class ButtonView extends DemoView {
         String text = source.getText();
         if (text.isEmpty() && containsChild(source, "img")) {
             text = "with image";
-        } else if (text.isEmpty() && containsChild(source, "iron-icon")) {
+        } else if (text.isEmpty() && containsChild(source, "vaadin-icon")) {
             text = "thumbs up";
         }
 

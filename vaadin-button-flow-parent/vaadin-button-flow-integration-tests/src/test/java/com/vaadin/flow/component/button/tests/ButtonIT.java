@@ -47,21 +47,21 @@ public class ButtonIT extends ComponentDemoTest {
     @Test
     public void clickOnIconButtons_textIsDisplayed() {
         WebElement leftButton = layout.findElement(By.id("left-icon-button"));
-        WebElement icon = leftButton.findElement(By.tagName("iron-icon"));
+        WebElement icon = leftButton.findElement(By.tagName("vaadin-icon"));
         Assert.assertEquals("vaadin:arrow-left", icon.getAttribute("icon"));
 
         // the icon is before the text
         Assert.assertTrue(getCenterX(leftButton) > getCenterX(icon));
 
         WebElement rightButton = layout.findElement(By.id("right-icon-button"));
-        icon = rightButton.findElement(By.tagName("iron-icon"));
+        icon = rightButton.findElement(By.tagName("vaadin-icon"));
         Assert.assertEquals("vaadin:arrow-right", icon.getAttribute("icon"));
 
         // the icon is after the text
         Assert.assertTrue(getCenterX(rightButton) < getCenterX(icon));
 
         WebElement thumbButton = layout.findElement(By.id("thumb-icon-button"));
-        icon = thumbButton.findElement(By.tagName("iron-icon"));
+        icon = thumbButton.findElement(By.tagName("vaadin-icon"));
         Assert.assertEquals("vaadin:thumbs-up", icon.getAttribute("icon"));
 
         scrollIntoViewAndClick(leftButton);
