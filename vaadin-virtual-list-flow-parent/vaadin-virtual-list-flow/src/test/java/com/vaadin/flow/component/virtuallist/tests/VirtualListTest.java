@@ -27,6 +27,14 @@ public class VirtualListTest {
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
+    public void templateWarningSuppressed() {
+        VirtualList<String> virtualList = new VirtualList<>();
+
+        Assert.assertTrue("Template warning is not suppressed", virtualList
+                .getElement().hasAttribute("suppress-template-warning"));
+    }
+
+    @Test
     public void paging_pagingDisabledByDefault() {
         VirtualList<String> virtualList = new VirtualList<>();
         Assert.assertFalse("VirtualList is not supposed to support the paging",

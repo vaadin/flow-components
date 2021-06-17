@@ -67,9 +67,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha8")
 @JsModule("@vaadin/vaadin-template-renderer/vaadin-template-renderer.js")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "21.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "21.0.0-alpha8")
 @JsModule("@vaadin/vaadin-virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -137,6 +137,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * Creates an empty list.
      */
     public VirtualList() {
+        getElement().setAttribute("suppress-template-warning", true);
+
         dataGenerator.addDataGenerator(
                 (item, jsonObject) -> renderer.getValueProviders()
                         .forEach((property, provider) -> jsonObject.put(

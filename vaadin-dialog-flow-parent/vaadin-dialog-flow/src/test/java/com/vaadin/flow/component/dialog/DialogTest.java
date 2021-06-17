@@ -95,6 +95,14 @@ public class DialogTest {
         Assert.assertEquals(dialog.getHeight(), "100px");
     }
 
+    @Test
+    public void templateWarningSuppressed() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertTrue("Template warning is not suppressed",
+                dialog.getElement().hasAttribute("suppress-template-warning"));
+    }
+
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUi() {
         UI.setCurrent(null);

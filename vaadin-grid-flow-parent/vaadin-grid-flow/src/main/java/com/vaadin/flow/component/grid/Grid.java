@@ -140,8 +140,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha6")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha8")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -391,6 +391,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
+
+            getElement().setAttribute("suppress-template-warning", true);
         }
 
         protected void destroyDataGenerators() {
@@ -1366,6 +1368,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
+
+        getElement().setAttribute("suppress-template-warning", true);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {

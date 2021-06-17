@@ -193,6 +193,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     }
 
     private void initBaseElementsAndListeners() {
+        getElement().setAttribute("suppress-template-warning", true);
+
         getElement().appendChild(templateElement);
         getElement().appendVirtualChild(container);
 
