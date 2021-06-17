@@ -91,6 +91,14 @@ public class ComboBoxTest {
     }
 
     @Test
+    public void templateWarningSuppressed() {
+        ComboBox<Object> comboBox = new ComboBox<>();
+
+        Assert.assertTrue("Template warning is not suppressed", comboBox
+                .getElement().hasAttribute("suppress-template-warning"));
+    }
+
+    @Test
     public void setItems_jsonItemsAreSet() {
         TestComboBox comboBox = new TestComboBox();
         comboBox.setItems(Arrays.asList("foo", "bar"));
