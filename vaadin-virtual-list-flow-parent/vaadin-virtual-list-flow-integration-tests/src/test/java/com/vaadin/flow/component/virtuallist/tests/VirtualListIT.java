@@ -380,7 +380,7 @@ public class VirtualListIT extends AbstractComponentIT {
     @Test
     public void numberRenderer() {
         List<TestBenchElement> items = $("vaadin-virtual-list")
-                .id("list-with-numbers").$("span").all();
+                .id("list-with-numbers").$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
         IntStream.range(0, 3).forEach(i -> {
             Assert.assertEquals("" + (i + 1), items.get(i).getText());
@@ -390,7 +390,7 @@ public class VirtualListIT extends AbstractComponentIT {
     @Test
     public void localDateRenderer() {
         List<TestBenchElement> items = $("vaadin-virtual-list")
-                .id("list-with-local-dates").$("span").all();
+                .id("list-with-local-dates").$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
 
         Assert.assertEquals("January 1, 2001", items.get(0).getText());
@@ -401,7 +401,7 @@ public class VirtualListIT extends AbstractComponentIT {
     @Test
     public void localDateTimeRenderer() {
         List<TestBenchElement> items = $("vaadin-virtual-list")
-                .id("list-with-local-date-times").$("span").all();
+                .id("list-with-local-date-times").$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
 
         Assert.assertEquals("January 1, 2001 1:01 AM", items.get(0).getText());
