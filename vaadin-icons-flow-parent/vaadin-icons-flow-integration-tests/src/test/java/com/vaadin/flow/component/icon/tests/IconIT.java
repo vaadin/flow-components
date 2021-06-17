@@ -44,11 +44,11 @@ public class IconIT extends AbstractComponentIT {
     @Test
     public void basicIcons() {
         assertIconProperty("close-icon", "vaadin", "close");
-        assetHasIconSvg("close-icon");
+        assertHasIconSvg("close-icon");
         assertIconProperty("clock-icon", "lumo", "clock");
-        assetHasIconSvg("clock-icon");
+        assertHasIconSvg("clock-icon");
         assertIconProperty("iron-icon", "vaadin", "palette");
-        assetHasIconSvg("iron-icon");
+        assertHasIconSvg("iron-icon");
     }
 
     @Test
@@ -129,7 +129,7 @@ public class IconIT extends AbstractComponentIT {
         assertIconProperty(findElement(By.id(id)), collection, iconName);
     }
 
-    private void assetHasIconSvg(String id) {
+    private void assertHasIconSvg(String id) {
         WebElement icon = findElement(By.id(id));
         List<WebElement> svgs = findInShadowRoot(icon, By.tagName("svg"));
         assertTrue("The icon has no svg inside", svgs.size() == 1);
