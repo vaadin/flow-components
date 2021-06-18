@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
 import org.junit.Assert;
@@ -132,7 +130,7 @@ public class IconIT extends AbstractComponentIT {
     private void assertHasIconSvg(String id) {
         WebElement icon = findElement(By.id(id));
         List<WebElement> svgs = findInShadowRoot(icon, By.tagName("svg"));
-        assertTrue("The icon has no svg inside", svgs.size() == 1);
+        Assert.assertTrue("The icon has no svg inside", svgs.size() == 1);
     }
 
     private void assertIconProperty(WebElement icon, String collection,
