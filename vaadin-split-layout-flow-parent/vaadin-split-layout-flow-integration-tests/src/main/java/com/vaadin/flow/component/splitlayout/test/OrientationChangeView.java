@@ -38,12 +38,11 @@ public class OrientationChangeView extends Div {
         layout.setId("splitLayout");
 
         NativeButton toggleOrientationButton = new NativeButton(
-                "Toggle orientation", e -> {
-                    layout.setOrientation(layout
-                            .getOrientation() == SplitLayout.Orientation.HORIZONTAL
-                                    ? SplitLayout.Orientation.VERTICAL
-                                    : SplitLayout.Orientation.HORIZONTAL);
-                });
+                "Toggle orientation",
+                e -> layout.setOrientation(layout
+                        .getOrientation() == SplitLayout.Orientation.HORIZONTAL
+                                ? SplitLayout.Orientation.VERTICAL
+                                : SplitLayout.Orientation.HORIZONTAL));
         toggleOrientationButton.setId("toggleOrientationButton");
 
         add(new H1("Orientation change"), layout, toggleOrientationButton);
