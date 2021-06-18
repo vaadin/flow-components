@@ -56,9 +56,6 @@ import elemental.json.JsonValue;
  * It supports {@link DataProvider}s to load data asynchronously and
  * {@link TemplateRenderer}s to render the markup for each item.
  * <p>
- * For this component to work properly, it needs to have a well defined
- * {@code height}. It can be an absolute height, like {@code 100px}, or a
- * relative height inside a container with well defined height.
  *
  *
  * @author Vaadin Ltd.
@@ -327,10 +324,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
          */
         template.setProperty("innerHTML", String.format(
         //@formatter:off
-            "<span>"
-                + "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
-                + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>"
-            + "</span>",
+            "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
+            + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>",
         //@formatter:on
                 placeholderTemplate, originalTemplate));
     }

@@ -92,33 +92,9 @@ public class IconIT extends AbstractComponentIT {
             WebElement label = labels.get(i);
             WebElement icon = icons.get(i);
             String enumName = VaadinIcon.values()[i].name();
-            String normalizedIconName = normalize(VaadinIcon.values()[i])
-                    .name();
             Assert.assertEquals(enumName, label.getText());
             assertIconProperty(icon, "vaadin",
-                    normalizedIconName.toLowerCase().replace('_', '-'));
-        }
-    }
-
-    /**
-     * In case a the given icon is one of the deprecated values, the
-     * corresponding updated VaadinIcon is returned. Otherwise the given
-     * VaadinIcon is returned as such.
-     */
-    private static VaadinIcon normalize(VaadinIcon icon) {
-        switch (icon) {
-        case BUSS:
-            return VaadinIcon.BUS;
-        case FUNCION:
-            return VaadinIcon.FUNCTION;
-        case MEGAFONE:
-            return VaadinIcon.MEGAPHONE;
-        case PALETE:
-            return VaadinIcon.PALETTE;
-        case TRENDIND_DOWN:
-            return VaadinIcon.TRENDING_DOWN;
-        default:
-            return icon;
+                    enumName.toLowerCase().replace('_', '-'));
         }
     }
 

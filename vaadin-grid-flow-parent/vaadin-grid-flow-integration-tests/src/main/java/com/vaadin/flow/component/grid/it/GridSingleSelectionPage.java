@@ -66,7 +66,7 @@ public class GridSingleSelectionPage extends VerticalLayout {
         grid.addColumn(string -> String.valueOf(Math.random()))
                 .setHeader("column 1");
         grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf));
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
         if (!deselectAllowed) {
             ((GridSingleSelectionModel) grid.getSelectionModel())
                     .setDeselectAllowed(deselectAllowed);
@@ -80,7 +80,7 @@ public class GridSingleSelectionPage extends VerticalLayout {
         grid.addColumn(string -> String.valueOf(Math.random()))
                 .setHeader("column 1");
         grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf));
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
         grid.setId(id);
         return grid;
     }
