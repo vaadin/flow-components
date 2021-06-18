@@ -298,13 +298,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         }
         this.updateStylesRegistration = ui.beforeClientResponse(this,
                 context -> {
-                    // Remove flex property for primary and secondary children.
-                    final String JS = "for(let i = 0;i < this.children.length;i++)"
-                            + "if(this.children[i].slot === 'primary'"
-                            + "   || this.children[i].slot === 'secondary')"
-                            + "this.children[i].style.flex = ''";
-                    getElement().executeJs(JS);
-
                     // Update width or height if splitter position is set.
                     updateStylesForSplitterPosition();
 
@@ -318,14 +311,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
-        String styleName;
-        if (getOrientation() == Orientation.VERTICAL) {
-            styleName = ElementConstants.STYLE_HEIGHT;
-        } else {
-            styleName = ElementConstants.STYLE_WIDTH;
-        }
-        setPrimaryStyle(styleName, primary + "%");
-        setSecondaryStyle(styleName, secondary + "%");
+        setPrimaryStyle("flex", String.format("1 1 %s%%", primary));
+        setSecondaryStyle("flex", String.format("1 1 %s%%", secondary));
     }
 
     /**
