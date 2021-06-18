@@ -30,7 +30,7 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
 
         Grid<ThreeString> grid1 = new Grid<>();
         grid1.setId("grid");
-        grid1.setHeightByRows(true);
+        grid1.setAllRowsVisible(true);
         grid1.setItems(ts1, ts2);
 
         grid1.addColumn(item -> item.a).setAutoWidth(true);

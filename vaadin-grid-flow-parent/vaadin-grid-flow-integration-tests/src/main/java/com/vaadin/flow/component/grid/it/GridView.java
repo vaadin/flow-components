@@ -889,9 +889,9 @@ public class GridView extends DemoView {
         // source-example-heading: Using height by rows
         Grid<Person> grid = new Grid<>();
 
-        // When using heightByRows, all items are fetched and
+        // When using allRowsVisible, all items are fetched and
         // Grid uses all the space needed to render everything.
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
 
         List<Person> people = createItems(50);
         grid.setItems(people);
