@@ -3,6 +3,7 @@ package com.vaadin.flow.component.gridpro.test;
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
 import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractParallelTest;
 
 import org.junit.Assert;
 import org.junit.Before;
