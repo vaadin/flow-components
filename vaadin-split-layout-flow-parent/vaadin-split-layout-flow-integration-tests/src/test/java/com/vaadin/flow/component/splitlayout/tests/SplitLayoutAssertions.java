@@ -33,11 +33,9 @@ class SplitLayoutAssertions {
     public static void assertChildWidthInPercentage(
             SplitLayoutElement layoutElement, TestBenchElement child,
             double percentage) {
-        int layoutWidth = layoutElement.getWrappedElement().getSize()
-                .getWidth();
-        int splitterWidth = layoutElement.getSplitter().getWrappedElement()
-                .getSize().getWidth();
-        int childWidth = child.getWrappedElement().getSize().getWidth();
+        int layoutWidth = layoutElement.getSize().getWidth();
+        int splitterWidth = layoutElement.getSplitter().getSize().getWidth();
+        int childWidth = child.getSize().getWidth();
         int expectedWidth = (int) Math
                 .round((layoutWidth - splitterWidth) * percentage / 100);
 
@@ -49,11 +47,10 @@ class SplitLayoutAssertions {
     public static void assertChildHeightInPercentage(
             SplitLayoutElement layoutElement, TestBenchElement child,
             double percentage) {
-        int layoutHeight = layoutElement.getWrappedElement().getSize()
-                .getHeight();
+        int layoutHeight = layoutElement.getSize().getHeight();
         int splitterHeight = layoutElement.getSplitter().getWrappedElement()
                 .getSize().getHeight();
-        int childHeight = child.getWrappedElement().getSize().getHeight();
+        int childHeight = child.getSize().getHeight();
         int expectedHeight = (int) Math
                 .round((layoutHeight - splitterHeight) * percentage / 100);
 
