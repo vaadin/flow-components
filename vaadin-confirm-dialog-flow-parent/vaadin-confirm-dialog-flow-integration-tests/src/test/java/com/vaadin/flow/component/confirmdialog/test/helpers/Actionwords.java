@@ -2,15 +2,15 @@ package com.vaadin.flow.component.confirmdialog.test.helpers;
 
 import java.util.Optional;
 
-import org.junit.Assert;
-
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.confirmdialog.examples.Features;
-import com.vaadin.flow.component.confirmdialog.test.AbstractParallelTest;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractParallelTest;
+
+import org.junit.Assert;
 
 public class Actionwords {
 
