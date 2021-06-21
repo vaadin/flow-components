@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.applayout.testbench.AppLayoutElement;
 import com.vaadin.flow.component.applayout.testbench.DrawerToggleElement;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractParallelTest;
 
 public class AppLayoutIT extends AbstractParallelTest {
 

@@ -9,6 +9,7 @@ import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
+import com.vaadin.tests.AbstractParallelTest;
 
 public abstract class BasicIT extends AbstractParallelTest {
 

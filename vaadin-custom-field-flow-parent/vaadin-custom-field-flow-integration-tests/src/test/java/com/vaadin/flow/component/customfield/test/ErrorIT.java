@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.customfield.test;
 
+import com.vaadin.tests.AbstractParallelTest;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
