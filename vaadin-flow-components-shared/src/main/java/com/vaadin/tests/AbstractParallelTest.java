@@ -105,7 +105,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
      */
     protected String getCurrentHostAddress() {
         if (getRunOnHub(getClass()) == null
-                || Parameters.getHubHostname() == null) {
+                && Parameters.getHubHostname() == null) {
             return "localhost";
         }
         try {
