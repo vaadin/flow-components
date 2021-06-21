@@ -49,30 +49,39 @@ window.Vaadin.Flow.virtualListConnector = {
 
     requestAnimationFrame(() => updateRequestedItem);
 
-    /*
-     * Ensure all items that virtual list will be looking at are actually defined.
-     * If this is not done, the component will keep looking ahead through the
-     * array until finding enough present items to render. In our case, that's
-     * a really slow way of achieving nothing since the rest of the array is
-     * empty.
-     */
-    const originalRenderer = list.renderer;
-    list.renderer = function (root, list, model) {
-      root.__virtualListIndex = model.index;
-
-      if (model.item === undefined) {
-        originalRenderer.call(list, root, list, {...model, item: list.$connector.placeholderItem});
-      } else {
-        originalRenderer.call(list, root, list, model);
+    // Add an observer function that will invoke on virtualList.renderer property
+    // change and then patches it with a wrapper renderer
+    list.patchVirtualListRenderer = function () {
+      if (!list.renderer || list.renderer.__virtualListConnectorPatched) {
+        // The list either doesn't have a renderer yet or it's already been patched
+        return;
       }
 
-      /*
-       * Check if we need to do anything once things have settled down.
-       * This method is called multiple times in sequence for the same user
-       * action, but we only want to do the check once.
-       */
-      scheduleUpdateRequest();
+      const originalRenderer = list.renderer;
+
+      const renderer = (root, list, model) => {
+        root.__virtualListIndex = model.index;
+
+        if (model.item === undefined) {
+          originalRenderer.call(list, root, list, {...model, item: list.$connector.placeholderItem});
+        } else {
+          originalRenderer.call(list, root, list, model);
+        }
+
+        /*
+        * Check if we need to do anything once things have settled down.
+        * This method is called multiple times in sequence for the same user
+        * action, but we only want to do the check once.
+        */
+        scheduleUpdateRequest();
+      }
+      renderer.__virtualListConnectorPatched = true;
+
+      list.renderer = renderer;
     };
+
+    list._createPropertyObserver('renderer', 'patchVirtualListRenderer', true);
+    list.patchVirtualListRenderer();
 
     list.items = [];
 

@@ -66,6 +66,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -423,10 +424,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(renderer, "The renderer must not be null");
         this.renderer = renderer;
 
-        if (template == null) {
-            template = new Element("template");
-            getElement().appendChild(template);
-        }
         scheduleRender();
     }
 
@@ -1602,13 +1599,37 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 dataGeneratorRegistration.remove();
                 dataGeneratorRegistration = null;
             }
-            Rendering<T> rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
+
+            // vaadin-template-renderer doesn't allow a custom renderer and
+            // a <template> at the same time.
+
+            // Remove <template> if it's attached...
+            if (template != null && template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            // ...and unset a possible custom renderer.
+            getElement().executeJs("this.renderer = undefined");
+
+            Rendering<T> rendering;
+            if (renderer instanceof LitRenderer) {
+                // LitRenderer
+                rendering = renderer.render(getElement(),
+                        dataCommunicator.getKeyMapper());
+            } else {
+                // TemplateRenderer or ComponentRenderer
+                if (template == null) {
+                    template = new Element("template");
+                }
+                rendering = renderer.render(getElement(),
+                        dataCommunicator.getKeyMapper(), template);
+            }
+
             if (rendering.getDataGenerator().isPresent()) {
                 dataGeneratorRegistration = dataGenerator
                         .addDataGenerator(rendering.getDataGenerator().get());
             }
             reset();
+            renderScheduled = false;
         });
     }
 

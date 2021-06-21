@@ -121,6 +121,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -2786,15 +2787,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
+        // vaadin-template-renderer doesn't allow a custom renderer and
+        // a <template> at the same time.
+
+        // Remove <template> if it's attached...
+        if (detailsTemplate != null && detailsTemplate.getParent() != null) {
+            getElement().removeChild(detailsTemplate);
+        }
+        // ...and unset a possible custom renderer.
+        getElement().executeJs("this.rowDetailsRenderer = undefined");
+
         Rendering<T> rendering;
-        if (detailsTemplate == null) {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper());
-            detailsTemplate = rendering.getTemplateElement();
-            detailsTemplate.setAttribute("class", "row-details");
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper(), detailsTemplate);
+            if (detailsTemplate == null) {
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper());
+                detailsTemplate = rendering.getTemplateElement();
+                detailsTemplate.setAttribute("class", "row-details");
+            } else {
+                getElement().appendChild(detailsTemplate);
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper(), detailsTemplate);
+            }
         }
 
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
