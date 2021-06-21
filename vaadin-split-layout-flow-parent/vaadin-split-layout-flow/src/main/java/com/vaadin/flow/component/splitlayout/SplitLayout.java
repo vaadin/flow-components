@@ -139,7 +139,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "21.0.0-alpha9")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -282,6 +282,11 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * relative to the secondary component. In horizontal mode this is the width
      * of the component and in vertical mode this is the height. The given value
      * will automatically be clamped to the range [0, 100].
+     *
+     * Note that when using vertical orientation, this method only works if the
+     * split layout has an explicit height, either as an absolute value or as
+     * percentage. When using a percentage value, ensure that ancestors have an
+     * explicit height as well.
      *
      * @param position
      *            the relative position of the splitter, in percentages
