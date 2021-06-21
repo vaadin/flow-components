@@ -290,9 +290,9 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "21.0.0-alpha9")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha9")
 @JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
