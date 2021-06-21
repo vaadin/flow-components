@@ -3187,12 +3187,49 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * large number of items, using the feature is discouraged to avoid
      * performance issues.
      *
+     * @deprecated since 14.7 - use {@link #setAllRowsVisible(boolean)}
+     * @see #setAllRowsVisible(boolean)
+     *
      * @param heightByRows
      *            <code>true</code> to make Grid compute its height by the
      *            number of rows, <code>false</code> for the default behavior
      */
+    @Deprecated
     public void setHeightByRows(boolean heightByRows) {
         getElement().setProperty("heightByRows", heightByRows);
+    }
+
+    /**
+     * Gets whether grid's height is defined by the number of its rows.
+     *
+     * @deprecated since 14.7 - use {@link #isAllRowsVisible()}
+     * @see #isAllRowsVisible()
+     *
+     * @return <code>true</code> if Grid computes its height by the number of
+     *         rows, <code>false</code> otherwise
+     */
+    @Synchronize("height-by-rows-changed")
+    @Deprecated
+    public boolean isHeightByRows() {
+        return isAllRowsVisible();
+    }
+
+    /**
+     * If <code>true</code>, the grid's height is defined by its rows. All items
+     * are fetched from the {@link DataProvider}, and the Grid shows no vertical
+     * scroll bar.
+     * <p>
+     * Note: <code>setAllRowsVisible</code> disables the grid's virtual
+     * scrolling so that all the rows are rendered in the DOM at once. If the
+     * grid has a large number of items, using the feature is discouraged to
+     * avoid performance issues.
+     *
+     * @param allRowsVisible
+     *            <code>true</code> to make Grid compute its height by the
+     *            number of rows, <code>false</code> for the default behavior
+     */
+    public void setAllRowsVisible(boolean allRowsVisible) {
+        getElement().setProperty("allRowsVisible", allRowsVisible);
     }
 
     /**
@@ -3201,9 +3238,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @return <code>true</code> if Grid computes its height by the number of
      *         rows, <code>false</code> otherwise
      */
-    @Synchronize("height-by-rows-changed")
-    public boolean isHeightByRows() {
-        return getElement().getProperty("heightByRows", false);
+    @Synchronize("all-rows-visible-changed")
+    public boolean isAllRowsVisible() {
+        return getElement().getProperty("allRowsVisible", false)
+                || getElement().getProperty("heightByRows", false);
     }
 
     @Override
