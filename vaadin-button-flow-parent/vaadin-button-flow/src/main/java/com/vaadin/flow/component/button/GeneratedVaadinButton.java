@@ -104,7 +104,7 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "21.0.0-alpha9")
 @JsModule("@vaadin/vaadin-button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component
