@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.details.DetailsVariant;
+import com.vaadin.flow.component.details.testbench.DetailsElement;
+import com.vaadin.tests.AbstractParallelTest;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vaadin.flow.component.details.DetailsVariant;
-import com.vaadin.flow.component.details.testbench.DetailsElement;
 
 public class BasicIT extends AbstractParallelTest {
 
