@@ -407,9 +407,15 @@ public class VirtualListIT extends AbstractComponentIT {
                 .$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
 
-        Assert.assertEquals("January 1, 2001 1:01 AM", items.get(0).getText());
-        Assert.assertEquals("February 2, 2002 2:02 AM", items.get(1).getText());
-        Assert.assertEquals("March 3, 2003 3:03 AM", items.get(2).getText());
+        // Sometimes a comma is displayed after year, using regex here
+        // expected:<January 1, 2001[] 1:01 AM> but was:<January 1, 2001[,] 1:01
+        // AM>
+        Assert.assertTrue(
+                items.get(0).getText().matches("January 1, 2001,? 1:01 AM"));
+        Assert.assertTrue(
+                items.get(1).getText().matches("February 2, 2002,? 2:02 AM"));
+        Assert.assertTrue(
+                items.get(2).getText().matches("March 3, 2003,? 3:03 AM"));
     }
 
     @Test
