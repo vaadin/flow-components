@@ -10,7 +10,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 public class DynamicChangingChartIT extends AbstractTBTest {
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return DynamicChangingChart.class;
     }
 

@@ -27,6 +27,7 @@ public abstract class ComponentDemoTest
         return browser.getGridBrowsers().orElse(super.getHubBrowsersToTest());
     }
 
+    @Override
     protected int getDeploymentPort() {
         return 8080;
     }
