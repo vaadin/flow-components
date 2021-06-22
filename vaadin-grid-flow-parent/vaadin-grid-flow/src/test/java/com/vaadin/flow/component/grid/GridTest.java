@@ -33,6 +33,14 @@ public class GridTest {
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
+    public void templateWarningSuppressed() {
+        Grid<String> grid = new Grid<>();
+
+        Assert.assertTrue("Template warning is not suppressed",
+                grid.getElement().hasAttribute("suppress-template-warning"));
+    }
+
+    @Test
     public void dataViewForFaultyDataProvider_throwsException() {
         exceptionRule.expect(IllegalStateException.class);
         exceptionRule.expectMessage(
@@ -61,4 +69,36 @@ public class GridTest {
         Assert.assertTrue(grid.getSelectedItems().contains("foo"));
     }
 
+    @Test
+    public void setHeightByRows_allRowsAreVisible() {
+        final Grid<String> grid = new Grid<>();
+
+        Assert.assertEquals(null,
+                grid.getElement().getProperty("allRowsVisible"));
+
+        grid.setHeightByRows(true);
+        Assert.assertEquals("true",
+                grid.getElement().getProperty("allRowsVisible"));
+    }
+
+    @Test
+    public void setAllRowsVisible_allRowsAreVisible() {
+        final Grid<String> grid = new Grid<>();
+
+        Assert.assertEquals(null,
+                grid.getElement().getProperty("allRowsVisible"));
+
+        grid.setAllRowsVisible(true);
+        Assert.assertEquals("true",
+                grid.getElement().getProperty("allRowsVisible"));
+    }
+
+    @Test
+    public void setAllRowsVisibleProperty_isHeightByRowsAndIsAllRowsVisibleWork() {
+        final Grid<String> grid = new Grid<>();
+        grid.getElement().setProperty("allRowsVisible", true);
+
+        Assert.assertTrue(grid.isHeightByRows());
+        Assert.assertTrue(grid.isAllRowsVisible());
+    }
 }

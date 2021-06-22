@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.applayout.testbench.AppLayoutElement;
 import com.vaadin.flow.component.applayout.testbench.DrawerToggleElement;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractParallelTest;
 
 public class AppLayoutIT extends AbstractParallelTest {
 
@@ -68,7 +69,7 @@ public class AppLayoutIT extends AbstractParallelTest {
                 .id(CUSTOM_TOGGLE_ID);
         Assert.assertTrue(customToggle.isDisplayed());
 
-        TestBenchElement iconElement = customToggle.$("iron-icon")
+        TestBenchElement iconElement = customToggle.$("vaadin-icon")
                 .id(CUSTOM_ICON_ID);
         Assert.assertTrue(iconElement.isDisplayed());
     }

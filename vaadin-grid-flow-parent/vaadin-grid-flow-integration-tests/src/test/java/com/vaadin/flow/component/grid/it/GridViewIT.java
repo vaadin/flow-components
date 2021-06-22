@@ -330,13 +330,13 @@ public class GridViewIT extends GridViewBase {
         WebElement toggleIdColumnVisibility = findElement(
                 By.id("toggle-id-column-visibility"));
         String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('tr')[1].querySelectorAll('td').length;";
-        Assert.assertEquals(4l, getCommandExecutor()
+        Assert.assertEquals(4L, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(3l, getCommandExecutor()
+        waitUntil(c -> 3L == (long) getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(4l, getCommandExecutor()
+        waitUntil(c -> 4L == (long) getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
@@ -803,7 +803,7 @@ public class GridViewIT extends GridViewBase {
         waitUntil(driver -> grid.getRowCount() == 50);
 
         Assert.assertEquals("Grid should have heightByRows set to true", "true",
-                grid.getAttribute("heightByRows"));
+                grid.getAttribute("allRowsVisible"));
     }
 
     @Test
@@ -1087,9 +1087,13 @@ public class GridViewIT extends GridViewBase {
     }
 
     private void waitUntilCellHasText(WebElement grid, String text) {
-        waitUntil(driver -> getCells(grid).stream()
-                .filter(cell -> text.equals(cell.getText())).findFirst()
-                .isPresent());
+        waitUntil(driver -> {
+            List<?> cellContentTexts = (List<?>) getCommandExecutor()
+                    .executeScript(
+                            "return Array.from(arguments[0].querySelectorAll('vaadin-grid-cell-content')).map(cell => cell.textContent)",
+                            grid);
+            return cellContentTexts.contains(text);
+        });
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {

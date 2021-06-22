@@ -265,11 +265,13 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         let pendingFetch = ensureSubCacheQueue.splice(0, 1)[0];
         let itemkey =  pendingFetch.itemkey;
 
-        let start = grid._virtualStart;
-        let end = grid._virtualEnd;
+        const visibleRows = grid._getVisibleRows();
+        let start = visibleRows[0].index;
+        let end = visibleRows[visibleRows.length - 1].index;
+
         let buffer = end - start;
-        let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
-        let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
+        let firstNeededIndex = Math.max(0, start - buffer);
+        let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
 
         // only fetch if given item is still in visible range
         for(let index = firstNeededIndex; index <= lastNeededIndex; index++) {
@@ -321,12 +323,13 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         // The buffer size could be multiplied by some constant defined by the user,
         // if he needs to reduce the number of items sent to the Grid to improve performance
         // or to increase it to make Grid smoother when scrolling
-        let start = grid._virtualStart;
-        let end = grid._virtualEnd;
+        const visibleRows = grid._getVisibleRows();
+        let start = visibleRows[0].index;
+        let end = visibleRows[visibleRows.length - 1].index;
         let buffer = end - start;
 
-        let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
-        let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
+        let firstNeededIndex = Math.max(0, start - buffer);
+        let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
 
         let firstNeededPage = page;
         let lastNeededPage = page;
@@ -442,8 +445,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         if (!row.hidden) {
           // make sure that component renderers are updated
           Array.from(row.children).forEach(cell => {
-            if (cell._instance && cell._instance.children) {
-              Array.from(cell._instance.children).forEach(content => {
+            if (cell._content && cell._content.__templateInstance && cell._content.__templateInstance.children) {
+              Array.from(cell._content.__templateInstance.children).forEach(content => {
                 if(content._attachRenderedComponentIfAble) {
                   content._attachRenderedComponentIfAble();
                 }
@@ -462,16 +465,15 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         }
       })
 
-      grid._expandedInstanceChangedCallback = tryCatchWrapper(function(inst, value) {
+      const itemExpandedChanged = tryCatchWrapper(function(item, expanded) {
         // method available only for the TreeGrid server-side component
-        if (inst.item == undefined || grid.$server.updateExpandedState == undefined) {
+        if (item == undefined || grid.$server.updateExpandedState == undefined) {
           return;
         }
-        let parentKey = grid.getItemId(inst.item);
-        grid.$server.updateExpandedState(parentKey, value);
-        if (value) {
-          this.expandItem(inst.item);
-        } else {
+        let parentKey = grid.getItemId(item);
+        grid.$server.updateExpandedState(parentKey, expanded);
+
+        if (!expanded) {
           delete cache[parentKey];
           let parentCache = grid.$connector.getCacheByKey(parentKey);
           if (parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
@@ -483,9 +485,20 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
                 .forEach(idx => delete parentCache.itemCaches[idx]);
           }
           delete lastRequestedRanges[parentKey];
-          this.collapseItem(inst.item);
         }
-      })
+      });
+
+      // Patch grid.expandItem and grid.collapseItem to have
+      // itemExpandedChanged run when either happens.
+      grid.expandItem = tryCatchWrapper(function(item) {
+        itemExpandedChanged(item, true);
+        GridElement.prototype.expandItem.call(grid, item);
+      });
+
+      grid.collapseItem = tryCatchWrapper(function(item) {
+        itemExpandedChanged(item, false);
+        GridElement.prototype.collapseItem.call(grid, item);
+      });
 
       const itemsUpdated = function(items) {
         if (!items || !Array.isArray(items)) {
@@ -575,7 +588,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       const updateAllGridRowsInDomBasedOnCache = function () {
         grid._cache.updateSize();
         grid._effectiveSize = grid._cache.effectiveSize;
-        grid._assignModels();
+        grid.__updateVisibleRows();
       };
 
       /**
@@ -584,21 +597,16 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
        * @param array items the items to update in DOM
        */
       const updateGridItemsInDomBasedOnCache = function(items) {
-        if (!items || !grid._physicalItems) {
+        if (!items || grid.$.items.childElementCount === 0) {
           return;
         }
-        /**
-         * Calls the _assignModels function from GridScrollerElement, that triggers
-         * the internal revalidation of the items based on the _cache of the DataProviderMixin.
-         * First mapping the item to physical (iron list) indexes, so that we update
-         * only items in with the correct index that are cached in the iron list.
-         */
+
         const itemKeys = items.map(item => item.key);
-        const indexes = grid._physicalItems
-            .map((tr, index) => tr._item && tr._item.key && itemKeys.indexOf(tr._item.key) > -1 ? index : null)
-            .filter(idx => idx !== null);
+        const indexes = grid._getVisibleRows()
+            .filter(row => row._item && itemKeys.includes(row._item.key))
+            .map(row => row.index);
         if (indexes.length > 0) {
-          grid._assignModels(indexes);
+          grid.__updateVisibleRows(indexes[0], indexes[indexes.length - 1]);
         }
       };
 
@@ -852,7 +860,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         grid.$server.confirmParentUpdate(id, parentKey);
 
         if (!grid.loading) {
-          grid._assignModels();
+          grid.__updateVisibleRows();
         }
       });
 

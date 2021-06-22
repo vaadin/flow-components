@@ -68,7 +68,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "20.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "21.0.0-alpha9")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -313,6 +313,10 @@ public class RadioButtonGroup<T>
     /**
      * Sets the item renderer for this radio button group. The renderer is
      * applied to each item to create a component which represents the item.
+     * <p>
+     * Note: Component acts as a label to the button and clicks on it trigger
+     * the radio button. Hence interactive components like DatePicker or
+     * ComboBox cannot be used.
      *
      * @param renderer
      *            the item renderer, not {@code null}

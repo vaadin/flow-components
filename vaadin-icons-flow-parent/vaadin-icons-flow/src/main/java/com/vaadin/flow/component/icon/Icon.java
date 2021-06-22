@@ -31,13 +31,16 @@ import com.vaadin.flow.dom.ElementConstants;
  * @author Vaadin Ltd
  * @see VaadinIcon
  */
-@Tag("iron-icon")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "20.0.0-beta1")
-@JsModule("@vaadin/vaadin-icons/vaadin-icons.js")
+@Tag("vaadin-icon")
+@NpmPackage(value = "@vaadin/vaadin-icons", version = "21.0.0-alpha9")
+@JsModule("@vaadin/vaadin-icons/vaadin-iconset.js")
+@NpmPackage(value = "@vaadin/vaadin-icon", version = "21.0.0-alpha9")
+@JsModule("@vaadin/vaadin-icon/vaadin-icon.js")
 public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
     private static final String ICON_COLLECTION_NAME = "vaadin";
+    private static final String STYLE_FILL = "fill";
 
     /**
      * Creates an Icon component that displays a Vaadin logo.
@@ -73,18 +76,23 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      * Creates an Icon component that displays the given {@code icon} from the
      * given {@code collection}.
      *
+     * If you want to use a custom {@code <vaadin-iconset>} -based icon set, you
+     * also need to add a dependency and an import for it, example:
+     *
+     * <pre>
+     * <code>
+     * &#64;NpmPackage(value = "custom-icons", version = "1.0.0")
+     * &#64;JsModule("custom-icons/iconset.js")
+     * public class MyView extends Div {
+     * </code>
+     * </pre>
+     *
      * @param collection
      *            the icon collection
      * @param icon
      *            the icon name
-     * @deprecated Use either {@link #Icon(String)} or
-     *             {@link IronIcon#IronIcon(String,String)
-     *             IronIcon(String,String)}
      */
-    @Deprecated
     public Icon(String collection, String icon) {
-        // iron-icon's icon-attribute uses the format "collection:name",
-        // e.g. icon="vaadin:arrow-down"
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
     }
 
@@ -119,9 +127,9 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      */
     public void setColor(String color) {
         if (color == null) {
-            getStyle().remove(ElementConstants.STYLE_COLOR);
+            getStyle().remove(STYLE_FILL);
         } else {
-            getStyle().set(ElementConstants.STYLE_COLOR, color);
+            getStyle().set(STYLE_FILL, color);
         }
     }
 
@@ -132,6 +140,6 @@ public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
      *         not been set
      */
     public String getColor() {
-        return getStyle().get(ElementConstants.STYLE_COLOR);
+        return getStyle().get(STYLE_FILL);
     }
 }

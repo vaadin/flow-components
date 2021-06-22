@@ -82,4 +82,13 @@ public class MessageElement extends TestBenchElement {
         return getPropertyInteger("userColorIndex");
     }
 
+    /**
+     * Gets the {@code theme} attribute of this element.
+     *
+     * @return the {@code theme} attribute
+     */
+    public String getTheme() {
+        return getAttribute("theme");
+    }
+
 }

@@ -915,14 +915,14 @@ public class GridDemo extends DemoView {
         // Providing a bean-type generates columns for all of it's properties
         Grid<Person> grid = new Grid<>();
 
-        // When using heightByRows, all items are fetched and
+        // When using allRowsVisible, all items are fetched and
         // Grid uses all the space needed to render everything.
         //
-        // Note: heightByRows disables the grid's virtual scrolling so that all
-        // the rows are rendered in the DOM at once.
+        // Note: allRowsVisible disables the grid's virtual scrolling so that
+        // all the rows are rendered in the DOM at once.
         // If the grid has a large number of items, using the feature is
         // discouraged to avoid performance issues.
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
 
         final GridListDataView<Person> dataView = grid.setItems(personList);
 

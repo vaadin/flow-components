@@ -49,7 +49,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return ServerSideEvents.class;
     }
 

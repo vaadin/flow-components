@@ -99,10 +99,10 @@ public class ItemCountEstimateGridIT extends AbstractItemCountGridIT {
         grid.scrollToRow(1500);
         setEstimate(1501);
 
-        verifyRows(1501);
+        verifyRows(1800);
 
-        setEstimate(1600);
-        verifyRows(1600);
+        setEstimate(1700);
+        verifyRows(1700);
 
         grid.scrollToRow(1100);
         setEstimate(1300);
