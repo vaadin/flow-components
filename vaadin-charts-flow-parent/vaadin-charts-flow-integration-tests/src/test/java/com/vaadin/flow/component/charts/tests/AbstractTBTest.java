@@ -14,31 +14,22 @@ package com.vaadin.flow.component.charts.tests;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.flow.component.charts.demo.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.charts.ui.MainView;
-import com.vaadin.testbench.parallel.Browser;
-import com.vaadin.testbench.parallel.BrowserUtil;
-import com.vaadin.testbench.parallel.DefaultBrowserFactory;
-import com.vaadin.tests.ParallelTest;
-import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
+import com.vaadin.tests.AbstractParallelTest;
 
-public abstract class AbstractTBTest extends ParallelTest {
-
-    private static final String PROPERTY_TEST_ALL_BROWSERS = "test.allBrowsers";
+public abstract class AbstractTBTest extends AbstractParallelTest {
 
     @Override
     public void setup() throws Exception {
         super.setup();
-        openTestURL();
+        driver.get(getTestUrl(getView()));
     }
 
     protected ChartElement getChartElement() {
@@ -65,63 +56,16 @@ public abstract class AbstractTBTest extends ParallelTest {
                 "Could not find required element in the shadowRoot");
     }
 
-    public List<DesiredCapabilities> getBrowserConfiguration() {
-        if (System.getProperty(PROPERTY_TEST_ALL_BROWSERS) == null) {
-            return Arrays.asList(BrowserUtil.chrome());
-        }
-
-        TestBenchBrowserFactory browserFactory = new DefaultBrowserFactory();
-        return Arrays.asList(BrowserUtil.chrome());
-    }
-
-    protected void openTestURL() {
-        String url = getTestUrl();
-        driver.get(url);
-    }
-
     /**
-     * Returns the full URL to be used for the test
-     *
-     * @return the full URL for the test
+     * Overriding the way how test path is calculated. In Charts we prepend a
+     * fragment like `/vaadin-charts/area/`
      */
-    protected String getTestUrl() {
-        String baseUrl = getBaseURL();
-        if (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-
-        return baseUrl + getDeploymentPath();
-    }
-
-    /**
-     * Returns the path that should be used for the test. The path contains the
-     * full path (appended to hostname+port) and must start with a slash.
-     *
-     * @return The URL path to the UI class to test
-     */
-    protected String getDeploymentPath() {
-        return "/" + getTestView().getCanonicalName()
+    @Override
+    protected String getDeploymentPath(Class<?> viewClass) {
+        return "/" + viewClass.getCanonicalName()
                 .replace(MainView.EXAMPLE_BASE_PACKAGE, "vaadin-charts/")
                 .replace(".", "/");
     }
 
-    /**
-     * Used to determine what URL to initially open for the test
-     *
-     * @return The base URL for the test. Does not include a trailing slash.
-     */
-    protected String getBaseURL() {
-        return "http://" + getDeploymentHostname() + ":" + getDeploymentPort();
-    }
-
-    protected String getDeploymentHostname() {
-        return "localhost";
-    }
-
-    protected int getDeploymentPort() {
-        return 8080;
-    }
-
-    protected abstract Class<? extends AbstractChartExample> getTestView();
-
+    protected abstract Class<? extends AbstractChartExample> getView();
 }
