@@ -30,7 +30,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 public class GlobalOptionsIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return GlobalOptions.class;
     }
 

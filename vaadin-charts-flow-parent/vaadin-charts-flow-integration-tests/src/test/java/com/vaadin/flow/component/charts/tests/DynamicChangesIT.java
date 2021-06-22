@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 public class DynamicChangesIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return DynamicChanges.class;
     }
 

@@ -1,17 +1,21 @@
-package com.vaadin.flow.component.board.test;
+package com.vaadin.tests;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Rule;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.RetryRule;
-
 import com.vaadin.testbench.parallel.BrowserUtil;
-import com.vaadin.tests.ParallelTest;
 
 public abstract class AbstractParallelTest extends ParallelTest {
 
@@ -36,14 +40,29 @@ public abstract class AbstractParallelTest extends ParallelTest {
                 "Screenshot " + referenceName + " contains differences", true);
     }
 
-    protected void open(Class<?> viewClass, Dimension size) {
+    public void open(Class<?> viewClass, Dimension size) {
         getDriver().manage().window().setSize(size);
         String url = getTestUrl(viewClass);
         getDriver().get(url);
     }
 
     protected String getBaseURL() {
-        return "http://localhost:" + getPort();
+        return "http://" + getCurrentHostAddress() + ":" + getPort();
+    }
+
+    private static Optional<String> getHostAddress(
+            NetworkInterface nwInterface) {
+        Enumeration<InetAddress> addresses = nwInterface.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+            InetAddress address = addresses.nextElement();
+            if (address.isLoopbackAddress()) {
+                continue;
+            }
+            if (address.isSiteLocalAddress()) {
+                return Optional.of(address.getHostAddress());
+            }
+        }
+        return Optional.empty();
     }
 
     protected String getTestUrl(Class<?> viewClass) {
@@ -79,4 +98,34 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return Arrays.asList(BrowserUtil.chrome());
     }
 
+    /**
+     * Copied from com.vaadin.flow.testutil.AbstractTestBenchTest
+     *
+     * @return current host address if running in a hub or localhost otherwise
+     */
+    protected String getCurrentHostAddress() {
+        if (getRunOnHub(getClass()) == null
+                && Parameters.getHubHostname() == null) {
+            return "localhost";
+        }
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface
+                    .getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface nwInterface = interfaces.nextElement();
+                if (!nwInterface.isUp() || nwInterface.isLoopback()
+                        || nwInterface.isVirtual()) {
+                    continue;
+                }
+                Optional<String> address = getHostAddress(nwInterface);
+                if (address.isPresent()) {
+                    return address.get();
+                }
+            }
+        } catch (SocketException e) {
+            throw new RuntimeException("Could not find the host name", e);
+        }
+        throw new RuntimeException(
+                "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
+    }
 }

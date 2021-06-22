@@ -23,7 +23,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
@@ -140,7 +139,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "21.0.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "21.0.0-alpha9")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -284,6 +283,11 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * of the component and in vertical mode this is the height. The given value
      * will automatically be clamped to the range [0, 100].
      *
+     * Note that when using vertical orientation, this method only works if the
+     * split layout has an explicit height, either as an absolute value or as
+     * percentage. When using a percentage value, ensure that ancestors have an
+     * explicit height as well.
+     *
      * @param position
      *            the relative position of the splitter, in percentages
      */
@@ -298,13 +302,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         }
         this.updateStylesRegistration = ui.beforeClientResponse(this,
                 context -> {
-                    // Remove flex property for primary and secondary children.
-                    final String JS = "for(let i = 0;i < this.children.length;i++)"
-                            + "if(this.children[i].slot === 'primary'"
-                            + "   || this.children[i].slot === 'secondary')"
-                            + "this.children[i].style.flex = ''";
-                    getElement().executeJs(JS);
-
                     // Update width or height if splitter position is set.
                     updateStylesForSplitterPosition();
 
@@ -318,14 +315,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
-        String styleName;
-        if (getOrientation() == Orientation.VERTICAL) {
-            styleName = ElementConstants.STYLE_HEIGHT;
-        } else {
-            styleName = ElementConstants.STYLE_WIDTH;
-        }
-        setPrimaryStyle(styleName, primary + "%");
-        setSecondaryStyle(styleName, secondary + "%");
+        setPrimaryStyle("flex", String.format("1 1 %s%%", primary));
+        setSecondaryStyle("flex", String.format("1 1 %s%%", secondary));
     }
 
     /**
