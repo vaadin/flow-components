@@ -15,7 +15,7 @@ import org.openqa.selenium.WebElement;
 public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return ColumnWithLazyMultiLevelDrilldown.class;
     }
 
