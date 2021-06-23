@@ -371,6 +371,7 @@ public class IronListIT extends AbstractComponentIT {
                 .id("list-with-local-date-times").$("span").all();
         Assert.assertEquals(3, items.size());
 
+        // JDK16 adds extra comma after year in en_US
         Assert.assertTrue(
                 items.get(0).getText().matches("January 1, 2001,? 1:01 AM"));
         Assert.assertTrue(
