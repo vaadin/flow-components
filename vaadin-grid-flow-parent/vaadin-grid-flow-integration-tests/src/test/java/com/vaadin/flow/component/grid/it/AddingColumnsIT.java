@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Tests for dynamically adding new columns with different renderers after the
@@ -74,8 +75,11 @@ public class AddingColumnsIT extends AbstractComponentIT {
     @Test
     public void gridRendered_addColumnWithLocalDateTimeRenderer_cellsRendered() {
         clickElementWithJs("add-local-date-time-column");
-        assertCellContents("January 1, 1980 1:20 AM",
-                "January 1, 1980 1:30 AM");
+        // JDK16 adds extra comma after year in en_US
+        Assert.assertTrue(grid.getCell(0, 0).getInnerHTML()
+                .matches("January 1, 1980,? 1:20 AM"));
+        Assert.assertTrue(grid.getCell(1, 0).getInnerHTML()
+                .matches("January 1, 1980,? 1:30 AM"));
     }
 
     @Test
@@ -94,9 +98,9 @@ public class AddingColumnsIT extends AbstractComponentIT {
 
     private void assertCellContentsContain(String expectedFirstRow,
             String expectedSecondRow) {
-        Assert.assertThat(grid.getCell(0, 0).getInnerHTML(),
+        MatcherAssert.assertThat(grid.getCell(0, 0).getInnerHTML(),
                 CoreMatchers.containsString(expectedFirstRow));
-        Assert.assertThat(grid.getCell(1, 0).getInnerHTML(),
+        MatcherAssert.assertThat(grid.getCell(1, 0).getInnerHTML(),
                 CoreMatchers.containsString(expectedSecondRow));
     }
 

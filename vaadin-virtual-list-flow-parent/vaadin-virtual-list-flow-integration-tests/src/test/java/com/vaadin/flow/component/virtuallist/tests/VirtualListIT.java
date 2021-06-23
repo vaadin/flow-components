@@ -407,9 +407,7 @@ public class VirtualListIT extends AbstractComponentIT {
                 .$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
 
-        // Sometimes a comma is displayed after year, using regex here
-        // expected:<January 1, 2001[] 1:01 AM> but was:<January 1, 2001[,] 1:01
-        // AM>
+        // JDK16 adds extra comma after year in en_US
         Assert.assertTrue(
                 items.get(0).getText().matches("January 1, 2001,? 1:01 AM"));
         Assert.assertTrue(
