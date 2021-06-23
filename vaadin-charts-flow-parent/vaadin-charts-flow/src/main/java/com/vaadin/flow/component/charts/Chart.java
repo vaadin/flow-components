@@ -189,7 +189,7 @@ public class Chart extends Component implements HasStyle, HasSize {
         final JsonObject configurationNode = getJsonFactory()
                 .parse(ChartSerialization.toJSON(configuration));
 
-        getElement().callJsFunction("update", configurationNode,
+        getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
     }
 
