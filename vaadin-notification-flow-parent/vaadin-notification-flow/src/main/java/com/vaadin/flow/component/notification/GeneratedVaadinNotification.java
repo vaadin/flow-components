@@ -200,18 +200,6 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Manually invoke existing renderer.
-     * </p>
-     */
-    protected void render() {
-        getElement().callJsFunction("render");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Opens the notification.
      * </p>
      */
