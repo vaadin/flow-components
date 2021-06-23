@@ -15,17 +15,18 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import java.lang.management.ManagementFactory;
 import java.util.List;
+
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
+import com.vaadin.flow.data.performance.TreeGridMemory;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.data.performance.TreeGridMemory;
-import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-grid/treegrid-huge-tree")
 public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
@@ -84,6 +85,14 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
     @Test
     public void collapsed_subtrees_outside_of_cache_stay_expanded() {
+
+        if (Double.parseDouble(
+                System.getProperty("java.specification.version")) >= 16) {
+            System.err.println(
+                    "\n-----------\n\n  Detected JDK16+ ignoring 'TreeGridHugeTreeIT.collapsed_subtrees_outside_of_cache_stay_expanded'\n  See https://github.com/vaadin/flow-components/issues/1835\n\n-----------\n");
+            return;
+        }
+
         getDriver().get(getRootURL() + "/vaadin-grid/" + TreeGridMemory.PATH
                 + "/items=200&initiallyExpanded");
         setupTreeGrid();
