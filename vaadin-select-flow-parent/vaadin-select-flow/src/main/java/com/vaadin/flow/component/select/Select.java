@@ -824,7 +824,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
         updateItemEnabled(vaadinItem);
 
-        callClientSideRenderIfNotPending();
+        requestClientSideContentUpdateIfNotPending();
     }
 
     private void updateItemEnabled(VaadinItem<T> item) {
@@ -854,7 +854,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         keyMapper.removeAll();
         listBox.removeAll();
         clear();
-        callClientSideRenderIfNotPending();
+        requestClientSideContentUpdateIfNotPending();
 
         if (isEmptySelectionAllowed()) {
             addEmptySelectionItem();
@@ -883,13 +883,13 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
     }
 
-    private void callClientSideRenderIfNotPending() {
+    private void requestClientSideContentUpdateIfNotPending() {
 
         // reset added at this point to avoid unnecessary selected item update
         if (!resetPending) {
             resetPending = true;
             runBeforeClientResponse(ui -> {
-                ui.getPage().executeJs("$0.render();", getElement());
+                ui.getPage().executeJs("$0.requestContentUpdate();", getElement());
                 resetPending = false;
             });
         }
