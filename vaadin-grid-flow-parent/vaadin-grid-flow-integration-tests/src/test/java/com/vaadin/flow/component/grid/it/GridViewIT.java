@@ -778,8 +778,8 @@ public class GridViewIT extends GridViewBase {
 
         Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
         Assert.assertEquals("$ 73.10", grid.getCell(0, 1).getText());
-        Assert.assertEquals("1/10/18 11:43:59 AM",
-                grid.getCell(0, 2).getText());
+        Assert.assertTrue(
+                grid.getCell(0, 2).getText().matches("1/10/18,? 11:43:59 AM"));
         Assert.assertEquals("Jan 11, 2018", grid.getCell(0, 3).getText());
         assertRendereredContent("$$$", grid.getCell(0, 4).getInnerHTML());
         Assert.assertEquals("<button>Remove</button>",
@@ -787,8 +787,8 @@ public class GridViewIT extends GridViewBase {
 
         Assert.assertEquals("Item 2", grid.getCell(1, 0).getText());
         Assert.assertEquals("$ 24.05", grid.getCell(1, 1).getText());
-        Assert.assertEquals("1/10/18 11:07:31 AM",
-                grid.getCell(1, 2).getText());
+        Assert.assertTrue(
+                grid.getCell(1, 2).getText().matches("1/10/18,? 11:07:31 AM"));
         Assert.assertEquals("Jan 24, 2018", grid.getCell(1, 3).getText());
         assertRendereredContent("$", grid.getCell(1, 4).getInnerHTML());
         Assert.assertEquals("<button>Remove</button>",
