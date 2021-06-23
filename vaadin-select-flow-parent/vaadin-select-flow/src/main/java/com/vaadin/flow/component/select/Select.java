@@ -889,7 +889,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         if (!resetPending) {
             resetPending = true;
             runBeforeClientResponse(ui -> {
-                ui.getPage().executeJs("$0.requestContentUpdate();", getElement());
+                ui.getPage().executeJs("$0.requestContentUpdate();",
+                        getElement());
                 resetPending = false;
             });
         }
