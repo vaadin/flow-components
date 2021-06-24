@@ -111,7 +111,11 @@ async function getLatestNpmVersion(package, version, major, minor) {
   if (!cachedNpmVersions[package]) {
     cmd = `npm view ${package} versions --json`;
     const json = await JSON.parse(await run(cmd))
-    const versions = json.filter(version => version.startsWith(`${major}.${minor}`));
+    const versions = json
+       .filter(version => version.startsWith(`${major}.${minor}`))
+       .map(a => a.replace(/\d+$/, n => +n+900000))
+       .sort()
+       .map(a => a.replace(/\d+$/, n => +n-900000));
     const next =  versions.pop();
     console.log(`Checking next Npm version for ${package} ${version} ${next}`);
     cachedNpmVersions[package] = next;
