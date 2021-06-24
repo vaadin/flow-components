@@ -96,14 +96,16 @@ public class SortingPage extends Div {
         });
         reOrder.setId("reorder-button");
 
-        NativeButton changeHeaderText = new NativeButton("Change header text", e -> {
-            ageColumn.setHeader("Age (updated)");
-        });
+        NativeButton changeHeaderText = new NativeButton("Change header text",
+                e -> {
+                    ageColumn.setHeader("Age (updated)");
+                });
         changeHeaderText.setId("change-header-text");
 
-        NativeButton changeHeaderTextComponent = new NativeButton("Change header text component", e -> {
-            ageColumn.setHeader(new Span("Age (updated)"));
-        });
+        NativeButton changeHeaderTextComponent = new NativeButton(
+                "Change header text component", e -> {
+                    ageColumn.setHeader(new Span("Age (updated)"));
+                });
         changeHeaderTextComponent.setId("change-header-text-component");
 
         add(button, reOrder, changeHeaderText, changeHeaderTextComponent);
