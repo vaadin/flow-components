@@ -32,7 +32,7 @@ import static java.util.Objects.requireNonNull;
  * {@link #setScrollDirection(ScrollDirection)}
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "21.0.0-alpha9")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "21.0.0-alpha12")
 @JsModule("@vaadin/vaadin-ordered-layout/vaadin-scroller.js")
 public class Scroller extends Component implements HasSize, HasStyle {
 
