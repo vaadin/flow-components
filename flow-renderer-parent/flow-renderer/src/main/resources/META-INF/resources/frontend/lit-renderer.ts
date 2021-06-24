@@ -4,21 +4,25 @@ type RenderRoot = HTMLElement & { __litRendererId?: number; _$litPart$?: any };
 
 type ItemModel = { item: any; index: number };
 
-type Renderer = (root: RenderRoot, _: HTMLElement, model?: ItemModel) => void;
+type Renderer = (
+  root: RenderRoot,
+  rendererOwner: HTMLElement,
+  model: ItemModel
+) => void;
 
 let rendererId = 0;
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
 
-_window.Vaadin.assignLitRenderer = (
+_window.Vaadin.setLitRenderer = (
   component: HTMLElement,
   rendererName: string,
   templateExpression: string,
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[]
 ) => {
-  // Dynamically constructed function that renders the templateExpression
+  // Dynamically created function that renders the templateExpression
   // inside the given root element using Lit
   const renderFunction = Function(`
     "use strict";
@@ -29,12 +33,12 @@ _window.Vaadin.assignLitRenderer = (
       ${clientCallables
         .map((clientCallable) => {
           // Map all the client-callables as inline functions so they can be accessed from the template (with @event-binding)
-          // TODO: check "arguments"
-          return `const ${clientCallable} = () => {
-            returnChannel('${clientCallable}', item.key, arguments[0] instanceof Event ? [] : [...arguments])
+          return `
+          const ${clientCallable} = (...args) => {
+            returnChannel('${clientCallable}', item.key, args[0] instanceof Event ? [] : [...args])
           }`;
         })
-        .join('\n')}
+        .join('')}
 
       render(html\`${templateExpression}\`, root)
     }
@@ -43,11 +47,6 @@ _window.Vaadin.assignLitRenderer = (
   const instanceRendererId = rendererId++;
 
   const renderer: Renderer = (root, _, model) => {
-    // TODO: Remove? Needed in virtual list?
-    if (model?.item === undefined) {
-      return;
-    }
-
     // Clean up the root element of any existing content
     // (and Lit's _$litPart$ property) from other renderers
     if (root.__litRendererId !== instanceRendererId) {

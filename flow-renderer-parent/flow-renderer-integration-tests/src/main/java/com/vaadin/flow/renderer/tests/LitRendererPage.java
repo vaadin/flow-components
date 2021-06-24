@@ -15,15 +15,59 @@
  */
 package com.vaadin.flow.renderer.tests;
 
-import com.vaadin.flow.component.Text;
+import java.util.Arrays;
+
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("flow-renderer/lit-renderer")
 public class LitRendererPage extends Div {
 
     public LitRendererPage() {
-        add(new Text("Nothing here yet"));
+
+        LitRendererTestComponent component = new LitRendererTestComponent();
+        component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
+        setLitRenderer(component);
+        add(component);
+
+        NativeButton setLitRendererButton = new NativeButton("Set LitRenderer",
+                e -> setLitRenderer(component));
+        setLitRendererButton.setId("setLitRendererButton");
+        add(setLitRendererButton);
+
+        NativeButton setSimpleLitRendererButton = new NativeButton("Set simple LitRenderer",
+                e -> component.setRenderer(LitRenderer.of("<div>${index}</div>")));
+        setSimpleLitRendererButton.setId("setSimpleLitRendererButton");
+        add(setSimpleLitRendererButton);
+
+        NativeButton removeRendererButton = new NativeButton("Remove renderer",
+                e -> component.setRenderer(null));
+        removeRendererButton.setId("removeRendererButton");
+        add(removeRendererButton);
+    }
+
+    private void setLitRenderer(LitRendererTestComponent component) {
+        component.setRenderer(LitRenderer
+                .<String> of(new StringBuilder().append("<div tabindex=\"0\"")
+                        .append("  id=\"content-${index}\"")
+                        .append("  @click=\"${clicked}\"")
+                        .append("  draggable=\"true\" @dragstart=\"${dragged}\"")
+                        .append("  @keypress=\"${(e) => keyPressed(e.key)}\">")
+                        .append("  Item: ${item.name}").append("</div>")
+                        .toString())
+                .withProperty("name", item -> item)
+                .withClientCallable("clicked", item -> {
+                    getElement()
+                            .executeJs("console.warn(`event: clicked, item: " + item + "`)");
+                }).withClientCallable("keyPressed", (item, args) -> {
+                    getElement().executeJs("console.warn(`event: keyPressed, item: " + item
+                            + ", key: " + args.getString(0) + "`)");
+                }).withClientCallable("dragged", (item, args) -> {
+                    getElement().executeJs("console.warn(`event: dragged, item: " + item
+                        + ", argument count: " + args.length() + "`)");
+                }));
     }
 
 }

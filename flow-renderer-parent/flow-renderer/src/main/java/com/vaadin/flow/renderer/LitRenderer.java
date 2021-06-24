@@ -3,6 +3,7 @@ package com.vaadin.flow.renderer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
 
@@ -11,13 +12,13 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.RendererUtil;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 
@@ -73,20 +74,18 @@ public class LitRenderer<T> extends Renderer<T> {
                     if (item != null) {
                         handler.accept(item, args);
                     } else {
-                        LoggerFactory.getLogger(RendererUtil.class.getName())
+                        LoggerFactory.getLogger(LitRenderer.class.getName())
                                 .info("Received an event for the handler '{}' with item key '{}', but the item is not present in the KeyMapper. Ignoring event.",
                                         handlerName, itemKey);
                     }
 
                 });
 
-        JsonArray clientCallablesArray = Json.createArray();
-        for (String clientCallable : clientCallables.keySet()) {
-            clientCallablesArray.set(clientCallablesArray.length(),
-                    clientCallable);
-        }
+        JsonArray clientCallablesArray = JsonUtils.listToJson(
+                clientCallables.keySet().stream().collect(Collectors.toList()));
+
         container.executeJs(
-                "window.Vaadin.assignLitRenderer(this, $0, $1, $2, $3)",
+                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3)",
                 rendererName, templateExpression, returnChannel,
                 clientCallablesArray);
 
