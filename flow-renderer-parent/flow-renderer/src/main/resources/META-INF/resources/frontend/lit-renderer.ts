@@ -1,6 +1,6 @@
 import { render, html } from 'lit';
 
-type RenderRoot = HTMLElement & { __litRendererId?: number; _$litPart$?: any };
+type RenderRoot = HTMLElement & { __litRenderer?: Renderer; _$litPart$?: any };
 
 type ItemModel = { item: any; index: number };
 
@@ -9,8 +9,6 @@ type Renderer = (
   rendererOwner: HTMLElement,
   model: ItemModel
 ) => void;
-
-let rendererId = 0;
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
@@ -44,15 +42,13 @@ _window.Vaadin.setLitRenderer = (
     }
   `)(render, html, returnChannel);
 
-  const instanceRendererId = rendererId++;
-
   const renderer: Renderer = (root, _, model) => {
     // Clean up the root element of any existing content
     // (and Lit's _$litPart$ property) from other renderers
-    if (root.__litRendererId !== instanceRendererId) {
+    if (root.__litRenderer !== renderer) {
       root.innerHTML = '';
       delete root._$litPart$;
-      root.__litRendererId = instanceRendererId;
+      root.__litRenderer = renderer;
     }
 
     renderFunction(root, model);

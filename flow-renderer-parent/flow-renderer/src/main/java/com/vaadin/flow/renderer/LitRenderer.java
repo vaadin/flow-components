@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -22,7 +20,6 @@ import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 
 @JsModule("./lit-renderer.ts")
@@ -55,30 +52,13 @@ public class LitRenderer<T> extends Renderer<T> {
                 .registerChannel(arguments -> {
                     String handlerName = arguments.getString(0);
                     String itemKey = arguments.getString(1);
-
-                    JsonArray args;
-                    if (arguments.length() == 3) {
-                        args = arguments.getArray(2);
-                    } else {
-                        args = Json.createArray();
-                    }
+                    JsonArray args = arguments.getArray(2);
 
                     SerializableBiConsumer<T, JsonArray> handler = clientCallables
                             .get(handlerName);
-                    if (handler == null) {
-                        throw new IllegalStateException(handlerName);
-                    }
-
                     T item = keyMapper.get(itemKey);
 
-                    if (item != null) {
-                        handler.accept(item, args);
-                    } else {
-                        LoggerFactory.getLogger(LitRenderer.class.getName())
-                                .info("Received an event for the handler '{}' with item key '{}', but the item is not present in the KeyMapper. Ignoring event.",
-                                        handlerName, itemKey);
-                    }
-
+                    handler.accept(item, args);
                 });
 
         JsonArray clientCallablesArray = JsonUtils.listToJson(
