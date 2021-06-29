@@ -84,6 +84,19 @@ public class LitRendererTestComponent extends Div
         }
     }
 
+    public void setDetailsRenderer(LitRenderer<String> renderer) {
+        if (renderer == null) {
+            getElement().executeJs("this.detailsRenderer = undefined");
+        } else {
+            Rendering<String> rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), "detailsRenderer");
+            if (rendering.getDataGenerator().isPresent()) {
+                dataGenerator.addDataGenerator(rendering.getDataGenerator().get());
+            }
+            dataCommunicator.reset();
+        }
+    }
+
     @Override
     public void setItems(Collection<String> items) {
         HasDataProvider.super.setItems(items);

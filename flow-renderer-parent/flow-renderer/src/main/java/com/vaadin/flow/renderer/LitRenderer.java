@@ -3,6 +3,7 @@ package com.vaadin.flow.renderer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.dependency.JsModule;
@@ -27,6 +28,8 @@ public class LitRenderer<T> extends Renderer<T> {
     private String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
+
+    private final String propertyNamespace = UUID.randomUUID().toString() + "_";
 
     private Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
 
@@ -65,9 +68,9 @@ public class LitRenderer<T> extends Renderer<T> {
                 clientCallables.keySet().stream().collect(Collectors.toList()));
 
         container.executeJs(
-                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3)",
+                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
                 rendererName, templateExpression, returnChannel,
-                clientCallablesArray);
+                clientCallablesArray, propertyNamespace);
 
         return new Rendering<T>() {
             @Override
@@ -95,7 +98,10 @@ public class LitRenderer<T> extends Renderer<T> {
 
     public LitRenderer<T> withProperty(String property,
             ValueProvider<T, ?> provider) {
-        setProperty(property, provider);
+        // Prefix the property name with a LitRenderer instance specific
+        // namespace to avoid property name clashes.
+        // Fixes https://github.com/vaadin/flow/issues/8629 in LitRenderer
+        setProperty(propertyNamespace + property, provider);
         return this;
     }
 

@@ -56,8 +56,8 @@ public class GridLitRendererPage extends Div {
 
     private void setLitRenderer(Grid<Integer> grid) {
         grid.setItemDetailsRenderer(LitRenderer.<Integer> of(
-                "<span id=\"details-${index}\">Details (Lit): ${item.name}</span>")
-                .withProperty("name", item -> "Item " + item));
+                "<span id=\"details-${index}\">Lit: ${item.name}</span>")
+                .withProperty("name", item -> "Item details " + item));
     }
 
     private void setComponentRenderer(Grid<Integer> grid) {
@@ -65,7 +65,7 @@ public class GridLitRendererPage extends Div {
                 new ComponentRenderer<Component, Integer>(item -> {
                     Div content = new Div();
                     content.setId("details-" + item);
-                    content.setText("Details (Component): Item " + item);
+                    content.setText("Component: Item details " + item);
                     return content;
                 }));
     }

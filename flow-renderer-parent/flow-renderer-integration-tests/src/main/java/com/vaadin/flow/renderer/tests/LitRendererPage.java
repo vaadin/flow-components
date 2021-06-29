@@ -17,8 +17,10 @@ package com.vaadin.flow.renderer.tests;
 
 import java.util.Arrays;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
@@ -31,6 +33,8 @@ public class LitRendererPage extends Div {
         component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
         setLitRenderer(component);
         add(component);
+
+        add(new Div(new Text("Main content:")));
 
         NativeButton setLitRendererButton = new NativeButton("Set LitRenderer",
                 e -> setLitRenderer(component));
@@ -46,6 +50,14 @@ public class LitRendererPage extends Div {
                 e -> component.setRenderer(null));
         removeRendererButton.setId("removeRendererButton");
         add(removeRendererButton);
+
+        add(new Div(new Text("Details:")));
+
+        NativeButton setDetailsLitRendererButton = new NativeButton("Set details LitRenderer",
+        e -> setDetailsLitRenderer(component));
+        setDetailsLitRendererButton.setId("setDetailsLitRendererButton");
+        add(setDetailsLitRendererButton);
+
     }
 
     private void setLitRenderer(LitRendererTestComponent component) {
@@ -55,9 +67,9 @@ public class LitRendererPage extends Div {
                         .append("  @click=\"${clicked}\"")
                         .append("  draggable=\"true\" @dragstart=\"${dragged}\"")
                         .append("  @keypress=\"${(e) => keyPressed(e.key)}\">")
-                        .append("  Item: ${item.name}").append("</div>")
+                        .append("  Item: ${item.value}").append("</div>")
                         .toString())
-                .withProperty("name", item -> item)
+                .withProperty("value", ValueProvider.identity())
                 .withClientCallable("clicked", item -> {
                     getElement()
                             .executeJs("console.warn(`event: clicked, item: " + item + "`)");
@@ -68,6 +80,12 @@ public class LitRendererPage extends Div {
                     getElement().executeJs("console.warn(`event: dragged, item: " + item
                         + ", argument count: " + args.length() + "`)");
                 }));
+    }
+
+    private void setDetailsLitRenderer(LitRendererTestComponent component) {
+        component.setDetailsRenderer(LitRenderer
+                .<String> of("<div id=\"details-${index}\">Details: ${item.value}</div>")
+                .withProperty("value", item -> item + " (details)"));
     }
 
 }

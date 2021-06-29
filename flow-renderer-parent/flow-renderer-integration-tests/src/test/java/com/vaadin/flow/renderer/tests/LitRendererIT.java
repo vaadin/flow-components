@@ -76,6 +76,15 @@ public class LitRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Item: 0", item.getText());
     }
 
+    @Test
+    public void shouldSupportRendererInstanceSpecificProperties() {
+        clickElementWithJs("setDetailsLitRendererButton");
+        WebElement main = findElement(By.cssSelector("#item-0 .main"));
+        Assert.assertEquals("Item: 0", main.getText());
+        WebElement details = findElement(By.cssSelector("#item-0 .details"));
+        Assert.assertEquals("Details: 0 (details)", details.getText());
+    }
+
     private String getClientCallableLogArray() {
         String message = getLogEntries(Level.WARNING).get(0).getMessage();
         return message.split("\"")[1];

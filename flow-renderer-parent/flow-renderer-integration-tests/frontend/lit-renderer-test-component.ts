@@ -10,6 +10,9 @@ export class LitRendererTestComponent extends LitElement {
   @property()
   renderer?: Renderer;
 
+  @property()
+  detailsRenderer?: Renderer;
+
   @property({ type: Array })
   items: string[] = [];
 
@@ -19,15 +22,26 @@ export class LitRendererTestComponent extends LitElement {
 
   updated() {
     this.items.forEach((item, index) => {
-      const element = this.querySelector(`#item-${index}`);
-      if (!(element instanceof HTMLElement)) {
+      const main = this.querySelector(`#item-${index} .main`);
+      if (!(main instanceof HTMLElement)) {
         return;
       }
 
       if (this.renderer) {
-        this.renderer(element, this, { item, index });
+        this.renderer(main, this, { item, index });
       } else {
-        element.textContent = item;
+        main.textContent = item;
+      }
+
+      const details = this.querySelector(`#item-${index} .details`);
+      if (!(details instanceof HTMLElement)) {
+        return;
+      }
+
+      if (this.detailsRenderer) {
+        this.detailsRenderer(details, this, { item, index });
+      } else {
+        details.textContent = '';
       }
     });
   }
@@ -36,7 +50,14 @@ export class LitRendererTestComponent extends LitElement {
     return html`
       <b>Items:</b>
       <ul>
-        ${this.items.map((_, index) => html`<li id="item-${index}"></li>`)}
+        ${this.items.map(
+          (_, index) => html`
+            <li id="item-${index}">
+              <div class="main"></div>
+              <i class="details"></i>
+            </li>
+          `
+        )}
       </ul>
     `;
   }

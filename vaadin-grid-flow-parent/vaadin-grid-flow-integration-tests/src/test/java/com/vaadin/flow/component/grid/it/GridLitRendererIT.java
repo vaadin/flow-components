@@ -39,7 +39,7 @@ public class GridLitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldRenderFirstItem() {
         WebElement item = grid.findElement(By.id("item-0"));
-        Assert.assertNotNull(item);
+        Assert.assertEquals("Lit: Item 0", item.getText());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class GridLitRendererIT extends AbstractComponentIT {
         clickElementWithJs("componentRendererButton");
         clickElementWithJs("item-0");
         WebElement details = grid.findElement(By.id("details-0"));
-        Assert.assertEquals("Details (Component): Item 0", details.getText());
+        Assert.assertEquals("Component: Item details 0", details.getText());
     }
 
     @Test
@@ -64,6 +64,6 @@ public class GridLitRendererIT extends AbstractComponentIT {
         clickElementWithJs("litRendererButton");
         clickElementWithJs("item-0");
         WebElement item = grid.findElement(By.id("details-0"));
-        Assert.assertEquals("Details (Lit): Item 0", item.getText());
+        Assert.assertEquals("Lit: Item details 0", item.getText());
     }
 }
