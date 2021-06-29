@@ -51,21 +51,24 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldInvokeCallableFromEvent() {
         clickElementWithJs("content-0");
-        Assert.assertEquals("event: clicked, item: 0", getClientCallableLogArray());
+        Assert.assertEquals("event: clicked, item: 0",
+                getClientCallableLogArray());
     }
 
     @Test
     public void shouldNotIncludeEventInCallableArguments() {
         WebElement itemContent = findElement(By.id("content-0"));
         drag(itemContent);
-        Assert.assertEquals("event: dragged, item: 0, argument count: 0", getClientCallableLogArray());
+        Assert.assertEquals("event: dragged, item: 0, argument count: 0",
+                getClientCallableLogArray());
     }
 
     @Test
     public void shouldInvokeCallableManually() {
         WebElement itemContent = findElement(By.id("content-0"));
         itemContent.sendKeys("a");
-        Assert.assertEquals("event: keyPressed, item: 0, key: a", getClientCallableLogArray());
+        Assert.assertEquals("event: keyPressed, item: 0, key: a",
+                getClientCallableLogArray());
     }
 
     @Test

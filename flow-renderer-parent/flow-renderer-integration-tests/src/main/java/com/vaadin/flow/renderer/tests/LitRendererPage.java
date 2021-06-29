@@ -41,8 +41,9 @@ public class LitRendererPage extends Div {
         setLitRendererButton.setId("setLitRendererButton");
         add(setLitRendererButton);
 
-        NativeButton setSimpleLitRendererButton = new NativeButton("Set simple LitRenderer",
-                e -> component.setRenderer(LitRenderer.of("<div>${index}</div>")));
+        NativeButton setSimpleLitRendererButton = new NativeButton(
+                "Set simple LitRenderer", e -> component
+                        .setRenderer(LitRenderer.of("<div>${index}</div>")));
         setSimpleLitRendererButton.setId("setSimpleLitRendererButton");
         add(setSimpleLitRendererButton);
 
@@ -53,38 +54,42 @@ public class LitRendererPage extends Div {
 
         add(new Div(new Text("Details:")));
 
-        NativeButton setDetailsLitRendererButton = new NativeButton("Set details LitRenderer",
-        e -> setDetailsLitRenderer(component));
+        NativeButton setDetailsLitRendererButton = new NativeButton(
+                "Set details LitRenderer",
+                e -> setDetailsLitRenderer(component));
         setDetailsLitRendererButton.setId("setDetailsLitRendererButton");
         add(setDetailsLitRendererButton);
 
     }
 
     private void setLitRenderer(LitRendererTestComponent component) {
-        component.setRenderer(LitRenderer
-                .<String> of(new StringBuilder().append("<div tabindex=\"0\"")
-                        .append("  id=\"content-${index}\"")
-                        .append("  @click=\"${clicked}\"")
-                        .append("  draggable=\"true\" @dragstart=\"${dragged}\"")
-                        .append("  @keypress=\"${(e) => keyPressed(e.key)}\">")
-                        .append("  Item: ${item.value}").append("</div>")
-                        .toString())
+        component.setRenderer(LitRenderer.<String> of(new StringBuilder()
+                .append("<div tabindex=\"0\"")
+                .append("  id=\"content-${index}\"")
+                .append("  @click=\"${clicked}\"")
+                .append("  draggable=\"true\" @dragstart=\"${dragged}\"")
+                .append("  @keypress=\"${(e) => keyPressed(e.key)}\">")
+                .append("  Item: ${item.value}").append("</div>").toString())
                 .withProperty("value", ValueProvider.identity())
                 .withClientCallable("clicked", item -> {
                     getElement()
-                            .executeJs("console.warn(`event: clicked, item: " + item + "`)");
+                            .executeJs("console.warn(`event: clicked, item: "
+                                    + item + "`)");
                 }).withClientCallable("keyPressed", (item, args) -> {
-                    getElement().executeJs("console.warn(`event: keyPressed, item: " + item
-                            + ", key: " + args.getString(0) + "`)");
+                    getElement().executeJs(
+                            "console.warn(`event: keyPressed, item: " + item
+                                    + ", key: " + args.getString(0) + "`)");
                 }).withClientCallable("dragged", (item, args) -> {
-                    getElement().executeJs("console.warn(`event: dragged, item: " + item
-                        + ", argument count: " + args.length() + "`)");
+                    getElement()
+                            .executeJs("console.warn(`event: dragged, item: "
+                                    + item + ", argument count: "
+                                    + args.length() + "`)");
                 }));
     }
 
     private void setDetailsLitRenderer(LitRendererTestComponent component) {
-        component.setDetailsRenderer(LitRenderer
-                .<String> of("<div id=\"details-${index}\">Details: ${item.value}</div>")
+        component.setDetailsRenderer(LitRenderer.<String> of(
+                "<div id=\"details-${index}\">Details: ${item.value}</div>")
                 .withProperty("value", item -> item + " (details)"));
     }
 
