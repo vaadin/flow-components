@@ -527,18 +527,6 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Manually invoke existing renderer.
-     * </p>
-     */
-    protected void render() {
-        getElement().callJsFunction("render");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Returns true if {@code value} is valid, and sets the {@code invalid} flag
      * appropriately.
      * </p>
