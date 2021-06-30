@@ -32,7 +32,10 @@ public class LitRendererPage extends Div {
         LitRendererTestComponent component = new LitRendererTestComponent();
         component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
         setLitRenderer(component);
-        add(component);
+
+        Div componentWrapper = new Div();
+        componentWrapper.add(component);
+        add(componentWrapper);
 
         add(new Div(new Text("Main content:")));
 
@@ -59,6 +62,19 @@ public class LitRendererPage extends Div {
                 e -> setDetailsLitRenderer(component));
         setDetailsLitRendererButton.setId("setDetailsLitRendererButton");
         add(setDetailsLitRendererButton);
+
+        add(new Div(new Text("Component:")));
+        NativeButton toggleAttachedButton = new NativeButton(
+                "Toggle attached",
+                e -> {
+                  if (component.isAttached()) {
+                        componentWrapper.remove(component);
+                  } else {
+                        componentWrapper.add(component);
+                  }
+                });
+        toggleAttachedButton.setId("toggleAttachedButton");
+        add(toggleAttachedButton);
 
     }
 

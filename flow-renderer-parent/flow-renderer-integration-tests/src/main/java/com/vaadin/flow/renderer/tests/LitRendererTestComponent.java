@@ -26,7 +26,6 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
@@ -41,8 +40,8 @@ public class LitRendererTestComponent extends Div
     private DataCommunicator<String> dataCommunicator;
     private final CompositeDataGenerator<String> dataGenerator = new CompositeDataGenerator<>();
 
-    private Registration dataGeneratorRegistration;
-    private Registration detailsDataGeneratorRegistration;
+    private Registration rendererRegistration;
+    private Registration detailsRendererRegistration;
 
     private final ArrayUpdater arrayUpdater = new ArrayUpdater() {
         @Override
@@ -76,37 +75,31 @@ public class LitRendererTestComponent extends Div
     }
 
     public void setRenderer(LitRenderer<String> renderer) {
-        if (dataGeneratorRegistration != null) {
-            dataGeneratorRegistration.remove();
+        if (rendererRegistration != null) {
+            rendererRegistration.remove();
+            rendererRegistration = null;
         }
 
         if (renderer == null) {
             getElement().executeJs("this.renderer = undefined");
         } else {
-            Rendering<String> rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
-            if (rendering.getDataGenerator().isPresent()) {
-                dataGeneratorRegistration = dataGenerator
-                        .addDataGenerator(rendering.getDataGenerator().get());
-            }
+            rendererRegistration = renderer.prepare(getElement(),
+                    dataCommunicator.getKeyMapper(), dataGenerator);
             dataCommunicator.reset();
         }
     }
 
     public void setDetailsRenderer(LitRenderer<String> renderer) {
-        if (detailsDataGeneratorRegistration != null) {
-            detailsDataGeneratorRegistration.remove();
+        if (detailsRendererRegistration != null) {
+            detailsRendererRegistration.remove();
+            detailsRendererRegistration = null;
         }
 
         if (renderer == null) {
             getElement().executeJs("this.detailsRenderer = undefined");
         } else {
-            Rendering<String> rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), "detailsRenderer");
-            if (rendering.getDataGenerator().isPresent()) {
-                detailsDataGeneratorRegistration = dataGenerator
-                        .addDataGenerator(rendering.getDataGenerator().get());
-            }
+            detailsRendererRegistration = renderer.prepare(getElement(),
+                    dataCommunicator.getKeyMapper(), dataGenerator, "detailsRenderer");
             dataCommunicator.reset();
         }
     }

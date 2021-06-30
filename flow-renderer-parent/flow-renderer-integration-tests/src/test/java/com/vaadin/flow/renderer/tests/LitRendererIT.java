@@ -49,6 +49,30 @@ public class LitRendererIT extends AbstractComponentIT {
     }
 
     @Test
+    public void shouldRenderAfterReattaching() {
+        // Detach
+        clickElementWithJs("toggleAttachedButton");
+        // Reattach
+        clickElementWithJs("toggleAttachedButton");
+
+        WebElement item = findElement(By.id("item-0"));
+        Assert.assertEquals("Item: 0", item.getText());
+    }
+
+    @Test
+    public void shouldNotRenderAfterReattaching() {
+        // Remove renderer
+        clickElementWithJs("removeRendererButton");
+        // Detach
+        clickElementWithJs("toggleAttachedButton");
+        // Reattach
+        clickElementWithJs("toggleAttachedButton");
+
+        WebElement item = findElement(By.id("item-0"));
+        Assert.assertEquals("[object Object]", item.getText());
+    }
+
+    @Test
     public void shouldInvokeCallableFromEvent() {
         clickElementWithJs("content-0");
         Assert.assertEquals("event: clicked, item: 0",

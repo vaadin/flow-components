@@ -1,14 +1,14 @@
 package com.vaadin.flow.renderer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
-import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
@@ -20,6 +20,7 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 
@@ -49,14 +50,27 @@ public class LitRenderer<T> extends Renderer<T> {
 
     @Override
     public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
-        return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
+        throw new UnsupportedOperationException();
     }
 
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
+    private void setElementRenderer(Element container, String rendererName, String templateExpression, ReturnChannelRegistration returnChannel,
+    JsonArray clientCallablesArray, String propertyNamespace) {
+        container.executeJs(
+            "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
+            rendererName, templateExpression, returnChannel,
+            clientCallablesArray, propertyNamespace);
+    }
+
+    public Registration prepare(Element container, DataKeyMapper<T> keyMapper, CompositeDataGenerator<T> hostDataDenerator) {
+        return prepare(container, keyMapper, hostDataDenerator, DEFAULT_RENDERER_NAME);
+    }
+
+    public Registration prepare(Element container, DataKeyMapper<T> keyMapper, CompositeDataGenerator<T> hostDataDenerator,
             String rendererName) {
-        ReturnChannelRegistration returnChannel = container.getNode()
+                ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
+                    // Invoked when the client calls one of the client callables
                     String handlerName = arguments.getString(0);
                     String itemKey = arguments.getString(1);
                     JsonArray args = arguments.getArray(2);
@@ -71,36 +85,37 @@ public class LitRenderer<T> extends Renderer<T> {
         JsonArray clientCallablesArray = JsonUtils.listToJson(
                 clientCallables.keySet().stream().collect(Collectors.toList()));
 
-        container.executeJs(
-                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
-                rendererName, templateExpression, returnChannel,
+        List<Registration> registrations = new ArrayList<>();
+
+        // Since the renderer is set manually on the client-side, an attach listener
+        // for the host component is required so that the renderer gets applied even when the
+        // host component is detached and reattached (crearing a new Web Component instance).
+        // The listener needs to be released when the Renderer instance is no longer used so
+        // the registration should get cleared by the renderer registration.
+        registrations.add(container.addAttachListener(e -> {
+            setElementRenderer(container, rendererName, templateExpression, returnChannel,
+                clientCallablesArray, propertyNamespace);
+        }));
+
+        setElementRenderer(container, rendererName, templateExpression, returnChannel,
                 clientCallablesArray, propertyNamespace);
 
-        return new Rendering<T>() {
-            @Override
-            public Optional<DataGenerator<T>> getDataGenerator() {
-                Map<String, ValueProvider<T, ?>> valueProviders = getValueProviders();
-                if (valueProviders == null || valueProviders.isEmpty()) {
-                    return Optional.empty();
-                }
-                CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
 
-                valueProviders.forEach((key, provider) -> composite
-                        .addDataGenerator((item, jsonObject) -> jsonObject.put(
-                                // Prefix the property name with a LitRenderer instance specific
-                                // namespace to avoid property name clashes.
-                                // Fixes https://github.com/vaadin/flow/issues/8629 in LitRenderer
-                                propertyNamespace + key,
-                                JsonSerializer.toJson(provider.apply(item)))));
+        if (hostDataDenerator != null && !getValueProviders().isEmpty()) {
+            CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
 
-                return Optional.of(composite);
-            }
+            getValueProviders().forEach((key, provider) -> composite
+                .addDataGenerator((item, jsonObject) -> jsonObject.put(
+                        // Prefix the property name with a LitRenderer instance specific
+                        // namespace to avoid property name clashes.
+                        // Fixes https://github.com/vaadin/flow/issues/8629 in LitRenderer
+                        propertyNamespace + key,
+                        JsonSerializer.toJson(provider.apply(item)))));
 
-            @Override
-            public Element getTemplateElement() {
-                return null;
-            }
-        };
+            registrations.add(hostDataDenerator.addDataGenerator(composite));
+        }
+
+        return () -> registrations.forEach(Registration::remove);
     }
 
     public LitRenderer<T> withProperty(String property,
