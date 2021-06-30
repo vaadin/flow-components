@@ -3,9 +3,9 @@ package com.vaadin.flow.renderer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -29,12 +29,16 @@ public class LitRenderer<T> extends Renderer<T> {
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
 
-    private final String propertyNamespace = UUID.randomUUID().toString() + "_";
+    private final String propertyNamespace;
 
     private Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
 
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
+
+        int litRendererCount = UI.getCurrent().getElement().getProperty("__litRendererCount", 0);
+        UI.getCurrent().getElement().setProperty("__litRendererCount", litRendererCount + 1);
+        propertyNamespace = "lr_" + litRendererCount + "_";
     }
 
     @Override
@@ -83,7 +87,10 @@ public class LitRenderer<T> extends Renderer<T> {
 
                 valueProviders.forEach((key, provider) -> composite
                         .addDataGenerator((item, jsonObject) -> jsonObject.put(
-                                key,
+                                // Prefix the property name with a LitRenderer instance specific
+                                // namespace to avoid property name clashes.
+                                // Fixes https://github.com/vaadin/flow/issues/8629 in LitRenderer
+                                propertyNamespace + key,
                                 JsonSerializer.toJson(provider.apply(item)))));
 
                 return Optional.of(composite);
@@ -98,10 +105,7 @@ public class LitRenderer<T> extends Renderer<T> {
 
     public LitRenderer<T> withProperty(String property,
             ValueProvider<T, ?> provider) {
-        // Prefix the property name with a LitRenderer instance specific
-        // namespace to avoid property name clashes.
-        // Fixes https://github.com/vaadin/flow/issues/8629 in LitRenderer
-        setProperty(propertyNamespace + property, provider);
+        setProperty(property, provider);
         return this;
     }
 
