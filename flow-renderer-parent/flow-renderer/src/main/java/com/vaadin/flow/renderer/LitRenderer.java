@@ -42,8 +42,10 @@ public class LitRenderer<T> extends Renderer<T> {
 
         // Generate a unique (in scope of the UI) namespace for the renderer
         // properties.
-        int litRendererCount = UI.getCurrent().getElement().getProperty("__litRendererCount", 0);
-        UI.getCurrent().getElement().setProperty("__litRendererCount", litRendererCount + 1);
+        int litRendererCount = UI.getCurrent().getElement()
+                .getProperty("__litRendererCount", 0);
+        UI.getCurrent().getElement().setProperty("__litRendererCount",
+                litRendererCount + 1);
         propertyNamespace = "lr_" + litRendererCount + "_";
     }
 
@@ -52,18 +54,22 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper, Element contentTemplate) {
+    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
+            Element contentTemplate) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
+    public LitRendering<T> render(Element container,
+            DataKeyMapper<T> keyMapper) {
         return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
     }
 
-    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper, String rendererName) {
+    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper,
+            String rendererName) {
         CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-        Registration rendererRegistration = prepare(container, keyMapper, dataGenerator, rendererName);
+        Registration rendererRegistration = prepare(container, keyMapper,
+                dataGenerator, rendererName);
 
         return new LitRendering<T>() {
             @Override
@@ -83,17 +89,18 @@ public class LitRenderer<T> extends Renderer<T> {
         };
     }
 
-    private void setElementRenderer(Element container, String rendererName, String templateExpression, ReturnChannelRegistration returnChannel,
-    JsonArray clientCallablesArray, String propertyNamespace) {
+    private void setElementRenderer(Element container, String rendererName,
+            String templateExpression, ReturnChannelRegistration returnChannel,
+            JsonArray clientCallablesArray, String propertyNamespace) {
         container.executeJs(
-            "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
-            rendererName, templateExpression, returnChannel,
-            clientCallablesArray, propertyNamespace);
+                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
+                rendererName, templateExpression, returnChannel,
+                clientCallablesArray, propertyNamespace);
     }
 
-    private Registration prepare(Element container, DataKeyMapper<T> keyMapper, CompositeDataGenerator<T> hostDataDenerator,
-            String rendererName) {
-                ReturnChannelRegistration returnChannel = container.getNode()
+    private Registration prepare(Element container, DataKeyMapper<T> keyMapper,
+            CompositeDataGenerator<T> hostDataDenerator, String rendererName) {
+        ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
                     // Invoked when the client calls one of the client callables
@@ -113,33 +120,41 @@ public class LitRenderer<T> extends Renderer<T> {
 
         List<Registration> registrations = new ArrayList<>();
 
-        // Since the renderer is set manually on the client-side, an attach listener
-        // for the host component is required so that the renderer gets applied even when the
-        // host component is detached and reattached (crearing a new Web Component instance).
-        // The listener needs to be released when the Renderer instance is no longer used so
+        // Since the renderer is set manually on the client-side, an attach
+        // listener
+        // for the host component is required so that the renderer gets applied
+        // even when the
+        // host component is detached and reattached (crearing a new Web
+        // Component instance).
+        // The listener needs to be released when the Renderer instance is no
+        // longer used so
         // the registration should get cleared by the renderer registration.
         registrations.add(container.addAttachListener(e -> {
-            setElementRenderer(container, rendererName, templateExpression, returnChannel,
-                clientCallablesArray, propertyNamespace);
+            setElementRenderer(container, rendererName, templateExpression,
+                    returnChannel, clientCallablesArray, propertyNamespace);
         }));
 
-        setElementRenderer(container, rendererName, templateExpression, returnChannel,
-                clientCallablesArray, propertyNamespace);
+        setElementRenderer(container, rendererName, templateExpression,
+                returnChannel, clientCallablesArray, propertyNamespace);
 
-        // Get the renderer function cleared when the LitRenderer is unregistered
-        registrations.add(() -> container.executeJs("window.Vaadin.unsetLitRenderer(this, $0, $1)",
-            rendererName, propertyNamespace));
+        // Get the renderer function cleared when the LitRenderer is
+        // unregistered
+        registrations.add(() -> container.executeJs(
+                "window.Vaadin.unsetLitRenderer(this, $0, $1)", rendererName,
+                propertyNamespace));
 
         if (hostDataDenerator != null && !valueProviders.isEmpty()) {
             CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
 
             valueProviders.forEach((key, provider) -> composite
-                .addDataGenerator((item, jsonObject) -> jsonObject.put(
-                        // Prefix the property name with a LitRenderer instance specific
-                        // namespace to avoid property name clashes.
-                        // Fixes https://github.com/vaadin/flow/issues/8629 in LitRenderer
-                        propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)))));
+                    .addDataGenerator((item, jsonObject) -> jsonObject.put(
+                            // Prefix the property name with a LitRenderer
+                            // instance specific
+                            // namespace to avoid property name clashes.
+                            // Fixes https://github.com/vaadin/flow/issues/8629
+                            // in LitRenderer
+                            propertyNamespace + key,
+                            JsonSerializer.toJson(provider.apply(item)))));
 
             registrations.add(hostDataDenerator.addDataGenerator(composite));
         }

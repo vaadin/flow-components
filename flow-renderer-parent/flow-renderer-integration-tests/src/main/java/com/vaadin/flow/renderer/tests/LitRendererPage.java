@@ -64,14 +64,13 @@ public class LitRendererPage extends Div {
         add(setDetailsLitRendererButton);
 
         add(new Div(new Text("Component:")));
-        NativeButton toggleAttachedButton = new NativeButton(
-                "Toggle attached",
+        NativeButton toggleAttachedButton = new NativeButton("Toggle attached",
                 e -> {
-                  if (component.isAttached()) {
+                    if (component.isAttached()) {
                         componentWrapper.remove(component);
-                  } else {
+                    } else {
                         componentWrapper.add(component);
-                  }
+                    }
                 });
         toggleAttachedButton.setId("toggleAttachedButton");
         add(toggleAttachedButton);

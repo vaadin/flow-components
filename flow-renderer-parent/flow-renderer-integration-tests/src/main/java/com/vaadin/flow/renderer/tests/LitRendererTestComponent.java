@@ -82,7 +82,8 @@ public class LitRendererTestComponent extends Div
         }
 
         if (renderer != null) {
-            LitRendering<String> rendering = renderer.render(getElement(), dataCommunicator.getKeyMapper());
+            LitRendering<String> rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
             rendererRegistration = rendering.getRendererRegistration();
             dataGenerator.addDataGenerator(rendering.getDataGenerator().get());
             dataCommunicator.reset();
@@ -96,7 +97,8 @@ public class LitRendererTestComponent extends Div
         }
 
         if (renderer != null) {
-            LitRendering<String> rendering = renderer.render(getElement(), dataCommunicator.getKeyMapper(), "detailsRenderer");
+            LitRendering<String> rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), "detailsRenderer");
             detailsRendererRegistration = rendering.getRendererRegistration();
             dataGenerator.addDataGenerator(rendering.getDataGenerator().get());
             dataCommunicator.reset();

@@ -138,7 +138,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public VirtualList() {
         getElement().setAttribute("suppress-template-warning", true);
         template = new Element("template");
-        setRenderer((ValueProvider<T,String>) String::valueOf);
+        setRenderer((ValueProvider<T, String>) String::valueOf);
     }
 
     private void initConnector() {
@@ -211,14 +211,14 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                 getElement().removeChild(template);
             }
             rendering = renderer.render(getElement(),
-                dataCommunicator.getKeyMapper());
+                    dataCommunicator.getKeyMapper());
         } else {
             // TemplateRenderer or ComponentRenderer
             if (template.getParent() == null) {
                 getElement().appendChild(template);
             }
             rendering = renderer.render(getElement(),
-                dataCommunicator.getKeyMapper(), template);
+                    dataCommunicator.getKeyMapper(), template);
         }
 
         if (rendering.getDataGenerator().isPresent()) {
@@ -226,7 +226,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                     .addDataGenerator(rendering.getDataGenerator().get()));
         }
         if (rendering instanceof LitRendering) {
-            rendererRegistrations.add(((LitRendering<T>) rendering).getRendererRegistration());
+            rendererRegistrations.add(
+                    ((LitRendering<T>) rendering).getRendererRegistration());
         }
 
         this.renderer = renderer;
@@ -243,8 +244,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * <p>
      * Setting a placeholder item improves the user experience of the list while
      * scrolling, since the placeholder uses the same renderer set with
-     * {@link #setRenderer(LitRenderer)} or {@link #setRenderer(TemplateRenderer)}
-     * , maintaining the same height for placeholders and actual items.
+     * {@link #setRenderer(LitRenderer)} or
+     * {@link #setRenderer(TemplateRenderer)} , maintaining the same height for
+     * placeholders and actual items.
      * <p>
      * When no placeholder item is set (or when set to <code>null</code>), an
      * empty placeholder element is created with <code>100px</code> of width and

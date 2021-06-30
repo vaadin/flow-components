@@ -2795,11 +2795,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
             // LitRenderer
-            if (detailsTemplate != null && detailsTemplate.getParent() != null) {
+            if (detailsTemplate != null
+                    && detailsTemplate.getParent() != null) {
                 getElement().removeChild(detailsTemplate);
             }
             rendering = ((LitRenderer<T>) renderer).render(getElement(),
-                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
+                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
             // TemplateRenderer or ComponentRenderer
             if (detailsTemplate == null) {
@@ -2815,7 +2816,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (rendering instanceof LitRendering) {
-            detailsRendererRegistrations.add(((LitRendering<T>) rendering).getRendererRegistration());
+            detailsRendererRegistrations.add(
+                    ((LitRendering<T>) rendering).getRendererRegistration());
         }
 
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();

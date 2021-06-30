@@ -407,9 +407,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Sets the Renderer responsible to render the individual items in
-     * the list of possible choices of the ComboBox. It doesn't affect how the
-     * selected item is rendered - that can be configured by using
+     * Sets the Renderer responsible to render the individual items in the list
+     * of possible choices of the ComboBox. It doesn't affect how the selected
+     * item is rendered - that can be configured by using
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      *
      * @param renderer
@@ -1606,7 +1606,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     getElement().removeChild(template);
                 }
                 rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
+                        dataCommunicator.getKeyMapper());
             } else {
                 // TemplateRenderer or ComponentRenderer
                 if (template == null) {
@@ -1616,7 +1616,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     getElement().appendChild(template);
                 }
                 rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
+                        dataCommunicator.getKeyMapper(), template);
             }
 
             if (rendering.getDataGenerator().isPresent()) {
@@ -1624,7 +1624,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         .addDataGenerator(rendering.getDataGenerator().get()));
             }
             if (rendering instanceof LitRendering) {
-                rendererRegistrations.add(((LitRendering<T>) rendering).getRendererRegistration());
+                rendererRegistrations.add(((LitRendering<T>) rendering)
+                        .getRendererRegistration());
             }
 
             reset();
