@@ -1181,6 +1181,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private PropertySet<T> propertySet;
 
     private DataGenerator<T> itemDetailsDataGenerator;
+    private Optional<Registration> detailsRendererRegistration = Optional.empty();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -2783,6 +2784,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setItemDetailsRenderer(Renderer<T> renderer) {
         detailsManager.destroyAllData();
         itemDetailsDataGenerator = null;
+        detailsRendererRegistration.ifPresent(Registration::remove);
+        detailsRendererRegistration = Optional.empty();
+
         if (renderer == null) {
             return;
         }
@@ -2798,27 +2802,52 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getElement().executeJs("this.rowDetailsRenderer = undefined");
 
         Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            rendering = ((LitRenderer<T>) renderer).render(getElement(),
-                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
+        if (detailsTemplate == null) {
+            rendering = renderer.render(getElement(),
+                    getDataCommunicator().getKeyMapper());
+            detailsTemplate = rendering.getTemplateElement();
+            detailsTemplate.setAttribute("class", "row-details");
         } else {
-            if (detailsTemplate == null) {
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper());
-                detailsTemplate = rendering.getTemplateElement();
-                detailsTemplate.setAttribute("class", "row-details");
-            } else {
-                getElement().appendChild(detailsTemplate);
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper(), detailsTemplate);
-            }
+            getElement().appendChild(detailsTemplate);
+            rendering = renderer.render(getElement(),
+                    getDataCommunicator().getKeyMapper(), detailsTemplate);
         }
 
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
 
         if (dataGenerator.isPresent()) {
             itemDetailsDataGenerator = dataGenerator.get();
+        }
+    }
+
+    /**
+     * Set the renderer to use for displaying the item details rows in this
+     * grid.
+     *
+     * @param renderer
+     *            the renderer to use for displaying item details rows,
+     *            {@code null} to remove the current renderer
+     */
+    public void setItemDetailsRenderer(com.vaadin.flow.renderer.Renderer<T> renderer) {
+        detailsManager.destroyAllData();
+        itemDetailsDataGenerator = null;
+        detailsRendererRegistration.ifPresent(Registration::remove);
+        detailsRendererRegistration = Optional.empty();
+
+        if (renderer == null) {
+            return;
+        }
+
+        if (detailsTemplate != null && detailsTemplate.getParent() != null) {
+            getElement().removeChild(detailsTemplate);
+        }
+
+
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            CompositeDataGenerator<T> itemDetailsDataGenerator = new CompositeDataGenerator<>();
+            detailsRendererRegistration = Optional.of(((LitRenderer<T>) renderer).prepare(getElement(), getDataCommunicator().getKeyMapper(), itemDetailsDataGenerator, "rowDetailsRenderer"));
+            this.itemDetailsDataGenerator = itemDetailsDataGenerator;
         }
     }
 

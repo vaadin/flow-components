@@ -52,7 +52,7 @@ public class VirtualListLitRendererPage extends Div {
         list.setRenderer(LitRenderer.<Integer> of(
                 "<div id=\"item-${index}\" @click=\"${clicked}\">Lit: ${item.name}</div>")
                 .withProperty("name", item -> "Item " + item)
-                .withClientCallable("clicked", item -> {
+                .withFunction("clicked", item -> {
                     list.getElement().setAttribute("data-clicked-item",
                             item.toString());
                 }));

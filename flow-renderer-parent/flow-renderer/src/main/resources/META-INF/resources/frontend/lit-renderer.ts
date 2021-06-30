@@ -47,6 +47,7 @@ _window.Vaadin.setLitRenderer = (
     // Clean up the root element of any existing content
     // (and Lit's _$litPart$ property) from other renderers
     if (root.__litRenderer !== renderer) {
+      // TODO: Remove once https://github.com/vaadin/web-components/issues/2161 is done
       root.innerHTML = '';
       delete root._$litPart$;
       root.__litRenderer = renderer;
@@ -56,7 +57,7 @@ _window.Vaadin.setLitRenderer = (
     // this specific LitRenderer instance. The renderer instance specific
     // "propertyNamespace" prefix is stripped from the property name at this point:
     //
-    // item: { key: "19", d1baea7d-ecaa-4316-a1ae-0cf807672624_lastName: "Tyler" }
+    // item: { key: "2", lr_3_lastName: "Tyler"}
     // ->
     // mappedItem: { lastName: "Tyler" }
     const mappedItem = {};
@@ -69,5 +70,16 @@ _window.Vaadin.setLitRenderer = (
     renderFunction(root, { index, item: mappedItem }, item.key);
   };
 
-  (component as any)[rendererName] = renderer;
+  (renderer as any).__rendererId = propertyNamespace;
+  component[rendererName] = renderer;
+};
+
+_window.Vaadin.unsetLitRenderer = (
+  component: HTMLElement,
+  rendererName: string,
+  propertyNamespace: string
+) => {
+  if (component[rendererName]?.__rendererId === propertyNamespace) {
+    component[rendererName] = undefined;
+  }
 };

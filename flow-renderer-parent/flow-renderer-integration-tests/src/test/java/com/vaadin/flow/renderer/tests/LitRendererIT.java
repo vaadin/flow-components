@@ -49,6 +49,13 @@ public class LitRendererIT extends AbstractComponentIT {
     }
 
     @Test
+    public void shouldRemoveTheRenderer() {
+        clickElementWithJs("removeRendererButton");
+        WebElement item = findElement(By.id("item-0"));
+        Assert.assertEquals("[object Object]", item.getText());
+    }
+
+    @Test
     public void shouldRenderAfterReattaching() {
         // Detach
         clickElementWithJs("toggleAttachedButton");

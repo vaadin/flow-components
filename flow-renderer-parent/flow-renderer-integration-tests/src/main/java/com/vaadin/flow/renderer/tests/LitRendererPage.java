@@ -87,15 +87,15 @@ public class LitRendererPage extends Div {
                 .append("  @keypress=\"${(e) => keyPressed(e.key)}\">")
                 .append("  Item: ${item.value}").append("</div>").toString())
                 .withProperty("value", ValueProvider.identity())
-                .withClientCallable("clicked", item -> {
+                .withFunction("clicked", item -> {
                     getElement()
                             .executeJs("console.warn(`event: clicked, item: "
                                     + item + "`)");
-                }).withClientCallable("keyPressed", (item, args) -> {
+                }).withFunction("keyPressed", (item, args) -> {
                     getElement().executeJs(
                             "console.warn(`event: keyPressed, item: " + item
                                     + ", key: " + args.getString(0) + "`)");
-                }).withClientCallable("dragged", (item, args) -> {
+                }).withFunction("dragged", (item, args) -> {
                     getElement()
                             .executeJs("console.warn(`event: dragged, item: "
                                     + item + ", argument count: "

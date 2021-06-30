@@ -117,13 +117,13 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     };
 
     private final Element template;
-    private Renderer<T> renderer;
+    private Object renderer;
     private String originalTemplate;
     private boolean rendererChanged;
     private boolean templateUpdateRegistered;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private Registration dataGeneratorRegistration;
+    private List<Registration> rendererRegistrations = new ArrayList<>();
     private transient T placeholderItem;
 
     private final DataCommunicator<T> dataCommunicator = new PagelessDataCommunicator<>(
@@ -136,15 +136,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public VirtualList() {
         getElement().setAttribute("suppress-template-warning", true);
-
-        dataGenerator.addDataGenerator(
-                (item, jsonObject) -> renderer.getValueProviders()
-                        .forEach((property, provider) -> jsonObject.put(
-                                property,
-                                JsonSerializer.toJson(provider.apply(item)))));
-
         template = new Element("template");
-        setRenderer(String::valueOf);
+        setRenderer((ValueProvider<T,String>) String::valueOf);
     }
 
     private void initConnector() {
@@ -209,36 +202,40 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
 
-        if (dataGeneratorRegistration != null) {
-            dataGeneratorRegistration.remove();
-            dataGeneratorRegistration = null;
+        rendererRegistrations.forEach(Registration::remove);
+        rendererRegistrations.clear();
+
+        getElement().appendChild(template);
+
+        Rendering<T> rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper(), template);
+        if (rendering.getDataGenerator().isPresent()) {
+            rendererRegistrations.add(dataGenerator
+                    .addDataGenerator(rendering.getDataGenerator().get()));
         }
 
-        // vaadin-template-renderer doesn't allow a custom renderer and
-        // a <template> at the same time.
+        this.renderer = renderer;
 
-        // Remove <template> if it's attached...
+        rendererChanged = true;
+        registerTemplateUpdate();
+
+        getDataCommunicator().reset();
+    }
+
+    public void setRenderer(com.vaadin.flow.renderer.Renderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+
+        rendererRegistrations.forEach(Registration::remove);
+        rendererRegistrations.clear();
+
         if (template.getParent() != null) {
             getElement().removeChild(template);
         }
-        // ...and unset a possible custom renderer.
-        getElement().executeJs("this.renderer = undefined");
 
-        Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
-        } else {
-            // TemplateRenderer or ComponentRenderer
-            getElement().appendChild(template);
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
-        }
-
-        if (rendering.getDataGenerator().isPresent()) {
-            dataGeneratorRegistration = dataGenerator
-                    .addDataGenerator(rendering.getDataGenerator().get());
+            Registration rendererRegistration = ((LitRenderer<T> )renderer).prepare(getElement(),
+                    dataCommunicator.getKeyMapper(), dataGenerator);
+            rendererRegistrations.add(rendererRegistration);
         }
 
         this.renderer = renderer;
@@ -357,7 +354,12 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         /*
          * Rendered component's enabled state needs to be updated via rendering
          */
-        setRenderer(renderer);
+        if (renderer instanceof Renderer) {
+            setRenderer((Renderer<T>) renderer);
+        } else if (renderer instanceof com.vaadin.flow.renderer.Renderer) {
+            setRenderer((com.vaadin.flow.renderer.Renderer<T>) renderer);
+        }
+
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)

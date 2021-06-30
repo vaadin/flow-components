@@ -76,6 +76,7 @@ window.Vaadin.Flow.virtualListConnector = {
         scheduleUpdateRequest();
       }
       renderer.__virtualListConnectorPatched = true;
+      renderer.__rendererId = originalRenderer.__rendererId;
 
       list.renderer = renderer;
     };

@@ -239,7 +239,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private Renderer<T> renderer;
+    private Object renderer;
     private boolean renderScheduled;
 
     // Filter set by the client when requesting data. It's sent back to client
@@ -251,7 +251,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private Registration dataGeneratorRegistration;
+    private Optional<Registration> rendererRegistration = Optional.empty();
 
     private Element template;
 
@@ -421,6 +421,28 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
     public void setRenderer(Renderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+        this.renderer = renderer;
+
+        scheduleRender();
+    }
+
+    /**
+     * Sets the Renderer responsible to render the individual items in
+     * the list of possible choices of the ComboBox. It doesn't affect how the
+     * selected item is rendered - that can be configured by using
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *
+     * @param renderer
+     *            a renderer for the items in the selection list of the
+     *            ComboBox, not <code>null</code>
+     *
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     */
+    public void setRenderer(com.vaadin.flow.renderer.Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
         this.renderer = renderer;
 
@@ -1595,39 +1617,31 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         renderScheduled = true;
         runBeforeClientResponse(ui -> {
-            if (dataGeneratorRegistration != null) {
-                dataGeneratorRegistration.remove();
-                dataGeneratorRegistration = null;
-            }
+            rendererRegistration.ifPresent(Registration::remove);
+            rendererRegistration = Optional.empty();
 
-            // vaadin-template-renderer doesn't allow a custom renderer and
-            // a <template> at the same time.
-
-            // Remove <template> if it's attached...
-            if (template != null && template.getParent() != null) {
-                getElement().removeChild(template);
-            }
-            // ...and unset a possible custom renderer.
-            getElement().executeJs("this.renderer = undefined");
-
-            Rendering<T> rendering;
             if (renderer instanceof LitRenderer) {
                 // LitRenderer
-                rendering = renderer.render(getElement(),
-                        dataCommunicator.getKeyMapper());
+                if (template != null && template.getParent() != null) {
+                    getElement().removeChild(template);
+                }
+                rendererRegistration = Optional.of(((LitRenderer<T>) renderer).prepare(getElement(), dataCommunicator.getKeyMapper(), dataGenerator));
             } else {
                 // TemplateRenderer or ComponentRenderer
                 if (template == null) {
                     template = new Element("template");
                 }
-                rendering = renderer.render(getElement(),
+                getElement().appendChild(template);
+
+                Rendering<T> rendering = ((Renderer<T>) renderer).render(getElement(),
                         dataCommunicator.getKeyMapper(), template);
+
+                if (rendering.getDataGenerator().isPresent()) {
+                    rendererRegistration = Optional.of(dataGenerator
+                            .addDataGenerator(rendering.getDataGenerator().get()));
+                }
             }
 
-            if (rendering.getDataGenerator().isPresent()) {
-                dataGeneratorRegistration = dataGenerator
-                        .addDataGenerator(rendering.getDataGenerator().get());
-            }
             reset();
             renderScheduled = false;
         });

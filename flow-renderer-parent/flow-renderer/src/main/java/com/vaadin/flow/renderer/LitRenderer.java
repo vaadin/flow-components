@@ -10,8 +10,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -25,32 +23,28 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonArray;
 
 @JsModule("./lit-renderer.ts")
-public class LitRenderer<T> extends Renderer<T> {
+public class LitRenderer<T> implements Renderer<T> {
     private String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
 
     private final String propertyNamespace;
 
+    private Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
     private Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
 
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
+        // Generate a unique (in scope of the UI) namespace for the renderer
+        // properties.
         int litRendererCount = UI.getCurrent().getElement().getProperty("__litRendererCount", 0);
         UI.getCurrent().getElement().setProperty("__litRendererCount", litRendererCount + 1);
         propertyNamespace = "lr_" + litRendererCount + "_";
     }
 
-    @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            Element contentTemplate) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
-        throw new UnsupportedOperationException();
+    public static <T> LitRenderer<T> of(String templateExpression) {
+        return new LitRenderer<>(templateExpression);
     }
 
     private void setElementRenderer(Element container, String rendererName, String templateExpression, ReturnChannelRegistration returnChannel,
@@ -100,11 +94,14 @@ public class LitRenderer<T> extends Renderer<T> {
         setElementRenderer(container, rendererName, templateExpression, returnChannel,
                 clientCallablesArray, propertyNamespace);
 
+        // Get the renderer function cleared when the LitRenderer is unregistered
+        registrations.add(() -> container.executeJs("window.Vaadin.unsetLitRenderer(this, $0, $1)",
+            rendererName, propertyNamespace));
 
-        if (hostDataDenerator != null && !getValueProviders().isEmpty()) {
+        if (hostDataDenerator != null && !valueProviders.isEmpty()) {
             CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
 
-            getValueProviders().forEach((key, provider) -> composite
+            valueProviders.forEach((key, provider) -> composite
                 .addDataGenerator((item, jsonObject) -> jsonObject.put(
                         // Prefix the property name with a LitRenderer instance specific
                         // namespace to avoid property name clashes.
@@ -120,24 +117,20 @@ public class LitRenderer<T> extends Renderer<T> {
 
     public LitRenderer<T> withProperty(String property,
             ValueProvider<T, ?> provider) {
-        setProperty(property, provider);
+        valueProviders.put(property, provider);
         return this;
     }
 
-    public LitRenderer<T> withClientCallable(String functionName,
+    public LitRenderer<T> withFunction(String functionName,
             SerializableConsumer<T> handler) {
-        return withClientCallable(functionName,
+        return withFunction(functionName,
                 (item, ignore) -> handler.accept(item));
     }
 
-    public LitRenderer<T> withClientCallable(String functionName,
+    public LitRenderer<T> withFunction(String functionName,
             SerializableBiConsumer<T, JsonArray> handler) {
         // TODO validate functionName
         clientCallables.put(functionName, handler);
         return this;
-    }
-
-    public static <T> LitRenderer<T> of(String templateExpression) {
-        return new LitRenderer<>(templateExpression);
     }
 }

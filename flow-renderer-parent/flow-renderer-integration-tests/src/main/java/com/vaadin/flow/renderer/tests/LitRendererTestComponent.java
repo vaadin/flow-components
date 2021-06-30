@@ -80,9 +80,7 @@ public class LitRendererTestComponent extends Div
             rendererRegistration = null;
         }
 
-        if (renderer == null) {
-            getElement().executeJs("this.renderer = undefined");
-        } else {
+        if (renderer != null) {
             rendererRegistration = renderer.prepare(getElement(),
                     dataCommunicator.getKeyMapper(), dataGenerator);
             dataCommunicator.reset();
@@ -95,9 +93,7 @@ public class LitRendererTestComponent extends Div
             detailsRendererRegistration = null;
         }
 
-        if (renderer == null) {
-            getElement().executeJs("this.detailsRenderer = undefined");
-        } else {
+        if (renderer != null) {
             detailsRendererRegistration = renderer.prepare(getElement(),
                     dataCommunicator.getKeyMapper(), dataGenerator, "detailsRenderer");
             dataCommunicator.reset();
