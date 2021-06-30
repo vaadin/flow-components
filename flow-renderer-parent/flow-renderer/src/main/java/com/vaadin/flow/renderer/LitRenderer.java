@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -23,7 +27,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonArray;
 
 @JsModule("./lit-renderer.ts")
-public class LitRenderer<T> implements Renderer<T> {
+public class LitRenderer<T> extends Renderer<T> {
     private String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
@@ -47,6 +51,38 @@ public class LitRenderer<T> implements Renderer<T> {
         return new LitRenderer<>(templateExpression);
     }
 
+    @Override
+    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper, Element contentTemplate) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
+        return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
+    }
+
+    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper, String rendererName) {
+        CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
+        Registration rendererRegistration = prepare(container, keyMapper, dataGenerator, rendererName);
+
+        return new LitRendering<T>() {
+            @Override
+            public Optional<DataGenerator<T>> getDataGenerator() {
+                return Optional.of(dataGenerator);
+            }
+
+            @Override
+            public Element getTemplateElement() {
+                return null;
+            }
+
+            @Override
+            public Registration getRendererRegistration() {
+                return rendererRegistration;
+            }
+        };
+    }
+
     private void setElementRenderer(Element container, String rendererName, String templateExpression, ReturnChannelRegistration returnChannel,
     JsonArray clientCallablesArray, String propertyNamespace) {
         container.executeJs(
@@ -55,11 +91,7 @@ public class LitRenderer<T> implements Renderer<T> {
             clientCallablesArray, propertyNamespace);
     }
 
-    public Registration prepare(Element container, DataKeyMapper<T> keyMapper, CompositeDataGenerator<T> hostDataDenerator) {
-        return prepare(container, keyMapper, hostDataDenerator, DEFAULT_RENDERER_NAME);
-    }
-
-    public Registration prepare(Element container, DataKeyMapper<T> keyMapper, CompositeDataGenerator<T> hostDataDenerator,
+    private Registration prepare(Element container, DataKeyMapper<T> keyMapper, CompositeDataGenerator<T> hostDataDenerator,
             String rendererName) {
                 ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
@@ -132,5 +164,11 @@ public class LitRenderer<T> implements Renderer<T> {
         // TODO validate functionName
         clientCallables.put(functionName, handler);
         return this;
+    }
+
+    public interface LitRendering<T> extends Rendering<T> {
+
+        Registration getRendererRegistration();
+
     }
 }

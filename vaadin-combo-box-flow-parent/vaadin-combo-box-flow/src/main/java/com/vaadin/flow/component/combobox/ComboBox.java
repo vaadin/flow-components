@@ -67,6 +67,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.renderer.LitRenderer;
+import com.vaadin.flow.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -239,7 +240,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private Object renderer;
+    private Renderer<T> renderer;
     private boolean renderScheduled;
 
     // Filter set by the client when requesting data. It's sent back to client
@@ -251,7 +252,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private Optional<Registration> rendererRegistration = Optional.empty();
+    private List<Registration> rendererRegistrations = new ArrayList<>();
 
     private Element template;
 
@@ -406,28 +407,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Sets the TemplateRenderer responsible to render the individual items in
-     * the list of possible choices of the ComboBox. It doesn't affect how the
-     * selected item is rendered - that can be configured by using
-     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
-     *
-     * @param renderer
-     *            a renderer for the items in the selection list of the
-     *            ComboBox, not <code>null</code>
-     *
-     *            Note that filtering of the ComboBox is not affected by the
-     *            renderer that is set here. Filtering is done on the original
-     *            values and can be affected by
-     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
-     */
-    public void setRenderer(Renderer<T> renderer) {
-        Objects.requireNonNull(renderer, "The renderer must not be null");
-        this.renderer = renderer;
-
-        scheduleRender();
-    }
-
-    /**
      * Sets the Renderer responsible to render the individual items in
      * the list of possible choices of the ComboBox. It doesn't affect how the
      * selected item is rendered - that can be configured by using
@@ -442,7 +421,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            values and can be affected by
      *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
-    public void setRenderer(com.vaadin.flow.renderer.Renderer<T> renderer) {
+    public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
         this.renderer = renderer;
 
@@ -1617,29 +1596,35 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         renderScheduled = true;
         runBeforeClientResponse(ui -> {
-            rendererRegistration.ifPresent(Registration::remove);
-            rendererRegistration = Optional.empty();
+            rendererRegistrations.forEach(Registration::remove);
+            rendererRegistrations.clear();
 
+            Rendering<T> rendering;
             if (renderer instanceof LitRenderer) {
                 // LitRenderer
                 if (template != null && template.getParent() != null) {
                     getElement().removeChild(template);
                 }
-                rendererRegistration = Optional.of(((LitRenderer<T>) renderer).prepare(getElement(), dataCommunicator.getKeyMapper(), dataGenerator));
+                rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
             } else {
                 // TemplateRenderer or ComponentRenderer
                 if (template == null) {
                     template = new Element("template");
                 }
-                getElement().appendChild(template);
-
-                Rendering<T> rendering = ((Renderer<T>) renderer).render(getElement(),
-                        dataCommunicator.getKeyMapper(), template);
-
-                if (rendering.getDataGenerator().isPresent()) {
-                    rendererRegistration = Optional.of(dataGenerator
-                            .addDataGenerator(rendering.getDataGenerator().get()));
+                if (template.getParent() == null) {
+                    getElement().appendChild(template);
                 }
+                rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), template);
+            }
+
+            if (rendering.getDataGenerator().isPresent()) {
+                rendererRegistrations.add(dataGenerator
+                        .addDataGenerator(rendering.getDataGenerator().get()));
+            }
+            if (rendering instanceof LitRendering) {
+                rendererRegistrations.add(((LitRendering<T>) rendering).getRendererRegistration());
             }
 
             reset();

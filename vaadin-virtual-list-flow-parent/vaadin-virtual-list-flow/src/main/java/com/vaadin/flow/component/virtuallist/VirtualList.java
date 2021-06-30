@@ -45,6 +45,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.renderer.LitRenderer;
+import com.vaadin.flow.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
@@ -55,7 +56,7 @@ import elemental.json.JsonValue;
  * {@code <vaadin-virtual-list>} webcomponent.
  * <p>
  * It supports {@link DataProvider}s to load data asynchronously and
- * {@link TemplateRenderer}s to render the markup for each item.
+ * {@link Renderer}s to render the markup for each item.
  * <p>
  *
  *
@@ -117,7 +118,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     };
 
     private final Element template;
-    private Object renderer;
+    private Renderer<T> renderer;
     private String originalTemplate;
     private boolean rendererChanged;
     private boolean templateUpdateRegistered;
@@ -189,9 +190,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     }
 
     /**
-     * Sets a renderer for the items in the list, by using a
-     * {@link TemplateRenderer}. The template returned by the renderer is used
-     * to render each item.
+     * Sets a renderer for the items in the list.
      * <p>
      * When set, a same renderer is used for the placeholder item. See
      * {@link #setPlaceholderItem(Object)} for details.
@@ -205,37 +204,29 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         rendererRegistrations.forEach(Registration::remove);
         rendererRegistrations.clear();
 
-        getElement().appendChild(template);
-
-        Rendering<T> rendering = renderer.render(getElement(),
+        Rendering<T> rendering;
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper());
+        } else {
+            // TemplateRenderer or ComponentRenderer
+            if (template.getParent() == null) {
+                getElement().appendChild(template);
+            }
+            rendering = renderer.render(getElement(),
                 dataCommunicator.getKeyMapper(), template);
+        }
+
         if (rendering.getDataGenerator().isPresent()) {
             rendererRegistrations.add(dataGenerator
                     .addDataGenerator(rendering.getDataGenerator().get()));
         }
-
-        this.renderer = renderer;
-
-        rendererChanged = true;
-        registerTemplateUpdate();
-
-        getDataCommunicator().reset();
-    }
-
-    public void setRenderer(com.vaadin.flow.renderer.Renderer<T> renderer) {
-        Objects.requireNonNull(renderer, "The renderer must not be null");
-
-        rendererRegistrations.forEach(Registration::remove);
-        rendererRegistrations.clear();
-
-        if (template.getParent() != null) {
-            getElement().removeChild(template);
-        }
-
-        if (renderer instanceof LitRenderer) {
-            Registration rendererRegistration = ((LitRenderer<T> )renderer).prepare(getElement(),
-                    dataCommunicator.getKeyMapper(), dataGenerator);
-            rendererRegistrations.add(rendererRegistration);
+        if (rendering instanceof LitRendering) {
+            rendererRegistrations.add(((LitRendering<T>) rendering).getRendererRegistration());
         }
 
         this.renderer = renderer;
@@ -252,8 +243,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * <p>
      * Setting a placeholder item improves the user experience of the list while
      * scrolling, since the placeholder uses the same renderer set with
-     * {@link #setRenderer(TemplateRenderer)}, maintaining the same height for
-     * placeholders and actual items.
+     * {@link #setRenderer(LitRenderer)} or {@link #setRenderer(TemplateRenderer)}
+     * , maintaining the same height for placeholders and actual items.
      * <p>
      * When no placeholder item is set (or when set to <code>null</code>), an
      * empty placeholder element is created with <code>100px</code> of width and
@@ -354,12 +345,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         /*
          * Rendered component's enabled state needs to be updated via rendering
          */
-        if (renderer instanceof Renderer) {
-            setRenderer((Renderer<T>) renderer);
-        } else if (renderer instanceof com.vaadin.flow.renderer.Renderer) {
-            setRenderer((com.vaadin.flow.renderer.Renderer<T>) renderer);
-        }
-
+        setRenderer(renderer);
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)

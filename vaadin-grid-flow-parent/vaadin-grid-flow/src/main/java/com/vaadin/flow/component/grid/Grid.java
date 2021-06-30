@@ -122,6 +122,7 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.renderer.LitRenderer;
+import com.vaadin.flow.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -1181,7 +1182,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private PropertySet<T> propertySet;
 
     private DataGenerator<T> itemDetailsDataGenerator;
-    private Optional<Registration> detailsRendererRegistration = Optional.empty();
+    private List<Registration> detailsRendererRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -2784,70 +2785,43 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setItemDetailsRenderer(Renderer<T> renderer) {
         detailsManager.destroyAllData();
         itemDetailsDataGenerator = null;
-        detailsRendererRegistration.ifPresent(Registration::remove);
-        detailsRendererRegistration = Optional.empty();
+        detailsRendererRegistrations.forEach(Registration::remove);
+        detailsRendererRegistrations.clear();
 
         if (renderer == null) {
             return;
         }
 
-        // vaadin-template-renderer doesn't allow a custom renderer and
-        // a <template> at the same time.
-
-        // Remove <template> if it's attached...
-        if (detailsTemplate != null && detailsTemplate.getParent() != null) {
-            getElement().removeChild(detailsTemplate);
-        }
-        // ...and unset a possible custom renderer.
-        getElement().executeJs("this.rowDetailsRenderer = undefined");
-
         Rendering<T> rendering;
-        if (detailsTemplate == null) {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper());
-            detailsTemplate = rendering.getTemplateElement();
-            detailsTemplate.setAttribute("class", "row-details");
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (detailsTemplate != null && detailsTemplate.getParent() != null) {
+                getElement().removeChild(detailsTemplate);
+            }
+            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
-            getElement().appendChild(detailsTemplate);
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper(), detailsTemplate);
+            // TemplateRenderer or ComponentRenderer
+            if (detailsTemplate == null) {
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper());
+                detailsTemplate = rendering.getTemplateElement();
+                detailsTemplate.setAttribute("class", "row-details");
+            } else {
+                getElement().appendChild(detailsTemplate);
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper(), detailsTemplate);
+            }
+        }
+
+        if (rendering instanceof LitRendering) {
+            detailsRendererRegistrations.add(((LitRendering<T>) rendering).getRendererRegistration());
         }
 
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
 
         if (dataGenerator.isPresent()) {
             itemDetailsDataGenerator = dataGenerator.get();
-        }
-    }
-
-    /**
-     * Set the renderer to use for displaying the item details rows in this
-     * grid.
-     *
-     * @param renderer
-     *            the renderer to use for displaying item details rows,
-     *            {@code null} to remove the current renderer
-     */
-    public void setItemDetailsRenderer(com.vaadin.flow.renderer.Renderer<T> renderer) {
-        detailsManager.destroyAllData();
-        itemDetailsDataGenerator = null;
-        detailsRendererRegistration.ifPresent(Registration::remove);
-        detailsRendererRegistration = Optional.empty();
-
-        if (renderer == null) {
-            return;
-        }
-
-        if (detailsTemplate != null && detailsTemplate.getParent() != null) {
-            getElement().removeChild(detailsTemplate);
-        }
-
-
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            CompositeDataGenerator<T> itemDetailsDataGenerator = new CompositeDataGenerator<>();
-            detailsRendererRegistration = Optional.of(((LitRenderer<T>) renderer).prepare(getElement(), getDataCommunicator().getKeyMapper(), itemDetailsDataGenerator, "rowDetailsRenderer"));
-            this.itemDetailsDataGenerator = itemDetailsDataGenerator;
         }
     }
 
