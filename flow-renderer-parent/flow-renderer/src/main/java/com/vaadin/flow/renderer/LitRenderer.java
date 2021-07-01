@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2000-2021 Vaadin Ltd.
  *
@@ -16,6 +17,7 @@
 package com.vaadin.flow.renderer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +119,15 @@ public class LitRenderer<T> extends Renderer<T> {
     @Override
     public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
             Element contentTemplate) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @deprecated LitRenderer doesn't support event handlers. Don't use.
+     */
+    @Deprecated
+    @Override
+    public Map<String, SerializableConsumer<T>> getEventHandlers() {
         throw new UnsupportedOperationException();
     }
 
@@ -369,6 +380,18 @@ public class LitRenderer<T> extends Renderer<T> {
         Objects.requireNonNull(handler);
         clientCallables.put(functionName, handler);
         return this;
+    }
+
+    /**
+     * Gets the functions linked to this renderer. The returned map is
+     * immutable.
+     *
+     * @return the mapped functions, never <code>null</code>
+     * @see #withFunction(String, SerializableBiConsumer)
+     */
+    public Map<String, SerializableBiConsumer<T, JsonArray>> getFunctions() {
+        return clientCallables == null ? Collections.emptyMap()
+                : Collections.unmodifiableMap(clientCallables);
     }
 
     /**
