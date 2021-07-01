@@ -12,6 +12,8 @@ then
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
       pr=*)
         PR=`echo $i | cut -d = -f2`;;
+      hub=*)
+        TBHUB=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
