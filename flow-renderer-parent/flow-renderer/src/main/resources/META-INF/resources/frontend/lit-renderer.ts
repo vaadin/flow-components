@@ -13,6 +13,19 @@ type Renderer = (
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
 
+/**
+ * Assigns the component a renderer function which uses Lit to render
+ * the given template expression inside the render root element.
+ *
+ * @param component The host component to which the renderer runction is to be set
+ * @param rendererName The name of the renderer function
+ * @param templateExpression The content of the template literal passed to Lit for rendering.
+ * @param returnChannel A channel to the server.
+ * Calling it will end up invoking a handler in the server-side LitRenderer.
+ * @param clientCallables A list of function names that can be called from within the template literal.
+ * @param propertyNamespace LitRenderer-specific namespace for properties.
+ * Needed to avoid property name collisions between renderers.
+ */
 _window.Vaadin.setLitRenderer = (
   component: HTMLElement,
   rendererName: string,
@@ -31,7 +44,7 @@ _window.Vaadin.setLitRenderer = (
     return (root, {item, index}, itemKey) => {
       ${clientCallables
         .map((clientCallable) => {
-          // Map all the client-callables as inline functions so they can be accessed from the template (with @event-binding)
+          // Map all the client-callables as inline functions so they can be accessed from the template literal
           return `
           const ${clientCallable} = (...args) => {
             if (itemKey !== undefined) {
@@ -48,8 +61,8 @@ _window.Vaadin.setLitRenderer = (
   const renderer: Renderer = (root, _, { index, item }) => {
     // Clean up the root element of any existing content
     // (and Lit's _$litPart$ property) from other renderers
+    // TODO: Remove once https://github.com/vaadin/web-components/issues/2161 is done
     if (root.__litRenderer !== renderer) {
-      // TODO: Remove once https://github.com/vaadin/web-components/issues/2161 is done
       root.innerHTML = '';
       delete root._$litPart$;
       root.__litRenderer = renderer;
@@ -76,12 +89,20 @@ _window.Vaadin.setLitRenderer = (
   component[rendererName] = renderer;
 };
 
+/**
+ * Removes the renderer function with the given name from the component
+ * if the propertyNamespace matches the renderer's id.
+ *
+ * @param component The host component whose renderer runction is to be removed
+ * @param rendererName The name of the renderer function
+ * @param rendererId The rendererId of the function to be removed
+ */
 _window.Vaadin.unsetLitRenderer = (
   component: HTMLElement,
   rendererName: string,
-  propertyNamespace: string
+  rendererId: string
 ) => {
-  if (component[rendererName]?.__rendererId === propertyNamespace) {
+  if (component[rendererName]?.__rendererId === rendererId) {
     component[rendererName] = undefined;
   }
 };
