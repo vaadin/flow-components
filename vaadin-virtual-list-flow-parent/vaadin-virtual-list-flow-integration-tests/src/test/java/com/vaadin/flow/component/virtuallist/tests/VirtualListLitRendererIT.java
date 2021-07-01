@@ -34,6 +34,7 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
     public void init() {
         open();
         list = $(VirtualListElement.class).first();
+        waitForElementPresent(By.id("item-0"));
     }
 
     @Test
@@ -46,8 +47,7 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
     public void shouldRenderLastItem() {
         int rowCount = list.getRowCount();
         list.scrollToRow(rowCount - 1);
-        WebElement item = list.findElement(By.id("item-" + (rowCount - 1)));
-        Assert.assertNotNull(item);
+        waitForElementPresent(By.id("item-" + (rowCount - 1)));
     }
 
     @Test
@@ -67,8 +67,9 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
 
     @Test
     public void shouldClickAnItem() {
+        waitForElementPresent(By.id("item-0"));
         clickElementWithJs("item-0");
-        Assert.assertEquals(list.getAttribute("data-clicked-item"), "0");
+        waitForElementPresent(By.cssSelector("vaadin-virtual-list[data-clicked-item=\"0\"]"));
     }
 
 }

@@ -34,7 +34,9 @@ _window.Vaadin.setLitRenderer = (
           // Map all the client-callables as inline functions so they can be accessed from the template (with @event-binding)
           return `
           const ${clientCallable} = (...args) => {
-            returnChannel('${clientCallable}', itemKey, args[0] instanceof Event ? [] : [...args])
+            if (itemKey !== undefined) {
+              returnChannel('${clientCallable}', itemKey, args[0] instanceof Event ? [] : [...args]);
+            }
           }`;
         })
         .join('')}
