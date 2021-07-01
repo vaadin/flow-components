@@ -11,6 +11,7 @@ public class CrudSerializableTest extends ClassesSerializableTest {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
                 "com\\.vaadin\\.flow\\.component\\.contextmenu\\.osgi\\..*",
                 "com\\.vaadin\\.flow\\.component\\.grid\\.GridColumnOrderHelper.*",
-                "com\\.vaadin\\.flow\\.component\\.grid\\.osgi\\..*"));
+                "com\\.vaadin\\.flow\\.component\\.grid\\.osgi\\..*",
+                "com\\.vaadin\\.base\\.devserver\\..*"));
     }
 }

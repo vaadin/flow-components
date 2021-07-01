@@ -11,6 +11,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
 public class GridSerializableTest extends ClassesSerializableTest {
+
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
@@ -18,7 +19,8 @@ public class GridSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.contextmenu\\.osgi\\..*",
                 "com\\.vaadin\\.flow\\.component\\.treegrid\\.it\\..*",
                 "com\\.vaadin\\.flow\\.component\\.datepicker\\..*",
-                "com\\.vaadin\\.flow\\.component\\.grid\\.GridColumnOrderHelper.*"));
+                "com\\.vaadin\\.flow\\.component\\.grid\\.GridColumnOrderHelper.*",
+                "com\\.vaadin\\.base\\.devserver\\..*"));
     }
 
     @Test

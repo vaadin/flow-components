@@ -24,7 +24,8 @@ public class FormLayoutSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.datepicker\\.osgi\\.DatePickerResource"),
+                "com\\.vaadin\\.flow\\.component\\.datepicker\\.osgi\\.DatePickerResource",
+                "com\\.vaadin\\.base\\.devserver\\..*"),
                 super.getExcludedPatterns());
     }
 }
