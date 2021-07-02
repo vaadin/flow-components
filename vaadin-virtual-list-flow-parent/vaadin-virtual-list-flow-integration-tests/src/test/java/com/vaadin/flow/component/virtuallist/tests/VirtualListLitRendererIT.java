@@ -69,7 +69,8 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
     public void shouldClickAnItem() {
         waitForElementPresent(By.id("item-0"));
         clickElementWithJs("item-0");
-        waitForElementPresent(By.cssSelector("vaadin-virtual-list[data-clicked-item=\"0\"]"));
+        waitForElementPresent(
+                By.cssSelector("vaadin-virtual-list[data-clicked-item=\"0\"]"));
     }
 
 }
