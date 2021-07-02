@@ -80,14 +80,22 @@ async function consolidate(template, pom, cb) {
 
 async function consolidatePomParent() {
   const template = proComponents.includes(componentName) ? 'pom-parent-pro.xml' : 'pom-parent.xml';
-  consolidate(template, `${mod}/pom.xml`, js => {
-    renameComponent(js.project.modules[0].module, name);
+  consolidate(template, `${mod}/pom.xml`, (js, org)  => {
+    const modules = js.project.modules[0].module;
+
+    renameComponent(modules, name);
+    // add testbench if module exists
     if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
-      js.project.modules[0].module.push(`${name}-testbench`);
+      modules.push(`${name}-testbench`);
     }
+    // add it's if module exists
     if (fs.existsSync(`${mod}/${name}-flow-demo/pom.xml`)) {
-      js.project.modules[0].module.push(`${name}-flow-demo`);
+      modules.push(`${name}-flow-demo`);
     }
+    // add other modules present in original pom
+    org.project.modules[0].module.forEach(
+      mod => !/(flow|flow-demo|testbench|flow-integration-test)$/.test(mod) && modules.push(mod));
+    
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
   });
 }
