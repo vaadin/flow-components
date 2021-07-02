@@ -341,7 +341,7 @@ public class LitRenderer<T> extends Renderer<T> {
 
     /**
      * Adds a function that can be called from within the template expression.
-     * The functino accepts agruments that can be consumed by the given handler.
+     * The function accepts agruments that can be consumed by the given handler.
      *
      * <p>
      * Examples:
