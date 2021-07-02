@@ -2,6 +2,8 @@ package com.vaadin.flow.component.confirmdialog.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.tests.AbstractParallelTest;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
