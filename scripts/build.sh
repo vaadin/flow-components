@@ -13,7 +13,9 @@ then
       pr=*)
         PR=`echo $i | cut -d = -f2`;;
       testMode=*)
-	      TEST_MODE=`echo $i | cut -d = -f2`;;
+        TEST_MODE=`echo $i | cut -d = -f2`;;
+      hub=*)
+        TBHUB=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
         elements="$elements $i"
