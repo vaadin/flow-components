@@ -80,7 +80,7 @@ browsers.forEach((browserName) => {
 
 const startJetty = (cwd,port,stopPort) => {
   return new Promise((resolve) => {
-    const jetty = spawn('mvn', ['-B', '-q', 'jetty:run', `-Djetty.http.port=${port}`, `-Djetty.stop.port=${stopPort}`], { cwd });
+    const jetty = spawn('mvn', ['-B', '-q', 'package', 'jetty:run', `-Djetty.http.port=${port}`, `-Djetty.stop.port=${stopPort}`], { cwd });
     processes.push(jetty);
     jetty.stderr.on('data', (data) => console.error(data.toString()));
     jetty.stdout.on('data', (data) => {
