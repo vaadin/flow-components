@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-renderer</artifactId>
+            <artifactId>vaadin-renderer-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

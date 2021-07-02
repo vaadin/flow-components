@@ -6,12 +6,12 @@
         <artifactId>vaadin-flow-components</artifactId>
         <version>21.0-SNAPSHOT</version>
     </parent>
-    <artifactId>flow-renderer-parent</artifactId>
+    <artifactId>vaadin-renderer-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Flow Renderer Parent</name>
     <modules>
-        <module>flow-renderer</module>
-        <module>flow-renderer-integration-tests</module>
+        <module>vaadin-renderer-flow</module>
+        <module>vaadin-renderer-flow-integration-tests</module>
     </modules>
     <profiles>
         <profile>
@@ -22,7 +22,7 @@
                 </property>
             </activation>
             <modules>
-                <module>flow-renderer-integration-tests</module>
+                <module>vaadin-renderer-flow-integration-tests</module>
             </modules>
         </profile>
     </profiles>

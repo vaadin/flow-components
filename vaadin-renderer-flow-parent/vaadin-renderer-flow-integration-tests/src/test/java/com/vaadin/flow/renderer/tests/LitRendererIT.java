@@ -27,7 +27,7 @@ import java.util.logging.Level;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("flow-renderer/lit-renderer")
+@TestPath("vaadin-renderer-flow/lit-renderer")
 public class LitRendererIT extends AbstractComponentIT {
 
     @Before

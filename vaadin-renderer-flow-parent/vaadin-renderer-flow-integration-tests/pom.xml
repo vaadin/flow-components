@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>flow-renderer-parent</artifactId>
+        <artifactId>vaadin-renderer-flow-parent</artifactId>
         <version>21.0-SNAPSHOT</version>
     </parent>
-    <artifactId>flow-renderer-integration-tests</artifactId>
+    <artifactId>vaadin-renderer-flow-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Flow Renderer Integration Tests</name>
     <dependencies>
@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-renderer</artifactId>
+            <artifactId>vaadin-renderer-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

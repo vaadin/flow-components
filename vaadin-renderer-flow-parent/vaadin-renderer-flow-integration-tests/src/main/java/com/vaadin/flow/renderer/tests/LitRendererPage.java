@@ -24,7 +24,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("flow-renderer/lit-renderer")
+@Route("vaadin-renderer-flow/lit-renderer")
 public class LitRendererPage extends Div {
 
     public LitRendererPage() {
