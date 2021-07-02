@@ -9,7 +9,6 @@ public class OrderedLayoutSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.orderedlayout\\.it\\..*",
-                "com\\.vaadin\\.base\\.devserver\\..*"));
+                "com\\.vaadin\\.flow\\.component\\.orderedlayout\\.it\\..*"));
     }
 }
