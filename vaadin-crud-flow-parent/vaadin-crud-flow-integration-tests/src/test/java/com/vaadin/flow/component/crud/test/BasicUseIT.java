@@ -5,9 +5,13 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.crud.examples.Person;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
@@ -25,6 +29,14 @@ public class BasicUseIT extends AbstractParallelTest {
     public void crudIsPresent() {
         Assert.assertTrue($(CrudElement.class).exists());
         Assert.assertNotNull($(CrudElement.class).first().getGrid());
+    }
+
+    @Test
+    public void crudReplacesGrid() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        getTestButton("addGrid").click();
+        List<GridElement> grids = $(GridElement.class).all();
+        Assert.assertEquals(1, grids.size());
     }
 
     @Test
