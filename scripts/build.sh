@@ -14,6 +14,8 @@ then
         PR=`echo $i | cut -d = -f2`;;
       testMode=*)
         TEST_MODE=`echo $i | cut -d = -f2`;;
+      quiet)
+        quiet="-q";;
       hub=*)
         TBHUB=`echo $i | cut -d = -f2`;;
       *)
@@ -23,6 +25,8 @@ then
      esac
   done
 fi
+
+args="$args -B $quiet"
 
 ## compute modules that were modified in this PR
 if [ -z "$modules" -a -n "$PR" ]
@@ -100,7 +104,7 @@ type pnpm && pnpm --version
 uname -a
 
 ## Compile all java files including tests in ITs modules
-cmd="mvn clean test-compile -DskipFrontend -B -q $args"
+cmd="mvn clean test-compile -DskipFrontend $args"
 tcLog "Compiling flow components - $cmd"
 $cmd || tcStatus 1 "Compilation failed"
 
@@ -109,7 +113,7 @@ tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
 ## Compile and install all modules excluding ITs
-cmd="mvn install -Drelease -B -q -T $FORK_COUNT $args"
+cmd="mvn install -Drelease -B -T $FORK_COUNT $args"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
@@ -143,6 +147,9 @@ then
 fi
 echo "$args"
 
+args="$args -Dfailsafe.rerunFailingTestsCount=2"
+
+## Install a selenium hub in local host to run tests against chrome
 if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
@@ -181,7 +188,7 @@ then
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -B -q -D$TEST_MODE -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn verify -D$TEST_MODE -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests/$pomFile -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
   tcLog "Running merged ITs - mvn verify -B -D$TEST_MODE -Drelease -pl integration-tests/$pomFile ..."
   echo $cmd
   $cmd
@@ -201,7 +208,7 @@ else
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -B -q -D$TEST_MODE -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dtest=none -Dit.test=$failed $(reuse_browser false)"
+        cmd="mvn verify -D$TEST_MODE -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests/$pomFile -Dtest=none -Dit.test=$failed $(reuse_browser false)"
         tcLog "Re-Running $nfailed failed IT classes ..."
         echo $cmd
         $cmd
