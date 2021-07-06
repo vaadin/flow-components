@@ -110,7 +110,8 @@ public class MainView extends VerticalLayout {
 
         setHeight("100%");
         add(crud, serverSideNewButton, serverSideEditButton, showFiltersButton,
-                updateI18nButton, toggleBordersButton, addGridButton, eventsPanel);
+                updateI18nButton, toggleBordersButton, addGridButton,
+                eventsPanel);
     }
 
     private void addEvent(String event) {
