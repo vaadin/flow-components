@@ -1,8 +1,5 @@
-package com.example.application.views.about;
+package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
-import com.vaadin.flow.component.charts.model.Halo;
-import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.style.Color;
 
 public class Inactive extends AbstractConfigurationObject {
