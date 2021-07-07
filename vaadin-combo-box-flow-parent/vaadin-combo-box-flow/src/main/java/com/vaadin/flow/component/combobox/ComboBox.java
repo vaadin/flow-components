@@ -1596,41 +1596,45 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         renderScheduled = true;
         runBeforeClientResponse(ui -> {
-            rendererRegistrations.forEach(Registration::remove);
-            rendererRegistrations.clear();
-
-            Rendering<T> rendering;
-            if (renderer instanceof LitRenderer) {
-                // LitRenderer
-                if (template != null && template.getParent() != null) {
-                    getElement().removeChild(template);
-                }
-                rendering = renderer.render(getElement(),
-                        dataCommunicator.getKeyMapper());
-            } else {
-                // TemplateRenderer or ComponentRenderer
-                if (template == null) {
-                    template = new Element("template");
-                }
-                if (template.getParent() == null) {
-                    getElement().appendChild(template);
-                }
-                rendering = renderer.render(getElement(),
-                        dataCommunicator.getKeyMapper(), template);
-            }
-
-            if (rendering.getDataGenerator().isPresent()) {
-                rendererRegistrations.add(dataGenerator
-                        .addDataGenerator(rendering.getDataGenerator().get()));
-            }
-            if (rendering instanceof LitRendering) {
-                rendererRegistrations.add(((LitRendering<T>) rendering)
-                        .getRendererRegistration());
-            }
-
-            reset();
+            render();
             renderScheduled = false;
         });
+    }
+
+    private void render() {
+        rendererRegistrations.forEach(Registration::remove);
+        rendererRegistrations.clear();
+
+        Rendering<T> rendering;
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (template != null && template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
+        } else {
+            // TemplateRenderer or ComponentRenderer
+            if (template == null) {
+                template = new Element("template");
+            }
+            if (template.getParent() == null) {
+                getElement().appendChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), template);
+        }
+
+        if (rendering.getDataGenerator().isPresent()) {
+            rendererRegistrations.add(dataGenerator
+                    .addDataGenerator(rendering.getDataGenerator().get()));
+        }
+        if (rendering instanceof LitRendering) {
+            rendererRegistrations.add(
+                    ((LitRendering<T>) rendering).getRendererRegistration());
+        }
+
+        reset();
     }
 
     @ClientCallable
