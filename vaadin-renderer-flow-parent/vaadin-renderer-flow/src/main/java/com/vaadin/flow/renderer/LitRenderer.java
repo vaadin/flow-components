@@ -199,7 +199,7 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     private Registration prepare(Element container, DataKeyMapper<T> keyMapper,
-            CompositeDataGenerator<T> hostDataDenerator, String rendererName) {
+            CompositeDataGenerator<T> hostDataGenerator, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
@@ -242,7 +242,7 @@ public class LitRenderer<T> extends Renderer<T> {
                 "window.Vaadin.unsetLitRenderer(this, $0, $1)", rendererName,
                 propertyNamespace));
 
-        if (hostDataDenerator != null && !valueProviders.isEmpty()) {
+        if (hostDataGenerator != null && !valueProviders.isEmpty()) {
             CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
 
             valueProviders.forEach((key, provider) -> composite
@@ -255,7 +255,7 @@ public class LitRenderer<T> extends Renderer<T> {
                             propertyNamespace + key,
                             JsonSerializer.toJson(provider.apply(item)))));
 
-            registrations.add(hostDataDenerator.addDataGenerator(composite));
+            registrations.add(hostDataGenerator.addDataGenerator(composite));
         }
 
         return () -> registrations.forEach(Registration::remove);
