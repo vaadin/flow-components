@@ -38,7 +38,7 @@ import elemental.json.JsonValue;
 public class LitRendererTestComponent extends Div
         implements HasDataProvider<String> {
 
-    private DataCommunicator<String> dataCommunicator;
+    private final DataCommunicator<String> dataCommunicator;
     private final CompositeDataGenerator<String> dataGenerator = new CompositeDataGenerator<>();
 
     private Registration rendererRegistration;
@@ -50,6 +50,7 @@ public class LitRendererTestComponent extends Div
             return new Update() {
                 @Override
                 public void clear(int start, int length) {
+                    // not essential for this test
                 }
 
                 @Override
@@ -60,17 +61,19 @@ public class LitRendererTestComponent extends Div
 
                 @Override
                 public void commit(int updateId) {
+                    // not essential for this test
                 }
             };
         }
 
         @Override
         public void initialize() {
+            // not essential for this test
         }
     };
 
     public LitRendererTestComponent() {
-        dataCommunicator = new DataCommunicator<String>(dataGenerator,
+        dataCommunicator = new DataCommunicator<>(dataGenerator,
                 arrayUpdater, data -> {
                 }, getElement().getNode());
     }

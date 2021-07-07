@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -59,14 +58,14 @@ import elemental.json.JsonArray;
  */
 @JsModule("./lit-renderer.ts")
 public class LitRenderer<T> extends Renderer<T> {
-    private String templateExpression;
+    private final String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
 
     private final String propertyNamespace;
 
-    private Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
-    private Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
+    private final Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
+    private final Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
 
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
@@ -216,7 +215,7 @@ public class LitRenderer<T> extends Renderer<T> {
                 });
 
         JsonArray clientCallablesArray = JsonUtils.listToJson(
-                clientCallables.keySet().stream().collect(Collectors.toList()));
+                new ArrayList<>(clientCallables.keySet()));
 
         List<Registration> registrations = new ArrayList<>();
 
