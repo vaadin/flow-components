@@ -53,7 +53,7 @@ import elemental.json.JsonValue;
 
 /**
  * Component that encapsulates the functionality of the
- * {@code <vaadin-virtual-list>} webcomponent.
+ * {@code <vaadin-virtual-list>} web component.
  * <p>
  * It supports {@link DataProvider}s to load data asynchronously and
  * {@link Renderer}s to render the markup for each item.
@@ -227,7 +227,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         }
         if (rendering instanceof LitRendering) {
             rendererRegistrations.add(
-                    ((LitRendering<T>) rendering).getRendererRegistration());
+                    ((LitRendering<T>) rendering).getRenderingRegistration());
         }
 
         this.renderer = renderer;
@@ -244,17 +244,16 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * <p>
      * Setting a placeholder item improves the user experience of the list while
      * scrolling, since the placeholder uses the same renderer set with
-     * {@link #setRenderer(LitRenderer)} or
-     * {@link #setRenderer(TemplateRenderer)} , maintaining the same height for
+     * {@link #setRenderer(Renderer)}, maintaining the same height for
      * placeholders and actual items.
      * <p>
      * When no placeholder item is set (or when set to <code>null</code>), an
      * empty placeholder element is created with <code>100px</code> of width and
      * <code>18px</code> of height.
      * <p>
-     * Note: when using {@link ComponentTemplateRenderer}s, the component used
-     * for the placeholder is statically stamped in the list. It can not be
-     * modified, nor receives any events.
+     * Note: when using {@link ComponentRenderer}s, the component used for the
+     * placeholder is statically stamped in the list. It can not be modified,
+     * nor receives any events.
      *
      * @param placeholderItem
      *            the item used as placeholder in the list, while the real data
@@ -287,7 +286,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         /*
          * The actual registration is done inside another beforeClientResponse
          * registration to make sure it runs last, after ComponentRenderer and
-         * BasicRenderes have executed their rendering operations, which also
+         * BasicRenderer have executed their rendering operations, which also
          * happen beforeClientResponse and might be registered after this.
          */
         runBeforeClientResponse(
@@ -327,7 +326,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             placeholderTemplate = originalTemplate;
         }
 
-        /**
+        /*
          * The placeholder is used by the client connector to create temporary
          * elements that are populated on demand (when the user scrolls to that
          * item).

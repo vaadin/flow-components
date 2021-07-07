@@ -44,17 +44,22 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonArray;
 
 /**
- * Helper class to create {@link Renderer} instances, with fluent API.
+ * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
+ * render given model objects in the components that support the JS renderer
+ * functions API. Mainly it's intended for use with {@code Grid},
+ * {@code ComboBox} and {@code VirtualList}, but is not limited to these.
  *
  * @author Vaadin Ltd
  * @since 22.0.
  *
  * @param <T>
- *            the type of the input object used inside the template expression
+ *            the type of the model object used inside the template expression
  *
  * @see #of(String)
  * @see <a href=
  *      "https://lit.dev/docs/templates/overview/">https://lit.dev/docs/templates/overview/</a>
+ * @see <a href=
+ *      "https://cdn.vaadin.com/vaadin-web-components/20.0.0/#/elements/vaadin-combo-box"><code>&lt;vaadin-combo-box&gt;.renderer</code></a>
  */
 @JsModule("./lit-renderer.ts")
 public class LitRenderer<T> extends Renderer<T> {
@@ -81,18 +86,30 @@ public class LitRenderer<T> extends Renderer<T> {
 
     /**
      * Creates a new LitRenderer based on the provided template expression. The
-     * expression accepts content that is allowed inside a JS template literals,
-     * and works with Lit data binding syntax.
+     * expression accepts content that is allowed inside JS template literals,
+     * and works with the Lit data binding syntax.
+     * <p>
+     * The template expression has access to:
+     * <ul>
+     * <li>{@code item} the model item being rendered</li>
+     * <li>{@code index} the index of the current item (when rendering a
+     * list)</li>
+     * <li>{@code item.property} any property of the model item exposed via
+     * {@link #withProperty(String, ValueProvider)}</li>
+     * <li>any function exposed via
+     * {@link #withFunction(String, SerializableConsumer)}</li>
+     * </ul>
      * <p>
      * Examples:
-     *
+     * 
      * <pre>
      * {@code
+     * // Prints the `name` property of a person
+     * LitRenderer.<Person> of("<div>Name: ${item.name}</div>")
+     *          .withProperty("name", Person::getName);
+     *
      * // Prints the index of the item inside a repeating list
      * LitRenderer.of("${index}");
-     *
-     * // Prints the property of an item
-     * LitRenderer.of("<div>Property: ${item.property}</div>");
      * }
      * </pre>
      *
@@ -122,7 +139,9 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support event handlers. Don't use.
+     * @deprecated LitRenderer doesn't support event handlers. Use functions
+     *             instead.
+     * @see LitRenderer#getFunctions()
      */
     @Deprecated
     @Override
@@ -131,11 +150,13 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     /**
-     * Sets up the rendering of the model objects by assigning a JS renderer
-     * function to the given container element.
+     * Sets up rendering of model objects inside a given {@param container}
+     * element. The model objects are rendered using the Lit template literal
+     * provided when creating this LitRenderer instance, and the Vaadin-default
+     * JS renderer function name.
      *
      * @param container
-     *            the element to which the renderer function will be set
+     *            the DOM element that supports setting a renderer function
      * @param keyMapper
      *            mapper used internally to fetch items by key and to provide
      *            keys for given items. It is required when either functions or
@@ -150,11 +171,13 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     /**
-     * Sets up the rendering of the model objects by assigning a JS renderer
-     * function with a specific name to the given container element.
+     * Sets up rendering of model objects inside a given {@param container}
+     * element. The model objects are rendered using the Lit template literal
+     * provided when creating this LitRenderer instance, and a given
+     * {@param rendererName} JS renderer function.
      *
      * @param container
-     *            the element to which the renderer function will be set
+     *            the DOM element that supports setting a renderer function
      * @param keyMapper
      *            mapper used internally to fetch items by key and to provide
      *            keys for given items. It is required when either functions or
@@ -182,7 +205,7 @@ public class LitRenderer<T> extends Renderer<T> {
             }
 
             @Override
-            public Registration getRendererRegistration() {
+            public Registration getRenderingRegistration() {
                 return rendererRegistration;
             }
         };
@@ -261,8 +284,8 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     /**
-     * Sets a property to be used inside the template expression. Each property
-     * is referenced inside the template by using the {@code ${item.property}}
+     * Makes a property available to the template expression. Each property is
+     * referenced inside the template by using the {@code ${item.property}}
      * syntax.
      * <p>
      * Examples:
@@ -320,7 +343,7 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * The name of the function used in the template expression should be the
      * name used at the functionName parameter. This name must be a valid
-     * Javascript function name.
+     * JavaScript function name.
      *
      * @param functionName
      *            the name of the function used inside the template expression,
@@ -340,7 +363,7 @@ public class LitRenderer<T> extends Renderer<T> {
 
     /**
      * Adds a function that can be called from within the template expression.
-     * The function accepts agruments that can be consumed by the given handler.
+     * The function accepts arguments that can be consumed by the given handler.
      *
      * <p>
      * Examples:
@@ -410,13 +433,13 @@ public class LitRenderer<T> extends Renderer<T> {
     public interface LitRendering<T> extends Rendering<T> {
 
         /**
-         * Gets a {@link Registration} associated with the renderer. The
+         * Gets a {@link Registration} associated with this rendering. The
          * registration should be removed with {@link Registration#remove} once
-         * the renderer is no longer used.
+         * the rendering is no longer used.
          *
          * @return the associated Registration
          */
-        Registration getRendererRegistration();
+        Registration getRenderingRegistration();
 
     }
 }

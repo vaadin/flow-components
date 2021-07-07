@@ -2817,7 +2817,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         if (rendering instanceof LitRendering) {
             detailsRendererRegistrations.add(
-                    ((LitRendering<T>) rendering).getRendererRegistration());
+                    ((LitRendering<T>) rendering).getRenderingRegistration());
         }
 
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();

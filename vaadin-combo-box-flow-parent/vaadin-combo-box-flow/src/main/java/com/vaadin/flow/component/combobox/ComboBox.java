@@ -1631,7 +1631,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         if (rendering instanceof LitRendering) {
             rendererRegistrations.add(
-                    ((LitRendering<T>) rendering).getRendererRegistration());
+                    ((LitRendering<T>) rendering).getRenderingRegistration());
         }
 
         reset();
