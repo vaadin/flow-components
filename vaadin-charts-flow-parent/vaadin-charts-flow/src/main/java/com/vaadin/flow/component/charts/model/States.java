@@ -17,6 +17,7 @@ public class States extends AbstractConfigurationObject {
 
     private Hover hover;
     private Select select;
+    private Inactive inactive;
 
     public States() {
     }
