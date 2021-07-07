@@ -73,8 +73,8 @@ public class LitRendererTestComponent extends Div
     };
 
     public LitRendererTestComponent() {
-        dataCommunicator = new DataCommunicator<>(dataGenerator,
-                arrayUpdater, data -> {
+        dataCommunicator = new DataCommunicator<>(dataGenerator, arrayUpdater,
+                data -> {
                 }, getElement().getNode());
     }
 

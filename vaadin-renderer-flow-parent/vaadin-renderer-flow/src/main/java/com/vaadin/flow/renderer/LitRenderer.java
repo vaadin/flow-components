@@ -214,8 +214,8 @@ public class LitRenderer<T> extends Renderer<T> {
                     handler.accept(item, args);
                 });
 
-        JsonArray clientCallablesArray = JsonUtils.listToJson(
-                new ArrayList<>(clientCallables.keySet()));
+        JsonArray clientCallablesArray = JsonUtils
+                .listToJson(new ArrayList<>(clientCallables.keySet()));
 
         List<Registration> registrations = new ArrayList<>();
 
