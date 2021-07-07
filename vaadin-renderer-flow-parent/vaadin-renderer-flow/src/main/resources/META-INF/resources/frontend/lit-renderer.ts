@@ -93,7 +93,7 @@ _window.Vaadin.setLitRenderer = (
  * Removes the renderer function with the given name from the component
  * if the propertyNamespace matches the renderer's id.
  *
- * @param component The host component whose renderer runction is to be removed
+ * @param component The host component whose renderer function is to be removed
  * @param rendererName The name of the renderer function
  * @param rendererId The rendererId of the function to be removed
  */
@@ -102,6 +102,10 @@ _window.Vaadin.unsetLitRenderer = (
   rendererName: string,
   rendererId: string
 ) => {
+  // The check for __rendererId property is necessary since the renderer function
+  // may get overridden by another renderer, for example, by one coming from
+  // vaadin-template-renderer. We don't want LitRenderer registration cleanup to
+  // unintentionally remove the new renderer.
   if (component[rendererName]?.__rendererId === rendererId) {
     component[rendererName] = undefined;
   }
