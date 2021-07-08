@@ -1182,7 +1182,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private PropertySet<T> propertySet;
 
     private DataGenerator<T> itemDetailsDataGenerator;
-    private List<Registration> detailsRendererRegistrations = new ArrayList<>();
+    private List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -2783,10 +2783,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code null} to remove the current renderer
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
-        detailsManager.destroyAllData();
-        itemDetailsDataGenerator = null;
-        detailsRendererRegistrations.forEach(Registration::remove);
-        detailsRendererRegistrations.clear();
+        detailsRenderingRegistrations.forEach(Registration::remove);
+        detailsRenderingRegistrations.clear();
 
         if (renderer == null) {
             return;
@@ -2815,15 +2813,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         }
 
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            itemDetailsDataGenerator = renderingDataGenerator;
+            Registration detailsRenderingDataGeneratorRegistration = () -> {
+                detailsManager.destroyAllData();
+                itemDetailsDataGenerator = null;
+            };
+            detailsRenderingRegistrations
+                    .add(detailsRenderingDataGeneratorRegistration);
+        });
+
         if (rendering instanceof LitRendering) {
-            detailsRendererRegistrations.add(
-                    ((LitRendering<T>) rendering).getRenderingRegistration());
-        }
-
-        Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
-
-        if (dataGenerator.isPresent()) {
-            itemDetailsDataGenerator = dataGenerator.get();
+            detailsRenderingRegistrations
+                    .add(((LitRendering<T>) rendering).getRegistration());
         }
     }
 

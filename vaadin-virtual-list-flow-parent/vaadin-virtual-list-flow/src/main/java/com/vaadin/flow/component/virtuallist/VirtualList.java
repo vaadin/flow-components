@@ -124,7 +124,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     private boolean templateUpdateRegistered;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private List<Registration> rendererRegistrations = new ArrayList<>();
+    private final List<Registration> renderingRegistrations = new ArrayList<>();
     private transient T placeholderItem;
 
     private final DataCommunicator<T> dataCommunicator = new PagelessDataCommunicator<>(
@@ -201,8 +201,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
 
-        rendererRegistrations.forEach(Registration::remove);
-        rendererRegistrations.clear();
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
 
         Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
@@ -221,13 +221,15 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                     dataCommunicator.getKeyMapper(), template);
         }
 
-        if (rendering.getDataGenerator().isPresent()) {
-            rendererRegistrations.add(dataGenerator
-                    .addDataGenerator(rendering.getDataGenerator().get()));
-        }
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            Registration renderingDataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(renderingDataGenerator);
+            renderingRegistrations.add(renderingDataGeneratorRegistration);
+        });
+
         if (rendering instanceof LitRendering) {
-            rendererRegistrations.add(
-                    ((LitRendering<T>) rendering).getRenderingRegistration());
+            renderingRegistrations
+                    .add(((LitRendering<T>) rendering).getRegistration());
         }
 
         this.renderer = renderer;

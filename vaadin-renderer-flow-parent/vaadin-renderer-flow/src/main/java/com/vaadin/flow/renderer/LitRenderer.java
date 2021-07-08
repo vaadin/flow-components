@@ -189,9 +189,9 @@ public class LitRenderer<T> extends Renderer<T> {
      */
     public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper,
             String rendererName) {
-        CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-        Registration rendererRegistration = prepare(container, keyMapper,
-                dataGenerator, rendererName);
+        DataGenerator<T> dataGenerator = createDataGenerator();
+        Registration registration = createJsRendererFunction(container,
+                keyMapper, rendererName);
 
         return new LitRendering<T>() {
             @Override
@@ -205,8 +205,8 @@ public class LitRenderer<T> extends Renderer<T> {
             }
 
             @Override
-            public Registration getRenderingRegistration() {
-                return rendererRegistration;
+            public Registration getRegistration() {
+                return registration;
             }
         };
     }
@@ -220,8 +220,8 @@ public class LitRenderer<T> extends Renderer<T> {
                 clientCallablesArray, propertyNamespace);
     }
 
-    private Registration prepare(Element container, DataKeyMapper<T> keyMapper,
-            CompositeDataGenerator<T> hostDataGenerator, String rendererName) {
+    private Registration createJsRendererFunction(Element container,
+            DataKeyMapper<T> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
@@ -264,23 +264,21 @@ public class LitRenderer<T> extends Renderer<T> {
                 "window.Vaadin.unsetLitRenderer(this, $0, $1)", rendererName,
                 propertyNamespace));
 
-        if (hostDataGenerator != null && !valueProviders.isEmpty()) {
-            CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
-
-            valueProviders.forEach((key, provider) -> composite
-                    .addDataGenerator((item, jsonObject) -> jsonObject.put(
-                            // Prefix the property name with a LitRenderer
-                            // instance specific namespace to avoid property
-                            // name clashes.
-                            // Fixes https://github.com/vaadin/flow/issues/8629
-                            // in LitRenderer
-                            propertyNamespace + key,
-                            JsonSerializer.toJson(provider.apply(item)))));
-
-            registrations.add(hostDataGenerator.addDataGenerator(composite));
-        }
-
         return () -> registrations.forEach(Registration::remove);
+    }
+
+    private DataGenerator<T> createDataGenerator() {
+        CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
+        valueProviders.forEach((key, provider) -> composite
+                .addDataGenerator((item, jsonObject) -> jsonObject.put(
+                        // Prefix the property name with a LitRenderer
+                        // instance specific namespace to avoid property
+                        // name clashes.
+                        // Fixes https://github.com/vaadin/flow/issues/8629
+                        // in LitRenderer
+                        propertyNamespace + key,
+                        JsonSerializer.toJson(provider.apply(item)))));
+        return composite;
     }
 
     /**
@@ -433,13 +431,15 @@ public class LitRenderer<T> extends Renderer<T> {
     public interface LitRendering<T> extends Rendering<T> {
 
         /**
-         * Gets a {@link Registration} associated with this rendering. The
-         * registration should be removed with {@link Registration#remove} once
-         * the rendering is no longer used.
+         * Gets a {@link Registration} that allows cleaning up resources
+         * associated with this rendering when the rendering is no longer used.
+         * It removes the listeners and properties added to the container
+         * element by this rendering.
          *
          * @return the associated Registration
+         * @see Registration#remove
          */
-        Registration getRenderingRegistration();
+        Registration getRegistration();
 
     }
 }

@@ -252,7 +252,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private List<Registration> rendererRegistrations = new ArrayList<>();
+    private List<Registration> renderingRegistrations = new ArrayList<>();
 
     private Element template;
 
@@ -1602,8 +1602,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void render() {
-        rendererRegistrations.forEach(Registration::remove);
-        rendererRegistrations.clear();
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
 
         Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
@@ -1625,13 +1625,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     dataCommunicator.getKeyMapper(), template);
         }
 
-        if (rendering.getDataGenerator().isPresent()) {
-            rendererRegistrations.add(dataGenerator
-                    .addDataGenerator(rendering.getDataGenerator().get()));
-        }
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            Registration renderingDataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(renderingDataGenerator);
+            renderingRegistrations.add(renderingDataGeneratorRegistration);
+        });
+
         if (rendering instanceof LitRendering) {
-            rendererRegistrations.add(
-                    ((LitRendering<T>) rendering).getRenderingRegistration());
+            renderingRegistrations
+                    .add(((LitRendering<T>) rendering).getRegistration());
         }
 
         reset();

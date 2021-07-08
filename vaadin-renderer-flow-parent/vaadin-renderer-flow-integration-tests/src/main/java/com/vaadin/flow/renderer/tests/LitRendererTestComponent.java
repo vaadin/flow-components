@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.renderer.tests;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,8 +42,8 @@ public class LitRendererTestComponent extends Div
     private final DataCommunicator<String> dataCommunicator;
     private final CompositeDataGenerator<String> dataGenerator = new CompositeDataGenerator<>();
 
-    private Registration rendererRegistration;
-    private Registration detailsRendererRegistration;
+    private final List<Registration> renderingRegistrations = new ArrayList<>();
+    private final List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     private final ArrayUpdater arrayUpdater = new ArrayUpdater() {
         @Override
@@ -79,31 +80,31 @@ public class LitRendererTestComponent extends Div
     }
 
     public void setRenderer(LitRenderer<String> renderer) {
-        if (rendererRegistration != null) {
-            rendererRegistration.remove();
-            rendererRegistration = null;
-        }
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
 
         if (renderer != null) {
             LitRendering<String> rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper());
-            rendererRegistration = rendering.getRenderingRegistration();
-            dataGenerator.addDataGenerator(rendering.getDataGenerator().get());
+            renderingRegistrations.add(rendering.getRegistration());
+            rendering.getDataGenerator()
+                    .ifPresent(generator -> renderingRegistrations
+                            .add(dataGenerator.addDataGenerator(generator)));
             dataCommunicator.reset();
         }
     }
 
     public void setDetailsRenderer(LitRenderer<String> renderer) {
-        if (detailsRendererRegistration != null) {
-            detailsRendererRegistration.remove();
-            detailsRendererRegistration = null;
-        }
+        detailsRenderingRegistrations.forEach(Registration::remove);
+        detailsRenderingRegistrations.clear();
 
         if (renderer != null) {
             LitRendering<String> rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper(), "detailsRenderer");
-            detailsRendererRegistration = rendering.getRenderingRegistration();
-            dataGenerator.addDataGenerator(rendering.getDataGenerator().get());
+            detailsRenderingRegistrations.add(rendering.getRegistration());
+            rendering.getDataGenerator()
+                    .ifPresent(generator -> detailsRenderingRegistrations
+                            .add(dataGenerator.addDataGenerator(generator)));
             dataCommunicator.reset();
         }
     }
