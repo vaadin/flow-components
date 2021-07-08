@@ -44,8 +44,8 @@ public class ComboBoxLazyDataViewTest {
 
     private static final String TYPE_ERROR_MESSAGE = "ComboBoxLazyDataView "
             + "only supports 'BackEndDataProvider' or it's subclasses, "
-            + "but was given a 'ListDataProvider'.\nUse either "
-            + "'getLazyDataView()', 'getListDataView()' or "
+            + "but was given a 'ListDataProvider'." + System.lineSeparator()
+            + "Use either 'getLazyDataView()', 'getListDataView()' or "
             + "'getGenericDataView()' according to the used data type.";
 
     private String[] items = { "foo", "bar", "baz" };
