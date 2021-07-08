@@ -360,6 +360,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private Renderer<T> renderer;
         private Rendering<T> rendering;
+        private LitRenderer<T> litRenderer;
+        private LitRendering<T> litRendering;
 
         private SerializableFunction<T, String> classNameGenerator = item -> null;
 
@@ -380,11 +382,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Objects.requireNonNull(renderer);
             this.columnInternalId = columnId;
             this.renderer = renderer;
+            this.litRenderer = null;
 
             comparator = (a, b) -> 0;
 
             rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
                     .getDataCommunicator().getKeyMapper());
+            litRendering = null;
 
             Optional<DataGenerator<T>> dataGenerator = rendering
                     .getDataGenerator();
@@ -393,6 +397,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
+
+            getElement().setAttribute("suppress-template-warning", true);
+        }
+
+        /**
+         * Constructs a new Column for use inside a Grid.
+         *
+         * @param grid
+         *            the grid this column is attached to
+         * @param columnId
+         *            unique identifier of this column
+         * @param renderer
+         *            the renderer to use in this column, must not be
+         *            {@code null}
+         */
+        @SuppressWarnings("unchecked")
+        public Column(Grid<T> grid, String columnId, LitRenderer<T> renderer) {
+            super(grid);
+            Objects.requireNonNull(renderer);
+            this.columnInternalId = columnId;
+            this.renderer = null;
+            this.litRenderer = renderer;
+
+            comparator = (a, b) -> 0;
+
+            rendering = null;
+            litRendering = renderer.render(getElement(),
+                    (KeyMapper<T>) getGrid().getDataCommunicator()
+                            .getKeyMapper());
+
+            columnDataGeneratorRegistration = grid
+                    .addDataGenerator(litRendering.getDataGenerator());
 
             getElement().setAttribute("suppress-template-warning", true);
         }
@@ -424,6 +460,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public Renderer<T> getRenderer() {
             return renderer;
+        }
+
+        /**
+         * Get the Lit renderer used for this column.
+         * <p>
+         * <strong>Note:</strong> Mutating the renderer after the Grid has been
+         * rendered on the client will not change the column, and can lead to
+         * undefined behavior.
+         *
+         * @return the renderer used for this column, should never be
+         *         {@code null}
+         */
+        public LitRenderer<T> getRenderer(Class<? extends LitRenderer> clazz) {
+            return litRenderer;
         }
 
         /**
@@ -1182,7 +1232,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private PropertySet<T> propertySet;
 
     private DataGenerator<T> itemDetailsDataGenerator;
-    private List<Registration> detailsRenderingRegistrations = new ArrayList<>();
+    private final List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -1511,6 +1561,49 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return column;
     }
 
+    /**
+     * Adds a new text column to this {@link Grid} with a value provider and
+     * column factory provided. The value is converted to String when sent to
+     * the client by using {@link String#valueOf(Object)}.
+     * <p>
+     * <em>NOTE:</em> For displaying components, see
+     * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
+     * see {@link #addColumn(LitRenderer)}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * @param valueProvider
+     *            the value provider
+     * @param columnFactory
+     *            the method that creates a new column instance for this
+     *            {@link Grid} instance.
+     * @return the created column
+     * @see #addColumn(ValueProvider)
+     * @see #addComponentColumn(ValueProvider)
+     * @see #addColumn(LitRenderer)
+     * @see #removeColumn(Column)
+     */
+    protected <C extends Column<T>> C addColumn(
+            ValueProvider<T, ?> valueProvider,
+            BiFunction<LitRenderer<T>, String, C> columnFactory,
+            Class<? extends LitRenderer> clazz) {
+        String columnId = createColumnId(false);
+
+        C column = addColumn(
+                new ColumnPathLitRenderer<T>(columnId,
+                        item -> formatValueToSendToTheClient(
+                                applyValueProvider(valueProvider, item))),
+                columnFactory);
+        ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
+                applyValueProvider(valueProvider, a),
+                applyValueProvider(valueProvider, b)));
+        return column;
+    }
+
     private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
             T item) {
         Object value;
@@ -1634,6 +1727,45 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Adds a new text column to this {@link Grid} with a renderer and default
+     * column factory.
+     * <p>
+     * See {@link LitRenderer} sub-classes for built-in renderer options with
+     * type safe APIs. For a renderer using template binding, use
+     * {@link LitRenderer#of(String)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link LitRenderer}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     * <p>
+     * <em>NOTE:</em> This method is a shorthand for
+     * {@link #addColumn(LitRenderer, BiFunction)}
+     * </p>
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @return the created column
+     *
+     * @see #getDefaultColumnFactory()
+     * @see LitRenderer#of(String)
+     * @see #addComponentColumn(ValueProvider)
+     * @see #removeColumn(Column)
+     * @see #addColumn(Renderer, BiFunction)
+     */
+    public Column<T> addColumn(LitRenderer<T> renderer) {
+        BiFunction<LitRenderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory(
+                LitRenderer.class);
+        return addColumn(renderer, defaultFactory);
+    }
+
+    /**
      * Adds a new text column to this {@link Grid} with a renderer and column
      * factory provided.
      * <p>
@@ -1669,6 +1801,49 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         String columnId = createColumnId(true);
 
         C column = columnFactory.apply(renderer, columnId);
+        return addColumn(columnId, column);
+    }
+
+    /**
+     * Adds a new text column to this {@link Grid} with a renderer and column
+     * factory provided.
+     * <p>
+     * See {@link LitRenderer} sub-classes for built-in renderer options with
+     * type safe APIs. For a renderer using template binding, use
+     * {@link LitRenderer#of(String)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link LitRenderer}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param columnFactory
+     *            the method that creates a new column instance for this
+     *            {@link Grid} instance.
+     * @return the created column
+     *
+     * @see #addColumn(LitRenderer)
+     * @see LitRenderer#of(String)
+     * @see #addComponentColumn(ValueProvider)
+     * @see #removeColumn(Column)
+     */
+    protected <C extends Column<T>> C addColumn(LitRenderer<T> renderer,
+            BiFunction<LitRenderer<T>, String, C> columnFactory) {
+        String columnId = createColumnId(true);
+
+        C column = columnFactory.apply(renderer, columnId);
+        return addColumn(columnId, column);
+    }
+
+    private <C extends Column<T>> C addColumn(String columnId, C column) {
         idToColumnMap.put(columnId, column);
         column.getElement().setProperty("_flowId", columnId);
 
@@ -1737,6 +1912,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Gives a reference to the column factory.
+     * <p>
+     * This method must not return <code>null</code>.
+     *
+     * @return method for column creation
+     */
+    protected BiFunction<LitRenderer<T>, String, Column<T>> getDefaultColumnFactory(
+            Class<? extends LitRenderer> clazz) {
+        return (LitRenderer<T> renderer, String columnId) -> new Column<T>(this,
+                columnId, renderer);
+    }
+
+    /**
      * Adds a new text column to this {@link Grid} with a template renderer,
      * sorting properties and default column factory. The values inside the
      * renderer are converted to JSON values by using
@@ -1779,6 +1967,53 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public Column<T> addColumn(Renderer<T> renderer,
             String... sortingProperties) {
         BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
+        return addColumn(renderer, defaultFactory, sortingProperties);
+    }
+
+    /**
+     * Adds a new text column to this {@link Grid} with a template renderer,
+     * sorting properties and default column factory. The values inside the
+     * renderer are converted to JSON values by using
+     * {@link JsonSerializer#toJson(Object)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link LitRenderer}.
+     * <p>
+     * This constructor attempts to automatically configure both in-memory and
+     * backend sorting using the given sorting properties and matching those
+     * with the property names used in the given renderer.
+     * <p>
+     * <strong>Note:</strong> if a property of the renderer that is used as a
+     * sorting property does not extend Comparable, no in-memory sorting is
+     * configured for it.
+     *
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * <p>
+     * <strong>Note:</strong> This method is a shorthand for
+     * {@link ##addColumn(LitRenderer, BiFunction, String...)}
+     * </p>
+     *
+     * @see #getDefaultColumnFactory(Class)
+     * @see #addColumn(LitRenderer, BiFunction, String...)
+     * @see #removeColumn(Column)
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param sortingProperties
+     *            the sorting properties to use for this column
+     * @return the created column
+     */
+    public Column<T> addColumn(LitRenderer<T> renderer,
+            String... sortingProperties) {
+        BiFunction<LitRenderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory(
+                LitRenderer.class);
         return addColumn(renderer, defaultFactory, sortingProperties);
     }
 
@@ -1827,6 +2062,59 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         Map<String, ValueProvider<T, ?>> valueProviders = renderer
                 .getValueProviders();
+        return addColumn(column, valueProviders, sortingProperties);
+    }
+
+    /**
+     * Adds a new text column to this {@link Grid} with a template renderer,
+     * sorting properties and column factory provided. The values inside the
+     * renderer are converted to JSON values by using
+     * {@link JsonSerializer#toJson(Object)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link LitRenderer}.
+     * <p>
+     * This constructor attempts to automatically configure both in-memory and
+     * backend sorting using the given sorting properties and matching those
+     * with the property names used in the given renderer.
+     * <p>
+     * <strong>Note:</strong> if a property of the renderer that is used as a
+     * sorting property does not extend Comparable, no in-memory sorting is
+     * configured for it.
+     *
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * @see #addColumn(LitRenderer, String...)
+     * @see #removeColumn(Column)
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param columnFactory
+     *            the method that creates a new column instance for this
+     *            {@link Grid} instance.
+     * @param sortingProperties
+     *            the sorting properties to use for this column
+     * @return the created column
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    protected <C extends Column<T>> C addColumn(LitRenderer<T> renderer,
+            BiFunction<LitRenderer<T>, String, C> columnFactory,
+            String... sortingProperties) {
+        C column = addColumn(renderer, columnFactory);
+        Map<String, ValueProvider<T, ?>> valueProviders = renderer
+                .getValueProviders();
+        return addColumn(column, valueProviders, sortingProperties);
+    }
+
+    private <C extends Column<T>> C addColumn(C column,
+            Map<String, ValueProvider<T, ?>> valueProviders,
+            String[] sortingProperties) {
         Set<String> valueProvidersKeySet = valueProviders.keySet();
         List<String> matchingSortingProperties = Arrays
                 .stream(sortingProperties)
@@ -1881,7 +2169,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #addColumn(String, BiFunction)}
      * </p>
      *
-     * @see #getDefaultColumnFactory()
+     * @see #getDefaultColumnFactory(Class)
      * @see #addColumn(String, BiFunction)
      * @see #removeColumn(Column)
      *
@@ -1890,8 +2178,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      */
     public Column<T> addColumn(String propertyName) {
-        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
-        return addColumn(propertyName, defaultFactory);
+        BiFunction<LitRenderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory(
+                LitRenderer.class);
+        return addColumn(propertyName, defaultFactory, LitRenderer.class);
     }
 
     /**
@@ -1942,6 +2231,55 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return addColumn(property, columnFactory);
     }
 
+    /**
+     * Adds a new column for the given property name with the column factory
+     * provided. The property values are converted to Strings in the grid cells.
+     * The property's full name will be used as the {@link Column#setKey(String)
+     * column key} and the property caption will be used as the
+     * {@link Column#setHeader(String) column header}.
+     * <p>
+     * You can add columns for nested properties with dot notation, eg.
+     * <code>"property.nestedProperty"</code>
+     * <p>
+     * If the property is {@link Comparable}, the created column is sortable by
+     * default. This can be changed with the {@link Column#setSortable(boolean)}
+     * method.
+     * <p>
+     * <strong>Note:</strong> This method can only be used for a Grid created
+     * from a bean type with {@link #Grid(Class)}.
+     *
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * @see #addColumn(String)
+     * @see #removeColumn(Column)
+     *
+     * @param propertyName
+     *            the property name of the new column, not <code>null</code>
+     * @param columnFactory
+     *            the method that creates a new column instance for this
+     *            {@link Grid} instance.
+     * @return the created column
+     */
+    protected <C extends Column<T>> C addColumn(String propertyName,
+            BiFunction<LitRenderer<T>, String, C> columnFactory,
+            Class<? extends LitRenderer> clazz) {
+        checkForBeanGrid();
+        Objects.requireNonNull(propertyName, "Property name can't be null");
+
+        PropertyDefinition<T, ?> property;
+        try {
+            property = propertySet.getProperty(propertyName).get();
+        } catch (NoSuchElementException | IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Can't resolve property name '"
+                    + propertyName + "' from '" + propertySet + "'");
+        }
+        return addColumn(property, columnFactory, clazz);
+    }
+
     private Column<T> addColumn(PropertyDefinition<T, ?> property) {
         BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
         return addColumn(property, defaultFactory);
@@ -1952,6 +2290,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         @SuppressWarnings("unchecked")
         C column = (C) addColumn(item -> runPropertyValueGetter(property, item),
                 columnFactory).setHeader(property.getCaption());
+        try {
+            column.setKey(property.getName());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException(
+                    "Multiple columns for the same property: "
+                            + property.getName());
+        }
+
+        if (Comparable.class.isAssignableFrom(property.getType())) {
+            column.setSortable(true);
+        }
+        return column;
+    }
+
+    private <C extends Column<T>> C addColumn(PropertyDefinition<T, ?> property,
+            BiFunction<LitRenderer<T>, String, C> columnFactory,
+            Class<? extends LitRenderer> clazz) {
+        @SuppressWarnings("unchecked")
+        C column = (C) addColumn(item -> runPropertyValueGetter(property, item),
+                columnFactory, clazz).setHeader(property.getCaption());
         try {
             column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {
@@ -2790,27 +3148,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
+        // TemplateRenderer or ComponentRenderer
         Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (detailsTemplate != null
-                    && detailsTemplate.getParent() != null) {
-                getElement().removeChild(detailsTemplate);
-            }
-            rendering = ((LitRenderer<T>) renderer).render(getElement(),
-                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
+        if (detailsTemplate == null) {
+            rendering = renderer.render(getElement(),
+                    getDataCommunicator().getKeyMapper());
+            detailsTemplate = rendering.getTemplateElement();
+            detailsTemplate.setAttribute("class", "row-details");
         } else {
-            // TemplateRenderer or ComponentRenderer
-            if (detailsTemplate == null) {
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper());
-                detailsTemplate = rendering.getTemplateElement();
-                detailsTemplate.setAttribute("class", "row-details");
-            } else {
-                getElement().appendChild(detailsTemplate);
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper(), detailsTemplate);
-            }
+            getElement().appendChild(detailsTemplate);
+            rendering = renderer.render(getElement(),
+                    getDataCommunicator().getKeyMapper(), detailsTemplate);
         }
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
@@ -2822,11 +3170,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             detailsRenderingRegistrations
                     .add(detailsRenderingDataGeneratorRegistration);
         });
+    }
 
-        if (rendering instanceof LitRendering) {
-            detailsRenderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
+    /**
+     * Set the renderer to use for displaying the item details rows in this
+     * grid.
+     *
+     * @param renderer
+     *            the renderer to use for displaying item details rows,
+     *            {@code null} to remove the current renderer
+     */
+    public void setItemDetailsRenderer(LitRenderer<T> renderer) {
+        detailsRenderingRegistrations.forEach(Registration::remove);
+        detailsRenderingRegistrations.clear();
+
+        if (renderer == null) {
+            return;
         }
+
+        if (detailsTemplate != null && detailsTemplate.getParent() != null) {
+            getElement().removeChild(detailsTemplate);
+        }
+        LitRendering<T> rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
+
+        itemDetailsDataGenerator = rendering.getDataGenerator();
+        Registration detailsRenderingDataGeneratorRegistration = () -> {
+            detailsManager.destroyAllData();
+            itemDetailsDataGenerator = null;
+        };
+        detailsRenderingRegistrations
+                .add(detailsRenderingDataGeneratorRegistration);
+        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**

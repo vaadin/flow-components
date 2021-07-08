@@ -16,21 +16,19 @@
  */
 package com.vaadin.flow.renderer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -44,15 +42,19 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonArray;
 
 /**
- * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
- * render given model objects in the components that support the JS renderer
- * functions API. Mainly it's intended for use with {@code Grid},
- * {@code ComboBox} and {@code VirtualList}, but is not limited to these.
+ * LitRenderer is a class that take a given model object as an input and outputs
+ * a set of elements that represents that item in the UI. Unlike its earlier
+ * alternative {@code TemplateRenderer}, LitRenderer uses a Lit-based template
+ * literal and creates a JS renderer function to render model object in a given
+ * container element. It's mainly intended for use with {@code Grid},
+ * {@code ComboBox} and {@code VirtualList}, but it is not limited to these
+ * components and can work with any components that support the JS renderer
+ * functions API.
  *
  * @author Vaadin Ltd
  * @since 22.0.
  *
- * @param <T>
+ * @param <SOURCE>
  *            the type of the model object used inside the template expression
  *
  * @see #of(String)
@@ -62,17 +64,17 @@ import elemental.json.JsonArray;
  *      "https://cdn.vaadin.com/vaadin-web-components/20.0.0/#/elements/vaadin-combo-box"><code>&lt;vaadin-combo-box&gt;.renderer</code></a>
  */
 @JsModule("./lit-renderer.ts")
-public class LitRenderer<T> extends Renderer<T> {
+public class LitRenderer<SOURCE> implements Serializable {
     private final String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
 
     private final String propertyNamespace;
 
-    private final Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
-    private final Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
+    private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
+    private final Map<String, SerializableBiConsumer<SOURCE, JsonArray>> clientCallables = new HashMap<>();
 
-    private LitRenderer(String templateExpression) {
+    protected LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
         // Generate a unique (in scope of the UI) namespace for the renderer
@@ -129,27 +131,6 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support <template> elements. Don't use.
-     */
-    @Deprecated
-    @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            Element contentTemplate) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @deprecated LitRenderer doesn't support event handlers. Use functions
-     *             instead.
-     * @see LitRenderer#getFunctions()
-     */
-    @Deprecated
-    @Override
-    public Map<String, SerializableConsumer<T>> getEventHandlers() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Sets up rendering of model objects inside a given {@param container}
      * element. The model objects are rendered using the Lit template literal
      * provided when creating this LitRenderer instance, and the Vaadin-default
@@ -164,9 +145,8 @@ public class LitRenderer<T> extends Renderer<T> {
      * @return the context of the rendering, that can be used by the components
      *         to provide extra customization
      */
-    @Override
-    public LitRendering<T> render(Element container,
-            DataKeyMapper<T> keyMapper) {
+    public LitRendering<SOURCE> render(Element container,
+            DataKeyMapper<SOURCE> keyMapper) {
         return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
     }
 
@@ -187,21 +167,16 @@ public class LitRenderer<T> extends Renderer<T> {
      * @return the context of the rendering, that can be used by the components
      *         to provide extra customization
      */
-    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            String rendererName) {
-        DataGenerator<T> dataGenerator = createDataGenerator();
+    public LitRendering<SOURCE> render(Element container,
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
+        DataGenerator<SOURCE> dataGenerator = createDataGenerator();
         Registration registration = createJsRendererFunction(container,
                 keyMapper, rendererName);
 
-        return new LitRendering<T>() {
+        return new LitRendering<SOURCE>() {
             @Override
-            public Optional<DataGenerator<T>> getDataGenerator() {
-                return Optional.of(dataGenerator);
-            }
-
-            @Override
-            public Element getTemplateElement() {
-                return null;
+            public DataGenerator<SOURCE> getDataGenerator() {
+                return dataGenerator;
             }
 
             @Override
@@ -221,7 +196,7 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     private Registration createJsRendererFunction(Element container,
-            DataKeyMapper<T> keyMapper, String rendererName) {
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
@@ -230,9 +205,9 @@ public class LitRenderer<T> extends Renderer<T> {
                     String itemKey = arguments.getString(1);
                     JsonArray args = arguments.getArray(2);
 
-                    SerializableBiConsumer<T, JsonArray> handler = clientCallables
+                    SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
-                    T item = keyMapper.get(itemKey);
+                    SOURCE item = keyMapper.get(itemKey);
 
                     handler.accept(item, args);
                 });
@@ -267,8 +242,8 @@ public class LitRenderer<T> extends Renderer<T> {
         return () -> registrations.forEach(Registration::remove);
     }
 
-    private DataGenerator<T> createDataGenerator() {
-        CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
+    private DataGenerator<SOURCE> createDataGenerator() {
+        CompositeDataGenerator<SOURCE> composite = new CompositeDataGenerator<>();
         valueProviders.forEach((key, provider) -> composite
                 .addDataGenerator((item, jsonObject) -> jsonObject.put(
                         // Prefix the property name with a LitRenderer
@@ -318,8 +293,8 @@ public class LitRenderer<T> extends Renderer<T> {
      *            property, not <code>null</code>
      * @return this instance for method chaining
      */
-    public LitRenderer<T> withProperty(String property,
-            ValueProvider<T, ?> provider) {
+    public LitRenderer<SOURCE> withProperty(String property,
+            ValueProvider<SOURCE, ?> provider) {
         Objects.requireNonNull(property);
         Objects.requireNonNull(provider);
         valueProviders.put(property, provider);
@@ -353,8 +328,8 @@ public class LitRenderer<T> extends Renderer<T> {
      * @see <a href=
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      */
-    public LitRenderer<T> withFunction(String functionName,
-            SerializableConsumer<T> handler) {
+    public LitRenderer<SOURCE> withFunction(String functionName,
+            SerializableConsumer<SOURCE> handler) {
         return withFunction(functionName,
                 (item, ignore) -> handler.accept(item));
     }
@@ -394,12 +369,22 @@ public class LitRenderer<T> extends Renderer<T> {
      * @see <a href=
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      */
-    public LitRenderer<T> withFunction(String functionName,
-            SerializableBiConsumer<T, JsonArray> handler) {
+    public LitRenderer<SOURCE> withFunction(String functionName,
+            SerializableBiConsumer<SOURCE, JsonArray> handler) {
         Objects.requireNonNull(functionName);
         Objects.requireNonNull(handler);
         clientCallables.put(functionName, handler);
         return this;
+    }
+
+    /**
+     * Gets the property mapped to {@link ValueProvider}s in this renderer. The
+     * returned map is immutable.
+     *
+     * @return the mapped properties, never <code>null</code>
+     */
+    public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
+        return Collections.unmodifiableMap(valueProviders);
     }
 
     /**
@@ -409,9 +394,8 @@ public class LitRenderer<T> extends Renderer<T> {
      * @return the mapped functions, never <code>null</code>
      * @see #withFunction(String, SerializableBiConsumer)
      */
-    public Map<String, SerializableBiConsumer<T, JsonArray>> getFunctions() {
-        return clientCallables == null ? Collections.emptyMap()
-                : Collections.unmodifiableMap(clientCallables);
+    public Map<String, SerializableBiConsumer<SOURCE, JsonArray>> getFunctions() {
+        return Collections.unmodifiableMap(clientCallables);
     }
 
     /**
@@ -422,19 +406,32 @@ public class LitRenderer<T> extends Renderer<T> {
      * @author Vaadin Ltd
      * @since 22.0.
      *
-     * @param <T>
+     * @param <SOURCE>
      *            the type of the object model
      *
      * @see LitRenderer#render(Element,
      *      com.vaadin.flow.data.provider.DataKeyMapper)
      */
-    public interface LitRendering<T> extends Rendering<T> {
+    public interface LitRendering<SOURCE> extends Serializable {
+
+        /**
+         * Gets a {@link DataGenerator} associated with the rendering. The
+         * DataGenerator is used in components that support asynchronous loading
+         * of items.
+         *
+         * @return the associated DataGenerator (not {@code null})
+         */
+        DataGenerator<SOURCE> getDataGenerator();
 
         /**
          * Gets a {@link Registration} that allows cleaning up resources
          * associated with this rendering when the rendering is no longer used.
          * It removes the listeners and properties added to the container
          * element by this rendering.
+         * <p>
+         * NOTE: If the rendering's data generator returned by
+         * {@link LitRendering#getDataGenerator()} is added to a component, it
+         * needs to be explicitly removed from it.
          *
          * @return the associated Registration
          * @see Registration#remove

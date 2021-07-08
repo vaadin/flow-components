@@ -119,6 +119,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
     private final Element template;
     private Renderer<T> renderer;
+    private LitRenderer<T> litRenderer;
     private String originalTemplate;
     private boolean rendererChanged;
     private boolean templateUpdateRegistered;
@@ -204,22 +205,12 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (template.getParent() != null) {
-                getElement().removeChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
-        } else {
-            // TemplateRenderer or ComponentRenderer
-            if (template.getParent() == null) {
-                getElement().appendChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
+        // TemplateRenderer or ComponentRenderer
+        if (template.getParent() == null) {
+            getElement().appendChild(template);
         }
+        Rendering<T> rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper(), template);
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = dataGenerator
@@ -227,12 +218,44 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             renderingRegistrations.add(renderingDataGeneratorRegistration);
         });
 
-        if (rendering instanceof LitRendering) {
-            renderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
-        }
-
+        this.litRenderer = null;
         this.renderer = renderer;
+
+        rendererChanged = true;
+        registerTemplateUpdate();
+
+        getDataCommunicator().reset();
+    }
+
+    /**
+     * Sets a renderer for the items in the list.
+     * <p>
+     * When set, a same renderer is used for the placeholder item. See
+     * {@link #setPlaceholderItem(Object)} for details.
+     *
+     * @param renderer
+     *            a renderer for the items in the list, not <code>null</code>
+     */
+    public void setRenderer(LitRenderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
+
+        if (template.getParent() != null) {
+            getElement().removeChild(template);
+        }
+        LitRendering<T> rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper());
+
+        Registration renderingDataGeneratorRegistration = dataGenerator
+                .addDataGenerator(rendering.getDataGenerator());
+        renderingRegistrations.add(renderingDataGeneratorRegistration);
+
+        renderingRegistrations.add(rendering.getRegistration());
+
+        this.litRenderer = renderer;
+        this.renderer = null;
 
         rendererChanged = true;
         registerTemplateUpdate();

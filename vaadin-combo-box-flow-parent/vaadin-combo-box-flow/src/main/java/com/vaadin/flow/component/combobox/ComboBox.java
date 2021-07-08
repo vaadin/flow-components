@@ -241,6 +241,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private Renderer<T> renderer;
+    private LitRenderer<T> litRenderer;
     private boolean renderScheduled;
 
     // Filter set by the client when requesting data. It's sent back to client
@@ -252,7 +253,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private List<Registration> renderingRegistrations = new ArrayList<>();
+    private final List<Registration> renderingRegistrations = new ArrayList<>();
 
     private Element template;
 
@@ -424,6 +425,30 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
         this.renderer = renderer;
+        this.litRenderer = null;
+
+        scheduleRender();
+    }
+
+    /**
+     * Sets the Renderer responsible to render the individual items in the list
+     * of possible choices of the ComboBox. It doesn't affect how the selected
+     * item is rendered - that can be configured by using
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *
+     * @param renderer
+     *            a renderer for the items in the selection list of the
+     *            ComboBox, not <code>null</code>
+     *
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     */
+    public void setRenderer(LitRenderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+        this.litRenderer = renderer;
+        this.renderer = null;
 
         scheduleRender();
     }
@@ -1591,7 +1616,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void scheduleRender() {
-        if (renderScheduled || dataCommunicator == null || renderer == null) {
+        if (renderScheduled || dataCommunicator == null
+                || (renderer == null && litRenderer == null)) {
             return;
         }
         renderScheduled = true;
@@ -1605,15 +1631,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (template != null && template.getParent() != null) {
-                getElement().removeChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
-        } else {
+        if (renderer != null) {
             // TemplateRenderer or ComponentRenderer
             if (template == null) {
                 template = new Element("template");
@@ -1621,19 +1639,26 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             if (template.getParent() == null) {
                 getElement().appendChild(template);
             }
-            rendering = renderer.render(getElement(),
+            Rendering<T> rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper(), template);
-        }
 
-        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+                Registration renderingDataGeneratorRegistration = dataGenerator
+                        .addDataGenerator(renderingDataGenerator);
+                renderingRegistrations.add(renderingDataGeneratorRegistration);
+            });
+        } else {
+            // LitRenderer
+            if (template != null && template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            LitRendering<T> rendering = litRenderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
+
             Registration renderingDataGeneratorRegistration = dataGenerator
-                    .addDataGenerator(renderingDataGenerator);
+                    .addDataGenerator(rendering.getDataGenerator());
             renderingRegistrations.add(renderingDataGeneratorRegistration);
-        });
-
-        if (rendering instanceof LitRendering) {
-            renderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
+            renderingRegistrations.add(rendering.getRegistration());
         }
 
         reset();
