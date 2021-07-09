@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -65,6 +65,7 @@ import elemental.json.JsonArray;
  */
 @JsModule("./lit-renderer.ts")
 public class LitRenderer<SOURCE> implements Serializable {
+    private final static AtomicInteger instanceCounter = new AtomicInteger(0);
     private final String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
@@ -77,12 +78,9 @@ public class LitRenderer<SOURCE> implements Serializable {
     protected LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        // Generate a unique (in scope of the UI) namespace for the renderer
-        // properties.
-        int litRendererCount = UI.getCurrent().getElement()
-                .getProperty("__litRendererCount", 0);
-        UI.getCurrent().getElement().setProperty("__litRendererCount",
-                litRendererCount + 1);
+        // Generate a unique (in scope of the JVM instance) namespace for
+        // the renderer properties.
+        int litRendererCount = instanceCounter.incrementAndGet();
         propertyNamespace = "lr_" + litRendererCount + "_";
     }
 
