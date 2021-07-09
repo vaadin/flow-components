@@ -195,7 +195,7 @@ else
   error=$?
 
   [ ! -d integration-tests/target/failsafe-reports ] && return 1
-  saveFailedTests run-1 $testMode
+  saveFailedTests run-1-$testMode
 
   if [ "$nfailed" -gt 0 ]
   then
@@ -214,7 +214,7 @@ else
         $cmd
         error=$?
         tcLog "Re-Run exited with code $error"
-        saveFailedTests run-2
+        saveFailedTests run-2-$testMode
         tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried, $nfailed failed), ignored: $nskipped"
       else
         tcStatus $error "(IT1)Test failed: $nfailed" "(IT1)Tests passed: $ncompleted (more than 15 failed), ignored: $nskipped"
