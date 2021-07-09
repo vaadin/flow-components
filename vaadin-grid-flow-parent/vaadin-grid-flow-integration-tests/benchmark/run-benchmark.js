@@ -80,11 +80,12 @@ browsers.forEach((browserName) => {
 
 const startJetty = (cwd,port,stopPort) => {
   return new Promise((resolve) => {
-    const jetty = spawn('mvn', ['-B', '-q', 'jetty:run', `-Djetty.http.port=${port}`, `-Djetty.stop.port=${stopPort}`], { cwd });
+    const jetty = spawn('mvn', ['-B', '-q', 'package', 'jetty:run', '-DskipTests', `-Djetty.http.port=${port}`, `-Djetty.stop.port=${stopPort}`], { cwd });
     processes.push(jetty);
     jetty.stderr.on('data', (data) => console.error(data.toString()));
     jetty.stdout.on('data', (data) => {
-      if (data.toString().includes('Frontend compiled successfully')) {
+      const message = data.toString();
+      if (message.includes('Frontend compiled successfully') || message.includes('Vaadin application has been deployed and started')) {
         resolve();
       }
     });
@@ -104,7 +105,7 @@ const prepareReferenceGrid = () => {
   });
 
   console.log('Installing the reference grid');
-  execSync(`mvn -B -q install -pl vaadin-grid-flow-parent/vaadin-grid-flow-integration-tests -am -DskipTests`, { cwd: refGridPath });
+  execSync(`mvn install -B -DskipTests -Drelease -T 1C`, { cwd: refGridPath });
 };
 
 const getTestResultValue = (testResultsFilePath) => {

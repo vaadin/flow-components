@@ -87,9 +87,9 @@ Your work has been saved
  * </p>
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "21.0.0-alpha9")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "21.0.0-alpha13")
 @JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha9")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha13")
 @JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {
@@ -193,18 +193,6 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      */
     protected void setPosition(String position) {
         getElement().setProperty("position", position == null ? "" : position);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Manually invoke existing renderer.
-     * </p>
-     */
-    protected void render() {
-        getElement().callJsFunction("render");
     }
 
     /**
