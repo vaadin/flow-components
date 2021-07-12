@@ -61,7 +61,7 @@ _window.Vaadin.setLitRenderer = (
   const renderer: Renderer = (root, _, { index, item }) => {
     // Clean up the root element of any existing content
     // (and Lit's _$litPart$ property) from other renderers
-    // TODO: Remove once https://github.com/vaadin/web-components/issues/2161 is done
+    // TODO: Remove once https://github.com/vaadin/web-components/issues/2235 is done
     if (root.__litRenderer !== renderer) {
       root.innerHTML = '';
       delete root._$litPart$;
