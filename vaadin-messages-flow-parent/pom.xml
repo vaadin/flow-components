@@ -23,6 +23,7 @@
             </activation>
             <modules>
                 <module>vaadin-messages-flow-integration-tests</module>
+                <module>vaadin-messages-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
