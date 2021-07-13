@@ -11,14 +11,11 @@
     </parent>
 
     <artifactId>component-flow-parent</artifactId>
-    <version>component</version>
     <packaging>pom</packaging>
     <name>component Parent</name>
 
     <modules>
         <module>component-flow</module>
-        <module>component-testbench</module>
-        <module>component-flow-demo</module>
     </modules>
 
     <profiles>

@@ -7,7 +7,6 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>component</version>
     </parent>
 
     <artifactId>component-flow-parent</artifactId>
@@ -19,12 +18,10 @@
             <name>cval3</name>
             <url>https://vaadin.com/license/cval-3</url>
         </license>
-    </licenses>    
+    </licenses>
 
     <modules>
         <module>component-flow</module>
-        <module>component-testbench</module>
-        <module>component-flow-demo</module>
     </modules>
 
     <profiles>
