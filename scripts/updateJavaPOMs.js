@@ -81,9 +81,13 @@ async function consolidate(template, pom, cb) {
 async function consolidatePomParent() {
   const template = proComponents.includes(componentName) ? 'pom-parent-pro.xml' : 'pom-parent.xml';
   consolidate(template, `${mod}/pom.xml`, (js, org)  => {
-    const modules = js.project.modules[0].module;
 
+    // Replace `component` key with actual component name
+    const modules = js.project.modules[0].module;
     renameComponent(modules, name);
+    const itModules = js.project.profiles[0].profile[0].modules[0].module
+    renameComponent(itModules, name);
+
     // add testbench if module exists
     if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
       modules.push(`${name}-testbench`);
@@ -92,12 +96,22 @@ async function consolidatePomParent() {
     if (fs.existsSync(`${mod}/${name}-flow-demo/pom.xml`)) {
       modules.push(`${name}-flow-demo`);
     }
+    // add bower it's if module exists
+    const bowerItModule = `${name}-flow-integration-tests/pom-bower-mode.xml`;
+    if (fs.existsSync(`${mod}/${bowerItModule}`)) {
+      itModules.indexOf(bowerItModule) < 0 && itModules.push(bowerItModule);
+    }
+
     // add other modules present in original pom
     org.project.modules[0].module.forEach(
       mod => !/(flow|flow-demo|testbench|flow-integration-test)$/.test(mod) && modules.push(mod));
 
-    renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
   });
+}
+
+async function consolidatePomBowerIT() {
+ const bowerITPom = `${mod}/${name}-flow-integration-tests/pom-bower-mode.xml`;
+ fs.existsSync(bowerITPom) && consolidate('pom-bower-mode.xml', bowerITPom);
 }
 
 async function consolidatePomFlow() {
@@ -124,3 +138,4 @@ consolidatePomFlow();
 consolidatePomTB();
 consolidatePomDemo();
 consolidatePomIT();
+consolidatePomBowerIT();
