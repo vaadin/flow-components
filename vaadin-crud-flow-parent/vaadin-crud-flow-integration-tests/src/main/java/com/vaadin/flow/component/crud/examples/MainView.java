@@ -9,6 +9,7 @@ import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.crud.CrudI18n;
 import com.vaadin.flow.component.crud.CrudI18nUpdatedEvent;
 import com.vaadin.flow.component.crud.CrudVariant;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -88,6 +89,15 @@ public class MainView extends VerticalLayout {
                 });
         toggleBordersButton.setId("toggleBorders");
 
+        final Button addGridButton = new Button("Add grid", event -> {
+            Grid<Person> grid = new Grid<>(Person.class);
+            grid.addColumn(Person::getId).setHeader("Id");
+            grid.addColumn(Person::getFirstName).setHeader("First Name");
+            grid.addColumn(Person::getLastName).setHeader("Last Name");
+            crud.setGrid(grid);
+        });
+        addGridButton.setId("addGrid");
+
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));
         crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));
         crud.addCancelListener(e -> addEvent("Cancel: " + e.getItem()));
@@ -100,7 +110,8 @@ public class MainView extends VerticalLayout {
 
         setHeight("100%");
         add(crud, serverSideNewButton, serverSideEditButton, showFiltersButton,
-                updateI18nButton, toggleBordersButton, eventsPanel);
+                updateI18nButton, toggleBordersButton, addGridButton,
+                eventsPanel);
     }
 
     private void addEvent(String event) {
