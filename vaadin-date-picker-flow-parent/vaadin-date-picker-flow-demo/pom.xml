@@ -58,7 +58,7 @@
             </resource>
         </resources>
         <plugins>
-                </plugins>
+        </plugins>
     </build>
     <profiles>
         <profile>

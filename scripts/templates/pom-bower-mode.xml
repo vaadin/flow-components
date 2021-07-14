@@ -9,7 +9,6 @@
   </parent>
 
   <artifactId>component-integration-tests-bower-mode</artifactId>
-  <version>component</version>
   <packaging>war</packaging>
 
   <name>component Integration Tests in Bower Mode</name>

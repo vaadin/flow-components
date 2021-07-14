@@ -165,7 +165,7 @@
                             <archive>
                                 <manifestFile>
                                     ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                                                                </manifestFile>
+                                </manifestFile>
                                 <manifestEntries>
                                     <Built-By/>
                                 </manifestEntries>
