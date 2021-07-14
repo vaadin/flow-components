@@ -11,7 +11,6 @@
     </parent>
 
     <artifactId>component-flow</artifactId>
-    <version>component</version>
     <packaging>jar</packaging>
 
     <name>component</name>
@@ -61,7 +60,7 @@
                                 </manifestEntries>
                             </archive>
                         </configuration>
-                    </plugin>                    
+                    </plugin>
                 </plugins>
             </build>
         </profile>
