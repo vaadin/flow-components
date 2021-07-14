@@ -360,7 +360,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         Objects.requireNonNull(grid, "Grid cannot be null");
 
         if (this.grid != null
-                && this.grid.getElement().getParent() == getElement()) {
+                && getElement().equals(this.grid.getElement().getParent())) {
             this.grid.getElement().removeFromParent();
         }
 
