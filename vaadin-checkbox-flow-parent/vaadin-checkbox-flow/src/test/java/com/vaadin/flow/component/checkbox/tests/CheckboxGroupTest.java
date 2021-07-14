@@ -144,40 +144,6 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void selectDisabledItem_noRedundantEvent() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("enabled", "disabled");
-        group.setItemEnabledProvider("enabled"::equals);
-
-        List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
-        group.addValueChangeListener(events::add);
-
-        List<String> keys = group.getChildren().map(Component::getElement)
-                .map(element -> element.getProperty("value"))
-                .collect(Collectors.toList());
-        String enabledKey = keys.get(0);
-        String disabledKey = keys.get(1);
-
-        JsonArray array = Json.createArray();
-        array.set(0, disabledKey);
-
-        group.getElement().setPropertyJson("value", array);
-        Assert.assertThat(group.getValue(), IsEmptyCollection.empty());
-        Assert.assertTrue(events.isEmpty());
-
-        array = Json.createArray();
-        array.set(0, enabledKey);
-
-        group.getElement().setPropertyJson("value", array);
-        Assert.assertEquals(Collections.singleton("enabled"), group.getValue());
-        Assert.assertEquals(1, events.size());
-
-        ValueChangeEvent<Set<String>> event = events.get(0);
-        Assert.assertThat(event.getOldValue(), IsEmptyCollection.empty());
-        Assert.assertEquals(Collections.singleton("enabled"), event.getValue());
-    }
-
-    @Test
     public void changeItems_selectionIsReset() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("Foo", "Bar");

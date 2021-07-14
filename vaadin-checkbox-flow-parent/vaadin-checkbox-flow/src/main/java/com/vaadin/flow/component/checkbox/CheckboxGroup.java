@@ -52,8 +52,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -89,8 +87,6 @@ public class CheckboxGroup<T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
@@ -103,7 +99,6 @@ public class CheckboxGroup<T>
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
-        registerValidation();
     }
 
     @Override
@@ -440,16 +435,6 @@ public class CheckboxGroup<T>
         return ids1.equals(ids2);
     }
 
-    @Override
-    protected boolean hasValidValue() {
-        Set<T> selectedItems = presentationToModel(this,
-                (JsonArray) getElement().getPropertyRaw(VALUE));
-        if (selectedItems == null || selectedItems.isEmpty()) {
-            return true;
-        }
-        return selectedItems.stream().allMatch(itemEnabledProvider);
-    }
-
     @SuppressWarnings("unchecked")
     private void reset() {
         // Cache helper component before removal
@@ -526,35 +511,6 @@ public class CheckboxGroup<T>
         } else {
             checkbox.setDisabled(disabled);
         }
-    }
-
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!hasValidValue()) {
-            Set<T> oldValue = presentationToModel(this,
-                    (JsonArray) event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setPropertyJson(VALUE,
-                        modelToPresentation(this, oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the button is still in the correct state
-            Set<T> value = presentationToModel(this,
-                    (JsonArray) event.getValue());
-            getCheckboxItems()
-                    .filter(checkbox -> value.contains(checkbox.getItem()))
-                    .forEach(this::updateEnabled);
-        }
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener(VALUE,
-                validationListener);
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,

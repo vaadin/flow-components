@@ -104,7 +104,7 @@ public class CheckboxGroupIT extends ComponentDemoTest {
             Assert.fail("Server should have disabled the checkbox again.");
         }
 
-        Assert.assertEquals("Value 'foo' should have been re-selected", "[foo]",
+        Assert.assertEquals("Value 'foo' should have been re-selected", "[bar, foo]",
                 infoLabel.getText());
 
         Assert.assertTrue(
