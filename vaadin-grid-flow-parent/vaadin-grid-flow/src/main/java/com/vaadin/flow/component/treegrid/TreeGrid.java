@@ -940,4 +940,20 @@ public class TreeGrid<T> extends Grid<T>
         }
         return (HierarchicalDataProvider<T, SerializablePredicate<T>>) super.getDataProvider();
     }
+
+    /**
+     * The effective index of an item depends on the complete hierarchy of the
+     * tree. {@link TreeGrid} uses lazy loading for performance reasons and does
+     * not know about the complete hierarchy. Without the knowledge of the
+     * complete hierarchy, {@link TreeGrid} can’t reliably calculate an exact
+     * scroll position. <b>This uncertainty makes this method unreliable and so
+     * should be avoided.</b>
+     *
+     * @param rowIndex
+     *            zero based index of the item to scroll to in the current view.
+     */
+    @Override
+    public void scrollToIndex(int rowIndex) {
+        super.scrollToIndex(rowIndex);
+    }
 }
