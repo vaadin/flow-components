@@ -41,6 +41,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * Server-side component for the {@code vaadin-upload} element.
@@ -560,15 +561,46 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
-                JsonObject i18nObject = (JsonObject) JsonSerializer
+                JsonObject i18nJson = (JsonObject) JsonSerializer
                         .toJson(this.i18n);
-                for (String key : i18nObject.keys()) {
-                    ui.getPage().executeJavaScript(
-                            "$0.set('i18n." + key + "', $1)", getElement(),
-                            i18nObject.get(key));
-                }
+
+                // Remove null values so that we don't overwrite existing WC
+                // translations with empty ones
+                deeplyRemoveNullValuesFromJsonObject(i18nJson);
+
+                // Assign new I18N object to WC, by deeply merging the existing
+                // WC I18N, and the values from the new UploadI18N instance,
+                // into an empty object
+                getElement().executeJs(
+                        "const dropFiles = Object.assign({}, this.i18n.dropFiles, $0.dropFiles);"
+                                + "const addFiles = Object.assign({}, this.i18n.addFiles, $0.addFiles);"
+                                + "const error = Object.assign({}, this.i18n.error, $0.error);"
+                                + "const uploadingStatus = Object.assign({}, this.i18n.uploading.status, $0.uploading && $0.uploading.status);"
+                                + "const uploadingRemainingTime = Object.assign({}, this.i18n.uploading.remainingTime, $0.uploading && $0.uploading.remainingTime);"
+                                + "const uploadingError = Object.assign({}, this.i18n.uploading.error, $0.uploading && $0.uploading.error);"
+                                + "const uploading = {"
+                                + "  status: uploadingStatus,"
+                                + "  remainingTime: uploadingRemainingTime,"
+                                + "  error: uploadingError," + "};"
+                                + "const units = $0.units || this.i18n.units;"
+                                + "this.i18n = Object.assign({}, this.i18n, $0, {"
+                                + "  addFiles: addFiles,"
+                                + "  dropFiles: dropFiles,"
+                                + "  uploading: uploading," + "  units: units,"
+                                + "});",
+                        i18nJson);
             }
         });
+    }
+
+    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
+                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
+            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
