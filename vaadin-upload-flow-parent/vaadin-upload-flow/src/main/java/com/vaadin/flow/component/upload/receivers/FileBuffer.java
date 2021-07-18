@@ -38,11 +38,17 @@ import com.vaadin.flow.component.upload.Receiver;
 public class FileBuffer extends AbstractFileBuffer implements Receiver {
 
     private FileData file;
+	
+	public FileBuffer(){}
+	
+	public FileBuffer(FileFactory factory){
+		super(factory);
+	}
 
     @Override
-    public OutputStream receiveUpload(String fileName, String MIMEType) {
+    public OutputStream receiveUpload(String fileName, String mimeType) {
         FileOutputStream outputBuffer = createFileOutputStream(fileName);
-        file = new FileData(fileName, MIMEType, outputBuffer);
+        file = new FileData(fileName, mimeType, outputBuffer);
 
         return outputBuffer;
     }

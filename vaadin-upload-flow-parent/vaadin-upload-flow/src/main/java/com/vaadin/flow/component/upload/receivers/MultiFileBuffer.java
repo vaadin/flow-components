@@ -41,11 +41,18 @@ public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 
     private Map<String, FileData> files = new HashMap<>();
+	
+	public MultiFileBuffer(){}
+	
+	public MultiFileBuffer(FileFactory factory){
+		super(factory);
+	}
+	
 
     @Override
-    public OutputStream receiveUpload(String fileName, String MIMEType) {
+    public OutputStream receiveUpload(String fileName, String mimeType) {
         FileOutputStream outputBuffer = createFileOutputStream(fileName);
-        files.put(fileName, new FileData(fileName, MIMEType, outputBuffer));
+        files.put(fileName, new FileData(fileName, mimeType, outputBuffer));
 
         return outputBuffer;
     }
