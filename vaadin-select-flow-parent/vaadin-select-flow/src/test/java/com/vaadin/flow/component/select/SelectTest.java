@@ -312,10 +312,10 @@ public class SelectTest {
 
         // getOuterHTML jsoup interprets the property value with "" as value as
         // a boolean
-        Assert.assertEquals("<vaadin-item value></vaadin-item>",
+        Assert.assertEquals("<vaadin-item value label></vaadin-item>",
                 getListBoxChild(0).getOuterHTML());
 
-        validateItem(0, "", null, true);
+        validateItem(0, "", "", true);
         validateItem(1, "foo", null, true);
         validateItem(2, "bar", null, true);
 
@@ -327,18 +327,19 @@ public class SelectTest {
         select.setEmptySelectionAllowed(true);
         select.setEmptySelectionCaption("EMPTY");
 
-        Assert.assertEquals("<vaadin-item value>\n EMPTY\n</vaadin-item>",
+        Assert.assertEquals(
+                "<vaadin-item value label=\"EMPTY\">\n EMPTY\n</vaadin-item>",
                 getListBoxChild(0).getOuterHTML());
 
-        validateItem(0, "EMPTY", null, true);
+        validateItem(0, "EMPTY", "EMPTY", true);
         validateItem(1, "foo", null, true);
         validateItem(2, "bar", null, true);
 
         select.setEmptySelectionCaption("changed");
-        validateItem(0, "changed", null, true);
+        validateItem(0, "changed", "changed", true);
 
         select.setItems("1", "2");
-        validateItem(0, "changed", null, true);
+        validateItem(0, "changed", "changed", true);
         validateItem(1, "1", null, true);
         validateItem(2, "2", null, true);
     }
@@ -349,19 +350,31 @@ public class SelectTest {
         select.setEmptySelectionAllowed(true);
         select.setItemEnabledProvider(Objects::nonNull);
 
-        validateItem(0, "", null, false);
+        validateItem(0, "", "", false);
         validateItem(1, "foo", null, true);
         validateItem(2, "bar", null, true);
     }
 
     @Test
-    public void emptySelectionItem_itemLabelGeneratorCanCustomizeIt() {
+    public void emptySelectionItemNull_itemLabelGeneratorSkipsNullCaption() {
         select.setItems("foo", "bar");
         select.setEmptySelectionAllowed(true);
-        select.setItemLabelGenerator(
-                string -> string == null ? "FOOBAR" : string + "!");
+        select.setItemLabelGenerator(string -> string + "!");
 
-        validateItem(0, "", "FOOBAR", true);
+        // emptySelectionCaption == null
+        validateItem(0, "", "", true);
+        validateItem(1, "foo!", "foo!", true);
+        validateItem(2, "bar!", "bar!", true);
+    }
+
+    @Test
+    public void emptySelectionItemNull_itemLabelGeneratorShowsCaption() {
+        select.setItems("foo", "bar");
+        select.setEmptySelectionAllowed(true);
+        select.setEmptySelectionCaption("FOOBAR");
+        select.setItemLabelGenerator(string -> string + "!");
+
+        validateItem(0, "FOOBAR", "FOOBAR", true);
         validateItem(1, "foo!", "foo!", true);
         validateItem(2, "bar!", "bar!", true);
     }

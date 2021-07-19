@@ -90,9 +90,8 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
         verify.selectedItem("caption", "caption");
 
         page.toggleItemLabelGenerator(true);
-        // the selected label should be updated accordingly to replace the
-        // caption
-        verify.selectedItem("caption", "null-LABEL");
+        // the selected label should stay the same
+        verify.selectedItem("caption", "caption");
 
         page.toggleItemLabelGenerator(false);
         verify.selectedItem("caption", "caption");

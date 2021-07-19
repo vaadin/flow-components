@@ -804,6 +804,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         vaadinItem.removeAll();
         T item = vaadinItem.getItem();
 
+        // handle the item's text
         if (vaadinItem == emptySelectionItem) {
             vaadinItem.setText(emptySelectionCaption);
         } else if (getItemRenderer() != null) {
@@ -814,11 +815,13 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             vaadinItem.setText(item.toString());
         }
 
-        if (getItemLabelGenerator() != null) {
+        // handle the item's label attribute
+        if (vaadinItem == emptySelectionItem) {
+            vaadinItem.getElement().setAttribute(LABEL_ATTRIBUTE,
+                    getEmptySelectionCaption());
+        } else if (getItemLabelGenerator() != null) {
             vaadinItem.getElement().setAttribute(LABEL_ATTRIBUTE,
                     getItemLabelGenerator().apply(item));
-        } else if (item == emptySelectionItem) {
-            vaadinItem.getElement().setAttribute(LABEL_ATTRIBUTE, "");
         } else {
             vaadinItem.getElement().removeAttribute(LABEL_ATTRIBUTE);
         }
