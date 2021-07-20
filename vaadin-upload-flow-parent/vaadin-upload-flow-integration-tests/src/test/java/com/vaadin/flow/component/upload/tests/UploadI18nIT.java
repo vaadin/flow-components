@@ -19,7 +19,6 @@ package com.vaadin.flow.component.upload.tests;
 
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.testbench.UploadElement;
-import com.vaadin.flow.component.upload.tests.it.UploadTestsI18N;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.testutil.TestPath;
 import elemental.json.Json;

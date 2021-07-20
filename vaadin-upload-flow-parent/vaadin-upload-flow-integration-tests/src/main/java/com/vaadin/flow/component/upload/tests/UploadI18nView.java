@@ -15,7 +15,7 @@
  *
  */
 
-package com.vaadin.flow.component.upload.tests.it;
+package com.vaadin.flow.component.upload.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;

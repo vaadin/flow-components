@@ -15,15 +15,15 @@
  *
  */
 
-package com.vaadin.flow.component.upload.tests.it;
+package com.vaadin.flow.component.upload.tests;
 
 import com.vaadin.flow.component.upload.UploadI18N;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class UploadTestsI18N {
-    public static final UploadI18N RUSSIAN_FULL = new UploadI18N()
+class UploadTestsI18N {
+    static final UploadI18N RUSSIAN_FULL = new UploadI18N()
             .setDropFiles(
                     new UploadI18N.DropFiles().setOne("Перетащите файл сюда...")
                             .setMany("Перетащите файлы сюда..."))
@@ -57,7 +57,7 @@ public class UploadTestsI18N {
                             "Эбайт", "Збайт", "Ибайт")
                     .collect(Collectors.toList()));
 
-    public static final UploadI18N RUSSIAN_PARTIAL = new UploadI18N()
+    static final UploadI18N RUSSIAN_PARTIAL = new UploadI18N()
             // Only translate a single property from dropFiles
             .setDropFiles(new UploadI18N.DropFiles()
                     .setOne("Перетащите файл сюда..."))
