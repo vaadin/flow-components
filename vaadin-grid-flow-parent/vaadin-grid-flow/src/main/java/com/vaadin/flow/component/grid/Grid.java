@@ -752,6 +752,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 defaultHeaderRow = getGrid().addFirstHeaderRow();
             }
             defaultHeaderRow.getCell(this).setText(labelText);
+            grid.updateClientSideSorterIndicators();
             return this;
         }
 
@@ -791,6 +792,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 defaultHeaderRow = getGrid().addFirstHeaderRow();
             }
             defaultHeaderRow.getCell(this).setComponent(headerComponent);
+            grid.updateClientSideSorterIndicators();
             return this;
         }
 
@@ -3266,6 +3268,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public List<GridSortOrder<T>> getSortOrder() {
         return Collections.unmodifiableList(sortOrder);
+    }
+
+    private void updateClientSideSorterIndicators() {
+        updateClientSideSorterIndicators(sortOrder);
     }
 
     private void updateClientSideSorterIndicators(
