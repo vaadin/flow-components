@@ -42,29 +42,28 @@ public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 
     private Map<String, FileData> files = new HashMap<>();
-	
+
     /**
-     * Constructor for creating a file buffer with the default file factory via super constructor.
+     * Constructor for creating a file buffer with the default file factory via
+     * super constructor.
      * <p>
      * Files will be created using {@link File#createTempFile(String, String)}
      * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
      */
-	public MultiFileBuffer(){
-		super();
-	}
-	
-	
-	/**
-     * Constructor taking in the file factory used to create upload and invoking AbstractFileBuffer constructor
-     * {@link File}.
+    public MultiFileBuffer() {
+        super();
+    }
+
+    /**
+     * Constructor taking in the file factory used to create upload and invoking
+     * AbstractFileBuffer constructor {@link File}.
      *
      * @param factory
      *            file factory for file buffer
      */
-	public MultiFileBuffer(FileFactory factory){
-		super(factory);
-	}
-	
+    public MultiFileBuffer(FileFactory factory) {
+        super(factory);
+    }
 
     @Override
     public OutputStream receiveUpload(String fileName, String mimeType) {

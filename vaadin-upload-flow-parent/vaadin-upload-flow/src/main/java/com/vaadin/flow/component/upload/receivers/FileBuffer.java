@@ -38,27 +38,28 @@ import com.vaadin.flow.component.upload.Receiver;
 public class FileBuffer extends AbstractFileBuffer implements Receiver {
 
     private FileData file;
-	
+
     /**
-     * Constructor for creating a file buffer with the default file factory via super constructor.
+     * Constructor for creating a file buffer with the default file factory via
+     * super constructor.
      * <p>
      * Files will be created using {@link File#createTempFile(String, String)}
      * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
      */
-	public FileBuffer(){
-		super();
-	}
-	
-	/**
-     * Constructor taking in the file factory used to create upload and invoking AbstractFileBuffer constructor
-     * {@link File}.
+    public FileBuffer() {
+        super();
+    }
+
+    /**
+     * Constructor taking in the file factory used to create upload and invoking
+     * AbstractFileBuffer constructor {@link File}.
      *
      * @param factory
      *            file factory for file buffer
      */
-	public FileBuffer(FileFactory factory){
-		super(factory);
-	}
+    public FileBuffer(FileFactory factory) {
+        super(factory);
+    }
 
     @Override
     public OutputStream receiveUpload(String fileName, String mimeType) {
