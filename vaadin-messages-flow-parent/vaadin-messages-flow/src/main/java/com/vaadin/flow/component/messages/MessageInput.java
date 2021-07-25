@@ -39,7 +39,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "20.0.0")
+@NpmPackage(value = "@vaadin/vaadin-messages", version = "20.0.1")
 public class MessageInput extends Component
         implements HasSize, HasStyle, HasEnabled {
 
