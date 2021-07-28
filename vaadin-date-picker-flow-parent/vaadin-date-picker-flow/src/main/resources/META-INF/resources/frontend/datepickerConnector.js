@@ -1,3 +1,7 @@
+import dateFnsFormat from 'date-fns/format';
+import dateFnsParse from 'date-fns/parse';
+import dateFnsIsValid from 'date-fns/isValid';
+
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker');
@@ -80,6 +84,7 @@
 
                 let currentDate = false;
                 let inputValue = getInputValue();
+                // todo check undefined
                 if (datepicker.i18n.parseDate !== 'undefined' && inputValue) {
                     /* get current date with old parsing */
                     currentDate = datepicker.i18n.parseDate(inputValue);
@@ -150,6 +155,36 @@
                     /* set current date to invoke use of new locale */
                     datepicker._selectedDate = datepicker._parseDate(`${currentDate.year}-${currentDate.month + 1}-${currentDate.day}`);
                 }
+            });
+
+            datepicker.$connector.setFormat = tryCatchWrapper(function (formats) {
+                function formatDate(dateParts) {
+                    // TODO: assert that formats has at least one item
+                    const format = formats[0];
+                    const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+
+                    console.log("###format date", dateParts, date, dateFnsFormat(date, format));
+
+                    return dateFnsFormat(date, format);
+                }
+
+                function parseDate(dateString) {
+                    // TODO: assert that formats has at least one item
+
+                    for (let format of formats) {
+                        const date = dateFnsParse(dateString, format, new Date());
+
+                        if (dateFnsIsValid(date)) {
+                            console.log("###parse date", dateString, format, date);
+                            return {day: date.getDate(), month: date.getMonth(), year: date.getFullYear()};
+                        }
+                    }
+
+                    console.log("###parse date failed");
+                    return false;
+                }
+
+                datepicker.i18n = Object.assign({}, datepicker.i18n, {formatDate: formatDate, parseDate: parseDate});
             });
         })(datepicker)
     };

@@ -17,9 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -29,11 +27,13 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
@@ -47,6 +47,7 @@ import elemental.json.JsonType;
  *
  */
 @JsModule("./datepickerConnector.js")
+@NpmPackage(value = "date-fns", version = "2.23.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper {
 
@@ -308,8 +309,15 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private void setLocaleWithJS() {
-        runBeforeClientResponse(ui -> getElement()
-                .callJsFunction("$connector.setLocale", languageTag));
+        runBeforeClientResponse(ui -> {
+            boolean hasDateFormats = i18n != null && i18n.dateFormats != null
+                    && i18n.dateFormats.size() > 0;
+
+            if (!hasDateFormats) {
+                getElement().callJsFunction("$connector.setLocale",
+                        languageTag);
+            }
+        });
     }
 
     /**
@@ -384,6 +392,19 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             getElement().executeJs(
                     "this.i18n = Object.assign({}, this.i18n, $0);",
                     i18nObject);
+
+            boolean hasDateFormats = i18n.dateFormats != null
+                    && i18n.dateFormats.size() > 0;
+
+            if (hasDateFormats) {
+                JsonArray dateFormatsJson = JsonSerializer
+                        .toJson(i18n.dateFormats);
+                getElement().callJsFunction("$connector.setFormat",
+                        dateFormatsJson);
+            } else {
+                getElement().callJsFunction("$connector.setLocale",
+                        languageTag);
+            }
         });
     }
 
@@ -682,6 +703,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         private List<String> monthNames;
         private List<String> weekdays;
         private List<String> weekdaysShort;
+        private List<String> dateFormats;
         private int firstDayOfWeek;
         private String week;
         private String calendar;
@@ -752,6 +774,34 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
             this.weekdaysShort = weekdaysShort;
+            return this;
+        }
+
+        public List<String> getDateFormats() {
+            return dateFormats;
+        }
+
+        public DatePickerI18n setDateFormat(String dateFormat) {
+            if (dateFormat == null) {
+                this.dateFormats = null;
+            } else {
+                this.dateFormats = new ArrayList<>();
+                this.dateFormats.add(dateFormat);
+            }
+
+            return this;
+        }
+
+        // todo check second arg not to be null
+        public DatePickerI18n setDateFormats(String primaryFormat,
+                String... secondaryFormats) {
+            if (primaryFormat == null) {
+                this.dateFormats = null;
+            } else {
+                this.setDateFormat(primaryFormat);
+                this.dateFormats.addAll(Arrays.asList(secondaryFormats));
+            }
+
             return this;
         }
 
