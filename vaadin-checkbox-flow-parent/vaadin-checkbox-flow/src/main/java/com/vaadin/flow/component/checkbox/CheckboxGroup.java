@@ -52,6 +52,8 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.dom.PropertyChangeEvent;
+import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -87,6 +89,8 @@ public class CheckboxGroup<T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
+    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
+    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
@@ -99,6 +103,7 @@ public class CheckboxGroup<T>
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
+        registerValidation();
     }
 
     @Override
@@ -511,6 +516,41 @@ public class CheckboxGroup<T>
         } else {
             checkbox.setDisabled(disabled);
         }
+    }
+
+    private void validateSelectionEnabledState(PropertyChangeEvent event) {
+        // we need to compare old value with new value to see if any disabled items changed their value
+        Set<T> oldValue = presentationToModel(this,
+                (JsonArray) event.getOldValue());
+        Set<T> value = presentationToModel(this,
+                (JsonArray) event.getValue());
+
+        // disabled items cannot change their value
+        boolean invalidChange = getCheckboxItems().filter(CheckBoxItem::isDisabledBoolean)
+                .anyMatch(item -> oldValue.contains(item.getItem()) != value.contains(item.getItem()));
+
+        if (event.isUserOriginated() && invalidChange) {
+            // return the value back on the client side
+            try {
+                validationRegistration.remove();
+                getElement().setPropertyJson(VALUE,
+                        modelToPresentation(this, oldValue));
+            } finally {
+                registerValidation();
+            }
+            // Now make sure that the button is still in the correct state
+            getCheckboxItems()
+                    .filter(checkbox -> value.contains(checkbox.getItem()))
+                    .forEach(this::updateEnabled);
+        }
+    }
+
+    private void registerValidation() {
+        if (validationRegistration != null) {
+            validationRegistration.remove();
+        }
+        validationRegistration = getElement().addPropertyChangeListener(VALUE,
+                validationListener);
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
