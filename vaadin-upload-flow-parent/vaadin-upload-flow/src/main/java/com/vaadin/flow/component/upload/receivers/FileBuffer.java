@@ -39,10 +39,31 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
 
     private FileData file;
 
+    /**
+     * Creates a file buffer with a default file factory.
+     * <p>
+     * Files will be created using {@link File#createTempFile(String, String)}
+     * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
+     */
+    public FileBuffer() {
+        super();
+    }
+
+    /**
+     * Creates a file buffer that uses a file factory to create a custom upload
+     * {@link File}.
+     *
+     * @param factory
+     *            file factory for file buffer
+     */
+    public FileBuffer(FileFactory factory) {
+        super(factory);
+    }
+
     @Override
-    public OutputStream receiveUpload(String fileName, String MIMEType) {
+    public OutputStream receiveUpload(String fileName, String mimeType) {
         FileOutputStream outputBuffer = createFileOutputStream(fileName);
-        file = new FileData(fileName, MIMEType, outputBuffer);
+        file = new FileData(fileName, mimeType, outputBuffer);
 
         return outputBuffer;
     }
