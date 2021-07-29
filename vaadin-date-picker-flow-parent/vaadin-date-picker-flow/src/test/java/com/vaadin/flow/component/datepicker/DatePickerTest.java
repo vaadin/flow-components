@@ -15,12 +15,8 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,6 +30,8 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import net.jcip.annotations.NotThreadSafe;
+
+import static org.junit.Assert.*;
 
 @NotThreadSafe
 public class DatePickerTest {
@@ -168,4 +166,63 @@ public class DatePickerTest {
         assertTrue("Should be possible to enable auto-open",
                 picker.isAutoOpen());
     }
+
+    @Test
+    public void setDateFormat_dateFormatsIsUpdated() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setDateFormat("MM-yyyy-dd");
+        List<String> dateFormats = i18n.getDateFormats();
+
+        assertNotNull(dateFormats);
+        assertEquals(1, dateFormats.size());
+        assertEquals("MM-yyyy-dd", dateFormats.get(0));
+    }
+
+    @Test
+    public void setDateFormats_dateFormatsIsUpdated() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setDateFormats("MM-yyyy-dd", "MM.dd.yyyy", null, "MM§yyyy§dd");
+        List<String> dateFormats = i18n.getDateFormats();
+
+        assertNotNull(dateFormats);
+        assertEquals(3, dateFormats.size());
+        assertEquals("MM-yyyy-dd", dateFormats.get(0));
+        assertEquals("MM.dd.yyyy", dateFormats.get(1));
+        assertEquals("MM§yyyy§dd", dateFormats.get(2));
+    }
+
+    @Test
+    public void setDateFormat_dateFormatsIsNull() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+
+        assertNull(i18n.getDateFormats());
+
+        i18n.setDateFormat("MM-yyyy-dd");
+        assertNotNull(i18n.getDateFormats());
+
+        i18n.setDateFormat(null);
+        assertNull(i18n.getDateFormats());
+    }
+
+    @Test
+    public void setDateFormats_dateFormatsIsNull() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+
+        assertNull(i18n.getDateFormats());
+
+        i18n.setDateFormats("MM-yyyy-dd");
+        assertNotNull(i18n.getDateFormats());
+
+        i18n.setDateFormats(null);
+        assertNull(i18n.getDateFormats());
+    }
+
+    @Test
+    public void setDateFormats_throwsExceptionWhenSecondArgIsNull() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> i18n.setDateFormats("MM-yyyy-dd", null));
+    }
+
 }

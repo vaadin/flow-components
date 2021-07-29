@@ -18,6 +18,8 @@ package com.vaadin.flow.component.datepicker;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -792,14 +794,20 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             return this;
         }
 
-        // todo check second arg not to be null
         public DatePickerI18n setDateFormats(String primaryFormat,
-                String... secondaryFormats) {
-            if (primaryFormat == null) {
-                this.dateFormats = null;
-            } else {
-                this.setDateFormat(primaryFormat);
-                this.dateFormats.addAll(Arrays.asList(secondaryFormats));
+                                             String... secondaryFormats) {
+            if(secondaryFormats == null) {
+                throw new IllegalArgumentException("Second argument can not be null.");
+            }
+
+            this.setDateFormat(primaryFormat);
+
+            // todo: having first argument as null and second arg as [nonNull...] would be a noop currently should we throw?
+            if (primaryFormat != null) {
+                this.dateFormats.addAll(
+                        Stream.of(secondaryFormats)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList()));
             }
 
             return this;
