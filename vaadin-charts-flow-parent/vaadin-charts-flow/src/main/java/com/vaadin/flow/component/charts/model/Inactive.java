@@ -6,18 +6,11 @@ public class Inactive extends AbstractConfigurationObject {
 
     private Boolean animation;
     private Boolean enabled;
-    private Halo halo;
     private Number lineWidth;
-    private Number lineWidthPlus;
-    private Color fillColor;
-    private Color lineColor;
-    private Number radius;
-    private Number radiusPlus;
     private Color borderColor;
     private Number brightness;
     private Color color;
     private Number opacity;
-    private Marker marker;
 
     public Inactive() {
     }
@@ -60,130 +53,10 @@ public class Inactive extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setHalo(Halo)
-     */
-    public Halo getHalo() {
-        if (halo == null) {
-            halo = new Halo();
-        }
-        return halo;
-    }
-
-    /**
-     * <p>
-     * Options for the halo appearing around the hovered point in line-type
-     * series as well as outside the hovered slice in pie charts. By default the
-     * halo is filled by the current point or series color with an opacity of
-     * 0.25. The halo can be disabled by setting the <code>halo</code> option to
-     * <code>false</code>.
-     * </p>
-     * 
-     * <p>
-     * In <a href=
-     * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-     * >styled mode</a>, the halo is styled with the
-     * <code>.highcharts-halo</code> class, with colors inherited from
-     * <code>.highcharts-color-{n}</code>.
-     * </p>
-     */
-    public void setHalo(Halo halo) {
-        this.halo = halo;
-    }
-
-    /**
      * @see #setLineWidth(Number)
      */
     public Number getLineWidth() {
         return lineWidth;
-    }
-
-    /**
-     * Pixel with of the graph line.
-     * <p>
-     * Defaults to: 2
-     */
-    public void setLineWidth(Number lineWidth) {
-        this.lineWidth = lineWidth;
-    }
-
-    /**
-     * @see #setLineWidthPlus(Number)
-     */
-    public Number getLineWidthPlus() {
-        return lineWidthPlus;
-    }
-
-    /**
-     * The additional line width for the graph of a hovered series.
-     * <p>
-     * Defaults to: 1
-     */
-    public void setLineWidthPlus(Number lineWidthPlus) {
-        this.lineWidthPlus = lineWidthPlus;
-    }
-
-    /**
-     * @see #setFillColor(Color)
-     */
-    public Color getFillColor() {
-        return fillColor;
-    }
-
-    /**
-     * The fill color of the marker in hover state.
-     */
-    public void setFillColor(Color fillColor) {
-        this.fillColor = fillColor;
-    }
-
-    /**
-     * @see #setLineColor(Color)
-     */
-    public Color getLineColor() {
-        return lineColor;
-    }
-
-    /**
-     * The color of the point marker's outline. When <code>null</code>, the
-     * series' or point's color is used.
-     * <p>
-     * Defaults to: #ffffff
-     */
-    public void setLineColor(Color lineColor) {
-        this.lineColor = lineColor;
-    }
-
-    /**
-     * @see #setRadius(Number)
-     */
-    public Number getRadius() {
-        return radius;
-    }
-
-    /**
-     * The radius of the point marker. In hover state, it defaults to the normal
-     * state's radius + 2 as per the <a href=
-     * "#plotOptions.series.marker.states.hover.radiusPlus">radiusPlus</a>
-     * option.
-     */
-    public void setRadius(Number radius) {
-        this.radius = radius;
-    }
-
-    /**
-     * @see #setRadiusPlus(Number)
-     */
-    public Number getRadiusPlus() {
-        return radiusPlus;
-    }
-
-    /**
-     * The number of pixels to increase the radius of the hovered point.
-     * <p>
-     * Defaults to: 2
-     */
-    public void setRadiusPlus(Number radiusPlus) {
-        this.radiusPlus = radiusPlus;
     }
 
     /**
@@ -258,19 +131,5 @@ public class Inactive extends AbstractConfigurationObject {
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
-    }
-
-    /**
-     * @see #setMarker(Marker)
-     */
-    public Marker getMarker() {
-        if (marker == null) {
-            marker = new Marker();
-        }
-        return marker;
-    }
-
-    public void setMarker(Marker marker) {
-        this.marker = marker;
     }
 }
