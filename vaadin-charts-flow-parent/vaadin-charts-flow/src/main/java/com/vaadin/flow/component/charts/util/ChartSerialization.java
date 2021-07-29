@@ -43,7 +43,7 @@ public class ChartSerialization implements Serializable {
 
     private static ObjectWriter jsonWriter;
 
-    final static ObjectWriter jsonWriterChartOptions;
+    static final ObjectWriter jsonWriterChartOptions;
 
     static {
         ObjectMapper defaultMapper = ChartSerialization.createObjectMapper();
@@ -55,6 +55,9 @@ public class ChartSerialization implements Serializable {
 
         // writer is thread safe so we can use a shared instance
         jsonWriter = createObjectMapper().writer();
+    }
+	
+	private ChartSerialization() {
     }
 
     /**
