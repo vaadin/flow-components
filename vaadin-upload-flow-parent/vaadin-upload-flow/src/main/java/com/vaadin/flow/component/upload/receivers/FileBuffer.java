@@ -40,8 +40,7 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
     private FileData file;
 
     /**
-     * Constructor for creating a file buffer with the default file factory via
-     * super constructor.
+     * Creates a file buffer with a default file factory.
      * <p>
      * Files will be created using {@link File#createTempFile(String, String)}
      * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
@@ -51,8 +50,8 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
     }
 
     /**
-     * Constructor taking in the file factory used to create upload and invoking
-     * AbstractFileBuffer constructor {@link File}.
+     * Creates a file buffer that uses a file factory to create a custom upload 
+     * {@link File}.
      *
      * @param factory
      *            file factory for file buffer

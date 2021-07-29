@@ -44,8 +44,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
     private Map<String, FileData> files = new HashMap<>();
 
     /**
-     * Constructor for creating a file buffer with the default file factory via
-     * super constructor.
+     * Creates a file buffer with a default file factory.
      * <p>
      * Files will be created using {@link File#createTempFile(String, String)}
      * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
@@ -55,8 +54,8 @@ public class MultiFileBuffer extends AbstractFileBuffer
     }
 
     /**
-     * Constructor taking in the file factory used to create upload and invoking
-     * AbstractFileBuffer constructor {@link File}.
+     * Creates a file buffer that uses a file factory to create custom upload 
+     * {@link File}s.
      *
      * @param factory
      *            file factory for file buffer
