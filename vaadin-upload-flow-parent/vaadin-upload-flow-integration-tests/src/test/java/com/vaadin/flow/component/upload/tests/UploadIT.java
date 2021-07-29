@@ -117,17 +117,6 @@ public class UploadIT extends AbstractUploadIT {
                 logList2.size(), CoreMatchers.is(0));
     }
 
-    @Test
-    public void i18nUploadTest() {
-        open();
-        waitUntil(driver -> getUpload().isDisplayed());
-
-        WebElement upload = findElement(By.id("i18n-upload"));
-        WebElement dropLabel = findInShadowRoot(upload, By.id("dropLabel"))
-                .get(0);
-        Assert.assertEquals("Перетащите файл сюда...", dropLabel.getText());
-    }
-
     private void fillPathToUploadInput(String... tempFileNames)
             throws Exception {
         fillPathToUploadInput(getInput(), tempFileNames);

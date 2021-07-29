@@ -65,9 +65,9 @@ askJetty() {
 ## Decide whether to run frontend compilation
 runFrontend() {
   [ -n "$module" ] && folder=$module-flow-parent/$module-flow-integration-tests || folder=integration-tests
-  bundle=$folder/target/classes/META-INF/VAADIN/build/vaadin-bundle*js
-  modified=`[ -f $bundle ] && find $folder/src -mnewer $bundle`
-  [ -f $bundle -a -z "$modified" ] && frontend="-DskipFrontend"
+  bundle="$folder/target/classes/META-INF/VAADIN/build/vaadin-bundle*js"
+  modified=`[ -f "$bundle" ] && find $folder/src -mnewer "$bundle"`
+  [ -f "$bundle" -a -z "$modified" ] && frontend="-DskipFrontend"
 }
 
 ## Ask for run options
