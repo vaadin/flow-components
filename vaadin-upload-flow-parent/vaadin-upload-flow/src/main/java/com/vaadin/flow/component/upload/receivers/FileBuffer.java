@@ -50,7 +50,7 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
     }
 
     /**
-     * Creates a file buffer that uses a file factory to create a custom upload 
+     * Creates a file buffer that uses a file factory to create a custom upload
      * {@link File}.
      *
      * @param factory

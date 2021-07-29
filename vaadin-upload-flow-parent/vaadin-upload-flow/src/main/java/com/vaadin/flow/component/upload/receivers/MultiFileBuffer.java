@@ -54,7 +54,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
     }
 
     /**
-     * Creates a file buffer that uses a file factory to create custom upload 
+     * Creates a file buffer that uses a file factory to create custom upload
      * {@link File}s.
      *
      * @param factory
