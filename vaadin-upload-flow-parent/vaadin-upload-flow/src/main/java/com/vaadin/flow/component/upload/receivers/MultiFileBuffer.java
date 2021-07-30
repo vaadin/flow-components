@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload.receivers;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,10 +43,31 @@ public class MultiFileBuffer extends AbstractFileBuffer
 
     private Map<String, FileData> files = new HashMap<>();
 
+    /**
+     * Creates a file buffer with a default file factory.
+     * <p>
+     * Files will be created using {@link File#createTempFile(String, String)}
+     * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
+     */
+    public MultiFileBuffer() {
+        super();
+    }
+
+    /**
+     * Creates a file buffer that uses a file factory to create custom upload
+     * {@link File}s.
+     *
+     * @param factory
+     *            file factory for file buffer
+     */
+    public MultiFileBuffer(FileFactory factory) {
+        super(factory);
+    }
+
     @Override
-    public OutputStream receiveUpload(String fileName, String MIMEType) {
+    public OutputStream receiveUpload(String fileName, String mimeType) {
         FileOutputStream outputBuffer = createFileOutputStream(fileName);
-        files.put(fileName, new FileData(fileName, MIMEType, outputBuffer));
+        files.put(fileName, new FileData(fileName, mimeType, outputBuffer));
 
         return outputBuffer;
     }
