@@ -153,7 +153,7 @@ args="$args -Dfailsafe.rerunFailingTestsCount=2"
 if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
-    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
+    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome:3.141.59-20210713"
     tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
     set -x
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
