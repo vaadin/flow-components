@@ -440,6 +440,20 @@ public class CheckboxGroup<T>
         return ids1.equals(ids2);
     }
 
+    @Override
+    protected boolean hasValidValue() {
+        // we need to compare old value with new value to see if any disabled
+        // items changed their value
+        Set<T> value = presentationToModel(this,
+                (JsonArray) getElement().getPropertyRaw(VALUE));
+        Set<T> oldValue = getValue();
+
+        // disabled items cannot change their value
+        return getCheckboxItems().filter(CheckBoxItem::isDisabledBoolean)
+                .noneMatch(item -> oldValue.contains(item.getItem()) != value
+                        .contains(item.getItem()));
+    }
+
     @SuppressWarnings("unchecked")
     private void reset() {
         // Cache helper component before removal
@@ -519,19 +533,9 @@ public class CheckboxGroup<T>
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        // we need to compare old value with new value to see if any disabled
-        // items changed their value
-        Set<T> oldValue = presentationToModel(this,
-                (JsonArray) event.getOldValue());
-        Set<T> value = presentationToModel(this, (JsonArray) event.getValue());
-
-        // disabled items cannot change their value
-        boolean invalidChange = getCheckboxItems()
-                .filter(CheckBoxItem::isDisabledBoolean)
-                .anyMatch(item -> oldValue.contains(item.getItem()) != value
-                        .contains(item.getItem()));
-
-        if (event.isUserOriginated() && invalidChange) {
+        if (!hasValidValue()) {
+            Set<T> oldValue = presentationToModel(this,
+                    (JsonArray) event.getOldValue());
             // return the value back on the client side
             try {
                 validationRegistration.remove();
@@ -540,7 +544,9 @@ public class CheckboxGroup<T>
             } finally {
                 registerValidation();
             }
-            // Now make sure that the button is still in the correct state
+            // Now make sure that the checkbox is still in the correct state
+            Set<T> value = presentationToModel(this,
+                    (JsonArray) event.getValue());
             getCheckboxItems()
                     .filter(checkbox -> value.contains(checkbox.getItem()))
                     .forEach(this::updateEnabled);
