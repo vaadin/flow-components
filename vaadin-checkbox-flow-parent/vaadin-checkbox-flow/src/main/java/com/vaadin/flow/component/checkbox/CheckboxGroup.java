@@ -519,15 +519,17 @@ public class CheckboxGroup<T>
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        // we need to compare old value with new value to see if any disabled items changed their value
+        // we need to compare old value with new value to see if any disabled
+        // items changed their value
         Set<T> oldValue = presentationToModel(this,
                 (JsonArray) event.getOldValue());
-        Set<T> value = presentationToModel(this,
-                (JsonArray) event.getValue());
+        Set<T> value = presentationToModel(this, (JsonArray) event.getValue());
 
         // disabled items cannot change their value
-        boolean invalidChange = getCheckboxItems().filter(CheckBoxItem::isDisabledBoolean)
-                .anyMatch(item -> oldValue.contains(item.getItem()) != value.contains(item.getItem()));
+        boolean invalidChange = getCheckboxItems()
+                .filter(CheckBoxItem::isDisabledBoolean)
+                .anyMatch(item -> oldValue.contains(item.getItem()) != value
+                        .contains(item.getItem()));
 
         if (event.isUserOriginated() && invalidChange) {
             // return the value back on the client side
