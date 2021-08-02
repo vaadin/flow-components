@@ -802,7 +802,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
             this.setDateFormat(primaryFormat);
 
-            // todo: having first argument as null and second arg as [nonNull...] would be a noop currently should we throw?
+            // todo: having first argument as null and second arg as [nonNull...] would be a noop currently, should we throw?
             if (primaryFormat != null) {
                 this.dateFormats.addAll(
                         Stream.of(secondaryFormats)
