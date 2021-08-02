@@ -25,7 +25,7 @@ public class CustomSearchIT extends AbstractParallelTest {
         GridElement grid = $(CrudElement.class).waitForFirst().getGrid();
         Assert.assertEquals(3, grid.getRowCount());
 
-        TextFieldElement searchBar = $(TextFieldElement.class).waitForFirst();
+        TextFieldElement searchBar = $(TextFieldElement.class).id("searchBar");
 
         searchBar.setValue("ll");
         waitUntil(c -> grid.getRowCount() == 1);
