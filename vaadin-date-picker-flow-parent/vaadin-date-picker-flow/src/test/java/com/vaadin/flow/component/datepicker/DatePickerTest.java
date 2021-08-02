@@ -201,6 +201,7 @@ public class DatePickerTest {
         assertNotNull(i18n.getDateFormats());
 
         i18n.setDateFormat(null);
+
         assertNull(i18n.getDateFormats());
     }
 
@@ -221,7 +222,7 @@ public class DatePickerTest {
     public void setDateFormats_throwsExceptionWhenSecondArgIsNull() {
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NullPointerException.class,
                 () -> i18n.setDateFormats("MM-yyyy-dd", null));
     }
 

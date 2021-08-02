@@ -779,35 +779,71 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             return this;
         }
 
+        /**
+         * Get the list of custom date formats that are used for formatting the date displayed in the text field, and for parsing the user input
+         *
+         * @return list of date patterns or null
+         */
         public List<String> getDateFormats() {
             return dateFormats;
         }
 
+        /**
+         * Sets a custom date format to be used by the date picker.
+         * The format is used for formatting the date displayed in the text field, and for parsing the user input.
+         * <p>
+         * The format is a string pattern using specific symbols to specify how and where the day, month and year should be displayed.
+         * The following symbols can be used in the pattern:
+         * <ul>
+         * <li>{@code yy} - 2 digit year
+         * <li>{@code yyyy} - 4 digit year
+         * <li>{@code M} - Month
+         * <li>{@code MM} - Month, padded to 2 digits
+         * <li>{@code d} - Day-of-month
+         * <li>{@code dd} - Day-of-month, padded to 2 digits
+         * </ul>
+         * <p>
+         * For example {@code dd/MM/yyyy}, will format the 20th of June 2021 as {@code 20/06/2021}.
+         * <p>
+         * Using a custom date format overrides the locale set in the date picker.
+         * <p>
+         * Setting the format to null will revert the date picker to use the locale for formatting and parsing dates.
+         * @param dateFormat A string with a date format pattern, or null to remove the previous custom format
+         * @return this instance for method chaining
+         */
         public DatePickerI18n setDateFormat(String dateFormat) {
-            if (dateFormat == null) {
-                this.dateFormats = null;
-            } else {
-                this.dateFormats = new ArrayList<>();
-                this.dateFormats.add(dateFormat);
-            }
-
+            this.setDateFormats(dateFormat);
             return this;
         }
 
+        /**
+         * Sets custom date formats to be used by the date picker.
+         * The primary format is used for formatting the date displayed in the text field, and for parsing the user input.
+         * Additional parsing formats can be specified to support entering dates in multiple formats.
+         * The date picker will first attempt to parse the user input using the primary format.
+         * If parsing with the primary format fails, it will attempt to parse the input using the additional formats in the order that they were specified.
+         * The additional parsing formats are never used for formatting the date. After entering a date using one of the additional parsing formats, it will still be displayed using the primary format.
+         * <p>
+         * See {@link DatePickerI18n#setDateFormat(String)} on how date patterns are structured.
+         * <p>
+         * Using custom date formats overrides the locale set in the date picker.
+         * <p>
+         * Setting the primary format to null will revert the date picker to use the locale for formatting and parsing dates.
+         * @param primaryFormat A string with a date format pattern, or null to remove the previous custom format
+         * @param additionalParsingFormats Additional date format patterns to be used for parsing
+         * @return this instance for method chaining
+         */
         public DatePickerI18n setDateFormats(String primaryFormat,
-                String... secondaryFormats) {
-            if (secondaryFormats == null) {
-                throw new IllegalArgumentException(
-                        "Second argument can not be null.");
-            }
+                                            String... additionalParsingFormats) {
+            Objects.requireNonNull(additionalParsingFormats, "Additional parsing formats must not be null");
 
-            this.setDateFormat(primaryFormat);
-
-            // todo: having first argument as null and second arg as
-            // [nonNull...] would be a noop currently, should we throw?
-            if (primaryFormat != null) {
-                this.dateFormats.addAll(Stream.of(secondaryFormats)
-                        .filter(Objects::nonNull).collect(Collectors.toList()));
+            if (primaryFormat == null) {
+                this.dateFormats = null;
+            } else {
+                this.dateFormats = new ArrayList<>();
+                this.dateFormats.add(primaryFormat);
+                this.dateFormats.addAll(Stream.of(additionalParsingFormats)
+                                                .filter(Objects::nonNull).collect(Collectors.toList()));
             }
 
             return this;
