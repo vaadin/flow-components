@@ -181,7 +181,20 @@ public class DatePickerTest {
     @Test
     public void setDateFormats_dateFormatsIsUpdated() {
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-        i18n.setDateFormats("MM-yyyy-dd", "MM.dd.yyyy", null, "MM§yyyy§dd");
+        i18n.setDateFormats("MM-yyyy-dd", "MM.dd.yyyy", "MM§yyyy§dd");
+        List<String> dateFormats = i18n.getDateFormats();
+
+        assertNotNull(dateFormats);
+        assertEquals(3, dateFormats.size());
+        assertEquals("MM-yyyy-dd", dateFormats.get(0));
+        assertEquals("MM.dd.yyyy", dateFormats.get(1));
+        assertEquals("MM§yyyy§dd", dateFormats.get(2));
+    }
+
+    @Test
+    public void setDateFormats_nullIsRemovedFromDateFormats() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setDateFormats("MM-yyyy-dd", null, "MM.dd.yyyy", "MM§yyyy§dd");
         List<String> dateFormats = i18n.getDateFormats();
 
         assertNotNull(dateFormats);

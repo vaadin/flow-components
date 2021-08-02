@@ -17,7 +17,10 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -315,6 +318,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             boolean hasDateFormats = i18n != null && i18n.dateFormats != null
                     && i18n.dateFormats.size() > 0;
 
+            // to prioritize custom date formats set via i18n over setLocale
             if (!hasDateFormats) {
                 getElement().callJsFunction("$connector.setLocale",
                         languageTag);
@@ -398,6 +402,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             boolean hasDateFormats = i18n.dateFormats != null
                     && i18n.dateFormats.size() > 0;
 
+            // to prioritize custom date formats set via i18n over setLocale
             if (hasDateFormats) {
                 JsonArray dateFormatsJson = JsonSerializer
                         .toJson(i18n.dateFormats);
@@ -814,7 +819,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * <p>
          * Setting the format to null will revert the date picker to use the
          * locale for formatting and parsing dates.
-         * 
+         *
          * @param dateFormat
          *            A string with a date format pattern, or null to remove the
          *            previous custom format
@@ -846,7 +851,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * <p>
          * Setting the primary format to null will revert the date picker to use
          * the locale for formatting and parsing dates.
-         * 
+         *
          * @param primaryFormat
          *            A string with a date format pattern, or null to remove the
          *            previous custom format

@@ -30,24 +30,25 @@ import java.util.Locale;
 
 @Route("vaadin-date-picker/date-picker-format")
 public class DatePickerFormatPage extends VerticalLayout {
-    public static final String PRIMARY_FORMAT = "PRIMARY_FORMAT";
-    public static final String MULTIPLE_FORMAT = "MULTIPLE_FORMAT";
+    public static final String PRIMARY_FORMAT_DATE_PICKER = "PRIMARY_FORMAT_DATE_PICKER";
+    public static final String MULTIPLE_FORMAT_DATE_PICKER = "MULTIPLE_FORMAT_DATE_PICKER";
     public static final String FORMAT_AND_SET_LOCALE = "FORMAT_AND_SET_LOCALE";
-    public static final String SET_FORMAT_TO_NULL_BUTTON = "SET_FORMAT_TO_NULL_BUTTON";
-    public static final String NULL_FORMAT = "NULL_FORMAT";
-    public static final String CHANGE_TO_FORMAT_BTN = "CHANGE_TO_FORMAT_BTN";
+    public static final String REMOVE_DATE_FORMAT_BUTTON = "REMOVE_DATE_FORMAT_BUTTON";
+    public static final String REMOVE_DATE_FORMAT = "REMOVE_DATE_FORMAT";
+    public static final String CHANGE_BETWEEN_FORMATS_BUTTON = "CHANGE_BETWEEN_FORMATS_BUTTON";
     public static final String CHANGE_BETWEEN_FORMATS = "CHANGE_BETWEEN_FORMATS";
     public static final String CHANGE_BETWEEN_FORMATS_OUTPUT = "CHANGE_BETWEEN_FORMATS_OUTPUT";
-    public static final String CLIENT_CHANGE = "CLIENT_CHANGE";
+    public static final String FALLBACK_PARSERS = "FALLBACK_PARSERS";
     public static final String SERVER_CHANGE = "SERVER_CHANGE";
-    public static final String CHANGE_DATE_BTN = "CHANGE_DATE_BTN";
+    public static final String CHANGE_DATE_BUTTON = "CHANGE_DATE_BUTTON";
     public static final String INVALID_CLIENT_DATE = "INVALID_CLIENT_DATE";
-    public static final String CHANGE_FROM_SET_LOCALE = "CHANGE_FROM_SET_LOCALE";
-    public static final String CLIENT_CHANGE_OUTPUT = "CLIENT_CHANGE_OUTPUT";
+    public static final String DATE_FORMAT_AFTER_SET_LOCALE = "DATE_FORMAT_AFTER_SET_LOCALE";
+    public static final String FALLBACK_PARSERS_OUTPUT = "FALLBACK_PARSERS_OUTPUT";
     public static final String PARSING_SINGLE_FORMAT = "PARSING_SINGLE_FORMAT";
     public static final String PARSING_SINGLE_FORMAT_OUTPUT = "PARSING_SINGLE_FORMAT_OUTPUT";
     public static final String FORMAT_AND_SET_LOCALE_OUTPUT = "FORMAT_AND_SET_LOCALE_OUTPUT";
-    public static final String NULL_FORMAT_OUTPUT = "NULL_FORMAT_OUTPUT";
+    public static final String REMOVE_DATE_FORMAT_OUTPUT = "NULL_FORMAT_OUTPUT";
+    public static final String INVALID_CLIENT_DATE_OUTPUT = "INVALID_CLIENT_DATE_OUTPUT";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
@@ -55,12 +56,12 @@ public class DatePickerFormatPage extends VerticalLayout {
         setupPrimaryFormat();
         setupMultipleFormats();
         setupChangeBetweenFormats();
-        setupNullFormat();
+        setupRemoveDateFormat();
         setupFormatAndSetLocale();
         setupSetFormatAfterSetLocale();
         setupParsingWithSingleFormat();
-        setupClientSideChange();
-        setupServerSideChange();
+        setupFallbackDateFormatParsers();
+        setupServerSideDatePickerValueChange();
         setupInvalidClientSideDate();
     }
 
@@ -70,7 +71,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormat("yyyy-MM-dd");
         datePicker.setI18n(i18n);
 
-        datePicker.setId(PRIMARY_FORMAT);
+        datePicker.setId(PRIMARY_FORMAT_DATE_PICKER);
         add(datePicker);
     }
 
@@ -80,7 +81,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormats("yyyy.MM.dd", "yyyy-MM-dd");
         datePicker.setI18n(i18n);
 
-        datePicker.setId(MULTIPLE_FORMAT);
+        datePicker.setId(MULTIPLE_FORMAT_DATE_PICKER);
         add(datePicker);
     }
 
@@ -101,13 +102,13 @@ public class DatePickerFormatPage extends VerticalLayout {
                     datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
-        btn.setId(CHANGE_TO_FORMAT_BTN);
+        btn.setId(CHANGE_BETWEEN_FORMATS_BUTTON);
         datePicker.setId(CHANGE_BETWEEN_FORMATS);
         output.setId(CHANGE_BETWEEN_FORMATS_OUTPUT);
         add(datePicker, btn, output);
     }
 
-    private void setupNullFormat() {
+    private void setupRemoveDateFormat() {
         DatePicker datePicker = new DatePicker(may13);
         datePicker.setLocale(Locale.GERMANY);
 
@@ -127,9 +128,9 @@ public class DatePickerFormatPage extends VerticalLayout {
                     datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
-        btn.setId(SET_FORMAT_TO_NULL_BUTTON);
-        datePicker.setId(NULL_FORMAT);
-        output.setId(NULL_FORMAT_OUTPUT);
+        btn.setId(REMOVE_DATE_FORMAT_BUTTON);
+        datePicker.setId(REMOVE_DATE_FORMAT);
+        output.setId(REMOVE_DATE_FORMAT_OUTPUT);
         add(datePicker, btn, output);
     }
 
@@ -160,7 +161,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormats("yyyy/MM/dd");
         datePicker.setI18n(i18n);
 
-        datePicker.setId(CHANGE_FROM_SET_LOCALE);
+        datePicker.setId(DATE_FORMAT_AFTER_SET_LOCALE);
         add(datePicker);
     }
 
@@ -181,7 +182,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         add(datePicker, output);
     }
 
-    private void setupClientSideChange() {
+    private void setupFallbackDateFormatParsers() {
         DatePicker datePicker = new DatePicker(may13);
         DatePickerI18n i18n = new DatePickerI18n();
         i18n.setDateFormats("yyyy/MM/dd", "dd.MM.yyyy", "dd-MM-yyyy");
@@ -193,12 +194,12 @@ public class DatePickerFormatPage extends VerticalLayout {
                     datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
-        datePicker.setId(CLIENT_CHANGE);
-        output.setId(CLIENT_CHANGE_OUTPUT);
+        datePicker.setId(FALLBACK_PARSERS);
+        output.setId(FALLBACK_PARSERS_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupServerSideChange() {
+    private void setupServerSideDatePickerValueChange() {
         DatePicker datePicker = new DatePicker();
         DatePickerI18n i18n = new DatePickerI18n();
         i18n.setDateFormats("d.M.yyyy", "dd-MM-yyyy");
@@ -208,7 +209,7 @@ public class DatePickerFormatPage extends VerticalLayout {
             datePicker.setValue(may13);
         });
 
-        btn.setId(CHANGE_DATE_BTN);
+        btn.setId(CHANGE_DATE_BUTTON);
         datePicker.setId(SERVER_CHANGE);
         add(datePicker, btn);
     }
@@ -219,7 +220,16 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormats("yyyy/MM/dd", "dd.MM.yyyy", "dd-MM-yyyy");
         datePicker.setI18n(i18n);
 
+        Span output = new Span();
         datePicker.setId(INVALID_CLIENT_DATE);
-        add(datePicker);
+        datePicker.addValueChangeListener(event -> {
+            if (datePicker.getValue() != null) {
+                output.setText(datePicker.getValue()
+                        .format(DateTimeFormatter.ISO_DATE));
+            }
+        });
+
+        output.setId(INVALID_CLIENT_DATE_OUTPUT);
+        add(datePicker, output);
     }
 }
