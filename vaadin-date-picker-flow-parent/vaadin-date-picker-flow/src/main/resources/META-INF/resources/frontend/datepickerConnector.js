@@ -184,7 +184,7 @@ import dateFnsIsValid from 'date-fns/isValid';
                     return false;
                 }
 
-                datepicker.i18n = Object.assign({}, datepicker.i18n, {formatDate: formatDate, parseDate: parseDate});
+                datepicker.i18n = Object.assign({}, datepicker.i18n, {formatDate, parseDate});
             });
         })(datepicker)
     };
