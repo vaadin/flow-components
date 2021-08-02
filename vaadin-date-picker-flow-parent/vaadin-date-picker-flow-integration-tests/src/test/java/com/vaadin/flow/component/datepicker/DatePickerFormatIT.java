@@ -81,7 +81,8 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testSetFormatAfterSetLocale() {
-        Assert.assertEquals(getInputValue(CHANGE_FROM_SET_LOCALE), "2018/05/13");
+        Assert.assertEquals(getInputValue(CHANGE_FROM_SET_LOCALE),
+                "2018/05/13");
     }
 
     @Test
@@ -120,7 +121,6 @@ public class DatePickerFormatIT extends AbstractComponentIT {
         Assert.assertEquals("2020-10-23", output.getText());
     }
 
-
     @Test
     public void testWithServerSideChange() {
         String id = SERVER_CHANGE;
@@ -142,8 +142,7 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     }
 
     private void submitValue(String id, String value) {
-        TestBenchElement input = $(DatePickerElement.class)
-                .id(id)
+        TestBenchElement input = $(DatePickerElement.class).id(id)
                 .$("vaadin-date-picker-text-field").first();
 
         while (!input.getAttribute("value").isEmpty()) {
@@ -155,9 +154,7 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     }
 
     private String getInputValue(String datePickerId) {
-        return $(DatePickerElement.class)
-                .id(datePickerId)
-                .getInputValue();
+        return $(DatePickerElement.class).id(datePickerId).getInputValue();
     }
 
 }

@@ -795,19 +795,19 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         }
 
         public DatePickerI18n setDateFormats(String primaryFormat,
-                                             String... secondaryFormats) {
-            if(secondaryFormats == null) {
-                throw new IllegalArgumentException("Second argument can not be null.");
+                String... secondaryFormats) {
+            if (secondaryFormats == null) {
+                throw new IllegalArgumentException(
+                        "Second argument can not be null.");
             }
 
             this.setDateFormat(primaryFormat);
 
-            // todo: having first argument as null and second arg as [nonNull...] would be a noop currently, should we throw?
+            // todo: having first argument as null and second arg as
+            // [nonNull...] would be a noop currently, should we throw?
             if (primaryFormat != null) {
-                this.dateFormats.addAll(
-                        Stream.of(secondaryFormats)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toList()));
+                this.dateFormats.addAll(Stream.of(secondaryFormats)
+                        .filter(Objects::nonNull).collect(Collectors.toList()));
             }
 
             return this;

@@ -97,7 +97,8 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = new Span();
         datePicker.addValueChangeListener(event -> {
-            output.setText(datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
+            output.setText(
+                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
         btn.setId(CHANGE_TO_FORMAT_BTN);
@@ -114,13 +115,16 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormats("dd yyyy MM");
         datePicker.setI18n(i18n);
 
-        NativeButton btn = new NativeButton("set format to null", clickEvent -> {
-            datePicker.setI18n(new DatePickerI18n().setDateFormat(null));
-        });
+        NativeButton btn = new NativeButton("set format to null",
+                clickEvent -> {
+                    datePicker
+                            .setI18n(new DatePickerI18n().setDateFormat(null));
+                });
 
         Span output = new Span();
         datePicker.addValueChangeListener(event -> {
-            output.setText(datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
+            output.setText(
+                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
         btn.setId(SET_FORMAT_TO_NULL_BUTTON);
@@ -139,7 +143,8 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = new Span();
         datePicker.addValueChangeListener(event -> {
-            output.setText(datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
+            output.setText(
+                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
         datePicker.setId(FORMAT_AND_SET_LOCALE);
@@ -167,7 +172,8 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = new Span();
         datePicker.addValueChangeListener(event -> {
-            output.setText(datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
+            output.setText(
+                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
         datePicker.setId(PARSING_SINGLE_FORMAT);
@@ -183,7 +189,8 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = new Span();
         datePicker.addValueChangeListener(event -> {
-            output.setText(datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
+            output.setText(
+                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
         });
 
         datePicker.setId(CLIENT_CHANGE);
