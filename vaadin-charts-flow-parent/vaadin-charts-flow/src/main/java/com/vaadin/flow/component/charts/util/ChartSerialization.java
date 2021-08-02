@@ -56,8 +56,8 @@ public class ChartSerialization implements Serializable {
         // writer is thread safe so we can use a shared instance
         jsonWriter = createObjectMapper().writer();
     }
-	
-	private ChartSerialization() {
+
+    private ChartSerialization() {
     }
 
     /**
