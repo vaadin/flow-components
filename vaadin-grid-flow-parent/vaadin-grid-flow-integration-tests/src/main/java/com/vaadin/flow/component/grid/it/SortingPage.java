@@ -62,7 +62,7 @@ public class SortingPage extends Div {
         add(grid, showGridBtn);
     }
 
-    private Grid createGrid(String gridId, String sortBtnId) {
+    private Grid<Person> createGrid(String gridId, String sortBtnId) {
         Grid<Person> grid = new Grid<>();
         grid.setMultiSort(true);
         grid.setId(gridId);
@@ -96,7 +96,19 @@ public class SortingPage extends Div {
         });
         reOrder.setId("reorder-button");
 
-        add(button, reOrder);
+        NativeButton changeHeaderText = new NativeButton("Change header text",
+                e -> {
+                    ageColumn.setHeader("Age (updated)");
+                });
+        changeHeaderText.setId("change-header-text");
+
+        NativeButton changeHeaderTextComponent = new NativeButton(
+                "Change header text component", e -> {
+                    ageColumn.setHeader(new Span("Age (updated)"));
+                });
+        changeHeaderTextComponent.setId("change-header-text-component");
+
+        add(button, reOrder, changeHeaderText, changeHeaderTextComponent);
 
         return grid;
     }

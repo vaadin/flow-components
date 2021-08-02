@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  *            the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "21.0.0-alpha13")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "21.0.0-beta1")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme {
@@ -360,7 +360,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         Objects.requireNonNull(grid, "Grid cannot be null");
 
         if (this.grid != null
-                && this.grid.getElement().getParent() == getElement()) {
+                && getElement().equals(this.grid.getElement().getParent())) {
             this.grid.getElement().removeFromParent();
         }
 
