@@ -325,12 +325,16 @@ public class CheckboxGroup<T>
 
     @Override
     protected boolean hasValidValue() {
-        Set<T> selectedItems = presentationToModel(this,
+        // we need to compare old value with new value to see if any disabled
+        // items changed their value
+        Set<T> value = presentationToModel(this,
                 (JsonArray) getElement().getPropertyRaw(VALUE));
-        if (selectedItems == null || selectedItems.isEmpty()) {
-            return true;
-        }
-        return selectedItems.stream().allMatch(itemEnabledProvider);
+        Set<T> oldValue = getValue();
+
+        // disabled items cannot change their value
+        return getCheckboxItems().filter(CheckBoxItem::isDisabledBoolean)
+                .noneMatch(item -> oldValue.contains(item.getItem()) != value
+                        .contains(item.getItem()));
     }
 
     private void reset() {
@@ -401,7 +405,7 @@ public class CheckboxGroup<T>
             } finally {
                 registerValidation();
             }
-            // Now make sure that the button is still in the correct state
+            // Now make sure that the checkbox is still in the correct state
             Set<T> value = presentationToModel(this,
                     (JsonArray) event.getValue());
             getCheckboxItems()
