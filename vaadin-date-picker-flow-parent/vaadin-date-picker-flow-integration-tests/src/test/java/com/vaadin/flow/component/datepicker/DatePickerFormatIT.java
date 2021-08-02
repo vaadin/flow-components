@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
+import java.util.logging.Level;
+
 import static com.vaadin.flow.component.datepicker.DatePickerFormatPage.*;
 
 @TestPath("vaadin-date-picker/date-picker-format")
@@ -103,6 +105,17 @@ public class DatePickerFormatIT extends AbstractComponentIT {
         TestBenchElement output = $("span").id(NULL_FORMAT_OUTPUT);
 
         Assert.assertEquals("1999-07-15", output.getText());
+    }
+
+    /**
+     * Verify datePickerConnector.setLocale is not called with null parameter
+     */
+    @Test
+    public void testNullFormatShouldNotLogBrowserError() {
+        $("button").id(SET_FORMAT_TO_NULL_BUTTON).click();
+
+        Assert.assertFalse(
+                getLogEntries(Level.SEVERE).stream().findAny().isPresent());
     }
 
     @Test

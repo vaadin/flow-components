@@ -158,29 +158,25 @@ import dateFnsIsValid from 'date-fns/isValid';
             });
 
             datepicker.$connector.setFormat = tryCatchWrapper(function (formats) {
+                if (!formats || formats.length === 0) {
+                    throw new Error("Array of custom date formats is null or empty");
+                }
+
                 function formatDate(dateParts) {
-                    // TODO: assert that formats has at least one item
                     const format = formats[0];
                     const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
-
-                    console.log("###format date", dateParts, date, dateFnsFormat(date, format));
 
                     return dateFnsFormat(date, format);
                 }
 
                 function parseDate(dateString) {
-                    // TODO: assert that formats has at least one item
-
                     for (let format of formats) {
                         const date = dateFnsParse(dateString, format, new Date());
 
                         if (dateFnsIsValid(date)) {
-                            console.log("###parse date", dateString, format, date);
                             return {day: date.getDate(), month: date.getMonth(), year: date.getFullYear()};
                         }
                     }
-
-                    console.log("###parse date failed");
                     return false;
                 }
 
