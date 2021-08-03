@@ -120,14 +120,16 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     public void testRemovingDateFormatShouldNotLogBrowserError() {
         $("button").id(REMOVE_DATE_FORMAT_BUTTON).click();
 
-        // Verify datePickerConnector.setLocale is not called with null parameter which would throw and log an error
+        // Verify datePickerConnector.setLocale is not called with null
+        // parameter which would throw and log an error
         Assert.assertFalse(
                 getLogEntries(Level.SEVERE).stream().findAny().isPresent());
     }
 
     @Test
     public void testSetLocaleAfterFormatShouldFormatWithCustomFormat() {
-        Assert.assertEquals(getInputValue(SET_LOCALE_AFTER_FORMAT_DATE_PICKER), "2018/05/13");
+        Assert.assertEquals(getInputValue(SET_LOCALE_AFTER_FORMAT_DATE_PICKER),
+                "2018/05/13");
     }
 
     @Test
@@ -141,8 +143,8 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testSetFormatAfterSetLocaleShouldFormatWithCustomFormat() {
-        Assert.assertEquals(getInputValue(
-                SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
+        Assert.assertEquals(
+                getInputValue(SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
                 "2018/05/13");
     }
 
@@ -150,7 +152,8 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     public void testSetFormatAfterSetLocaleShouldParseWithCustomFormat() {
         submitValue(SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER, "1999/07/15");
 
-        TestBenchElement output = $("span").id(SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
+        TestBenchElement output = $("span")
+                .id(SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
 
         Assert.assertEquals("1999-07-15", output.getText());
     }

@@ -169,9 +169,8 @@ public class DatePickerFormatPage extends VerticalLayout {
         Span output = new Span();
         datePicker.addValueChangeListener(event -> {
             LocalDate newValue = datePicker.getValue();
-            if(newValue != null) {
-                output.setText(
-                        newValue.format(DateTimeFormatter.ISO_DATE));
+            if (newValue != null) {
+                output.setText(newValue.format(DateTimeFormatter.ISO_DATE));
             } else {
                 output.setText("");
             }
