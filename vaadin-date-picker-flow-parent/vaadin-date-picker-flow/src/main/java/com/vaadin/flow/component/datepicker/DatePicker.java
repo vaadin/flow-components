@@ -805,9 +805,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * <ul>
          * <li>{@code yy} - 2 digit year
          * <li>{@code yyyy} - 4 digit year
-         * <li>{@code M} - Month
+         * <li>{@code M} - Month, as 1 or 2 digits
          * <li>{@code MM} - Month, padded to 2 digits
-         * <li>{@code d} - Day-of-month
+         * <li>{@code d} - Day-of-month, as 1 or 2 digits
          * <li>{@code dd} - Day-of-month, padded to 2 digits
          * </ul>
          * <p>
