@@ -36,9 +36,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
@@ -74,6 +74,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private LocalDate max;
     private LocalDate min;
     private boolean required;
+
+    private StateTree.ExecutionRegistration pendingI18nUpdate;
 
     /**
      * Default constructor.
@@ -315,20 +317,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         } else {
             languageTag = locale.getLanguage() + "-" + locale.getCountry();
         }
-        getUI().ifPresent(ui -> setLocaleWithJS());
-    }
-
-    private void setLocaleWithJS() {
-        runBeforeClientResponse(ui -> {
-            boolean hasDateFormats = i18n != null && i18n.dateFormats != null
-                    && !i18n.dateFormats.isEmpty();
-
-            // to prioritize custom date formats set via i18n over setLocale
-            if (!hasDateFormats) {
-                getElement().callJsFunction("$connector.setLocale",
-                        languageTag);
-            }
-        });
+        requestI18nUpdate();
     }
 
     /**
@@ -348,10 +337,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         if (locale == null) {
             getUI().ifPresent(ui -> setLocale(ui.getLocale()));
         } else if (languageTag != null) {
-            setLocaleWithJS();
+            requestI18nUpdate();
         }
         if (i18n != null) {
-            setI18nWithJS();
+            requestI18nUpdate();
         }
         FieldValidationUtil.disableClientValidation(this);
     }
@@ -386,34 +375,41 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
         this.i18n = i18n;
-        getUI().ifPresent(ui -> setI18nWithJS());
+        requestI18nUpdate();
     }
 
-    private void setI18nWithJS() {
-        runBeforeClientResponse(ui -> {
-            JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
-            // Remove null values to prevent errors in web component
-            removeNullValuesFromJsonObject(i18nObject);
-            // Assign new I18N object to WC, keep current values if they are not
-            // defined in the new object
-            getElement().executeJs(
-                    "this.i18n = Object.assign({}, this.i18n, $0);",
-                    i18nObject);
-
-            boolean hasDateFormats = i18n.dateFormats != null
-                    && !i18n.dateFormats.isEmpty();
-
-            // to prioritize custom date formats set via i18n over setLocale
-            if (hasDateFormats) {
-                JsonArray dateFormatsJson = JsonSerializer
-                        .toJson(i18n.dateFormats);
-                getElement().callJsFunction("$connector.setFormat",
-                        dateFormatsJson);
-            } else {
-                getElement().callJsFunction("$connector.setLocale",
-                        languageTag);
+    private void requestI18nUpdate() {
+        getUI().ifPresent(ui -> {
+            if (pendingI18nUpdate != null) {
+                pendingI18nUpdate.remove();
             }
+            pendingI18nUpdate = ui.beforeClientResponse(this, context -> {
+                pendingI18nUpdate = null;
+                executeI18nUpdate();
+            });
         });
+    }
+
+    /**
+     * Update I18N settings in the web component. Merges the DatePickerI18N
+     * settings with the current settings of the web component, and configures
+     * formatting and parsing functions based on either the locale, or the
+     * custom date formats specified in DatePickerI18N.
+     */
+    private void executeI18nUpdate() {
+        JsonObject i18nObject = i18n != null
+                ? (JsonObject) JsonSerializer.toJson(i18n)
+                : null;
+        // Remove properties with null values to prevent errors in web
+        // component
+        if (i18nObject != null) {
+            removeNullValuesFromJsonObject(i18nObject);
+        }
+
+        // Call update function in connector with locale and I18N settings
+        // The connector is expected to handle that either of those can be null
+        getElement().callJsFunction("$connector.updateI18n", languageTag,
+                i18nObject);
     }
 
     private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
