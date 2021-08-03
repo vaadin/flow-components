@@ -321,7 +321,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private void setLocaleWithJS() {
         runBeforeClientResponse(ui -> {
             boolean hasDateFormats = i18n != null && i18n.dateFormats != null
-                    && i18n.dateFormats.size() > 0;
+                    && !i18n.dateFormats.isEmpty();
 
             // to prioritize custom date formats set via i18n over setLocale
             if (!hasDateFormats) {
@@ -392,12 +392,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private void setI18nWithJS() {
         runBeforeClientResponse(ui -> {
             JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
-            // Remove null values to prevent errors
-            for (String key : i18nObject.keys()) {
-                if (i18nObject.get(key).getType() == JsonType.NULL) {
-                    i18nObject.remove(key);
-                }
-            }
+            // Remove null values to prevent errors in web component
+            removeNullValuesFromJsonObject(i18nObject);
             // Assign new I18N object to WC, keep current values if they are not
             // defined in the new object
             getElement().executeJs(
@@ -405,7 +401,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                     i18nObject);
 
             boolean hasDateFormats = i18n.dateFormats != null
-                    && i18n.dateFormats.size() > 0;
+                    && !i18n.dateFormats.isEmpty();
 
             // to prioritize custom date formats set via i18n over setLocale
             if (hasDateFormats) {
@@ -418,6 +414,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                         languageTag);
             }
         });
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
