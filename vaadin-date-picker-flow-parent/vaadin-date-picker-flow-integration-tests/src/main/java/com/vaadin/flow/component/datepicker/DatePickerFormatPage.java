@@ -31,24 +31,21 @@ import java.util.Locale;
 @Route("vaadin-date-picker/date-picker-format")
 public class DatePickerFormatPage extends VerticalLayout {
     public static final String PRIMARY_FORMAT_DATE_PICKER = "PRIMARY_FORMAT_DATE_PICKER";
+    public static final String PRIMARY_FORMAT_OUTPUT = "PRIMARY_FORMAT_OUTPUT";
     public static final String MULTIPLE_FORMAT_DATE_PICKER = "MULTIPLE_FORMAT_DATE_PICKER";
-    public static final String FORMAT_AND_SET_LOCALE = "FORMAT_AND_SET_LOCALE";
-    public static final String REMOVE_DATE_FORMAT_BUTTON = "REMOVE_DATE_FORMAT_BUTTON";
-    public static final String REMOVE_DATE_FORMAT = "REMOVE_DATE_FORMAT";
+    public static final String MULTIPLE_FORMAT_OUTPUT = "MULTIPLE_FORMAT_OUTPUT";
+    public static final String CHANGE_BETWEEN_FORMATS_DATE_PICKER = "CHANGE_BETWEEN_FORMATS_DATE_PICKER";
     public static final String CHANGE_BETWEEN_FORMATS_BUTTON = "CHANGE_BETWEEN_FORMATS_BUTTON";
-    public static final String CHANGE_BETWEEN_FORMATS = "CHANGE_BETWEEN_FORMATS";
     public static final String CHANGE_BETWEEN_FORMATS_OUTPUT = "CHANGE_BETWEEN_FORMATS_OUTPUT";
-    public static final String FALLBACK_PARSERS = "FALLBACK_PARSERS";
-    public static final String SERVER_CHANGE = "SERVER_CHANGE";
-    public static final String CHANGE_DATE_BUTTON = "CHANGE_DATE_BUTTON";
-    public static final String INVALID_CLIENT_DATE = "INVALID_CLIENT_DATE";
-    public static final String DATE_FORMAT_AFTER_SET_LOCALE = "DATE_FORMAT_AFTER_SET_LOCALE";
-    public static final String FALLBACK_PARSERS_OUTPUT = "FALLBACK_PARSERS_OUTPUT";
-    public static final String PARSING_SINGLE_FORMAT = "PARSING_SINGLE_FORMAT";
-    public static final String PARSING_SINGLE_FORMAT_OUTPUT = "PARSING_SINGLE_FORMAT_OUTPUT";
-    public static final String FORMAT_AND_SET_LOCALE_OUTPUT = "FORMAT_AND_SET_LOCALE_OUTPUT";
-    public static final String REMOVE_DATE_FORMAT_OUTPUT = "NULL_FORMAT_OUTPUT";
-    public static final String INVALID_CLIENT_DATE_OUTPUT = "INVALID_CLIENT_DATE_OUTPUT";
+    public static final String REMOVE_DATE_FORMAT_DATE_PICKER = "REMOVE_DATE_FORMAT_DATE_PICKER";
+    public static final String REMOVE_DATE_FORMAT_BUTTON = "REMOVE_DATE_FORMAT_BUTTON";
+    public static final String REMOVE_DATE_FORMAT_OUTPUT = "REMOVE_DATE_FORMAT_OUTPUT";
+    public static final String SET_LOCALE_AFTER_FORMAT_DATE_PICKER = "SET_LOCALE_AFTER_FORMAT_DATE_PICKER";
+    public static final String SET_LOCALE_AFTER_FORMAT_OUTPUT = "SET_LOCALE_AFTER_FORMAT_OUTPUT";
+    public static final String SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER = "SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER";
+    public static final String SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT = "SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT";
+    public static final String SERVER_SIDE_VALUE_CHANGE_DATE_PICKER = "SERVER_SIDE_VALUE_CHANGE_DATE_PICKER";
+    public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
@@ -57,12 +54,9 @@ public class DatePickerFormatPage extends VerticalLayout {
         setupMultipleFormats();
         setupChangeBetweenFormats();
         setupRemoveDateFormat();
-        setupFormatAndSetLocale();
-        setupSetFormatAfterSetLocale();
-        setupParsingWithSingleFormat();
-        setupFallbackDateFormatParsers();
-        setupServerSideDatePickerValueChange();
-        setupInvalidClientSideDate();
+        setupSetLocaleAfterFormat();
+        setupSetFormatAfterLocale();
+        setupServerSideValueChange();
     }
 
     public void setupPrimaryFormat() {
@@ -71,18 +65,22 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormat("yyyy-MM-dd");
         datePicker.setI18n(i18n);
 
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(PRIMARY_FORMAT_DATE_PICKER);
-        add(datePicker);
+        output.setId(PRIMARY_FORMAT_OUTPUT);
+        add(datePicker, output);
     }
 
     private void setupMultipleFormats() {
         DatePicker datePicker = new DatePicker(may13);
         DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("yyyy.MM.dd", "yyyy-MM-dd");
+        i18n.setDateFormats("yyyy-MM-dd", "dd.MM.yyyy", "MM/dd/yyyy");
         datePicker.setI18n(i18n);
 
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(MULTIPLE_FORMAT_DATE_PICKER);
-        add(datePicker);
+        output.setId(MULTIPLE_FORMAT_OUTPUT);
+        add(datePicker, output);
     }
 
     private void setupChangeBetweenFormats() {
@@ -96,14 +94,9 @@ public class DatePickerFormatPage extends VerticalLayout {
             datePicker.setI18n(new DatePickerI18n().setDateFormat("M/d/yy"));
         });
 
-        Span output = new Span();
-        datePicker.addValueChangeListener(event -> {
-            output.setText(
-                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
-        });
-
+        Span output = createOutputSpan(datePicker);
         btn.setId(CHANGE_BETWEEN_FORMATS_BUTTON);
-        datePicker.setId(CHANGE_BETWEEN_FORMATS);
+        datePicker.setId(CHANGE_BETWEEN_FORMATS_DATE_PICKER);
         output.setId(CHANGE_BETWEEN_FORMATS_OUTPUT);
         add(datePicker, btn, output);
     }
@@ -113,7 +106,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         datePicker.setLocale(Locale.GERMANY);
 
         DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("dd yyyy MM");
+        i18n.setDateFormat("dd yyyy MM");
         datePicker.setI18n(i18n);
 
         NativeButton btn = new NativeButton("set format to null",
@@ -122,114 +115,67 @@ public class DatePickerFormatPage extends VerticalLayout {
                             .setI18n(new DatePickerI18n().setDateFormat(null));
                 });
 
-        Span output = new Span();
-        datePicker.addValueChangeListener(event -> {
-            output.setText(
-                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
-        });
-
+        Span output = createOutputSpan(datePicker);
         btn.setId(REMOVE_DATE_FORMAT_BUTTON);
-        datePicker.setId(REMOVE_DATE_FORMAT);
+        datePicker.setId(REMOVE_DATE_FORMAT_DATE_PICKER);
         output.setId(REMOVE_DATE_FORMAT_OUTPUT);
         add(datePicker, btn, output);
     }
 
-    private void setupFormatAndSetLocale() {
+    private void setupSetLocaleAfterFormat() {
         DatePicker datePicker = new DatePicker(may13);
         DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("yyyy/MM/dd");
+        i18n.setDateFormat("yyyy/MM/dd");
         datePicker.setI18n(i18n);
 
         datePicker.setLocale(Locale.GERMANY); // should have no effect
 
-        Span output = new Span();
-        datePicker.addValueChangeListener(event -> {
-            output.setText(
-                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
-        });
-
-        datePicker.setId(FORMAT_AND_SET_LOCALE);
-        output.setId(FORMAT_AND_SET_LOCALE_OUTPUT);
+        Span output = createOutputSpan(datePicker);
+        datePicker.setId(SET_LOCALE_AFTER_FORMAT_DATE_PICKER);
+        output.setId(SET_LOCALE_AFTER_FORMAT_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupSetFormatAfterSetLocale() {
+    private void setupSetFormatAfterLocale() {
         DatePicker datePicker = new DatePicker(may13);
         DatePickerI18n i18n = new DatePickerI18n();
         datePicker.setLocale(Locale.GERMANY);
 
-        i18n.setDateFormats("yyyy/MM/dd");
+        i18n.setDateFormat("yyyy/MM/dd");
         datePicker.setI18n(i18n);
 
-        datePicker.setId(DATE_FORMAT_AFTER_SET_LOCALE);
-        add(datePicker);
-    }
-
-    private void setupParsingWithSingleFormat() {
-        DatePicker datePicker = new DatePicker(may13);
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("yyyy/MM/dd");
-        datePicker.setI18n(i18n);
-
-        Span output = new Span();
-        datePicker.addValueChangeListener(event -> {
-            output.setText(
-                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
-        });
-
-        datePicker.setId(PARSING_SINGLE_FORMAT);
-        output.setId(PARSING_SINGLE_FORMAT_OUTPUT);
+        Span output = createOutputSpan(datePicker);
+        datePicker.setId(SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER);
+        output.setId(SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupFallbackDateFormatParsers() {
-        DatePicker datePicker = new DatePicker(may13);
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("yyyy/MM/dd", "dd.MM.yyyy", "dd-MM-yyyy");
-        datePicker.setI18n(i18n);
-
-        Span output = new Span();
-        datePicker.addValueChangeListener(event -> {
-            output.setText(
-                    datePicker.getValue().format(DateTimeFormatter.ISO_DATE));
-        });
-
-        datePicker.setId(FALLBACK_PARSERS);
-        output.setId(FALLBACK_PARSERS_OUTPUT);
-        add(datePicker, output);
-    }
-
-    private void setupServerSideDatePickerValueChange() {
+    private void setupServerSideValueChange() {
         DatePicker datePicker = new DatePicker();
         DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("d.M.yyyy", "dd-MM-yyyy");
+        i18n.setDateFormat("d.M.yyyy");
         datePicker.setI18n(i18n);
 
         NativeButton btn = new NativeButton("change date", clickEvent -> {
             datePicker.setValue(may13);
         });
 
-        btn.setId(CHANGE_DATE_BUTTON);
-        datePicker.setId(SERVER_CHANGE);
+        btn.setId(SERVER_SIDE_VALUE_CHANGE_BUTTON);
+        datePicker.setId(SERVER_SIDE_VALUE_CHANGE_DATE_PICKER);
         add(datePicker, btn);
     }
 
-    private void setupInvalidClientSideDate() {
-        DatePicker datePicker = new DatePicker(may13);
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("yyyy/MM/dd", "dd.MM.yyyy", "dd-MM-yyyy");
-        datePicker.setI18n(i18n);
-
+    private static Span createOutputSpan(DatePicker datePicker) {
         Span output = new Span();
-        datePicker.setId(INVALID_CLIENT_DATE);
         datePicker.addValueChangeListener(event -> {
-            if (datePicker.getValue() != null) {
-                output.setText(datePicker.getValue()
-                        .format(DateTimeFormatter.ISO_DATE));
+            LocalDate newValue = datePicker.getValue();
+            if(newValue != null) {
+                output.setText(
+                        newValue.format(DateTimeFormatter.ISO_DATE));
+            } else {
+                output.setText("");
             }
         });
-
-        output.setId(INVALID_CLIENT_DATE_OUTPUT);
-        add(datePicker, output);
+        return output;
     }
 }
