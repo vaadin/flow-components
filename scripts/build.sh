@@ -18,6 +18,8 @@ then
         quiet="-q";;
       hub=*)
         TBHUB=`echo $i | cut -d = -f2`;;
+      image=*)
+        SELENIUM_IMAGE=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
         elements="$elements $i"
@@ -93,6 +95,7 @@ computeFastBuild() {
 [ -z "$FORK_COUNT" ] && FORK_COUNT="5"
 ### By default, run test under npm-it
 [ -z "$TEST_MODE" ] && TEST_MODE="npm-it"
+[ -z "$SELENIUM_IMAGE" ] && SELENIUM_IMAGE="latest"
 
 tcLog "Show info (forks=$FORK_COUNT parallel=$TESTS_IN_PARALLEL)"
 echo $SHELL
@@ -153,7 +156,7 @@ args="$args -Dfailsafe.rerunFailingTestsCount=2"
 if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
-    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome:3.141.59-20210713"
+    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome:$SELENIUM_IMAGE"
     tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
     set -x
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
