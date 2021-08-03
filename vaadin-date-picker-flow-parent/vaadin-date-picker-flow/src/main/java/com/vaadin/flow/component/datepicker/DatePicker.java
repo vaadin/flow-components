@@ -289,6 +289,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * compatibility can be different based on the browser and mobile devices,
      * you can check here for more details: <a href=
      * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString</a>
+     * <p>
+     * When using custom date formats through
+     * {@link DatePicker#setI18n(DatePickerI18n)}, setting a locale has no
+     * effect, and dates will always be parsed and displayed using the custom
+     * date format.
      *
      * @param locale
      *            the locale set to the date picker, cannot be null
