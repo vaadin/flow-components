@@ -1,8 +1,5 @@
 package com.vaadin.flow.component.charts.examples.dynamic;
 
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AxisTitle;
@@ -16,7 +13,7 @@ import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.YAxis;
-import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.NativeButton;
 
 public class DynamicExtremes extends AbstractChartExample {
 
@@ -79,12 +76,8 @@ public class DynamicExtremes extends AbstractChartExample {
                 4.8);
         configuration.addSeries(ls);
 
-        Input toggleExtremesButton = new Input();
-        toggleExtremesButton.setValue("Toggle extremes");
-        toggleExtremesButton.setId("toggleExtremesButton");
-        toggleExtremesButton.setType("button");
-        ComponentUtil.addListener(toggleExtremesButton, ClickEvent.class,
-                (ComponentEventListener) e -> {
+        NativeButton toggleExtremesButton = new NativeButton("Toggle extremes",
+                e -> {
                     if (setExtremes) {
                         chart.getConfiguration().getyAxes().getAxis(0)
                                 .setExtremes(10, 15);
@@ -93,6 +86,7 @@ public class DynamicExtremes extends AbstractChartExample {
                     }
                     setExtremes = !setExtremes;
                 });
+        toggleExtremesButton.setId("toggleExtremesButton");
 
         add(chart, toggleExtremesButton);
     }
