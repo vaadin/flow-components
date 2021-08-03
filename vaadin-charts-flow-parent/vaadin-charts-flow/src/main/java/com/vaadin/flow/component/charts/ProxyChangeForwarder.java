@@ -85,9 +85,11 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     public void axisRescaled(AxisRescaledEvent event) {
         chart.getElement().callFunction("__callAxisFunction", "setExtremes",
                 event.getAxis(), event.getAxisIndex(),
-                event.getMinimum().doubleValue(),
-                event.getMaximum().doubleValue(), event.isRedrawingNeeded(),
-                event.isAnimated());
+                event.getMinimum() == null ? null
+                        : event.getMinimum().doubleValue(),
+                event.getMaximum() == null ? null
+                        : event.getMaximum().doubleValue(),
+                event.isRedrawingNeeded(), event.isAnimated());
     }
 
     @Override
