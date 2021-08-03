@@ -60,15 +60,18 @@ async function createPom(pomFile, pomTemplateFile, artifactID) {
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
-    // Add component-flow and component-testbench dependencies
-    const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
-    addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
-    addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
-    // Read original IT dependencies in master and add them
-    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/`+pomFile, 'utf8'))
-    js.project.dependencies[0].dependency.forEach(dep => {
-      addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0], dep.exclusions);
-    });
+    //vaadin-messages doesn't have the bower mode support
+    if (!pomFile.includes('bower') || !id.includes('messages')){
+      // Add component-flow and component-testbench dependencies
+      const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
+      addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
+      addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
+      // Read original IT dependencies in master and add them
+      const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/`+pomFile, 'utf8'))
+      js.project.dependencies[0].dependency.forEach(dep => {
+        addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0], dep.exclusions);
+      });
+    }
     return prev;
   }, Promise.resolve([
     // these dependencies should be always there
