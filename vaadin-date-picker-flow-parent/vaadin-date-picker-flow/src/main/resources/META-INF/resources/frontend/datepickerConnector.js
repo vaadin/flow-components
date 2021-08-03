@@ -84,8 +84,7 @@ import dateFnsIsValid from 'date-fns/isValid';
 
                 let currentDate = false;
                 let inputValue = getInputValue();
-                // todo check undefined
-                if (datepicker.i18n.parseDate !== 'undefined' && inputValue) {
+                if (typeof datepicker.i18n.parseDate === 'function' && inputValue) {
                     /* get current date with old parsing */
                     currentDate = datepicker.i18n.parseDate(inputValue);
                 }
