@@ -1,3 +1,7 @@
+import dateFnsFormat from 'date-fns/format';
+import dateFnsParse from 'date-fns/parse';
+import dateFnsIsValid from 'date-fns/isValid';
+
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker');
@@ -37,12 +41,6 @@
             datepicker.$connector.yearPart = new FlowDatePickerPart("1987");
             datepicker.$connector.parts = [datepicker.$connector.dayPart, datepicker.$connector.monthPart, datepicker.$connector.yearPart];
 
-            // Old locale should always be the default vaadin-date-picker component
-            // locale {English/US} as we init lazily and the date-picker formats
-            // the date using the default i18n settings and we need to use the input
-            // value as we may need to parse user input so we can't use the _selectedDate value.
-            let oldLocale = "en-us";
-
             datepicker.addEventListener('blur', tryCatchWrapper(e => {
                 if (!e.target.value && e.target.invalid) {
                     console.warn("Invalid value in the DatePicker.");
@@ -61,28 +59,20 @@
                 let inputValue = '';
                 try {
                     inputValue = datepicker._inputValue;
-                } catch(err) {
+                } catch (err) {
                     /* component not ready: falling back to stored value */
                     inputValue = datepicker.value || '';
                 }
                 return inputValue;
             });
 
-            datepicker.$connector.setLocale = tryCatchWrapper(function (locale) {
-
+            const createLocaleBasedFormatterAndParser = tryCatchWrapper(function (locale) {
                 try {
                     // Check whether the locale is supported or not
                     new Date().toLocaleDateString(locale);
                 } catch (e) {
                     locale = "en-US";
                     console.warn("The locale is not supported, using default locale setting(en-US).");
-                }
-
-                let currentDate = false;
-                let inputValue = getInputValue();
-                if (datepicker.i18n.parseDate !== 'undefined' && inputValue) {
-                    /* get current date with old parsing */
-                    currentDate = datepicker.i18n.parseDate(inputValue);
                 }
 
                 /* create test-string where to extract parsing regex */
@@ -110,7 +100,7 @@
                     .replace(datepicker.$connector.monthPart.initial, "(\\d{1,2})")
                     .replace(datepicker.$connector.yearPart.initial, "(\\d{1,4})");
 
-                datepicker.i18n.formatDate = tryCatchWrapper(function (date) {
+                function formatDate(date) {
                     let rawDate = datepicker._parseDate(`${date.year}-${date.month + 1}-${date.day}`);
 
                     // Workaround for Safari DST offset issue when using Date.toLocaleDateString().
@@ -120,9 +110,9 @@
                     rawDate.setHours(12)
 
                     return cleanString(rawDate.toLocaleDateString(locale));
-                });
+                }
 
-                datepicker.i18n.parseDate = tryCatchWrapper(function (dateString) {
+                function parseDate(dateString) {
                     dateString = cleanString(dateString);
 
                     if (dateString.length == 0) {
@@ -132,24 +122,66 @@
                     let match = dateString.match(datepicker.$connector.regex);
                     if (match && match.length == 4) {
                         for (let i = 1; i < 4; i++) {
-                            datepicker.$connector.parts[i-1].value = parseInt(match[i]);
+                            datepicker.$connector.parts[i - 1].value = parseInt(match[i]);
                         }
                         return {
                             day: datepicker.$connector.dayPart.value,
                             month: datepicker.$connector.monthPart.value - 1,
                             year: datepicker.$connector.yearPart.value
                         };
-                    }  else {
+                    } else {
                         return false;
                     }
-                });
-
-                if (inputValue === "") {
-                    oldLocale = locale;
-                } else if (currentDate) {
-                    /* set current date to invoke use of new locale */
-                    datepicker._selectedDate = datepicker._parseDate(`${currentDate.year}-${currentDate.month + 1}-${currentDate.day}`);
                 }
+
+                return {
+                    formatDate: formatDate,
+                    parseDate: parseDate,
+                };
+            });
+
+            const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats) {
+                if (!formats || formats.length === 0) {
+                    throw new Error("Array of custom date formats is null or empty");
+                }
+
+                function formatDate(dateParts) {
+                    const format = formats[0];
+                    const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+
+                    return dateFnsFormat(date, format);
+                }
+
+                function parseDate(dateString) {
+                    for (let format of formats) {
+                        const date = dateFnsParse(dateString, format, new Date());
+
+                        if (dateFnsIsValid(date)) {
+                            return {day: date.getDate(), month: date.getMonth(), year: date.getFullYear()};
+                        }
+                    }
+                    return false;
+                }
+
+                return {
+                    formatDate: formatDate,
+                    parseDate: parseDate,
+                };
+            });
+
+            datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
+                // Create formatting and parsing functions, either based on custom formats set in i18n object,
+                // or based on the locale set in the date picker
+                // Custom formats take priority over locale
+                const hasDateFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
+                const formatterAndParser = hasDateFormats
+                    ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats)
+                    : locale
+                        ? createLocaleBasedFormatterAndParser(locale)
+                        : null;
+
+                // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
+                datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
             });
         })(datepicker)
     };
