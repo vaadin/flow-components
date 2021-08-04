@@ -45,6 +45,7 @@ public class CustomSearchView extends VerticalLayout {
         crud.addNewListener(e -> data.add(e.getItem()));
 
         final TextField searchBar = new TextField();
+        searchBar.setId("searchBar");
         searchBar.getElement().getStyle().set("flex-grow", "1");
         searchBar.setValueChangeMode(ValueChangeMode.EAGER);
         searchBar.setPrefixComponent(VaadinIcon.SEARCH.create());
