@@ -16,18 +16,16 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class DatePickerTest {
@@ -51,33 +49,35 @@ public class DatePickerTest {
     public void datePicker_basicCases() {
         DatePicker picker = new DatePicker();
 
-        assertEquals(null, picker.getValue());
-        assertFalse(picker.getElement().hasProperty("value"));
+        Assert.assertNull(picker.getValue());
+        Assert.assertFalse(picker.getElement().hasProperty("value"));
 
         picker.setValue(LocalDate.of(2018, 4, 25));
-        assertEquals("2018-04-25", picker.getElement().getProperty("value"));
+        Assert.assertEquals("2018-04-25",
+                picker.getElement().getProperty("value"));
 
         picker.getElement().setProperty("value", "2017-03-24");
-        assertEquals(LocalDate.of(2017, 3, 24), picker.getValue());
+        Assert.assertEquals(LocalDate.of(2017, 3, 24), picker.getValue());
 
         // Cannot do removeProperty because
         // https://github.com/vaadin/flow/issues/3994
         picker.getElement().setProperty("value", null);
-        assertEquals(null, picker.getValue());
+        Assert.assertNull(picker.getValue());
     }
 
     @Test
     public void defaultCtor_does_not_update_values() {
         DatePicker picker = new DatePicker();
-        assertNull(picker.getValue());
-        assertEquals(null, picker.getElement().getProperty("value"));
+        Assert.assertNull(picker.getValue());
+        Assert.assertNull(picker.getElement().getProperty("value"));
     }
 
     @Test
     public void setInitialValue() {
         DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
-        assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
-        assertEquals("2018-04-25", picker.getElement().getProperty("value"));
+        Assert.assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
+        Assert.assertEquals("2018-04-25",
+                picker.getElement().getProperty("value"));
     }
 
     @Test
@@ -87,35 +87,37 @@ public class DatePickerTest {
         picker.setValue(LocalDate.now());
         picker.setValue(null);
 
-        assertNull(picker.getValue());
-        assertEquals("", picker.getElement().getProperty("value"));
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
     public void setOpened_openedPropertyIsUpdated() {
         DatePicker picker = new DatePicker();
-        assertFalse("Initially DatePicker should be closed", picker.isOpened());
+        Assert.assertFalse("Initially DatePicker should be closed",
+                picker.isOpened());
         picker.setOpened(true);
-        assertTrue(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+        Assert.assertTrue(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
         picker.setOpened(false);
-        assertFalse(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+        Assert.assertFalse(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
     }
 
     @Test
     public void openAndClose_openedPropertyIsUpdated() {
         DatePicker picker = new DatePicker();
-        assertFalse("Initially DatePicker should be closed", picker.isOpened());
+        Assert.assertFalse("Initially DatePicker should be closed",
+                picker.isOpened());
         picker.open();
-        assertTrue(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+        Assert.assertTrue(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
         picker.close();
-        assertFalse(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+        Assert.assertFalse(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
     }
 
     @Test
     public void clearButtonVisiblePropertyValue() {
         DatePicker picker = new DatePicker();
 
-        assertFalse("Clear button should not be visible by default",
+        Assert.assertFalse("Clear button should not be visible by default",
                 picker.isClearButtonVisible());
         assertClearButtonPropertyValueEquals(picker, true);
         assertClearButtonPropertyValueEquals(picker, false);
@@ -124,21 +126,94 @@ public class DatePickerTest {
     public void assertClearButtonPropertyValueEquals(DatePicker picker,
             Boolean value) {
         picker.setClearButtonVisible(value);
-        assertEquals(value, picker.isClearButtonVisible());
-        assertEquals(picker.isClearButtonVisible(),
+        Assert.assertEquals(value, picker.isClearButtonVisible());
+        Assert.assertEquals(picker.isClearButtonVisible(),
                 picker.getElement().getProperty("clearButtonVisible", value));
     }
 
     @Test
     public void setAutoOpenEnabled() {
         DatePicker picker = new DatePicker();
-        assertTrue("Auto-open should be enabled by default",
+        Assert.assertTrue("Auto-open should be enabled by default",
                 picker.isAutoOpen());
         picker.setAutoOpen(false);
-        assertFalse("Should be possible to disable auto-open",
+        Assert.assertFalse("Should be possible to disable auto-open",
                 picker.isAutoOpen());
         picker.setAutoOpen(true);
-        assertTrue("Should be possible to enable auto-open",
+        Assert.assertTrue("Should be possible to enable auto-open",
                 picker.isAutoOpen());
     }
+
+    @Test
+    public void setDateFormat_dateFormatsIsUpdated() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setDateFormat("MM-yyyy-dd");
+        List<String> dateFormats = i18n.getDateFormats();
+
+        Assert.assertNotNull(dateFormats);
+        Assert.assertEquals(1, dateFormats.size());
+        Assert.assertEquals("MM-yyyy-dd", dateFormats.get(0));
+    }
+
+    @Test
+    public void setDateFormats_dateFormatsIsUpdated() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setDateFormats("MM-yyyy-dd", "MM.dd.yyyy", "MM§yyyy§dd");
+        List<String> dateFormats = i18n.getDateFormats();
+
+        Assert.assertNotNull(dateFormats);
+        Assert.assertEquals(3, dateFormats.size());
+        Assert.assertEquals("MM-yyyy-dd", dateFormats.get(0));
+        Assert.assertEquals("MM.dd.yyyy", dateFormats.get(1));
+        Assert.assertEquals("MM§yyyy§dd", dateFormats.get(2));
+    }
+
+    @Test
+    public void setDateFormats_nullIsRemovedFromDateFormats() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setDateFormats("MM-yyyy-dd", null, "MM.dd.yyyy", "MM§yyyy§dd");
+        List<String> dateFormats = i18n.getDateFormats();
+
+        Assert.assertNotNull(dateFormats);
+        Assert.assertEquals(3, dateFormats.size());
+        Assert.assertEquals("MM-yyyy-dd", dateFormats.get(0));
+        Assert.assertEquals("MM.dd.yyyy", dateFormats.get(1));
+        Assert.assertEquals("MM§yyyy§dd", dateFormats.get(2));
+    }
+
+    @Test
+    public void setDateFormat_dateFormatsIsNull() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+
+        Assert.assertNull(i18n.getDateFormats());
+
+        i18n.setDateFormat("MM-yyyy-dd");
+        Assert.assertNotNull(i18n.getDateFormats());
+
+        i18n.setDateFormat(null);
+
+        Assert.assertNull(i18n.getDateFormats());
+    }
+
+    @Test
+    public void setDateFormats_dateFormatsIsNull() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+
+        Assert.assertNull(i18n.getDateFormats());
+
+        i18n.setDateFormats("MM-yyyy-dd");
+        Assert.assertNotNull(i18n.getDateFormats());
+
+        i18n.setDateFormats(null);
+        Assert.assertNull(i18n.getDateFormats());
+    }
+
+    @Test
+    public void setDateFormats_throwsExceptionWhenSecondArgIsNull() {
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+
+        Assert.assertThrows(NullPointerException.class,
+                () -> i18n.setDateFormats("MM-yyyy-dd", null));
+    }
+
 }

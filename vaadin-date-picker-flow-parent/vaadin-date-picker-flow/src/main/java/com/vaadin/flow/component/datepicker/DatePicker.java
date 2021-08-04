@@ -17,9 +17,12 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -33,6 +36,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -70,6 +74,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private LocalDate max;
     private LocalDate min;
     private boolean required;
+
+    private StateTree.ExecutionRegistration pendingI18nUpdate;
 
     /**
      * Default constructor.
@@ -264,6 +270,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * compatibility can be different based on the browser and mobile devices,
      * you can check here for more details: <a href=
      * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString</a>
+     * <p>
+     * When using custom date formats through
+     * {@link DatePicker#setI18n(DatePickerI18n)}, setting a locale has no
+     * effect, and dates will always be parsed and displayed using the custom
+     * date format.
      *
      * @param locale
      *            the locale set to the date picker, cannot be null
@@ -285,12 +296,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         } else {
             languageTag = locale.getLanguage() + "-" + locale.getCountry();
         }
-        getUI().ifPresent(ui -> setLocaleWithJS());
-    }
-
-    private void setLocaleWithJS() {
-        runBeforeClientResponse(ui -> getElement()
-                .callJsFunction("$connector.setLocale", languageTag));
+        requestI18nUpdate();
     }
 
     /**
@@ -307,11 +313,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if (languageTag != null) {
-            setLocaleWithJS();
+        if (locale == null) {
+            getUI().ifPresent(ui -> setLocale(ui.getLocale()));
+        } else if (languageTag != null) {
+            requestI18nUpdate();
         }
         if (i18n != null) {
-            setI18nWithJS();
+            requestI18nUpdate();
         }
         FieldValidationUtil.disableClientValidation(this);
     }
@@ -346,24 +354,49 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
         this.i18n = i18n;
-        getUI().ifPresent(ui -> setI18nWithJS());
+        requestI18nUpdate();
     }
 
-    private void setI18nWithJS() {
-        runBeforeClientResponse(ui -> {
-            JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
-            // Remove null values to prevent errors
-            for (String key : i18nObject.keys()) {
-                if (i18nObject.get(key).getType() == JsonType.NULL) {
-                    i18nObject.remove(key);
-                }
+    private void requestI18nUpdate() {
+        getUI().ifPresent(ui -> {
+            if (pendingI18nUpdate != null) {
+                pendingI18nUpdate.remove();
             }
-            // Assign new I18N object to WC, keep current values if they are not
-            // defined in the new object
-            getElement().executeJs(
-                    "this.i18n = Object.assign({}, this.i18n, $0);",
-                    i18nObject);
+            pendingI18nUpdate = ui.beforeClientResponse(this, context -> {
+                pendingI18nUpdate = null;
+                executeI18nUpdate();
+            });
         });
+    }
+
+    /**
+     * Update I18N settings in the web component. Merges the DatePickerI18N
+     * settings with the current settings of the web component, and configures
+     * formatting and parsing functions based on either the locale, or the
+     * custom date formats specified in DatePickerI18N.
+     */
+    private void executeI18nUpdate() {
+        JsonObject i18nObject = i18n != null
+                ? (JsonObject) JsonSerializer.toJson(i18n)
+                : null;
+        // Remove properties with null values to prevent errors in web
+        // component
+        if (i18nObject != null) {
+            removeNullValuesFromJsonObject(i18nObject);
+        }
+
+        // Call update function in connector with locale and I18N settings
+        // The connector is expected to handle that either of those can be null
+        getElement().callJsFunction("$connector.updateI18n", languageTag,
+                i18nObject);
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -661,6 +694,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         private List<String> monthNames;
         private List<String> weekdays;
         private List<String> weekdaysShort;
+        private List<String> dateFormats;
         private int firstDayOfWeek;
         private String week;
         private String calendar;
@@ -731,6 +765,98 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
             this.weekdaysShort = weekdaysShort;
+            return this;
+        }
+
+        /**
+         * Get the list of custom date formats that are used for formatting the
+         * date displayed in the text field, and for parsing the user input
+         *
+         * @return list of date patterns or null
+         */
+        public List<String> getDateFormats() {
+            return dateFormats;
+        }
+
+        /**
+         * Sets a custom date format to be used by the date picker. The format
+         * is used for formatting the date displayed in the text field, and for
+         * parsing the user input.
+         * <p>
+         * The format is a string pattern using specific symbols to specify how
+         * and where the day, month and year should be displayed. The following
+         * symbols can be used in the pattern:
+         * <ul>
+         * <li>{@code yy} - 2 digit year
+         * <li>{@code yyyy} - 4 digit year
+         * <li>{@code M} - Month, as 1 or 2 digits
+         * <li>{@code MM} - Month, padded to 2 digits
+         * <li>{@code d} - Day-of-month, as 1 or 2 digits
+         * <li>{@code dd} - Day-of-month, padded to 2 digits
+         * </ul>
+         * <p>
+         * For example {@code dd/MM/yyyy}, will format the 20th of June 2021 as
+         * {@code 20/06/2021}.
+         * <p>
+         * Using a custom date format overrides the locale set in the date
+         * picker.
+         * <p>
+         * Setting the format to null will revert the date picker to use the
+         * locale for formatting and parsing dates.
+         *
+         * @param dateFormat
+         *            A string with a date format pattern, or null to remove the
+         *            previous custom format
+         * @return this instance for method chaining
+         */
+        public DatePickerI18n setDateFormat(String dateFormat) {
+            this.setDateFormats(dateFormat);
+            return this;
+        }
+
+        /**
+         * Sets custom date formats to be used by the date picker. The primary
+         * format is used for formatting the date displayed in the text field,
+         * and for parsing the user input. Additional parsing formats can be
+         * specified to support entering dates in multiple formats. The date
+         * picker will first attempt to parse the user input using the primary
+         * format. If parsing with the primary format fails, it will attempt to
+         * parse the input using the additional formats in the order that they
+         * were specified. The additional parsing formats are never used for
+         * formatting the date. After entering a date using one of the
+         * additional parsing formats, it will still be displayed using the
+         * primary format.
+         * <p>
+         * See {@link DatePickerI18n#setDateFormat(String)} on how date patterns
+         * are structured.
+         * <p>
+         * Using custom date formats overrides the locale set in the date
+         * picker.
+         * <p>
+         * Setting the primary format to null will revert the date picker to use
+         * the locale for formatting and parsing dates.
+         *
+         * @param primaryFormat
+         *            A string with a date format pattern, or null to remove the
+         *            previous custom format
+         * @param additionalParsingFormats
+         *            Additional date format patterns to be used for parsing
+         * @return this instance for method chaining
+         */
+        public DatePickerI18n setDateFormats(String primaryFormat,
+                String... additionalParsingFormats) {
+            Objects.requireNonNull(additionalParsingFormats,
+                    "Additional parsing formats must not be null");
+
+            if (primaryFormat == null) {
+                this.dateFormats = null;
+            } else {
+                this.dateFormats = new ArrayList<>();
+                this.dateFormats.add(primaryFormat);
+                this.dateFormats.addAll(Stream.of(additionalParsingFormats)
+                        .filter(Objects::nonNull).collect(Collectors.toList()));
+            }
+
             return this;
         }
 
