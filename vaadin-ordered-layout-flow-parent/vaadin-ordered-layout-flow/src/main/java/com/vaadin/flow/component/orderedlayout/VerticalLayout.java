@@ -28,7 +28,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * wide.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "20.0.1")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "20.0.2")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {
