@@ -1,7 +1,3 @@
-import dateFnsFormat from 'date-fns/format';
-import dateFnsParse from 'date-fns/parse';
-import dateFnsIsValid from 'date-fns/isValid';
-
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker');
@@ -145,18 +141,23 @@ import dateFnsIsValid from 'date-fns/isValid';
                     throw new Error("Array of custom date formats is null or empty");
                 }
 
+                const dateFns = window.Vaadin.Flow.datepickerDateFns;
+                if (!dateFns) {
+                    throw new Error("Custom date-fns bundle for date picker is not registered at window.Vaadin.Flow.datepickerDateFns");
+                }
+
                 function formatDate(dateParts) {
                     const format = formats[0];
                     const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
-                    return dateFnsFormat(date, format);
+                    return dateFns.format(date, format);
                 }
 
                 function parseDate(dateString) {
                     for (let format of formats) {
-                        const date = dateFnsParse(dateString, format, new Date());
+                        const date = dateFns.parse(dateString, format, new Date());
 
-                        if (dateFnsIsValid(date)) {
+                        if (dateFns.isValid(date)) {
                             return {day: date.getDate(), month: date.getMonth(), year: date.getFullYear()};
                         }
                     }
