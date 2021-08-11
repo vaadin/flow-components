@@ -16,6 +16,8 @@ then
         quiet="-q";;
       hub=*)
         TBHUB=`echo $i | cut -d = -f2`;;
+      image=*)
+        SELENIUM_IMAGE=`echo $i | cut -d = -f2`;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -90,6 +92,7 @@ computeFastBuild() {
 ## Set default build paramters
 [ -z "$TESTS_IN_PARALLEL" ] && TESTS_IN_PARALLEL=1
 [ -z "$FORK_COUNT" ] && FORK_COUNT="5"
+[ -z "$SELENIUM_IMAGE" ] && SELENIUM_IMAGE="latest"
 
 ## Show info about environment
 tcLog "Show info (forks=$FORK_COUNT parallel=$TESTS_IN_PARALLEL)"
@@ -157,7 +160,7 @@ args="$args -Dfailsafe.rerunFailingTestsCount=2"
 if [ "$TBHUB" = "localhost" ]
 then
     DOCKER_CONTAINER_NAME="selenium-container"
-    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome"
+    [ -n "$SELENIUM_DOCKER_IMAGE" ]  || SELENIUM_DOCKER_IMAGE="selenium/standalone-chrome:$SELENIUM_IMAGE"
     tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
     set -x
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT

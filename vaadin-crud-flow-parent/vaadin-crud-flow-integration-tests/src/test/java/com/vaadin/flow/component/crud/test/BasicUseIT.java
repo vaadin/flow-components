@@ -28,6 +28,13 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
+    public void crudReplacesGrid() {
+        getTestButton("addGrid").click();
+        List<GridElement> grids = $(GridElement.class).all();
+        Assert.assertEquals(1, grids.size());
+    }
+
+    @Test
     public void dataPresentInGrid() {
         Assert.assertEquals(3,
                 $(CrudElement.class).waitForFirst().getGrid().getRowCount());
