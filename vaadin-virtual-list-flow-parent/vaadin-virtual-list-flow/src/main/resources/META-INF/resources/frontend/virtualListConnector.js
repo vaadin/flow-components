@@ -74,7 +74,7 @@ window.Vaadin.Flow.virtualListConnector = {
         * action, but we only want to do the check once.
         */
         scheduleUpdateRequest();
-      }
+      };
       renderer.__virtualListConnectorPatched = true;
       renderer.__rendererId = originalRenderer.__rendererId;
 
