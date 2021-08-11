@@ -140,8 +140,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-beta2")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
