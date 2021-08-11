@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>21.0-SNAPSHOT</version>
+        <version>22.0-SNAPSHOT</version>
     </parent>
     <!-- With the current CI setup, all modules in this repo should follow
          the same naming pattern: vaadin-[name]-flow
