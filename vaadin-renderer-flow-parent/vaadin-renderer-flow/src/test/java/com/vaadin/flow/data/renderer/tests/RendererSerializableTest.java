@@ -1,4 +1,4 @@
-package com.vaadin.flow.renderer.tests;
+package com.vaadin.flow.data.renderer.tests;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 

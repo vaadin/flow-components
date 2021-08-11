@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.renderer.tests;
+package com.vaadin.flow.data.renderer.tests;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,8 +28,8 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.renderer.LitRenderer;
-import com.vaadin.flow.renderer.LitRenderer.LitRendering;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonValue;

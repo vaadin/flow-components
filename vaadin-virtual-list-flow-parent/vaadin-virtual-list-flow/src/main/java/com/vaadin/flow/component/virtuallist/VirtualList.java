@@ -44,8 +44,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.renderer.LitRenderer;
-import com.vaadin.flow.renderer.LitRenderer.LitRendering;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.renderer.tests;
+package com.vaadin.flow.data.renderer.tests;
 
 import java.util.Arrays;
 
@@ -21,7 +21,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-renderer-flow/lit-renderer")

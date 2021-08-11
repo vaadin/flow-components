@@ -66,8 +66,8 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.renderer.LitRenderer;
-import com.vaadin.flow.renderer.LitRenderer.LitRendering;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;

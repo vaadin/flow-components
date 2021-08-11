@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.renderer;
+package com.vaadin.flow.data.renderer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +29,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -101,7 +99,7 @@ public class LitRenderer<T> extends Renderer<T> {
      * </ul>
      * <p>
      * Examples:
-     * 
+     *
      * <pre>
      * {@code
      * // Prints the `name` property of a person
