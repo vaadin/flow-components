@@ -55,7 +55,7 @@ async function computeVersion() {
 }
 
 // Creates the pom.xml for the integration-tests module
-async function createPom(pomFile, pomTemplateFile, artifactID) {
+async function createPom(pomFile, pomTemplateFile, artifactID, excludedTests) {
 
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
@@ -97,7 +97,7 @@ async function createPom(pomFile, pomTemplateFile, artifactID) {
   tplJs.project.parent[0].version = [version];
   delete tplJs.project.version;
   const tests = tplJs.project.build[0].plugins[0].plugin.find(p => p.artifactId[0] === 'maven-failsafe-plugin');
-  tests.configuration = [{excludes: [{exclude: exclude}]}]
+  tests.configuration = [{excludes: [{exclude: excludedTests}]}]
   if (!fs.existsSync(itFolder)) {
     console.log(`Creating Folder ${itFolder}`);
     fs.mkdirSync(itFolder)
@@ -211,9 +211,10 @@ async function main() {
   await computeModules();
   await copySources();
   await createFrontendIndex();
-  await createPom('pom.xml', 'pom-integration-tests.xml', 'vaadin-flow-components-integration-tests');
+  await createPom('pom.xml', 'pom-integration-tests.xml', 'vaadin-flow-components-integration-tests', exclude);
   //V14.X needs to validate the bower Mode
-  await createPom('pom-bower-mode.xml', 'pom-bower-mode.xml','vaadin-flow-components-integration-tests-bower-mode');
+  exclude = ['%regex[com.vaadin.flow.component.messages.*]']
+  await createPom('pom-bower-mode.xml', 'pom-bower-mode.xml','vaadin-flow-components-integration-tests-bower-mode', exclude);
 }
 
 main();
