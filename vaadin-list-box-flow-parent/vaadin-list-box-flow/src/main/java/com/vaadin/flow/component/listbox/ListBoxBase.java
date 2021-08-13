@@ -102,6 +102,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
+        rebuild();
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -118,7 +119,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                         rebuild();
                     }
                 });
-        rebuild();
     }
 
     @Override
