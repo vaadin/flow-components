@@ -17,10 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -39,7 +36,6 @@ import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.di.Instantiator;
@@ -47,6 +43,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.DataProviderListenersTest;
 
 import elemental.json.Json;
 import static org.junit.Assert.assertEquals;
@@ -458,59 +455,11 @@ public class ComboBoxTest {
     }
 
     @Test
-    public void dataProviderListeners_comboBoxAttached_oldDataProviderListenerRemoved() {
-        AtomicInteger listenersCount = new AtomicInteger(0);
-        AtomicBoolean oldListenerRemoved = new AtomicBoolean();
-
-        // given
-        ComboBox<String> comboBox = new ComboBox<>();
-        ListDataProvider<String> dataProvider = new ListDataProvider<String>(
-                Collections.emptyList()) {
-            @Override
-            public Registration addDataProviderListener(
-                    DataProviderListener<String> listener) {
-                listenersCount.incrementAndGet();
-                Registration registration = super.addDataProviderListener(
-                        listener);
-                // the second listener is added by ComboBox and it is the one
-                // we want to be removed.
-                return listenersCount.get() == 2
-                        ? Registration.combine(registration,
-                                () -> oldListenerRemoved.set(true))
-                        : registration;
-            }
-        };
-
-        // when
-        comboBox.setDataProvider(dataProvider);
-
-        // then
-        Assert.assertEquals(
-                "Expected exactly two data provider listeners added by "
-                        + "DataCommunicator's and ComboBox's 'setDataProvider' methods",
-                2, listenersCount.get());
-        Assert.assertFalse(
-                "Expected data provider listener added by ComboBox not to be "
-                        + "removed before ComboBox being attached",
-                oldListenerRemoved.get());
-
-        // given
-        listenersCount.set(0);
-
-        // when
-        DataCommunicatorTest.MockUI mockUI = new DataCommunicatorTest.MockUI();
-        mockUI.add(comboBox);
-        fakeClientCommunication(mockUI);
-
-        // then
-        Assert.assertEquals(
-                "Expected exactly two data provider listeners added by "
-                        + "DataCommunicator's and ComboBox's attach handle methods",
-                2, listenersCount.get());
-        Assert.assertTrue(
-                "Expected old data provider listener to be removed after "
-                        + "combobox being attached",
-                oldListenerRemoved.get());
+    public void dataProviderListeners_comboBoxAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new ComboBox<>(), 2, 2, new int[] { 1, 3 },
+                        new DataCommunicatorTest.MockUI());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

@@ -17,9 +17,6 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
@@ -27,13 +24,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.DataProviderListener;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.DataProviderListenersTest;
 
 public class GridTest {
 
@@ -111,64 +105,10 @@ public class GridTest {
     }
 
     @Test
-    public void dataProviderListeners_gridAttached_oldDataProviderListenerRemoved() {
-        AtomicInteger listenersCount = new AtomicInteger(0);
-        AtomicBoolean oldListenerRemoved = new AtomicBoolean();
-
-        // given
-        Grid<String> grid = new Grid<>();
-        ListDataProvider<String> dataProvider = new ListDataProvider<String>(
-                Collections.emptyList()) {
-            @Override
-            public Registration addDataProviderListener(
-                    DataProviderListener<String> listener) {
-                listenersCount.incrementAndGet();
-                Registration registration = super.addDataProviderListener(
-                        listener);
-                // the first listener is added by Grid in 'setDataProvider'
-                // and it is the one we want to be removed.
-                return listenersCount.get() == 1
-                        ? Registration.combine(registration,
-                                () -> oldListenerRemoved.set(true))
-                        : registration;
-            }
-        };
-
-        // when
-        grid.setDataProvider(dataProvider);
-
-        // then
-        Assert.assertEquals(
-                "Expected exactly two data provider listeners added by "
-                        + "DataCommunicator's and Grid's 'setDataProvider' methods",
-                2, listenersCount.get());
-        Assert.assertFalse(
-                "Expected data provider listener added by Grid not to be "
-                        + "removed before Grid being attached",
-                oldListenerRemoved.get());
-
-        // given
-        listenersCount.set(0);
-
-        // when
-        DataCommunicatorTest.MockUI mockUI = new DataCommunicatorTest.MockUI();
-        mockUI.add(grid);
-        fakeClientCommunication(mockUI);
-
-        // then
-        Assert.assertEquals(
-                "Expected exactly two data provider listeners added by "
-                        + "DataCommunicator's and Grid's attach handle methods",
-                2, listenersCount.get());
-        Assert.assertTrue(
-                "Expected old data provider listener to be removed after "
-                        + "grid being attached",
-                oldListenerRemoved.get());
-    }
-
-    private void fakeClientCommunication(UI ui) {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+    public void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new Grid<>(), 2, 2, new int[] { 0, 2 },
+                        new DataCommunicatorTest.MockUI());
     }
 }

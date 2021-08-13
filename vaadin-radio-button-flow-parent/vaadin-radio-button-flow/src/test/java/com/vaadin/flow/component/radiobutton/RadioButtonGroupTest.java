@@ -17,10 +17,7 @@ package com.vaadin.flow.component.radiobutton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,13 +36,11 @@ import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataVi
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.DataProviderListener;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.DataProviderListenersTest;
 
 public class RadioButtonGroupTest {
 
@@ -426,61 +421,10 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void dataProviderListeners_radioButtonGroupAttached_oldDataProviderListenerRemoved() {
-        AtomicInteger listenersCount = new AtomicInteger(0);
-        AtomicBoolean oldListenerRemoved = new AtomicBoolean();
-
-        // given
-        RadioButtonGroup<String> rbg = new RadioButtonGroup<>();
-        ListDataProvider<String> dataProvider = new ListDataProvider<String>(
-                Collections.emptyList()) {
-            @Override
-            public Registration addDataProviderListener(
-                    DataProviderListener<String> listener) {
-                listenersCount.incrementAndGet();
-                Registration registration = super.addDataProviderListener(
-                        listener);
-                // the first listener is added by RBG in 'setDataProvider'
-                // and it is the one we want to be removed.
-                return listenersCount.get() == 1
-                        ? Registration.combine(registration,
-                                () -> oldListenerRemoved.set(true))
-                        : registration;
-            }
-        };
-
-        // when
-        rbg.setDataProvider(dataProvider);
-
-        // then
-        Assert.assertEquals(
-                "Expected exactly one data provider listener added by RBG's "
-                        + "'setDataProvider' method",
-                1, listenersCount.get());
-        Assert.assertFalse(
-                "Expected data provider listener added by RBG not to be "
-                        + "removed before RBG being attached",
-                oldListenerRemoved.get());
-
-        // when
-        DataCommunicatorTest.MockUI mockUI = new DataCommunicatorTest.MockUI();
-        mockUI.add(rbg);
-        fakeClientCommunication(mockUI);
-
-        // then
-        Assert.assertEquals(
-                "Expected exactly one data provider listener added by "
-                        + "RBG's attach handle method",
-                2, listenersCount.get());
-        Assert.assertTrue(
-                "Expected old data provider listener to be removed after "
-                        + "RBG being attached",
-                oldListenerRemoved.get());
-    }
-
-    private void fakeClientCommunication(UI ui) {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+    public void dataProviderListeners_radioButtonGroupAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
+                        new DataCommunicatorTest.MockUI());
     }
 }
