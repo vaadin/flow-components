@@ -2,7 +2,10 @@ package com.vaadin.flow.component.listbox.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,8 +13,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.DataProviderListener;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.shared.Registration;
 
 public class ListBoxUnitTest {
 
@@ -161,6 +169,65 @@ public class ListBoxUnitTest {
         listDataView.setIdentifierProvider(CustomItem::getId);
 
         listBox.setValue(new CustomItem(null, "First"));
+    }
+
+    @Test
+    public void dataProviderListeners_listBoxAttached_oldDataProviderListenerRemoved() {
+        AtomicInteger listenersCount = new AtomicInteger(0);
+        AtomicBoolean oldListenerRemoved = new AtomicBoolean();
+
+        // given
+        ListBox<String> listBox = new ListBox<>();
+        ListDataProvider<String> dataProvider = new ListDataProvider<String>(
+                Collections.emptyList()) {
+            @Override
+            public Registration addDataProviderListener(
+                    DataProviderListener<String> listener) {
+                listenersCount.incrementAndGet();
+                Registration registration = super.addDataProviderListener(
+                        listener);
+                // the first listener is added by ListBox in 'setDataProvider'
+                // and it is the one we want to be removed.
+                return listenersCount.get() == 1
+                        ? Registration.combine(registration,
+                                () -> oldListenerRemoved.set(true))
+                        : registration;
+            }
+        };
+
+        // when
+        listBox.setDataProvider(dataProvider);
+
+        // then
+        Assert.assertEquals(
+                "Expected exactly one data provider listener added by "
+                        + "ListBox's 'setDataProvider' method",
+                1, listenersCount.get());
+        Assert.assertFalse(
+                "Expected data provider listener added by ListBox not to be "
+                        + "removed before ListBox being attached",
+                oldListenerRemoved.get());
+
+        // when
+        DataCommunicatorTest.MockUI mockUI = new DataCommunicatorTest.MockUI();
+        mockUI.add(listBox);
+        fakeClientCommunication(mockUI);
+
+        // then
+        Assert.assertEquals(
+                "Expected exactly one data provider listener added by "
+                        + "ListBox's attach handle method",
+                2, listenersCount.get());
+        Assert.assertTrue(
+                "Expected old data provider listener to be removed after "
+                        + "ListBox being attached",
+                oldListenerRemoved.get());
+    }
+
+    private void fakeClientCommunication(UI ui) {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
     private void assertDisabledItem(int index, boolean disabled) {

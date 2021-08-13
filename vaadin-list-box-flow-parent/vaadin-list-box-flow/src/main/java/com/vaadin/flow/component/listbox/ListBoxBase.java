@@ -124,8 +124,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null
-                && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null) {
             setupDataProviderListener(getDataProvider());
         }
     }
