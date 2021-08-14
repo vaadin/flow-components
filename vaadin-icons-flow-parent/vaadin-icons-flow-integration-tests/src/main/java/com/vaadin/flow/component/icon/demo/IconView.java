@@ -21,6 +21,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.IconFactory;
+import com.vaadin.flow.component.icon.LumoIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -40,7 +42,8 @@ public class IconView extends Div {
         createBasicIconsView();
         createStyledIconView();
         createClickableIconsView();
-        createAllIconsView();
+        createAllVaadinIconsView();
+        createAllLumoIconsView();
     }
 
     private void createBasicIconsView() {
@@ -86,29 +89,46 @@ public class IconView extends Div {
         message.setId("clickable-message");
     }
 
-    private void createAllIconsView() {
+    private void createAllVaadinIconsView() {
         HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.getStyle().set("flexWrap", "wrap");
 
         iconLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
         for (VaadinIcon icon : VaadinIcon.values()) {
-            Icon iconComponent = icon.create();
-            iconComponent.setSize("50px");
-            iconComponent.getStyle().set("color", "#00b4f0").set("marginBottom",
-                    "3px");
-            VerticalLayout iconWithName = new VerticalLayout(iconComponent,
-                    new Label(icon.name()));
-            iconWithName.setSizeUndefined();
-            iconWithName
-                    .setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            iconWithName.getStyle().set("margin", "5px").set("width", "140px")
-                    .set("fontSize", "12px");
-            iconLayout.add(iconWithName);
+            iconLayout.add(iconWithName(icon, icon.name()));
         }
 
-        iconLayout.setId("all-icons");
-        addCard("All available icons", iconLayout);
+        iconLayout.setId("all-vaadin-icons");
+        addCard("All available Vaadin icons", iconLayout);
+    }
+
+    private void createAllLumoIconsView() {
+        HorizontalLayout iconLayout = new HorizontalLayout();
+        iconLayout.getStyle().set("flexWrap", "wrap");
+
+        iconLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+
+        for (LumoIcon icon : LumoIcon.values()) {
+            iconLayout.add(iconWithName(icon, icon.name()));
+        }
+
+        iconLayout.setId("all-lumo-icons");
+        addCard("All available Lumo icons", iconLayout);
+    }
+
+    private VerticalLayout iconWithName(IconFactory iconFactory, String name) {
+        Icon iconComponent = iconFactory.create();
+        iconComponent.setSize("50px");
+        iconComponent.getStyle().set("color", "#00b4f0").set("marginBottom",
+                "3px");
+        VerticalLayout iconWithName = new VerticalLayout(iconComponent,
+                new Label(name));
+        iconWithName.setSizeUndefined();
+        iconWithName.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        iconWithName.getStyle().set("margin", "5px").set("width", "140px")
+                .set("fontSize", "12px");
+        return iconWithName;
     }
 
     private void addCard(String title, Component... components) {
