@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.icon.LumoIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.icon.demo.IconView;
 import com.vaadin.flow.testutil.TestPath;
@@ -90,6 +91,26 @@ public class IconIT extends AbstractComponentIT {
             String enumName = VaadinIcon.values()[i].name();
             Assert.assertEquals(enumName, label.getText());
             assertIconProperty(icon, "vaadin",
+                    enumName.toLowerCase().replace('_', '-'));
+        }
+    }
+
+    @Test
+    public void allAvailableLumoIcons() {
+        WebElement allIcons = findElement(By.id("all-lumo-icons"));
+        List<WebElement> labels = allIcons.findElements(By.tagName("label"));
+        List<WebElement> icons = allIcons
+                .findElements(By.tagName("vaadin-icon"));
+
+        Assert.assertEquals(LumoIcon.values().length, labels.size());
+        Assert.assertEquals(LumoIcon.values().length, icons.size());
+
+        for (int i = 0; i < labels.size(); i += 17) {
+            WebElement label = labels.get(i);
+            WebElement icon = icons.get(i);
+            String enumName = LumoIcon.values()[i].name();
+            Assert.assertEquals(enumName, label.getText());
+            assertIconProperty(icon, "lumo",
                     enumName.toLowerCase().replace('_', '-'));
         }
     }
