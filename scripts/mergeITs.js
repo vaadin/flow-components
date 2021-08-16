@@ -55,23 +55,26 @@ async function computeVersion() {
 }
 
 // Creates the pom.xml for the integration-tests module
-async function createPom(pomFile, pomTemplateFile, artifactID) {
+async function createPom(pomFile, pomTemplateFile, artifactID, excludedTests) {
 
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
-    //vaadin-messages doesn't have the bower mode support
-    if (!pomFile.includes('bower') || !id.includes('messages')){
-      // Add component-flow and component-testbench dependencies
-      const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
-      addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
-      addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
-      // Read original IT dependencies in master and add them
-      const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/`+pomFile, 'utf8'))
-      js.project.dependencies[0].dependency.forEach(dep => {
-        addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0], dep.exclusions);
-      });
+    //vaadin-messages doesn't have the bower mode pom
+    if (pomFile.includes('bower') && id.includes('messages')){
+      pomFileTemp = "pom.xml";
+    } else {
+      pomFileTemp = pomFile;
     }
+    // Add component-flow and component-testbench dependencies
+    const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
+    addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
+    addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
+    // Read original IT dependencies in master and add them
+    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/`+pomFileTemp, 'utf8'))
+    js.project.dependencies[0].dependency.forEach(dep => {
+      addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0], dep.exclusions);
+    });  
     return prev;
   }, Promise.resolve([
     // these dependencies should be always there
@@ -94,7 +97,7 @@ async function createPom(pomFile, pomTemplateFile, artifactID) {
   tplJs.project.parent[0].version = [version];
   delete tplJs.project.version;
   const tests = tplJs.project.build[0].plugins[0].plugin.find(p => p.artifactId[0] === 'maven-failsafe-plugin');
-  tests.configuration = [{excludes: [{exclude: exclude}]}]
+  tests.configuration = [{excludes: [{exclude: excludedTests}]}]
   if (!fs.existsSync(itFolder)) {
     console.log(`Creating Folder ${itFolder}`);
     fs.mkdirSync(itFolder)
@@ -208,9 +211,10 @@ async function main() {
   await computeModules();
   await copySources();
   await createFrontendIndex();
-  await createPom('pom.xml', 'pom-integration-tests.xml', 'vaadin-flow-components-integration-tests');
+  await createPom('pom.xml', 'pom-integration-tests.xml', 'vaadin-flow-components-integration-tests', exclude);
   //V14.X needs to validate the bower Mode
-  await createPom('pom-bower-mode.xml', 'pom-bower-mode.xml','vaadin-flow-components-integration-tests-bower-mode');
+  exclude = ['%regex[com.vaadin.flow.component.messages.*]']
+  await createPom('pom-bower-mode.xml', 'pom-bower-mode.xml','vaadin-flow-components-integration-tests-bower-mode', exclude);
 }
 
 main();
