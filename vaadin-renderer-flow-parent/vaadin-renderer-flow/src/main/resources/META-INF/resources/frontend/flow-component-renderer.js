@@ -9,13 +9,14 @@ class FlowComponentRenderer extends PolymerElement {
   static get template() {
     return html`
       <style>
+        :host {
+          animation: 1ms flow-component-renderer-appear;
+        }
+
         @keyframes flow-component-renderer-appear {
           to {
             opacity: 1;
           }
-        }
-        :host {
-          animation: 1ms flow-component-renderer-appear;
         }
       </style>
       <slot></slot>
