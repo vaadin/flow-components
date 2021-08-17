@@ -1,4 +1,3 @@
-import '@polymer/polymer/polymer-legacy.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import {
