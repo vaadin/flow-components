@@ -1,10 +1,8 @@
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import {
-  animationFrame,
-  idlePeriod,
-} from '@polymer/polymer/lib/utils/async.js';
+import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+
 class FlowComponentRenderer extends PolymerElement {
   static get template() {
     return html`
@@ -34,60 +32,6 @@ class FlowComponentRenderer extends PolymerElement {
   }
   static get observers() {
     return ['_attachRenderedComponentIfAble(appid, nodeid)'];
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this._runChrome72ShadowDomBugWorkaround();
-  }
-
-  /* workaround for issue vaadin/flow#5025 */
-  _runChrome72ShadowDomBugWorkaround() {
-    const userAgent = navigator.userAgent;
-    if (userAgent && userAgent.match('Chrome/')) {
-      // example: ... Chrome/72.0.3626.96 ...
-      const majorVersionString = userAgent.split('Chrome/')[1].split('.')[0];
-      if (majorVersionString && parseInt(majorVersionString) > 71) {
-        const debouncedNotifyResize = this._getDebouncedNotifyResizeFunction();
-
-        // if there is no notifyResize function, then just skip
-
-        if (debouncedNotifyResize) {
-          this.style.visibility = 'hidden';
-          // need to use animation frame instead of timeout or focusing won't work
-          requestAnimationFrame(() => {
-            this.style.visibility = '';
-            debouncedNotifyResize();
-          });
-        }
-      }
-    }
-  }
-
-  _getDebouncedNotifyResizeFunction() {
-    // 1. dig out the web component that might have the notifyResize function
-    let component = this.parentElement;
-    while (true) {
-      if (!component) {
-        return;
-      }
-      if (component.notifyResize) {
-        break;
-      } else {
-        component = component.parentElement;
-      }
-    }
-    // 2. assign a debounced proxy to notifyResize, if not yet there
-    if (!component._debouncedNotifyResize) {
-      component._debouncedNotifyResize = function () {
-        component.__debouncedNotifyResize = Debouncer.debounce(
-          component.__debouncedNotifyResize, // initially undefined
-          animationFrame,
-          component.notifyResize
-        );
-      };
-    }
-    return component._debouncedNotifyResize;
   }
 
   ready() {
