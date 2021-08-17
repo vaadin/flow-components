@@ -25,7 +25,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.tests.DataProviderListenersTest;
 
 public class GridTest {
 
@@ -100,5 +102,13 @@ public class GridTest {
 
         Assert.assertTrue(grid.isHeightByRows());
         Assert.assertTrue(grid.isAllRowsVisible());
+    }
+
+    @Test
+    public void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new Grid<>(), 2, 2, new int[] { 0, 2 },
+                        new DataCommunicatorTest.MockUI());
     }
 }
