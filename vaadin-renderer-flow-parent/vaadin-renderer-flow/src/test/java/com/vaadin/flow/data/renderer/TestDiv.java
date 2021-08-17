@@ -58,8 +58,8 @@ public class TestDiv extends HtmlContainer {
      * method has been called.
      *
      * @param forComponent
-     *            the component that this div describes, not <code>null</code>
-     *            , must have an id
+     *            the component that this div describes, not <code>null</code> ,
+     *            must have an id
      * @throws IllegalArgumentException
      *             if the provided component has no id
      */
