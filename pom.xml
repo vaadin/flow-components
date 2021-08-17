@@ -37,6 +37,7 @@
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
     </properties>
     <modules>
+        <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
         <module>vaadin-flow-components-shared</module>

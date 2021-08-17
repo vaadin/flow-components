@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-combo-box-flow-parent</artifactId>
+        <artifactId>vaadin-renderer-flow-parent</artifactId>
         <version>22.0-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-combo-box-flow</artifactId>
+    <artifactId>vaadin-renderer-flow</artifactId>
     <packaging>jar</packaging>
-    <name>Vaadin Combo Box</name>
+    <name>Flow Renderer</name>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -17,41 +17,19 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-data</artifactId>
-            <version>${flow.version}</version>
-            <type>test-jar</type>
+            <artifactId>flow-test-generic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-generic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-flow-components-shared</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-renderer-flow</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>

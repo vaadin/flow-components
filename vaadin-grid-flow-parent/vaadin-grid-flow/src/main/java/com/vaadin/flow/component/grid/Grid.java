@@ -121,6 +121,8 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -1182,6 +1184,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private PropertySet<T> propertySet;
 
     private DataGenerator<T> itemDetailsDataGenerator;
+    private List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -2782,27 +2785,49 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code null} to remove the current renderer
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
-        detailsManager.destroyAllData();
-        itemDetailsDataGenerator = null;
+        detailsRenderingRegistrations.forEach(Registration::remove);
+        detailsRenderingRegistrations.clear();
+
         if (renderer == null) {
             return;
         }
 
         Rendering<T> rendering;
-        if (detailsTemplate == null) {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper());
-            detailsTemplate = rendering.getTemplateElement();
-            detailsTemplate.setAttribute("class", "row-details");
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (detailsTemplate != null
+                    && detailsTemplate.getParent() != null) {
+                getElement().removeChild(detailsTemplate);
+            }
+            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper(), detailsTemplate);
+            // TemplateRenderer or ComponentRenderer
+            if (detailsTemplate == null) {
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper());
+                detailsTemplate = rendering.getTemplateElement();
+                detailsTemplate.setAttribute("class", "row-details");
+            } else {
+                getElement().appendChild(detailsTemplate);
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper(), detailsTemplate);
+            }
         }
 
-        Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            itemDetailsDataGenerator = renderingDataGenerator;
+            Registration detailsRenderingDataGeneratorRegistration = () -> {
+                detailsManager.destroyAllData();
+                itemDetailsDataGenerator = null;
+            };
+            detailsRenderingRegistrations
+                    .add(detailsRenderingDataGeneratorRegistration);
+        });
 
-        if (dataGenerator.isPresent()) {
-            itemDetailsDataGenerator = dataGenerator.get();
+        if (rendering instanceof LitRendering) {
+            detailsRenderingRegistrations
+                    .add(((LitRendering<T>) rendering).getRegistration());
         }
     }
 
