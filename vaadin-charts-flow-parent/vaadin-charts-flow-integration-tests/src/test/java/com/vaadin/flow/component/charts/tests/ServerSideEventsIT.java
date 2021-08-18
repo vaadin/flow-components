@@ -37,7 +37,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.tests.elements.LabelElement;
+import com.vaadin.tests.elements.SpanElement;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 
@@ -190,13 +190,13 @@ public class ServerSideEventsIT extends AbstractTBTest {
     private void assertLastEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
         getCommandExecutor().waitForVaadin();
-        LabelElement lastEvent = $(LabelElement.class).waitForFirst(); // id("lastEvent");
+        SpanElement lastEvent = $(SpanElement.class).id("lastEvent");
         Assert.assertEquals(expectedEvent.getSimpleName(), lastEvent.getText());
     }
 
     private void assertFirstHistoryEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        LabelElement lastEvent = $(LabelElement.class).id("event0");
+        SpanElement lastEvent = $(SpanElement.class).id("event0");
         String eventHistory = lastEvent.getText();
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
@@ -205,7 +205,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
     private void assertHasEventOfType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        List<LabelElement> labels = $(LabelElement.class).all();
+        List<SpanElement> labels = $(SpanElement.class).all();
         String expected = expectedEvent.getSimpleName();
         Optional<String> actual = labels.stream().map(label -> {
             String eventHistory = label.getText();
@@ -218,8 +218,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     private void assertNthHistoryEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent,
             int historyIndex) {
-        LabelElement lastEvent = $(LabelElement.class)
-                .id("event" + historyIndex);
+        SpanElement lastEvent = $(SpanElement.class).id("event" + historyIndex);
         String eventHistory = lastEvent.getText();
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
@@ -234,7 +233,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private SeriesCheckboxClickEvent readCheckboxEventDetails() {
-        String detailsJson = $(LabelElement.class).id("eventDetails").getText();
+        String detailsJson = $(SpanElement.class).id("eventDetails").getText();
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Series.class, new DataSeriesDeserializer())

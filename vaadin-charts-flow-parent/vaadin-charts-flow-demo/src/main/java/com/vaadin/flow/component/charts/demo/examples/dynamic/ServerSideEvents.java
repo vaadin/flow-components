@@ -30,7 +30,7 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -40,8 +40,8 @@ import com.vaadin.flow.server.Command;
 public class ServerSideEvents extends AbstractChartExample {
 
     private Chart chart;
-    private Label lastEvent;
-    private Label eventDetails;
+    private Span lastEvent;
+    private Span eventDetails;
     private int id;
     private VerticalLayout historyLayout;
     private int eventNumber;
@@ -51,10 +51,10 @@ public class ServerSideEvents extends AbstractChartExample {
 
     @Override
     public void initDemo() {
-        eventDetails = new Label();
+        eventDetails = new Span();
         eventDetails.setId("eventDetails");
 
-        lastEvent = new Label();
+        lastEvent = new Span();
         lastEvent.setId("lastEvent");
 
         historyLayout = new VerticalLayout();
@@ -213,7 +213,7 @@ public class ServerSideEvents extends AbstractChartExample {
         String details = createEventString(event);
         lastEvent.setText(name);
         eventDetails.setText(details);
-        Label history = new Label(name + ": " + details + "\n");
+        Span history = new Span(name + ": " + details + "\n");
         history.setId("event" + eventNumber++);
         historyLayout.getElement().insertChild(0, history.getElement());
     }
