@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -78,6 +79,34 @@ public class ServerSideEventsIT extends AbstractTBTest {
         legendItem.click();
 
         assertLastEventIsType(SeriesLegendItemClickEvent.class);
+    }
+
+    @Test
+    public void seriesLegendItemClick_withoutModifier_eventIsFired() {
+        WebElement disableVisibilityToggling = findDisableVisibityToggle();
+        disableVisibilityToggling.click();
+        WebElement legend = findLegendItem();
+
+        legend.click();
+
+        assertLastEventIsType(SeriesLegendItemClickEvent.class);
+        Assert.assertTrue($(SpanElement.class).id("eventDetails").getText()
+                .contains("\"shiftKey\" : false"));
+
+    }
+
+    @Test
+    public void seriesLegendItemClick_withModifier_eventIsFired() {
+        WebElement disableVisibilityToggling = findDisableVisibityToggle();
+        disableVisibilityToggling.click();
+        WebElement legend = findLegendItem();
+
+        new Actions(driver).keyDown(Keys.SHIFT).click(legend).keyUp(Keys.SHIFT)
+                .perform();
+
+        assertLastEventIsType(SeriesLegendItemClickEvent.class);
+        Assert.assertTrue($(SpanElement.class).id("eventDetails").getText()
+                .contains("\"shiftKey\" : true"));
     }
 
     @Test

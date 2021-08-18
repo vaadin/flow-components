@@ -24,11 +24,12 @@ import com.vaadin.flow.component.charts.Chart;
  */
 @DomEvent("point-legend-item-click")
 public class PointLegendItemClickEvent extends ComponentEvent<Chart>
-        implements HasItem {
+        implements ClickEvent, HasItem {
 
     private final int seriesIndex;
     private final String category;
     private final int pointIndex;
+    private final MouseEventDetails details;
 
     /**
      * Constructs a SeriesLegendItemClickEvent
@@ -37,6 +38,13 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
      * @param fromClient
      */
     public PointLegendItemClickEvent(Chart source, boolean fromClient,
+            @EventData("event.detail.originalEvent.browserEvent.pageX") int pageX,
+            @EventData("event.detail.originalEvent.browserEvent.pageY") int pageY,
+            @EventData("event.detail.originalEvent.browserEvent.altKey") boolean altKey,
+            @EventData("event.detail.originalEvent.browserEvent.ctrlKey") boolean ctrlKey,
+            @EventData("event.detail.originalEvent.browserEvent.metaKey") boolean metaKey,
+            @EventData("event.detail.originalEvent.browserEvent.shiftKey") boolean shiftKey,
+            @EventData("event.detail.originalEvent.button") int button,
             @EventData("event.detail.point.series.index") int seriesIndex,
             @EventData("event.detail.point.category") String category,
             @EventData("event.detail.point.index") int pointIndex) {
@@ -44,6 +52,15 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
         this.seriesIndex = seriesIndex;
         this.category = category;
         this.pointIndex = pointIndex;
+
+        details = new MouseEventDetails();
+        details.setAbsoluteX(pageX);
+        details.setAbsoluteY(pageY);
+        details.setButton(MouseEventDetails.MouseButton.of(button));
+        details.setAltKey(altKey);
+        details.setCtrlKey(ctrlKey);
+        details.setMetaKey(metaKey);
+        details.setShiftKey(shiftKey);
     }
 
     @Override
@@ -59,5 +76,10 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
     @Override
     public int getItemIndex() {
         return pointIndex;
+    }
+
+    @Override
+    public MouseEventDetails getMouseDetails() {
+        return details;
     }
 }
