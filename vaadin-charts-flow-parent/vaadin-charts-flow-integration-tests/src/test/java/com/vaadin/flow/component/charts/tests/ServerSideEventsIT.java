@@ -54,12 +54,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     @Test
-    @org.junit.Ignore("Does not pass in mono-repo - 100% failure")
     public void chartClick_occured_eventIsFired() {
-        WebElement chart = getChartElement();
-
-        new Actions(driver).moveToElement(chart, 200, 200).click().build()
-                .perform();
+        new Actions(driver).moveByOffset(200, 200).click().build().perform();
 
         assertLastEventIsType(ChartClickEvent.class);
     }
