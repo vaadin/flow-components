@@ -8,7 +8,7 @@
     </parent>
     <artifactId>vaadin-renderer-flow-integration-tests</artifactId>
     <packaging>war</packaging>
-    <name>Flow Renderer Integration Tests</name>
+    <name>Vaadin Renderer Integration Tests</name>
     <dependencies>
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
@@ -140,9 +140,6 @@
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
-                        <configuration>
-                            <scanIntervalSeconds>5</scanIntervalSeconds>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -8,7 +8,7 @@
     </parent>
     <artifactId>vaadin-renderer-flow</artifactId>
     <packaging>jar</packaging>
-    <name>Flow Renderer</name>
+    <name>Vaadin Renderer</name>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

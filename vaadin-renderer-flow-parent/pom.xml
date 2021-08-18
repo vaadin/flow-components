@@ -6,12 +6,9 @@
         <artifactId>vaadin-flow-components</artifactId>
         <version>22.0-SNAPSHOT</version>
     </parent>
-    <!-- With the current CI setup, all modules in this repo should follow
-         the same naming pattern: vaadin-[name]-flow
-         https://vaadin.slack.com/archives/C020AE8T02Z/p1625214456273000?thread_ts=1624431063.244300&cid=C020AE8T02Z -->
     <artifactId>vaadin-renderer-flow-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Flow Renderer Parent</name>
+    <name>Vaadin Renderer Parent</name>
     <modules>
         <module>vaadin-renderer-flow</module>
     </modules>
