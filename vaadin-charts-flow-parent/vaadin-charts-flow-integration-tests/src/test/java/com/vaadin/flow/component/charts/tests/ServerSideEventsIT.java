@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -37,7 +38,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.tests.elements.LabelElement;
+import com.vaadin.tests.elements.SpanElement;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 
@@ -54,12 +55,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     @Test
-    @org.junit.Ignore("Does not pass in mono-repo - 100% failure")
     public void chartClick_occured_eventIsFired() {
-        WebElement chart = getChartElement();
-
-        new Actions(driver).moveToElement(chart, 200, 200).click().build()
-                .perform();
+        new Actions(driver).moveByOffset(200, 200).click().build().perform();
 
         assertLastEventIsType(ChartClickEvent.class);
     }
@@ -82,6 +79,34 @@ public class ServerSideEventsIT extends AbstractTBTest {
         legendItem.click();
 
         assertLastEventIsType(SeriesLegendItemClickEvent.class);
+    }
+
+    @Test
+    public void seriesLegendItemClick_withoutModifier_eventIsFired() {
+        WebElement disableVisibilityToggling = findDisableVisibityToggle();
+        disableVisibilityToggling.click();
+        WebElement legend = findLegendItem();
+
+        legend.click();
+
+        assertLastEventIsType(SeriesLegendItemClickEvent.class);
+        Assert.assertTrue($(SpanElement.class).id("eventDetails").getText()
+                .contains("\"shiftKey\" : false"));
+
+    }
+
+    @Test
+    public void seriesLegendItemClick_withModifier_eventIsFired() {
+        WebElement disableVisibilityToggling = findDisableVisibityToggle();
+        disableVisibilityToggling.click();
+        WebElement legend = findLegendItem();
+
+        new Actions(driver).keyDown(Keys.SHIFT).click(legend).keyUp(Keys.SHIFT)
+                .perform();
+
+        assertLastEventIsType(SeriesLegendItemClickEvent.class);
+        Assert.assertTrue($(SpanElement.class).id("eventDetails").getText()
+                .contains("\"shiftKey\" : true"));
     }
 
     @Test
@@ -190,13 +215,13 @@ public class ServerSideEventsIT extends AbstractTBTest {
     private void assertLastEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
         getCommandExecutor().waitForVaadin();
-        LabelElement lastEvent = $(LabelElement.class).waitForFirst(); // id("lastEvent");
+        SpanElement lastEvent = $(SpanElement.class).id("lastEvent");
         Assert.assertEquals(expectedEvent.getSimpleName(), lastEvent.getText());
     }
 
     private void assertFirstHistoryEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        LabelElement lastEvent = $(LabelElement.class).id("event0");
+        SpanElement lastEvent = $(SpanElement.class).id("event0");
         String eventHistory = lastEvent.getText();
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
@@ -205,7 +230,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
     private void assertHasEventOfType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        List<LabelElement> labels = $(LabelElement.class).all();
+        List<SpanElement> labels = $(SpanElement.class).all();
         String expected = expectedEvent.getSimpleName();
         Optional<String> actual = labels.stream().map(label -> {
             String eventHistory = label.getText();
@@ -218,8 +243,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     private void assertNthHistoryEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent,
             int historyIndex) {
-        LabelElement lastEvent = $(LabelElement.class)
-                .id("event" + historyIndex);
+        SpanElement lastEvent = $(SpanElement.class).id("event" + historyIndex);
         String eventHistory = lastEvent.getText();
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
@@ -234,7 +258,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private SeriesCheckboxClickEvent readCheckboxEventDetails() {
-        String detailsJson = $(LabelElement.class).id("eventDetails").getText();
+        String detailsJson = $(SpanElement.class).id("eventDetails").getText();
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Series.class, new DataSeriesDeserializer())
