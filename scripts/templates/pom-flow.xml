@@ -14,9 +14,8 @@
     <packaging>jar</packaging>
 
     <name>component</name>
-
-    <dependencies>
-    </dependencies>
+    <properties/>
+    <dependencies/>
     <build>
         <plugins>
             <plugin>

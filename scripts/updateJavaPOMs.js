@@ -59,6 +59,12 @@ function mergeDependencies(prj1, prj2) {
   return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
 }
 
+function mergeProperties(props1, props2) {
+  const arr1 = (props1 || []).filter(o => typeof o === 'object');
+  const arr2 = (props2 || []).filter(o => typeof o === 'object');
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => Object.keys(b)[0] === Object.keys(a)[0]))];
+}
+
 async function consolidate(template, pom, cb) {
   const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/${template}`, 'utf8'));
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
@@ -104,6 +110,7 @@ async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
   consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
     tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
+    tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);
   });
 }
 async function consolidatePomTB() {
