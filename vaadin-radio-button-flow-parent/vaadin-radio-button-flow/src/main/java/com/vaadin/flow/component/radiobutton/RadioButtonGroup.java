@@ -245,8 +245,7 @@ public class RadioButtonGroup<T>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null
-                && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null) {
             setupDataProviderListener(getDataProvider());
         }
         FieldValidationUtil.disableClientValidation(this);
