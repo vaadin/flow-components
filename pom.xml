@@ -191,9 +191,12 @@
                           exportPackageDefault: ${project.groupId}.flow.component.*${packageName}.*
                           isExportPackageDefault: ${is;${osgi.export.package};default}
                           exportPackage: ${if;${isExportPackageDefault};${exportPackageDefault};${osgi.export.package}}
+                          symbolicNameDefault: ${project.groupId}.flow.component.${packageName}
+                          symbolicName: ${if;${isExportPackageDefault};${symbolicNameDefault};${osgi.export.package}}
 
                           Bundle-Name: ${project.artifactId}
-                          Bundle-SymbolicName: ${project.groupId}.flow.component.${packageName}
+                          Bundle-SymbolicName: ${symbolicName}
+
                           Import-Package: *
                           Export-Package: ${exportPackage};-noimport:=true
                           Bundle-License: ${osgi.bundle.license}
