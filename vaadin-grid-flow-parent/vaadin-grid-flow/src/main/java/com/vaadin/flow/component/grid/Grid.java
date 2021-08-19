@@ -2204,6 +2204,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void addThemeVariants(GridVariant... variants) {
         getThemeNames().addAll(Stream.of(variants)
                 .map(GridVariant::getVariantName).collect(Collectors.toList()));
+        if (Stream.of(variants).anyMatch(variant -> variant == GridVariant.LUMO_COMPACT)) {
+            getElement().executeJs("this.notifyResize()");
+        }            
     }
 
     /**
@@ -2215,6 +2218,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void removeThemeVariants(GridVariant... variants) {
         getThemeNames().removeAll(Stream.of(variants)
                 .map(GridVariant::getVariantName).collect(Collectors.toList()));
+        if (Stream.of(variants).anyMatch(variant -> variant == GridVariant.LUMO_COMPACT)) {
+            getElement().executeJs("this.notifyResize()");
+        }            
     }
 
     /**
