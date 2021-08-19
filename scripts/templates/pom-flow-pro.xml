@@ -17,8 +17,7 @@
     <properties>
         <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
     </properties>
-    <dependencies>
-    </dependencies>
+    <dependencies/>
     <build>
         <plugins>
             <plugin>
