@@ -940,7 +940,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider != null && dataProviderListener == null) {
+        if (dataProvider != null) {
             setupDataProviderListener(dataProvider);
         }
 

@@ -25,7 +25,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.tests.DataProviderListenersTest;
 
 public class GridTest {
 
@@ -59,6 +61,14 @@ public class GridTest {
         grid.select("foo");
         Assert.assertEquals(1, grid.getSelectedItems().size());
         Assert.assertTrue(grid.getSelectedItems().contains("foo"));
+    }
+
+    @Test
+    public void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new Grid<>(), 2, 2, new int[] { 0, 2 },
+                        new DataCommunicatorTest.MockUI());
     }
 
 }
