@@ -35,7 +35,6 @@ import com.vaadin.flow.internal.JsonSerializer;
  * input and outputs a set of elements that represents that item in the UI.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the input object used inside the template

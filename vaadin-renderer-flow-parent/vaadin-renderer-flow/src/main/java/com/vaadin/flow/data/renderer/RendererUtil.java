@@ -39,7 +39,6 @@ import com.vaadin.flow.shared.Registration;
  * Used internally by components that support {@link TemplateRenderer}.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  */
 public class RendererUtil {

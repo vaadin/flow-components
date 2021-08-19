@@ -27,7 +27,6 @@ import com.vaadin.flow.function.SerializableFunction;
  * provided icon generator and label generator.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <ITEM>
  *            the type of the input object that can be used by the rendered

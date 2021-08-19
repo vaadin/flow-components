@@ -36,7 +36,6 @@ import elemental.json.JsonObject;
  * {@link LocalDateRenderer}.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the item used inside the renderer

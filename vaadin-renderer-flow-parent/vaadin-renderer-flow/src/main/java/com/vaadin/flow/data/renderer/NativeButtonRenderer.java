@@ -34,7 +34,6 @@ import com.vaadin.flow.shared.Registration;
  * clicked or tapped (in touch devices).
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the item to be received in the click listeners

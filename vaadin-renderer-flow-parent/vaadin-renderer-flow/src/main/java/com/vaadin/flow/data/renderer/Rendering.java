@@ -27,7 +27,6 @@ import com.vaadin.flow.dom.Element;
  * the rendering according to their needs.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the object model

@@ -26,7 +26,6 @@ import com.vaadin.flow.function.ValueProvider;
  * A template renderer for presenting date values.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the input item, from which the {@link LocalDate} is
@@ -172,7 +171,7 @@ public class LocalDateRenderer<SOURCE>
      *            the formatter to use, not <code>null</code>
      * @param nullRepresentation
      *            the textual representation of the <code>null</code> value
-     * 
+     *
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
             DateTimeFormatter formatter, String nullRepresentation) {

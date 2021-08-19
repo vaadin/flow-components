@@ -28,7 +28,6 @@ import com.vaadin.flow.internal.JsonSerializer;
  * Helper class to create {@link Renderer} instances, with fluent API.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the input object used inside the template
