@@ -43,6 +43,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.DataProviderListenersTest;
 
 import elemental.json.Json;
 import static org.junit.Assert.assertEquals;
@@ -443,6 +444,14 @@ public class ComboBoxTest {
         listDataView.removeItem("First");
         listDataView.removeItem("Third");
         Assert.assertEquals(2L, listDataView.getItemCount());
+    }
+
+    @Test
+    public void dataProviderListeners_comboBoxAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new ComboBox<>(), 2, 2, new int[] { 1, 3 },
+                        new DataCommunicatorTest.MockUI());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
