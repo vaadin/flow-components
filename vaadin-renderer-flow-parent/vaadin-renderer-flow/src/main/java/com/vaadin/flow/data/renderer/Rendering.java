@@ -52,7 +52,10 @@ public interface Rendering<SOURCE> extends Serializable {
      *
      * @return the associated template element, or {@code null} if no template
      *         element is associated with the rendering
+     *
+     * @deprecated since Vaadin 22
      */
+    @Deprecated
     Element getTemplateElement();
 
 }
