@@ -1,3 +1,4 @@
+import '@polymer/polymer/lib/elements/dom-if.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
