@@ -209,6 +209,11 @@ public class LitRenderer<T> extends Renderer<T> {
             public Registration getRegistration() {
                 return registration;
             }
+
+            @Override
+            public String getPropertyNamespace() {
+                return propertyNamespace;
+            }
         };
     }
 
@@ -455,6 +460,8 @@ public class LitRenderer<T> extends Renderer<T> {
          * @see Registration#remove
          */
         Registration getRegistration();
+
+        String getPropertyNamespace();
 
     }
 }

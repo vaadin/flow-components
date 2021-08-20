@@ -30,9 +30,6 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
-
 /**
  * Base class for all renderers that support arbitrary {@link Component}s.
  * <p>
@@ -191,49 +188,28 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     private void setupTemplateWhenAttached(UI ui, Element owner,
             ComponentRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
         String appId = ui.getInternals().getAppId();
+
+        // TODO: Remove once the components no longer append the template element when using a ComponentRenderer
         Element templateElement = rendering.getTemplateElement();
         owner.removeChild(templateElement);
 
         Element container = new Element("div");
         owner.appendVirtualChild(container);
         rendering.setContainer(container);
-        String templateInnerHtml;
 
         if (keyMapper != null) {
             String nodeIdPropertyName = "_renderer_"
-                    + templateElement.getNode().getId();
-
-            // templateInnerHtml = String.format(
-            //         "<%s appid=\"%s\" nodeid=\"[[item.%s]]\"></%s>",
-            //         componentRendererTag, appId, nodeIdPropertyName,
-            //         componentRendererTag);
-            rendering.setNodeIdPropertyName(nodeIdPropertyName);
-
+                    + owner.getNode().getId();
             LitRenderer<SOURCE> litRenderer = LitRenderer.<SOURCE>of("<flow-component-renderer appid=\""+ appId + "\" .nodeid=\"${item." + nodeIdPropertyName + "}\"></flow-component-renderer>");
             LitRendering<SOURCE> litRendering = litRenderer.render(owner, keyMapper);
-
-            // TODO: This is quite a nasty hack to get the LitRenderer namespace. Rather allow setting
-            litRenderer.withProperty("", item -> null);
-            JsonObject obj = Json.createObject();
-            litRendering.getDataGenerator().get().generateData(null, obj);
-            String litRendererNamespace = obj.keys()[0];
-            rendering.setNodeIdPropertyName(litRendererNamespace + nodeIdPropertyName);
-
-            // owner.executeJs(
-            //     "window.Vaadin.setLitRenderer(this, $0, $1)",
-            //     "renderer", "<flow-component-renderer appid=\""+ appId + "\" .nodeid=\"${item." + nodeIdPropertyName + "}\"></flow-component-renderer>");
+            rendering.setNodeIdPropertyName(litRendering.getPropertyNamespace() + nodeIdPropertyName);
         } else {
             COMPONENT component = createComponent(null);
             if (component != null) {
                 container.appendChild(component.getElement());
-
-                templateInnerHtml = String.format(
-                        "<%s appid=\"%s\" nodeid=\"%s\"></%s>",
-                        componentRendererTag, appId,
-                        component.getElement().getNode().getId(),
-                        componentRendererTag);
-            } else {
-                templateInnerHtml = "";
+                LitRenderer<SOURCE> litRenderer = LitRenderer.<SOURCE>of("<flow-component-renderer appid=\""+ appId + "\" nodeid=\""+ component.getElement().getNode().getId() +"\"></flow-component-renderer>");
+                LitRendering<SOURCE> litRendering = litRenderer.render(owner, keyMapper);
+                // TODO: The ComponentRenderer's Rendering also needs to return the Registration from LitRenderer, which must be called on discard
             }
         }
     }
