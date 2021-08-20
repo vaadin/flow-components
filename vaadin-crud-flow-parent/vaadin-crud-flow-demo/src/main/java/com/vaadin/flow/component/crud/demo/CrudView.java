@@ -76,7 +76,10 @@ public class CrudView extends DemoView {
         crud.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
-
+        crud.addNewListener(e -> {
+            e.getItem().setFirstName("noname");
+            crud.getEditor().setItem(e.getItem());
+        });
         crud.getGrid().removeColumnByKey("id");
         crud.addThemeVariants(CrudVariant.NO_BORDER);
         // end-source-example
