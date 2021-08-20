@@ -24,7 +24,6 @@ import com.vaadin.flow.dom.Element;
  * {@link ItemLabelGenerator}.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <ITEM>
  *            the type of the input object that can be used by the rendered

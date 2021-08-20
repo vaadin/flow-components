@@ -24,7 +24,6 @@ import com.vaadin.flow.shared.Registration;
  * Represents a clickable renderer.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the item received in the click listeners

@@ -27,7 +27,6 @@ import com.vaadin.flow.dom.Element;
  * the rendering according to their needs.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the object model
@@ -52,7 +51,10 @@ public interface Rendering<SOURCE> extends Serializable {
      *
      * @return the associated template element, or {@code null} if no template
      *         element is associated with the rendering
+     *
+     * @deprecated since Vaadin 22
      */
+    @Deprecated
     Element getTemplateElement();
 
 }
