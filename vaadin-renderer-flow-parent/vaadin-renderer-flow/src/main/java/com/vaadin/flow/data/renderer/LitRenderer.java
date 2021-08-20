@@ -270,15 +270,20 @@ public class LitRenderer<T> extends Renderer<T> {
 
     private DataGenerator<T> createDataGenerator() {
         CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
-        valueProviders.forEach((key, provider) -> composite
-                .addDataGenerator((item, jsonObject) -> jsonObject.put(
+        // TODO: Fix this issue properly. render() should be callable before the last withProperty() call.
+        // With the shape is was in, it wasn't possible to add more properties after render() was called.
+        composite.addDataGenerator((item, jsonObject) -> {
+            valueProviders.forEach((key, provider) -> {
+                jsonObject.put(
                         // Prefix the property name with a LitRenderer
                         // instance specific namespace to avoid property
                         // name clashes.
                         // Fixes https://github.com/vaadin/flow/issues/8629
                         // in LitRenderer
                         propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)))));
+                        JsonSerializer.toJson(provider.apply(item)));
+            });
+        });
         return composite;
     }
 

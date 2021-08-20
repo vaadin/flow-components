@@ -22,12 +22,16 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
 
 /**
  * Base class for all renderers that support arbitrary {@link Component}s.
@@ -188,7 +192,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
             ComponentRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
         String appId = ui.getInternals().getAppId();
         Element templateElement = rendering.getTemplateElement();
-        owner.appendChild(templateElement);
+        owner.removeChild(templateElement);
 
         Element container = new Element("div");
         owner.appendVirtualChild(container);
@@ -199,11 +203,25 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
             String nodeIdPropertyName = "_renderer_"
                     + templateElement.getNode().getId();
 
-            templateInnerHtml = String.format(
-                    "<%s appid=\"%s\" nodeid=\"[[item.%s]]\"></%s>",
-                    componentRendererTag, appId, nodeIdPropertyName,
-                    componentRendererTag);
+            // templateInnerHtml = String.format(
+            //         "<%s appid=\"%s\" nodeid=\"[[item.%s]]\"></%s>",
+            //         componentRendererTag, appId, nodeIdPropertyName,
+            //         componentRendererTag);
             rendering.setNodeIdPropertyName(nodeIdPropertyName);
+
+            LitRenderer<SOURCE> litRenderer = LitRenderer.<SOURCE>of("<flow-component-renderer appid=\""+ appId + "\" .nodeid=\"${item." + nodeIdPropertyName + "}\"></flow-component-renderer>");
+            LitRendering<SOURCE> litRendering = litRenderer.render(owner, keyMapper);
+
+            // TODO: This is quite a nasty hack to get the LitRenderer namespace. Rather allow setting
+            litRenderer.withProperty("", item -> null);
+            JsonObject obj = Json.createObject();
+            litRendering.getDataGenerator().get().generateData(null, obj);
+            String litRendererNamespace = obj.keys()[0];
+            rendering.setNodeIdPropertyName(litRendererNamespace + nodeIdPropertyName);
+
+            // owner.executeJs(
+            //     "window.Vaadin.setLitRenderer(this, $0, $1)",
+            //     "renderer", "<flow-component-renderer appid=\""+ appId + "\" .nodeid=\"${item." + nodeIdPropertyName + "}\"></flow-component-renderer>");
         } else {
             COMPONENT component = createComponent(null);
             if (component != null) {
@@ -218,8 +236,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 templateInnerHtml = "";
             }
         }
-
-        templateElement.setProperty("innerHTML", templateInnerHtml);
     }
 
     /**

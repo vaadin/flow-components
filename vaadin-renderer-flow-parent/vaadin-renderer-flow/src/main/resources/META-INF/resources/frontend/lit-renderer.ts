@@ -43,7 +43,7 @@ _window.Vaadin.setLitRenderer = (
 
     return (root, {item, index}, itemKey) => {
       ${clientCallables
-        .map((clientCallable) => {
+        ?.map((clientCallable) => {
           // Map all the client-callables as inline functions so they can be accessed from the template literal
           return `
           const ${clientCallable} = (...args) => {
@@ -75,6 +75,7 @@ _window.Vaadin.setLitRenderer = (
     // item: { key: "2", lr_3_lastName: "Tyler"}
     // ->
     // mappedItem: { lastName: "Tyler" }
+    propertyNamespace = propertyNamespace || '';
     const mappedItem = {};
     for (const key in item) {
       if (key.startsWith(propertyNamespace)) {
