@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -69,6 +70,8 @@ public class LitRenderer<T> extends Renderer<T> {
 
     private final Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
     private final Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
+
+    private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
@@ -343,9 +346,10 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * @param functionName
      *            the name of the function used inside the template expression,
-     *            not <code>null</code>
+     *            must be alphanumeric and not <code>null</code>,
+     *            must not be one of the JavaScript reserved words (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
-     *            the handler executed when the event is triggered, not
+     *            the handler executed when the function is called, not
      *            <code>null</code>
      * @return this instance for method chaining
      * @see <a href=
@@ -384,9 +388,10 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * @param functionName
      *            the name of the function used inside the template expression,
-     *            not <code>null</code>
+     *            must be alphanumeric and not <code>null</code>,
+     *            must not be one of the JavaScript reserved words (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
-     *            the handler executed when the event is triggered, not
+     *            the handler executed when the function is called, not
      *            <code>null</code>
      * @return this instance for method chaining
      * @see <a href=
@@ -396,6 +401,10 @@ public class LitRenderer<T> extends Renderer<T> {
             SerializableBiConsumer<T, JsonArray> handler) {
         Objects.requireNonNull(functionName);
         Objects.requireNonNull(handler);
+
+        if (!Pattern.matches(ALPHANUMERIC_REGEX, functionName)) {
+            throw new IllegalArgumentException("Function name must be alphanumeric");
+        }
         clientCallables.put(functionName, handler);
         return this;
     }
