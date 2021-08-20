@@ -30,27 +30,33 @@ public class LitRendererTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotAllowFunctionNamesWithFunctions() {
-        LitRenderer.of("").withFunction("foo=0; alert(\"gotcha\"); const bar", item -> {});
+        LitRenderer.of("").withFunction("foo=0; alert(\"gotcha\"); const bar",
+                item -> {
+                });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotAllowFunctionNamesWithSpaces() {
-        LitRenderer.of("").withFunction("illegal name", item -> {});
+        LitRenderer.of("").withFunction("illegal name", item -> {
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotAllowFunctionNamesWithDots() {
-        LitRenderer.of("").withFunction("illegal.name", item -> {});
+        LitRenderer.of("").withFunction("illegal.name", item -> {
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotAllowFunctionNamesWithParenthesis() {
-        LitRenderer.of("").withFunction("illegalname()", item -> {});
+        LitRenderer.of("").withFunction("illegalname()", item -> {
+        });
     }
 
     @Test
     public void allowAlphaNumericFunctionNames() {
-        LitRenderer.of("<div></div>").withFunction("legalName1", item -> {});
+        LitRenderer.of("<div></div>").withFunction("legalName1", item -> {
+        });
     }
 
 }

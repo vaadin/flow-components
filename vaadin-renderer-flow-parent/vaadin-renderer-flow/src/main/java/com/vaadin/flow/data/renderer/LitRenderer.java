@@ -346,8 +346,9 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * @param functionName
      *            the name of the function used inside the template expression,
-     *            must be alphanumeric and not <code>null</code>,
-     *            must not be one of the JavaScript reserved words (https://www.w3schools.com/js/js_reserved.asp)
+     *            must be alphanumeric and not <code>null</code>, must not be
+     *            one of the JavaScript reserved words
+     *            (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
      *            the handler executed when the function is called, not
      *            <code>null</code>
@@ -388,8 +389,9 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * @param functionName
      *            the name of the function used inside the template expression,
-     *            must be alphanumeric and not <code>null</code>,
-     *            must not be one of the JavaScript reserved words (https://www.w3schools.com/js/js_reserved.asp)
+     *            must be alphanumeric and not <code>null</code>, must not be
+     *            one of the JavaScript reserved words
+     *            (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
      *            the handler executed when the function is called, not
      *            <code>null</code>
@@ -403,7 +405,8 @@ public class LitRenderer<T> extends Renderer<T> {
         Objects.requireNonNull(handler);
 
         if (!Pattern.matches(ALPHANUMERIC_REGEX, functionName)) {
-            throw new IllegalArgumentException("Function name must be alphanumeric");
+            throw new IllegalArgumentException(
+                    "Function name must be alphanumeric");
         }
         clientCallables.put(functionName, handler);
         return this;
