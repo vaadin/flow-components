@@ -44,7 +44,9 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
-        Assert.assertEquals("New: Person{id=null, firstName='null', lastName='null'}", getLastEvent());
+        Assert.assertEquals(
+                "New: Person{id=null, firstName='null', lastName='null'}",
+                getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
     }
 
@@ -161,7 +163,7 @@ public class EventHandlingIT extends AbstractParallelTest {
                 $(GridElement.class).first().getCell(0, 2).getText());
 
         // Valid input
-        lastNameField.setValue("Oladeji");
+        lastNameField.setValue("Obbbbbbbbbbb");
         Assert.assertFalse(lastNameField.hasAttribute("invalid"));
 
         crud.getEditorSaveButton().click();
@@ -174,7 +176,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         }
 
         Assert.assertFalse(crud.isEditorOpen());
-        Assert.assertEquals("Oladeji",
+        Assert.assertEquals("Obbbbbbbbbbb",
                 $(GridElement.class).first().getCell(0, 2).getText());
     }
 

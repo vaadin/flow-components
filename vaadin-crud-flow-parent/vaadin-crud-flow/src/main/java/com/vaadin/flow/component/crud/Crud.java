@@ -185,9 +185,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                                 "Unable to instantiate new bean", ex);
                     }
 
-                    NewEvent modifiedEvent = new NewEvent(e.getSource(),e.isFromClient(),getEditor().getItem(),null);
-                    newListeners
-                            .forEach(listener -> listener.onComponentEvent(modifiedEvent));
+                    NewEvent modifiedEvent = new NewEvent(e.getSource(),
+                            e.isFromClient(), getEditor().getItem(), null);
+                    newListeners.forEach(listener -> listener
+                            .onComponentEvent(modifiedEvent));
                 }));
 
         ComponentUtil.addListener(this, EditEvent.class,

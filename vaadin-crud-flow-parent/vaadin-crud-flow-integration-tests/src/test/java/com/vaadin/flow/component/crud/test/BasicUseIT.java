@@ -139,7 +139,9 @@ public class BasicUseIT extends AbstractParallelTest {
         // we need to do this trick because the way `New` events are logged
         crud.getNewItemButton().get().click();
         crud.getEditorCancelButton().click();
-        Assert.assertEquals("Cancel: Person{id=0, firstName='firstName', lastName='lastName'}", getLastEvent());
+        Assert.assertEquals(
+                "Cancel: Person{id=0, firstName='firstName', lastName='lastName'}",
+                getLastEvent());
     }
 
     private ButtonElement getTestButton(String id) {
@@ -148,7 +150,6 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Override
     protected String getLastEvent() {
-        return $(VerticalLayoutElement.class).last()
-                .$("span").last().getText();
+        return $(VerticalLayoutElement.class).last().$("span").last().getText();
     }
 }
