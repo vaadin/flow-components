@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -269,17 +268,18 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     private DataGenerator<T> createDataGenerator() {
-        CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
-        valueProviders.forEach((key, provider) -> composite
-                .addDataGenerator((item, jsonObject) -> jsonObject.put(
+        return (item, jsonObject) -> {
+            valueProviders.forEach((key, provider) -> {
+                jsonObject.put(
                         // Prefix the property name with a LitRenderer
                         // instance specific namespace to avoid property
                         // name clashes.
                         // Fixes https://github.com/vaadin/flow/issues/8629
                         // in LitRenderer
                         propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)))));
-        return composite;
+                        JsonSerializer.toJson(provider.apply(item)));
+            });
+        };
     }
 
     /**
