@@ -98,6 +98,19 @@ public class MainView extends VerticalLayout {
         });
         addGridButton.setId("addGrid");
 
+
+        final Button addNewEventListener = new Button("Add New-Event listener", event -> {
+                crud.addNewListener(e -> {
+                        Person item = e.getItem();
+                        item.setId(0);
+                        item.setFirstName("firstName");
+                        item.setLastName("lastName");
+                        crud.getEditor().setItem(e.getItem());
+                });
+        });
+        addNewEventListener.setId("newEventListener");
+
+
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));
         crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));
         crud.addCancelListener(e -> addEvent("Cancel: " + e.getItem()));
@@ -110,7 +123,7 @@ public class MainView extends VerticalLayout {
 
         setHeight("100%");
         add(crud, serverSideNewButton, serverSideEditButton, showFiltersButton,
-                updateI18nButton, toggleBordersButton, addGridButton,
+                updateI18nButton, toggleBordersButton, addGridButton, addNewEventListener,
                 eventsPanel);
     }
 

@@ -50,6 +50,20 @@ public class CrudTest {
     }
 
     @Test
+    public void sameItemInNewEvent() {
+       String value = "thing";
+
+        systemUnderTest.addNewListener(e -> {
+            Thing item = e.getItem();
+            item.name = value;
+        });
+
+        systemUnderTest.addNewListener(e -> Assert.assertEquals(value, e.getItem().name));
+
+        ComponentUtil.fireEvent(systemUnderTest, new Crud.NewEvent<>(systemUnderTest, false, null));
+    }
+
+    @Test
     public void getEditorPosition_defaultOVERLAY() {
         Assert.assertEquals(CrudEditorPosition.OVERLAY,
                 systemUnderTest.getEditorPosition());
