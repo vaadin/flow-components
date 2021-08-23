@@ -36,7 +36,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "20.0.2")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "20.0.3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
