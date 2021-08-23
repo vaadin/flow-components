@@ -189,10 +189,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
             ComponentRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
         String appId = ui.getInternals().getAppId();
 
-        // TODO: Remove once the components no longer append the template element when using a ComponentRenderer
-        Element templateElement = rendering.getTemplateElement();
-        owner.removeChild(templateElement);
-
         Element container = new Element("div");
         owner.appendVirtualChild(container);
         rendering.setContainer(container);

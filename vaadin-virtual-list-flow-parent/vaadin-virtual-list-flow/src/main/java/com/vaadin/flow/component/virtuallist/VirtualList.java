@@ -205,15 +205,15 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         renderingRegistrations.clear();
 
         Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
+        if (!(renderer instanceof TemplateRenderer)) {
+            // LitRenderer or ComponentRenderer
             if (template.getParent() != null) {
                 getElement().removeChild(template);
             }
             rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper());
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (template.getParent() == null) {
                 getElement().appendChild(template);
             }

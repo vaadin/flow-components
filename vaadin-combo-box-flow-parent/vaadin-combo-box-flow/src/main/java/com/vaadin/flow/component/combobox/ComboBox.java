@@ -58,6 +58,7 @@ import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableBiPredicate;
@@ -1606,15 +1607,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         renderingRegistrations.clear();
 
         Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
+        if (!(renderer instanceof TemplateRenderer)) {
+            // LitRenderer or ComponentRenderer
             if (template != null && template.getParent() != null) {
                 getElement().removeChild(template);
             }
             rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper());
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (template == null) {
                 template = new Element("template");
             }

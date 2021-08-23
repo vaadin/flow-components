@@ -2793,8 +2793,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
+        if (!(renderer instanceof TemplateRenderer)) {
+            // LitRenderer or ComponentRenderer
             if (detailsTemplate != null
                     && detailsTemplate.getParent() != null) {
                 getElement().removeChild(detailsTemplate);
