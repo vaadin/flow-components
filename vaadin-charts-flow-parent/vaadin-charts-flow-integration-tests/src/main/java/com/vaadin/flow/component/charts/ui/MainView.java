@@ -17,7 +17,9 @@ import java.util.Optional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.charts.demo.AbstractChartExample;
 import com.vaadin.flow.component.charts.demo.examples.area.AreaChart;
+import com.vaadin.flow.component.charts.demo.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -26,6 +28,7 @@ import com.vaadin.flow.router.WildcardParameter;
 
 @Route("vaadin-charts")
 @StyleSheet("context://styles.css")
+@Uses(ServerSideEvents.class)
 public class MainView extends Div implements HasUrlParameter<String> {
 
     public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.demo.examples.";

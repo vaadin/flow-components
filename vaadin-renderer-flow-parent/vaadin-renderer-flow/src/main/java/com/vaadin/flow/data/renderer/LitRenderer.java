@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -69,6 +69,8 @@ public class LitRenderer<T> extends Renderer<T> {
 
     private final Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
     private final Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
+
+    private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
@@ -266,17 +268,18 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     private DataGenerator<T> createDataGenerator() {
-        CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
-        valueProviders.forEach((key, provider) -> composite
-                .addDataGenerator((item, jsonObject) -> jsonObject.put(
+        return (item, jsonObject) -> {
+            valueProviders.forEach((key, provider) -> {
+                jsonObject.put(
                         // Prefix the property name with a LitRenderer
                         // instance specific namespace to avoid property
                         // name clashes.
                         // Fixes https://github.com/vaadin/flow/issues/8629
                         // in LitRenderer
                         propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)))));
-        return composite;
+                        JsonSerializer.toJson(provider.apply(item)));
+            });
+        };
     }
 
     /**
@@ -343,9 +346,11 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * @param functionName
      *            the name of the function used inside the template expression,
-     *            not <code>null</code>
+     *            must be alphanumeric and not <code>null</code>, must not be
+     *            one of the JavaScript reserved words
+     *            (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
-     *            the handler executed when the event is triggered, not
+     *            the handler executed when the function is called, not
      *            <code>null</code>
      * @return this instance for method chaining
      * @see <a href=
@@ -384,9 +389,11 @@ public class LitRenderer<T> extends Renderer<T> {
      *
      * @param functionName
      *            the name of the function used inside the template expression,
-     *            not <code>null</code>
+     *            must be alphanumeric and not <code>null</code>, must not be
+     *            one of the JavaScript reserved words
+     *            (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
-     *            the handler executed when the event is triggered, not
+     *            the handler executed when the function is called, not
      *            <code>null</code>
      * @return this instance for method chaining
      * @see <a href=
@@ -396,6 +403,11 @@ public class LitRenderer<T> extends Renderer<T> {
             SerializableBiConsumer<T, JsonArray> handler) {
         Objects.requireNonNull(functionName);
         Objects.requireNonNull(handler);
+
+        if (!Pattern.matches(ALPHANUMERIC_REGEX, functionName)) {
+            throw new IllegalArgumentException(
+                    "Function name must be alphanumeric");
+        }
         clientCallables.put(functionName, handler);
         return this;
     }

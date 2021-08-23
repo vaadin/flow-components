@@ -34,7 +34,6 @@ import elemental.json.JsonObject;
  * ComponentRenderers.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <T>
  *            the date type

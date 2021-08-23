@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.renderer.ComponentDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -39,7 +38,6 @@ import com.vaadin.flow.function.ValueProvider;
  * {@link #createComponent(Object)} for components that use light-dom.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <COMPONENT>
  *            the type of the output component
@@ -249,7 +247,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
      * but setting a update function via the
      * {@link #ComponentRenderer(SerializableFunction, SerializableBiFunction)}
      * can change the behavior.
-     * 
+     *
      * @param currentComponent
      *            the current component used to render the item, not
      *            <code>null</code>

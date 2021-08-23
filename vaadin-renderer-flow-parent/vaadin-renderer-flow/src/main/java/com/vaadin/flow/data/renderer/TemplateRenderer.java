@@ -28,7 +28,6 @@ import com.vaadin.flow.internal.JsonSerializer;
  * Helper class to create {@link Renderer} instances, with fluent API.
  *
  * @author Vaadin Ltd
- * @since 1.0.
  *
  * @param <SOURCE>
  *            the type of the input object used inside the template
@@ -36,7 +35,11 @@ import com.vaadin.flow.internal.JsonSerializer;
  * @see #of(String)
  * @see <a href=
  *      "https://www.polymer-project.org/2.0/docs/devguide/templates">https://www.polymer-project.org/2.0/docs/devguide/templates</a>
+ *
+ * @deprecated since Vaadin 22, {@code TemplateRenderer} is deprecated in favor
+ *             of {@link LitRenderer}
  */
+@Deprecated
 public final class TemplateRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private static final Pattern BINDING_MISSING_DOLLAR = Pattern
