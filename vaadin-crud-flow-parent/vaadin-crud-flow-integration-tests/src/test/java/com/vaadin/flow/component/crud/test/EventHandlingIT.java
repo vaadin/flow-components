@@ -44,7 +44,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
-        Assert.assertEquals("New: null", getLastEvent());
+        Assert.assertEquals("New: Person{id=null, firstName='null', lastName='null'}", getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
     }
 
