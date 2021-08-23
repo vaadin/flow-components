@@ -103,9 +103,12 @@ public class LitRendererPage extends Div {
     }
 
     private void setDetailsLitRenderer(LitRendererTestComponent component) {
-        component.setDetailsRenderer(LitRenderer.<String> of(
-                "<div id=\"details-${index}\">Details: ${item.value}</div>")
-                .withProperty("value", item -> item + " (details)"));
+        LitRenderer<String> renderer = LitRenderer.<String> of(
+                "<div id=\"details-${index}\">Details: ${item.value}</div>");
+        component.setDetailsRenderer(renderer);
+        // Even though the properties are typically defined using the fluent API,
+        // it should be possible to set them even after the renderer has been set.
+        renderer.withProperty("value", item -> item + " (details)");
     }
 
 }

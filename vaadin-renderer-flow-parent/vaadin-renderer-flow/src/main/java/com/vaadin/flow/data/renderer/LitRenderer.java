@@ -270,15 +270,18 @@ public class LitRenderer<T> extends Renderer<T> {
 
     private DataGenerator<T> createDataGenerator() {
         CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
-        valueProviders.forEach((key, provider) -> composite
-                .addDataGenerator((item, jsonObject) -> jsonObject.put(
+        composite.addDataGenerator((item, jsonObject) -> {
+            valueProviders.forEach((key, provider) -> {
+                jsonObject.put(
                         // Prefix the property name with a LitRenderer
                         // instance specific namespace to avoid property
                         // name clashes.
                         // Fixes https://github.com/vaadin/flow/issues/8629
                         // in LitRenderer
                         propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)))));
+                        JsonSerializer.toJson(provider.apply(item)));
+            });
+        });
         return composite;
     }
 
