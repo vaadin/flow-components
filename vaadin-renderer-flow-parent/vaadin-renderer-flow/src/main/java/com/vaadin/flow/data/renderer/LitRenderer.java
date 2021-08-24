@@ -139,6 +139,15 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
+     * @deprecated LitRenderer doesn't support getting the event handlers. Don't use.
+     */
+    @Deprecated
+    @Override
+    public Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Sets up rendering of model objects inside a given {@param container}
      * element. The model objects are rendered using the Lit template literal
      * provided when creating this LitRenderer instance, and the Vaadin-default
