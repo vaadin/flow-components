@@ -378,7 +378,7 @@ public class CrudView extends DemoView {
         }
 
         @Override
-        public Person clone() {
+        public Person clone() { // NOSONAR
             try {
                 return (Person) super.clone();
             } catch (CloneNotSupportedException e) {
