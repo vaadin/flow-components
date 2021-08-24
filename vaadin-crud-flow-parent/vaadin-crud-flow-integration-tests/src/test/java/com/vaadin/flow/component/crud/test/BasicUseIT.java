@@ -132,18 +132,6 @@ public class BasicUseIT extends AbstractParallelTest {
         Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
     }
 
-    @Test
-    public void newEventItem() {
-        CrudElement crud = $(CrudElement.class).waitForFirst();
-        $("#newEventListener").onPage().first().click();
-        // we need to do this trick because the way `New` events are logged
-        crud.getNewItemButton().get().click();
-        crud.getEditorCancelButton().click();
-        Assert.assertEquals(
-                "Cancel: Person{id=0, firstName='firstName', lastName='lastName'}",
-                getLastEvent());
-    }
-
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
     }

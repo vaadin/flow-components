@@ -163,7 +163,7 @@ public class EventHandlingIT extends AbstractParallelTest {
                 $(GridElement.class).first().getCell(0, 2).getText());
 
         // Valid input
-        lastNameField.setValue("Obbbbbbbbbbb");
+        lastNameField.setValue("Oladeji");
         Assert.assertFalse(lastNameField.hasAttribute("invalid"));
 
         crud.getEditorSaveButton().click();
@@ -176,7 +176,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         }
 
         Assert.assertFalse(crud.isEditorOpen());
-        Assert.assertEquals("Obbbbbbbbbbb",
+        Assert.assertEquals("Oladeji",
                 $(GridElement.class).first().getCell(0, 2).getText());
     }
 
@@ -217,6 +217,18 @@ public class EventHandlingIT extends AbstractParallelTest {
         crud.getEditorSaveButton().click();
 
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+    }
+
+    @Test
+    public void newEventItem() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        getTestButton("newEventListener").click();
+        // we need to do this trick because the way `New` events are logged
+        crud.getNewItemButton().get().click();
+        crud.getEditorCancelButton().click();
+        Assert.assertEquals(
+                "Cancel: Person{id=0, firstName='firstName', lastName='lastName'}",
+                getLastEvent());
     }
 
     private static String getFooterText(CrudElement crud) {
