@@ -165,8 +165,7 @@ public class LitRenderer<T> extends Renderer<T> {
      *         to provide extra customization
      */
     @Override
-    public Rendering<T> render(Element container,
-            DataKeyMapper<T> keyMapper) {
+    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
         return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
     }
 

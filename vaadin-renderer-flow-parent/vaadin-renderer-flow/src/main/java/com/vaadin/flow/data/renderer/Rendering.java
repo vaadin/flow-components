@@ -66,6 +66,7 @@ public interface Rendering<SOURCE> extends Serializable {
      * @see Registration#remove
      */
     default Registration getRegistration() {
-        return () -> {};
+        return () -> {
+        };
     }
 }

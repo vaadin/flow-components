@@ -228,7 +228,6 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
         renderingRegistrations.add(rendering.getRegistration());
 
-
         this.renderer = renderer;
 
         rendererChanged = true;
