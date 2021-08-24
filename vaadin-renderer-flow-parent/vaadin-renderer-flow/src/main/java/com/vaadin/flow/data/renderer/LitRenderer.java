@@ -317,7 +317,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * Adds an event handler that can be called from within the template expression.
+     * Adds an event handler that can be called from within the template
+     * expression.
      * <p>
      * Examples:
      *
@@ -329,14 +330,14 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * }
      * </pre>
      *
-     * The name of the event handler used in the template expression should be the
-     * name used at the eventHandlerName parameter. This name must be a valid
-     * JavaScript function name.
+     * The name of the event handler used in the template expression should be
+     * the name used at the eventHandlerName parameter. This name must be a
+     * valid JavaScript function name.
      *
      * @param eventHandlerName
-     *            the name of the event handler used inside the template expression,
-     *            must be alphanumeric and not <code>null</code>, must not be
-     *            one of the JavaScript reserved words
+     *            the name of the event handler used inside the template
+     *            expression, must be alphanumeric and not <code>null</code>,
+     *            must not be one of the JavaScript reserved words
      *            (https://www.w3schools.com/js/js_reserved.asp)
      * @param handler
      *            the handler executed when the event handler is called, not
@@ -345,7 +346,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * @see <a href=
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      *
-     * @deprecated Use {@link #withFunction(String, SerializableConsumer)} instead.
+     * @deprecated Use {@link #withFunction(String, SerializableConsumer)}
+     *             instead.
      */
     public LitRenderer<SOURCE> withEventHandler(String eventHandlerName,
             SerializableConsumer<SOURCE> handler) {
