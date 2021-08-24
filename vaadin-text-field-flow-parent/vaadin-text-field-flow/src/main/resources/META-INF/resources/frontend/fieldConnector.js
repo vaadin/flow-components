@@ -13,20 +13,20 @@
             field.$connector = {};
 
             field.$connector.forwardBlur = tryCatchWrapper(function (){
-            	if (field.inputElement) {
-					field.inputElement.addEventListener('blur', (event) => {
-						event.stopPropagation();
-						field.dispatchEvent(new Event('blur'));
-					});
-              	}
-				else {
+                if (field.inputElement) {
+                    field.inputElement.addEventListener('blur', (event) => {
+                        event.stopPropagation();
+                        field.dispatchEvent(new Event('blur'));
+                    });
+                }
+                else {
                     setTimeout(() => {
                         field.$connector.forwardBlur();
                     }, 10);
                 }
             });
 
-			field.$connector.forwardBlur();
+            field.$connector.forwardBlur();
         })(field)
     }
 })();
