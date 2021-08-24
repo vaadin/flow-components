@@ -74,6 +74,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        addAttachListener(e -> initConnector());
     }
 
     /**
@@ -172,8 +174,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-
-        addAttachListener(e -> initConnector());
     }
 
     private TextFieldValidationSupport getValidationSupport() {

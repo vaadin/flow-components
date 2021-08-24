@@ -63,6 +63,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        addAttachListener(e -> initConnector());
     }
 
     /**
@@ -142,8 +144,6 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-
-        addAttachListener(e -> initConnector());
     }
 
     private TextFieldValidationSupport getValidationSupport() {

@@ -76,8 +76,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
             ValueChangeListener<? super ComponentValueChangeEvent<NumberField, Double>> listener) {
         this();
         addValueChangeListener(listener);
-
-        addAttachListener(e -> initConnector());
     }
 
     /**
@@ -138,6 +136,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
     private NumberField(Formatter formatter, boolean isInitialValueOptional) {
         super(formatter::parse, formatter, Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY, isInitialValueOptional);
+
+        addAttachListener(e -> initConnector());
     }
 
     @Override

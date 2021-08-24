@@ -50,6 +50,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      */
     public IntegerField() {
         super(PARSER, FORMATTER, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+
+        addAttachListener(e -> initConnector());
     }
 
     /**
@@ -129,8 +131,6 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-
-        addAttachListener(e -> initConnector());
     }
 
     /**

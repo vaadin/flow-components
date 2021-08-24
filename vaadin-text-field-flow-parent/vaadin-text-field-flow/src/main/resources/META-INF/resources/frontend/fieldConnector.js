@@ -17,7 +17,7 @@
 					field.inputElement.addEventListener('blur', (event) => {
 						event.stopPropagation();
 						field.dispatchEvent(new Event('blur'));
-					})
+					});
               	}
 				else {
                     setTimeout(() => {
