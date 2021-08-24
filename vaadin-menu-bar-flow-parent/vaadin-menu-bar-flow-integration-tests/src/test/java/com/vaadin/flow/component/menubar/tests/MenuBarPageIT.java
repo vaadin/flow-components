@@ -363,6 +363,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertButtonContents("item 1");
     }
 
+    @Test
+    public void addSubItem_clickMenuItem_clickButton_subMenuOpenedAndClosed() {
+        click("add-sub-item");
+        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
+                .click();
+        verifyOpened();
+        menuBar.getButtons().get(1).click();
+        verifyClosed();
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();
