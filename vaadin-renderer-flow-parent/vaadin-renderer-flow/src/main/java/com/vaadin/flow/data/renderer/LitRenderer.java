@@ -165,7 +165,7 @@ public class LitRenderer<T> extends Renderer<T> {
      *         to provide extra customization
      */
     @Override
-    public LitRendering<T> render(Element container,
+    public Rendering<T> render(Element container,
             DataKeyMapper<T> keyMapper) {
         return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
     }
@@ -187,13 +187,13 @@ public class LitRenderer<T> extends Renderer<T> {
      * @return the context of the rendering, that can be used by the components
      *         to provide extra customization
      */
-    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper,
+    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
             String rendererName) {
         DataGenerator<T> dataGenerator = createDataGenerator();
         Registration registration = createJsRendererFunction(container,
                 keyMapper, rendererName);
 
-        return new LitRendering<T>() {
+        return new Rendering<T>() {
             @Override
             public Optional<DataGenerator<T>> getDataGenerator() {
                 return Optional.of(dataGenerator);
@@ -422,34 +422,5 @@ public class LitRenderer<T> extends Renderer<T> {
     public Map<String, SerializableBiConsumer<T, JsonArray>> getFunctions() {
         return clientCallables == null ? Collections.emptyMap()
                 : Collections.unmodifiableMap(clientCallables);
-    }
-
-    /**
-     * Defines the context of a given {@link LitRenderer} when building the
-     * output elements. Components that support Renderers can use the context to
-     * customize the rendering according to their needs.
-     *
-     * @author Vaadin Ltd
-     * @since 22.0.
-     *
-     * @param <T>
-     *            the type of the object model
-     *
-     * @see LitRenderer#render(Element,
-     *      com.vaadin.flow.data.provider.DataKeyMapper)
-     */
-    public interface LitRendering<T> extends Rendering<T> {
-
-        /**
-         * Gets a {@link Registration} that allows cleaning up resources
-         * associated with this rendering when the rendering is no longer used.
-         * It removes the listeners and properties added to the container
-         * element by this rendering.
-         *
-         * @return the associated Registration
-         * @see Registration#remove
-         */
-        Registration getRegistration();
-
     }
 }

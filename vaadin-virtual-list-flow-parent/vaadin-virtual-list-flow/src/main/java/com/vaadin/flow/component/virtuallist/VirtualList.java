@@ -45,7 +45,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
@@ -227,10 +226,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             renderingRegistrations.add(renderingDataGeneratorRegistration);
         });
 
-        if (rendering instanceof LitRendering) {
-            renderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
-        }
+        renderingRegistrations.add(rendering.getRegistration());
+
 
         this.renderer = renderer;
 

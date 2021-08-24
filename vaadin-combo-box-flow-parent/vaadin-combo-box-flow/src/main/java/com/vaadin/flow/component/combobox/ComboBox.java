@@ -67,7 +67,6 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -1631,10 +1630,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             renderingRegistrations.add(renderingDataGeneratorRegistration);
         });
 
-        if (rendering instanceof LitRendering) {
-            renderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
-        }
+        renderingRegistrations.add(rendering.getRegistration());
 
         reset();
     }
