@@ -29,7 +29,7 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "22.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "22.0.0-alpha2")
 @JsModule("@vaadin/vaadin-lumo-styles/color.js")
 @JsModule("@vaadin/vaadin-lumo-styles/typography.js")
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")

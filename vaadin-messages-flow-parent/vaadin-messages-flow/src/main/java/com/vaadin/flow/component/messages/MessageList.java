@@ -44,7 +44,7 @@ import elemental.json.JsonArray;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "22.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-messages", version = "22.0.0-alpha2")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
