@@ -206,7 +206,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
     }
 
     private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.fieldConnector.initLazy(this)");
+        getElement()
+                .executeJs("window.Vaadin.Flow.fieldConnector.initLazy(this)");
     }
 }

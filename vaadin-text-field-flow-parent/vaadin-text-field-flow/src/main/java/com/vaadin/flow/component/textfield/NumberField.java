@@ -328,8 +328,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
     }
 
     private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.fieldConnector.initLazy(this)");
+        getElement()
+                .executeJs("window.Vaadin.Flow.fieldConnector.initLazy(this)");
     }
 
     private static class Formatter
