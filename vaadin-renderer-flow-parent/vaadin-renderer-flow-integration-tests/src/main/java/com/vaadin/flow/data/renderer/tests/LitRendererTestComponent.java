@@ -29,7 +29,7 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
+import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonValue;
@@ -84,7 +84,7 @@ public class LitRendererTestComponent extends Div
         renderingRegistrations.clear();
 
         if (renderer != null) {
-            LitRendering<String> rendering = renderer.render(getElement(),
+            Rendering<String> rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper());
             renderingRegistrations.add(rendering.getRegistration());
             rendering.getDataGenerator()
@@ -99,7 +99,7 @@ public class LitRendererTestComponent extends Div
         detailsRenderingRegistrations.clear();
 
         if (renderer != null) {
-            LitRendering<String> rendering = renderer.render(getElement(),
+            Rendering<String> rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper(), "detailsRenderer");
             detailsRenderingRegistrations.add(rendering.getRegistration());
             rendering.getDataGenerator()
