@@ -247,7 +247,7 @@ public class Renderer<SOURCE> implements Serializable {
      * @deprecated since Vaadin 22
      */
     @Deprecated
-    public Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
+    Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
         return eventHandlers == null ? Collections.emptyMap()
                 : Collections.unmodifiableMap(eventHandlers);
     }

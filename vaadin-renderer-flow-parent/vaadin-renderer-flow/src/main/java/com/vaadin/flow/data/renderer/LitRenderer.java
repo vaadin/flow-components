@@ -139,17 +139,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support event handlers. Use functions
-     *             instead.
-     * @see LitRenderer#getFunctions()
-     */
-    @Deprecated
-    @Override
-    public Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Sets up rendering of model objects inside a given {@param container}
      * element. The model objects are rendered using the Lit template literal
      * provided when creating this LitRenderer instance, and the Vaadin-default
@@ -328,6 +317,42 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
+     * Adds an event handler that can be called from within the template expression.
+     * <p>
+     * Examples:
+     *
+     * <pre>
+     * {@code
+     * // Standard event
+     * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
+     *          .withEventHandler("handleClick", object -> doSomething());
+     * }
+     * </pre>
+     *
+     * The name of the event handler used in the template expression should be the
+     * name used at the eventHandlerName parameter. This name must be a valid
+     * JavaScript function name.
+     *
+     * @param eventHandlerName
+     *            the name of the event handler used inside the template expression,
+     *            must be alphanumeric and not <code>null</code>, must not be
+     *            one of the JavaScript reserved words
+     *            (https://www.w3schools.com/js/js_reserved.asp)
+     * @param handler
+     *            the handler executed when the event handler is called, not
+     *            <code>null</code>
+     * @return this instance for method chaining
+     * @see <a href=
+     *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
+     *
+     * @deprecated Use {@link #withFunction(String, SerializableConsumer)} instead.
+     */
+    public LitRenderer<SOURCE> withEventHandler(String eventHandlerName,
+            SerializableConsumer<SOURCE> handler) {
+        return withFunction(eventHandlerName, handler);
+    }
+
+    /**
      * Adds a function that can be called from within the template expression.
      * <p>
      * Examples:
@@ -410,17 +435,5 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         }
         clientCallables.put(functionName, handler);
         return this;
-    }
-
-    /**
-     * Gets the functions linked to this renderer. The returned map is
-     * immutable.
-     *
-     * @return the mapped functions, never <code>null</code>
-     * @see #withFunction(String, SerializableBiConsumer)
-     */
-    public Map<String, SerializableBiConsumer<SOURCE, JsonArray>> getFunctions() {
-        return clientCallables == null ? Collections.emptyMap()
-                : Collections.unmodifiableMap(clientCallables);
     }
 }
