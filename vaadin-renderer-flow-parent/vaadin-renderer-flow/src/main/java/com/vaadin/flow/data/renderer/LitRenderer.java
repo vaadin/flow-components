@@ -139,7 +139,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support getting the event handlers. Don't use.
+     * @deprecated LitRenderer doesn't support getting the event handlers. Don't
+     *             use.
      */
     @Deprecated
     @Override
