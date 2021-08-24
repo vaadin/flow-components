@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -31,6 +32,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd.
  */
+@JsModule("./fieldConnector.js")
 public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
@@ -56,7 +58,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * If {@code isInitialValueOptional} is {@code true} then the initial value
      * is used only if element has no {@code "value"} property value, otherwise
      * element {@code "value"} property is ignored and the initial value is set.
-     * 
+     *
      * @param isInitialValueOptional
      *            if {@code isInitialValueOptional} is {@code true} then the
      *            initial value is used only if element has no {@code "value"}
@@ -170,6 +172,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+
+        addAttachListener(e -> initConnector());
     }
 
     private TextFieldValidationSupport getValidationSupport() {
@@ -448,5 +452,10 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.fieldConnector.initLazy(this)");
     }
 }

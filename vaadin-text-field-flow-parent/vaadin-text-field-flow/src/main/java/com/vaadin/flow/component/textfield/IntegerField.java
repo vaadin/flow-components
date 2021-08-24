@@ -27,6 +27,7 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @Tag("vaadin-integer-field")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-integer-field.js")
+@JsModule("./fieldConnector.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 
     private static final SerializableFunction<String, Integer> PARSER = valueFormClient -> {
@@ -128,12 +129,14 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+
+        addAttachListener(e -> initConnector());
     }
 
     /**
      * Sets the minimum value of the field. Entering a value which is smaller
      * than {@code min} invalidates the field.
-     * 
+     *
      * @param min
      *            the min value to set
      */
@@ -178,7 +181,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      * {@link #setHasControls(boolean) control buttons}. It is also used to
      * invalidate the field, if the value doesn't align with the specified step
      * and {@link #setMin(int) min} (if specified by user).
-     * 
+     *
      * @param step
      *            the new step to set
      * @throws IllegalArgumentException
@@ -202,4 +205,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
         return (int) getStepDouble();
     }
 
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.fieldConnector.initLazy(this)");
+    }
 }
