@@ -902,8 +902,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * @param firstDayOfWeek
          *            the index of the first day of the week
          * @return this instance for method chaining
+         * @throws IllegalArgumentException if firstDayOfWeek is invalid 
          */
         public DatePickerI18n setFirstDayOfWeek(int firstDayOfWeek) {
+            if (firstDayOfWeek < 0 || firstDayOfWeek > 6) {
+                throw new IllegalArgumentException("First day of the week needs to be in range of 0 to 6.");
+            }
             this.firstDayOfWeek = firstDayOfWeek;
             return this;
         }
