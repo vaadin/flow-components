@@ -23,6 +23,15 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
+import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
+
 import com.vaadin.tests.AbstractComponentIT;
 
 import static org.junit.Assert.assertTrue;
@@ -39,26 +48,27 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private WebElement message;
     private String lastMessageText = "";
 
-    private WebElement textField;
-    private WebElement textArea;
-    private WebElement passwordField;
-    private WebElement emailField;
-    private WebElement numberField;
-    private WebElement integerField;
-    private WebElement bigDecimalField;
+    private TextFieldElement textField;
+    private TextAreaElement textArea;
+    private PasswordFieldElement passwordField;
+    private EmailFieldElement emailField;
+    private NumberFieldElement numberField;
+    private IntegerFieldElement integerField;
+    private BigDecimalFieldElement bigDecimalField;
+    private WebElement target;
 
     @Before
     public void init() {
         open();
         waitForElementPresent(By.id("message"));
         message = findElement(By.id("message"));
-        textField = findElement(By.tagName("vaadin-text-field"));
-        textArea = findElement(By.tagName("vaadin-text-area"));
-        passwordField = findElement(By.tagName("vaadin-password-field"));
-        emailField = findElement(By.tagName("vaadin-email-field"));
-        numberField = findElement(By.tagName("vaadin-number-field"));
-        integerField = findElement(By.tagName("vaadin-integer-field"));
-        bigDecimalField = findElement(By.tagName("vaadin-big-decimal-field"));
+        textField = $(TextFieldElement.class).first();
+        textArea = $(TextAreaElement.class).first();
+        passwordField = $(PasswordFieldElement.class).first();
+        emailField = $(EmailFieldElement.class).first();
+        numberField = $(NumberFieldElement.class).first();
+        integerField = $(IntegerFieldElement.class).first();
+        bigDecimalField = $(BigDecimalFieldElement.class).first();
     }
 
     @Test
@@ -108,21 +118,31 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         testValueChangeModes(bigDecimalField, "bigdecimalfield");
     }
 
-    private void testValueChangeModes(WebElement field, String componentName)
-            throws InterruptedException {
+    private void testValueChangeModes(TestBenchElement field,
+            String componentName) throws InterruptedException {
 
-        field.sendKeys("1");
+        if (field == textField) {
+            target = textField;
+        } else if (field == bigDecimalField) {
+            target = bigDecimalField;
+        } else if (field == textArea) {
+            target = field.$("textarea").first();
+        } else {
+            target = field.$("input").first();
+        }
+
+        target.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
 
         if (field != textArea) {
             // Clicking enter on TextArea makes a line-break instead of
             // "committing" the change and firing a change-event.
-            field.sendKeys(Keys.ENTER);
+            target.sendKeys(Keys.ENTER);
             waitUntilMessageUpdated();
         }
 
-        field.sendKeys("1");
+        target.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
         blur();
@@ -130,11 +150,11 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
         clickButton(componentName + "-on-blur");
 
-        field.sendKeys("1");
+        target.sendKeys("1");
         assertMessageNotUpdated(
                 "The value change events should not be sent on every key stroke when using ValueChangeMode.ON_BLUR");
 
-        field.sendKeys(Keys.ENTER);
+        target.sendKeys(Keys.ENTER);
         assertMessageNotUpdated(
                 "The value change events should not be sent with enter key when using ValueChangeMode.ON_BLUR");
 
@@ -142,7 +162,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         waitUntilMessageUpdated();
 
         clickButton(componentName + "-eager");
-        field.sendKeys("1");
+        target.sendKeys("1");
 
         waitUntilMessageUpdated();
 
@@ -155,7 +175,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         changeTimeoutField.sendKeys("1000");
         blur();
 
-        testValueChangeTimeout(field, componentName);
+        testValueChangeTimeout(target, componentName);
     }
 
     private void testValueChangeTimeout(WebElement field, String componentName)
