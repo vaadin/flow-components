@@ -44,7 +44,8 @@ public class NumberFieldElement extends TestBenchElement
     @Override
     public void sendKeys(CharSequence... keysToSend) {
         waitForVaadin();
-        getWrappedElement().findElement(By.tagName("input")).sendKeys(keysToSend);
+        getWrappedElement().findElement(By.tagName("input"))
+                .sendKeys(keysToSend);
     }
 
 }

@@ -56,7 +56,6 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private IntegerFieldElement integerField;
     private BigDecimalFieldElement bigDecimalField;
 
-
     @Before
     public void init() {
         open();
