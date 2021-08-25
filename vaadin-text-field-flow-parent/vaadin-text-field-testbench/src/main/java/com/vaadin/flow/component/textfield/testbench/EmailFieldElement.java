@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.testbench;
 
+import org.openqa.selenium.By;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -37,6 +39,12 @@ public class EmailFieldElement extends TestBenchElement
         HasStringValueProperty.super.setValue(string);
         dispatchEvent("change", Collections.singletonMap("bubbles", true));
         dispatchEvent("blur");
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        waitForVaadin();
+        getWrappedElement().findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 
 }

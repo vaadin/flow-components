@@ -55,7 +55,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private NumberFieldElement numberField;
     private IntegerFieldElement integerField;
     private BigDecimalFieldElement bigDecimalField;
-    private WebElement target;
+
 
     @Before
     public void init() {
@@ -121,28 +121,18 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private void testValueChangeModes(TestBenchElement field,
             String componentName) throws InterruptedException {
 
-        if (field == textField) {
-            target = textField;
-        } else if (field == bigDecimalField) {
-            target = bigDecimalField;
-        } else if (field == textArea) {
-            target = field.$("textarea").first();
-        } else {
-            target = field.$("input").first();
-        }
-
-        target.sendKeys("1");
+        field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
 
         if (field != textArea) {
             // Clicking enter on TextArea makes a line-break instead of
             // "committing" the change and firing a change-event.
-            target.sendKeys(Keys.ENTER);
+            field.sendKeys(Keys.ENTER);
             waitUntilMessageUpdated();
         }
 
-        target.sendKeys("1");
+        field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
         blur();
@@ -150,11 +140,11 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
         clickButton(componentName + "-on-blur");
 
-        target.sendKeys("1");
+        field.sendKeys("1");
         assertMessageNotUpdated(
                 "The value change events should not be sent on every key stroke when using ValueChangeMode.ON_BLUR");
 
-        target.sendKeys(Keys.ENTER);
+        field.sendKeys(Keys.ENTER);
         assertMessageNotUpdated(
                 "The value change events should not be sent with enter key when using ValueChangeMode.ON_BLUR");
 
@@ -162,7 +152,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         waitUntilMessageUpdated();
 
         clickButton(componentName + "-eager");
-        target.sendKeys("1");
+        field.sendKeys("1");
 
         waitUntilMessageUpdated();
 
@@ -175,7 +165,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         changeTimeoutField.sendKeys("1000");
         blur();
 
-        testValueChangeTimeout(target, componentName);
+        testValueChangeTimeout(field, componentName);
     }
 
     private void testValueChangeTimeout(WebElement field, String componentName)
