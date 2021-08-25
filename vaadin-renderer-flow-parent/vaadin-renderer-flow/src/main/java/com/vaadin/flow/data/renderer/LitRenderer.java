@@ -50,7 +50,7 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  * @since 22.0.
  *
- * @param <T>
+ * @param <SOURCE>
  *            the type of the model object used inside the template expression
  *
  * @see #of(String)
@@ -60,15 +60,15 @@ import elemental.json.JsonArray;
  *      "https://cdn.vaadin.com/vaadin-web-components/20.0.0/#/elements/vaadin-combo-box"><code>&lt;vaadin-combo-box&gt;.renderer</code></a>
  */
 @JsModule("./lit-renderer.ts")
-public class LitRenderer<T> extends Renderer<T> {
+public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private final String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
 
     private final String propertyNamespace;
 
-    private final Map<String, ValueProvider<T, ?>> valueProviders = new HashMap<>();
-    private final Map<String, SerializableBiConsumer<T, JsonArray>> clientCallables = new HashMap<>();
+    private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
+    private final Map<String, SerializableBiConsumer<SOURCE, JsonArray>> clientCallables = new HashMap<>();
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
@@ -113,7 +113,7 @@ public class LitRenderer<T> extends Renderer<T> {
      * }
      * </pre>
      *
-     * @param <T>
+     * @param <SOURCE>
      *            the type of the input object used inside the template
      *
      * @param templateExpression
@@ -123,7 +123,7 @@ public class LitRenderer<T> extends Renderer<T> {
      * @see LitRenderer#withProperty(String, ValueProvider)
      * @see LitRenderer#withFunction(String, SerializableConsumer)
      */
-    public static <T> LitRenderer<T> of(String templateExpression) {
+    public static <SOURCE> LitRenderer<SOURCE> of(String templateExpression) {
         Objects.requireNonNull(templateExpression);
         return new LitRenderer<>(templateExpression);
     }
@@ -133,19 +133,18 @@ public class LitRenderer<T> extends Renderer<T> {
      */
     @Deprecated
     @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            Element contentTemplate) {
+    public Rendering<SOURCE> render(Element container,
+            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @deprecated LitRenderer doesn't support event handlers. Use functions
-     *             instead.
-     * @see LitRenderer#getFunctions()
+     * @deprecated LitRenderer doesn't support getting the event handlers. Don't
+     *             use.
      */
     @Deprecated
     @Override
-    public Map<String, SerializableConsumer<T>> getEventHandlers() {
+    public Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
         throw new UnsupportedOperationException();
     }
 
@@ -165,8 +164,8 @@ public class LitRenderer<T> extends Renderer<T> {
      *         to provide extra customization
      */
     @Override
-    public LitRendering<T> render(Element container,
-            DataKeyMapper<T> keyMapper) {
+    public Rendering<SOURCE> render(Element container,
+            DataKeyMapper<SOURCE> keyMapper) {
         return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
     }
 
@@ -187,15 +186,15 @@ public class LitRenderer<T> extends Renderer<T> {
      * @return the context of the rendering, that can be used by the components
      *         to provide extra customization
      */
-    public LitRendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            String rendererName) {
-        DataGenerator<T> dataGenerator = createDataGenerator();
+    public Rendering<SOURCE> render(Element container,
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
+        DataGenerator<SOURCE> dataGenerator = createDataGenerator();
         Registration registration = createJsRendererFunction(container,
                 keyMapper, rendererName);
 
-        return new LitRendering<T>() {
+        return new Rendering<SOURCE>() {
             @Override
-            public Optional<DataGenerator<T>> getDataGenerator() {
+            public Optional<DataGenerator<SOURCE>> getDataGenerator() {
                 return Optional.of(dataGenerator);
             }
 
@@ -221,7 +220,7 @@ public class LitRenderer<T> extends Renderer<T> {
     }
 
     private Registration createJsRendererFunction(Element container,
-            DataKeyMapper<T> keyMapper, String rendererName) {
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
@@ -230,9 +229,9 @@ public class LitRenderer<T> extends Renderer<T> {
                     String itemKey = arguments.getString(1);
                     JsonArray args = arguments.getArray(2);
 
-                    SerializableBiConsumer<T, JsonArray> handler = clientCallables
+                    SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
-                    T item = keyMapper.get(itemKey);
+                    SOURCE item = keyMapper.get(itemKey);
 
                     handler.accept(item, args);
                 });
@@ -267,7 +266,7 @@ public class LitRenderer<T> extends Renderer<T> {
         return () -> registrations.forEach(Registration::remove);
     }
 
-    private DataGenerator<T> createDataGenerator() {
+    private DataGenerator<SOURCE> createDataGenerator() {
         return (item, jsonObject) -> {
             valueProviders.forEach((key, provider) -> {
                 jsonObject.put(
@@ -319,12 +318,50 @@ public class LitRenderer<T> extends Renderer<T> {
      *            property, not <code>null</code>
      * @return this instance for method chaining
      */
-    public LitRenderer<T> withProperty(String property,
-            ValueProvider<T, ?> provider) {
+    public LitRenderer<SOURCE> withProperty(String property,
+            ValueProvider<SOURCE, ?> provider) {
         Objects.requireNonNull(property);
         Objects.requireNonNull(provider);
         valueProviders.put(property, provider);
         return this;
+    }
+
+    /**
+     * Adds an event handler that can be called from within the template
+     * expression.
+     * <p>
+     * Examples:
+     *
+     * <pre>
+     * {@code
+     * // Standard event
+     * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
+     *          .withEventHandler("handleClick", object -> doSomething());
+     * }
+     * </pre>
+     *
+     * The name of the event handler used in the template expression should be
+     * the name used at the eventHandlerName parameter. This name must be a
+     * valid JavaScript function name.
+     *
+     * @param eventHandlerName
+     *            the name of the event handler used inside the template
+     *            expression, must be alphanumeric and not <code>null</code>,
+     *            must not be one of the JavaScript reserved words
+     *            (https://www.w3schools.com/js/js_reserved.asp)
+     * @param handler
+     *            the handler executed when the event handler is called, not
+     *            <code>null</code>
+     * @return this instance for method chaining
+     * @see <a href=
+     *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
+     *
+     * @deprecated Use {@link #withFunction(String, SerializableConsumer)}
+     *             instead.
+     */
+    public LitRenderer<SOURCE> withEventHandler(String eventHandlerName,
+            SerializableConsumer<SOURCE> handler) {
+        return withFunction(eventHandlerName, handler);
     }
 
     /**
@@ -356,8 +393,8 @@ public class LitRenderer<T> extends Renderer<T> {
      * @see <a href=
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      */
-    public LitRenderer<T> withFunction(String functionName,
-            SerializableConsumer<T> handler) {
+    public LitRenderer<SOURCE> withFunction(String functionName,
+            SerializableConsumer<SOURCE> handler) {
         return withFunction(functionName,
                 (item, ignore) -> handler.accept(item));
     }
@@ -399,8 +436,8 @@ public class LitRenderer<T> extends Renderer<T> {
      * @see <a href=
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      */
-    public LitRenderer<T> withFunction(String functionName,
-            SerializableBiConsumer<T, JsonArray> handler) {
+    public LitRenderer<SOURCE> withFunction(String functionName,
+            SerializableBiConsumer<SOURCE, JsonArray> handler) {
         Objects.requireNonNull(functionName);
         Objects.requireNonNull(handler);
 
@@ -410,46 +447,5 @@ public class LitRenderer<T> extends Renderer<T> {
         }
         clientCallables.put(functionName, handler);
         return this;
-    }
-
-    /**
-     * Gets the functions linked to this renderer. The returned map is
-     * immutable.
-     *
-     * @return the mapped functions, never <code>null</code>
-     * @see #withFunction(String, SerializableBiConsumer)
-     */
-    public Map<String, SerializableBiConsumer<T, JsonArray>> getFunctions() {
-        return clientCallables == null ? Collections.emptyMap()
-                : Collections.unmodifiableMap(clientCallables);
-    }
-
-    /**
-     * Defines the context of a given {@link LitRenderer} when building the
-     * output elements. Components that support Renderers can use the context to
-     * customize the rendering according to their needs.
-     *
-     * @author Vaadin Ltd
-     * @since 22.0.
-     *
-     * @param <T>
-     *            the type of the object model
-     *
-     * @see LitRenderer#render(Element,
-     *      com.vaadin.flow.data.provider.DataKeyMapper)
-     */
-    public interface LitRendering<T> extends Rendering<T> {
-
-        /**
-         * Gets a {@link Registration} that allows cleaning up resources
-         * associated with this rendering when the rendering is no longer used.
-         * It removes the listeners and properties added to the container
-         * element by this rendering.
-         *
-         * @return the associated Registration
-         * @see Registration#remove
-         */
-        Registration getRegistration();
-
     }
 }
