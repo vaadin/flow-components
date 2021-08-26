@@ -720,7 +720,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      * <p>
      * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
+     * with the given {@code maxlength} or {@code minlength} properties.
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
@@ -738,7 +738,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      * <p>
      * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
+     * with the given {@code maxlength} or {@code minlength} properties.
      * </p>
      *
      * @param preventInvalidInput
