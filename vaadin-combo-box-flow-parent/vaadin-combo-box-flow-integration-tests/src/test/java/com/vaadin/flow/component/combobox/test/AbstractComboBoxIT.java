@@ -129,14 +129,9 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected List<TestBenchElement> getItemElements() {
-        TestBenchElement focusBackfillItem = getOverlay().$("div").id("content")
-                .$("iron-list").first()
-                .getPropertyElement("_focusBackfillItem");
-
         return getOverlay().$("div").id("content").$("vaadin-combo-box-item")
                 .all().stream()
                 .filter(element -> !element.hasAttribute("hidden"))
-                .filter(element -> !Objects.equals(focusBackfillItem, element))
                 .collect(Collectors.toList());
     }
 
