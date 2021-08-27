@@ -22,8 +22,6 @@ import java.io.Serializable;
 public class MouseEventDetails implements Serializable {
 
     private MouseButton button;
-    private int x;
-    private int y;
     private int absoluteX;
     private int absoluteY;
     private boolean altKey;

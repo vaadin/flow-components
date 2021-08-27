@@ -66,6 +66,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -250,7 +251,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private Registration dataGeneratorRegistration;
+    private List<Registration> renderingRegistrations = new ArrayList<>();
 
     private Element template;
 
@@ -405,9 +406,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Sets the TemplateRenderer responsible to render the individual items in
-     * the list of possible choices of the ComboBox. It doesn't affect how the
-     * selected item is rendered - that can be configured by using
+     * Sets the Renderer responsible to render the individual items in the list
+     * of possible choices of the ComboBox. It doesn't affect how the selected
+     * item is rendered - that can be configured by using
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      *
      * @param renderer
@@ -423,10 +424,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(renderer, "The renderer must not be null");
         this.renderer = renderer;
 
-        if (template == null) {
-            template = new Element("template");
-            getElement().appendChild(template);
-        }
         scheduleRender();
     }
 
@@ -942,7 +939,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider != null && dataProviderListener == null) {
+        if (dataProvider != null) {
             setupDataProviderListener(dataProvider);
         }
 
@@ -1598,18 +1595,44 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         renderScheduled = true;
         runBeforeClientResponse(ui -> {
-            if (dataGeneratorRegistration != null) {
-                dataGeneratorRegistration.remove();
-                dataGeneratorRegistration = null;
-            }
-            Rendering<T> rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
-            if (rendering.getDataGenerator().isPresent()) {
-                dataGeneratorRegistration = dataGenerator
-                        .addDataGenerator(rendering.getDataGenerator().get());
-            }
-            reset();
+            render();
+            renderScheduled = false;
         });
+    }
+
+    private void render() {
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
+
+        Rendering<T> rendering;
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (template != null && template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
+        } else {
+            // TemplateRenderer or ComponentRenderer
+            if (template == null) {
+                template = new Element("template");
+            }
+            if (template.getParent() == null) {
+                getElement().appendChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), template);
+        }
+
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            Registration renderingDataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(renderingDataGenerator);
+            renderingRegistrations.add(renderingDataGeneratorRegistration);
+        });
+
+        renderingRegistrations.add(rendering.getRegistration());
+
+        reset();
     }
 
     @ClientCallable

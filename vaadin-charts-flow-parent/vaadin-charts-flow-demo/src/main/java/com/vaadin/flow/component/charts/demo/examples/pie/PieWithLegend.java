@@ -9,10 +9,12 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.Tooltip;
+import com.vaadin.flow.shared.Registration;
 
 public class PieWithLegend extends AbstractChartExample {
 
     protected Chart chart;
+    protected Registration listenerRegistration;
 
     @Override
     public void initDemo() {
@@ -48,7 +50,7 @@ public class PieWithLegend extends AbstractChartExample {
         conf.setSeries(series);
         chart.setVisibilityTogglingDisabled(true);
 
-        chart.addPointLegendItemClickListener(event -> {
+        listenerRegistration = chart.addPointLegendItemClickListener(event -> {
             showNotification("Legend item click" + " : " + event.getItemIndex()
                     + " : " + event.getItem().getName());
         });

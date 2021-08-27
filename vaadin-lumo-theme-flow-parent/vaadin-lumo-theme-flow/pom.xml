@@ -9,6 +9,9 @@
     <artifactId>vaadin-lumo-theme</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Lumo Theme</name>
+    <properties>
+        <osgi.export.package>com.vaadin.flow.theme.lumo</osgi.export.package>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

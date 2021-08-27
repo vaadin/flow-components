@@ -166,7 +166,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "21.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -744,7 +744,8 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      * <p>
      * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
+     * with the given {@code pattern}, {@code maxlength} or {@code minlength}
+     * properties.
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
@@ -762,7 +763,8 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      * <p>
      * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
+     * with the given {@code pattern}, {@code maxlength} or {@code minlength}
+     * properties.
      * </p>
      *
      * @param preventInvalidInput

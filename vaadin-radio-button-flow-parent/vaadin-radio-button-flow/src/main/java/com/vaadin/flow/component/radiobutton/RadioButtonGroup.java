@@ -68,7 +68,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "21.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "22.0.0-alpha3")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -245,8 +245,7 @@ public class RadioButtonGroup<T>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null
-                && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null) {
             setupDataProviderListener(getDataProvider());
         }
         FieldValidationUtil.disableClientValidation(this);

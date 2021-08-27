@@ -328,6 +328,10 @@ function logByComponent(commits) {
     });
   }
   commits.forEach(commit => {
+    // Group the WC update commit to one category 
+    if (commit.title.includes("Increase Web-Component version")){
+      commit.components=["All Components"];
+    }
     !commit.skip && addCommit(commit, commit.components);
     commit.commits.forEach(c => {
       !c.skip && addCommit(c, commit.components);
@@ -335,7 +339,8 @@ function logByComponent(commits) {
   });
 
   Object.keys(byComponent).sort().forEach(k => {
-    console.log(`\n#### Changes in \`vaadin-${k}-flow\``);
+    k.includes("All Components") ? 
+    console.log(`\n#### Changes in \`All Components\``) : console.log(`\n#### Changes in \`vaadin-${k}-flow\``);
     logCommitsByType(byComponent[k]);
   });
 }

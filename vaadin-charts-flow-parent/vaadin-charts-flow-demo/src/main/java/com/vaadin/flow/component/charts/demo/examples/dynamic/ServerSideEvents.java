@@ -1,16 +1,7 @@
 package com.vaadin.flow.component.charts.demo.examples.dynamic;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.demo.AbstractChartExample;
@@ -30,31 +21,31 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.server.Command;
 
 @SkipFromDemo
 public class ServerSideEvents extends AbstractChartExample {
 
     private Chart chart;
-    private Label lastEvent;
-    private Label eventDetails;
+    private Span lastEvent;
+    private Span eventDetails;
     private int id;
     private VerticalLayout historyLayout;
     private int eventNumber;
     private DataSeriesItem firstDataPoint;
     private Checkbox visibilityToggling;
     private boolean setExtremes = true;
+    private boolean hideSeries = true;
 
     @Override
     public void initDemo() {
-        eventDetails = new Label();
+        eventDetails = new Span();
         eventDetails.setId("eventDetails");
 
-        lastEvent = new Label();
+        lastEvent = new Span();
         lastEvent.setId("lastEvent");
 
         historyLayout = new VerticalLayout();
@@ -141,21 +132,12 @@ public class ServerSideEvents extends AbstractChartExample {
                 .setVisibilityTogglingDisabled(visibilityToggling.getValue()));
         visibilityToggling.setValue(false);
 
-        final Button firstSeriesVisible = new Button("Hide first series");
+        final Button firstSeriesVisible = new Button("Hide first series", e -> {
+            Series firstSeries = chart.getConfiguration().getSeries().get(0);
+            ((AbstractSeries) firstSeries).setVisible(!hideSeries);
+            hideSeries = !hideSeries;
+        });
         firstSeriesVisible.setId("hideFirstSeries");
-        firstSeriesVisible.addClickListener(
-                new ComponentEventListener<ClickEvent<Button>>() {
-                    private boolean hideSeries = true;
-
-                    @Override
-                    public void onComponentEvent(
-                            ClickEvent<Button> buttonClickEvent) {
-                        Series firstSeries = chart.getConfiguration()
-                                .getSeries().get(0);
-                        ((AbstractSeries) firstSeries).setVisible(!hideSeries);
-                        hideSeries = !hideSeries;
-                    }
-                });
 
         final RadioButtonGroup<Dimension> zoomLevels = new RadioButtonGroup<>();
         zoomLevels.setItems(Dimension.XY, Dimension.X, Dimension.Y);
@@ -213,31 +195,8 @@ public class ServerSideEvents extends AbstractChartExample {
         String details = createEventString(event);
         lastEvent.setText(name);
         eventDetails.setText(details);
-        Label history = new Label(name + ": " + details + "\n");
+        Span history = new Span(name + ": " + details + "\n");
         history.setId("event" + eventNumber++);
-        historyLayout.getElement().insertChild(0, history.getElement());
-    }
-
-    private String createEventString(ComponentEvent<Chart> event) {
-        ObjectMapper mapper = new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .enable(SerializationFeature.INDENT_OUTPUT)
-                .setVisibility(PropertyAccessor.ALL,
-                        JsonAutoDetect.Visibility.NONE)
-                .setVisibility(PropertyAccessor.FIELD,
-                        JsonAutoDetect.Visibility.ANY)
-                .addMixIn(Command.class, JacksonMixinForIgnoreCommand.class);
-
-        try {
-            return mapper.writeValueAsString(event);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    @JsonIgnoreType
-    static class JacksonMixinForIgnoreCommand {
+        historyLayout.addComponentAtIndex(0, history);
     }
 }

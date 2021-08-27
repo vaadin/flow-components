@@ -35,8 +35,10 @@
         <ci-sauce.version>1.149</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.export.package>default</osgi.export.package>
     </properties>
     <modules>
+        <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
         <module>vaadin-flow-components-shared</module>
@@ -171,6 +173,8 @@
                     <version>5.3.0</version>
                     <configuration>
                         <bnd><![CDATA[
+                          // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
+
                           regexArtifactId: vaadin-(.*)-flow(-.*)?
                           replacementPattern: $1
                           packageNameWithDash: ${replacestring;${project.artifactId};${regexArtifactId};${replacementPattern}}
@@ -184,17 +188,26 @@
                           isDemo: ${matches;${project.artifactId};${isDemoPattern}}
                           packageName: ${packageNameTmp}${if;${isDemo};.demo}
 
+                          exportPackageDefault: ${project.groupId}.flow.component.*${packageName}.*
+                          isExportPackageDefault: ${is;${osgi.export.package};default}
+                          exportPackage: ${if;${isExportPackageDefault};${exportPackageDefault};${osgi.export.package}}
+                          symbolicNameDefault: ${project.groupId}.flow.component.${packageName}
+                          symbolicName: ${if;${isExportPackageDefault};${symbolicNameDefault};${osgi.export.package}}
+
                           Bundle-Name: ${project.artifactId}
-                          Bundle-SymbolicName: ${project.groupId}.flow.component.${packageName}
+                          Bundle-SymbolicName: ${symbolicName}
+
                           Import-Package: *
-                          Export-Package: ${project.groupId}.flow.component.*${packageName}.*;-noimport:=true
+                          Export-Package: ${exportPackage};-noimport:=true
                           Bundle-License: ${osgi.bundle.license}
+
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
                           -includeresource.resources: -src/main/resources
 
                           //if profile war is used in demos
                           -fixupmessages: "Classes found in the wrong directory";is:=warning
+
                           ]]></bnd>
                     </configuration>
                     <executions>
