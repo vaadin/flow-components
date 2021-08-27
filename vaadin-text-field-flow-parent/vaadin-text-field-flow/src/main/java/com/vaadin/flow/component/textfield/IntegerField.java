@@ -27,7 +27,6 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @Tag("vaadin-integer-field")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-integer-field.js")
-@JsModule("./fieldConnector.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 
     private static final SerializableFunction<String, Integer> PARSER = valueFormClient -> {
@@ -50,8 +49,6 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      */
     public IntegerField() {
         super(PARSER, FORMATTER, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
-
-        addAttachListener(e -> initConnector());
     }
 
     /**
@@ -203,10 +200,5 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      */
     public int getStep() {
         return (int) getStepDouble();
-    }
-
-    private void initConnector() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.fieldConnector.initLazy(this)");
     }
 }

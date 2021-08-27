@@ -21,7 +21,6 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Locale;
 
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -29,7 +28,6 @@ import com.vaadin.flow.function.SerializableFunction;
  *
  * @author Vaadin Ltd.
  */
-@JsModule("./fieldConnector.js")
 public class NumberField extends AbstractNumberField<NumberField, Double> {
 
     /**
@@ -136,8 +134,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
     private NumberField(Formatter formatter, boolean isInitialValueOptional) {
         super(formatter::parse, formatter, Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY, isInitialValueOptional);
-
-        addAttachListener(e -> initConnector());
     }
 
     @Override
@@ -325,11 +321,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
     @Deprecated
     public String getPattern() {
         return getPatternString();
-    }
-
-    private void initConnector() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.fieldConnector.initLazy(this)");
     }
 
     private static class Formatter
