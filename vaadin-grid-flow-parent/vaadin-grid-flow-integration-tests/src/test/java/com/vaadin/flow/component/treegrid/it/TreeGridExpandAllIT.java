@@ -61,7 +61,14 @@ public class TreeGridExpandAllIT extends AbstractTreeGridIT {
         expandToggleElement.click();
         waitUntil(e -> {
             int widthAfterExpend = grid.getCell(1, 0).getSize().getWidth();
-            System.out.println("width after expend: " + widthAfterExpend); // <-- this will probably be printed multiple times
+            System.out.println("width after expend: " + widthAfterExpend); // <--
+                                                                           // this
+                                                                           // will
+                                                                           // probably
+                                                                           // be
+                                                                           // printed
+                                                                           // multiple
+                                                                           // times
             return widthBeforeExpend != widthAfterExpend;
         }, 200);
 
