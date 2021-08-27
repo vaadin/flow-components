@@ -42,9 +42,7 @@ public class TextAreaElement extends TestBenchElement
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
-        waitForVaadin();
-        getWrappedElement().findElement(By.tagName("textarea"))
-                .sendKeys(keysToSend);
+        findElement(By.tagName("textarea")).sendKeys(keysToSend);
     }
 
 }
