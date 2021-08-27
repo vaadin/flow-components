@@ -33,7 +33,7 @@ public class States extends AbstractConfigurationObject {
     }
 
     /**
-     * The appearance of the other marker when hover.
+     * The appearance of the other marker or data point when hover.
      *
      * @see #setInactive(Hover)
      */
@@ -71,7 +71,9 @@ public class States extends AbstractConfigurationObject {
     }
 
     /**
-     * The appearance of the other point markers when one is hovered.
+     * The appearance of the other data points when one is hovered.
+     * <p>
+     * Note: Inactive style is not applied to <code>Marker</code>.
      *
      * @see #setHover(Hover)
      */
