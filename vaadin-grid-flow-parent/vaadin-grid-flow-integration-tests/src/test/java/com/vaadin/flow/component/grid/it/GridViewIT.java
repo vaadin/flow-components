@@ -369,8 +369,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertEquals(3l, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(4l, getCommandExecutor()
-                .executeScript(firstCellHiddenScript, grid));
+        waitUntil(driver -> getCommandExecutor()
+                .executeScript(firstCellHiddenScript, grid).equals(4L));
 
         Assert.assertNotEquals("true",
                 grid.getAttribute("columnReorderingAllowed"));
