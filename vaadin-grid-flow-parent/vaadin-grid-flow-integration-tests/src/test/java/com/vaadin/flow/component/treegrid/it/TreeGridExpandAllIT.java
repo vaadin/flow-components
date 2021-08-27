@@ -67,7 +67,7 @@ public class TreeGridExpandAllIT extends AbstractTreeGridIT {
         waitUntil(e -> {
             int widthAfterCollapse = grid.getCell(1, 0).getSize().getWidth();
             return widthBeforeExpend == widthAfterCollapse;
-        }, 200);
+        }, 1000);
     }
 
     private void runAddNewItemAfterCollapseAndExpand()
