@@ -25,6 +25,7 @@ public class EditorButtonsView extends VerticalLayout {
 
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
         crud.setDataProvider(dataProvider);
+        crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
 
         buttonsLayout = new HorizontalLayout();
 
