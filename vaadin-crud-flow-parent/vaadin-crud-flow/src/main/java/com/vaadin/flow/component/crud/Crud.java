@@ -88,6 +88,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     private Grid<E> grid;
     private CrudEditor<E> editor;
     private E gridActiveItem;
+    private boolean toolbarVisible = true;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -529,6 +530,30 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             ComponentUtil.fireEvent(this.grid,
                     new CrudI18nUpdatedEvent(this, false, i18n));
         }
+    }
+
+    /**
+     * Hides toolbar property of crud instance.
+     * 
+     * @param value
+     */
+    public void setToolbarVisible(boolean value) {
+        toolbarVisible = value;
+        if (value) {
+            getElement().setProperty("hideToolbar", false);
+        } else {
+            getElement().setProperty("hideToolbar", true);
+        }
+    }
+
+    /**
+     * Gets value of hide-toolbar attribute or return null if not present.
+     * 
+     * @param
+     * @return true if toolbar is visible false otherwise
+     */
+    public boolean getToolbarVisible() {
+        return toolbarVisible;
     }
 
     /**

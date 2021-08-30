@@ -57,6 +57,17 @@ public class CrudTest {
                 systemUnderTest.getEditorPosition());
     }
 
+    @Test
+    public void getCrudToolbarAttribute() {
+        Assert.assertTrue(systemUnderTest.getToolbarVisible());
+    }
+
+    @Test
+    public void hideToolbarAttributePresent() {
+        systemUnderTest.setToolbarVisible(false);
+        Assert.assertEquals(false, systemUnderTest.getToolbarVisible());
+    }
+
     private Grid<Thing> createFakeGrid() {
         Grid<Thing> grid = Mockito.spy(new Grid<>());
 

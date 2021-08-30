@@ -131,6 +131,30 @@ public class BasicUseIT extends AbstractParallelTest {
         Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
     }
 
+    @Test
+    public void hideToolbar() {
+
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+
+        ButtonElement hideToolbarButton = getTestButton("hideToolbarButton");
+        hideToolbarButton.click();
+
+
+        Assert.assertNotNull(crud.getAttribute("hide-toolbar"));
+    }
+
+    @Test
+    public void showToolbar() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+
+        ButtonElement hideToolbarButton = getTestButton("hideToolbarButton");
+        ButtonElement showToolbarButton = getTestButton("showToolbarButton");
+
+        hideToolbarButton.click();
+        showToolbarButton.click();
+        Assert.assertNull(crud.getAttribute("hide-toolbar"));
+    }
+
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
     }
