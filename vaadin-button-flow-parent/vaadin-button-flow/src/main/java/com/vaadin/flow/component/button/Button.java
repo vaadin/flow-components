@@ -15,18 +15,10 @@
  */
 package com.vaadin.flow.component.button;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Image;
@@ -34,6 +26,12 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Server-side component for the <code>vaadin-button</code> element.
@@ -46,7 +44,6 @@ public class Button extends GeneratedVaadinButton<Button>
     private Component iconComponent;
     private boolean iconAfterText;
     private boolean disableOnClick = false;
-    private boolean disableOnClickConfigured = false;
 
     // Register immediately as first listener
     private Registration disableListener = addClickListener(
@@ -343,13 +340,10 @@ public class Button extends GeneratedVaadinButton<Button>
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        if (!disableOnClickConfigured) {
-            getElement().executeJs("var disableEvent = function () {"
-                    + "if($0.getAttribute('disableOnClick')){"
-                    + " $0.setAttribute('disabled', 'true');" + "}" + "};"
-                    + "$0.addEventListener('click', disableEvent)");
-            disableOnClickConfigured = true;
-        }
+        getElement().executeJs("var disableEvent = function () {"
+                + "if($0.getAttribute('disableOnClick')){"
+                + " $0.setAttribute('disabled', 'true');" + "}" + "};"
+                + "$0.addEventListener('click', disableEvent)");
     }
 
     private void updateIconSlot() {
@@ -429,8 +423,4 @@ public class Button extends GeneratedVaadinButton<Button>
         initDisableOnClick();
     }
 
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        disableOnClickConfigured = false;
-    }
 }
