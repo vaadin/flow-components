@@ -53,6 +53,7 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldSwitchToComponentRenderer() {
         clickElementWithJs("componentRendererButton");
+        waitForElementPresent(By.id("item-0"));
         WebElement item = list.findElement(By.id("item-0"));
         Assert.assertEquals("Component: Item 0", item.getText());
     }

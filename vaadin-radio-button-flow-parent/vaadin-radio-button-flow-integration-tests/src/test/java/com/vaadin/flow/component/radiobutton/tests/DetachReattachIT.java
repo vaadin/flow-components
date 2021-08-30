@@ -58,6 +58,6 @@ public class DetachReattachIT extends AbstractComponentIT {
     }
 
     private void clickButton(String id) {
-        $("#" + id).first().click();
+        $("button").id(id).click();
     }
 }
