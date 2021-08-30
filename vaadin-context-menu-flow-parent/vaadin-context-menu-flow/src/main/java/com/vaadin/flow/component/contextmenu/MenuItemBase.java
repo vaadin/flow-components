@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
@@ -154,12 +157,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
         getElement().setProperty("_checked", checked);
 
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    ui.getPage().executeJavaScript(
-                            "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
-                            getElement(), checked);
-                }));
+        executeJsWhenAttached("window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
+                getElement(), checked);
     }
 
     /**
@@ -175,5 +174,27 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         return getElement().getProperty("_checked", false);
     }
 
+    public void setThemeName(String theme) {
+        if (theme != null) {
+            getElement().setProperty("_theme", theme);
+        } else {
+            getElement().removeProperty("_theme");
+        }
+
+        executeJsWhenAttached("window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
+                getElement(), theme);
+    }
+
+    public String getThemeName() {
+        return getElement().getProperty("_theme");
+    }
+
     protected abstract S createSubMenu();
+
+    protected void executeJsWhenAttached(String expression,
+            Serializable... parameters) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this,
+                        context -> ui.getPage().executeJs(expression, parameters)));
+    }
 }

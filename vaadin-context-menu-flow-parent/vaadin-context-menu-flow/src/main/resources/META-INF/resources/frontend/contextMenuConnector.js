@@ -94,7 +94,11 @@ import * as Gestures from "@polymer/polymer/lib/utils/gestures.js";
           const items =
             container &&
             Array.from(container.children).map(child => {
-              const item = { component: child, checked: child._checked };
+              const item = {
+                  component: child,
+                  checked: child._checked,
+                  theme: child._theme
+              };
               if (
                 child.tagName == "VAADIN-CONTEXT-MENU-ITEM" &&
                 child._containerNodeId
@@ -116,6 +120,13 @@ import * as Gestures from "@polymer/polymer/lib/utils/gestures.js";
         if (component._item) {
           component._item.checked = checked;
         }
-      })(component, checked)
+      })(component, checked),
+
+    setTheme: (component, theme) =>
+        tryCatchWrapper((component, theme) => {
+            if (component._item) {
+                component._item.theme = theme;
+            }
+        })(component, theme)
   };
 })();

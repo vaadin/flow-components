@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.menubar;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -51,5 +53,14 @@ class MenuBarRootItem extends MenuItem {
         }
         super.setVisible(visible);
         menuBar.resetContent();
+    }
+
+    @Override
+    public void setThemeName(String theme) {
+        if (Objects.equals(theme, getThemeName())) {
+            return;
+        }
+        super.setThemeName(theme);
+        menuBar.updateButtons();
     }
 }

@@ -28,6 +28,10 @@ import com.vaadin.flow.router.Route;
 @PreserveOnRefresh
 public class MenuBarTestPage extends Div {
 
+    public static final String MENU_BAR_THEME = "menu-bar-theme";
+    public static final String MENU_ITEM_THEME = "menu-item-theme";
+    public static final String SUB_ITEM_THEME = "sub-item-theme";
+
     public MenuBarTestPage() {
         MenuBar menuBar = new MenuBar();
         add(menuBar);
@@ -108,9 +112,41 @@ public class MenuBarTestPage extends Div {
                         .setMoreOptions("more-options")));
         setI18nButton.setId("set-i18n");
 
+        NativeButton toggleMenuBarThemeButton = new NativeButton("toggle theme",
+                e -> {
+                    if (menuBar.hasThemeName(MENU_BAR_THEME)) {
+                        menuBar.removeThemeName(MENU_BAR_THEME);
+                    } else {
+                        menuBar.addThemeName(MENU_BAR_THEME);
+                    }
+                });
+        toggleMenuBarThemeButton.setId("toggle-theme");
+
+        NativeButton toggleMenuItemThemeButton = new NativeButton("toggle item theme",
+                e -> {
+                    if (MENU_ITEM_THEME.equals(item1.getThemeName())) {
+                        item1.setThemeName(null);
+                    } else {
+                        item1.setThemeName(MENU_ITEM_THEME);
+                    }
+                });
+        toggleMenuItemThemeButton.setId("toggle-item-theme");
+
+        NativeButton toggleSubItemThemeButton = new NativeButton("toggle sub theme",
+                e -> {
+                    if (SUB_ITEM_THEME.equals(subItem2.getThemeName())) {
+                        subItem2.setThemeName(null);
+                    } else {
+                        subItem2.setThemeName(SUB_ITEM_THEME);
+                    }
+                });
+        toggleSubItemThemeButton.setId("toggle-sub-theme");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
                 disableButton, visibleButton, checkedButton,
-                toggleAttachedButton, setI18nButton);
+                toggleAttachedButton, setI18nButton,
+                toggleAttachedButton, toggleMenuBarThemeButton,
+                toggleMenuItemThemeButton, toggleSubItemThemeButton);
     }
 }
