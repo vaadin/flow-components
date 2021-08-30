@@ -223,12 +223,16 @@ public class EventHandlingIT extends AbstractParallelTest {
     public void newEventItem() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         getTestButton("newEventListener").click();
-        // we need to do this trick because the way `New` events are logged
+
         crud.getNewItemButton().get().click();
-        crud.getEditorCancelButton().click();
-        Assert.assertEquals(
-                "Cancel: Person{id=0, firstName='firstName', lastName='lastName'}",
-                getLastEvent());
+
+        TestBenchElement editor = crud.getEditor();
+        TextFieldElement firstNameField = editor.$(TextFieldElement.class).attribute("editor-role", "first-name").first();
+        TextFieldElement lastNameField = editor.$(TextFieldElement.class).attribute("editor-role", "last-name").first();
+
+        Assert.assertEquals("firstName", firstNameField.getValue());
+        Assert.assertEquals("lastName", lastNameField.getValue());
+       
     }
 
     private static String getFooterText(CrudElement crud) {
