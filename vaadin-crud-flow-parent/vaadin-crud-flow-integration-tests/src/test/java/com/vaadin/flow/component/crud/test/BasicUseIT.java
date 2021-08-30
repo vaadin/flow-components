@@ -139,7 +139,6 @@ public class BasicUseIT extends AbstractParallelTest {
         ButtonElement hideToolbarButton = getTestButton("hideToolbarButton");
         hideToolbarButton.click();
 
-
         Assert.assertNotNull(crud.getAttribute("hide-toolbar"));
     }
 
