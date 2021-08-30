@@ -61,7 +61,7 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
     }
 
     @Test
-    public void detachReattachDisableOnClickButtonTest() {
+    public void testDetachingAndReattachingShouldKeepDisabledOnClick() {
         open();
 
         ButtonElement disableOnClickButton = getDisableOnClickButton();
