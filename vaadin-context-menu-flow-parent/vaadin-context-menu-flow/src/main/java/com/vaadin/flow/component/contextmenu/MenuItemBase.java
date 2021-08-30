@@ -43,6 +43,8 @@ import com.vaadin.flow.component.Tag;
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 
+    private static final String PRIVATE_THEME_ATTRIBUTE = "_theme";
+
     private final C contextMenu;
     private S subMenu;
 
@@ -177,9 +179,9 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
     public void setThemeName(String theme) {
         if (theme != null) {
-            getElement().setProperty("_theme", theme);
+            getElement().setProperty(PRIVATE_THEME_ATTRIBUTE, theme);
         } else {
-            getElement().removeProperty("_theme");
+            getElement().removeProperty(PRIVATE_THEME_ATTRIBUTE);
         }
 
         executeJsWhenAttached(
@@ -188,7 +190,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     }
 
     public String getThemeName() {
-        return getElement().getProperty("_theme");
+        return getElement().getProperty(PRIVATE_THEME_ATTRIBUTE);
     }
 
     protected abstract S createSubMenu();
