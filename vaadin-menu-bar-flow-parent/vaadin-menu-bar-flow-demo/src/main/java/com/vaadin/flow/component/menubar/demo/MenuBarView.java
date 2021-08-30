@@ -410,7 +410,8 @@ public class MenuBarView extends DemoView {
         MenuItem project = menuBar.addItem("Project");
         project.setThemeName(MenuBarVariant.LUMO_PRIMARY.getVariantName());
         MenuItem account = menuBar.addItem("Account");
-        MenuItem signOut = menuBar.addItem(VaadinIcon.SIGN_OUT.create(), e -> selected.setText("Sign Out"));
+        MenuItem signOut = menuBar.addItem(VaadinIcon.SIGN_OUT.create(),
+                e -> selected.setText("Sign Out"));
         signOut.setThemeName(MenuBarVariant.LUMO_TERTIARY.getVariantName());
 
         SubMenu projectSubMenu = project.getSubMenu();

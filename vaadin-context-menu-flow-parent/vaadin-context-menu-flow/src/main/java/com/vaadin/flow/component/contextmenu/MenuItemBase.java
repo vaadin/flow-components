@@ -157,7 +157,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
         getElement().setProperty("_checked", checked);
 
-        executeJsWhenAttached("window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
+        executeJsWhenAttached(
+                "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
                 getElement(), checked);
     }
 
@@ -181,7 +182,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
             getElement().removeProperty("_theme");
         }
 
-        executeJsWhenAttached("window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
+        executeJsWhenAttached(
+                "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
                 getElement(), theme);
     }
 
@@ -193,8 +195,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
     protected void executeJsWhenAttached(String expression,
             Serializable... parameters) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this,
-                        context -> ui.getPage().executeJs(expression, parameters)));
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                context -> ui.getPage().executeJs(expression, parameters)));
     }
 }

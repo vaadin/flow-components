@@ -411,7 +411,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void toggleMenuBarTheme_themeIsToggled() {
         Assert.assertFalse(menuBar.hasAttribute("theme"));
         click("toggle-theme");
-        Assert.assertEquals(menuBar.getAttribute("theme"), MenuBarTestPage.MENU_BAR_THEME);
+        Assert.assertEquals(menuBar.getAttribute("theme"),
+                MenuBarTestPage.MENU_BAR_THEME);
         click("toggle-theme");
         Assert.assertFalse(menuBar.hasAttribute("theme"));
     }
@@ -422,7 +423,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
         click("toggle-item-theme");
         menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertEquals(menuButton1.getAttribute("theme"), MenuBarTestPage.MENU_ITEM_THEME);
+        Assert.assertEquals(menuButton1.getAttribute("theme"),
+                MenuBarTestPage.MENU_ITEM_THEME);
         click("toggle-item-theme");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
@@ -437,7 +439,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         verifyClosed();
 
         menuBar.getButtons().get(0).click();
-        Assert.assertEquals(getOverlayMenuItems().get(1).getAttribute("theme"), MenuBarTestPage.SUB_ITEM_THEME);
+        Assert.assertEquals(getOverlayMenuItems().get(1).getAttribute("theme"),
+                MenuBarTestPage.SUB_ITEM_THEME);
 
         click("toggle-sub-theme");
         verifyClosed();
@@ -452,8 +455,10 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item-theme");
 
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertTrue(menuButton1.getAttribute("theme").contains(MenuBarTestPage.MENU_BAR_THEME));
-        Assert.assertTrue(menuButton1.getAttribute("theme").contains(MenuBarTestPage.MENU_ITEM_THEME));
+        Assert.assertTrue(menuButton1.getAttribute("theme")
+                .contains(MenuBarTestPage.MENU_BAR_THEME));
+        Assert.assertTrue(menuButton1.getAttribute("theme")
+                .contains(MenuBarTestPage.MENU_ITEM_THEME));
     }
 
     @After
