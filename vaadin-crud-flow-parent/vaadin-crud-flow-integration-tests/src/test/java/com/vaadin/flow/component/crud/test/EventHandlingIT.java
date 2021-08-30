@@ -227,12 +227,14 @@ public class EventHandlingIT extends AbstractParallelTest {
         crud.getNewItemButton().get().click();
 
         TestBenchElement editor = crud.getEditor();
-        TextFieldElement firstNameField = editor.$(TextFieldElement.class).attribute("editor-role", "first-name").first();
-        TextFieldElement lastNameField = editor.$(TextFieldElement.class).attribute("editor-role", "last-name").first();
+        TextFieldElement firstNameField = editor.$(TextFieldElement.class)
+                .attribute("editor-role", "first-name").first();
+        TextFieldElement lastNameField = editor.$(TextFieldElement.class)
+                .attribute("editor-role", "last-name").first();
 
         Assert.assertEquals("firstName", firstNameField.getValue());
         Assert.assertEquals("lastName", lastNameField.getValue());
-       
+
     }
 
     private static String getFooterText(CrudElement crud) {
