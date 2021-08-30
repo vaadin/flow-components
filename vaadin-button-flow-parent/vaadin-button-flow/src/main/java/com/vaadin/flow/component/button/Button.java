@@ -319,7 +319,6 @@ public class Button extends GeneratedVaadinButton<Button>
     public void setDisableOnClick(boolean disableOnClick) {
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
-            initDisableOnClick();
             getElement().setAttribute("disableOnClick", "true");
         } else {
             getElement().removeAttribute("disableOnClick");
