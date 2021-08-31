@@ -196,8 +196,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             getElement()
                     .executeJs("this.__validate = function () {return true;}");
             // Override onFormChanges to dispatch an event so the server can
-            // control
-            // the dirty state of the form
+            // control the dirty state of the form
             getElement().executeJs(
                     "this.__onFormChanges = function () { this.dispatchEvent(new CustomEvent('form-change')); }");
         });
