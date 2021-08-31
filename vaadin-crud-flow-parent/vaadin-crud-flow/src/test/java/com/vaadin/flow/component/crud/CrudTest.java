@@ -58,14 +58,15 @@ public class CrudTest {
     }
 
     @Test
-    public void getCrudToolbarAttribute() {
+    public void getToolbarVisible_defaultTrue() {
         Assert.assertTrue(systemUnderTest.getToolbarVisible());
     }
 
     @Test
-    public void hideToolbarAttributePresent() {
+    public void getToolbarVisible_setVisibleToFalse_returnsFalse() {
         systemUnderTest.setToolbarVisible(false);
         Assert.assertEquals(false, systemUnderTest.getToolbarVisible());
+        Assert.assertEquals("", );
     }
 
     private Grid<Thing> createFakeGrid() {
