@@ -87,7 +87,7 @@ Your work has been saved
  * </p>
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "20.0.3")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "20.0.4")
 @JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {
