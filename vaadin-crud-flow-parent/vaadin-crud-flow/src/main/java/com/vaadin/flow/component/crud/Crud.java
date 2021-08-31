@@ -895,6 +895,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             this.item = item;
         }
 
+        /**
+         * Gets new item being created
+         * 
+         * @return a new object of bean type
+         */
         @Override
         public E getItem() {
             return item;
