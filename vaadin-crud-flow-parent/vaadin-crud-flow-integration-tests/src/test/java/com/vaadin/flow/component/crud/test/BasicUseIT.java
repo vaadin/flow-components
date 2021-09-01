@@ -132,6 +132,12 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
+    public void toolbarVisibleByDefault() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertNull(crud.getAttribute("hide-toolbar"));
+    }
+
+    @Test
     public void hideToolbar() {
 
         CrudElement crud = $(CrudElement.class).waitForFirst();
