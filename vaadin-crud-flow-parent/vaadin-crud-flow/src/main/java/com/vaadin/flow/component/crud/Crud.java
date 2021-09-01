@@ -540,9 +540,9 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     public void setToolbarVisible(boolean value) {
         toolbarVisible = value;
         if (value) {
-            getElement().setProperty("hideToolbar", false);
+            getElement().setProperty("noToolbar", false);
         } else {
-            getElement().setProperty("hideToolbar", true);
+            getElement().setProperty("noToolbar", true);
         }
     }
 
