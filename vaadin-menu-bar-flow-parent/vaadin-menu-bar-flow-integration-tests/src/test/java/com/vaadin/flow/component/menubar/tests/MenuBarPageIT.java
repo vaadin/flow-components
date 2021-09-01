@@ -450,15 +450,13 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void toggleMenuBarTheme_toggleMenuItemTheme_themesAreMerged() {
+    public void toggleMenuBarTheme_toggleMenuItemTheme_themeIsOverridden() {
         click("toggle-theme");
         click("toggle-item-theme");
 
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertTrue(menuButton1.getAttribute("theme")
-                .contains(MenuBarTestPage.MENU_BAR_THEME));
-        Assert.assertTrue(menuButton1.getAttribute("theme")
-                .contains(MenuBarTestPage.MENU_ITEM_THEME));
+        Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
+                menuButton1.getAttribute("theme"));
     }
 
     @After
