@@ -91,11 +91,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     private E gridActiveItem;
     private boolean toolbarVisible = true;
 
-    final private Button save;
+    final private Button saveButton;
 
-    final private Button cancel;
+    final private Button cancelButton;
 
-    final private Button delete;
+    final private Button deleteButton;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -177,20 +177,20 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
 
-        save = new Button();
-        save.getElement().setAttribute("slot", "save-button");
-        save.addThemeName("primary");
-        getElement().appendChild(save.getElement());
+        saveButton = new Button();
+        saveButton.getElement().setAttribute("slot", "save-button");
+        saveButton.addThemeName("primary");
+        getElement().appendChild(saveButton.getElement());
 
-        cancel = new Button();
-        cancel.getElement().setAttribute("slot", "cancel-button");
-        cancel.addThemeName("tertiary");
-        getElement().appendChild(cancel.getElement());
+        cancelButton = new Button();
+        cancelButton.getElement().setAttribute("slot", "cancel-button");
+        cancelButton.addThemeName("tertiary");
+        getElement().appendChild(cancelButton.getElement());
 
-        delete = new Button();
-        delete.getElement().setAttribute("slot", "delete-button");
-        delete.addThemeNames("tertiary", "error");
-        getElement().appendChild(delete.getElement());
+        deleteButton = new Button();
+        deleteButton.getElement().setAttribute("slot", "delete-button");
+        deleteButton.addThemeNames("tertiary", "error");
+        getElement().appendChild(deleteButton.getElement());
 
         addAttachListener(e -> {
             getElement()
@@ -205,7 +205,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     }
 
     private void formChangeEvent(com.vaadin.flow.dom.DomEvent e) {
-        if (this.save.isEnabled()) {
+        if (this.saveButton.isEnabled()) {
             this.setDirty(true);
         }
     }
@@ -601,7 +601,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
      * @return the delete button
      */
     public Button getDeleteButton() {
-        return delete;
+        return deleteButton;
     }
 
     /**
@@ -610,7 +610,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
      * @return the save button
      */
     public Button getSaveButton() {
-        return save;
+        return saveButton;
     }
 
     /**
@@ -619,7 +619,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
      * @return the cancel button
      */
     public Button getCancelButton() {
-        return cancel;
+        return cancelButton;
     }
 
     /**
