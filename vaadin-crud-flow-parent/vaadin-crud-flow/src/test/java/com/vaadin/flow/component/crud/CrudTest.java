@@ -66,7 +66,6 @@ public class CrudTest {
     public void getToolbarVisible_setVisibleToFalse_returnsFalse() {
         systemUnderTest.setToolbarVisible(false);
         Assert.assertEquals(false, systemUnderTest.getToolbarVisible());
-        Assert.assertEquals("", );
     }
 
     private Grid<Thing> createFakeGrid() {
