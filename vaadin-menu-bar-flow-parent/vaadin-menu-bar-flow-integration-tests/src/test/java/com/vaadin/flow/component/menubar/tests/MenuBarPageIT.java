@@ -378,6 +378,26 @@ public class MenuBarPageIT extends AbstractComponentIT {
                 overflowButton.getAttribute("aria-label"));
     }
 
+    @Test
+    public void setI18n_detach_attach_i18nIsPersisted() {
+        click("set-width");
+        click("add-root-item");
+        click("set-i18n");
+        TestBenchElement overflowButton = menuBar.getOverflowButton();
+
+        Assert.assertEquals("more-options",
+                overflowButton.getAttribute("aria-label"));
+
+        click("toggle-attached");
+        click("toggle-attached");
+
+        menuBar = $(MenuBarElement.class).first();
+        overflowButton = menuBar.getOverflowButton();
+
+        Assert.assertEquals("more-options",
+                overflowButton.getAttribute("aria-label"));
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();

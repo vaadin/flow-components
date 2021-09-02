@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -306,6 +307,16 @@ public class MenuBar extends Component
         // into an empty object
         getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
                 i18nJson);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
     }
 
     private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
