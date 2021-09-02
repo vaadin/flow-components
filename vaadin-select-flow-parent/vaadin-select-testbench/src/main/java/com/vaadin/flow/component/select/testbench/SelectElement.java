@@ -108,11 +108,7 @@ public class SelectElement extends TestBenchElement
     }
 
     public ItemElement getSelectedItem() {
-        TestBenchElement textFieldElement = $("vaadin-select-text-field")
-                .first();
-        TestBenchElement itemSlotElement = wrapElement(
-                textFieldElement.findElement(By.xpath("div[@part=\"value\"]")),
-                getCommandExecutor());
-        return itemSlotElement.$(ItemElement.class).first();
+        TestBenchElement valueElement = $("vaadin-select-value-button").first();
+        return valueElement.$(ItemElement.class).first();
     }
 }
