@@ -16,7 +16,6 @@ import com.vaadin.flow.component.KeyModifier;
 public class EditorButtonsView extends VerticalLayout {
 
     final HorizontalLayout buttonsLayout;
-    boolean hasBorder = true;
 
     public EditorButtonsView() {
         final Crud<Person> crud = new Crud<>(Person.class,
