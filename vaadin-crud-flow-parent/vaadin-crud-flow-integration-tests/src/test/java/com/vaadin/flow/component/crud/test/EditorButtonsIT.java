@@ -131,7 +131,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
 
     @Test
     public void buttonsCanWorkWithShortcutsDefinedOnServer() {
-        String LAST_NAME_EXPECTED = "OTTO";
+        String lastNameExpected = "OTTO";
         CrudElement crud = getCrud();
         crud.openRowForEditing(0);
         assertTrue(crud.isEditorOpen());
@@ -141,17 +141,17 @@ public class EditorButtonsIT extends AbstractParallelTest {
         TextFieldElement lastNameField = crud.getEditor()
                 .$(TextFieldElement.class).attribute("editor-role", "last-name")
                 .first();
-        lastNameField.setValue(LAST_NAME_EXPECTED);
+        lastNameField.setValue(lastNameExpected);
 
         // invoke shortcut
         WebElement body = getDriver().findElement(By.xpath("//body"));
         body.sendKeys(Keys.ENTER);
 
-        String LAST_NAME_ACTUAL = crud.getGrid().getCell(0, 2).getText();
+        String lastNameActual = crud.getGrid().getCell(0, 2).getText();
 
         assertFalse("Editor is closed", crud.isEditorOpen());
-        assertEquals("Last name is updated", LAST_NAME_EXPECTED,
-                LAST_NAME_ACTUAL);
+        assertEquals("Last name is updated", lastNameExpected,
+                lastNameActual);
     }
 
     private CrudElement getCrud() {
