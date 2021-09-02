@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 
+
 public class EditorButtonsIT extends AbstractParallelTest {
 
     @Before
@@ -39,6 +40,22 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertTrue("Save button should be enabled", saveButton.isEnabled());
         getTestButton("disable-save-button").click();
         assertFalse("Save button should be disabled", saveButton.isEnabled());
+    }
+
+    @Test
+    public void saveButtonBecomesEnabledWhenFormBecomesDirty() {
+        CrudElement crud = getCrud();
+
+        crud.getNewItemButton().get().click();
+        ButtonElement saveButton = crud.getEditorSaveButton();
+        assertFalse(saveButton.isEnabled());
+
+        TextFieldElement lastNameField = crud.getEditor()
+                .$(TextFieldElement.class).attribute("editor-role", "last-name")
+                .first();
+        lastNameField.setValue("Otto");
+
+        assertTrue(saveButton.isEnabled());
     }
 
     @Test
