@@ -130,7 +130,7 @@ public class TextAreaPage extends Div {
         TextArea field = new TextArea();
         field.setLabel("Helper component should be visible");
         Span span = new Span("Helper Component");
-        span.setId("helper-component");
+        span.getElement().setAttribute("name", "helper-component");
         field.setHelperComponent(span);
         field.setId("helper-component-field");
 

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.testbench;
 
+import org.openqa.selenium.By;
+
 import java.util.Collections;
 
 import com.vaadin.testbench.HasHelper;
@@ -60,6 +62,11 @@ public class PasswordFieldElement extends TestBenchElement
         HasStringValueProperty.super.setValue(string);
         dispatchEvent("change", Collections.singletonMap("bubbles", true));
         dispatchEvent("blur");
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 
 }
