@@ -14,7 +14,6 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 
-
 public class EditorButtonsIT extends AbstractParallelTest {
 
     @Before
@@ -150,8 +149,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
         String lastNameActual = crud.getGrid().getCell(0, 2).getText();
 
         assertFalse("Editor is closed", crud.isEditorOpen());
-        assertEquals("Last name is updated", lastNameExpected,
-                lastNameActual);
+        assertEquals("Last name is updated", lastNameExpected, lastNameActual);
     }
 
     private CrudElement getCrud() {
