@@ -15,8 +15,12 @@ import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.Inactive;
 import com.vaadin.flow.component.charts.model.ListSeries;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
+import com.vaadin.flow.component.charts.model.States;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.charts.model.style.SolidColor;
 
 /**
  * Tests for the JSON serialization in {@link Configuration}
@@ -114,6 +118,24 @@ public class ConfigurationJSONSerializationTest {
         conf.addSeries(new ListSeries());
         assertEquals(
                 "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[{\"data\":[]},{\"data\":[]},{\"data\":[]}],\"exporting\":{\"enabled\":false}}",
+                toJSON(conf));
+    }
+
+    @Test
+    public void configurationJSONSerialization_setOptionsWithInactiveState_inactiveStatesSerialized() {
+        Configuration conf = new Configuration();
+        PlotOptionsPie options = new PlotOptionsPie();
+        States states = options.getStates();
+        Inactive inactive = states.getInactive();
+        inactive.setOpacity(1.0);
+        inactive.setBorderColor(new SolidColor("#000000"));
+        inactive.setColor(new SolidColor("#808080"));
+        inactive.setBrightness(1);
+        inactive.setAnimation(false);
+        conf.setPlotOptions(options);
+
+        assertEquals(
+                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{\"pie\":{\"states\":{\"inactive\":{\"animation\":false,\"borderColor\":\"#000000\",\"brightness\":1,\"color\":\"#808080\",\"opacity\":1.0}}}},\"series\":[],\"exporting\":{\"enabled\":false}}",
                 toJSON(conf));
     }
 }
