@@ -74,11 +74,9 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-        WebElement field = findElement(By.id("clear-password-field"));
-
-        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
-        input.sendKeys("foo");
-        blur();
+        PasswordFieldElement field = $(PasswordFieldElement.class)
+                .id("clear-password-field");
+        field.setValue("foo");
 
         WebElement clearButton = getInShadowRoot(field,
                 By.cssSelector("[part~='clear-button']"));
