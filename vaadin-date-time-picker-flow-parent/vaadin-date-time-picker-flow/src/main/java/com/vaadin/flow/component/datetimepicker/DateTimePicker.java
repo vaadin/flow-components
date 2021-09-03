@@ -238,15 +238,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     @Override
     public void setValue(LocalDateTime value) {
         super.setValue(value);
-        // Get the value from client after possible adjustment.
-        // This is a workaround for infinite value change loop which can be
-        // triggered when the field is set as read-only.
-        // fixme(haprog) This workaround should probably be removed after this
-        // is fixed: https://github.com/vaadin/vaadin-time-picker-flow/issues/77
-        getElement().executeJs("return this.value;")
-                .then(jsonValue -> super.setValue(
-                        jsonValue.asString().isEmpty() ? null
-                                : LocalDateTime.parse(jsonValue.asString())));
     }
 
     @Override

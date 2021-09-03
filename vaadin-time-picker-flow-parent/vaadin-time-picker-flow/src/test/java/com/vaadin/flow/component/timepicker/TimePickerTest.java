@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,8 +12,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
+ *
  */
-package com.vaadin.flow.component.timepicker.tests;
+package com.vaadin.flow.component.timepicker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -278,5 +279,39 @@ public class TimePickerTest {
         assertTrue(timePicker.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,
                 false));
         assertFalse(timePicker.isAutoOpen());
+    }
+
+    @Test
+    public void defaultPrecision() {
+        TimePicker timePicker = new TimePicker();
+        ChronoUnit precision = timePicker.getPrecision();
+
+        assertEquals(ChronoUnit.MINUTES, precision);
+    }
+
+    @Test
+    public void customStepPrecision() {
+        TimePicker timePicker = new TimePicker();
+
+        timePicker.setStep(Duration.of(1, ChronoUnit.HOURS));
+        assertEquals(ChronoUnit.MINUTES, timePicker.getPrecision());
+
+        timePicker.setStep(Duration.of(30, ChronoUnit.MINUTES));
+        assertEquals(ChronoUnit.MINUTES, timePicker.getPrecision());
+
+        timePicker.setStep(Duration.of(1, ChronoUnit.MINUTES));
+        assertEquals(ChronoUnit.MINUTES, timePicker.getPrecision());
+
+        timePicker.setStep(Duration.of(30, ChronoUnit.SECONDS));
+        assertEquals(ChronoUnit.SECONDS, timePicker.getPrecision());
+
+        timePicker.setStep(Duration.of(1, ChronoUnit.SECONDS));
+        assertEquals(ChronoUnit.SECONDS, timePicker.getPrecision());
+
+        timePicker.setStep(Duration.of(500, ChronoUnit.MILLIS));
+        assertEquals(ChronoUnit.MILLIS, timePicker.getPrecision());
+
+        timePicker.setStep(Duration.of(1, ChronoUnit.MILLIS));
+        assertEquals(ChronoUnit.MILLIS, timePicker.getPrecision());
     }
 }

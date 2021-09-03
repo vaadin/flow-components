@@ -33,7 +33,6 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -46,18 +45,42 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper {
 
-    private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
-        return valueFromClient == null || valueFromClient.isEmpty() ? null
-                : LocalTime.parse(valueFromClient);
-    };
+    private static String modelToPresentation(TimePicker timePicker,
+            LocalTime model) {
+        if (model == null)
+            return "";
 
-    private static final SerializableFunction<LocalTime, String> FORMATTER = valueFromModel -> {
-        return valueFromModel == null ? "" : valueFromModel.toString();
-    };
+        LocalTime truncatedModelValue = timePicker.truncateToPrecision(model);
+
+        return truncatedModelValue.toString();
+    }
+
+    private static LocalTime presentationToModel(TimePicker timePicker,
+            String presentation) {
+        if (presentation == null || presentation.isEmpty())
+            return null;
+
+        // If the value is still the same when respecting the precision, then
+        // keep current value to prevent additional value changed events
+        LocalTime newValue = LocalTime.parse(presentation);
+        LocalTime currentValue = timePicker.getValue();
+        LocalTime truncatedCurrentValue = timePicker
+                .truncateToPrecision(currentValue);
+
+        if (newValue.equals(truncatedCurrentValue)) {
+            return currentValue;
+        }
+
+        return newValue;
+    }
 
     private static final long MILLISECONDS_IN_A_DAY = 86400000L;
     private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+    private static final Duration MILLISECOND_PRECISION_THRESHOLD = Duration
+            .of(1, ChronoUnit.SECONDS);
+    private static final Duration SECOND_PRECISION_THRESHOLD = Duration.of(60,
+            ChronoUnit.SECONDS);
 
     private Locale locale;
     private transient DateTimeFormatter dateTimeFormatter;
@@ -95,8 +118,9 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *            ignored and the initial value is set
      */
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
-        super(time, null, String.class, PARSER, FORMATTER,
-                isInitialValueOptional);
+        // TODO: restore isInitialValueOptional and add tests
+        super(time, null, String.class, TimePicker::presentationToModel,
+                TimePicker::modelToPresentation);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -149,16 +173,9 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.setLabel(label);
     }
 
-    // This is needed because the LocalTime format is not the same depending on
-    // the platform.
     @Override
     public void setValue(LocalTime value) {
-        if (value == null) {
-            super.setValue(null);
-        } else {
-            LocalTime truncatedValue = value.truncatedTo(ChronoUnit.MILLIS);
-            super.setValue(truncatedValue);
-        }
+        super.setValue(value);
     }
 
     /**
@@ -317,6 +334,27 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             return Duration.ofHours(1);
         }
         return Duration.ofNanos((long) (getStepDouble() * 1E9));
+    }
+
+    // TODO: javadoc
+    ChronoUnit getPrecision() {
+        Duration step = getStep();
+
+        if (step.compareTo(MILLISECOND_PRECISION_THRESHOLD) < 0)
+            // Step is less than a second
+            return ChronoUnit.MILLIS;
+        else if (step.compareTo(SECOND_PRECISION_THRESHOLD) < 0)
+            // Step is less than a minute
+            return ChronoUnit.SECONDS;
+
+        // The minimum precision for the time picker is minutes
+        return ChronoUnit.MINUTES;
+    }
+
+    LocalTime truncateToPrecision(LocalTime value) {
+        if (value == null)
+            return null;
+        return value.truncatedTo(getPrecision());
     }
 
     @Override
