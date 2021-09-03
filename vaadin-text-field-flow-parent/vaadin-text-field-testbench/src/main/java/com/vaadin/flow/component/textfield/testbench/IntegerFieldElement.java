@@ -43,9 +43,7 @@ public class IntegerFieldElement extends TestBenchElement
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
-        waitForVaadin();
-        getWrappedElement().findElement(By.tagName("input"))
-                .sendKeys(keysToSend);
+        findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 
 }
