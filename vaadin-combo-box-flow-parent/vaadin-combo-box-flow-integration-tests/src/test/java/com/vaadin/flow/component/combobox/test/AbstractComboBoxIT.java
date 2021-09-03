@@ -161,10 +161,12 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected List<?> getItems(WebElement combo) {
-        executeScript("arguments[0].opened=true", combo);
+        executeScript("arguments[0].__wasOpened = arguments[0].opened;", combo);
+        executeScript("arguments[0].opened = true;", combo);
         List<?> items = (List<?>) getCommandExecutor()
                 .executeScript("return arguments[0].filteredItems;", combo);
-        executeScript("arguments[0].opened=false", combo);
+        // Avoid closing the popup if it was open before
+        executeScript("arguments[0].opened = arguments[0].__wasOpened;", combo);
         return items;
     }
 
