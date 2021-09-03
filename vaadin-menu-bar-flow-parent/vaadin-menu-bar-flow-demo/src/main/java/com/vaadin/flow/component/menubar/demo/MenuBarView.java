@@ -42,6 +42,7 @@ public class MenuBarView extends DemoView {
         createBasicDemo();
         createOpenOnHover();
         createOverflowingButtons();
+        createOverflowI18n();
         createDisabledItems();
         createCheckableItems();
         createUsingComponents();
@@ -132,6 +133,20 @@ public class MenuBarView extends DemoView {
         // end-source-example
 
         addCard("Overflowing Buttons", menuBar);
+    }
+
+    private void createOverflowI18n() {
+        // begin-source-example
+        // source-example-heading: Overflow Button Accessible i18n
+        MenuBar menuBar = new MenuBar();
+        Stream.of("Home", "Dashboard", "Content", "Structure", "Appearance",
+                "Modules", "Users", "Configuration", "Reports", "Help")
+                .forEach(menuBar::addItem);
+        menuBar.setI18n(
+                new MenuBar.MenuBarI18n().setMoreOptions("Lisää vaihtoehtoja"));
+        // end-source-example
+
+        addCard("Overflow Button Accessible i18n", menuBar);
     }
 
     private void createDisabledItems() {
