@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Defines the context of a given {@link Renderer} when building the output
@@ -57,4 +58,15 @@ public interface Rendering<SOURCE> extends Serializable {
     @Deprecated
     Element getTemplateElement();
 
+    /**
+     * Gets a {@link Registration} that can be used to clean up resources
+     * associated with the renderer when it's no longer used.
+     *
+     * @return the Registration
+     * @see Registration#remove
+     */
+    default Registration getRegistration() {
+        return () -> {
+        };
+    }
 }

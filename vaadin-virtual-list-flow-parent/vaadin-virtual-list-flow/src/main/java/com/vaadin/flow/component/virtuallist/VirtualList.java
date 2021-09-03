@@ -45,7 +45,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
@@ -66,9 +65,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha3")
 @JsModule("@vaadin/vaadin-template-renderer/vaadin-template-renderer.js")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "22.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "22.0.0-alpha3")
 @JsModule("@vaadin/vaadin-virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -227,10 +226,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             renderingRegistrations.add(renderingDataGeneratorRegistration);
         });
 
-        if (rendering instanceof LitRendering) {
-            renderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
-        }
+        renderingRegistrations.add(rendering.getRegistration());
 
         this.renderer = renderer;
 

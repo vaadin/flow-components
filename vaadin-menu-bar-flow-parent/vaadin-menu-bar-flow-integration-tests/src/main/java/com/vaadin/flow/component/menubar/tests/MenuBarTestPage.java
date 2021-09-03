@@ -103,9 +103,14 @@ public class MenuBarTestPage extends Div {
                 });
         toggleAttachedButton.setId("toggle-attached");
 
+        NativeButton setI18nButton = new NativeButton("set i18n",
+                e -> menuBar.setI18n(new MenuBar.MenuBarI18n()
+                        .setMoreOptions("more-options")));
+        setI18nButton.setId("set-i18n");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
                 disableButton, visibleButton, checkedButton,
-                toggleAttachedButton);
+                toggleAttachedButton, setI18nButton);
     }
 }

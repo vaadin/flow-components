@@ -122,7 +122,6 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.data.renderer.LitRenderer.LitRendering;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -142,8 +141,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "22.0.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "22.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha3")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -2825,10 +2824,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     .add(detailsRenderingDataGeneratorRegistration);
         });
 
-        if (rendering instanceof LitRendering) {
-            detailsRenderingRegistrations
-                    .add(((LitRendering<T>) rendering).getRegistration());
-        }
+        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**

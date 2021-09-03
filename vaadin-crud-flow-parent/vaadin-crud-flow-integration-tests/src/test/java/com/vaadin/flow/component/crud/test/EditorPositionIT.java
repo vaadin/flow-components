@@ -35,7 +35,8 @@ public class EditorPositionIT extends AbstractParallelTest {
     private void assertPositionEquals(String position) {
         waitUntil(driver -> {
             getPositionButton().click();
-            return position.equals($("#editorPositionLabel").first().getText());
+            return position
+                    .equals($("span").id("editorPositionLabel").getText());
         });
     }
 }

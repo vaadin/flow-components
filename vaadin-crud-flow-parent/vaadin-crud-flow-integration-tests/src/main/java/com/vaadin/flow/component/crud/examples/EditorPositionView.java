@@ -4,7 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
@@ -36,7 +36,7 @@ public class EditorPositionView extends VerticalLayout {
                 event -> crud.setEditorPosition(CrudEditorPosition.OVERLAY));
         positionOverlay.setId("positionOverlay");
 
-        Label editorPosition = new Label();
+        Span editorPosition = new Span();
         editorPosition.setId("editorPositionLabel");
 
         final Button getEditorPosition = new Button("Get Editor Position",
