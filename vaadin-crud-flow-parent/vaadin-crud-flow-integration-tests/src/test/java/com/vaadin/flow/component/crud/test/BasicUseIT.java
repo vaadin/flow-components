@@ -145,7 +145,9 @@ public class BasicUseIT extends AbstractParallelTest {
         ButtonElement hideToolbarButton = getTestButton("hideToolbarButton");
         hideToolbarButton.click();
 
-        Assert.assertNotNull(crud.getAttribute("no-toolbar"));
+        TestBenchElement toolbar =  crud.$(TestBenchElement.class).id("toolbar");
+
+        Assert.assertEquals("none", toolbar.getCssValue("display"));
     }
 
     @Test
@@ -157,7 +159,9 @@ public class BasicUseIT extends AbstractParallelTest {
 
         hideToolbarButton.click();
         showToolbarButton.click();
-        Assert.assertNull(crud.getAttribute("no-toolbar"));
+
+        TestBenchElement toolbar =  crud.$(TestBenchElement.class).id("toolbar");
+        Assert.assertEquals("flex", toolbar.getCssValue("display"));
     }
 
     private ButtonElement getTestButton(String id) {
