@@ -142,7 +142,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha4")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
