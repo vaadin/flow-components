@@ -187,7 +187,7 @@ import elemental.json.JsonArray;
  * </p>
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "21.0.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "21.0.0")
 @JsModule("@vaadin/vaadin-rich-text-editor/src/vaadin-rich-text-editor.js")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
