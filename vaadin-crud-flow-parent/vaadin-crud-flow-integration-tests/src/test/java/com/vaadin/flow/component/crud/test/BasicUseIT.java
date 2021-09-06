@@ -139,7 +139,6 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void hideToolbar() {
-
         CrudElement crud = $(CrudElement.class).waitForFirst();
 
         ButtonElement hideToolbarButton = getTestButton("hideToolbarButton");
