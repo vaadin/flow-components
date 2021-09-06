@@ -24,26 +24,6 @@ public class EditorButtonsIT extends AbstractParallelTest {
     }
 
     @Test
-    public void saveButtonCanBeEnabledWhenFormBecomesDirty() {
-        CrudElement crud = getCrud();
-        crud.getNewItemButton().get().click();
-
-        ButtonElement saveButton = crud.getEditorSaveButton();
-
-        assertFalse("Save button should be disabled on initial load of dialog.",
-                saveButton.isEnabled());
-
-        // make the field dirty
-        TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
-        lastNameField.setValue("Otto");
-
-        assertTrue("Save button should be enalbed when form becomes dirty.",
-                saveButton.isEnabled());
-    }
-
-    @Test
     public void saveButtonCanBeDisabledOnTheServer() {
         CrudElement crud = getCrud();
 
