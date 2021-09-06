@@ -25,10 +25,10 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
@@ -177,7 +177,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
 
-        saveButton = new Button();
+        saveButton = new SaveButton();
         saveButton.getElement().setAttribute("slot", "save-button");
         saveButton.addThemeName("primary");
         getElement().appendChild(saveButton.getElement());
@@ -191,23 +191,18 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         deleteButton.getElement().setAttribute("slot", "delete-button");
         deleteButton.addThemeNames("tertiary", "error");
         getElement().appendChild(deleteButton.getElement());
-
-        addAttachListener(e -> {
-            getElement()
-                    .executeJs("this.__validate = function () {return true;}");
-            // Override onFormChanges to dispatch an event so the server can
-            // control the dirty state of the form
-            getElement().executeJs(
-                    "this.__onFormChanges = function () { this.dispatchEvent(new CustomEvent('form-change')); }");
-        });
-
-        getElement().addEventListener("form-change", this::formChangeEvent);
     }
 
-    private void formChangeEvent(com.vaadin.flow.dom.DomEvent e) {
-        if (this.saveButton.isEnabled()) {
-            this.setDirty(true);
+    private class SaveButton extends Button {
+        @Override
+        public void onEnabledStateChanged(boolean enabled) {
+            super.onEnabledStateChanged(enabled);
+            overrideSaveDisabled(enabled);
         }
+    }
+
+    private void overrideSaveDisabled(boolean enabled) {
+        getElement().executeJs("this.__isSaveBtnDisabled = () => {return $0;}", !enabled);
     }
 
     private void registerHandlers() {
@@ -335,9 +330,13 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
      * fields within it but in some special cases (e.g with composites) this
      * might not be automatically detected. For such cases this method could be
      * used to explicitly set the dirty state of the Crud editor.
+     * <p>
+     * NOTE: editor Save button will not be automatically enabled
+     * in case its enabled state was changed with {@link Crud#getSaveButton()}
      *
      * @param dirty
      *            true if dirty and false if otherwise.
+     * @see #getSaveButton()
      */
     public void setDirty(boolean dirty) {
         getElement().executeJs("this.set('__isDirty', $0)", dirty);
@@ -606,8 +605,12 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
     /**
      * Gets the Crud save button
-     * 
+     * <p>
+     * NOTE: State of the button set with {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)}
+     * will remain even if dirty state of the crud changes
+     *
      * @return the save button
+     * @see Crud#setDirty(boolean)
      */
     public Button getSaveButton() {
         return saveButton;
