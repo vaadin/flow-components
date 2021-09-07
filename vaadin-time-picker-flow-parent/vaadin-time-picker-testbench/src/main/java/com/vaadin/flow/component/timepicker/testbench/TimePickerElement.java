@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.testbench;
 
+import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.testbench.HasHelper;
@@ -73,9 +74,12 @@ public class TimePickerElement extends TestBenchElement
          * @return the item element
          */
         public TestBenchElement getItem(int index) {
-            return $(TestBenchElement.class).id("content")
-                    .$(TestBenchElement.class).id("selector")
-                    .$("vaadin-combo-box-item").get(index);
+            List<TestBenchElement> allItems = $(TestBenchElement.class)
+                    .id("content").$(TestBenchElement.class).id("selector")
+                    .$("vaadin-combo-box-item").all();
+            return allItems.stream()
+                    .filter(item -> index == item.getPropertyInteger("index"))
+                    .findFirst().get();
         }
 
         /**
