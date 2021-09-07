@@ -291,6 +291,7 @@ public class TimePickerView extends DemoView {
 
         public void setStep(Duration step) {
             this.step = step;
+            updateValue();
         }
 
         private void updateValue() {

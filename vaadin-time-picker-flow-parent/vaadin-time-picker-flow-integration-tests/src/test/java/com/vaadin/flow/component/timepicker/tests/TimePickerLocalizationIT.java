@@ -156,13 +156,13 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
         errors.add(verifyFormat());
         errors.add(verifyValueProperty("17:22:33"));
-        errors.add(verifyServerValue("17:22:33.0"));
+        errors.add(verifyServerValue("17:22:33.123"));
 
         selectStep("1m");
 
         errors.add(verifyFormat());
         errors.add(verifyValueProperty("17:22"));
-        errors.add(verifyServerValue("17:22:0.0"));
+        errors.add(verifyServerValue("17:22:33.123"));
 
         selectStep("1h");
 
@@ -170,7 +170,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         // when changing granularity from 1min -> 60min
         errors.add(verifyFormat());
         errors.add(verifyValueProperty("17:22"));
-        errors.add(verifyServerValue("17:22:0.0"));
+        errors.add(verifyServerValue("17:22:33.123"));
 
         errors.removeIf(item -> item == null);
 
