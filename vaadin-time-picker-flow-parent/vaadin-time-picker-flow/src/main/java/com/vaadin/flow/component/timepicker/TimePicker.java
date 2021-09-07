@@ -121,9 +121,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *            ignored and the initial value is set
      */
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
-        // TODO: restore isInitialValueOptional and add tests
         super(time, null, String.class, TimePicker::presentationToModel,
-                TimePicker::modelToPresentation);
+                TimePicker::modelToPresentation, isInitialValueOptional);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);

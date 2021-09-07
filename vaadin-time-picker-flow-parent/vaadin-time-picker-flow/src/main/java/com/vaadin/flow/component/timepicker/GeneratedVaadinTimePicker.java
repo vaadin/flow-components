@@ -937,10 +937,12 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
-            SerializableBiFunction<R, T, P> modelToPresentation) {
+            SerializableBiFunction<R, T, P> modelToPresentation,
+                                         boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
