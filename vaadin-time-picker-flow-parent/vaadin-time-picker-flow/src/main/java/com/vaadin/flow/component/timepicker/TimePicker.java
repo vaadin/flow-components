@@ -50,6 +50,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         if (model == null)
             return "";
 
+        // Truncate value to the precision that the web component supports with
+        // its current step setting to prevent client-side value changed event
         LocalTime truncatedModelValue = timePicker.truncateToPrecision(model);
 
         return truncatedModelValue.toString();
@@ -61,7 +63,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             return null;
 
         // If the value is still the same when respecting the precision, then
-        // keep current value to prevent additional value changed events
+        // keep current value to prevent additional value changed events from
+        // server-side
         LocalTime newValue = LocalTime.parse(presentation);
         LocalTime currentValue = timePicker.getValue();
         LocalTime truncatedCurrentValue = timePicker

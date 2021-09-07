@@ -16,10 +16,6 @@
  */
 package com.vaadin.flow.component.timepicker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -30,17 +26,17 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.timepicker.GeneratedVaadinTimePicker;
-import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
+import static org.junit.Assert.*;
+
 public class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
-    private static LocalTime TEST_VALUE = LocalTime.now();
+    private static final LocalTime TEST_VALUE = LocalTime.now();
 
     private static class TestTimePicker
             extends GeneratedVaadinTimePicker<TestTimePicker, LocalTime> {
@@ -55,7 +51,7 @@ public class TimePickerTest {
     public void timePicker_basicCases() {
         TimePicker picker = new TimePicker();
 
-        assertEquals(null, picker.getValue());
+        assertNull(picker.getValue());
         assertFalse(picker.getElement().hasProperty("value"));
 
         picker.setValue(LocalTime.of(5, 30));
@@ -69,7 +65,7 @@ public class TimePickerTest {
     public void timePicker_nullValue() {
         TimePicker timePicker = new TimePicker();
         timePicker.setValue(null);
-        assertEquals(null, timePicker.getValue());
+        assertNull(timePicker.getValue());
     }
 
     @Test
@@ -81,14 +77,14 @@ public class TimePickerTest {
 
     @Test
     public void timePickerWithLabel() {
-        String label = new String("Time Picker Label");
+        String label = "Time Picker Label";
         TimePicker picker = new TimePicker(label);
         assertEquals(label, picker.getElement().getProperty("label"));
     }
 
     @Test
     public void timePickerWithPlaceholder() {
-        String placeholder = new String("This is a Time Picker");
+        String placeholder = "This is a Time Picker";
         TimePicker picker = new TimePicker();
         picker.setPlaceholder(placeholder);
 
@@ -186,19 +182,19 @@ public class TimePickerTest {
     @Test
     public void setMin_getMin_null() {
         TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMin());
+        assertNull(timePicker.getMin());
         timePicker.setMin(null);
         assertEquals("", timePicker.getMin());
-        assertEquals(null, timePicker.getMinTime());
+        assertNull(timePicker.getMinTime());
     }
 
     @Test
     public void setMinTime_getMin_null() {
         TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMinTime());
+        assertNull(timePicker.getMinTime());
         timePicker.setMinTime(null);
         assertEquals("", timePicker.getMin());
-        assertEquals(null, timePicker.getMinTime());
+        assertNull(timePicker.getMinTime());
     }
 
     @Test
@@ -214,19 +210,19 @@ public class TimePickerTest {
     @Test
     public void setMax_getMax_null() {
         TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMax());
+        assertNull(timePicker.getMax());
         timePicker.setMax(null);
         assertEquals("", timePicker.getMax());
-        assertEquals(null, timePicker.getMaxTime());
+        assertNull(timePicker.getMaxTime());
     }
 
     @Test
     public void setMaxTime_getMax_null() {
         TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMaxTime());
+        assertNull(timePicker.getMaxTime());
         timePicker.setMaxTime(null);
         assertEquals("", timePicker.getMax());
-        assertEquals(null, timePicker.getMaxTime());
+        assertNull(timePicker.getMaxTime());
     }
 
     @Test
@@ -313,5 +309,27 @@ public class TimePickerTest {
 
         timePicker.setStep(Duration.of(1, ChronoUnit.MILLIS));
         assertEquals(ChronoUnit.MILLIS, timePicker.getPrecision());
+    }
+
+    @Test
+    public void truncateToPrecision() {
+        TimePicker timePicker = new TimePicker();
+
+        LocalTime input = LocalTime.of(9, 30, 56);
+        // with default settings time should be truncated to minutes
+        LocalTime expected = LocalTime.of(9, 30);
+
+        LocalTime result = timePicker.truncateToPrecision(input);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void truncateToPrecision_handlesNull() {
+        TimePicker timePicker = new TimePicker();
+
+        LocalTime result = timePicker.truncateToPrecision(null);
+
+        assertNull(result);
     }
 }
