@@ -15,10 +15,13 @@
  */
 package com.vaadin.flow.component.menubar;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -35,6 +38,10 @@ import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JsonSerializer;
+
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * Server-side component for the <code>vaadin-menu-bar</code> element.
@@ -50,6 +57,8 @@ public class MenuBar extends Component
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
+
+    private MenuBarI18n i18n;
 
     private boolean updateScheduled = false;
 
@@ -254,6 +263,70 @@ public class MenuBar extends Component
                         .collect(Collectors.toList()));
     }
 
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the object content that is gotten from this method will
+     * not update the lang on the component if not set back using
+     * {@link MenuBar#setI18n(MenuBarI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, If the i18n
+     *         properties weren't set.
+     */
+    public MenuBarI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(MenuBarI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+
+        runBeforeClientResponse(ui -> {
+            if (i18n == this.i18n) {
+                setI18nWithJS();
+            }
+        });
+    }
+
+    private void setI18nWithJS() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+
+        // Remove properties with null values to prevent errors in web
+        // component
+        removeNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new MenuBarI18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
+    }
+
     void resetContent() {
         menuItemsArrayGenerator.generate();
         updateButtons();
@@ -278,5 +351,35 @@ public class MenuBar extends Component
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    /**
+     * The internationalization properties for {@link MenuBar}
+     */
+    public static class MenuBarI18n implements Serializable {
+        private String moreOptions;
+
+        /**
+         * Gets the text that is used on the overflow button to make it
+         * accessible.
+         *
+         * @return the overflow button aria-label
+         */
+        public String getMoreOptions() {
+            return moreOptions;
+        }
+
+        /**
+         * Sets the text that is used on the overflow button to make it
+         * accessible.
+         *
+         * @param moreOptions
+         *            the overflow button aria-label
+         * @return this instance for method chaining
+         */
+        public MenuBarI18n setMoreOptions(String moreOptions) {
+            this.moreOptions = moreOptions;
+            return this;
+        }
     }
 }
