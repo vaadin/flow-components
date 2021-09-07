@@ -47,39 +47,47 @@ public class DateTimePickerValueChangeIT extends AbstractComponentIT {
 
     @Test
     public void setServerSideValueShouldTriggerSingleServerSideChangeEvent() {
-        TestBenchElement setCurrentDateTimeButton = $("button").id("set-current-date-time");
+        TestBenchElement setCurrentDateTimeButton = $("button")
+                .id("set-current-date-time");
 
         setCurrentDateTimeButton.click();
 
         String[] entries = getChangeLogEntries();
         Assert.assertEquals(1, entries.length);
-        Assert.assertTrue("Event should originate from server-side", entries[0].startsWith("source: server"));
+        Assert.assertTrue("Event should originate from server-side",
+                entries[0].startsWith("source: server"));
     }
 
     @Test
     public void setServerSideValueWithSecondsPrecisionShouldTriggerSingleServerSideChangeEvent() {
-        TestBenchElement setSecondsPrecisionButton = $("button").id("set-seconds-precision");
-        TestBenchElement setCurrentDateTimeButton = $("button").id("set-current-date-time");
+        TestBenchElement setSecondsPrecisionButton = $("button")
+                .id("set-seconds-precision");
+        TestBenchElement setCurrentDateTimeButton = $("button")
+                .id("set-current-date-time");
 
         setSecondsPrecisionButton.click();
         setCurrentDateTimeButton.click();
 
         String[] entries = getChangeLogEntries();
         Assert.assertEquals(1, entries.length);
-        Assert.assertTrue("Event should originate from server-side", entries[0].startsWith("source: server"));
+        Assert.assertTrue("Event should originate from server-side",
+                entries[0].startsWith("source: server"));
     }
 
     @Test
     public void setServerSideValueWithMillisPrecisionShouldTriggerSingleServerSideChangeEvent() {
-        TestBenchElement setMillisPrecisionButton = $("button").id("set-millis-precision");
-        TestBenchElement setCurrentDateTimeButton = $("button").id("set-current-date-time");
+        TestBenchElement setMillisPrecisionButton = $("button")
+                .id("set-millis-precision");
+        TestBenchElement setCurrentDateTimeButton = $("button")
+                .id("set-current-date-time");
 
         setMillisPrecisionButton.click();
         setCurrentDateTimeButton.click();
 
         String[] entries = getChangeLogEntries();
         Assert.assertEquals(1, entries.length);
-        Assert.assertTrue("Event should originate from server-side", entries[0].startsWith("source: server"));
+        Assert.assertTrue("Event should originate from server-side",
+                entries[0].startsWith("source: server"));
     }
 
     @Test
@@ -89,7 +97,8 @@ public class DateTimePickerValueChangeIT extends AbstractComponentIT {
 
         String[] entries = getChangeLogEntries();
         Assert.assertEquals(1, entries.length);
-        Assert.assertTrue("Event should originate from client-side", entries[0].startsWith("source: client"));
+        Assert.assertTrue("Event should originate from client-side",
+                entries[0].startsWith("source: client"));
     }
 
     private String[] getChangeLogEntries() {

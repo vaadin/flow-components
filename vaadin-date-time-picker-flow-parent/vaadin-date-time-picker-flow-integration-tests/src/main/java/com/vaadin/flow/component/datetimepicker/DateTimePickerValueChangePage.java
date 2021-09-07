@@ -41,23 +41,27 @@ public class DateTimePickerValueChangePage extends Div {
         dateTimePicker.setLabel("Date time picker");
         dateTimePicker.addValueChangeListener(this::logValueChangedEvent);
 
-        NativeButton setCurrentTimeButton = new NativeButton("Set current date and time", event -> {
-            dateTimePicker.setValue(LocalDateTime.now());
-        });
+        NativeButton setCurrentTimeButton = new NativeButton(
+                "Set current date and time", event -> {
+                    dateTimePicker.setValue(LocalDateTime.now());
+                });
         setCurrentTimeButton.setId("set-current-date-time");
 
-        NativeButton setSecondsPrecisionButton = new NativeButton("Set seconds precision", event -> {
-            dateTimePicker.setStep(Duration.of(30, ChronoUnit.SECONDS));
-        });
+        NativeButton setSecondsPrecisionButton = new NativeButton(
+                "Set seconds precision", event -> {
+                    dateTimePicker.setStep(Duration.of(30, ChronoUnit.SECONDS));
+                });
         setSecondsPrecisionButton.setId("set-seconds-precision");
 
-        NativeButton setMillisPrecisionButton = new NativeButton("Set millisecond precision", event -> {
-            dateTimePicker.setStep(Duration.of(500, ChronoUnit.MILLIS));
-        });
+        NativeButton setMillisPrecisionButton = new NativeButton(
+                "Set millisecond precision", event -> {
+                    dateTimePicker.setStep(Duration.of(500, ChronoUnit.MILLIS));
+                });
         setMillisPrecisionButton.setId("set-millis-precision");
 
         add(dateTimePicker);
-        add(new Div(setCurrentTimeButton, setSecondsPrecisionButton, setMillisPrecisionButton));
+        add(new Div(setCurrentTimeButton, setSecondsPrecisionButton,
+                setMillisPrecisionButton));
     }
 
     private void createChangeLog() {
@@ -67,11 +71,13 @@ public class DateTimePickerValueChangePage extends Div {
         add(changeLog);
     }
 
-    private void logValueChangedEvent(AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime> event) {
+    private void logValueChangedEvent(
+            AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime> event) {
         String source = event.isFromClient() ? "client" : "server";
         String value = event.getValue().format(DateTimeFormatter.ISO_DATE_TIME);
 
-        String logEntry = String.format("source: %s; value: %s%n", source, value);
+        String logEntry = String.format("source: %s; value: %s%n", source,
+                value);
 
         changeLog.setText(changeLog.getText() + logEntry);
     }

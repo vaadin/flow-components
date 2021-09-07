@@ -938,7 +938,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
             SerializableBiFunction<R, T, P> modelToPresentation,
-                                         boolean isInitialValueOptional) {
+            boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if ((getElement().getProperty("value") == null

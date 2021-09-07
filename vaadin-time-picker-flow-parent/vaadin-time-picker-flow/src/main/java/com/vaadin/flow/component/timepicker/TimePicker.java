@@ -82,8 +82,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
     private static final Duration MILLISECOND_PRECISION_THRESHOLD = Duration
             .of(1, ChronoUnit.SECONDS);
-    private static final Duration SECOND_PRECISION_THRESHOLD = Duration.of(60,
-            ChronoUnit.SECONDS);
+    private static final Duration SECOND_PRECISION_THRESHOLD = Duration.of(1,
+            ChronoUnit.MINUTES);
 
     private Locale locale;
     private transient DateTimeFormatter dateTimeFormatter;
@@ -338,7 +338,16 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return Duration.ofNanos((long) (getStepDouble() * 1E9));
     }
 
-    // TODO: javadoc
+    /**
+     * Gets the precision of the time picker as ChronoUnit, based on the
+     * configured steps. This implementation mirrors the behaviour of the web
+     * component, where setting a step changes the precision of the string
+     * value. By default, the precision is ChronoUnit.MINUTES. Setting a step
+     * value lower than 1 minute results in a seconds precision. Setting a step
+     * value lower than 1 second results in a millisecond precision.
+     * 
+     * @return precision as ChronoUnit
+     */
     ChronoUnit getPrecision() {
         Duration step = getStep();
 
@@ -353,6 +362,15 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return ChronoUnit.MINUTES;
     }
 
+    /**
+     * Truncates a LocalTime value to the precision that is currently configured
+     * in the time picker.
+     * 
+     * @see #getPrecision()
+     * @param value
+     *            the LocalTime value to truncate, can be null
+     * @return the LocalTime value truncated to the precision
+     */
     LocalTime truncateToPrecision(LocalTime value) {
         if (value == null)
             return null;
