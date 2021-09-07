@@ -76,6 +76,16 @@ public class TimePickerTest {
     }
 
     @Test
+    public void setValue_doesNotTruncateValue() {
+        // Value includes nanoseconds
+        LocalTime value = LocalTime.of(9, 32, 13, 123);
+        TimePicker picker = new TimePicker();
+        picker.setValue(value);
+
+        assertEquals(value, picker.getValue());
+    }
+
+    @Test
     public void timePickerWithLabel() {
         String label = "Time Picker Label";
         TimePicker picker = new TimePicker(label);

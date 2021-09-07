@@ -69,6 +69,16 @@ public class DateTimePickerTest {
     }
 
     @Test
+    public void setValue_doesNotTruncateValue() {
+        // Value includes nanoseconds
+        LocalDateTime value = LocalDateTime.of(2018, 4, 25, 13, 45, 10, 123);
+        DateTimePicker picker = new DateTimePicker();
+        picker.setValue(value);
+
+        assertEquals(value, picker.getValue());
+    }
+
+    @Test
     public void setMinGetMin() {
         DateTimePicker picker = new DateTimePicker();
         picker.setMin(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
