@@ -135,9 +135,4 @@ public class BasicUseIT extends AbstractParallelTest {
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
     }
-
-    @Override
-    protected String getLastEvent() {
-        return $(VerticalLayoutElement.class).last().$("span").last().getText();
-    }
 }
