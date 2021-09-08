@@ -185,10 +185,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                                 "Unable to instantiate new bean", ex);
                     }
 
-                    NewEvent modifiedEvent = new NewEvent(e.getSource(),
+                    NewEvent eventWithNewItem = new NewEvent(e.getSource(),
                             e.isFromClient(), getEditor().getItem(), null);
                     newListeners.forEach(listener -> listener
-                            .onComponentEvent(modifiedEvent));
+                            .onComponentEvent(eventWithNewItem));
                 }));
 
         ComponentUtil.addListener(this, EditEvent.class,
@@ -898,7 +898,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         /**
          * Gets new item being created
          * 
-         * @return a new object of bean type
+         * @return a new instance of bean type
          */
         @Override
         public E getItem() {
