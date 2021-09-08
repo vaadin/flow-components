@@ -130,12 +130,11 @@ public class ConfigurationJSONSerializationTest {
         inactive.setOpacity(1.0);
         inactive.setBorderColor(new SolidColor("#000000"));
         inactive.setColor(new SolidColor("#808080"));
-        inactive.setBrightness(1);
         inactive.setAnimation(false);
         conf.setPlotOptions(options);
 
         assertEquals(
-                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{\"pie\":{\"states\":{\"inactive\":{\"animation\":false,\"borderColor\":\"#000000\",\"brightness\":1,\"color\":\"#808080\",\"opacity\":1.0}}}},\"series\":[],\"exporting\":{\"enabled\":false}}",
+                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{\"pie\":{\"states\":{\"inactive\":{\"animation\":false,\"borderColor\":\"#000000\",\"color\":\"#808080\",\"opacity\":1.0}}}},\"series\":[],\"exporting\":{\"enabled\":false}}",
                 toJSON(conf));
     }
 }

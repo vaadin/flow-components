@@ -21,7 +21,6 @@ public class Inactive extends AbstractConfigurationObject {
     private Boolean enabled;
     private Number lineWidth;
     private Color borderColor;
-    private Number brightness;
     private Color color;
     private Number opacity;
 
@@ -85,32 +84,6 @@ public class Inactive extends AbstractConfigurationObject {
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
-    }
-
-    /**
-     * @see #setBrightness(Number)
-     */
-    public Number getBrightness() {
-        return brightness;
-    }
-
-    /**
-     * <p>
-     * How much to brighten the point on interaction. Requires the main color to
-     * be defined in hex or rgb(a) format.
-     * </p>
-     * 
-     * <p>
-     * In <a href=
-     * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-     * >styled mode</a>, the hover brightening is by default replaced with a
-     * fill-opacity set in the <code>.highcharts-point:hover</code> rule.
-     * </p>
-     * <p>
-     * Defaults to: 0.1
-     */
-    public void setBrightness(Number brightness) {
-        this.brightness = brightness;
     }
 
     /**
