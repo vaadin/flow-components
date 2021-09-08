@@ -220,7 +220,7 @@ public class EventHandlingIT extends AbstractParallelTest {
     }
 
     @Test
-    public void newEventItem() {
+    public void newItemDialogFields_ShouldPrefilledWithExpectedValues_SetInNewEventListener() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         getTestButton("newEventListener").click();
 
