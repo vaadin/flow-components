@@ -37,15 +37,15 @@ public class CrudTest {
 
         // Simulate a sequence of interactions.
         Arrays.asList(new Crud.NewEvent<>(systemUnderTest, false, null),
-                        new Crud.CancelEvent<>(systemUnderTest, false, null),
+                new Crud.CancelEvent<>(systemUnderTest, false, null),
 
-                        new Crud.EditEvent<>(systemUnderTest, false, selectedItem,
-                                null),
-                        new Crud.DeleteEvent<>(systemUnderTest, false, null),
+                new Crud.EditEvent<>(systemUnderTest, false, selectedItem,
+                        null),
+                new Crud.DeleteEvent<>(systemUnderTest, false, null),
 
-                        new Crud.EditEvent<>(systemUnderTest, false, selectedItem,
-                                null),
-                        new Crud.SaveEvent<>(systemUnderTest, false, null))
+                new Crud.EditEvent<>(systemUnderTest, false, selectedItem,
+                        null),
+                new Crud.SaveEvent<>(systemUnderTest, false, null))
                 .forEach(e -> ComponentUtil.fireEvent(systemUnderTest, e));
     }
 
@@ -61,16 +61,19 @@ public class CrudTest {
         ComponentUtil.fireEvent(systemUnderTest,
                 new Crud.NewEvent<>(systemUnderTest, false, null));
 
-        Assert.assertEquals("thing", systemUnderTest.getEditor().getItem().name);
+        Assert.assertEquals("thing",
+                systemUnderTest.getEditor().getItem().name);
     }
 
     @Test
     public void crudEditorIsItemEqualNewEventItem() {
         systemUnderTest.addNewListener(e -> {
-            Assert.assertEquals(systemUnderTest.getEditor().getItem(), e.getItem());
+            Assert.assertEquals(systemUnderTest.getEditor().getItem(),
+                    e.getItem());
         });
 
-        ComponentUtil.fireEvent(systemUnderTest, new Crud.NewEvent<>(systemUnderTest, false, null));
+        ComponentUtil.fireEvent(systemUnderTest,
+                new Crud.NewEvent<>(systemUnderTest, false, null));
     }
 
     @Test
