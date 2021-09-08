@@ -23,23 +23,22 @@ public class MainView extends VerticalLayout {
 
     final VerticalLayout eventsPanel;
     final HorizontalLayout buttons;
-
     boolean hasBorder = true;
 
     public MainView() {
         eventsPanel = new VerticalLayout();
+        buttons = new HorizontalLayout();
         eventsPanel.setId("events");
 
         final Crud<Person> crud = new Crud<>(Person.class,
                 createPersonEditor());
 
-        buttons = new HorizontalLayout();
         final Button newButton = new Button(
                 CrudI18n.createDefault().getNewItem());
         newButton.setThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
         newButton.getElement().setAttribute("new-button", "");
-
         buttons.add(newButton);
+
         final Button serverSideNewButton = new Button(
                 CrudI18n.createDefault().getNewItem());
         serverSideNewButton.setId("newServerItem");
@@ -82,6 +81,8 @@ public class MainView extends VerticalLayout {
                     newButton.setText(yorubaI18n.getNewItem());
                 });
         updateI18nButton.setId("updateI18n");
+        buttons.add(updateI18nButton);
+
         ComponentUtil.addListener(crud.getGrid(), CrudI18nUpdatedEvent.class,
                 e -> addEvent("I18n updated"));
         buttons.add(updateI18nButton);
@@ -122,6 +123,19 @@ public class MainView extends VerticalLayout {
         addNewEventListener.setId("newEventListener");
 
         buttons.add(addNewEventListener);
+
+        final Button showToolbarButton = new Button("Show toolbar", event -> {
+            crud.setToolbarVisible(true);
+        });
+        showToolbarButton.setId("showToolbarButton");
+        buttons.add(showToolbarButton);
+
+        final Button hideToolbarButton = new Button("Hide toolbar", event -> {
+            crud.setToolbarVisible(false);
+        });
+        hideToolbarButton.setId("hideToolbarButton");
+        buttons.add(hideToolbarButton);
+
 
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));
         crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));
