@@ -1,17 +1,15 @@
 package com.vaadin.flow.component.crud.test;
 
-import java.util.List;
-
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.crud.testbench.CrudElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.crud.testbench.CrudElement;
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
+import java.util.List;
 
 public class BasicUseIT extends AbstractParallelTest {
 
