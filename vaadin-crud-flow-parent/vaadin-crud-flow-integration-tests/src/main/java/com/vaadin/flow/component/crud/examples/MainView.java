@@ -136,7 +136,6 @@ public class MainView extends VerticalLayout {
         hideToolbarButton.setId("hideToolbarButton");
         buttons.add(hideToolbarButton);
 
-
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));
         crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));
         crud.addCancelListener(e -> addEvent("Cancel: " + e.getItem()));
