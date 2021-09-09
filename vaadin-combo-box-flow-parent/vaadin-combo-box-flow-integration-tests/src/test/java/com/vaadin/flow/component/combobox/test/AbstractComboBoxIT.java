@@ -129,15 +129,15 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected List<TestBenchElement> getItemElements() {
-        return getOverlay().$("div").id("content").$("vaadin-combo-box-item")
-                .all().stream()
+        return getOverlay().$("vaadin-combo-box-item").all().stream()
                 .filter(element -> !element.hasAttribute("hidden"))
                 .collect(Collectors.toList());
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
         comboBox.openPopup();
-        executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
+        executeScript(
+                "arguments[0].$.dropdown._scroller.scrollIntoView(arguments[1])",
                 comboBox, index);
     }
 
