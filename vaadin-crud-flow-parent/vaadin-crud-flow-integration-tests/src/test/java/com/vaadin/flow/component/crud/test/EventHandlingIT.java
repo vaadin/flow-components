@@ -44,7 +44,9 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
-        Assert.assertEquals("New: null", getLastEvent());
+        Assert.assertEquals(
+                "New: Person{id=null, firstName='null', lastName='null'}",
+                getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
     }
 
@@ -215,6 +217,24 @@ public class EventHandlingIT extends AbstractParallelTest {
         crud.getEditorSaveButton().click();
 
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+    }
+
+    @Test
+    public void newItemDialogFields_ShouldPrefilledWithExpectedValues_SetInNewEventListener() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        getTestButton("newEventListener").click();
+
+        crud.getNewItemButton().get().click();
+
+        TestBenchElement editor = crud.getEditor();
+        TextFieldElement firstNameField = editor.$(TextFieldElement.class)
+                .attribute("editor-role", "first-name").first();
+        TextFieldElement lastNameField = editor.$(TextFieldElement.class)
+                .attribute("editor-role", "last-name").first();
+
+        Assert.assertEquals("firstName", firstNameField.getValue());
+        Assert.assertEquals("lastName", lastNameField.getValue());
+
     }
 
     private static String getFooterText(CrudElement crud) {
