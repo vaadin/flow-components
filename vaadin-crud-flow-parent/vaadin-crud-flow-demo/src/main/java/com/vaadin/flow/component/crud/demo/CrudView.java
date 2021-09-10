@@ -76,7 +76,6 @@ public class CrudView extends DemoView {
         crud.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
-
         crud.getGrid().removeColumnByKey("id");
         crud.addThemeVariants(CrudVariant.NO_BORDER);
         // end-source-example
@@ -379,7 +378,7 @@ public class CrudView extends DemoView {
         }
 
         @Override
-        public Person clone() {
+        public Person clone() { // NOSONAR
             try {
                 return (Person) super.clone();
             } catch (CloneNotSupportedException e) {

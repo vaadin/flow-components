@@ -85,6 +85,7 @@ public class MainView extends VerticalLayout {
 
         ComponentUtil.addListener(crud.getGrid(), CrudI18nUpdatedEvent.class,
                 e -> addEvent("I18n updated"));
+        buttons.add(updateI18nButton);
 
         // no-border should be reflected to the generated grid too
         final Button toggleBordersButton = new Button("Toggle borders",
@@ -108,6 +109,20 @@ public class MainView extends VerticalLayout {
         });
         addGridButton.setId("addGrid");
         buttons.add(addGridButton);
+
+        final Button addNewEventListener = new Button("Add New-Event listener",
+                event -> {
+                    crud.addNewListener(e -> {
+                        Person item = e.getItem();
+                        item.setId(0);
+                        item.setFirstName("firstName");
+                        item.setLastName("lastName");
+                        crud.getEditor().setItem(e.getItem());
+                    });
+                });
+        addNewEventListener.setId("newEventListener");
+
+        buttons.add(addNewEventListener);
 
         final Button showToolbarButton = new Button("Show toolbar", event -> {
             crud.setToolbarVisible(true);
