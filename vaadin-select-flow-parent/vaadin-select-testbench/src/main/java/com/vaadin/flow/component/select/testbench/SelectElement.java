@@ -74,8 +74,7 @@ public class SelectElement extends TestBenchElement
 
     public Stream<ItemElement> getItemsStream() {
         openPopup();
-        List<WebElement> elements = getDriver()
-                .findElement(By.tagName("vaadin-select-overlay"))
+        List<WebElement> elements = getPropertyElement("_overlayElement")
                 .findElement(By.tagName("vaadin-list-box"))
                 .findElements(By.tagName("vaadin-item"));
         if (elements.size() == 0) {
