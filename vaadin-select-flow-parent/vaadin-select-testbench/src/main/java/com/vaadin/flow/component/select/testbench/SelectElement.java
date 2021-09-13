@@ -90,8 +90,10 @@ public class SelectElement extends TestBenchElement
 
     @Override
     public void selectByText(String text) {
-        getItemsStream().filter(item -> text.equals(item.getText())).findFirst()
-                .get().click();
+        getItemsStream()
+                .filter(item -> text
+                        .equals(item.getPropertyString("textContent").trim()))
+                .findFirst().get().click();
     }
 
     @Override
