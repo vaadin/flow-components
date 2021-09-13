@@ -308,7 +308,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @return the {@code step} property from the picker, unit seconds
      */
     public Duration getStep() {
-        // if step was not set by the user, then assume default value of the time picker web component
+        // if step was not set by the user, then assume default value of the
+        // time picker web component
         if (!getElement().hasProperty("step")) {
             return StepsUtil.DEFAULT_WEB_COMPONENT_STEP;
         }

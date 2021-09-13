@@ -20,10 +20,12 @@ package com.vaadin.flow.component.timepicker;
 import java.time.Duration;
 
 /**
- * Utility class around the time picker steps functionality. The logic in here is extracted for reuse by the DateTimePicker component.
+ * Utility class around the time picker steps functionality. The logic in here
+ * is extracted for reuse by the DateTimePicker component.
  *
  * <p>
- *     NOTE: This class is not part of the public API surface and for internal use only
+ * NOTE: This class is not part of the public API surface and for internal use
+ * only
  */
 public class StepsUtil {
     private static final long MILLISECONDS_IN_A_DAY = 86400000L;
@@ -32,10 +34,13 @@ public class StepsUtil {
     /**
      * Default step value of the web component, as Duration
      */
-    public static final Duration DEFAULT_WEB_COMPONENT_STEP = Duration.ofHours(1);
+    public static final Duration DEFAULT_WEB_COMPONENT_STEP = Duration
+            .ofHours(1);
 
     /**
-     * Converts a Duration object into a decimal value that is used internally by the time picker web component.
+     * Converts a Duration object into a decimal value that is used internally
+     * by the time picker web component.
+     * 
      * @param duration
      * @return
      */
@@ -50,14 +55,16 @@ public class StepsUtil {
         if (MILLISECONDS_IN_A_DAY % stepAsMilliseconds != 0
                 && MILLISECONDS_IN_AN_HOUR % stepAsMilliseconds != 0) {
             throw new IllegalArgumentException("Given step " + duration
-                                                       + " does not divide evenly a day or an hour.");
+                    + " does not divide evenly a day or an hour.");
         }
 
         return duration.getSeconds() + (duration.getNano() / 1E9);
     }
 
     /**
-     * Converts the decimal steps value use internally by the time picker web component into a Duration instance
+     * Converts the decimal steps value use internally by the time picker web
+     * component into a Duration instance
+     * 
      * @param stepsValue
      * @return
      */

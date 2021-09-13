@@ -41,8 +41,7 @@ public class DateTimePickerStepIT extends AbstractComponentIT {
 
     @Test
     public void setValueShouldFormatWithMinutePrecisionByDefault() {
-        TestBenchElement setValue = $("button")
-                .id("set-date-time-value");
+        TestBenchElement setValue = $("button").id("set-date-time-value");
 
         setValue.click();
 
@@ -53,8 +52,7 @@ public class DateTimePickerStepIT extends AbstractComponentIT {
     public void setValueAfterSettingSecondPrecisionShouldFormatWithSecondPrecision() {
         TestBenchElement setSecondPrecision = $("button")
                 .id("set-second-precision");
-        TestBenchElement setValue = $("button")
-                .id("set-date-time-value");
+        TestBenchElement setValue = $("button").id("set-date-time-value");
 
         setSecondPrecision.click();
         setValue.click();
@@ -66,8 +64,7 @@ public class DateTimePickerStepIT extends AbstractComponentIT {
     public void setValueAfterSettingMillisecondPrecisionShouldFormatWithMillisecondPrecision() {
         TestBenchElement setMillisecondPrecision = $("button")
                 .id("set-millisecond-precision");
-        TestBenchElement setValue = $("button")
-                .id("set-date-time-value");
+        TestBenchElement setValue = $("button").id("set-date-time-value");
 
         setMillisecondPrecision.click();
         setValue.click();
