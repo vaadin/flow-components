@@ -132,11 +132,9 @@ public class DateTimePicker
     public DateTimePicker(LocalDateTime initialDateTime) {
         super("value", null, String.class, PARSER, FORMATTER);
         if (initialDateTime != null) {
+            initialDateTime = sanitizeValue(initialDateTime);
             setPresentationValue(initialDateTime);
-            datePicker.passThroughPresentationValue(
-                    initialDateTime.toLocalDate());
-            timePicker.passThroughPresentationValue(
-                    initialDateTime.toLocalTime());
+            synchronizeChildComponentValues(initialDateTime);
         }
 
         addToSlot(datePicker, "date-picker");
@@ -235,11 +233,54 @@ public class DateTimePicker
         setLocale(locale);
     }
 
+    /**
+     * Sets the selected date and time value of the component. The value can be
+     * cleared by setting null.
+     *
+     * <p>
+     * The value will be truncated to millisecond precision, as that is the
+     * maximum that the time picker supports. This means that
+     * {@link #getValue()} might return a different value than what was passed
+     * in.
+     * 
+     * @param value
+     *            the LocalDateTime instance representing the selected date and
+     *            time, or null
+     */
     @Override
     public void setValue(LocalDateTime value) {
+        value = sanitizeValue(value);
         super.setValue(value);
-        datePicker.passThroughPresentationValue(value.toLocalDate());
-        timePicker.passThroughPresentationValue(value.toLocalTime());
+        synchronizeChildComponentValues(value);
+    }
+
+    /**
+     * Sanitizes a LocalDateTime instance for to be used as internal value.
+     *
+     * <p>
+     * Truncates value to millisecond precision, as that is the maximum that the
+     * time picker supports. This is also necessary to synchronize with the
+     * internal value of the Flow TimePicker, which truncates the value as well.
+     * 
+     * @param value
+     *            the LocalDateTime instance to sanitize, can be null
+     * @return sanitized LocalDateTime instance
+     */
+    private LocalDateTime sanitizeValue(LocalDateTime value) {
+        if (value == null)
+            return null;
+
+        return value.truncatedTo(ChronoUnit.MILLIS);
+    }
+
+    private void synchronizeChildComponentValues(LocalDateTime value) {
+        if (value != null) {
+            datePicker.passThroughPresentationValue(value.toLocalDate());
+            timePicker.passThroughPresentationValue(value.toLocalTime());
+        } else {
+            datePicker.passThroughPresentationValue(null);
+            timePicker.passThroughPresentationValue(null);
+        }
     }
 
     /**

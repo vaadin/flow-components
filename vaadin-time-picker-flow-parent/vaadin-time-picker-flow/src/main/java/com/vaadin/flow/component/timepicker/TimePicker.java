@@ -149,16 +149,27 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.setLabel(label);
     }
 
-    // This is needed because the LocalTime format is not the same depending on
-    // the platform.
+    /**
+     * Sets the selected time value of the component. The value can be cleared
+     * by setting null.
+     *
+     * <p>
+     * The value will be truncated to millisecond precision, as that is the
+     * maximum that the time picker supports. This means that
+     * {@link #getValue()} might return a different value than what was passed
+     * in.
+     *
+     * @param value
+     *            the LocalTime instance representing the selected time, or null
+     */
     @Override
     public void setValue(LocalTime value) {
-        if (value == null) {
-            super.setValue(null);
-        } else {
-            LocalTime truncatedValue = value.truncatedTo(ChronoUnit.MILLIS);
-            super.setValue(truncatedValue);
+        // Truncate the value to millisecond precision, as the is the maximum
+        // that the time picker web component supports.
+        if (value != null) {
+            value = value.truncatedTo(ChronoUnit.MILLIS);
         }
+        super.setValue(value);
     }
 
     /**
