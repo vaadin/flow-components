@@ -251,7 +251,7 @@ function createGHLink(path) {
 }
 // create link to low-components repo given a type or id
 function createLink(type, id, char) {
-  return id ? `[${char ? char : id}](${createGHLink(`vaadin-flow-components/${type}/${id})`)}` : '';
+  return id ? `[${char ? char : id}](${createGHLink(`flow-components/${type}/${id})`)}` : '';
 }
 // convert GH internal links to absolute links
 function parseLinks(message) {
@@ -355,11 +355,11 @@ This is a release of the Java integration for [Vaadin Components](https://github
   const includedCommits = commits.filter(c => c.isIncluded);
   if (includedCommits.length) {
     console.log(`
-### Changes in ${product} from [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
+### Changes in ${product} from [${from}](https://github.com/vaadin/flow-components/releases/tag/${from})
     `)
   } else {
     console.log(`
-### There are no Changes in ${product} since [${from}](https://github.com/vaadin/vaadin-flow-components/releases/tag/${from})
+### There are no Changes in ${product} since [${from}](https://github.com/vaadin/flow-components/releases/tag/${from})
     `)
   }
   if (compact) {
