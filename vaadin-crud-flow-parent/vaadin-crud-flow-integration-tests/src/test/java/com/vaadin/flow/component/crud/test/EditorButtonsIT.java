@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -21,6 +22,27 @@ public class EditorButtonsIT extends AbstractParallelTest {
         String url = getBaseURL().replace(super.getBaseURL(),
                 super.getBaseURL() + "/vaadin-crud") + "/editorbuttons";
         getDriver().get(url);
+    }
+
+    @Test
+    public void saveBtnIsAlwaysEnabled() {
+        getTestButton("enable-save-button").click();
+        CrudElement crud = getCrud();
+        crud.openRowForEditing(0);
+        Assert.assertTrue(crud.getEditorSaveButton().isEnabled());
+    }
+
+    @Test
+    public void saveBtnIsAlwaysDisabled() {
+        getTestButton("disable-save-button").click();
+        CrudElement crud = getCrud();
+        crud.openRowForEditing(0);
+        TextFieldElement lastNameField = crud.getEditor()
+                .$(TextFieldElement.class).attribute("editor-role", "last-name")
+                .first();
+        lastNameField.setValue("Otto");
+
+        Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
     }
 
     @Test
