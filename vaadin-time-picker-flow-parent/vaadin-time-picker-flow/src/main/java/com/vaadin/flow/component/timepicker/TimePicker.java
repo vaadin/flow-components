@@ -55,8 +55,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return valueFromModel == null ? "" : valueFromModel.toString();
     };
 
-    private static final long MILLISECONDS_IN_A_DAY = 86400000L;
-    private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
@@ -296,20 +294,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public void setStep(Duration step) {
         Objects.requireNonNull(step, "Step cannot be null");
-        long stepAsMilliseconds = step.getSeconds() * 1000
-                + (long) (step.getNano() / 1E6);
-        if (step.isNegative() || stepAsMilliseconds == 0) {
-            throw new IllegalArgumentException(
-                    "Step cannot be negative and must be larger than 0 milliseconds");
-        }
 
-        if (MILLISECONDS_IN_A_DAY % stepAsMilliseconds != 0
-                && MILLISECONDS_IN_AN_HOUR % stepAsMilliseconds != 0) {
-            throw new IllegalArgumentException("Given step " + step.toString()
-                    + " does not divide evenly a day or an hour.");
-        }
-
-        super.setStep(step.getSeconds() + (step.getNano() / 1E9));
+        super.setStep(StepsUtil.convertDurationToStepsValue(step));
     }
 
     /**
@@ -322,12 +308,11 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @return the {@code step} property from the picker, unit seconds
      */
     public Duration getStep() {
-        // the web component doesn't have a default value defined, but it is an
-        // hour, not 0.0 like in the generated class
+        // if step was not set by the user, then assume default value of the time picker web component
         if (!getElement().hasProperty("step")) {
-            return Duration.ofHours(1);
+            return StepsUtil.DEFAULT_WEB_COMPONENT_STEP;
         }
-        return Duration.ofNanos((long) (getStepDouble() * 1E9));
+        return StepsUtil.convertStepsValueToDuration(getStepDouble());
     }
 
     @Override

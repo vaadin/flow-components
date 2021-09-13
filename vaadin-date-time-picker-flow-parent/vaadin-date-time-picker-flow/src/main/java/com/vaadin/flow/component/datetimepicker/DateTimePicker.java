@@ -27,6 +27,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
@@ -384,7 +385,10 @@ public class DateTimePicker
      *            an hour evenly
      */
     public void setStep(Duration step) {
-        timePicker.setStep(step);
+        Objects.requireNonNull(step, "Step cannot be null");
+
+        getElement().setProperty("step",
+                StepsUtil.convertDurationToStepsValue(step));
     }
 
     /**
@@ -393,7 +397,15 @@ public class DateTimePicker
      * @return the {@code step} property from the picker, unit seconds
      */
     public Duration getStep() {
-        return timePicker.getStep();
+        // if step was not set by the user, then assume default value of the
+        // time picker web component
+        if (!getElement().hasProperty("step")) {
+            return StepsUtil.DEFAULT_WEB_COMPONENT_STEP;
+        }
+
+        double stepsValue = getElement().getProperty("step", 0.0);
+
+        return StepsUtil.convertStepsValueToDuration(stepsValue);
     }
 
     /**
