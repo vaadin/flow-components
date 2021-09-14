@@ -38,9 +38,7 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
 
         WebElement overlay = findElement(
                 By.tagName("vaadin-combo-box-overlay"));
-        WebElement content = getInShadowRoot(overlay, By.id("content"));
-        WebElement selector = getInShadowRoot(content, By.id("selector"));
-        List<String> items = selector
+        List<String> items = overlay
                 .findElements(By.tagName("vaadin-combo-box-item")).stream()
                 .map(item -> getInShadowRoot(item,
                         By.cssSelector("flow-component-renderer")))

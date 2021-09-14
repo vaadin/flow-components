@@ -76,8 +76,7 @@ public class ComponentRendererIT extends AbstractComponentIT {
 
     private void testItems(TestBenchElement comboBox) {
         executeScript("arguments[0].open(); return true;", comboBox);
-        TestBenchElement overlay = $(TestBenchElement.class).id("overlay")
-                .$(TestBenchElement.class).id("content");
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
         ElementQuery<TestBenchElement> items = overlay
                 .$("vaadin-combo-box-item");
 
