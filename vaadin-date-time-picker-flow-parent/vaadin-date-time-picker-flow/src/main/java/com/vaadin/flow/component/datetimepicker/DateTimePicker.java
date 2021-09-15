@@ -23,21 +23,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
@@ -47,6 +37,10 @@ class DateTimePickerDatePicker
     protected void validate() {
         // Should not change invalid state
     }
+
+    void passThroughPresentationValue(LocalDate newPresentationValue) {
+        super.setPresentationValue(newPresentationValue);
+    }
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
@@ -55,6 +49,10 @@ class DateTimePickerTimePicker
     @Override
     protected void validate() {
         // Should not change invalid state
+    }
+
+    void passThroughPresentationValue(LocalTime newPresentationValue) {
+        super.setPresentationValue(newPresentationValue);
     }
 }
 
@@ -66,7 +64,8 @@ class DateTimePickerTimePicker
 @Tag("vaadin-date-time-picker")
 @NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "20.0.4")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
+public class DateTimePicker
+        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
         Focusable<DateTimePicker>, HasHelper {
 
@@ -132,10 +131,11 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      *            the pre-selected date time in the picker
      */
     public DateTimePicker(LocalDateTime initialDateTime) {
-        super(null);
+        super("value", null, String.class, PARSER, FORMATTER);
         if (initialDateTime != null) {
+            initialDateTime = sanitizeValue(initialDateTime);
             setPresentationValue(initialDateTime);
-            updateValue();
+            synchronizeChildComponentValues(initialDateTime);
         }
 
         addToSlot(datePicker, "date-picker");
@@ -146,7 +146,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        getElement().addEventListener("value-changed", e -> this.updateValue());
         addValueChangeListener(e -> validate());
     }
 
@@ -235,42 +234,54 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         setLocale(locale);
     }
 
+    /**
+     * Sets the selected date and time value of the component. The value can be
+     * cleared by setting null.
+     *
+     * <p>
+     * The value will be truncated to millisecond precision, as that is the
+     * maximum that the time picker supports. This means that
+     * {@link #getValue()} might return a different value than what was passed
+     * in.
+     * 
+     * @param value
+     *            the LocalDateTime instance representing the selected date and
+     *            time, or null
+     */
     @Override
     public void setValue(LocalDateTime value) {
+        value = sanitizeValue(value);
         super.setValue(value);
-        // Get the value from client after possible adjustment.
-        // This is a workaround for infinite value change loop which can be
-        // triggered when the field is set as read-only.
-        // fixme(haprog) This workaround should probably be removed after this
-        // is fixed: https://github.com/vaadin/vaadin-time-picker-flow/issues/77
-        getElement().executeJs("return this.value;")
-                .then(jsonValue -> super.setValue(
-                        jsonValue.asString().isEmpty() ? null
-                                : LocalDateTime.parse(jsonValue.asString())));
+        synchronizeChildComponentValues(value);
     }
 
-    @Override
-    protected void setPresentationValue(LocalDateTime newPresentationValue) {
-        datePicker.setValue(newPresentationValue != null
-                ? newPresentationValue.toLocalDate()
-                : null);
-        timePicker.setValue(newPresentationValue != null
-                ? newPresentationValue.toLocalTime()
-                : null);
-        // Make custom field detect and propagate the value change by triggering
-        // "change" event on one of the fields.
-        datePicker.getElement().executeJs(
-                "this.dispatchEvent(new CustomEvent('change', { bubbles: true }));");
+    /**
+     * Sanitizes a LocalDateTime instance for to be used as internal value.
+     *
+     * <p>
+     * Truncates value to millisecond precision, as that is the maximum that the
+     * time picker supports. This is also necessary to synchronize with the
+     * internal value of the Flow TimePicker, which truncates the value as well.
+     * 
+     * @param value
+     *            the LocalDateTime instance to sanitize, can be null
+     * @return sanitized LocalDateTime instance
+     */
+    private LocalDateTime sanitizeValue(LocalDateTime value) {
+        if (value == null)
+            return null;
+
+        return value.truncatedTo(ChronoUnit.MILLIS);
     }
 
-    private void updateValue() {
-        final LocalDate date = datePicker.getValue();
-        final LocalTime time = timePicker.getValue();
-        final LocalDateTime newValue = date != null && time != null
-                ? LocalDateTime.of(date, time)
-                : null;
-
-        setModelValue(newValue, true);
+    private void synchronizeChildComponentValues(LocalDateTime value) {
+        if (value != null) {
+            datePicker.passThroughPresentationValue(value.toLocalDate());
+            timePicker.passThroughPresentationValue(value.toLocalTime());
+        } else {
+            datePicker.passThroughPresentationValue(null);
+            timePicker.passThroughPresentationValue(null);
+        }
     }
 
     /**
@@ -374,7 +385,10 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      *            an hour evenly
      */
     public void setStep(Duration step) {
-        timePicker.setStep(step);
+        Objects.requireNonNull(step, "Step cannot be null");
+
+        getElement().setProperty("step",
+                StepsUtil.convertDurationToStepsValue(step));
     }
 
     /**
@@ -383,7 +397,15 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      * @return the {@code step} property from the picker, unit seconds
      */
     public Duration getStep() {
-        return timePicker.getStep();
+        // if step was not set by the user, then assume default value of the
+        // time picker web component
+        if (!getElement().hasProperty("step")) {
+            return StepsUtil.DEFAULT_WEB_COMPONENT_STEP;
+        }
+
+        double stepsValue = getElement().getProperty("step", 0.0);
+
+        return StepsUtil.convertStepsValueToDuration(stepsValue);
     }
 
     /**
