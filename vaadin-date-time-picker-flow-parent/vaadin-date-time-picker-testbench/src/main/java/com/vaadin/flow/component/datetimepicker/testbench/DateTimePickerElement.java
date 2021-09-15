@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datetimepicker.testbench;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
@@ -107,7 +108,9 @@ public class DateTimePickerElement extends TestBenchElement
         if (time == null) {
             setTimeValue("");
         } else {
-            setTimeValue(time.toString());
+            // Time needs to be truncated to millisecond precision, otherwise
+            // the web component will not update the value
+            setTimeValue(time.truncatedTo(ChronoUnit.MILLIS).toString());
         }
     }
 
@@ -160,7 +163,7 @@ public class DateTimePickerElement extends TestBenchElement
      */
     private void setDateValue(String value) {
         getDatePicker().setProperty(VALUE_PROPERTY, value);
-        triggerChange();
+        triggerChange(getDatePicker());
     }
 
     /**
@@ -185,7 +188,7 @@ public class DateTimePickerElement extends TestBenchElement
      */
     private void setTimeValue(String value) {
         getTimePicker().setProperty(VALUE_PROPERTY, value);
-        triggerChange();
+        triggerChange(getTimePicker());
     }
 
     /**
@@ -205,10 +208,10 @@ public class DateTimePickerElement extends TestBenchElement
      * property of inner inputs. Otherwise the value property of custom field is
      * not updated and the value isn't propagated to vaadin-date-time-picker.
      */
-    private void triggerChange() {
+    private void triggerChange(TestBenchElement pickerElement) {
         executeScript(
                 "arguments[0].dispatchEvent(new CustomEvent('change', { bubbles: true }));",
-                getDatePicker());
+                pickerElement);
     }
 
     /**
