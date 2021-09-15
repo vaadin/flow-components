@@ -33,7 +33,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 
 /**
- * Integration tests for the {@link DateTimePickerView}.
+ * Integration tests for the {@link DateTimePickerPage}.
  */
 @TestPath("vaadin-date-time-picker/date-time-picker-it")
 public class DateTimePickerIT extends AbstractComponentIT {
@@ -154,5 +154,27 @@ public class DateTimePickerIT extends AbstractComponentIT {
         button.click();
         Assert.assertEquals("1/2/2018", picker.getDatePresentation());
         Assert.assertEquals("3:30 PM", picker.getTimePresentation());
+    }
+
+    @Test
+    public void testSetHighPrecisionValueShouldWorkNotThrowErrors() {
+        DateTimePickerElement picker = $(DateTimePickerElement.class)
+                .id("date-time-picker-set-high-precision-value");
+
+        Assert.assertEquals(LocalDateTime.of(2018, 1, 2, 15, 30),
+                picker.getDateTime());
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void testSetHighPrecisionInitialValueShouldWorkAndNotThrowErrors() {
+        DateTimePickerElement picker = $(DateTimePickerElement.class)
+                .id("date-time-picker-high-precision-initial-value");
+
+        Assert.assertEquals(LocalDateTime.of(2018, 1, 2, 15, 30),
+                picker.getDateTime());
+
+        checkLogsForErrors();
     }
 }
