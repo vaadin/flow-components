@@ -73,9 +73,9 @@ public class TimePickerElement extends TestBenchElement
          * @return the item element
          */
         public TestBenchElement getItem(int index) {
-            return $(TestBenchElement.class).id("content")
-                    .$(TestBenchElement.class).id("selector")
-                    .$("vaadin-combo-box-item").get(index);
+            return $("vaadin-combo-box-item").all().stream()
+                    .filter(item -> index == item.getPropertyInteger("index"))
+                    .findFirst().get();
         }
 
         /**
@@ -85,9 +85,10 @@ public class TimePickerElement extends TestBenchElement
          * @return the last item element
          */
         public TestBenchElement getLastItem() {
-            return $(TestBenchElement.class).id("content")
-                    .$(TestBenchElement.class).id("selector")
-                    .$("vaadin-combo-box-item").last();
+            return $("vaadin-combo-box-item").all().stream()
+                    .max((a, b) -> a.getPropertyInteger("index")
+                            - b.getPropertyInteger("index"))
+                    .get();
         }
     }
 
@@ -195,7 +196,8 @@ public class TimePickerElement extends TestBenchElement
      *            the index of the item to scroll to
      */
     public void scrollToItem(int index) {
-        executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
+        executeScript(
+                "arguments[0].$.dropdown._scroller.scrollIntoView(arguments[1])",
                 getTimePickerComboBoxLightElement(), index);
     }
 

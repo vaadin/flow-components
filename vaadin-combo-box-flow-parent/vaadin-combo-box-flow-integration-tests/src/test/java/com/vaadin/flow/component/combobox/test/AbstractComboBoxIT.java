@@ -129,20 +129,15 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected List<TestBenchElement> getItemElements() {
-        TestBenchElement focusBackfillItem = getOverlay().$("div").id("content")
-                .$("iron-list").first()
-                .getPropertyElement("_focusBackfillItem");
-
-        return getOverlay().$("div").id("content").$("vaadin-combo-box-item")
-                .all().stream()
+        return getOverlay().$("vaadin-combo-box-item").all().stream()
                 .filter(element -> !element.hasAttribute("hidden"))
-                .filter(element -> !Objects.equals(focusBackfillItem, element))
                 .collect(Collectors.toList());
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
         comboBox.openPopup();
-        executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
+        executeScript(
+                "arguments[0].$.dropdown._scroller.scrollIntoView(arguments[1])",
                 comboBox, index);
     }
 
@@ -166,10 +161,12 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected List<?> getItems(WebElement combo) {
-        executeScript("arguments[0].opened=true", combo);
+        executeScript("arguments[0].__wasOpened = arguments[0].opened;", combo);
+        executeScript("arguments[0].opened = true;", combo);
         List<?> items = (List<?>) getCommandExecutor()
                 .executeScript("return arguments[0].filteredItems;", combo);
-        executeScript("arguments[0].opened=false", combo);
+        // Avoid closing the popup if it was open before
+        executeScript("arguments[0].opened = arguments[0].__wasOpened;", combo);
         return items;
     }
 
