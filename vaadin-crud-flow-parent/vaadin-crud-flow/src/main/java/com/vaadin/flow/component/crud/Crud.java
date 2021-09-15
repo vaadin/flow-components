@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  *            the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "22.0.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme {
@@ -88,6 +88,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     private Grid<E> grid;
     private CrudEditor<E> editor;
     private E gridActiveItem;
+    private boolean toolbarVisible = true;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -185,8 +186,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                                 "Unable to instantiate new bean", ex);
                     }
 
-                    newListeners
-                            .forEach(listener -> listener.onComponentEvent(e));
+                    NewEvent eventWithNewItem = new NewEvent(e.getSource(),
+                            e.isFromClient(), getEditor().getItem(), null);
+                    newListeners.forEach(listener -> listener
+                            .onComponentEvent(eventWithNewItem));
                 }));
 
         ComponentUtil.addListener(this, EditEvent.class,
@@ -529,6 +532,30 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             ComponentUtil.fireEvent(this.grid,
                     new CrudI18nUpdatedEvent(this, false, i18n));
         }
+    }
+
+    /**
+     * Controls visiblity of toolbar
+     * 
+     * @param value
+     */
+    public void setToolbarVisible(boolean value) {
+        toolbarVisible = value;
+        if (value) {
+            getElement().setProperty("noToolbar", false);
+        } else {
+            getElement().setProperty("noToolbar", true);
+        }
+    }
+
+    /**
+     * Gets visiblity state of toolbar
+     * 
+     * @param
+     * @return true if toolbar is visible false otherwise
+     */
+    public boolean getToolbarVisible() {
+        return toolbarVisible;
     }
 
     /**
@@ -893,6 +920,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             this.item = item;
         }
 
+        /**
+         * Gets new item being created
+         * 
+         * @return a new instance of bean type
+         */
         @Override
         public E getItem() {
             return item;

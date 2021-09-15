@@ -63,6 +63,7 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
     public void openEmptyComboBox_setItems_open_containsItems() {
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
         comboBox.openPopup();
+        comboBox.closePopup();
         WebElement button = findElement(By.id("set-items-button"));
         button.click();
         comboBox.openPopup();

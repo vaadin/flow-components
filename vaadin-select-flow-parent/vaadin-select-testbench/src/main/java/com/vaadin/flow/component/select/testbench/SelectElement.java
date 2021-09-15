@@ -74,8 +74,7 @@ public class SelectElement extends TestBenchElement
 
     public Stream<ItemElement> getItemsStream() {
         openPopup();
-        List<WebElement> elements = getDriver()
-                .findElement(By.tagName("vaadin-select-overlay"))
+        List<WebElement> elements = getPropertyElement("_overlayElement")
                 .findElement(By.tagName("vaadin-list-box"))
                 .findElements(By.tagName("vaadin-item"));
         if (elements.size() == 0) {
@@ -91,8 +90,10 @@ public class SelectElement extends TestBenchElement
 
     @Override
     public void selectByText(String text) {
-        getItemsStream().filter(item -> text.equals(item.getText())).findFirst()
-                .get().click();
+        getItemsStream()
+                .filter(item -> text
+                        .equals(item.getPropertyString("textContent").trim()))
+                .findFirst().get().click();
     }
 
     @Override
