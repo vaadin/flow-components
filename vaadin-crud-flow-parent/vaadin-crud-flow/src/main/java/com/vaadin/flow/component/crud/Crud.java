@@ -89,6 +89,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     private Grid<E> grid;
     private CrudEditor<E> editor;
     private E gridActiveItem;
+    private boolean toolbarVisible = true;
     private boolean saveBtnDisabledOverridden;
 
     final private Button saveButton;
@@ -583,7 +584,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
     /**
      * Controls visiblity of toolbar
-     * 
+     *
      * @param value
      */
     public void setToolbarVisible(boolean value) {
@@ -597,7 +598,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
     /**
      * Gets visiblity state of toolbar
-     * 
+     *
      * @param
      * @return true if toolbar is visible false otherwise
      */
@@ -1001,7 +1002,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
         /**
          * Gets new item being created
-         * 
+         *
          * @return a new instance of bean type
          */
         @Override
