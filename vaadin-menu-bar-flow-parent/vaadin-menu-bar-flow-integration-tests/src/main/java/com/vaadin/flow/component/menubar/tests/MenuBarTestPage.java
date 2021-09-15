@@ -145,8 +145,8 @@ public class MenuBarTestPage extends Div {
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
                 disableButton, visibleButton, checkedButton,
-                toggleAttachedButton, setI18nButton,
-                toggleAttachedButton, toggleMenuBarThemeButton,
-                toggleMenuItemThemeButton, toggleSubItemThemeButton);
+                toggleAttachedButton, setI18nButton, toggleAttachedButton,
+                toggleMenuBarThemeButton, toggleMenuItemThemeButton,
+                toggleSubItemThemeButton);
     }
 }
