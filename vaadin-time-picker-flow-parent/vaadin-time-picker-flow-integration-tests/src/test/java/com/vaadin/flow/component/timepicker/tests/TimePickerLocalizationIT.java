@@ -77,14 +77,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     public void testAllAvailableLocalesWhenValueChangedFromDropDown_step30Minutes_pickerValuesMatchesBrowserFormatted() {
         // same stuff as the previous test, but instead use a different step
 
-        selectStep("30m"); // could test with eg. 15 minutes, but after
-        // scrolling down, the iron-list ditches the first items and the indexes
-        // are f'ckd, thus after
-        // certain point it is too fragile to test based on indexes, index 0
-        // might not be the top most item
-
-        // cannot test further than 13:00, otherwise the item at index 0 will be
-        // 00:30 instead of 00:00 ...
+        selectStep("30m");
         runLocalisationTestPattern(
                 new String[] { "00:00", "00:30", "01:00", "06:00", "06:30" },
                 Arrays.asList(0, 1, 2, 12, 13));

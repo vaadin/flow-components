@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
@@ -28,7 +29,7 @@ import com.vaadin.flow.router.Route;
 public class DateTimePickerPage extends Div {
 
     public DateTimePickerPage() {
-        // 1
+        // Focus
         Div message = createMessageDiv("message");
 
         DateTimePicker picker = new DateTimePicker();
@@ -39,9 +40,9 @@ public class DateTimePickerPage extends Div {
         focusButton.setId("button-focus");
         focusButton.addClickListener(event -> picker.focus());
 
-        add(picker, message, focusButton);
+        add(new H1("Focus"), picker, message, focusButton);
 
-        // 2
+        // Set value and clear value from server
         Div message2 = createMessageDiv("message-value-from-server");
         NativeButton button2 = new NativeButton("Set value from server");
         button2.setId("button-value-from-server");
@@ -58,9 +59,10 @@ public class DateTimePickerPage extends Div {
                 "Clear from server", e -> picker2.clear());
         clearFromServerButton.setId("clear-from-server");
 
-        add(new Hr(), picker2, message2, button2, clearFromServerButton);
+        add(new Hr(), new H1("Set and clear value from server"), picker2,
+                message2, button2, clearFromServerButton);
 
-        // 3
+        // Set value after constructor
         NativeButton button3 = new NativeButton("Set locale");
         button3.setId("button-locale");
 
@@ -70,7 +72,23 @@ public class DateTimePickerPage extends Div {
         picker3.setId("date-time-picker-locale");
         button3.addClickListener(event -> picker3.setLocale(Locale.US));
 
-        add(new Hr(), picker3, button3);
+        add(new Hr(), new H1("Change locale"), picker3, button3);
+
+        // Set value with high precision
+        DateTimePicker picker4 = new DateTimePicker();
+        picker4.setValue(LocalDateTime.of(2018, 1, 2, 15, 30, 10, 100)); // Includes
+                                                                         // nanoseconds
+        picker4.setId("date-time-picker-set-high-precision-value");
+
+        add(new Hr(), new H1("Set value with high precision"), picker4);
+
+        // Set initial value with high precision
+        DateTimePicker picker5 = new DateTimePicker(
+                LocalDateTime.of(2018, 1, 2, 15, 30, 10, 100));// Includes
+                                                               // nanoseconds
+        picker5.setId("date-time-picker-high-precision-initial-value");
+
+        add(new Hr(), new H1("Set initial value with high precision"), picker5);
     }
 
     private void updateMessage(Div message, DateTimePicker dateTimePicker) {
