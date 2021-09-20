@@ -115,7 +115,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
         HistoryEvent event = findHistoryEventOfType(
                 SeriesCheckboxClickEvent.class);
         Assert.assertNotNull(event);
-        Assert.assertEquals(1, event.as(SeriesCheckboxClickEvent.class).getSeriesItemIndex());
+        Assert.assertEquals(1,
+                event.as(SeriesCheckboxClickEvent.class).getSeriesItemIndex());
     }
 
     @Test
@@ -194,11 +195,14 @@ public class ServerSideEventsIT extends AbstractTBTest {
         assertHasEventOfType(YAxesExtremesSetEvent.class);
     }
 
-    private HistoryEvent findHistoryEventOfType(Class<? extends ComponentEvent<Chart>> expectedEvent) {
+    private HistoryEvent findHistoryEventOfType(
+            Class<? extends ComponentEvent<Chart>> expectedEvent) {
         List<HistoryEvent> historyEvents = getHistoryEvents();
         String expectedEventType = expectedEvent.getSimpleName();
 
-        return historyEvents.stream().filter(event -> expectedEventType.equals(event.eventType)).findFirst().orElse(null);
+        return historyEvents.stream()
+                .filter(event -> expectedEventType.equals(event.eventType))
+                .findFirst().orElse(null);
     }
 
     private void assertLastEventIsType(
@@ -206,11 +210,13 @@ public class ServerSideEventsIT extends AbstractTBTest {
         getCommandExecutor().waitForVaadin();
         List<HistoryEvent> historyEvents = getHistoryEvents();
 
-        Assert.assertTrue("History should have events", historyEvents.size() > 0);
+        Assert.assertTrue("History should have events",
+                historyEvents.size() > 0);
 
         HistoryEvent firstEvent = historyEvents.get(historyEvents.size() - 1);
 
-        Assert.assertEquals(expectedEvent.getSimpleName(), firstEvent.eventType);
+        Assert.assertEquals(expectedEvent.getSimpleName(),
+                firstEvent.eventType);
     }
 
     private void assertHasEventOfType(
@@ -218,12 +224,15 @@ public class ServerSideEventsIT extends AbstractTBTest {
         getCommandExecutor().waitForVaadin();
         List<HistoryEvent> historyEvents = getHistoryEvents();
 
-        Assert.assertTrue("History should have events", historyEvents.size() > 0);
+        Assert.assertTrue("History should have events",
+                historyEvents.size() > 0);
 
         String expectedEventType = expectedEvent.getSimpleName();
         HistoryEvent searchedEvent = findHistoryEventOfType(expectedEvent);
 
-        Assert.assertNotNull("History does not contain event of type: " + expectedEventType, searchedEvent);
+        Assert.assertNotNull(
+                "History does not contain event of type: " + expectedEventType,
+                searchedEvent);
     }
 
     private void resetHistory() {
@@ -278,7 +287,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private List<HistoryEvent> getHistoryEvents() {
-        TestBenchElement historyLayout = $(TestBenchElement.class).id("history");
+        TestBenchElement historyLayout = $(TestBenchElement.class)
+                .id("history");
         List<TestBenchElement> historyItems = historyLayout.$("li").all();
 
         return historyItems.stream().map(item -> {
@@ -303,9 +313,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
         }
 
         public <T> T as(Class<T> clazz) {
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Series.class, new DataSeriesDeserializer())
-                    .create();
+            Gson gson = new GsonBuilder().registerTypeAdapter(Series.class,
+                    new DataSeriesDeserializer()).create();
 
             return gson.fromJson(this.eventDetailsJson, clazz);
         }
