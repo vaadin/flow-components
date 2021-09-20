@@ -132,8 +132,8 @@ If you need to make any modification in a component, consider whether it is conv
 Run `mvn formatter:format` before pushing your code.
 
 ## Bug and enhancement tickets
-- Bug tickets and enhancement requests that are specific to a certain Vaadin component should be posted in the component's Web Component repostory (e.g. https://github.com/vaadin/vaadin-button for Button).
-- Issues that are not component-specific (e.g. requests for new components) or encompass multiple components should be posted in this repository.
+- Bug tickets and enhancement requests for the web component implementations should go to the Vaadin web components monorepo https://github.com/vaadin/web-components/.
+- Issues that are not component-specific (e.g. requests for new components) or encompass multiple Flow components should be posted in this repository.
 
 ## LICENSE
 For specific module(s), check the LICENSE file under the parent module.
