@@ -1,13 +1,9 @@
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,7 +36,6 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.tests.elements.LabelElement;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 
