@@ -5,7 +5,10 @@ import static org.junit.Assert.assertNotNull;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +73,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         firstMarker.click();
 
-        assertFirstHistoryEventIsType(PointClickEvent.class);
+        assertHasEventOfType(PointClickEvent.class);
     }
 
     @Test
@@ -81,7 +84,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertLastEventIsType(SeriesLegendItemClickEvent.class);
+        assertHasEventOfType(SeriesLegendItemClickEvent.class);
     }
 
     @Test
@@ -91,7 +94,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
         legendItem.click();
 
         assertHasEventOfType(SeriesHideEvent.class);
-        assertFirstHistoryEventIsType(SeriesLegendItemClickEvent.class);
+        assertHasEventOfType(SeriesLegendItemClickEvent.class);
     }
 
     @Test
@@ -100,7 +103,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         checkBox.click();
 
-        assertLastEventIsType(SeriesCheckboxClickEvent.class);
+        assertHasEventOfType(SeriesCheckboxClickEvent.class);
     }
 
     @Test
@@ -109,8 +112,10 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         secondCheckBox.click();
 
-        SeriesCheckboxClickEvent checkboxClickEvent = readCheckboxEventDetails();
-        Assert.assertEquals(1, checkboxClickEvent.getSeriesItemIndex());
+        HistoryEvent event = findHistoryEventOfType(
+                SeriesCheckboxClickEvent.class);
+        Assert.assertNotNull(event);
+        Assert.assertEquals(1, event.as(SeriesCheckboxClickEvent.class).getSeriesItemIndex());
     }
 
     @Test
@@ -119,8 +124,10 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         secondCheckBox.click();
 
-        SeriesCheckboxClickEvent checkboxClickEvent = readCheckboxEventDetails();
-        Assert.assertTrue(checkboxClickEvent.isChecked());
+        HistoryEvent event = findHistoryEventOfType(
+                SeriesCheckboxClickEvent.class);
+        Assert.assertNotNull(event);
+        Assert.assertTrue(event.as(SeriesCheckboxClickEvent.class).isChecked());
     }
 
     @Test
@@ -176,7 +183,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
         List<WebElement> points = chart.getPoints();
         points.get(1).click();
 
-        assertNthHistoryEventIsType(PointSelectEvent.class, 1);
+        assertHasEventOfType(PointSelectEvent.class);
     }
 
     @Test
@@ -184,46 +191,39 @@ public class ServerSideEventsIT extends AbstractTBTest {
         WebElement toggleExtremesButton = findToggleButton();
         toggleExtremesButton.click();
 
-        assertFirstHistoryEventIsType(YAxesExtremesSetEvent.class);
+        assertHasEventOfType(YAxesExtremesSetEvent.class);
+    }
+
+    private HistoryEvent findHistoryEventOfType(Class<? extends ComponentEvent<Chart>> expectedEvent) {
+        List<HistoryEvent> historyEvents = getHistoryEvents();
+        String expectedEventType = expectedEvent.getSimpleName();
+
+        return historyEvents.stream().filter(event -> expectedEventType.equals(event.eventType)).findFirst().orElse(null);
     }
 
     private void assertLastEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
         getCommandExecutor().waitForVaadin();
-        LabelElement lastEvent = $(LabelElement.class).waitForFirst(); // id("lastEvent");
-        Assert.assertEquals(expectedEvent.getSimpleName(), lastEvent.getText());
-    }
+        List<HistoryEvent> historyEvents = getHistoryEvents();
 
-    private void assertFirstHistoryEventIsType(
-            Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        LabelElement lastEvent = $(LabelElement.class).id("event0");
-        String eventHistory = lastEvent.getText();
-        assertNotNull(eventHistory);
-        String eventType = eventHistory.split(":")[0];
-        Assert.assertEquals(expectedEvent.getSimpleName(), eventType);
+        Assert.assertTrue("History should have events", historyEvents.size() > 0);
+
+        HistoryEvent firstEvent = historyEvents.get(historyEvents.size() - 1);
+
+        Assert.assertEquals(expectedEvent.getSimpleName(), firstEvent.eventType);
     }
 
     private void assertHasEventOfType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
-        List<LabelElement> labels = $(LabelElement.class).all();
-        String expected = expectedEvent.getSimpleName();
-        Optional<String> actual = labels.stream().map(label -> {
-            String eventHistory = label.getText();
-            assertNotNull(eventHistory);
-            return eventHistory.split(":")[0];
-        }).filter(text -> text.equals(expected)).findFirst();
-        Assert.assertTrue("Expect to find " + expected, actual.isPresent());
-    }
+        getCommandExecutor().waitForVaadin();
+        List<HistoryEvent> historyEvents = getHistoryEvents();
 
-    private void assertNthHistoryEventIsType(
-            Class<? extends ComponentEvent<Chart>> expectedEvent,
-            int historyIndex) {
-        LabelElement lastEvent = $(LabelElement.class)
-                .id("event" + historyIndex);
-        String eventHistory = lastEvent.getText();
-        assertNotNull(eventHistory);
-        String eventType = eventHistory.split(":")[0];
-        Assert.assertEquals(expectedEvent.getSimpleName(), eventType);
+        Assert.assertTrue("History should have events", historyEvents.size() > 0);
+
+        String expectedEventType = expectedEvent.getSimpleName();
+        HistoryEvent searchedEvent = findHistoryEventOfType(expectedEvent);
+
+        Assert.assertNotNull("History does not contain event of type: " + expectedEventType, searchedEvent);
     }
 
     private void resetHistory() {
@@ -231,16 +231,6 @@ public class ServerSideEventsIT extends AbstractTBTest {
         WebElement resetHistoryButton = $(ButtonElement.class)
                 .id("resetHistory");
         resetHistoryButton.click();
-    }
-
-    private SeriesCheckboxClickEvent readCheckboxEventDetails() {
-        String detailsJson = $(LabelElement.class).id("eventDetails").getText();
-
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Series.class, new DataSeriesDeserializer())
-                .create();
-
-        return gson.fromJson(detailsJson, SeriesCheckboxClickEvent.class);
     }
 
     private WebElement findHideFirstSeriesButton() {
@@ -284,6 +274,40 @@ public class ServerSideEventsIT extends AbstractTBTest {
         public Series deserialize(JsonElement series, Type type,
                 JsonDeserializationContext jdc) throws JsonParseException {
             return new Gson().fromJson(series, DataSeries.class);
+        }
+    }
+
+    private List<HistoryEvent> getHistoryEvents() {
+        TestBenchElement historyLayout = $(TestBenchElement.class).id("history");
+        List<TestBenchElement> historyItems = historyLayout.$("li").all();
+
+        return historyItems.stream().map(item -> {
+            TestBenchElement eventTypeSpan = item.$(TestBenchElement.class)
+                    .id("event-type");
+            TestBenchElement eventDetailsSpan = item.$(TestBenchElement.class)
+                    .id("event-details");
+            String eventType = eventTypeSpan.getText();
+            String eventDetailsJson = eventDetailsSpan.getText();
+
+            return new HistoryEvent(eventType, eventDetailsJson);
+        }).collect(Collectors.toList());
+    }
+
+    private static class HistoryEvent {
+        String eventType;
+        String eventDetailsJson;
+
+        public HistoryEvent(String eventType, String eventDetailsJson) {
+            this.eventType = eventType;
+            this.eventDetailsJson = eventDetailsJson;
+        }
+
+        public <T> T as(Class<T> clazz) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Series.class, new DataSeriesDeserializer())
+                    .create();
+
+            return gson.fromJson(this.eventDetailsJson, clazz);
         }
     }
 }
