@@ -7,21 +7,24 @@ import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-combo-box/combo-box-in-template-initial-value")
-public class ComboBoxInTemplateInitValueServersideIT extends AbstractComboBoxIT {
+public class ComboBoxInTemplateInitValueServersideIT
+        extends AbstractComboBoxIT {
 
     private ComboBoxElement comboBox;
 
     @Before
     public void init() {
         open();
-        comboBox = $("combobox-initial-value").first().$(ComboBoxElement.class).id("combo");
+        comboBox = $("combobox-initial-value").first().$(ComboBoxElement.class)
+                .id("combo");
     }
 
     @Test
     public void comboBoxInitialValue_litTemplate_ShouldBeSetWithSetValue() {
         String labelValue = "1";
 
-        Assert.assertEquals(labelValue, comboBox.getProperty("_inputElementValue"));
+        Assert.assertEquals(labelValue,
+                comboBox.getProperty("_inputElementValue"));
     }
 
 }

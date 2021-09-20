@@ -18,7 +18,6 @@ public class ComboBoxTemplateInitialValue extends LitTemplate {
     @Id("combo")
     private ComboBox<Bean> comboBox;
 
-
     List<Bean> beans = new ArrayList<>();
 
     private Binder<BeanHolder> binder = new Binder<>();
@@ -39,8 +38,7 @@ public class ComboBoxTemplateInitialValue extends LitTemplate {
         comboBox.setItems(beans);
         comboBox.setItemLabelGenerator(Bean::getBeanid);
         comboBox.setAllowCustomValue(true);
-        binder.forField(comboBox)
-                .asRequired("Not blank");
+        binder.forField(comboBox).asRequired("Not blank");
     }
 
     public static class Bean implements Serializable {
