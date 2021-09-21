@@ -136,7 +136,7 @@ import elemental.json.JsonObject;
  * </table>
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "22.0.0-alpha5")
 @JsModule("@vaadin/vaadin-form-layout/src/vaadin-form-layout.js")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component implements HasStyle {
