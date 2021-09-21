@@ -32,7 +32,7 @@ public class DateTimePickerHelpersPageIT extends AbstractComponentIT {
         DateTimePickerElement dtp = $(DateTimePickerElement.class)
                 .id("dtp-helper-component");
         Assert.assertEquals("helper-component",
-                dtp.getHelperComponent().getAttribute("id"));
+                dtp.getHelperComponent().getClassNames().iterator().next());
 
         $("button").id("button-clear-helper-component").click();
         Assert.assertNull(dtp.getHelperComponent());

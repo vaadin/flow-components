@@ -254,5 +254,24 @@ public class DateTimePickerElement extends TestBenchElement
     private TestBenchElement getTimePicker() {
         return $("vaadin-date-time-picker-time-picker")
                 .attribute("slot", "time-picker").first();
+
+    /**
+     * Gets the slotted helper component for the element.
+     *
+     * @return the slotted component or {@code null} if there is no component
+     */
+    public TestBenchElement getHelperComponent() {
+        final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
+                .attribute("slot", "helper");
+        if (query.exists()) {
+            TestBenchElement last = query.last();
+            // To avoid getting the "slot" element, for components with slotted
+            // slots
+            if (!"slot".equals(last.getTagName())
+                    && this.equals(last.getPropertyElement("parentElement"))) {
+                return last;
+            }
+        }
+        return null;
     }
 }

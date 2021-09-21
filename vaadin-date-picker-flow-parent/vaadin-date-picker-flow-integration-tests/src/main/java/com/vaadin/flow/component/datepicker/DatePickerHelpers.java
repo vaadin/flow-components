@@ -22,7 +22,7 @@ public class DatePickerHelpers extends Div {
         datePickerComponentHelper.setId("data-picker-helper-component");
 
         Span helper = new Span();
-        helper.setId("helper-component");
+        helper.setClassName("helper-component");
         datePickerComponentHelper.setHelperComponent(helper);
 
         NativeButton clearHelperComponent = new NativeButton(

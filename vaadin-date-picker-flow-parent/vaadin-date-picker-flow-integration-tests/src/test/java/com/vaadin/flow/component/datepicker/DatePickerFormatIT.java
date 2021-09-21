@@ -24,6 +24,7 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import java.util.logging.Level;
@@ -210,7 +211,7 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     private void submitValue(String id, String value) {
         TestBenchElement input = $(DatePickerElement.class).id(id)
-                .$("vaadin-date-picker-text-field").first();
+                .findElement(By.tagName("input"));
 
         while (!input.getAttribute("value").isEmpty()) {
             input.sendKeys(Keys.BACK_SPACE);
