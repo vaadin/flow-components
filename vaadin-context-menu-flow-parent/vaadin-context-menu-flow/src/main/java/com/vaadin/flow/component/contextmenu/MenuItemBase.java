@@ -15,19 +15,16 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 
+import java.io.Serializable;
+
 /**
  * Base class for item component used inside {@link ContextMenu}s.
- *
- * @see MenuItem
  *
  * @param <C>
  *            the context menu type
@@ -35,8 +32,8 @@ import com.vaadin.flow.component.Tag;
  *            the menu item type
  * @param <S>
  *            the sub menu type
- *
  * @author Vaadin Ltd.
+ * @see MenuItem
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
@@ -177,18 +174,32 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         return getElement().getProperty("_checked", false);
     }
 
-    public void setThemeName(String theme) {
-        if (theme != null) {
-            getElement().setProperty(PRIVATE_THEME_ATTRIBUTE, theme);
+    /**
+     * Sets the theme names of the item. This method overwrites any previous set
+     * theme names.
+     *
+     * @param themeName
+     *            a space-separated string of theme names to set, or empty
+     *            string to remove all theme names
+     */
+    public void setThemeName(String themeName) {
+        if (themeName != null) {
+            getElement().setProperty(PRIVATE_THEME_ATTRIBUTE, themeName);
         } else {
             getElement().removeProperty(PRIVATE_THEME_ATTRIBUTE);
         }
 
         executeJsWhenAttached(
                 "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
-                getElement(), theme);
+                getElement(), themeName);
     }
 
+    /**
+     * Gets the theme names for this component.
+     *
+     * @return a space-separated string of theme names, empty string if there
+     *         are no theme names or null if attribute (theme) is not set at all
+     */
     public String getThemeName() {
         return getElement().getProperty(PRIVATE_THEME_ATTRIBUTE);
     }

@@ -55,12 +55,23 @@ class MenuBarRootItem extends MenuItem {
         menuBar.resetContent();
     }
 
+    /**
+     * Sets the theme names of the item. This method overwrites any previous set
+     * theme names.
+     * <p>
+     * Note that the themes set via {@link MenuBar#setThemeName(String)} will be
+     * overridden when using this method.
+     *
+     * @param themeName
+     *            a space-separated string of theme names to set, or empty
+     *            string to remove all theme names
+     */
     @Override
-    public void setThemeName(String theme) {
-        if (Objects.equals(theme, getThemeName())) {
+    public void setThemeName(String themeName) {
+        if (Objects.equals(themeName, getThemeName())) {
             return;
         }
-        super.setThemeName(theme);
+        super.setThemeName(themeName);
         menuBar.updateButtons();
     }
 }
