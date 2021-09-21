@@ -50,6 +50,7 @@
               button.addEventListener('click', e => {
                 if (e.composedPath().indexOf(button.item.component) === -1) {
                   button.item.component.click();
+                  e.stopPropagation();
                 }
               });
             }
