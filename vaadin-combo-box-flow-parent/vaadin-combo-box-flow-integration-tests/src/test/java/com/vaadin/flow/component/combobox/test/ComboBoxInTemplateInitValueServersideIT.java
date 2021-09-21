@@ -15,16 +15,13 @@ public class ComboBoxInTemplateInitValueServersideIT
     @Before
     public void init() {
         open();
-        comboBox = $("combobox-initial-value").first().$(ComboBoxElement.class)
+        comboBox = $("combo-box-initial-value").first().$(ComboBoxElement.class)
                 .id("combo");
     }
 
     @Test
     public void comboBoxInitialValue_litTemplate_ShouldBeSetWithSetValue() {
         String labelValue = "1";
-
-        Assert.assertEquals(labelValue,
-                comboBox.getProperty("_inputElementValue"));
+        Assert.assertEquals(labelValue, comboBox.getSelectedText());
     }
-
 }

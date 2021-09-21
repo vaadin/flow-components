@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsModule("./src/combobox-template-initial-value-serverside.ts")
-@Tag("combobox-initial-value")
+@Tag("combo-box-initial-value")
 public class ComboBoxTemplateInitialValue extends LitTemplate {
 
     @Id("combo")
@@ -41,7 +41,7 @@ public class ComboBoxTemplateInitialValue extends LitTemplate {
         binder.forField(comboBox).asRequired("Not blank");
     }
 
-    public static class Bean implements Serializable {
+    private static class Bean implements Serializable {
         private String beanid;
 
         public Bean(String beanid) {
@@ -57,7 +57,7 @@ public class ComboBoxTemplateInitialValue extends LitTemplate {
         }
     }
 
-    public static class BeanHolder {
+    private static class BeanHolder {
         private Bean bean;
 
         public void setBean(Bean study) {
