@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
@@ -254,12 +255,13 @@ public class DateTimePickerElement extends TestBenchElement
     private TestBenchElement getTimePicker() {
         return $("vaadin-date-time-picker-time-picker")
                 .attribute("slot", "time-picker").first();
+    }
 
     /**
-     * Gets the slotted helper component for the element.
-     *
-     * @return the slotted component or {@code null} if there is no component
+     * {@inheritDoc}
      */
+    // TODO: Remove once https://github.com/vaadin/testbench/issues/1299 is fixed
+    @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
                 .attribute("slot", "helper");

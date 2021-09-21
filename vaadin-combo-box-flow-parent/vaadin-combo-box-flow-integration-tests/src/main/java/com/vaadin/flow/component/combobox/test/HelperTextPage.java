@@ -29,7 +29,7 @@ public class HelperTextPage extends Div {
         helperComponentCombobox.setId("combobox-helper-component");
 
         Span span = new Span("Helper Component");
-        span.setId("helper-component");
+        span.setClassName("helper-component");
         helperComponentCombobox.setHelperComponent(span);
 
         NativeButton emptyHelperComponent = new NativeButton(

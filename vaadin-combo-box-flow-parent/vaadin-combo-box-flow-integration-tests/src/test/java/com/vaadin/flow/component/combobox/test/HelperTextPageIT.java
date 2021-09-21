@@ -29,7 +29,7 @@ public class HelperTextPageIT extends AbstractComboBoxIT {
         ComboBoxElement comboHelperComponent = $(ComboBoxElement.class)
                 .id("combobox-helper-component");
         Assert.assertEquals("helper-component",
-                comboHelperComponent.getHelperComponent().getAttribute("id"));
+                comboHelperComponent.getHelperComponent().getClassNames().iterator().next());
 
         clickButton("empty-helper-component");
         Assert.assertEquals(null, comboHelperComponent.getHelperComponent());
