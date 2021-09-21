@@ -29,7 +29,10 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.OrderedList;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -39,24 +42,14 @@ import com.vaadin.flow.server.Command;
 public class ServerSideEvents extends AbstractChartExample {
 
     private Chart chart;
-    private Label lastEvent;
-    private Label eventDetails;
     private int id;
-    private VerticalLayout historyLayout;
-    private int eventNumber;
-    private DataSeriesItem firstDataPoint;
+    private OrderedList historyLayout;
     private Checkbox visibilityToggling;
     private boolean setExtremes = true;
 
     @Override
     public void initDemo() {
-        eventDetails = new Label();
-        eventDetails.setId("eventDetails");
-
-        lastEvent = new Label();
-        lastEvent.setId("lastEvent");
-
-        historyLayout = new VerticalLayout();
+        historyLayout = new OrderedList();
         historyLayout.setId("history");
 
         chart = new Chart();
@@ -102,19 +95,19 @@ public class ServerSideEvents extends AbstractChartExample {
         series3.get(3).setY(95);
         series3.setName("Another axis");
         series3.setyAxis(1);
-        firstDataPoint = series1.get(0);
+        DataSeriesItem firstDataPoint = series1.get(0);
         firstDataPoint.setSelected(true);
         configuration.setSeries(series1, series2, series3);
 
-        chart.addChartClickListener(event -> logEvent(event));
-        chart.addPointClickListener(event -> logEvent(event));
-        chart.addCheckBoxClickListener(event -> logEvent(event));
-        chart.addSeriesLegendItemClickListener(event -> logEvent(event));
-        chart.addSeriesHideListener(event -> logEvent(event));
-        chart.addSeriesShowListener(event -> logEvent(event));
-        chart.addPointSelectListener(event -> logEvent(event));
-        chart.addPointUnselectListener(event -> logEvent(event));
-        chart.addYAxesExtremesSetListener(event -> logEvent(event));
+        chart.addChartClickListener(this::logEvent);
+        chart.addPointClickListener(this::logEvent);
+        chart.addCheckBoxClickListener(this::logEvent);
+        chart.addSeriesLegendItemClickListener(this::logEvent);
+        chart.addSeriesHideListener(this::logEvent);
+        chart.addSeriesShowListener(this::logEvent);
+        chart.addPointSelectListener(this::logEvent);
+        chart.addPointUnselectListener(this::logEvent);
+        chart.addYAxesExtremesSetListener(this::logEvent);
         chart.drawChart();
 
         chart.setVisibilityTogglingDisabled(false);
@@ -123,9 +116,7 @@ public class ServerSideEvents extends AbstractChartExample {
         layout.setId("master");
         layout.add(createControls());
 
-        layout.add(lastEvent);
-        layout.add(eventDetails);
-        layout.add(historyLayout);
+        layout.add(new H2("Event History"), historyLayout);
         add(chart, layout);
     }
 
@@ -164,10 +155,7 @@ public class ServerSideEvents extends AbstractChartExample {
         Button resetHistory = new Button("Reset history");
         resetHistory.setId("resetHistory");
         resetHistory.addClickListener(event -> {
-            lastEvent.setText(null);
-            eventDetails.setText(null);
             historyLayout.removeAll();
-            eventNumber = 0;
         });
 
         Button toggleExtremes = new Button("Toggle Extremes");
@@ -206,11 +194,12 @@ public class ServerSideEvents extends AbstractChartExample {
     private void logEvent(ComponentEvent<Chart> event) {
         String name = event.getClass().getSimpleName();
         String details = createEventString(event);
-        lastEvent.setText(name);
-        eventDetails.setText(details);
-        Label history = new Label(name + ": " + details + "\n");
-        history.setId("event" + eventNumber++);
-        historyLayout.getElement().insertChild(0, history.getElement());
+        Span eventTypeSpan = new Span(name);
+        eventTypeSpan.setId("event-type");
+        Span eventDetailsSpan = new Span(details);
+        eventDetailsSpan.setId("event-details");
+        ListItem listItem = new ListItem(eventTypeSpan, eventDetailsSpan);
+        historyLayout.add(listItem);
     }
 
     private String createEventString(ComponentEvent<Chart> event) {
