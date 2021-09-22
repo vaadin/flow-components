@@ -22,6 +22,10 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -46,6 +50,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     private S subMenu;
 
     private boolean checkable = false;
+
+    private Set<String> themeNames = new LinkedHashSet<>();
 
     /**
      * Default constructor
@@ -175,14 +181,43 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     }
 
     /**
-     * Sets the theme names of the item. This method overwrites any previous set
-     * theme names.
+     * Adds one or more theme names to this item. Multiple theme names can be
+     * specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be added to the item
+     */
+    public void addThemeNames(String... themeNames) {
+        this.themeNames.addAll(Arrays.asList(themeNames));
+        setThemeName();
+    }
+
+    /**
+     * Removes one or more theme names from this item. Multiple theme names can
+     * be specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be removed from the item
+     */
+    public void removeThemeNames(String... themeNames) {
+        this.themeNames.removeAll(Arrays.asList(themeNames));
+        setThemeName();
+    }
+
+    /**
+     * Checks if the item has the given theme name.
      *
      * @param themeName
-     *            a space-separated string of theme names to set, or empty
-     *            string to remove all theme names
+     *            the theme name to check for
+     * @return <code>true</code> if the item has the given theme name,
+     *         <code>false</code> otherwise
      */
-    public void setThemeName(String themeName) {
+    public boolean hasThemeName(String themeName) {
+        return themeNames.contains(themeName);
+    }
+
+    private void setThemeName() {
+        String themeName = themeNames.stream().collect(Collectors.joining(" "));
         if (themeName != null) {
             getElement().setProperty(PRIVATE_THEME_ATTRIBUTE, themeName);
         } else {
@@ -192,16 +227,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         executeJsWhenAttached(
                 "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
                 getElement(), themeName);
-    }
-
-    /**
-     * Gets the theme names for this component.
-     *
-     * @return a space-separated string of theme names, empty string if there
-     *         are no theme names or null if attribute (theme) is not set at all
-     */
-    public String getThemeName() {
-        return getElement().getProperty(PRIVATE_THEME_ATTRIBUTE);
     }
 
     protected abstract S createSubMenu();

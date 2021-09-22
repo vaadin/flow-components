@@ -124,20 +124,20 @@ public class MenuBarTestPage extends Div {
 
         NativeButton toggleMenuItemThemeButton = new NativeButton(
                 "toggle item theme", e -> {
-                    if (MENU_ITEM_THEME.equals(item1.getThemeName())) {
-                        item1.setThemeName(null);
+                    if (item1.hasThemeName(MENU_ITEM_THEME)) {
+                        item1.removeThemeNames(MENU_ITEM_THEME);
                     } else {
-                        item1.setThemeName(MENU_ITEM_THEME);
+                        item1.addThemeNames(MENU_ITEM_THEME);
                     }
                 });
         toggleMenuItemThemeButton.setId("toggle-item-theme");
 
         NativeButton toggleSubItemThemeButton = new NativeButton(
                 "toggle sub theme", e -> {
-                    if (SUB_ITEM_THEME.equals(subItem2.getThemeName())) {
-                        subItem2.setThemeName(null);
+                    if (subItem2.hasThemeName(SUB_ITEM_THEME)) {
+                        subItem2.removeThemeNames(SUB_ITEM_THEME);
                     } else {
-                        subItem2.setThemeName(SUB_ITEM_THEME);
+                        subItem2.addThemeNames(SUB_ITEM_THEME);
                     }
                 });
         toggleSubItemThemeButton.setId("toggle-sub-theme");

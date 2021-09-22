@@ -408,11 +408,11 @@ public class MenuBarView extends DemoView {
         Div message = new Div(new Text("Selected: "), selected);
 
         MenuItem project = menuBar.addItem("Project");
-        project.setThemeName(MenuBarVariant.LUMO_PRIMARY.getVariantName());
+        project.addThemeNames(MenuBarVariant.LUMO_PRIMARY.getVariantName());
         MenuItem account = menuBar.addItem("Account");
         MenuItem signOut = menuBar.addItem(VaadinIcon.SIGN_OUT.create(),
                 e -> selected.setText("Sign Out"));
-        signOut.setThemeName(MenuBarVariant.LUMO_TERTIARY.getVariantName());
+        signOut.addThemeNames(MenuBarVariant.LUMO_TERTIARY.getVariantName());
 
         SubMenu projectSubMenu = project.getSubMenu();
         MenuItem users = projectSubMenu.addItem("Users");

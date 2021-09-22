@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.menubar;
 
-import java.util.Objects;
-
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -56,22 +54,31 @@ class MenuBarRootItem extends MenuItem {
     }
 
     /**
-     * Sets the theme names of the item. This method overwrites any previous set
-     * theme names.
+     * Adds one or more theme names to this item. Multiple theme names can be
+     * specified by using multiple parameters.
      * <p>
      * Note that the themes set via {@link MenuBar#setThemeName(String)} will be
      * overridden when using this method.
      *
-     * @param themeName
-     *            a space-separated string of theme names to set, or empty
-     *            string to remove all theme names
+     * @param themeNames
+     *            the theme name or theme names to be added to the item
      */
     @Override
-    public void setThemeName(String themeName) {
-        if (Objects.equals(themeName, getThemeName())) {
-            return;
-        }
-        super.setThemeName(themeName);
+    public void addThemeNames(String... themeNames) {
+        super.addThemeNames(themeNames);
+        menuBar.updateButtons();
+    }
+
+    /**
+     * Removes one or more theme names from this item. Multiple theme names can
+     * be specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be removed from the item
+     */
+    @Override
+    public void removeThemeNames(String... themeNames) {
+        super.removeThemeNames(themeNames);
         menuBar.updateButtons();
     }
 }
