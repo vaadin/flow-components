@@ -20,10 +20,11 @@ public class ComboBoxInTemplateInitValueServersideIT
     }
 
     /**
-     *  This particular test case, test when we use `combo-box` inside a lit-template(the wrapper),
-     *  and use the wrapped component in Java code for setting the initial value or readonly attribute
-     *  disabled and ... the intent of this test is to check if combo-box value (visible label) is set
-     *  correctly or not.
+     * This particular test case, test when we use `combo-box` inside a
+     * lit-template(the wrapper), and use the wrapped component in Java code for
+     * setting the initial value or readonly attribute disabled and ... the
+     * intent of this test is to check if combo-box value (visible label) is set
+     * correctly or not.
      */
     @Test
     public void comboBoxInitialValue_litTemplate_ShouldBeSetWithSetValue() {
