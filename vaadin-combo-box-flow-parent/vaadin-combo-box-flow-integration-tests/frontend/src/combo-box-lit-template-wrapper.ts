@@ -1,7 +1,7 @@
 import {customElement, html, TemplateResult, LitElement} from "lit-element";
 
-@customElement("combo-box-lit-wrapper")
-class ComboBoxLitWrapper extends LitElement {
+@customElement("combo-box-lit-template-wrapper")
+class ComboBoxLitTemplateWrapper extends LitElement {
  render() {
         return html`
             <style>

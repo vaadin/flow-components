@@ -9,14 +9,14 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 
 import java.util.Arrays;
 
-@Tag("combo-box-lit-wrapper")
-@JsModule("./src/combobox-lit-wrapper.ts")
-public class ComboBoxLitWrapper extends LitTemplate {
+@Tag("combo-box-lit-template-wrapper")
+@JsModule("./src/combo-box-lit-template-wrapper.ts")
+public class ComboBoxLitTemplateWrapper extends LitTemplate {
 
     @Id("cb")
     private ComboBox<String> comboBox;
 
-    public ComboBoxLitWrapper() {
+    public ComboBoxLitTemplateWrapper() {
         comboBox.setDataProvider(
                 new ListDataProvider<>(Arrays.asList("B", "C", "A", "D")));
         comboBox.setValue("D");
