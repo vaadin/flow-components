@@ -283,6 +283,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 100");
     }
 
+    // found
     @Ignore
     public void loadItems_changeItemLabelGenerator() {
         beanBox.openPopup();
@@ -293,21 +294,24 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         getItemElements().get(5).click();
         Assert.assertEquals("Born 5", getTextFieldValue(beanBox));
 
+        // 100 items are loaded
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
                 beanBox);
     }
 
+    // found
     @Ignore
     public void loadItems_changeRenderer() {
         beanBox.openPopup();
         clickButton("component-renderer");
         beanBox.openPopup();
         assertComponentRendered("<h4>Person 4</h4>");
+        // loaded page returns 100 instead of 50
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
                 beanBox);
     }
 
-    @Ignore
+    @Test
     public void loadItems_changeDataProvider() {
         beanBox.openPopup();
         clickButton("data-provider");
@@ -339,7 +343,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "Updated", getOverlayContents().get(0));
     }
 
-    @Ignore
+    @Test
     public void loadItems_removeItem_itemRemoved() {
         beanBox.openPopup();
         clickButton("remove-item");
