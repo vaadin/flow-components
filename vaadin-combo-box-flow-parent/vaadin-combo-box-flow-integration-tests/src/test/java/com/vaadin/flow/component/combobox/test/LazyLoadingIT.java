@@ -329,7 +329,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
     }
 
-    @Ignore
+    @Test
     public void loadItems_refreshItem_itemUpdated() {
         beanBox.openPopup();
         clickButton("update-item");
