@@ -716,8 +716,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            theme variants to add
      */
     public void addThemeVariants(DatePickerVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(DatePickerVariant::getVariantName)
+        getThemeNames().addAll(
+                Stream.of(variants).map(DatePickerVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
 
