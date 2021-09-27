@@ -20,7 +20,6 @@ import com.vaadin.flow.testutil.TestPath;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -296,7 +295,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 beanBox);
     }
 
-    @Ignore
+    @Test
     public void loadItems_changeRenderer() {
         beanBox.openPopup();
         clickButton("component-renderer");
@@ -306,7 +305,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 beanBox);
     }
 
-    @Ignore
+    @Test
     public void loadItems_changeDataProvider() {
         beanBox.openPopup();
         clickButton("data-provider");
@@ -328,7 +327,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
     }
 
-    @Ignore
+    @Test
     public void loadItems_refreshItem_itemUpdated() {
         beanBox.openPopup();
         clickButton("update-item");
@@ -338,7 +337,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "Updated", getOverlayContents().get(0));
     }
 
-    @Ignore
+    @Test
     public void loadItems_removeItem_itemRemoved() {
         beanBox.openPopup();
         clickButton("remove-item");
