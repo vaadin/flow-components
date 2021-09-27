@@ -282,7 +282,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 100");
     }
 
-    @Ignore
+    @Test
     public void loadItems_changeItemLabelGenerator() {
         beanBox.openPopup();
         clickButton("item-label-generator");
@@ -306,7 +306,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 beanBox);
     }
 
-    @Test
+    @Ignore
     public void loadItems_changeDataProvider() {
         beanBox.openPopup();
         clickButton("data-provider");
@@ -328,7 +328,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
     }
 
-    @Test
+    @Ignore
     public void loadItems_refreshItem_itemUpdated() {
         beanBox.openPopup();
         clickButton("update-item");
@@ -338,7 +338,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "Updated", getOverlayContents().get(0));
     }
 
-    @Test
+    @Ignore
     public void loadItems_removeItem_itemRemoved() {
         beanBox.openPopup();
         clickButton("remove-item");
