@@ -20,6 +20,7 @@ import com.vaadin.flow.testutil.TestPath;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -281,7 +282,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 100");
     }
 
-    @Test
+    @Ignore
     public void loadItems_changeItemLabelGenerator() {
         beanBox.openPopup();
         clickButton("item-label-generator");
@@ -295,7 +296,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 beanBox);
     }
 
-    @Test
+    @Ignore
     public void loadItems_changeRenderer() {
         beanBox.openPopup();
         clickButton("component-renderer");
