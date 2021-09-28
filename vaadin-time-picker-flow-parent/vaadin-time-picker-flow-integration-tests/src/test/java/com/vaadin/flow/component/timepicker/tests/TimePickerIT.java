@@ -135,7 +135,7 @@ public class TimePickerIT extends AbstractComponentIT {
         TimePickerElement picker = $(TimePickerElement.class)
                 .id("time-picker-helper-component");
         Assert.assertEquals("helper-component",
-                picker.getHelperComponent().getAttribute("id"));
+                picker.getHelperComponent().getClassNames().iterator().next());
 
         $("button").id("button-clear-helper-component").click();
         Assert.assertNull(picker.getHelperComponent());

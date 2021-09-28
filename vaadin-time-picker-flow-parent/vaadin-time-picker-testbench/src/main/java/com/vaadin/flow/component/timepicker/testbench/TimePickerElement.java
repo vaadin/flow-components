@@ -45,12 +45,12 @@ public class TimePickerElement extends TestBenchElement
 
     /**
      * A TestBench element representing
-     * <code>&lt;vaadin-combo-box-overlay&gt;</code> element that contains the
+     * <code>&lt;vaadin-time-picker-overlay&gt;</code> element that contains the
      * items for the <code>&lt;vaadin-time-picker&gt;</code> element when the
      * drop down has been opened with {@link #openDropDown()}.
      */
-    @Element("vaadin-combo-box-overlay")
-    public static class ComboBoxOverlayElement extends TestBenchElement {
+    @Element("vaadin-time-picker-overlay")
+    public static class TimePickerOverlayElement extends TestBenchElement {
 
         /**
          * Gets the item at the given index from the opened drop down for the
@@ -61,7 +61,7 @@ public class TimePickerElement extends TestBenchElement
          * @return the item element
          */
         public TestBenchElement getItem(int index) {
-            return $("vaadin-combo-box-item").all().stream()
+            return $("vaadin-time-picker-item").all().stream()
                     .filter(item -> index == item.getPropertyInteger("index"))
                     .findFirst().get();
         }
@@ -73,7 +73,7 @@ public class TimePickerElement extends TestBenchElement
          * @return the last item element
          */
         public TestBenchElement getLastItem() {
-            return $("vaadin-combo-box-item").all().stream()
+            return $("vaadin-time-picker-item").all().stream()
                     .max((a, b) -> a.getPropertyInteger("index")
                             - b.getPropertyInteger("index"))
                     .get();
@@ -119,7 +119,7 @@ public class TimePickerElement extends TestBenchElement
      * @return the text content for the item
      */
     public String getItemText(int index) {
-        return $(ComboBoxOverlayElement.class).onPage().first().getItem(index)
+        return $(TimePickerOverlayElement.class).onPage().first().getItem(index)
                 .getText();
     }
 
@@ -132,7 +132,7 @@ public class TimePickerElement extends TestBenchElement
      * @return the text content for the last item
      */
     public String getLastItemText() {
-        return $(ComboBoxOverlayElement.class).onPage().first().getLastItem()
+        return $(TimePickerOverlayElement.class).onPage().first().getLastItem()
                 .getText();
     }
 
@@ -157,7 +157,7 @@ public class TimePickerElement extends TestBenchElement
     }
 
     public void waitUntilDropDownOpen() {
-        $(ComboBoxOverlayElement.class).onPage().waitForFirst();
+        $(TimePickerOverlayElement.class).onPage().waitForFirst();
     }
 
     /**
@@ -168,7 +168,7 @@ public class TimePickerElement extends TestBenchElement
                 "const cb = arguments[0]; window.requestAnimationFrame(function(){ cb.close(); });",
                 getTimePickerComboBox());
         waitUntil(input -> input
-                .findElements(By.tagName("vaadin-combo-box-overlay"))
+                .findElements(By.tagName("vaadin-time-picker-overlay"))
                 .isEmpty());
     }
 
@@ -198,7 +198,7 @@ public class TimePickerElement extends TestBenchElement
         openDropDown();
         scrollToItem(index);
 
-        TestBenchElement item = $(ComboBoxOverlayElement.class).onPage().first()
+        TestBenchElement item = $(TimePickerOverlayElement.class).onPage().first()
                 .getItem(index);
         item.click();
     }
