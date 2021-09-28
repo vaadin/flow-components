@@ -232,7 +232,7 @@ public class DateTimePickerElement extends TestBenchElement
      * @return the presentation value of the inner time picker
      */
     public String getTimePresentation() {
-        return getTimePicker().getPropertyString("__inputElement",
+        return getTimePicker().getPropertyString("inputElement",
                 VALUE_PROPERTY);
     }
 
