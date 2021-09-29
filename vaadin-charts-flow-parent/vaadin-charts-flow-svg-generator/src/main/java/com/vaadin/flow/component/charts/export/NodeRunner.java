@@ -25,7 +25,7 @@ class NodeRunner {
 
     int runJavascript(String script) throws InterruptedException, IOException {
         FrontendToolsSettings settings = new FrontendToolsSettings("",
-                                                                   () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
+                () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
         FrontendTools tools = new FrontendTools(settings);
         String node = tools.getNodeExecutable();
         List<String> command = new ArrayList<>();
