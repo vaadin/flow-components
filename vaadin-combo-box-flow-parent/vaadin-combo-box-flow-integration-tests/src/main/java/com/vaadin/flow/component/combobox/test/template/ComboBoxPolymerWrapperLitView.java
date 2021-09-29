@@ -29,12 +29,6 @@ public class ComboBoxPolymerWrapperLitView extends LitTemplate {
     @Id("cbw1")
     private ComboBoxPolymerWrapper comboBoxLitWrapper1;
 
-    @Id("cbw2")
-    private ComboBoxPolymerWrapper comboBoxLitWrapper2;
-
-    @Id("cbw3")
-    private ComboBoxPolymerWrapper comboBoxLitWrapper3;
-
     public ComboBoxPolymerWrapperLitView() {
     }
 }

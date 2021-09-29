@@ -24,8 +24,6 @@ class ComboBoxPolymerWrapperLitView extends LitElement {
                 }
             </style>
             <combo-box-polymer-wrapper id="cbw1"></combo-box-polymer-wrapper>
-            <combo-box-polymer-wrapper id="cbw2"></combo-box-polymer-wrapper>
-            <combo-box-polymer-wrapper id="cbw3"></combo-box-polymer-wrapper>
         `
     }
 }
