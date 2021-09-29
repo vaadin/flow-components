@@ -927,10 +927,6 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       grid.$connector.setVerticalScrollingEnabled = tryCatchWrapper(function(enabled) {
         // There are two scollable containers in grid so apply the changes for both
         setVerticalScrollingEnabled(grid.$.table, enabled);
-
-        // Since the scrollbars were toggled, there might have been some changes to layout
-        // size. Notify grid of the resize to ensure everything is in place.
-        grid.notifyResize();
       });
 
       const setVerticalScrollingEnabled = function(scrollable, enabled) {
