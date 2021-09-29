@@ -18,13 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.server.frontend.FrontendTools;
+import com.vaadin.flow.server.frontend.FrontendToolsSettings;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 class NodeRunner {
 
     int runJavascript(String script) throws InterruptedException, IOException {
-        FrontendTools tools = new FrontendTools("",
+        FrontendToolsSettings settings = new FrontendToolsSettings("",
                 () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
+        FrontendTools tools = new FrontendTools(settings);
         String node = tools.getNodeExecutable();
         List<String> command = new ArrayList<>();
         command.add(node);
