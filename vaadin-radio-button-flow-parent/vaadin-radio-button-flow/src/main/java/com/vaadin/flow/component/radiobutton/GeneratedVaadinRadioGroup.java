@@ -114,6 +114,8 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-radio-group")
+// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/vaadin-radio-button/src/vaadin-radio-group.js")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

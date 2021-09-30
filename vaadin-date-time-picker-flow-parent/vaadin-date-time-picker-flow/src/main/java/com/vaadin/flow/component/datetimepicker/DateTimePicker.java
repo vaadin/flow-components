@@ -31,6 +31,8 @@ import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
+// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
     @Override
@@ -44,6 +46,8 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
+// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
     @Override
@@ -62,7 +66,9 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "22.0.0-alpha7")
+// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -243,7 +249,7 @@ public class DateTimePicker
      * maximum that the time picker supports. This means that
      * {@link #getValue()} might return a different value than what was passed
      * in.
-     * 
+     *
      * @param value
      *            the LocalDateTime instance representing the selected date and
      *            time, or null
@@ -262,7 +268,7 @@ public class DateTimePicker
      * Truncates value to millisecond precision, as that is the maximum that the
      * time picker supports. This is also necessary to synchronize with the
      * internal value of the Flow TimePicker, which truncates the value as well.
-     * 
+     *
      * @param value
      *            the LocalDateTime instance to sanitize, can be null
      * @return sanitized LocalDateTime instance

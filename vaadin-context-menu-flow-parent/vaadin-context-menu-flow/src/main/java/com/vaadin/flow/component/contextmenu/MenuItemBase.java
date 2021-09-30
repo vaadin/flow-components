@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -41,6 +42,8 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
+// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 

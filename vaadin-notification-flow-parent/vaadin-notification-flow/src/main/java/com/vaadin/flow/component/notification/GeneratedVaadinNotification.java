@@ -87,7 +87,9 @@ Your work has been saved
  * </p>
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "22.0.0-alpha7")
+// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
 @NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
