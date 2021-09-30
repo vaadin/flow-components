@@ -24,19 +24,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 @TestPath("vaadin-date-time-picker/date-time-picker-step")
 public class DateTimePickerStepIT extends AbstractComponentIT {
 
-    DateTimePickerElement picker;
+    DateTimePickerElement initialStepsPicker;
+    DateTimePickerElement changeStepsPicker;
 
     @Before
     public void init() {
         open();
         waitForElementPresent(By.tagName("vaadin-date-time-picker"));
-        picker = $(DateTimePickerElement.class).first();
+        initialStepsPicker = $(DateTimePickerElement.class)
+                .id("initial-steps-date-time-picker");
+        changeStepsPicker = $(DateTimePickerElement.class)
+                .id("change-steps-date-time-picker");
+    }
+
+    @Test
+    public void setInitialStepsToMillisecondPrecisionShouldFormatWithMillisecondPrecision() {
+        Assert.assertEquals("3:20:30.123 PM",
+                initialStepsPicker.getTimePresentation());
     }
 
     @Test
@@ -45,7 +52,7 @@ public class DateTimePickerStepIT extends AbstractComponentIT {
 
         setValue.click();
 
-        Assert.assertEquals("3:20 PM", picker.getTimePresentation());
+        Assert.assertEquals("3:20 PM", changeStepsPicker.getTimePresentation());
     }
 
     @Test
@@ -57,7 +64,8 @@ public class DateTimePickerStepIT extends AbstractComponentIT {
         setSecondPrecision.click();
         setValue.click();
 
-        Assert.assertEquals("3:20:30 PM", picker.getTimePresentation());
+        Assert.assertEquals("3:20:30 PM",
+                changeStepsPicker.getTimePresentation());
     }
 
     @Test
@@ -69,6 +77,7 @@ public class DateTimePickerStepIT extends AbstractComponentIT {
         setMillisecondPrecision.click();
         setValue.click();
 
-        Assert.assertEquals("3:20:30.123 PM", picker.getTimePresentation());
+        Assert.assertEquals("3:20:30.123 PM",
+                changeStepsPicker.getTimePresentation());
     }
 }
