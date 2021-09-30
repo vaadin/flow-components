@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
@@ -29,8 +29,24 @@ import java.util.Locale;
 public class DateTimePickerStepPage extends Div {
 
     public DateTimePickerStepPage() {
+        setupInitialSteps();
+        setupChangeSteps();
+    }
+
+    private void setupInitialSteps() {
         DateTimePicker picker = new DateTimePicker();
-        picker.setId("date-time-picker");
+        picker.setId("initial-steps-date-time-picker");
+        picker.setStep(Duration.ofMillis(500));
+        picker.setValue(LocalDateTime.of(2021, 9, 13, 15, 20, 30)
+                .plus(Duration.ofMillis(123)));
+
+        add(new H1("Initial steps"));
+        add(picker);
+    }
+
+    private void setupChangeSteps() {
+        DateTimePicker picker = new DateTimePicker();
+        picker.setId("change-steps-date-time-picker");
 
         NativeButton valueButton = new NativeButton("Set value");
         valueButton.addClickListener(e -> picker.setValue(LocalDateTime
@@ -49,6 +65,7 @@ public class DateTimePickerStepPage extends Div {
                 .addClickListener(e -> picker.setStep(Duration.ofMillis(500)));
         millisecondPrecisionButton.setId("set-millisecond-precision");
 
+        add(new H1("Change steps"));
         add(picker);
         add(new Div(valueButton, secondPrecisionButton,
                 millisecondPrecisionButton));

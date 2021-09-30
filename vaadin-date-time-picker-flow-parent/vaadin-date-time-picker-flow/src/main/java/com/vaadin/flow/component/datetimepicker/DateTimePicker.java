@@ -391,6 +391,7 @@ public class DateTimePicker
 
         getElement().setProperty("step",
                 StepsUtil.convertDurationToStepsValue(step));
+        timePicker.setStep(step);
     }
 
     /**
