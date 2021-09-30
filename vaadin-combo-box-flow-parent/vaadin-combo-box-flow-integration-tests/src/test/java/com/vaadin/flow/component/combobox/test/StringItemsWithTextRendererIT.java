@@ -51,7 +51,8 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected rendered the second item text", "bar",
                 items.get(1));
 
-        $("vaadin-combo-box").id("list").findElement(By.tagName("input")).sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
+        $("vaadin-combo-box").id("list").findElement(By.tagName("input"))
+                .sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
 
         Assert.assertEquals("Unexpected selected item text", "foo",
                 $("div").id("info").getText());

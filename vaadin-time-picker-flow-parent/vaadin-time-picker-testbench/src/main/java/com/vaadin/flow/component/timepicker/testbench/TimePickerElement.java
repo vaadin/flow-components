@@ -198,8 +198,8 @@ public class TimePickerElement extends TestBenchElement
         openDropDown();
         scrollToItem(index);
 
-        TestBenchElement item = $(TimePickerOverlayElement.class).onPage().first()
-                .getItem(index);
+        TestBenchElement item = $(TimePickerOverlayElement.class).onPage()
+                .first().getItem(index);
         item.click();
     }
 

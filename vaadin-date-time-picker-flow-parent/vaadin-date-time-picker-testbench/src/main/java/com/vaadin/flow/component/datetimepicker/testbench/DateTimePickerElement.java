@@ -260,7 +260,8 @@ public class DateTimePickerElement extends TestBenchElement
     /**
      * {@inheritDoc}
      */
-    // TODO: Remove once https://github.com/vaadin/testbench/issues/1299 is fixed
+    // TODO: Remove once https://github.com/vaadin/testbench/issues/1299 is
+    // fixed
     @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
