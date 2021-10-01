@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.tests.ComponentDemoTest;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
@@ -129,8 +128,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
 
-        new Actions(getDriver()).moveToElement(buttons.get(0)).click().build()
-                .perform();
+        buttons.get(0).click();
 
         WebElement infoLabel = layout
                 .findElement(By.id("button-group-disabled-items-info"));
@@ -141,8 +139,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         executeScript("arguments[0].removeAttribute(\"disabled\");",
                 buttons.get(1));
 
-        new Actions(getDriver()).moveToElement(buttons.get(1)).click().build()
-                .perform();
+        buttons.get(1).click();
 
         try {
             waitUntil(driver -> group
@@ -175,28 +172,23 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
 
-        new Actions(getDriver()).moveToElement(buttons.get(1)).click().build()
-                .perform();
+        buttons.get(1).click();
 
         WebElement valueInfo = layout.findElement(By.id("selected-value-info"));
         Assert.assertEquals("", valueInfo.getText());
 
         // make the group not read-only
         WebElement switchReadOnly = findElement(By.id("switch-read-only"));
-        new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
-                .perform();
+        switchReadOnly.click();
 
-        new Actions(getDriver()).moveToElement(buttons.get(1)).click().build()
-                .perform();
+        buttons.get(1).click();
         Assert.assertEquals("bar", valueInfo.getText());
 
         // make it read-only again
-        new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
-                .perform();
+        switchReadOnly.click();
 
         // click to the first item
-        new Actions(getDriver()).moveToElement(buttons.get(0)).click().build()
-                .perform();
+        buttons.get(0).click();
 
         // Nothing has changed
         Assert.assertEquals("bar", valueInfo.getText());
