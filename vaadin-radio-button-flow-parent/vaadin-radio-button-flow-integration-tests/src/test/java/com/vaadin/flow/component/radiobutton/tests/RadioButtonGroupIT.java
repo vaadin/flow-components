@@ -210,7 +210,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 4,
+                "Unexpected amount of elements in radio-button-group", 7,
                 elements.size());
         Assert.assertEquals("First element should be a <vaadin-radio-button>",
                 "vaadin-radio-button", elements.get(0).getTagName());
@@ -230,7 +230,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 5,
+                "Unexpected amount of elements in radio-button-group", 8,
                 elements.size());
         Assert.assertEquals("Second element should be a label", "label",
                 elements.get(1).getTagName());
@@ -248,7 +248,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 12,
+                "Unexpected amount of elements in radio-button-group", 15,
                 elements.size());
         // Three groups of (label, hr, vaadin-radio-button, vaadin-radio-button)
         IntStream.range(0, 2).forEach(i -> {
@@ -280,7 +280,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 6,
+                "Unexpected amount of elements in radio-button-group", 9,
                 elements.size());
         for (int i = 0; i < 6; i++) {
             Assert.assertEquals(
@@ -294,7 +294,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             List<WebElement> els = group.findElements(By.xpath("./*"));
             // Expected one label to have been added to radio-button-group
             // Second element should be a label as first element was selected",
-            return els.size() == 7 && "label".equals(els.get(1).getTagName());
+            return els.size() == 10 && "label".equals(els.get(1).getTagName());
         }, 200);
 
         executeScript("arguments[0].value=5;", group);
@@ -303,7 +303,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             List<WebElement> els = group.findElements(By.xpath("./*"));
             // Expected label to stay, just change place in radio-button-group
             // Fifth element should be a label as fourth element was selected
-            return els.size() == 7 && "label".equals(els.get(5).getTagName());
+            return els.size() == 10 && "label".equals(els.get(5).getTagName());
         }, 200);
     }
 
