@@ -106,9 +106,6 @@ public class FilteringIT extends AbstractComboBoxIT {
                 + "should be no filtered items until server has responded.", 0,
                 items.size());
 
-        Assert.assertEquals("No item should match the ItemFilter (startsWith).",
-                0, getNonEmptyOverlayContents().size());
-
         items = setFilterAndGetImmediateResults("Item 2");
         Assert.assertEquals("Expected server-side filtering, so there "
                 + "should be no filtered items until server has responded.", 0,
@@ -155,6 +152,7 @@ public class FilteringIT extends AbstractComboBoxIT {
                 filteredItems.size());
 
         waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        waitUntil(driver -> getOverlayContents().get(0).equals("filtered"));
         assertRendered("filtered");
     }
 

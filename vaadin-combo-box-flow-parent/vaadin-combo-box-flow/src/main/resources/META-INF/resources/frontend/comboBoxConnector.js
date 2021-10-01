@@ -240,10 +240,10 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
             });
 
             customElements.whenDefined('vaadin-combo-box').then(tryCatchWrapper(() => {
-                const _isItemSelected = comboBox.$.overlay._isItemSelected;
+                const isItemSelected = comboBox.$.dropdown._scroller.__isItemSelected;
                 // Override comboBox's _isItemSelected logic to handle remapped items
-                comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
-                    let selected = _isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
+                comboBox.$.dropdown._scroller.__isItemSelected = (item, selectedItem, itemIdPath) => {
+                    let selected = isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
 
                     if (comboBox._selectedKey) {
                         if (comboBox.filteredItems.indexOf(selectedItem) > -1) {
@@ -352,10 +352,6 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
 
                 callback(filteredItems, filteredItems.length);
             });
-
-            // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
-            comboBox.addEventListener('opened-changed', tryCatchWrapper(e =>
-                {e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {})}));
 
             // Prevent setting the custom value as the 'value'-prop automatically
             comboBox.addEventListener('custom-value-set', tryCatchWrapper(e => e.preventDefault()));

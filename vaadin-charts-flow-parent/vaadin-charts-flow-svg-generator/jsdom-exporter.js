@@ -20,6 +20,8 @@ const dom = new JSDOM(
     </html>`);
 const win = dom.window;
 const doc = win.document;
+//workaround for highcharts#15913
+global.Node = win.Node
 
 // Require Highcharts with the window shim
 const Highcharts = require('highcharts/highstock')(win);

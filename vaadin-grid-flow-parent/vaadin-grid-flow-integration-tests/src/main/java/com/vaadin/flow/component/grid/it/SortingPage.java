@@ -55,7 +55,6 @@ public class SortingPage extends Div {
         NativeButton showGridBtn = new NativeButton("Show grid", e -> {
             grid.getStyle().set("display", "block");
             grid.getStyle().remove("max-height");
-            grid.getElement().executeJs("$0.notifyResize();");
         });
         showGridBtn.setId("show-hidden-grid");
 
