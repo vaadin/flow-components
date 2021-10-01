@@ -24,6 +24,7 @@ public enum ComboBoxVariant {
                     "align-right"), LUMO_HELPER_ABOVE_FIELD(
                             "helper-above-field"), MATERIAL_ALWAYS_FLOAT_LABEL(
                                     "always-float-label");
+
     private final String variant;
 
     ComboBoxVariant(String variant) {
