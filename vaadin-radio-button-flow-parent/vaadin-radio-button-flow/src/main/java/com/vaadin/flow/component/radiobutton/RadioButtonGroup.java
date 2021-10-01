@@ -34,6 +34,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -509,7 +510,10 @@ public class RadioButtonGroup<T>
     private void updateButton(RadioButton<T> button) {
         updateEnabled(button);
         button.getElement().getChildren().forEach(e -> button.getElement().removeChild(e));
-        button.add(getItemRenderer().createComponent(button.getItem()));
+        Label label = new Label();
+        label.getElement().setAttribute("slot", "label");
+        label.add(getItemRenderer().createComponent(button.getItem()));
+        button.add(label);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
