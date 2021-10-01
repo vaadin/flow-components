@@ -508,7 +508,7 @@ public class RadioButtonGroup<T>
 
     private void updateButton(RadioButton<T> button) {
         updateEnabled(button);
-        button.removeAll();
+        button.getElement().getChildren().forEach(e -> button.getElement().removeChild(e));
         button.add(getItemRenderer().createComponent(button.getItem()));
     }
 
