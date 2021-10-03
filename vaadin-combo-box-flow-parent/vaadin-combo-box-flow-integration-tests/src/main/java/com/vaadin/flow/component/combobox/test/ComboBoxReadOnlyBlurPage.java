@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -39,7 +39,7 @@ public class ComboBoxReadOnlyBlurPage extends VerticalLayout {
         comboBox.setItems("A", "B", "C");
         comboBox.setValue("C");
         comboBox.focus();
-        Button button = new Button("Click");
+        NativeButton button = new NativeButton("Click");
         button.setId("blur-combo");
         button.addClickListener(ev -> {
             Span span = new Span("Clicked");
