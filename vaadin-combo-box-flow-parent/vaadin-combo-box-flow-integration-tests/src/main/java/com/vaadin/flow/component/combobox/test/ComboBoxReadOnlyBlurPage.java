@@ -29,6 +29,7 @@ public class ComboBoxReadOnlyBlurPage extends VerticalLayout {
         comboBox.setAllowCustomValue(true);
         comboBox.setRequired(true);
         comboBox.setReadOnly(true);
+        comboBox.setId("test-combo");
         comboBox.addCustomValueSetListener(ev -> {
             Span span = new Span();
             span.setText("Triggered");
