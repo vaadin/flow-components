@@ -40,6 +40,11 @@ public class ComboBoxReadOnlyBlurPage extends VerticalLayout {
         comboBox.focus();
         Button button = new Button("Click");
         button.setId("blur-combo");
+        button.addClickListener(ev -> {
+            Span span = new Span("Clicked");
+            span.setId("button-clicked");
+            add(span);
+        });
         add(comboBox, button);
     }
 
