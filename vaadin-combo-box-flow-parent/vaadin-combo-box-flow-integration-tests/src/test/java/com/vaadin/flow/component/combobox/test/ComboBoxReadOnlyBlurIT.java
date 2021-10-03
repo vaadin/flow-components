@@ -27,14 +27,12 @@ import static org.junit.Assert.assertTrue;
 @TestPath("vaadin-combo-box/readonly-blur")
 public class ComboBoxReadOnlyBlurIT extends AbstractComboBoxIT {
 
-//    @Test(expected = NoSuchElementException.class)
-    @Test
+    @Test(expected = NoSuchElementException.class)
     public void comboBoxReadOnlyBlur() {
         open();
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         // Clicking button will blur the ComboBox.
-        findElement(By.id("test-combo")).click();
         findElement(By.id("blur-combo")).click();
         // Wait until click processed.
         waitUntil(driver -> findElements(By.id("button-clicked")).size() > 0);
