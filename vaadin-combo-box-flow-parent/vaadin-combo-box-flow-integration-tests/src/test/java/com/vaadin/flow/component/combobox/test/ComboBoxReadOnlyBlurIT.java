@@ -32,7 +32,12 @@ public class ComboBoxReadOnlyBlurIT extends AbstractComboBoxIT {
         open();
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
+        // Clicking button will blur the ComboBox.
         findElement(By.id("blur-combo")).click();
+        // Wait until click processed.
+        waitUntil(driver -> findElements(By.id("button-clicked"))
+                .size() > 0);
+        // Blur should trigger custom value set event.
         WebElement span = findElement(By.id("triggered"));
         assertTrue(span == null);
     }
