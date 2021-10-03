@@ -27,7 +27,8 @@ import static org.junit.Assert.assertTrue;
 @TestPath("vaadin-combo-box/readonly-blur")
 public class ComboBoxReadOnlyBlurIT extends AbstractComboBoxIT {
 
-    @Test(expected = NoSuchElementException.class)
+//    @Test(expected = NoSuchElementException.class)
+    @Test
     public void comboBoxReadOnlyBlur() {
         open();
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
@@ -36,7 +37,7 @@ public class ComboBoxReadOnlyBlurIT extends AbstractComboBoxIT {
         findElement(By.id("blur-combo")).click();
         // Wait until click processed.
         waitUntil(driver -> findElements(By.id("button-clicked")).size() > 0);
-        // Blur should trigger custom value set event.
+        // Blur should not trigger custom value set event.
         WebElement span = findElement(By.id("triggered"));
         assertTrue(span == null);
     }
