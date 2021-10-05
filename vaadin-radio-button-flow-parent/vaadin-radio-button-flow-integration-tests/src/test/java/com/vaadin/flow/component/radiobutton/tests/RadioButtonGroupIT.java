@@ -202,7 +202,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 7,
+                "Unexpected amount of elements in radio-button-group", 6,
                 elements.size());
         Assert.assertEquals("First element should be a <vaadin-radio-button>",
                 "vaadin-radio-button", elements.get(0).getTagName());
@@ -222,7 +222,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 8,
+                "Unexpected amount of elements in radio-button-group", 7,
                 elements.size());
         Assert.assertEquals("Second element should be a label", "label",
                 elements.get(1).getTagName());
@@ -240,7 +240,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 15,
+                "Unexpected amount of elements in radio-button-group", 14,
                 elements.size());
         // Three groups of (label, hr, vaadin-radio-button, vaadin-radio-button)
         IntStream.range(0, 2).forEach(i -> {
@@ -272,7 +272,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
         Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 9,
+                "Unexpected amount of elements in radio-button-group", 8,
                 elements.size());
         for (int i = 0; i < 6; i++) {
             Assert.assertEquals(
