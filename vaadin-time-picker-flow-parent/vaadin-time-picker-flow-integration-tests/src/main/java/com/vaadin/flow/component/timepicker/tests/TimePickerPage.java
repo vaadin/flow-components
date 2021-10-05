@@ -142,7 +142,7 @@ public class TimePickerPage extends Div {
         timePickerHelperComponent.setId("time-picker-helper-component");
 
         Span span = new Span("Helper component");
-        span.setClassName("helper-component");
+        span.setId("helper-component");
         timePickerHelperComponent.setHelperComponent(span);
 
         NativeButton clearComponent = new NativeButton("Clear component helper",

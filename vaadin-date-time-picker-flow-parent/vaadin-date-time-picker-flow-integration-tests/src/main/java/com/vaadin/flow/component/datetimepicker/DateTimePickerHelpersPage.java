@@ -31,7 +31,7 @@ public class DateTimePickerHelpersPage extends Div {
                 "Arrival time");
         dateTimePickerHelperComponent.setId("dtp-helper-component");
         Span span = new Span("Select your arrival time");
-        span.setClassName("helper-component");
+        span.setId("helper-component");
         dateTimePickerHelperComponent.setHelperComponent(span);
 
         NativeButton clearHelperComponent = new NativeButton(
