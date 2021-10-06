@@ -27,7 +27,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 public class ChartSizeIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return PieWithSize.class;
     }
 

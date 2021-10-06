@@ -100,12 +100,12 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     /**
      * Copied from com.vaadin.flow.testutil.AbstractTestBenchTest
-     * 
+     *
      * @return current host address if running in a hub or localhost otherwise
      */
     protected String getCurrentHostAddress() {
         if (getRunOnHub(getClass()) == null
-                || Parameters.getHubHostname() == null) {
+                && Parameters.getHubHostname() == null) {
             return "localhost";
         }
         try {
