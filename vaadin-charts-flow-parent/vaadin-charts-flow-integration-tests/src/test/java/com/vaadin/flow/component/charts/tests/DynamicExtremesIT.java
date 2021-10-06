@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 public class DynamicExtremesIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return DynamicExtremes.class;
     }
 
