@@ -206,8 +206,7 @@ public class DateTimePickerElement extends TestBenchElement
 
     /**
      * This is needed when simulating user input by explicitly setting the value
-     * property of inner inputs. Otherwise the value property of custom field is
-     * not updated and the value isn't propagated to vaadin-date-time-picker.
+     * property of inner inputs.
      */
     private void triggerChange(TestBenchElement pickerElement) {
         executeScript(
