@@ -137,7 +137,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "20.0.4")
+@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "20.0.5")
 @JsModule("@vaadin/vaadin-context-menu/src/vaadin-context-menu.js")
 public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>
         extends Component implements HasStyle, ClickNotifier<R> {

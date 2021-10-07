@@ -91,7 +91,7 @@ Tab 1
  */
 @Tag("vaadin-tab")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "20.0.4")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "20.0.5")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 
