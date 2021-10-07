@@ -79,7 +79,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
         com.vaadin.flow.router.Route[] ann = viewClass
                 .getAnnotationsByType(com.vaadin.flow.router.Route.class);
         if (ann.length > 0) {
-            return "/" + ann[0].value();
+            return "/" + ann[0].value()[0];
         }
         if (viewClass == null) {
             return "/";
