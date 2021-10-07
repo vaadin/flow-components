@@ -62,7 +62,7 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "20.0.4")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "20.0.5")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
