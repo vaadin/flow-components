@@ -1,7 +1,7 @@
 import '@vaadin/grid/vaadin-grid-column.js';
 import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 {
-  class GridFlowSelectionColumnElement extends GridColumnElement {
+  class GridFlowSelectionColumnElement extends GridColumn {
 
     static get is() {
       return 'vaadin-grid-flow-selection-column';
