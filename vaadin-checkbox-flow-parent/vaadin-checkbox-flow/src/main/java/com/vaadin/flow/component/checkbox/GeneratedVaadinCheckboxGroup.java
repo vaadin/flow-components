@@ -120,7 +120,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-checkbox-group")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "22.0.0-alpha7")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinCheckboxGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
