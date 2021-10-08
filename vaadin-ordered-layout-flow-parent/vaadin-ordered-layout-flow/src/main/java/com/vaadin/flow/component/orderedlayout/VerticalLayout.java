@@ -28,7 +28,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * wide.
  */
 @Tag("vaadin-vertical-layout")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js")

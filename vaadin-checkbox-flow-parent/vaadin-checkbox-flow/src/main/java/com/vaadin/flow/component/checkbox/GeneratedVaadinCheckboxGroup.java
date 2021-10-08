@@ -118,7 +118,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-checkbox-group")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-checkbox", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox-group.js")

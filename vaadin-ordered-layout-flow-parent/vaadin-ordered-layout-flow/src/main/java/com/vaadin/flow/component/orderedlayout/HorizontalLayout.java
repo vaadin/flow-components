@@ -28,7 +28,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * have a predefined size - its size is defined by the components inside it.
  */
 @Tag("vaadin-horizontal-layout")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js")

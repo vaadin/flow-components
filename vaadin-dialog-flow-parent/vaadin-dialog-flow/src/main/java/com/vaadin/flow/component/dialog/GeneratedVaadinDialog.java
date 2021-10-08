@@ -49,7 +49,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-dialog")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-dialog", version = "22.0.0-alpha6")
 @NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha6")

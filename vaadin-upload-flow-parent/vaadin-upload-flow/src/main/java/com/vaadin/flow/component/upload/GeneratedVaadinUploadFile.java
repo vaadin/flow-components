@@ -23,6 +23,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -140,7 +141,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-upload-file")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload-file.js")
 public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadFile<R>>

@@ -81,7 +81,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-password-field")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-password-field.js")

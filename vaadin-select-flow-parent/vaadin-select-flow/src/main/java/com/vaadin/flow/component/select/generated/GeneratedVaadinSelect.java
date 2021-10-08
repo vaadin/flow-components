@@ -185,7 +185,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-select")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-select", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-select/src/vaadin-select.js")

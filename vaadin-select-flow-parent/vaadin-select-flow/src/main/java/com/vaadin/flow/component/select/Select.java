@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
@@ -184,7 +185,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-list-box")
-    // @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox<T> extends Component
             implements HasItemComponents<T> {

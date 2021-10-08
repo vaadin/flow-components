@@ -42,7 +42,7 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-list")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/vaadin-messages/src/vaadin-message-list.js")

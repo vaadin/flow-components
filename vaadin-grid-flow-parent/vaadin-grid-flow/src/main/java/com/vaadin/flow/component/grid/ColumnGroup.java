@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.dom.Element;
 
@@ -32,7 +33,7 @@ import com.vaadin.flow.dom.Element;
  */
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column-group.js")
 @Tag("vaadin-grid-column-group")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class ColumnGroup extends AbstractColumn<ColumnGroup> {
 

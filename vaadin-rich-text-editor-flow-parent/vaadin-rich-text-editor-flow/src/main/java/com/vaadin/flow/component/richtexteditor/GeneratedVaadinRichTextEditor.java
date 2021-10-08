@@ -187,7 +187,7 @@ import elemental.json.JsonArray;
  * </p>
  */
 @Tag("vaadin-rich-text-editor")
-// @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "22.0.0-alpha6")
 @JsModule("@vaadin/vaadin-rich-text-editor/src/vaadin-rich-text-editor.js")
