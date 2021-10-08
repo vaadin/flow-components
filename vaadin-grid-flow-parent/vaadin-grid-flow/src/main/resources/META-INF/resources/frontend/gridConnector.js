@@ -1,7 +1,7 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
-import { GridElement } from '@vaadin/vaadin-grid/src/vaadin-grid.js';
-import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mixin.js';
+import { GridElement } from '@vaadin/grid/src/vaadin-grid.js';
+import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
