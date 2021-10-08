@@ -36,8 +36,8 @@ public class GridFilteringIT extends AbstractComponentIT {
     public void gridInNotLoadingState() {
         open();
 
-        WebElement filter = $("vaadin-text-field").id("filter");
-        WebElement input = getInShadowRoot(filter, By.cssSelector("input"));
+        TextFieldElement filter = $(TextFieldElement.class).id("filter");
+        WebElement input = filter.$("input").first();
         input.sendKeys("w");
 
         // Blur input to get value change
