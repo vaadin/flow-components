@@ -113,7 +113,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @return the current label text
      */
     public String getLabel() {
-        return getElement().getChildren().filter(predicate -> predicate.getTag()
+        return getElement().getChildren().filter(child -> child.getTag()
                 .equals("label")).findFirst().get().getText();
     }
 
