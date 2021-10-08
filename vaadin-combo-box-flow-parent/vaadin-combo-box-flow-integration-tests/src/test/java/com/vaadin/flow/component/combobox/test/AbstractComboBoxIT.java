@@ -123,8 +123,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected String getItemLabel(TestBenchElement itemElement) {
-        return itemElement.$("div").id("content")
-                .getPropertyString("innerHTML");
+        return itemElement.getPropertyString("innerHTML");
     }
 
     protected List<TestBenchElement> getItemElements() {
