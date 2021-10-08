@@ -80,7 +80,8 @@ public class GridEditorFocusIT extends AbstractComponentIT {
         // Assert editor is focused
         TestBenchElement editorComponent = nameCell.$("vaadin-text-field")
                 .first();
-        assertElementHasFocus(editorComponent);
+        TestBenchElement input = editorComponent.$("input").first();
+        assertElementHasFocus(input);
 
     }
 
@@ -102,8 +103,9 @@ public class GridEditorFocusIT extends AbstractComponentIT {
     }
 
     private void assertElementHasFocus(WebElement element) {
-        Assert.assertTrue("Element should have focus", (Boolean) executeScript(
-                "return document.activeElement === arguments[0].focusElement",
-                element));
+        Assert.assertTrue("Element should have focus",
+                (Boolean) executeScript(
+                        "return document.activeElement === arguments[0]",
+                        element));
     }
 }

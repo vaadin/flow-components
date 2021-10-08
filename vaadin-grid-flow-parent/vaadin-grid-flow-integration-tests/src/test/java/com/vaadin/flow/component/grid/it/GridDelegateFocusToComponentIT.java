@@ -47,7 +47,8 @@ public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
         // Assert vaadin-text-field with id 'foo' is focused
         TestBenchElement focusableComponent = grid.getCell(0, 1)
                 .$("vaadin-text-field").id("foo");
-        assertElementHasFocus(focusableComponent);
+        TestBenchElement input = focusableComponent.$("input").first();
+        assertElementHasFocus(input);
 
     }
 
@@ -76,8 +77,9 @@ public class GridDelegateFocusToComponentIT extends AbstractComponentIT {
     }
 
     private void assertElementHasFocus(WebElement element) {
-        Assert.assertTrue("Element should have focus", (Boolean) executeScript(
-                "return [arguments[0], arguments[0].focusElement].includes(document.activeElement)",
-                element));
+        Assert.assertTrue("Element should have focus",
+                (Boolean) executeScript(
+                        "return document.activeElement === arguments[0]",
+                        element));
     }
 }
