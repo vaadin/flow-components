@@ -29,7 +29,7 @@ import com.vaadin.flow.function.SerializableFunction;
 @Tag("vaadin-integer-field")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@JsModule("@vaadin/vaadin-text-field/src/vaadin-integer-field.js")
+@JsModule("@vaadin/text-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 
     private static final SerializableFunction<String, Integer> PARSER = valueFormClient -> {

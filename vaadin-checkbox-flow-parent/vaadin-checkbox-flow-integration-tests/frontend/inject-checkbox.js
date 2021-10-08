@@ -1,6 +1,6 @@
 import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 import {html} from '@polymer/polymer/lib/utils/html-tag.js';
-import '@vaadin/vaadin-checkbox/vaadin-checkbox.js';
+import '@vaadin/checkbox/vaadin-checkbox.js';
 
 class InjectChecbox extends PolymerElement {
     static get template() {
