@@ -87,13 +87,13 @@ public class DateTimePickerIT extends AbstractComponentIT {
         TestBenchCommandExecutor cmd = focusButton.getCommandExecutor();
 
         Assert.assertEquals(true, cmd.executeScript(
-                "return document.activeElement !== arguments[0].__datePicker",
+                "return document.activeElement !== arguments[0].__datePicker.inputElement",
                 picker));
 
         focusButton.click();
 
         Assert.assertEquals(true, cmd.executeScript(
-                "return document.activeElement === arguments[0].__datePicker",
+                "return document.activeElement === arguments[0].__datePicker.inputElement",
                 picker));
     }
 

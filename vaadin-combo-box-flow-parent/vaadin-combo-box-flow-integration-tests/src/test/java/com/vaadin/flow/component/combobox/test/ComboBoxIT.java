@@ -279,8 +279,7 @@ public class ComboBoxIT extends AbstractComboBoxIT {
 
     private List<String> getRenderedItems() {
         return getItemElements().stream()
-                .map(element -> element.$("div").id("content")
-                        .getPropertyString("innerHTML"))
+                .map(element -> element.getPropertyString("innerHTML"))
                 .collect(Collectors.toList());
     }
 

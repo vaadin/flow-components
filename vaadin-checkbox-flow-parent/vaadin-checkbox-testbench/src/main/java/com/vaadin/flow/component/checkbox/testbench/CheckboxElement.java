@@ -50,9 +50,7 @@ public class CheckboxElement extends TestBenchElement
 
     @Override
     public String getLabel() {
-        return (String) executeScript(
-                "return arguments[0].firstChild ? arguments[0].firstChild.textContent : '';",
-                this);
+        return $("label").first().getPropertyString("textContent");
     }
 
 }

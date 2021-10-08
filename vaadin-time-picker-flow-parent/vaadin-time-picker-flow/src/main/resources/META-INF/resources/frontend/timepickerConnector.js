@@ -237,13 +237,12 @@
                 };
 
                 if (previousValueObject) {
-                    when(() => timepicker.shadowRoot, () => {
+                    when(() => timepicker.$, () => {
                         const newValue = timepicker.i18n.formatTime(previousValueObject);
                         // FIXME works but uses private API, needs fixes in web component
-                        if (timepicker.__inputElement.value !== newValue) {
-                            timepicker.__inputElement.value = newValue;
-                            timepicker.__dropdownElement.value = newValue;
-                            timepicker.__onInputChange();
+                        if (timepicker.inputElement.value !== newValue) {
+                            timepicker.inputElement.value = newValue;
+                            timepicker.$.comboBox.value = newValue;
                         }
                     });
                 }
