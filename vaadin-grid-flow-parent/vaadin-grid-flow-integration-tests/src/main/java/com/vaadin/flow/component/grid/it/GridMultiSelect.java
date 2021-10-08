@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 public class GridMultiSelect extends VerticalLayout {
     public GridMultiSelect() {
         Grid<String> grid = new Grid<>();
-        grid.setItems(IntStream.range(0,2).mapToObj(Integer::toString));
+        grid.setItems(IntStream.range(0, 2).mapToObj(Integer::toString));
 
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
