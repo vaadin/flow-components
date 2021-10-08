@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme {

@@ -137,8 +137,8 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "22.0.0-alpha6")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "22.0.0-alpha7")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
 public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>
