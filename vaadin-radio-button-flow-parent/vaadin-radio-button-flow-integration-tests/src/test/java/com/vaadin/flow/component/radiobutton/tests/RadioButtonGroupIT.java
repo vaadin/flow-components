@@ -286,7 +286,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             List<WebElement> els = group.findElements(By.xpath("./*"));
             // Expected one label to have been added to radio-button-group
             // Second element should be a label as first element was selected",
-            return els.size() == 10 && "label".equals(els.get(1).getTagName());
+            return els.size() == 9 && "label".equals(els.get(1).getTagName());
         }, 200);
 
         executeScript("arguments[0].value=5;", group);
@@ -295,7 +295,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             List<WebElement> els = group.findElements(By.xpath("./*"));
             // Expected label to stay, just change place in radio-button-group
             // Fifth element should be a label as fourth element was selected
-            return els.size() == 10 && "label".equals(els.get(5).getTagName());
+            return els.size() == 9 && "label".equals(els.get(5).getTagName());
         }, 200);
     }
 
