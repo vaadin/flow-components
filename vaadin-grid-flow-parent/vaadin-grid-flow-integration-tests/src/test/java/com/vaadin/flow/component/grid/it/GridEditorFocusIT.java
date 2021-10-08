@@ -104,7 +104,7 @@ public class GridEditorFocusIT extends AbstractComponentIT {
     private void assertElementHasFocus(WebElement element) {
         Assert.assertTrue("Element should have focus",
                 (Boolean) executeScript(
-                        "return document.activeElement === arguments[0]",
+                        "return document.activeElement === arguments[0].focusElement",
                         element));
     }
 }
