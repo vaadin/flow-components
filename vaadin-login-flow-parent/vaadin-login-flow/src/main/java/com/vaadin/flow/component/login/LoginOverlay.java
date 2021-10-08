@@ -42,7 +42,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-login-overlay")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin {
 

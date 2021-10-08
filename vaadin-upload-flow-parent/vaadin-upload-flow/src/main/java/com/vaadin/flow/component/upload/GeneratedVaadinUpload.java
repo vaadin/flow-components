@@ -116,7 +116,7 @@ import elemental.json.JsonObject;
 @Tag("vaadin-upload")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {

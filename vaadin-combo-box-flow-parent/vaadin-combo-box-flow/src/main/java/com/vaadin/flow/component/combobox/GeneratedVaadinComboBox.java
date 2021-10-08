@@ -292,7 +292,7 @@ import elemental.json.JsonObject;
 @Tag("vaadin-combo-box")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
 @NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")

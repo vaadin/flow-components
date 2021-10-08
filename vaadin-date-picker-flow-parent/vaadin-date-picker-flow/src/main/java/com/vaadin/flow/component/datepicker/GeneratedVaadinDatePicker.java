@@ -255,7 +255,7 @@ import elemental.json.JsonObject;
 @Tag("vaadin-date-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-date-picker/src/vaadin-date-picker.js")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

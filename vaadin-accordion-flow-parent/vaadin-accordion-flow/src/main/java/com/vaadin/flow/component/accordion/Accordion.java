@@ -41,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-accordion")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-accordion/src/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize, HasStyle {
 

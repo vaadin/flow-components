@@ -67,7 +67,7 @@ import elemental.json.JsonValue;
 @Tag("vaadin-virtual-list")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-template-renderer/vaadin-template-renderer.js")
 @NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-virtual-list/vaadin-virtual-list.js")

@@ -47,7 +47,7 @@ import com.vaadin.flow.function.SerializableFunction;
 @Tag("vaadin-email-field")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-email-field.js")
 public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
