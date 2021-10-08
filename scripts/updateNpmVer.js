@@ -57,7 +57,7 @@ function excludeComponents() {
       }
   }
   exclude=components.split(',');
-  packageBase='@vaadin/vaadin-';
+  packageBase='@vaadin/';
   for(j = 0; j < exclude.length; j++){
 	  exclude[j] = packageBase.concat(exclude[j]);
   }
