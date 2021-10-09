@@ -122,6 +122,9 @@ class FlowComponentRenderer extends PolymerElement {
     if (this._isFocusable(node)) {
       return node;
     }
+    if (node.hasAttribute('disabled') || node.hasAttribute('hidden')) {
+      return null;
+    }
     if (!node.children) {
       return null;
     }
