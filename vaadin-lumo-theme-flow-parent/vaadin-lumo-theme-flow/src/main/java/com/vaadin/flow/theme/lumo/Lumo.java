@@ -39,6 +39,7 @@ import com.vaadin.flow.theme.AbstractTheme;
 @JsModule("@vaadin/vaadin-lumo-styles/spacing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/style.js")
 @JsModule("@vaadin/vaadin-lumo-styles/icons.js")
+@JsModule("./lumo-includes.ts")
 public class Lumo implements AbstractTheme {
 
     public static final String LIGHT = "light";
@@ -56,9 +57,7 @@ public class Lumo implements AbstractTheme {
 
     @Override
     public List<String> getHeaderInlineContents() {
-        return Collections.singletonList("<custom-style>\n"
-                + "    <style include=\"lumo-color lumo-typography\"></style>\n"
-                + "</custom-style>");
+        return Collections.emptyList();
     }
 
     @Override

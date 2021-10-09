@@ -34,6 +34,7 @@ import com.vaadin.flow.theme.AbstractTheme;
 @NpmPackage(value = "@vaadin/vaadin-material-styles", version = "22.0.0-alpha7")
 @JsModule("@vaadin/vaadin-material-styles/color.js")
 @JsModule("@vaadin/vaadin-material-styles/typography.js")
+@JsModule("./material-includes.ts")
 public class Material implements AbstractTheme {
     public static final String LIGHT = "light";
     public static final String DARK = "dark";
@@ -50,9 +51,7 @@ public class Material implements AbstractTheme {
 
     @Override
     public List<String> getHeaderInlineContents() {
-        return Collections.singletonList("<custom-style>\n"
-                + "    <style include=\"material-color-light material-typography\"></style>\n"
-                + "</custom-style>");
+        return Collections.emptyList();
     }
 
     @Override
