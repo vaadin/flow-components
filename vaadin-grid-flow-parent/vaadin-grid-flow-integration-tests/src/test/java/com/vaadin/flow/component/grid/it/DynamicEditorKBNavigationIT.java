@@ -63,9 +63,9 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         TestBenchElement nativeCheckbox = checkbox.$("input").first();
         nativeCheckbox.sendKeys(Keys.TAB);
 
-        new Actions(getDriver())
-                .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
-                .sendKeys("org").build().perform();
+        new Actions(getDriver()).sendKeys(Keys.ARROW_RIGHT, Keys.BACK_SPACE,
+                Keys.BACK_SPACE, Keys.BACK_SPACE).sendKeys("org").build()
+                .perform();
 
         grid.getRow(0).click(2, 2);
 
