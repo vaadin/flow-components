@@ -66,7 +66,8 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
                 .findElement(By.tagName("vaadin-checkbox"));
 
         getOverlay().findElement(By.tagName("hr"));
-        WebElement label = getOverlay().findElement(By.cssSelector("vaadin-context-menu-list-box > label"));
+        WebElement label = getOverlay().findElement(
+                By.cssSelector("vaadin-context-menu-list-box > label"));
         Assert.assertEquals("This is not a menu item", label.getText());
 
         checkbox.click();
