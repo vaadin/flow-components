@@ -71,55 +71,48 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
-
     public void testValueChangeModesForTextField() throws InterruptedException {
-        testValueChangeModes(textField, "textfield");
+        testValueChangeModes(textField.$("input").first(), "textfield");
     }
 
     @Test
-
     public void testValueChangeModesForTextArea() throws InterruptedException {
         testValueChangeModes(textArea, "textarea");
     }
 
     @Test
-
     public void testValueChangeModesForPasswordField()
             throws InterruptedException {
         testValueChangeModes(passwordField, "passwordfield");
     }
 
     @Test
-
     public void testValueChangeModesForEmailField()
             throws InterruptedException {
         testValueChangeModes(emailField, "emailfield");
     }
 
     @Test
-
     public void testValueChangeModesForNumberField()
             throws InterruptedException {
         testValueChangeModes(numberField, "numberfield");
     }
 
     @Test
-
     public void testValueChangeModesForIntegerField()
             throws InterruptedException {
         testValueChangeModes(integerField, "integerfield");
     }
 
     @Test
-
     public void testValueChangeModesForBigDecimalField()
             throws InterruptedException {
-        testValueChangeModes(bigDecimalField, "bigdecimalfield");
+        testValueChangeModes(bigDecimalField.$("input").first(),
+                "bigdecimalfield");
     }
 
     private void testValueChangeModes(TestBenchElement field,
             String componentName) throws InterruptedException {
-
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
