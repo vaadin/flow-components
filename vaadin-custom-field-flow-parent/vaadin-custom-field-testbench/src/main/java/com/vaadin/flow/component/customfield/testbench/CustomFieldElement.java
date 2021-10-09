@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.customfield.testbench;
 
+import com.vaadin.testbench.ElementQuery;
+
 /*
  * #%L
  * Vaadin CustomField Testbench API
@@ -35,4 +37,24 @@ public class CustomFieldElement extends TestBenchElement implements HasHelper {
         return getPropertyString("errorMessage");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    // TODO: Remove once https://github.com/vaadin/testbench/issues/1299 is
+    // fixed
+    @Override
+    public TestBenchElement getHelperComponent() {
+        final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
+                .attribute("slot", "helper");
+        if (query.exists()) {
+            TestBenchElement last = query.last();
+            // To avoid getting the "slot" element, for components with slotted
+            // slots
+            if (!"slot".equals(last.getTagName())
+                    && this.equals(last.getPropertyElement("parentElement"))) {
+                return last;
+            }
+        }
+        return null;
+    }
 }
