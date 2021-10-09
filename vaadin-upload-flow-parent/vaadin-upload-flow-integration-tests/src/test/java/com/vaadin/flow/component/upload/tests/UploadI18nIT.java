@@ -133,17 +133,26 @@ public class UploadI18nIT extends AbstractUploadIT {
 
     private void assertTranslationMapsHaveSameKeys(Map<String, String> expected,
             Map<String, String> actual) {
-        expected.keySet()
-                .forEach(expectedKey -> Assert.assertTrue(
-                        "Missing translation key: " + expectedKey,
-                        actual.containsKey(expectedKey)));
+        expected.keySet().forEach(expectedKey -> {
+            // Cancel was removed in
+            // https://github.com/vaadin/web-components/pull/2723
+            if (!"cancel".equals(expectedKey)) {
+                Assert.assertTrue("Missing translation key: " + expectedKey,
+                        actual.containsKey(expectedKey));
+            }
+        });
     }
 
     private void assertTranslationMapHasNoMissingTranslations(
             Map<String, String> map) {
         map.keySet().forEach(key -> {
-            String value = map.get(key);
-            Assert.assertNotNull("Missing translation value: " + key, value);
+            // Cancel was removed in
+            // https://github.com/vaadin/web-components/pull/2723
+            if (!"cancel".equals(key)) {
+                String value = map.get(key);
+                Assert.assertNotNull("Missing translation value: " + key,
+                        value);
+            }
         });
     }
 
