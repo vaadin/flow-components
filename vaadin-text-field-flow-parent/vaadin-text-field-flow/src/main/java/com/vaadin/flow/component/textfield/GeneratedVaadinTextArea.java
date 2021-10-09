@@ -144,8 +144,8 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-text-area")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha7")
-@JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
+@NpmPackage(value = "@vaadin/text-area", version = "22.0.0-alpha7")
+@JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R>, HasTheme {

@@ -1,7 +1,7 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
-import { GridElement } from '@vaadin/vaadin-grid/src/vaadin-grid.js';
-import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mixin.js';
+import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
+import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -437,7 +437,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       grid._createPropertyObserver("_previousSorters", sorterChangeListener);
 
       grid._updateItem = tryCatchWrapper(function(row, item) {
-        GridElement.prototype._updateItem.call(grid, row, item);
+        Grid.prototype._updateItem.call(grid, row, item);
 
         // There might be inactive component renderers on hidden rows that still refer to the
         // same component instance as one of the renderers on a visible row. Making the
@@ -492,12 +492,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       // itemExpandedChanged run when either happens.
       grid.expandItem = tryCatchWrapper(function(item) {
         itemExpandedChanged(item, true);
-        GridElement.prototype.expandItem.call(grid, item);
+        Grid.prototype.expandItem.call(grid, item);
       });
 
       grid.collapseItem = tryCatchWrapper(function(item) {
         itemExpandedChanged(item, false);
-        GridElement.prototype.collapseItem.call(grid, item);
+        Grid.prototype.collapseItem.call(grid, item);
       });
 
       const itemsUpdated = function(items) {

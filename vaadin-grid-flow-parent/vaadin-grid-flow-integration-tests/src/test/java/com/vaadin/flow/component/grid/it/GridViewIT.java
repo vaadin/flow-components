@@ -256,14 +256,14 @@ public class GridViewIT extends GridViewBase {
         grid.findElement(By.id("selectAllCheckbox")).click();
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been deselected", "false",
+        Assert.assertEquals("Select all should have been deselected", false,
                 grid.findElement(By.id("selectAllCheckbox"))
-                        .getAttribute("aria-checked"));
+                        .getPropertyBoolean("checked"));
 
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been reselected", "true",
+        Assert.assertEquals("Select all should have been reselected", true,
                 grid.findElement(By.id("selectAllCheckbox"))
-                        .getAttribute("aria-checked"));
+                        .getPropertyBoolean("checked"));
 
     }
 
@@ -953,8 +953,9 @@ public class GridViewIT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
+        nameInput.sendKeys(Keys.END);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 

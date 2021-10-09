@@ -1,9 +1,9 @@
 import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 import {html} from '@polymer/polymer/lib/utils/html-tag.js'
-import '@vaadin/vaadin-text-field/vaadin-text-field.js';
-import '@vaadin/vaadin-form-layout/vaadin-form-layout.js';
-import '@vaadin/vaadin-crud/vaadin-crud.js';
-import '@vaadin/vaadin-ordered-layout/vaadin-vertical-layout.js';
+import '@vaadin/text-field/vaadin-text-field.js';
+import '@vaadin/form-layout/vaadin-form-layout.js';
+import '@vaadin/crud/vaadin-crud.js';
+import '@vaadin/vertical-layout/vaadin-vertical-layout.js';
 
 class CrudApp extends PolymerElement {
   static get template() {
