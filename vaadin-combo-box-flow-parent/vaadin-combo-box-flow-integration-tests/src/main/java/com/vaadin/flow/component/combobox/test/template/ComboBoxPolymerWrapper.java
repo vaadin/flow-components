@@ -27,7 +27,8 @@ import java.util.Arrays;
 
 @Tag("combo-box-polymer-wrapper")
 @JsModule("./src/combo-box-polymer-wrapper.ts")
-public class ComboBoxPolymerWrapper extends PolymerTemplate<ComboBoxPolymerWrapper.Modal> {
+public class ComboBoxPolymerWrapper
+        extends PolymerTemplate<ComboBoxPolymerWrapper.Modal> {
 
     @Id("cb")
     private ComboBox<String> comboBox;

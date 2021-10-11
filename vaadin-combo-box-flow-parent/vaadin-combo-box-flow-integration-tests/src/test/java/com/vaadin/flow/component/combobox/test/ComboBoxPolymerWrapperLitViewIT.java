@@ -22,8 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-combo-box/combo-box-polymer-wrapper-lit-view")
-public class ComboBoxPolymerWrapperLitViewIT
-        extends AbstractComboBoxIT {
+public class ComboBoxPolymerWrapperLitViewIT extends AbstractComboBoxIT {
     private ComboBoxElement comboBox;
 
     @Before
