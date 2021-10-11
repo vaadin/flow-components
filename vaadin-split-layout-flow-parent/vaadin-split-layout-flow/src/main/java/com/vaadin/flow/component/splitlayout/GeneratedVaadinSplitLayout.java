@@ -191,7 +191,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-split-layout")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@JsModule("@vaadin/vaadin-split-layout/src/vaadin-split-layout.js")
+@JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
         extends Component implements HasStyle, ClickNotifier<R>, HasTheme {
 

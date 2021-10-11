@@ -126,8 +126,8 @@ import elemental.json.JsonObject;
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "22.0.0-alpha7")
-@JsModule("@vaadin/vaadin-time-picker/src/vaadin-time-picker.js")
+@NpmPackage(value = "@vaadin/time-picker", version = "22.0.0-alpha7")
+@JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {

@@ -1,6 +1,6 @@
 import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 import {html} from '@polymer/polymer/lib/utils/html-tag.js';
-import '@vaadin/vaadin-button/vaadin-button.js';
+import '@vaadin/button/vaadin-button.js';
 import '@polymer/iron-icon/iron-icon.js';
 
 class TemplateButton extends PolymerElement {

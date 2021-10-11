@@ -50,9 +50,9 @@ import elemental.json.JsonObject;
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "22.0.0-alpha7")
-@JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
-@JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
+@NpmPackage(value = "@vaadin/grid-pro", version = "22.0.0-alpha7")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
 /**
  * Server-side component for the {@code <vaadin-grid-pro>} element.

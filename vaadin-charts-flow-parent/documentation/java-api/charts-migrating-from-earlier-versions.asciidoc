@@ -57,7 +57,7 @@ conf.getChart().setStyledMode(true);
 +
 [source, java]
 ----
-@JsModule("@vaadin/vaadin-charts/theme/vaadin-chart-default-theme")
+@JsModule("@vaadin/charts/theme/vaadin-chart-default-theme")
 ----
 
 For more detailed instructions, please check the

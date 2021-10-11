@@ -50,12 +50,12 @@ public class MaterialThemedTemplateIT extends AbstractComponentIT {
         // rgba(176, 0, 32, 1)
         // 16px
         // Lumo css property values
-        // rgba(246, 84, 76, 1)
+        // rgba(224, 36, 26, 1)
         // 40px
 
         String color = div.getCssValue("color");
         Assert.assertTrue("Should set correct color but it was " + color,
-                color.matches("rgba\\((176, 0, 32, 1|246, 84, 76, 1)\\)"));
+                color.matches("rgba\\((176, 0, 32, 1|224, 36, 26, 1)\\)"));
 
         String font = div.getCssValue("font-size");
         Assert.assertTrue("Should set correct font size but it was " + font,

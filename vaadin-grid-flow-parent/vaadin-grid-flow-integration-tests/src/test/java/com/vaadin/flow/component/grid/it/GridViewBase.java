@@ -114,6 +114,9 @@ public class GridViewBase extends TabbedComponentDemoTest {
         TestBenchElement nameInput = nameField.$("input").first();
         nameInput.click();
 
+        // Move caret to the end of the text
+        new Actions(getDriver()).sendKeys(Keys.END).build().perform();
+
         nameInput.sendKeys("foo");
 
         // skip checkbox and focus the email field
@@ -121,9 +124,9 @@ public class GridViewBase extends TabbedComponentDemoTest {
                 .perform();
 
         // change the e-mail to .org
-        new Actions(getDriver())
-                .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
-                .sendKeys("org").build().perform();
+        new Actions(getDriver()).sendKeys(Keys.END, Keys.BACK_SPACE,
+                Keys.BACK_SPACE, Keys.BACK_SPACE).sendKeys("org").build()
+                .perform();
 
         // press enter on the save button
         new Actions(getDriver()).sendKeys(Keys.TAB).sendKeys(Keys.ENTER).build()
