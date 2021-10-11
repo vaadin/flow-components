@@ -127,14 +127,13 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         WebElement message = findElement(By.id("button-renderer-message"));
         Assert.assertEquals("Nothing clicked yet...", message.getText());
 
-        WebElement combo = findElement(By.id("button-renderer"));
-        WebElement textField = findInShadowRoot(combo, By.id("input")).get(0);
+        ComboBoxElement combo = $(ComboBoxElement.class).id("button-renderer");
+        WebElement input = combo.$("input").first();
         // opens the dropdown
-        clickElementWithJs(textField);
+        clickElementWithJs(input);
 
         WebElement item = getItemElements().get(0);
-        WebElement button = findInShadowRoot(item, By.cssSelector("button"))
-                .get(0);
+        WebElement button = item.findElement(By.cssSelector("button"));
         clickElementWithJs(button);
 
         Assert.assertEquals("Button clicked: foo", message.getText());

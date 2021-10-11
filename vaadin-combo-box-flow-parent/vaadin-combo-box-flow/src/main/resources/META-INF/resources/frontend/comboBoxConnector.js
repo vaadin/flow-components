@@ -1,6 +1,6 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
-import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-box-placeholder.js';
+import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
 
 (function () {
     const tryCatchWrapper = function (callback) {
@@ -259,18 +259,12 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
 
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
-                let input = null;
                 if ( comboBox.$ ){
-                    input = comboBox.$["input"];
-                }
-                if (input){
                     if ( enable){
                         enableClientValidation(comboBox);
-                        enableTextFieldClientValidation(input);
                     }
                     else {
                         disableClientValidation(comboBox);
-                        disableTextFieldClientValidation(input,comboBox );
                     }
 
                     comboBox.validate();
@@ -292,20 +286,6 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
                     combo.validate = function() {
                         return !(comboBox.focusElement.invalid = comboBox.invalid);
                     };
-                }
-            });
-
-            const disableTextFieldClientValidation =  tryCatchWrapper(function (field, comboBox){
-                if ( typeof field.$checkValidity == 'undefined'){
-                    field.$checkValidity = field.checkValidity;
-                    field.checkValidity = function() { return !comboBox.invalid; };
-                }
-            });
-
-            const enableTextFieldClientValidation = tryCatchWrapper(function (field){
-                if ( field.$checkValidity ){
-                    field.checkValidity = field.$checkValidity;
-                    delete field.$checkValidity;
                 }
             });
 

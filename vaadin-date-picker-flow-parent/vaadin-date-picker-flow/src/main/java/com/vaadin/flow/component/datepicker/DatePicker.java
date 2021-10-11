@@ -28,6 +28,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
@@ -54,7 +55,7 @@ import elemental.json.JsonType;
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.23.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper {
+        implements HasSize, HasValidation, HasHelper, HasTheme {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -709,6 +710,30 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(DatePickerVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(DatePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(DatePickerVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(DatePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
      * The internationalization properties for {@link DatePicker}.
      */
     public static class DatePickerI18n implements Serializable {
@@ -902,8 +927,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * @param firstDayOfWeek
          *            the index of the first day of the week
          * @return this instance for method chaining
+         * @throws IllegalArgumentException
+         *             if firstDayOfWeek is invalid
          */
         public DatePickerI18n setFirstDayOfWeek(int firstDayOfWeek) {
+            if (firstDayOfWeek < 0 || firstDayOfWeek > 6) {
+                throw new IllegalArgumentException(
+                        "First day of the week needs to be in range of 0 to 6.");
+            }
             this.firstDayOfWeek = firstDayOfWeek;
             return this;
         }

@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
@@ -205,8 +206,7 @@ public class DateTimePickerElement extends TestBenchElement
 
     /**
      * This is needed when simulating user input by explicitly setting the value
-     * property of inner inputs. Otherwise the value property of custom field is
-     * not updated and the value isn't propagated to vaadin-date-time-picker.
+     * property of inner inputs.
      */
     private void triggerChange(TestBenchElement pickerElement) {
         executeScript(
@@ -231,7 +231,7 @@ public class DateTimePickerElement extends TestBenchElement
      * @return the presentation value of the inner time picker
      */
     public String getTimePresentation() {
-        return getTimePicker().getPropertyString("__inputElement",
+        return getTimePicker().getPropertyString("inputElement",
                 VALUE_PROPERTY);
     }
 
@@ -254,5 +254,26 @@ public class DateTimePickerElement extends TestBenchElement
     private TestBenchElement getTimePicker() {
         return $("vaadin-date-time-picker-time-picker")
                 .attribute("slot", "time-picker").first();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    // TODO: Remove once https://github.com/vaadin/testbench/issues/1299 is
+    // fixed
+    @Override
+    public TestBenchElement getHelperComponent() {
+        final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
+                .attribute("slot", "helper");
+        if (query.exists()) {
+            TestBenchElement last = query.last();
+            // To avoid getting the "slot" element, for components with slotted
+            // slots
+            if (!"slot".equals(last.getTagName())
+                    && this.equals(last.getPropertyElement("parentElement"))) {
+                return last;
+            }
+        }
+        return null;
     }
 }

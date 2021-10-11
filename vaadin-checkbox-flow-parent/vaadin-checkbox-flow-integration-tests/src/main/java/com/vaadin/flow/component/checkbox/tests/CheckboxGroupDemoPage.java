@@ -213,6 +213,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         CheckboxGroup<String> groupHelperComponent = new CheckboxGroup<>();
         groupHelperComponent.setItems("foo", "bar", "baz");
         Span span = new Span("Helper text");
+        span.setId("helper-component");
         groupHelperComponent.setHelperComponent(span);
 
         NativeButton clearHelperComponent = new NativeButton(

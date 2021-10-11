@@ -1,8 +1,8 @@
 import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 import {html} from '@polymer/polymer/lib/utils/html-tag.js';
-import '@vaadin/vaadin-accordion/vaadin-accordion.js';
-import '@vaadin/vaadin-text-field/vaadin-text-field.js';
-import '@vaadin/vaadin-ordered-layout/vaadin-vertical-layout.js';
+import '@vaadin/accordion/vaadin-accordion.js';
+import '@vaadin/text-field/vaadin-text-field.js';
+import '@vaadin/vertical-layout/vaadin-vertical-layout.js';
 
 class AccordionApp extends PolymerElement {
   static get template() {

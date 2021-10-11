@@ -40,8 +40,8 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
                 By.tagName("vaadin-combo-box-overlay"));
         List<String> items = overlay
                 .findElements(By.tagName("vaadin-combo-box-item")).stream()
-                .map(item -> getInShadowRoot(item,
-                        By.cssSelector("flow-component-renderer")))
+                .map(item -> item
+                        .findElement(By.cssSelector("flow-component-renderer")))
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
@@ -51,7 +51,8 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected rendered the second item text", "bar",
                 items.get(1));
 
-        $("vaadin-combo-box").id("list").sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
+        $("vaadin-combo-box").id("list").findElement(By.tagName("input"))
+                .sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
 
         Assert.assertEquals("Unexpected selected item text", "foo",
                 $("div").id("info").getText());

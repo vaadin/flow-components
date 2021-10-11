@@ -16,12 +16,9 @@ import org.openqa.selenium.logging.LogEntry;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocaleIT extends AbstractComponentIT {
-
-    private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";
 
     @Test
     public void testPickerWithValueAndLocaleFromServerSideDifferentCtor() {
@@ -29,8 +26,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
         DatePickerElement localePicker = $(DatePickerElement.class)
                 .id("locale-picker-server-with-value");
-        WebElement displayText = localePicker.$(TestBenchElement.class)
-                .id("input");
+        WebElement displayText = localePicker.findElement(By.tagName("input"));
 
         Assert.assertEquals("Wrong initial date in field.", "2018/4/23",
                 executeScript("return arguments[0].value", displayText));
@@ -72,8 +68,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     private void assertText(DatePickerElement datePickerElement,
             String expected) {
-        WebElement displayText = datePickerElement.$(TestBenchElement.class)
-                .id("input");
+        WebElement displayText = datePickerElement
+                .findElement(By.tagName("input"));
         Assert.assertEquals("Didn't have expected locale date.", expected,
                 executeScript("return arguments[0].value", displayText));
     }

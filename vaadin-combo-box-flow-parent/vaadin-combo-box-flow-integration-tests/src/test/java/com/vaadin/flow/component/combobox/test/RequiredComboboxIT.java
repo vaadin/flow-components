@@ -61,8 +61,7 @@ public class RequiredComboboxIT extends AbstractComponentIT {
         Assert.assertEquals(Boolean.FALSE.toString(),
                 comboBox.getAttribute("invalid"));
         // the error message is not visible
-        TestBenchElement error = comboBox.$("vaadin-text-field").first()
-                .$(TestBenchElement.class).id("vaadin-text-field-error-0");
+        TestBenchElement error = comboBox.$("[part='error-message']").first();
         waitUntil(driver -> error.getSize().getHeight() == 0);
     }
 
@@ -76,8 +75,7 @@ public class RequiredComboboxIT extends AbstractComponentIT {
         Assert.assertEquals(Boolean.TRUE.toString(),
                 comboBox.getAttribute("invalid"));
 
-        TestBenchElement error = comboBox.$("vaadin-text-field").first()
-                .$(TestBenchElement.class).id("vaadin-text-field-error-0");
+        TestBenchElement error = comboBox.$("[part='error-message']").first();
         Assert.assertTrue(error.getSize().getHeight() > 0);
         Assert.assertEquals("'foo' is invalid value", error.getText());
     }

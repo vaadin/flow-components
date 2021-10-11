@@ -31,8 +31,7 @@ public class DatePickerWithCustomValidationIT extends AbstractComponentIT {
         open();
 
         TestBenchElement dateField = $("vaadin-date-picker").first();
-        TestBenchElement input = dateField.$("vaadin-date-picker-text-field")
-                .first();
+        TestBenchElement input = dateField.$("input").first();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 dateField.getAttribute("invalid"));

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -239,6 +241,30 @@ public class DatePickerTest {
 
         Assert.assertThrows(NullPointerException.class,
                 () -> i18n.setDateFormats("MM-yyyy-dd", null));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void datePickerFirstDayOfTheWeek() {
+        DatePicker germanDatePicker = new DatePicker();
+        germanDatePicker.setLabel("German");
+        germanDatePicker.setValue(LocalDate.now());
+
+        DatePickerI18n datePickerI18n = new DatePickerI18n();
+        datePickerI18n.setWeek("Woche");
+        datePickerI18n.setCalendar("Kalender");
+        datePickerI18n.setClear("Löschen");
+        datePickerI18n.setToday("Heute");
+        datePickerI18n.setCancel("Abbrechen");
+        datePickerI18n.setWeekdays(Arrays.asList("Sonntag", "Montag",
+                "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"));
+        datePickerI18n.setWeekdaysShort(
+                Arrays.asList("So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"));
+        datePickerI18n.setMonthNames(Arrays.asList("Januar", "Februar", "März",
+                "April", "Mai", "Juni", "Juli", "August", "September",
+                "Oktober", "November", "Dezember"));
+        datePickerI18n.setFirstDayOfWeek(7); // or any number outside 0-6 range
+
+        germanDatePicker.setI18n(datePickerI18n);
     }
 
 }
