@@ -440,7 +440,7 @@ public class UploadI18N implements Serializable {
 
         /**
          * get units size list
-         * 
+         *
          * @return
          */
         public List<String> getSize() {
@@ -450,7 +450,7 @@ public class UploadI18N implements Serializable {
         /**
          * units size list: ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB",
          * "YB"]
-         * 
+         *
          * @param size
          * @return
          */
@@ -545,27 +545,6 @@ public class UploadI18N implements Serializable {
      */
     public UploadI18N setAddFiles(AddFiles addFiles) {
         this.addFiles = addFiles;
-        return this;
-    }
-
-    /**
-     * Get cancel translation.
-     *
-     * @return translation string
-     */
-    public String getCancel() {
-        return cancel;
-    }
-
-    /**
-     * Set cancel translation.
-     *
-     * @param cancel
-     *            translation string
-     * @return i18n translations
-     */
-    public UploadI18N setCancel(String cancel) {
-        this.cancel = cancel;
         return this;
     }
 
