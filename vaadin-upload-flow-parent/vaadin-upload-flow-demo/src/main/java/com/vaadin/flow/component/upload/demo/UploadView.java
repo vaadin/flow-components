@@ -231,8 +231,8 @@ public class UploadView extends DemoView {
         i18n.setDropFiles(
                 new UploadI18N.DropFiles().setOne("Перетащите файл сюда...")
                         .setMany("Перетащите файлы сюда..."))
-                .setAddFiles(new UploadI18N.AddFiles()
-                        .setOne("Выбрать файл").setMany("Добавить файлы"))
+                .setAddFiles(new UploadI18N.AddFiles().setOne("Выбрать файл")
+                        .setMany("Добавить файлы"))
                 .setError(new UploadI18N.Error()
                         .setTooManyFiles("Слишком много файлов.")
                         .setFileIsTooBig("Слишком большой файл.")
