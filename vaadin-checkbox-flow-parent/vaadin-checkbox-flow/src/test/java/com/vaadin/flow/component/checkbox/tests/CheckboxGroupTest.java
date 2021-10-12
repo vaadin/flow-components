@@ -545,9 +545,9 @@ public class CheckboxGroupTest {
                 .collect(Collectors.toList());
         Assert.assertEquals(2, components.size());
         Assert.assertEquals(firstLabel,
-                components.get(0).getElement().getText());
+                ((Checkbox) components.get(0)).getLabel());
         Assert.assertEquals(secondLabel,
-                components.get(1).getElement().getText());
+                ((Checkbox) components.get(1)).getLabel());
     }
 
     /**

@@ -38,7 +38,7 @@ public abstract class AbstractThemedTemplateIT extends AbstractComponentIT {
         // imported by verifying that the lumo css variables introduced in the
         // files work
         Assert.assertEquals("color variables not applied",
-                "rgba(246, 84, 76, 1)", div.getCssValue("color"));
+                "rgba(224, 36, 26, 1)", div.getCssValue("color"));
         Assert.assertEquals("typography variables not applied", "40px",
                 div.getCssValue("font-size"));
         Assert.assertEquals("sizing variables not applied",

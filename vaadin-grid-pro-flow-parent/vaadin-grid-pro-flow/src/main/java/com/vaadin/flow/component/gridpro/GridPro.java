@@ -48,9 +48,11 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "22.0.0-alpha6")
-@JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
-@JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/grid-pro", version = "22.0.0-alpha7")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
 /**
  * Server-side component for the {@code <vaadin-grid-pro>} element.
@@ -145,6 +147,8 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
         private ItemUpdater<T, String> itemUpdater;

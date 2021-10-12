@@ -34,7 +34,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Tag("templated-columns")
 // Order matters see https://github.com/vaadin/flow/issues/5591
 @JsModule("src/templated-columns.js")
-@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column-group.js")
+@JsModule("@vaadin/grid/src/vaadin-grid-column-group.js")
 public class TemplatedColumnsPage extends PolymerTemplate<TemplateModel> {
 
     @Id

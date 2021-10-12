@@ -17,6 +17,7 @@ package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
@@ -112,7 +113,19 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @return the current label text
      */
     public String getLabel() {
-        return getElement().getText();
+        return getElement().getChildren()
+                .filter(child -> child.getTag().equals("label")).findFirst()
+                .get().getText();
+    }
+
+    private Label addNewLabel() {
+        // Clear all known child elements
+        getElement().getChildren().forEach(e -> getElement().removeChild(e));
+        // Create and add a new slotted label
+        Label label = new Label();
+        label.getElement().setAttribute("slot", "label");
+        this.getElement().appendChild(label.getElement());
+        return label;
     }
 
     /**
@@ -122,7 +135,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *            the label text to set
      */
     public void setLabel(String label) {
-        getElement().setText(label);
+        addNewLabel().setText(label);
     }
 
     /**
@@ -137,7 +150,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *            the label html to set
      */
     public void setLabelAsHtml(String htmlContent) {
-        getElement().setProperty("innerHTML", htmlContent);
+        addNewLabel().getElement().setProperty("innerHTML", htmlContent);
     }
 
     /**

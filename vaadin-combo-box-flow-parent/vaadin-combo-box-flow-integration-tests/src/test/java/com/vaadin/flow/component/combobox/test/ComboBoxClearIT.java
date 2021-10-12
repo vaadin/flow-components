@@ -15,11 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.List;
-
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 

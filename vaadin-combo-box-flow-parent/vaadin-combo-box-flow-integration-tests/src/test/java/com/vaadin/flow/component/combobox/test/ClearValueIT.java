@@ -50,8 +50,7 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBoxId), ClearValuePage.INITIAL_VALUE,
                 comboBox.getSelectedText());
 
-        comboBox.$("vaadin-text-field").get(0).$("[part~='clear-button']")
-                .get(0).click();
+        comboBox.$("[part~='clear-button']").get(0).click();
 
         Assert.assertEquals(String.format(
                 "Combo box with id '%s' should have its value empty after the test",

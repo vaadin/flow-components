@@ -116,8 +116,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         waitUntil(driver -> getLogEntries(Level.WARNING).toString().contains(
                 "The locale is not supported, using default locale setting(en-US)."));
         WebElement picker = findElement(By.id("field"));
-        WebElement displayText = findInShadowRoot(picker, By.id("input"))
-                .get(0);
+        WebElement displayText = picker.findElement(By.tagName("input"));
 
         executeScript("arguments[0].value = '2018-12-26'", picker);
         Assert.assertEquals(
@@ -143,8 +142,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     @Test
     public void testDifferentLocales() {
         WebElement localePicker = findElement(By.id("locale-picker"));
-        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
-                .get(0);
+        WebElement displayText = localePicker.findElement(By.tagName("input"));
         findElement(By.id("polish-locale")).click();
 
         executeScript("arguments[0].value = '2018-03-26'", localePicker);
@@ -162,8 +160,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     @Test
     public void testPickerWithValueAndLocaleFromServerSide() {
         WebElement localePicker = findElement(By.id("locale-picker-server"));
-        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
-                .get(0);
+        WebElement displayText = localePicker.findElement(By.tagName("input"));
 
         Assert.assertEquals("Initial date is 5/23/2018", true, executeScript(
                 "return arguments[0].value === '5/23/2018'", displayText));

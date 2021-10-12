@@ -67,9 +67,11 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "22.0.0-alpha6")
-@JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
-@JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/crud", version = "22.0.0-alpha7")
+@JsModule("@vaadin/crud/src/vaadin-crud.js")
+@JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";

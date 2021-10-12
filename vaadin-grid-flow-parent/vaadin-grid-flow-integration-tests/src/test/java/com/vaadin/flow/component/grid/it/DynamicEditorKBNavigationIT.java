@@ -60,11 +60,12 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         nameInput.click();
         nameInput.sendKeys(Keys.TAB);
         TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
-        checkbox.sendKeys(Keys.TAB);
+        TestBenchElement nativeCheckbox = checkbox.$("input").first();
+        nativeCheckbox.sendKeys(Keys.TAB);
 
-        new Actions(getDriver())
-                .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
-                .sendKeys("org").build().perform();
+        new Actions(getDriver()).sendKeys(Keys.ARROW_RIGHT, Keys.BACK_SPACE,
+                Keys.BACK_SPACE, Keys.BACK_SPACE).sendKeys("org").build()
+                .perform();
 
         grid.getRow(0).click(2, 2);
 
@@ -86,7 +87,7 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         nameField = nameCell.$("vaadin-text-field").first();
         nameInput.click();
         nameInput.sendKeys(Keys.TAB);
-        checkbox.sendKeys(Keys.TAB);
+        nativeCheckbox.sendKeys(Keys.TAB);
         new Actions(getDriver()).sendKeys(Keys.BACK_SPACE).build().perform();
 
         emailField = emailCell.$("vaadin-text-field").first();
