@@ -33,7 +33,7 @@ public class ComboBoxInLitTemplate extends LitTemplate {
     @Id("combo")
     private ComboBox<Bean> comboBox;
 
-    List<Bean> beans = new ArrayList<>();
+    private List<Bean> beans = new ArrayList<>();
 
     private Binder<BeanHolder> binder = new Binder<>();
 
