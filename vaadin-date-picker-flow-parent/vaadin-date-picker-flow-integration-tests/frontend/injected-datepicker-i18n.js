@@ -1,6 +1,6 @@
 import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 import {html} from '@polymer/polymer/lib/utils/html-tag.js';
-import '@vaadin/vaadin-date-picker/vaadin-date-picker.js';
+import '@vaadin/date-picker/vaadin-date-picker.js';
 
 class InjectedDatepickerI18n extends PolymerElement {
     static get template() {
@@ -13,4 +13,4 @@ class InjectedDatepickerI18n extends PolymerElement {
   }
 }
 
-customElements.define(InjectedDatepickerI18n.is, InjectedDatepickerI18n); 
+customElements.define(InjectedDatepickerI18n.is, InjectedDatepickerI18n);

@@ -73,7 +73,7 @@ import elemental.json.JsonValue;
  *            the grid bean type
  * @author Vaadin Ltd
  */
-@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-tree-toggle.js")
+@JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
 

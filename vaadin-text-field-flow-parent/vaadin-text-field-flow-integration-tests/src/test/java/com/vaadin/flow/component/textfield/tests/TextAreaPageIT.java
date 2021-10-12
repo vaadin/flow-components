@@ -179,7 +179,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textAreaElement.getHelperComponent().getAttribute("name"));
+                textAreaElement.getHelperComponent().getAttribute("id"));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textAreaElement.getHelperComponent().getAttribute("name"));
+                textAreaElement.getHelperComponent().getAttribute("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textAreaElement.getHelperComponent());

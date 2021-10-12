@@ -24,6 +24,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -98,7 +99,9 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-radio-button")
-@JsModule("@vaadin/vaadin-radio-button/src/vaadin-radio-button.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/radio-group/src/vaadin-radio-button.js")
 public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
         extends Component implements HasStyle, Focusable<R>, ClickNotifier<R> {
 
