@@ -40,7 +40,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "21.0.2")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "21.0.3")
 @JsModule("@vaadin/vaadin-login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin {
 
