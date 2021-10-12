@@ -18,11 +18,11 @@ package com.vaadin.flow.component.combobox.test.template;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-combo-box/combo-box-lit-wrapper-java-view")
-public class ComboBoxLitWrapperJavaView extends FlexLayout {
+@Route("vaadin-combo-box/combo-box-in-lit-template-page")
+public class ComboBoxInLitTemplatePage extends FlexLayout {
 
-    public ComboBoxLitWrapperJavaView() {
+    public ComboBoxInLitTemplatePage() {
         setWidthFull();
-        add(new ComboBoxLitWrapper());
+        add(new ComboBoxInLitTemplate());
     }
 }

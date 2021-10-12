@@ -28,7 +28,7 @@ import java.util.List;
 
 @JsModule("./src/combo-box-lit-wrapper.ts")
 @Tag("combo-box-lit-wrapper")
-public class ComboBoxLitWrapper extends LitTemplate {
+public class ComboBoxInLitTemplate extends LitTemplate {
 
     @Id("combo")
     private ComboBox<Bean> comboBox;
@@ -37,7 +37,7 @@ public class ComboBoxLitWrapper extends LitTemplate {
 
     private Binder<BeanHolder> binder = new Binder<>();
 
-    public ComboBoxLitWrapper() {
+    public ComboBoxInLitTemplate() {
         for (int i = 0; i < 4; i++) {
             beans.add(new Bean("" + i));
         }

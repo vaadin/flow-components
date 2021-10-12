@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-combo-box/combo-box-lit-wrapper-java-view")
-public class ComboBoxLitWrapperJavaViewIT extends AbstractComboBoxIT {
+public class ComboBoxInLitTemplateRefrencedInJavaPageIT extends AbstractComboBoxIT {
 
     private ComboBoxElement comboBox;
 
@@ -41,13 +41,13 @@ public class ComboBoxLitWrapperJavaViewIT extends AbstractComboBoxIT {
      * correctly or not.
      */
     @Test
-    public void comboBoxInitialValue_litTemplate_ShouldBeSetWithSetValue() {
+    public void comboBoxInitialValue_ShouldBeSetCorrectly_WhenSetValueUsed() {
         String labelValue = "1";
         Assert.assertEquals(labelValue, comboBox.getSelectedText());
     }
 
     @Test
-    public void comboBox_retainValue_openClosed() {
+    public void comboBox_retainValue_WhenOpenClosed() {
         String labelValue = "1";
         comboBox.openPopup();
         comboBox.closePopup();
