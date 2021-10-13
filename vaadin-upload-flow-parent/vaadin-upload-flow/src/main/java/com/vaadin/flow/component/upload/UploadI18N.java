@@ -556,6 +556,7 @@ public class UploadI18N implements Serializable {
      * @deprecated since Vaadin 22, {@link #getCancel()} is deprecated as the
      *             `cancel` translation is not used anywhere.
      */
+    @Deprecated
     public String getCancel() {
         return cancel;
     }
@@ -570,6 +571,7 @@ public class UploadI18N implements Serializable {
      * @deprecated since Vaadin 22, {@link #setCancel(String)} is deprecated as
      *             the `cancel` translation is not used anywhere.
      */
+    @Deprecated
     public UploadI18N setCancel(String cancel) {
         this.cancel = cancel;
         return this;
