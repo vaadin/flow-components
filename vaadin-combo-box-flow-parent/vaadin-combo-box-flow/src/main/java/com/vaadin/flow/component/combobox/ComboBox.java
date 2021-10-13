@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -30,6 +31,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
@@ -105,7 +107,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
-        HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper {
+        HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
+        HasTheme {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -1724,4 +1727,27 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         reset();
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(ComboBoxVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(ComboBoxVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(ComboBoxVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(ComboBoxVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 }
