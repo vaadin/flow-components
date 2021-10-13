@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("vaadin-combo-box/combo-box-lit-wrapper-java-view")
+@TestPath("vaadin-combo-box/combo-box-in-lit-template-page")
 public class ComboBoxInLitTemplateRefrencedInJavaPageIT
         extends AbstractComboBoxIT {
 
