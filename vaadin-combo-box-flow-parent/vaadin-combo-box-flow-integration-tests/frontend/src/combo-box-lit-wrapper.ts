@@ -13,8 +13,7 @@
   ~ License for the specific language governing permissions and limitations under
   ~ the License.
   */
-import {html, TemplateResult, LitElement} from "lit";
-import {customElement} from "lit/decorators.js";
+import {customElement, html, TemplateResult, LitElement} from "lit-element";
 
 @customElement("combo-box-lit-wrapper")
 export class ComboBoxLitWrapper extends LitElement {
