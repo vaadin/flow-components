@@ -15,21 +15,20 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.WebElement;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
