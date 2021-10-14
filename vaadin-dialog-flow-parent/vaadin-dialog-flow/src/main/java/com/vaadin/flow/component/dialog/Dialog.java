@@ -642,8 +642,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public void addThemeVariants(DialogVariant... variants) {
         getThemeNames()
-                .addAll(Stream.of(variants)
-                        .map(DialogVariant::getVariantName)
+                .addAll(Stream.of(variants).map(DialogVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
 
@@ -654,9 +653,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *            theme variants to remove
      */
     public void removeThemeVariants(DialogVariant... variants) {
-        getThemeNames()
-                .removeAll(Stream.of(variants)
-                        .map(DialogVariant::getVariantName)
+        getThemeNames().removeAll(
+                Stream.of(variants).map(DialogVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
 
