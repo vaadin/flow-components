@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-combo-box/combo-box-in-lit-template-page")
-public class ComboBoxInLitTemplateRefrencedInJavaPageIT
+public class ComboBoxInLitTemplatePageIT
         extends AbstractComboBoxIT {
 
     private ComboBoxElement comboBox;
@@ -35,11 +35,7 @@ public class ComboBoxInLitTemplateRefrencedInJavaPageIT
     }
 
     /**
-     * This particular test case, test when we use `combo-box` inside a
-     * lit-template(the wrapper), and use the wrapped component in Java code for
-     * setting the initial value or readonly attribute disabled and ... the
-     * intent of this test is to check if combo-box value (visible label) is set
-     * correctly or not.
+     * See: https://github.com/vaadin/flow-components/issues/2059
      */
     @Test
     public void comboBoxInitialValue_ShouldBeSetCorrectly_WhenSetValueUsed() {
