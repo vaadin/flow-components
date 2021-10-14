@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-combo-box/combo-box-in-lit-template-page")
-public class ComboBoxInLitTemplatePageIT extends AbstractComboBoxIT {
+public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
 
     private ComboBoxElement comboBox;
 
