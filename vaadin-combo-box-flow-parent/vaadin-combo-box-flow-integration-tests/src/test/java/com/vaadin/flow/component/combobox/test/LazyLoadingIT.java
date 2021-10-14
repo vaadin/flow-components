@@ -15,20 +15,20 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.TestPath;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
@@ -41,6 +41,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement callbackBox;
     private ComboBoxElement templateBox;
     private ComboBoxElement emptyCallbackBox;
+    private ComboBoxElement lazyCustomPageSize;
+
+    private WebElement lazySizeRequestCountSpan;
 
     @Before
     public void init() {
@@ -57,6 +60,10 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         templateBox = $("combo-box-in-a-template").id("template")
                 .$(ComboBoxElement.class).first();
         emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
+        lazyCustomPageSize = $(ComboBoxElement.class)
+                .id("lazy-custom-page-size");
+        lazySizeRequestCountSpan = findElement(
+                By.id("callback-dataprovider-size-request-count"));
     }
 
     @Test
@@ -383,7 +390,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         filterBox.setFilter("10");
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 5);
+        waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
 
         getNonEmptyOverlayContents().forEach(rendered -> {
             Assert.assertThat(rendered,
@@ -417,11 +424,17 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
     @Test
     public void callbackDataprovider_pagesLoadedLazily() {
+        // Check that no backend calls before open popup
+        Assert.assertEquals("0", lazySizeRequestCountSpan.getText());
+
         callbackBox.openPopup();
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
         assertRendered("Item 10");
+
+        // Now backend request should take place to init the data communicator
+        Assert.assertEquals("1", lazySizeRequestCountSpan.getText());
 
         callbackBox.openPopup();
         scrollToItem(callbackBox, 60);
@@ -535,6 +548,23 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "return arguments[0].focusElement.value", beanBox);
         Assert.assertEquals("The ComboBox filter text got modified",
                 "Person 111", filterText);
+    }
+
+    @Test
+    public void customPageSize_pageSizePopulatedToDataCommunicator() {
+        lazyCustomPageSize.openPopup();
+        scrollToItem(lazyCustomPageSize, 100);
+        waitUntilTextInContent("100");
+        // page size should be 42
+        assertMessage("42");
+
+        clickButton("change-page-size-button");
+        lazyCustomPageSize.closePopup();
+        lazyCustomPageSize.openPopup();
+        scrollToItem(lazyCustomPageSize, 300);
+        waitUntilTextInContent("300");
+        // page size should be 41
+        assertMessage("41");
     }
 
     private void assertMessage(String expectedMessage) {

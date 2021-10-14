@@ -368,6 +368,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
+        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
+                generateLabel(value));
     }
 
     /**
