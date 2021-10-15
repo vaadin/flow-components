@@ -13,12 +13,12 @@
   ~ License for the specific language governing permissions and limitations under
   ~ the License.
   */
-import {customElement, html, TemplateResult, LitElement} from "lit-element";
+import {html, TemplateResult, LitElement} from "lit-element";
 
-@customElement("combo-box-lit-wrapper")
+
 export class ComboBoxLitWrapper extends LitElement {
 
-    protected render(): TemplateResult {
+    render() {
         return html`
             <div>
                 <vaadin-combo-box id="combo" style="width: 100%;"></vaadin-combo-box>
@@ -26,15 +26,6 @@ export class ComboBoxLitWrapper extends LitElement {
         `;
     }
 
-    constructor() {
-        super();
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-    }
 }
+
+customElements.define('combo-box-lit-wrapper', ComboBoxLitWrapper)
