@@ -649,6 +649,13 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         return result;
     }
 
+    /**
+     * Clear the filelist of the component.
+     */
+    public void clearFilelist() {
+        getElement().setPropertyJson("files", Json.createArray());
+    }
+
     private static class DefaultStreamVariable implements StreamVariable {
 
         private Deque<StreamVariable.StreamingStartEvent> lastStartedEvent = new ArrayDeque<>();
