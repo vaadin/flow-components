@@ -58,6 +58,7 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
     }
 
     private boolean isBower() {
-        return (Boolean) $("html").first().getCommandExecutor().executeScript("return !!window.Vaadin.Lumo");
+        return (Boolean) $("html").first().getCommandExecutor()
+                .executeScript("return !!window.Vaadin.Lumo");
     }
 }
