@@ -26,13 +26,6 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
 
     private ComboBoxElement comboBox;
 
-    @Before
-    public void init() {
-        open();
-        comboBox = $("combo-box-lit-wrapper").first().$(ComboBoxElement.class)
-                .id("combo");
-    }
-
     /**
      * See: https://github.com/vaadin/flow-components/issues/2059
      */
@@ -41,6 +34,9 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
         if (isBower()) {
             return;
         }
+        open();
+        comboBox = $("combo-box-lit-wrapper").first().$(ComboBoxElement.class)
+                .id("combo");
         String labelValue = "1";
         Assert.assertEquals(labelValue, comboBox.getSelectedText());
     }
@@ -50,6 +46,9 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
         if (isBower()) {
             return;
         }
+        open();
+        comboBox = $("combo-box-lit-wrapper").first().$(ComboBoxElement.class)
+                .id("combo");
         String labelValue = "1";
         comboBox.openPopup();
         comboBox.closePopup();
