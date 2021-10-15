@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsModule("./src/combo-box-lit-wrapper.ts")
+@JsModule("./src/combo-box-lit-wrapper.js")
 @Tag("combo-box-lit-wrapper")
 public class ComboBoxInLitTemplate extends LitTemplate {
 
