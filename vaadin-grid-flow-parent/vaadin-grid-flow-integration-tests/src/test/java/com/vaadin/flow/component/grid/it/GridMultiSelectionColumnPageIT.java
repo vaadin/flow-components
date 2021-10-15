@@ -243,7 +243,8 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         GridElement grid = $(GridElement.class).id(
                 GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID);
 
-        TestBenchElement deSelectRow = $(TestBenchElement.class).id("deSelectRow0");
+        TestBenchElement deSelectRow = $(TestBenchElement.class)
+                .id("deSelectRow0");
         deSelectRow.click();
 
         WebElement selectAllCheckbox = grid
@@ -254,9 +255,11 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     @Test
     public void selectAllColumn_shouldBeSelected_whenOneRowSelectedServerSide() {
         open();
-        GridElement grid = $(GridElement.class).id(GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
+        GridElement grid = $(GridElement.class).id(
+                GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
 
-        TestBenchElement selectRow0Button = $(TestBenchElement.class).id("selectRow0");
+        TestBenchElement selectRow0Button = $(TestBenchElement.class)
+                .id("selectRow0");
         selectRow0Button.click();
 
         WebElement selectAllCheckbox = grid

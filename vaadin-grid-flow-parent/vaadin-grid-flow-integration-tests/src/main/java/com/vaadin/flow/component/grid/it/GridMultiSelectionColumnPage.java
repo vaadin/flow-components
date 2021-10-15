@@ -191,7 +191,8 @@ public class GridMultiSelectionColumnPage extends Div {
             grid.getSelectionModel().deselect("0");
         });
 
-        add(new H2("Small grid with two rows all selected"), grid, deSelectRow0Button);
+        add(new H2("Small grid with two rows all selected"), grid,
+                deSelectRow0Button);
     }
 
     private void createBasicGridMultiOneRowDeSelected() {
@@ -210,6 +211,7 @@ public class GridMultiSelectionColumnPage extends Div {
             grid.getSelectionModel().select("0");
         });
 
-        add(new H2("Grid with two rows only one row selected"), grid, selectRow0Button);
+        add(new H2("Grid with two rows only one row selected"), grid,
+                selectRow0Button);
     }
 }
