@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -224,5 +225,42 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
         // Check that the count callback not invoked -> no exception thrown
         checkLogsForErrors();
+    }
+
+    @Test
+    public void selectAllColumn_shouldBeSelected_whenAllRowsSelectedOnServerSide() {
+        open();
+        GridElement grid = $(GridElement.class).id(
+                GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID);
+        WebElement selectAllCheckbox = grid
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
+        Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
+    }
+
+    @Test
+    public void selectAllColumn_shouldBeDeSelected_whenOneRowDeSelectedServerSide() {
+        open();
+        GridElement grid = $(GridElement.class).id(
+                GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID);
+
+        TestBenchElement deSelectRow = $(TestBenchElement.class).id("deSelectRow0");
+        deSelectRow.click();
+
+        WebElement selectAllCheckbox = grid
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
+        Assert.assertEquals(null, selectAllCheckbox.getAttribute("checked"));
+    }
+
+    @Test
+    public void selectAllColumn_shouldBeSelected_whenOneRowSelectedServerSide() {
+        open();
+        GridElement grid = $(GridElement.class).id(GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
+
+        TestBenchElement selectRow0Button = $(TestBenchElement.class).id("selectRow0");
+        selectRow0Button.click();
+
+        WebElement selectAllCheckbox = grid
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
+        Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
     }
 }
