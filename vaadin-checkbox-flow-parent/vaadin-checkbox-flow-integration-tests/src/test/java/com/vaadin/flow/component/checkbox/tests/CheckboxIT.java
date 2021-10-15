@@ -29,94 +29,112 @@ public class CheckboxIT extends ComponentDemoTest {
     @Test
     public void defaultCheckbox() {
         WebElement checkbox = layout.findElement(By.id("default-checkbox"));
-        Assert.assertTrue("Default checkbox should be present", "vaadin-checkbox".equals(checkbox.getTagName()));
-        Assert.assertEquals("Default checkbox label should have text 'Default Checkbox'", "Default Checkbox",
-                checkbox.getText());
+        Assert.assertTrue("Default checkbox should be present",
+                "vaadin-checkbox".equals(checkbox.getTagName()));
+        Assert.assertEquals(
+                "Default checkbox label should have text 'Default Checkbox'",
+                "Default Checkbox", checkbox.getText());
     }
 
     @Test
     public void disabledCheckbox() {
         WebElement checkbox = layout.findElement(By.id("disabled-checkbox"));
         Assert.assertEquals("true", checkbox.getAttribute("disabled"));
-        WebElement message = layout.findElement(By.id("disabled-checkbox-message"));
+        WebElement message = layout
+                .findElement(By.id("disabled-checkbox-message"));
         Assert.assertEquals("", message.getText());
 
-        executeScript("arguments[0].removeAttribute(\"disabled\");" + "arguments[0].click();", checkbox);
+        executeScript("arguments[0].removeAttribute(\"disabled\");"
+                + "arguments[0].click();", checkbox);
         message = layout.findElement(By.id("disabled-checkbox-message"));
         Assert.assertEquals("", message.getText());
     }
 
     @Test
     public void indeterminateCheckbox() {
-        WebElement checkbox = layout.findElement(By.id("indeterminate-checkbox"));
+        WebElement checkbox = layout
+                .findElement(By.id("indeterminate-checkbox"));
         WebElement button = layout.findElement(By.id("reset-indeterminate"));
-        Assert.assertEquals("This checkbox should be in indeterminate state", "true",
-                checkbox.getAttribute("indeterminate"));
+        Assert.assertEquals("This checkbox should be in indeterminate state",
+                "true", checkbox.getAttribute("indeterminate"));
 
         checkbox.click();
-        Assert.assertNotEquals("Checkbox should not be in indeterminate state after clicking it", "true",
-                checkbox.getAttribute("indeterminate"));
+        Assert.assertNotEquals(
+                "Checkbox should not be in indeterminate state after clicking it",
+                "true", checkbox.getAttribute("indeterminate"));
 
         clickElementWithJs(button);
-        Assert.assertEquals("This checkbox should be in indeterminate state after resetting", "true",
-                checkbox.getAttribute("indeterminate"));
+        Assert.assertEquals(
+                "This checkbox should be in indeterminate state after resetting",
+                "true", checkbox.getAttribute("indeterminate"));
     }
 
     @Test
     public void valueChangeCheckbox() {
-        WebElement checkbox = layout.findElement(By.id("value-change-checkbox"));
-        WebElement message = layout.findElement(By.id("value-change-checkbox-message"));
+        WebElement checkbox = layout
+                .findElement(By.id("value-change-checkbox"));
+        WebElement message = layout
+                .findElement(By.id("value-change-checkbox-message"));
         checkbox.click();
         Assert.assertEquals("Clicking checkbox should update message div",
-                "Checkbox value changed from 'false' to 'true'", message.getText());
+                "Checkbox value changed from 'false' to 'true'",
+                message.getText());
     }
 
     @Test
     public void accessibleCheckbox() {
         WebElement checkbox = layout.findElement(By.id("accessible-checkbox"));
-        Assert.assertEquals("Accessible checkbox should have the aria-label attribute", "Click me",
-                checkbox.getAttribute("aria-label"));
+        Assert.assertEquals(
+                "Accessible checkbox should have the aria-label attribute",
+                "Click me", checkbox.getAttribute("aria-label"));
     }
 
     @Test
     public void htmlCheckbox() {
         WebElement checkbox = layout.findElement(By.id("html-checkbox"));
         WebElement anchor = checkbox.findElement(By.tagName("a"));
-        Assert.assertEquals("Content should contain a link to vaadin.com/privacy-policy",
-                "https://vaadin.com/privacy-policy", anchor.getAttribute("href"));
+        Assert.assertEquals(
+                "Content should contain a link to vaadin.com/privacy-policy",
+                "https://vaadin.com/privacy-policy",
+                anchor.getAttribute("href"));
     }
 
     @Test
     public void changeCheckboxHtmlLabel_labelContentIsChanged() {
-        WebElement button = layout.findElement(By.id("change-html-checkbox-label"));
+        WebElement button = layout
+                .findElement(By.id("change-html-checkbox-label"));
         button.click();
 
         WebElement checkbox = layout.findElement(By.id("html-checkbox"));
         WebElement anchor = checkbox.findElement(By.tagName("a"));
-        Assert.assertEquals("Content should contain a link to vaadin.com/", "https://vaadin.com/",
-                anchor.getAttribute("href"));
+        Assert.assertEquals("Content should contain a link to vaadin.com/",
+                "https://vaadin.com/", anchor.getAttribute("href"));
     }
 
     @Test
     public void changeCheckboxHtmlLabel_labelIsClickable() {
         WebElement checkbox = layout.findElement(By.id("html-checkbox"));
-        WebElement button = layout.findElement(By.id("change-html-checkbox-label"));
+        WebElement button = layout
+                .findElement(By.id("change-html-checkbox-label"));
         button.click();
         WebElement input = checkbox.findElement(By.tagName("input"));
         input.click();
 
-        Assert.assertEquals("Checkbox should be checked", true, checkbox.getAttribute("checked"));
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.getAttribute("checked"));
     }
 
     @Test
     public void changeCheckboxHtmlLabel_inputIsClickable() {
         WebElement checkbox = layout.findElement(By.id("html-checkbox"));
-        WebElement button = layout.findElement(By.id("change-html-checkbox-label"));
+        WebElement button = layout
+                .findElement(By.id("change-html-checkbox-label"));
         button.click();
         WebElement label = checkbox.findElement(By.tagName("label"));
         label.click();
 
-        Assert.assertEquals("Checkbox should be checked", true, checkbox.getAttribute("checked"));
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.getAttribute("checked"));
     }
 
     @Override
