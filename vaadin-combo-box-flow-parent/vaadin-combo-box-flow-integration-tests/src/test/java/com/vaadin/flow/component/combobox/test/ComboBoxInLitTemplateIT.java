@@ -31,10 +31,10 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
      */
     @Test
     public void comboBoxInitialValue_ShouldBeSetCorrectly_WhenSetValueUsed() {
+        open();
         if (isBower()) {
             return;
         }
-        open();
         comboBox = $("combo-box-lit-wrapper").first().$(ComboBoxElement.class)
                 .id("combo");
         String labelValue = "1";
@@ -43,10 +43,10 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
 
     @Test
     public void comboBox_retainValue_WhenOpenClosed() {
+        open();
         if (isBower()) {
             return;
         }
-        open();
         comboBox = $("combo-box-lit-wrapper").first().$(ComboBoxElement.class)
                 .id("combo");
         String labelValue = "1";
