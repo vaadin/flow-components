@@ -38,9 +38,9 @@ public class CheckboxDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Default Checkbox
         Checkbox checkbox = new Checkbox();
-        checkbox.setId("default-checkbox");
         checkbox.setLabel("Default Checkbox");
         // end-source-example
+        checkbox.setId("default-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {
             checkbox.setLabel("New Label");
@@ -113,14 +113,14 @@ public class CheckboxDemoPage extends DemoView {
         // begin-source-example
         // source-example-heading: Checkbox with simple html markup in the label
         Checkbox checkbox = new Checkbox();
-        checkbox.setId("html-checkbox");
         checkbox.setLabelAsHtml(
                 "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
         // end-source-example
+        checkbox.setId("html-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {
             checkbox.setLabelAsHtml(
-                    "Follow <a href='https://vaadin.com/'>the Vaadin website</a> for more details.");
+                    "Accept the <a href='https://vaadin.com/community-terms'>community terms</a>");
         });
         button.setId("change-html-checkbox-label");
 
