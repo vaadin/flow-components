@@ -38,16 +38,26 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
      */
     @Test
     public void comboBoxInitialValue_ShouldBeSetCorrectly_WhenSetValueUsed() {
+        if (isBower()) {
+            return;
+        }
         String labelValue = "1";
         Assert.assertEquals(labelValue, comboBox.getSelectedText());
     }
 
     @Test
     public void comboBox_retainValue_WhenOpenClosed() {
+        if (isBower()) {
+            return;
+        }
         String labelValue = "1";
         comboBox.openPopup();
         comboBox.closePopup();
 
         Assert.assertEquals(labelValue, comboBox.getSelectedText());
+    }
+
+    private boolean isBower() {
+        return (Boolean) $("html").first().getCommandExecutor().executeScript("return !!window.Vaadin.Lumo");
     }
 }
