@@ -122,22 +122,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 return;
             }
 
-            final DataCommunicator<T> dataCommunicator = getGrid()
-                    .getDataCommunicator();
-
-            final DataProvider<T, ?> dataProvider = dataCommunicator
-                    .getDataProvider();
-
-            // Avoid throwing an IllegalArgumentException in case of
-            // HierarchicalDataProvider
-            if (!(dataProvider instanceof HierarchicalDataProvider)) {
-                if (dataProvider.isInMemory()) {
-                    size = dataProvider.size(new Query<>());
-                } else if (dataCommunicator.isDefinedSize()) {
-                    // Use a cached value of items count for defined size
-                    size = dataCommunicator.getItemCount();
-                }
-            }
+            size = getDataProviderSize();
 
             selectionColumn.setSelectAllCheckboxState(size == selected.size());
         }
@@ -454,6 +439,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
         if (!removedItems.isEmpty()) {
             selectionColumn.setSelectAllCheckboxState(false);
+        } else {
+            long size = getDataProviderSize();
+            selectionColumn.setSelectAllCheckboxState(size == selected.size());
         }
     }
 
@@ -479,5 +467,26 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private Object getItemId(T item) {
         return getGrid().getDataCommunicator().getDataProvider().getId(item);
+    }
+
+    private long getDataProviderSize() {
+        long size = 0;
+        final DataCommunicator<T> dataCommunicator = getGrid()
+                .getDataCommunicator();
+
+        final DataProvider<T, ?> dataProvider = dataCommunicator
+                .getDataProvider();
+
+        // Avoid throwing an IllegalArgumentException in case of
+        // HierarchicalDataProvider
+        if (!(dataProvider instanceof HierarchicalDataProvider)) {
+            if (dataProvider.isInMemory()) {
+                size = dataProvider.size(new Query<>());
+            } else if (dataCommunicator.isDefinedSize()) {
+                // Use a cached value of items count for defined size
+                size = dataCommunicator.getItemCount();
+            }
+        }
+        return size;
     }
 }
