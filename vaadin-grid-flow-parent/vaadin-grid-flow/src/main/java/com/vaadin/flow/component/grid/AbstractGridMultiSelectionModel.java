@@ -113,16 +113,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
 
-            long size = 0;
-
-            final DataProvider<T, ?> dataProvider = getGrid()
-                    .getDataCommunicator().getDataProvider();
-
-            // Avoid throwing an IllegalArgumentException in case of
-            // HierarchicalDataProvider
-            if (!(dataProvider instanceof HierarchicalDataProvider)) {
-                size = dataProvider.size(new Query<>());
-            }
+            long size = getDataProviderSize();
 
             selectionColumn.setSelectAllCheckboxState(size == selected.size());
         }
@@ -435,6 +426,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
         if (!removedItems.isEmpty()) {
             selectionColumn.setSelectAllCheckboxState(false);
+        } else {
+            long size = getDataProviderSize();
+            selectionColumn.setSelectAllCheckboxState(size == selected.size());
         }
     }
 
@@ -460,5 +454,19 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private Object getItemId(T item) {
         return getGrid().getDataCommunicator().getDataProvider().getId(item);
+    }
+
+    private long getDataProviderSize() {
+        long size = 0;
+        final DataProvider<T, ?> dataProvider = getGrid().getDataCommunicator()
+                .getDataProvider();
+
+        // Avoid throwing an IllegalArgumentException in case of
+        // HierarchicalDataProvider
+        if (!(dataProvider instanceof HierarchicalDataProvider)) {
+            size = dataProvider.size(new Query<>());
+        }
+
+        return size;
     }
 }

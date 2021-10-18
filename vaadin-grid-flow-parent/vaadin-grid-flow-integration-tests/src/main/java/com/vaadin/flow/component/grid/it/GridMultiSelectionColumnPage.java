@@ -38,6 +38,8 @@ import com.vaadin.flow.router.Route;
 public class GridMultiSelectionColumnPage extends Div {
 
     public static final int ITEM_COUNT = 1000;
+    static final String MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID = "multi-select-grid-all-selected";
+    static final String MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID = "multi-select-grid-one-deselected";
 
     private Div message;
 
@@ -51,6 +53,8 @@ public class GridMultiSelectionColumnPage extends Div {
         createLazyGrid();
         createInMemoryGrid();
         createGridWithSwappedDataProvider();
+        createBasicGridMultiAllRowsSelected();
+        createBasicGridMultiOneRowDeSelected();
 
         add(message);
         createBasicGridFromSingleToMultiBeforeAttached();
@@ -157,5 +161,46 @@ public class GridMultiSelectionColumnPage extends Div {
 
         grid.setSelectionMode(SelectionMode.MULTI);
         add(grid);
+    }
+
+    private void createBasicGridMultiAllRowsSelected() {
+        Grid<String> grid = new Grid<>();
+        grid.setId(MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID);
+        grid.setItems(IntStream.range(0, 2).mapToObj(Integer::toString));
+        grid.addColumn(i -> i).setHeader("text");
+        grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        grid.getSelectionModel().select("0");
+        grid.getSelectionModel().select("1");
+
+        NativeButton deSelectRow0Button = new NativeButton("DeSelect Row 0");
+        deSelectRow0Button.setId("deSelectRow0");
+        deSelectRow0Button.addClickListener(event -> {
+            grid.getSelectionModel().deselect("0");
+        });
+
+        add(new H2("Small grid with two rows all selected"), grid,
+                deSelectRow0Button);
+    }
+
+    private void createBasicGridMultiOneRowDeSelected() {
+        Grid<String> grid = new Grid<>();
+        grid.setId(MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
+        grid.setItems(IntStream.range(0, 2).mapToObj(Integer::toString));
+        grid.addColumn(i -> i).setHeader("text");
+        grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        grid.getSelectionModel().select("1");
+
+        NativeButton selectRow0Button = new NativeButton("Select Row 0");
+        selectRow0Button.setId("selectRow0");
+        selectRow0Button.addClickListener(event -> {
+            grid.getSelectionModel().select("0");
+        });
+
+        add(new H2("Grid with two rows only one row selected"), grid,
+                selectRow0Button);
     }
 }
