@@ -22,7 +22,8 @@ public class CheckboxDemoPage extends DemoView {
         addIndeterminateCheckbox();
         addValueChangeCheckbox();
         addAccessibleCheckbox();
-        addCheckboxWithHtmlLabel();
+        addCheckboxHtmlLabel();
+        addCheckboxLazyHtmlLabel();
     }
 
     @Override
@@ -45,7 +46,7 @@ public class CheckboxDemoPage extends DemoView {
         NativeButton button = new NativeButton("Change label", event -> {
             checkbox.setLabel("New Label");
         });
-        button.setId("change-default-checkbox-label");
+        button.setId("change-default-label");
 
         addCard("Default Checkbox", checkbox, button);
     }
@@ -109,22 +110,36 @@ public class CheckboxDemoPage extends DemoView {
         accessibleCheckbox.setId("accessible-checkbox");
     }
 
-    private void addCheckboxWithHtmlLabel() {
+    private void addCheckboxHtmlLabel() {
         // begin-source-example
-        // source-example-heading: Checkbox with simple html markup in the label
+        // source-example-heading: Checkbox with the HTML-content based label
         Checkbox checkbox = new Checkbox();
         checkbox.setLabelAsHtml(
                 "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
         // end-source-example
-        checkbox.setId("html-checkbox");
+        checkbox.setId("html-label-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {
             checkbox.setLabelAsHtml(
                     "Accept the <a href='https://vaadin.com/community-terms'>community terms</a>");
         });
-        button.setId("change-html-checkbox-label");
+        button.setId("change-html-label");
 
-        addCard("Checkbox with simple html markup in the label", checkbox,
+        addCard("Checkbox with the label that contains HTML markup", checkbox,
                 button);
+    }
+
+    private void addCheckboxLazyHtmlLabel() {
+        Checkbox checkbox = new Checkbox();
+        checkbox.setId("lazy-html-label-checkbox");
+
+        NativeButton button = new NativeButton("Set label", event -> {
+            checkbox.setLabelAsHtml(
+                    "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
+        });
+        button.setId("set-html-label");
+
+        addCard("Checkbox with the lazy label that contains HTML markup",
+                checkbox, button);
     }
 }

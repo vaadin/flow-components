@@ -20,6 +20,8 @@ import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
+import org.openqa.selenium.WebElement;
+
 /**
  * A TestBench element representing a <code>&lt;vaadin-checkbox&gt;</code>
  * element.
@@ -51,6 +53,14 @@ public class CheckboxElement extends TestBenchElement
     @Override
     public String getLabel() {
         return $("label").first().getPropertyString("textContent");
+    }
+
+    public WebElement getLabelElement() {
+        return $("label").first();
+    }
+
+    public WebElement getInputElement() {
+        return $("input").first();
     }
 
 }
