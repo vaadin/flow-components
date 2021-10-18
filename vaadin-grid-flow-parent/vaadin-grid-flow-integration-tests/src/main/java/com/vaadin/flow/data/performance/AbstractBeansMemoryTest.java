@@ -135,8 +135,8 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
             setBackendContainer(component, persons);
         }
 
-        memoryLabel.setText(
-                String.valueOf(GraphLayout.parseInstance(component).totalSize()));
+        memoryLabel.setText(String
+                .valueOf(GraphLayout.parseInstance(component).totalSize()));
     }
 
     private void createMenu(T component) {
