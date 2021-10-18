@@ -514,7 +514,7 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the key of the column
          */
-        private String getPath() {
+        public String getPath() {
             return path;
         }
     }
