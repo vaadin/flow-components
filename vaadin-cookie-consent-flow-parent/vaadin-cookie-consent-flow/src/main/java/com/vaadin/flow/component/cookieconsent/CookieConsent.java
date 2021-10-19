@@ -33,6 +33,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/cookie-consent", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "22.0.0-alpha10")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
 public class CookieConsent extends Component {
 

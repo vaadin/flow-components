@@ -40,6 +40,7 @@ import java.util.Objects;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/app-layout", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "22.0.0-alpha10")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
