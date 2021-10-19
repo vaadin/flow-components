@@ -30,6 +30,7 @@ import com.vaadin.flow.function.SerializableFunction;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/integer-field", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-alpha10")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 

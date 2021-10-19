@@ -107,6 +107,7 @@ import com.vaadin.flow.dom.Element;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/button", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "22.0.0-alpha10")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component

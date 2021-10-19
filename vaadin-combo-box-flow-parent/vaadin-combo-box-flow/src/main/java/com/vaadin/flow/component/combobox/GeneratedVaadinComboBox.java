@@ -293,6 +293,7 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/combo-box", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "22.0.0-alpha10")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>

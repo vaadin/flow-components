@@ -41,6 +41,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/confirm-dialog", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "22.0.0-alpha10")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
