@@ -57,7 +57,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("default-checkbox");
-        checkbox.getLabelElement().click();
+        checkbox.$("label").first().click();
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());
@@ -69,7 +69,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("default-checkbox");
-        checkbox.getInputElement().click();
+        checkbox.$("input").first().click();
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());
@@ -132,7 +132,7 @@ public class CheckboxIT extends ComponentDemoTest {
     public void htmlLabelCheckbox_labelIsDisplayed() {
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("html-label-checkbox");
-        WebElement anchor = checkbox.getLabelElement()
+        WebElement anchor = checkbox.$("label").first()
                 .findElement(By.tagName("a"));
 
         Assert.assertEquals(
@@ -147,7 +147,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("html-label-checkbox");
-        WebElement anchor = checkbox.getLabelElement()
+        WebElement anchor = checkbox.$("label").first()
                 .findElement(By.tagName("a"));
 
         Assert.assertEquals(
@@ -162,7 +162,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("html-label-checkbox");
-        checkbox.getInputElement().click();
+        checkbox.$("input").first().click();
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());
@@ -174,7 +174,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("html-label-checkbox");
-        checkbox.getLabelElement().click();
+        checkbox.$("label").first().click();
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());
@@ -186,7 +186,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("lazy-html-label-checkbox");
-        WebElement anchor = checkbox.getLabelElement()
+        WebElement anchor = checkbox.$("label").first()
                 .findElement(By.tagName("a"));
 
         Assert.assertEquals(
@@ -201,7 +201,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("lazy-html-label-checkbox");
-        checkbox.getLabelElement().click();
+        checkbox.$("label").first().click();
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());
@@ -213,7 +213,7 @@ public class CheckboxIT extends ComponentDemoTest {
 
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("lazy-html-label-checkbox");
-        checkbox.getInputElement().click();
+        checkbox.$("input").first().click();
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());

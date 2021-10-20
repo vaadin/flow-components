@@ -54,13 +54,4 @@ public class CheckboxElement extends TestBenchElement
     public String getLabel() {
         return $("label").first().getPropertyString("textContent");
     }
-
-    public WebElement getLabelElement() {
-        return $("label").first();
-    }
-
-    public WebElement getInputElement() {
-        return $("input").first();
-    }
-
 }
