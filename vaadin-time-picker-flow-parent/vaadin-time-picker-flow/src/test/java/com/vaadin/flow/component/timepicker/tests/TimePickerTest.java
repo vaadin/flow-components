@@ -178,7 +178,7 @@ public class TimePickerTest {
         final String min = "12:00";
         LocalTime minTime = LocalTime.parse(min);
         timePicker.setMinTime(minTime);
-        assertEquals(min, timePicker.getMin());
+        assertEquals(minTime, timePicker.getMin());
         assertEquals(minTime, timePicker.getMinTime());
     }
 
@@ -187,7 +187,7 @@ public class TimePickerTest {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMin());
         timePicker.setMin(null);
-        assertEquals("", timePicker.getMin());
+        assertEquals(null, timePicker.getMin());
         assertEquals(null, timePicker.getMinTime());
     }
 
@@ -196,7 +196,7 @@ public class TimePickerTest {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMinTime());
         timePicker.setMinTime(null);
-        assertEquals("", timePicker.getMin());
+        assertEquals(null, timePicker.getMin());
         assertEquals(null, timePicker.getMinTime());
     }
 
@@ -206,7 +206,7 @@ public class TimePickerTest {
         final String max = "12:00";
         LocalTime maxTime = LocalTime.parse(max);
         timePicker.setMaxTime(maxTime);
-        assertEquals(max, timePicker.getMax());
+        assertEquals(maxTime, timePicker.getMax());
         assertEquals(maxTime, timePicker.getMaxTime());
     }
 
@@ -215,7 +215,7 @@ public class TimePickerTest {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMax());
         timePicker.setMax(null);
-        assertEquals("", timePicker.getMax());
+        assertEquals(null, timePicker.getMax());
         assertEquals(null, timePicker.getMaxTime());
     }
 
@@ -224,7 +224,7 @@ public class TimePickerTest {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMaxTime());
         timePicker.setMaxTime(null);
-        assertEquals("", timePicker.getMax());
+        assertEquals(null, timePicker.getMax());
         assertEquals(null, timePicker.getMaxTime());
     }
 
