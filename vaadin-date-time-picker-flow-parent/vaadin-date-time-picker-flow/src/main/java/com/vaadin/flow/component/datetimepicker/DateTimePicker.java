@@ -69,6 +69,7 @@ class DateTimePickerTimePicker
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/date-time-picker", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "22.0.0-alpha10")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>

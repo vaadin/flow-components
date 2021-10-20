@@ -54,6 +54,7 @@ import elemental.json.JsonType;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @NpmPackage(value = "@vaadin/menu-bar", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "22.0.0-alpha10")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme {
 
