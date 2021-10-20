@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
@@ -31,6 +33,8 @@ class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
 
     private T item;
 
+    private final Label labelElement = appendLabelElement();
+
     RadioButton(String key, T item) {
         this.item = item;
         getElement().setProperty("value", key);
@@ -41,4 +45,21 @@ class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
         return item;
     }
 
+    /**
+     * Replaces the label content with the given label component.
+     *
+     * @param component
+     *            the component to be added to the label.
+     */
+    public void setLabelComponent(Component component) {
+        labelElement.removeAll();
+        labelElement.add(component);
+    }
+
+    private Label appendLabelElement() {
+        Label label = new Label();
+        label.getElement().setAttribute("slot", "label");
+        getElement().appendChild(label.getElement());
+        return label;
+    }
 }
