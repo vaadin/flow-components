@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,9 +39,10 @@ public abstract class AbstractFileBuffer implements Serializable {
      */
     public AbstractFileBuffer() {
         factory = fileName -> {
-            final String tempFileName = "upload_tmpfile_" + fileName + "_"
-                    + System.currentTimeMillis();
-            return File.createTempFile(tempFileName, null);
+            final String tempFileName = "upload_temp_file_" + System.currentTimeMillis();
+            Path tempDirectory = Files.createTempDirectory("temp_directory");
+
+            return Files.createTempFile(tempDirectory, tempFileName, null).toFile();
         };
     }
 
