@@ -20,8 +20,6 @@ import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
-import org.openqa.selenium.WebElement;
-
 /**
  * A TestBench element representing a <code>&lt;vaadin-checkbox&gt;</code>
  * element.
