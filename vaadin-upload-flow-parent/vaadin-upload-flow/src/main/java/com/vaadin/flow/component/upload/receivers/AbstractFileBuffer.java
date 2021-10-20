@@ -39,10 +39,12 @@ public abstract class AbstractFileBuffer implements Serializable {
      */
     public AbstractFileBuffer() {
         factory = fileName -> {
-            final String tempFileName = "upload_temp_file_" + System.currentTimeMillis();
+            final String tempFileName = "upload_temp_file_"
+                    + System.currentTimeMillis();
             Path tempDirectory = Files.createTempDirectory("temp_directory");
 
-            return Files.createTempFile(tempDirectory, tempFileName, null).toFile();
+            return Files.createTempFile(tempDirectory, tempFileName, null)
+                    .toFile();
         };
     }
 
