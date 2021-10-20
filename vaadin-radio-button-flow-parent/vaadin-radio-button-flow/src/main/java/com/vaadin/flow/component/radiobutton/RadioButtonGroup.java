@@ -510,12 +510,9 @@ public class RadioButtonGroup<T>
 
     private void updateButton(RadioButton<T> button) {
         updateEnabled(button);
-        button.getElement().getChildren()
-                .forEach(e -> button.getElement().removeChild(e));
-        Label label = new Label();
-        label.getElement().setAttribute("slot", "label");
-        label.add(getItemRenderer().createComponent(button.getItem()));
-        button.add(label);
+        Component labelComponent = getItemRenderer()
+                .createComponent(button.getItem());
+        button.setLabelComponent(labelComponent);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
