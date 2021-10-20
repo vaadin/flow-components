@@ -34,17 +34,6 @@ public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
 
-    private static LocalDate TEST_VALUE = LocalDate.now();
-
-    private static class TestDatePicker
-            extends GeneratedVaadinDatePicker<TestDatePicker, LocalDate> {
-
-        TestDatePicker() {
-            super(TEST_VALUE, null, String.class, value -> null, value -> null,
-                    true);
-        }
-    }
-
     @Test
     public void datePicker_basicCases() {
         DatePicker picker = new DatePicker();
