@@ -129,7 +129,7 @@ public class CheckboxIT extends ComponentDemoTest {
     }
 
     @Test
-    public void htmlLabelCheckbox_labelIsDisplayed() {
+    public void htmlLabelCheckbox_labelLinkIsDisplayed() {
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("html-label-checkbox");
         WebElement anchor = checkbox.$("label").first()
@@ -142,7 +142,7 @@ public class CheckboxIT extends ComponentDemoTest {
     }
 
     @Test
-    public void htmlLabelCheckbox_changeLabel_newLabelIsDisplayed() {
+    public void htmlLabelCheckbox_changeLabel_newLabelLinkIsDisplayed() {
         clickButton("change-html-label");
 
         CheckboxElement checkbox = $(CheckboxElement.class)
@@ -181,7 +181,7 @@ public class CheckboxIT extends ComponentDemoTest {
     }
 
     @Test
-    public void lazyHtmlLabelCheckbox_setLabel_labelIsDisplayed() {
+    public void lazyHtmlLabelCheckbox_setLabel_labelLinkIsDisplayed() {
         clickButton("set-html-label");
 
         CheckboxElement checkbox = $(CheckboxElement.class)
