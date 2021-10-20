@@ -205,7 +205,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-
     public void customEditorValueIsUpdatedByLeavingEditorWithTab() {
         GridTHTDElement cell = grid.getCell(0, 5);
         Assert.assertEquals("person1@vaadin.com", cell.getText());
@@ -232,6 +231,25 @@ public class BasicIT extends AbstractParallelTest {
         input.sendKeys(Keys.ENTER);
 
         Assert.assertEquals("newperson1@vaadin.com", cell.getText());
+    }
+
+    @Test
+    public void customEditorOpened_gridIsScrolled_editorIsClosed() {
+        GridTHTDElement cell = grid.getCell(5, 5);
+        Assert.assertEquals("person6@vaadin.com", cell.getText());
+
+        AssertCellEnterEditModeOnDoubleClick(5, 5, "input");
+
+        // Test to cover the bug where, after scrolling a bit, the component was
+        // receiving the focus again and the grid would scroll back to the row
+        // with the editor opened
+        // https://github.com/vaadin/flow-components/issues/2253
+        grid.scrollToRow(10);
+        Assert.assertTrue(cell.innerHTMLContains("input"));
+        Assert.assertEquals(10, grid.getFirstVisibleRowIndex());
+
+        grid.scrollToRow(30);
+        Assert.assertFalse(cell.innerHTMLContains("input"));
     }
 
     private void AssertCellEnterEditModeOnDoubleClick(Integer rowIndex,
