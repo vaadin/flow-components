@@ -509,13 +509,10 @@ public class RadioButtonGroup<T>
     }
 
     private void updateButton(RadioButton<T> button) {
-        updateEnabled(button);
-        button.getElement().getChildren()
-                .forEach(e -> button.getElement().removeChild(e));
-        Label label = new Label();
-        label.getElement().setAttribute("slot", "label");
-        label.add(getItemRenderer().createComponent(button.getItem()));
-        button.add(label);
+        updateButtonEnabled(button);
+        Component labelComponent = getItemRenderer()
+                .createComponent(button.getItem());
+        button.setLabelComponent(labelComponent);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
@@ -533,7 +530,7 @@ public class RadioButtonGroup<T>
                     button -> button.getItem() == getValue(event.getValue()))
                     .findFirst();
 
-            selectedButton.ifPresent(this::updateEnabled);
+            selectedButton.ifPresent(this::updateButtonEnabled);
         }
     }
 
@@ -563,7 +560,7 @@ public class RadioButtonGroup<T>
         return getItemId(value1).equals(getItemId(value2));
     }
 
-    private void updateEnabled(RadioButton<T> button) {
+    private void updateButtonEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
         button.setEnabled(!disabled);
