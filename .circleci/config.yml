@@ -20,12 +20,22 @@ jobs:
       - checkout
       # Use mvn clean and package as the standard maven build phase
       - run:
-          name: Build
-          command: mvn -B -DskipFrontend -DskipTests clean test-compile -T 1C
-      # Then run your tests!
+          name: Install packages
+          command: |
+            echo 'apt-get update -qq && apt-get install -qq --no-install-recommends nodejs npm' | sudo bash
       - run:
-          name: Test
-          command: mvn test
+          name: Build
+          command: echo mvn -B -DskipFrontend -DskipTests clean test-compile -T 1C -q
+      - run:
+          name: List tests
+          command: circleci tests glob "**/src/test/**/**.java"    
+
+      # curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | sudo bash
+
+      # Then run your tests!
+      # - run:
+      #     name: Test
+      #     command: mvn test
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -34,3 +44,24 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build-and-test
+
+
+# version: 2.1
+# orbs:
+#   slack: circleci/slack@4.0.0
+
+# jobs:
+#   build:
+#     working_directory: ~/circleci-demo-python-django
+#     docker:
+#       - image: circleci/python:3.6.4
+#         environment:
+#           PIPENV_VENV_IN_PROJECT: true
+#           DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
+#       - image: circleci/postgres:9.6.2
+#         environment:
+#           POSTGRES_USER: root
+#           POSTGRES_DB: circle_test  
+#     steps:
+#       - checkout
+#       - run: postgres -V
