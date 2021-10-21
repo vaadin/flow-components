@@ -37,7 +37,7 @@ public class BasicIT extends AbstractParallelTest {
     public void columnIsRenderedInBeanGrid() {
         GridTHTDElement cell = beanGrid.getCell(0, 0);
         Assert.assertEquals("23", cell.getInnerHTML());
-        AssertCellEnterEditModeOnDoubleClick(0, 0,
+        assertCellEnterEditModeOnDoubleClick(0, 0,
                 "vaadin-grid-pro-edit-text-field", beanGrid, true);
     }
 
@@ -66,7 +66,7 @@ public class BasicIT extends AbstractParallelTest {
 
         TestBenchElement sorter = headerCell.$("vaadin-grid-sorter").first();
 
-        AssertCellEnterEditModeOnDoubleClick(1, 1,
+        assertCellEnterEditModeOnDoubleClick(1, 1,
                 "vaadin-grid-pro-edit-text-field");
         TestBenchElement textField = grid.getCell(1, 1)
                 .$("vaadin-grid-pro-edit-text-field").first();
@@ -89,7 +89,7 @@ public class BasicIT extends AbstractParallelTest {
         GridTHTDElement cell = grid.getCell(0, 3);
         Assert.assertEquals("No", cell.$("span").first().getText());
 
-        AssertCellEnterEditModeOnDoubleClick(0, 3,
+        assertCellEnterEditModeOnDoubleClick(0, 3,
                 "vaadin-grid-pro-edit-checkbox");
         TestBenchElement checkbox = cell.$("vaadin-grid-pro-edit-checkbox")
                 .first();
@@ -106,7 +106,7 @@ public class BasicIT extends AbstractParallelTest {
         GridTHTDElement cell = grid.getCell(0, 4);
         Assert.assertEquals("City 1", cell.$("span").first().getText());
 
-        AssertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
+        assertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
 
         waitUntil(e -> cell.$("vaadin-combo-box").exists());
         TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
@@ -130,13 +130,13 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void textEditorIsUsedForTextColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 1,
+        assertCellEnterEditModeOnDoubleClick(0, 1,
                 "vaadin-grid-pro-edit-text-field");
     }
 
     @Test
     public void cellEditStartedListenerCalledOnce() {
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+        assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
         Assert.assertEquals(
                 "Person{id=1, age=23, name='Person 1', "
                         + "isSubscriber=false, email='person1@vaadin.com', "
@@ -147,13 +147,13 @@ public class BasicIT extends AbstractParallelTest {
     @Test
 
     public void customComboBoxIsUsedForEditColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+        assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
     }
 
     @Test
     public void customComboBoxIsGettingValue() {
         GridTHTDElement cell = grid.getCell(0, 2);
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+        assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
         TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
 
         Assert.assertEquals("1", comboBox.getProperty("value"));
@@ -162,20 +162,20 @@ public class BasicIT extends AbstractParallelTest {
     @Test
 
     public void checkboxEditorIsUsedForCheckboxColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 3,
+        assertCellEnterEditModeOnDoubleClick(0, 3,
                 "vaadin-grid-pro-edit-checkbox");
     }
 
     @Test
     public void customTextFieldIsUsedForEditColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-text-field",
+        assertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-text-field",
                 beanGrid, true);
     }
 
     @Test
     public void customTextFieldIsGettingValue() {
         GridTHTDElement cell = beanGrid.getCell(0, 1);
-        AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-text-field",
+        assertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-text-field",
                 beanGrid, true);
         TestBenchElement textField = cell.$("vaadin-text-field").first();
 
@@ -184,7 +184,7 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void selectEditorIsUsedForSelectColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 2,
+        assertCellEnterEditModeOnDoubleClick(0, 2,
                 "vaadin-grid-pro-edit-select", beanGrid, true);
     }
 
@@ -200,17 +200,16 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void disabledGridShouldNotBeActivatedByDoubleClick() {
         $("vaadin-button").id("disable-grid-id").click();
-        AssertCellEnterEditModeOnDoubleClick(0, 1,
+        assertCellEnterEditModeOnDoubleClick(0, 1,
                 "vaadin-grid-pro-edit-text-field", grid, false);
     }
 
     @Test
-
     public void customEditorValueIsUpdatedByLeavingEditorWithTab() {
         GridTHTDElement cell = grid.getCell(0, 5);
         Assert.assertEquals("person1@vaadin.com", cell.getText());
 
-        AssertCellEnterEditModeOnDoubleClick(0, 5, "input");
+        assertCellEnterEditModeOnDoubleClick(0, 5, "input");
         TestBenchElement input = cell.$("input").first();
         // Clearing the field before sending keys
         input.setProperty("value", "");
@@ -225,7 +224,7 @@ public class BasicIT extends AbstractParallelTest {
         GridTHTDElement cell = grid.getCell(0, 5);
         Assert.assertEquals("person1@vaadin.com", cell.getText());
 
-        AssertCellEnterEditModeOnDoubleClick(0, 5, "input");
+        assertCellEnterEditModeOnDoubleClick(0, 5, "input");
         TestBenchElement input = cell.$("input").first();
         input.setProperty("value", "");
         input.sendKeys("newperson1@vaadin.com");
@@ -234,13 +233,32 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("newperson1@vaadin.com", cell.getText());
     }
 
-    private void AssertCellEnterEditModeOnDoubleClick(Integer rowIndex,
+    @Test
+    public void customEditorOpened_gridIsScrolled_editorIsClosed() {
+        GridTHTDElement cell = grid.getCell(5, 5);
+        Assert.assertEquals("person6@vaadin.com", cell.getText());
+
+        assertCellEnterEditModeOnDoubleClick(5, 5, "input");
+
+        // Test to cover the bug where, after scrolling a bit, the component was
+        // receiving the focus again and the grid would scroll back to the row
+        // with the editor opened
+        // https://github.com/vaadin/flow-components/issues/2253
+        grid.scrollToRow(10);
+        Assert.assertTrue(cell.innerHTMLContains("input"));
+        Assert.assertEquals(10, grid.getFirstVisibleRowIndex());
+
+        grid.scrollToRow(30);
+        Assert.assertFalse(cell.innerHTMLContains("input"));
+    }
+
+    private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag) {
-        AssertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
+        assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
                 grid, true);
     }
 
-    private void AssertCellEnterEditModeOnDoubleClick(Integer rowIndex,
+    private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag, GridProElement grid,
             boolean editingEnabled) {
         GridTHTDElement cell = grid.getCell(rowIndex, colIndex);
