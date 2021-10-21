@@ -3,10 +3,14 @@
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid Pro', 'vaadin-grid-pro');
     };
 
+    function isEditedRow(grid, rowData) {
+        return grid.__edited && grid.__edited.model.item.key === rowData.item.key;
+    }
+
     window.Vaadin.Flow.gridProConnector = {
         setEditModeRenderer: (column, component) => tryCatchWrapper(function (column, component) {
-            column.editModeRenderer = tryCatchWrapper(function (root, _, rowData) {
-                if (this._grid.__edited && this._grid.__edited.model.item.key !== rowData.item.key) {
+            column.editModeRenderer = tryCatchWrapper(function editModeRenderer(root, _, rowData) {
+                if (!isEditedRow(this._grid, rowData)) {
                     this._grid._stopEdit();
                     return;
                 }
@@ -29,11 +33,11 @@
         })(column, component),
 
         patchEditModeRenderer: column => tryCatchWrapper(function (column) {
-            column.__editModeRenderer = tryCatchWrapper(function (root, column, rowData) {
+            column.__editModeRenderer = tryCatchWrapper(function __editModeRenderer(root, column, rowData) {
                 const cell = root.assignedSlot.parentNode;
                 const grid = column._grid;
 
-                if (grid.__edited && grid.__edited.model.item.key !== rowData.item.key) {
+                if (!isEditedRow(grid, rowData)) {
                     grid._stopEdit();
                     return;
                 }
