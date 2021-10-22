@@ -25,11 +25,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
 
@@ -352,28 +347,18 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         beanBox.setFilter("person 2");
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 10);
+        waitUntil(driver -> getNonEmptyOverlayContents().size() > 5);
 
         getNonEmptyOverlayContents().forEach(rendered -> {
-            Assert.assertThat(rendered,
-                    CoreMatchers.containsString("Person 2"));
+                Assert.assertTrue(rendered.contains("Person 2"));
         });
 
-        beanBox.setFilter("oN 33");
+        beanBox.setFilter("oN 330");
 
-        List<String> expectedFilteredItems = new ArrayList<>();
-        expectedFilteredItems.add("Person 33");
-        expectedFilteredItems.addAll(IntStream.range(0, 10)
-                .mapToObj(i -> "Person 33" + i).collect(Collectors.toList()));
+        waitUntil(driver -> getOverlayContents().size() == 1);
 
-        waitUntil(driver -> getOverlayContents().size() == expectedFilteredItems
-                .size());
-
-        List<String> filteredItems = getNonEmptyOverlayContents();
-        IntStream.range(0, filteredItems.size()).forEach(i -> {
-            Assert.assertEquals("Unexpected item after filtering.",
-                    expectedFilteredItems.get(i), filteredItems.get(i));
-        });
+        Assert.assertEquals("Unexpected item after filtering.",
+                "Person 330", getNonEmptyOverlayContents().get(0));
     }
 
     @Test
@@ -509,7 +494,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         assertComponentRendered("<h4>Person 0</h4>");
         assertComponentRendered("<h4>Person 4</h4>");
-        assertComponentRendered("<h4>Person 9</h4>");
+        assertComponentRendered("<h4>Person 7</h4>");
     }
 
     @Test
