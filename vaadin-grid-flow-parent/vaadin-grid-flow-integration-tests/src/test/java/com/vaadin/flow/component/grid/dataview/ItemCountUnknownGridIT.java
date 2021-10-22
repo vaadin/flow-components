@@ -80,7 +80,8 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
 
         grid.scrollToRow(500);
 
-        int viewportItemCapacity = grid.getLastVisibleRowIndex() - grid.getFirstVisibleRowIndex();
+        int viewportItemCapacity = grid.getLastVisibleRowIndex()
+                - grid.getFirstVisibleRowIndex();
         int expectedLastItem = 500 + viewportItemCapacity;
         Assert.assertEquals(
                 "Grid should be able to scroll after changing to defined size",
