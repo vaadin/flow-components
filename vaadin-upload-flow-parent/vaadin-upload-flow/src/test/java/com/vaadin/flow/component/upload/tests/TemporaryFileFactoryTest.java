@@ -13,7 +13,6 @@ public class TemporaryFileFactoryTest {
     public void temporaryFileShouldNotContainFileName() throws IOException {
         TemporaryFileFactory temporaryFileFactory = new TemporaryFileFactory();
         File testFile = temporaryFileFactory.createFile("test");
-        System.out.println(testFile.getName());
         Assert.assertFalse(testFile.getName().contains("test"));
     }
 }

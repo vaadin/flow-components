@@ -7,14 +7,17 @@ import java.nio.file.Path;
 
 public class TemporaryFileFactory implements FileFactory {
 
+    static Path tempDirectory = null;
+
     /**
      * Create a new temporary file
      */
     @Override
     public File createFile(String fileName) throws IOException {
+        if (tempDirectory == null) {
+            tempDirectory = Files.createTempDirectory("temp_directory");
+        }
         final String tempFileName = "upload_temp_file";
-        Path tempPath = Files.createTempDirectory("temp_directory");
-
-        return Files.createTempFile(tempPath, tempFileName, null).toFile();
+        return Files.createTempFile(tempDirectory, tempFileName, null).toFile();
     }
 }
