@@ -52,6 +52,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/dialog", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/vaadin-dialog", version = "22.0.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
