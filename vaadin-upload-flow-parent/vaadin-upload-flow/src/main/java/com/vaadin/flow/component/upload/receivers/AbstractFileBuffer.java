@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,18 +35,11 @@ public abstract class AbstractFileBuffer implements Serializable {
     /**
      * Constructor for creating a file buffer with the default file factory.
      * <p>
-     * Files will be created using {@link File#createTempFile(String, String)}
-     * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
+     * Files will be created using combination of @{link {@link Files#createTempDirectory(String, FileAttribute[])}}
+     * and {@link Files#createTempFile(Path, String, String, FileAttribute[])}}
      */
     public AbstractFileBuffer() {
-        factory = fileName -> {
-            final String tempFileName = "upload_temp_file_"
-                    + System.currentTimeMillis();
-            Path tempDirectory = Files.createTempDirectory("temp_directory");
-
-            return Files.createTempFile(tempDirectory, tempFileName, null)
-                    .toFile();
-        };
+        factory = new TemporaryFileFactory();
     }
 
     /**
@@ -71,8 +65,7 @@ public abstract class AbstractFileBuffer implements Serializable {
             return new UploadOutputStream(factory.createFile(fileName));
         } catch (IOException e) {
             getLogger().log(Level.SEVERE,
-                    "Failed to create file output stream for: '" + fileName
-                            + "'",
+                    "Failed to create temporary file output stream",
                     e);
         }
         return null;
