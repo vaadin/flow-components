@@ -88,7 +88,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public DatePicker(LocalDate initialDate) {
         super(initialDate, null, String.class, PARSER, FORMATTER);
-        setLocale(UI.getCurrent().getLocale());
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -307,7 +306,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if (languageTag != null) {
+        if (locale == null) {
+            getUI().ifPresent(ui -> setLocale(ui.getLocale()));
+        } else if (languageTag != null) {
             setLocaleWithJS();
         }
         if (i18n != null) {
