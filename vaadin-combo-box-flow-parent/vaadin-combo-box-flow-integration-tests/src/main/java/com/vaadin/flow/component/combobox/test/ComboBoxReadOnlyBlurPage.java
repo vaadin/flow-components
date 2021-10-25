@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,25 +28,17 @@ public class ComboBoxReadOnlyBlurPage extends VerticalLayout {
         comboBox.setAllowCustomValue(true);
         comboBox.setRequired(true);
         comboBox.setReadOnly(true);
-        comboBox.setId("test-combo");
         comboBox.addCustomValueSetListener(ev -> {
             Span span = new Span();
-            span.setText("Triggered");
-            span.setId("triggered");
+            span.setText("Custom value set");
+            span.setId("custom-value-set");
             add(span);
         });
         comboBox.setItems("A", "B", "C");
-        comboBox.setValue("C");
+        comboBox.setValue("D");
         comboBox.focus();
-        Button button = new Button("Click");
-        button.setId("blur-combo");
-        button.addClickListener(ev -> {
-            button.focus();
-            Span span = new Span("Clicked");
-            span.setId("button-clicked");
-            add(span);
-        });
-        add(comboBox, button);
+
+        add(comboBox);
     }
 
 }
