@@ -34,7 +34,7 @@ public class BinderValidationPage extends Div {
         TimePicker timePicker = new TimePicker("Time");
 
         // Set time field validation constraint
-        timePicker.setMin("13:00:00");
+        timePicker.setMin(LocalTime.of(13, 0, 0));
 
         // Set invalid indicator label
         String invalidString = "invalid";

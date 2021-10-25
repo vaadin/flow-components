@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.tests.ComponentDemoTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,9 +32,47 @@ public class CheckboxIT extends ComponentDemoTest {
         WebElement checkbox = layout.findElement(By.id("default-checkbox"));
         Assert.assertTrue("Default checkbox should be present",
                 "vaadin-checkbox".equals(checkbox.getTagName()));
+    }
+
+    @Test
+    public void defaultCheckbox_labelIsDisplayed() {
+        WebElement checkbox = layout.findElement(By.id("default-checkbox"));
         Assert.assertEquals(
-                "Default checkbox label should have text 'Default Checkbox'",
+                "Checkbox label should have the text 'Default Checkbox'",
                 "Default Checkbox", checkbox.getText());
+    }
+
+    @Test
+    public void defaultCheckbox_changeLabel_newLabelIsDisplayed() {
+        clickButton("change-default-label");
+
+        WebElement checkbox = layout.findElement(By.id("default-checkbox"));
+        Assert.assertEquals("Checkbox label should have the text 'New Label'",
+                "New Label", checkbox.getText());
+    }
+
+    @Test
+    public void defaultCheckbox_changeLabel_clickOnLabel_checkboxIsChecked() {
+        clickButton("change-default-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("default-checkbox");
+        checkbox.$("label").first().click();
+
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.isChecked());
+    }
+
+    @Test
+    public void defaultCheckbox_changeLabel_clickOnInput_checkboxIsChecked() {
+        clickButton("change-default-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("default-checkbox");
+        checkbox.$("input").first().click();
+
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.isChecked());
     }
 
     @Test
@@ -90,16 +129,102 @@ public class CheckboxIT extends ComponentDemoTest {
     }
 
     @Test
-    public void htmlCheckbox() {
-        WebElement checkbox = layout.findElement(By.id("html-checkbox"));
-        WebElement anchor = checkbox.findElement(By.tagName("a"));
-        Assert.assertEquals("Content should contain a link to vaadin.com",
+    public void htmlLabelCheckbox_labelLinkIsDisplayed() {
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("html-label-checkbox");
+        WebElement anchor = checkbox.$("label").first()
+                .findElement(By.tagName("a"));
+
+        Assert.assertEquals(
+                "Content should contain a link to vaadin.com/privacy-policy",
                 "https://vaadin.com/privacy-policy",
                 anchor.getAttribute("href"));
+    }
+
+    @Test
+    public void htmlLabelCheckbox_changeLabel_newLabelLinkIsDisplayed() {
+        clickButton("change-html-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("html-label-checkbox");
+        WebElement anchor = checkbox.$("label").first()
+                .findElement(By.tagName("a"));
+
+        Assert.assertEquals(
+                "Content should contain a link to vaadin.com/community-terms",
+                "https://vaadin.com/community-terms",
+                anchor.getAttribute("href"));
+    }
+
+    @Test
+    public void htmlLabelCheckbox_changeLabel_clickOnInput_checkboxIsChecked() {
+        clickButton("change-html-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("html-label-checkbox");
+        checkbox.$("input").first().click();
+
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.isChecked());
+    }
+
+    @Test
+    public void htmlLabelCheckbox_changeLabel_clickOnLabel_checkboxIsChecked() {
+        clickButton("change-html-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("html-label-checkbox");
+        checkbox.$("label").first().click();
+
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.isChecked());
+    }
+
+    @Test
+    public void lazyHtmlLabelCheckbox_setLabel_labelLinkIsDisplayed() {
+        clickButton("set-html-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("lazy-html-label-checkbox");
+        WebElement anchor = checkbox.$("label").first()
+                .findElement(By.tagName("a"));
+
+        Assert.assertEquals(
+                "Content should contain a link to vaadin.com/privacy-policy",
+                "https://vaadin.com/privacy-policy",
+                anchor.getAttribute("href"));
+    }
+
+    @Test
+    public void lazyHtmlLabelCheckbox_setLabel_clickOnLabel_checkboxIsChecked() {
+        clickButton("set-html-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("lazy-html-label-checkbox");
+        checkbox.$("label").first().click();
+
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.isChecked());
+    }
+
+    @Test
+    public void lazyHtmlLabelCheckbox_setLabel_clickOnInput_checkboxIsChecked() {
+        clickButton("set-html-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("lazy-html-label-checkbox");
+        checkbox.$("input").first().click();
+
+        Assert.assertEquals("Checkbox should be checked", true,
+                checkbox.isChecked());
     }
 
     @Override
     protected String getTestPath() {
         return ("/vaadin-checkbox-test-demo");
+    }
+
+    private void clickButton(String id) {
+        $("button").id(id).click();
     }
 }
