@@ -235,10 +235,10 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void customEditorOpened_gridIsScrolled_editorIsClosed() {
-        GridTHTDElement cell = grid.getCell(5, 5);
-        Assert.assertEquals("person6@vaadin.com", cell.getText());
+        GridTHTDElement cell = grid.getCell(8, 5);
+        Assert.assertEquals("person9@vaadin.com", cell.getText());
 
-        assertCellEnterEditModeOnDoubleClick(5, 5, "input");
+        assertCellEnterEditModeOnDoubleClick(8, 5, "input");
 
         // Test to cover the bug where, after scrolling a bit, the component was
         // receiving the focus again and the grid would scroll back to the row
