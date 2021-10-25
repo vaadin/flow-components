@@ -25,7 +25,8 @@ import com.vaadin.flow.component.HasLabel;
  *
  * @author Vaadin Ltd.
  */
-public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents, HasLabel {
+public class Tab extends GeneratedVaadinTab<Tab>
+        implements HasComponents, HasLabel {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 

@@ -35,7 +35,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
+        HasLabel {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
