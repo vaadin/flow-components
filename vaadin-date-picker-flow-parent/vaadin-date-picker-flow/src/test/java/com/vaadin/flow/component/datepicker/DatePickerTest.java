@@ -17,9 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
 
-import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -29,23 +27,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import net.jcip.annotations.NotThreadSafe;
+
 @NotThreadSafe
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
-
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
 
     @Test
     public void datePicker_basicCases() {
