@@ -80,7 +80,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             DataProvider.ofItems());
     private List<ITEM> items;
     private ItemLabelGenerator<ITEM> itemLabelGenerator = String::valueOf;
-    private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>(itemLabelGenerator);
+    private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>(
+            itemLabelGenerator);
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
     private Registration dataProviderListenerRegistration;
 
@@ -181,8 +182,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     /**
      * Sets the item label generator that is used to produce the strings shown
-     * in the ListBox for each item. By default,
-     * {@link String#valueOf(Object)} is used.
+     * in the ListBox for each item. By default, {@link String#valueOf(Object)}
+     * is used.
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
@@ -192,7 +193,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        getItemComponents().forEach(this::refreshContent);
+        setRenderer(new TextRenderer<>(this.itemLabelGenerator));
     }
 
     /**
@@ -204,6 +205,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     public ItemLabelGenerator<ITEM> getItemLabelGenerator() {
         return itemLabelGenerator;
     }
+
     /**
      * Sets the item enabled predicate for this ListBox. The predicate is
      * applied to each item to determine whether the item should be enabled
