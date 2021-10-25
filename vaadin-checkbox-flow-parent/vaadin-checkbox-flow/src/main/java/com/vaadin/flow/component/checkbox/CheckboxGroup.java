@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -74,7 +75,7 @@ public class CheckboxGroup<T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper {
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel {
 
     private static final String VALUE = "value";
 

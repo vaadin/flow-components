@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
@@ -55,7 +56,7 @@ import elemental.json.JsonType;
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.23.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasTheme {
+        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 

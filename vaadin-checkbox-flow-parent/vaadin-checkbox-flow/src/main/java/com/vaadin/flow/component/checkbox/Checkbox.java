@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.dom.PropertyChangeListener;
@@ -32,7 +33,7 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * @author Vaadin Ltd
  */
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
-        implements HasSize {
+        implements HasSize, HasLabel {
 
     private final Label labelElement = appendLabelElement();
 

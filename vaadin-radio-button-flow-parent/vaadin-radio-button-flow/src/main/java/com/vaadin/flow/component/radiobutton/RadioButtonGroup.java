@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.UI;
@@ -76,7 +77,7 @@ public class RadioButtonGroup<T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation,
-        HasHelper, HasSize {
+        HasHelper, HasSize, HasLabel {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 

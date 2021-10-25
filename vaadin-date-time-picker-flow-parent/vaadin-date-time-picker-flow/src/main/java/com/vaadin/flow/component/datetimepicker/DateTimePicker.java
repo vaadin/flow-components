@@ -74,7 +74,7 @@ class DateTimePickerTimePicker
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper {
+        Focusable<DateTimePicker>, HasHelper, HasLabel {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
