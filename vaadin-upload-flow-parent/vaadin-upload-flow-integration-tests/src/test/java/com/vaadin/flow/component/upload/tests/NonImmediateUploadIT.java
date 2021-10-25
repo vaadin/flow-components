@@ -36,7 +36,7 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
     @Test
     public void uploadMultipleFiles_shouldNotThrowException_onRemove()
             throws Exception {
-        uploadMultipleFiles_shouldNotThrowException("clear-button");
+        uploadMultipleFiles_shouldNotThrowException("remove-button");
     }
 
     private void uploadMultipleFiles_shouldNotThrowException(String buttonType)
