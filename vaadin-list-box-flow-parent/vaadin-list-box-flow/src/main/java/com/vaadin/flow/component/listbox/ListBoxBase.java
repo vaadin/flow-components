@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -78,7 +79,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     private final AtomicReference<DataProvider<ITEM, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
     private List<ITEM> items;
-    private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>();
+    private ItemLabelGenerator<ITEM> itemLabelGenerator = String::valueOf;
+    private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>(itemLabelGenerator);
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
     private Registration dataProviderListenerRegistration;
 
@@ -177,6 +179,31 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         getItemComponents().forEach(this::refreshContent);
     }
 
+    /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the ListBox for each item. By default,
+     * {@link String#valueOf(Object)} is used.
+     *
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<ITEM> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        getItemComponents().forEach(this::refreshContent);
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the ListBox for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<ITEM> getItemLabelGenerator() {
+        return itemLabelGenerator;
+    }
     /**
      * Sets the item enabled predicate for this ListBox. The predicate is
      * applied to each item to determine whether the item should be enabled
