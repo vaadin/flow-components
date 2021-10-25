@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -31,6 +32,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Shortcuts;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -46,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./flow-component-renderer.js")
 @HtmlImport("flow-component-renderer.html")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize {
+        implements HasComponents, HasSize, HasTheme {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
@@ -470,7 +472,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Gets whether dialog is enabled to be dragged or not.
-     * 
+     *
      * @return {@code true} if dragging is enabled, {@code false} otherwise
      *         (default).
      */
@@ -480,7 +482,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Sets whether dialog can be resized by user or not.
-     * 
+     *
      * @param resizable
      *            {@code true} to enabled resizing of the dialog, {@code false}
      *            otherwise.
@@ -630,6 +632,30 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(DialogVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(DialogVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(DialogVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(DialogVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     private void setDimension(String dimension, String value) {

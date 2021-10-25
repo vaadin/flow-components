@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
+import org.openjdk.jol.info.GraphLayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -135,8 +135,8 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
             setBackendContainer(component, persons);
         }
 
-        memoryLabel.setText(
-                String.valueOf(ObjectSizeCalculator.getObjectSize(component)));
+        memoryLabel.setText(String
+                .valueOf(GraphLayout.parseInstance(component).totalSize()));
     }
 
     private void createMenu(T component) {

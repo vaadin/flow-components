@@ -19,9 +19,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
@@ -33,19 +31,6 @@ import net.jcip.annotations.NotThreadSafe;
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
-
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
 
     @Test
     public void datePicker_basicCases() {
