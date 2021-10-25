@@ -15,7 +15,6 @@ public class TemporaryFileFactory implements FileFactory {
         final String tempFileName = "upload_temp_file";
         Path tempPath = Files.createTempDirectory("temp_directory");
 
-        return Files.createTempFile(tempPath, tempFileName, null)
-                .toFile();
+        return Files.createTempFile(tempPath, tempFileName, null).toFile();
     }
 }

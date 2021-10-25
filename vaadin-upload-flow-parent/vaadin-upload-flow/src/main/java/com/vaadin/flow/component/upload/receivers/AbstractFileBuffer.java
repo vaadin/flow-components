@@ -35,8 +35,9 @@ public abstract class AbstractFileBuffer implements Serializable {
     /**
      * Constructor for creating a file buffer with the default file factory.
      * <p>
-     * Files will be created using combination of @{link {@link Files#createTempDirectory(String, FileAttribute[])}}
-     * and {@link Files#createTempFile(Path, String, String, FileAttribute[])}}
+     * Files will be created using combination of @{link
+     * {@link Files#createTempDirectory(String, FileAttribute[])}} and
+     * {@link Files#createTempFile(Path, String, String, FileAttribute[])}}
      */
     public AbstractFileBuffer() {
         factory = new TemporaryFileFactory();
@@ -65,8 +66,7 @@ public abstract class AbstractFileBuffer implements Serializable {
             return new UploadOutputStream(factory.createFile(fileName));
         } catch (IOException e) {
             getLogger().log(Level.SEVERE,
-                    "Failed to create temporary file output stream",
-                    e);
+                    "Failed to create temporary file output stream", e);
         }
         return null;
     }
