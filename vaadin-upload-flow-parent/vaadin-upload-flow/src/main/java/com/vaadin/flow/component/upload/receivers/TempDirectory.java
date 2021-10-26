@@ -16,7 +16,7 @@ public class TempDirectory implements Serializable {
         }
     }
 
-    private static class LazyHolder {
+    private static class LazyHolder implements Serializable {
         static final TempDirectory INSTANCE = new TempDirectory();
     }
 
