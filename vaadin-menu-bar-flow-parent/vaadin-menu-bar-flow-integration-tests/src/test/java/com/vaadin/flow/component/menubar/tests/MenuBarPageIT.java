@@ -24,9 +24,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/menu-bar-test")
 public class MenuBarPageIT extends AbstractComponentIT {
@@ -361,6 +361,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
         menuBar = $(MenuBarElement.class).first();
         click("toggle-visible");
         assertButtonContents("item 1");
+    }
+
+    @Test
+    public void addSubItem_clickMenuItem_clickButton_subMenuOpenedAndClosed() {
+        click("add-sub-item");
+        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
+                .click();
+        verifyOpened();
+        menuBar.getButtons().get(1).click();
+        verifyClosed();
     }
 
     @After
