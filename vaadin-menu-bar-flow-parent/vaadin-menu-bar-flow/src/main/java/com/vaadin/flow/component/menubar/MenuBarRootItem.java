@@ -52,4 +52,33 @@ class MenuBarRootItem extends MenuItem {
         super.setVisible(visible);
         menuBar.resetContent();
     }
+
+    /**
+     * Adds one or more theme names to this item. Multiple theme names can be
+     * specified by using multiple parameters.
+     * <p>
+     * Note that the themes set via {@link MenuBar#setThemeName(String)} will be
+     * overridden when using this method.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be added to the item
+     */
+    @Override
+    public void addThemeNames(String... themeNames) {
+        super.addThemeNames(themeNames);
+        menuBar.updateButtons();
+    }
+
+    /**
+     * Removes one or more theme names from this item. Multiple theme names can
+     * be specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be removed from the item
+     */
+    @Override
+    public void removeThemeNames(String... themeNames) {
+        super.removeThemeNames(themeNames);
+        menuBar.updateButtons();
+    }
 }

@@ -15,19 +15,20 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
- *
- * @see MenuItem
  *
  * @param <C>
  *            the context menu type
@@ -35,8 +36,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *            the menu item type
  * @param <S>
  *            the sub menu type
- *
  * @author Vaadin Ltd.
+ * @see MenuItem
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
@@ -44,10 +45,14 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 
+    private static final String PRIVATE_THEME_ATTRIBUTE = "_theme";
+
     private final C contextMenu;
     private S subMenu;
 
     private boolean checkable = false;
+
+    private Set<String> themeNames = new LinkedHashSet<>();
 
     /**
      * Default constructor
@@ -158,12 +163,9 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
         getElement().setProperty("_checked", checked);
 
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    ui.getPage().executeJavaScript(
-                            "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
-                            getElement(), checked);
-                }));
+        executeJsWhenAttached(
+                "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
+                getElement(), checked);
     }
 
     /**
@@ -179,5 +181,61 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         return getElement().getProperty("_checked", false);
     }
 
+    /**
+     * Adds one or more theme names to this item. Multiple theme names can be
+     * specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be added to the item
+     */
+    public void addThemeNames(String... themeNames) {
+        this.themeNames.addAll(Arrays.asList(themeNames));
+        setThemeName();
+    }
+
+    /**
+     * Removes one or more theme names from this item. Multiple theme names can
+     * be specified by using multiple parameters.
+     *
+     * @param themeNames
+     *            the theme name or theme names to be removed from the item
+     */
+    public void removeThemeNames(String... themeNames) {
+        this.themeNames.removeAll(Arrays.asList(themeNames));
+        setThemeName();
+    }
+
+    /**
+     * Checks if the item has the given theme name.
+     *
+     * @param themeName
+     *            the theme name to check for
+     * @return <code>true</code> if the item has the given theme name,
+     *         <code>false</code> otherwise
+     */
+    public boolean hasThemeName(String themeName) {
+        return themeNames.contains(themeName);
+    }
+
+    private void setThemeName() {
+        String themeName = themeNames.stream().collect(Collectors.joining(" "));
+        if (themeName != null) {
+            getElement().setProperty(PRIVATE_THEME_ATTRIBUTE, themeName);
+        } else {
+            getElement().removeProperty(PRIVATE_THEME_ATTRIBUTE);
+        }
+
+        executeJsWhenAttached(
+                "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
+                getElement(), themeName);
+    }
+
     protected abstract S createSubMenu();
+
+    protected void executeJsWhenAttached(String expression,
+            Serializable... parameters) {
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                context -> ui.getPage().executeJs(expression, parameters)));
+    }
 }
