@@ -3,6 +3,7 @@ package com.vaadin.flow.component.upload.receivers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class TemporaryFileFactory implements FileFactory {
 
@@ -13,7 +14,11 @@ public class TemporaryFileFactory implements FileFactory {
     public File createFile(String fileName) throws IOException {
 
         final String tempFileName = "upload_temp_file";
-        return Files.createTempFile(TempDirectory.getInstance().getTempPath(),
-                tempFileName, "").toFile();
+        Path tempDirectory = TempDirectory.getInstance().getTempPath();
+
+        if (tempDirectory == null) {
+            throw new IOException("Failed to create temp directory");
+        }
+        return Files.createTempFile(tempDirectory, tempFileName, "").toFile();
     }
 }

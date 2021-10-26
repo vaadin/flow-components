@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TempDirectory implements Serializable {
     private transient Path tempPath;
@@ -12,7 +14,10 @@ public class TempDirectory implements Serializable {
         try {
             tempPath = Files.createTempDirectory("temp_dir");
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().log(Level.SEVERE,
+                    "Failed to create temporary directory for upload component '",
+                    e);
+            tempPath = null;
         }
     }
 
@@ -30,5 +35,9 @@ public class TempDirectory implements Serializable {
 
     public Path getTempPath() {
         return tempPath;
+    }
+
+    private Logger getLogger() {
+        return Logger.getLogger(this.getClass().getName());
     }
 }
