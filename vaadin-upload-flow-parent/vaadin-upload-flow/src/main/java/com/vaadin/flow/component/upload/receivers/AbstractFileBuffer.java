@@ -33,11 +33,8 @@ public abstract class AbstractFileBuffer implements Serializable {
     private FileFactory factory;
 
     /**
-     * Constructor for creating a file buffer with the default file factory.
-     * <p>
-     * Files will be created using combination of @{link
-     * {@link Files#createTempDirectory(String, FileAttribute[])}} and
-     * {@link Files#createTempFile(Path, String, String, FileAttribute[])}}
+     * Constructor for creating a file buffer with the default temporary file
+     * factory.
      */
     public AbstractFileBuffer() {
         factory = new TemporaryFileFactory();

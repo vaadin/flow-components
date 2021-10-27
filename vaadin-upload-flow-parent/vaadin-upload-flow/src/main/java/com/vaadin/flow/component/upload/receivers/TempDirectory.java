@@ -1,16 +1,16 @@
 package com.vaadin.flow.component.upload.receivers;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TempDirectory implements Serializable {
-    private transient Path tempPath;
+public final class TempDirectory {
+    private final Path path;
 
     private TempDirectory() {
+        Path tempPath;
         try {
             tempPath = Files.createTempDirectory("temp_dir");
         } catch (IOException e) {
@@ -19,22 +19,20 @@ public class TempDirectory implements Serializable {
                     e);
             tempPath = null;
         }
+        path = tempPath;
     }
 
-    private static class LazyHolder implements Serializable {
+    /**
+     * This class is for having a thread-safe singleton object. please take a
+     * look here:
+     * https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+     */
+    private static class LazyHolder {
         static final TempDirectory INSTANCE = new TempDirectory();
     }
 
-    public Object readResolve() {
-        return getInstance();
-    }
-
-    public static TempDirectory getInstance() {
-        return LazyHolder.INSTANCE;
-    }
-
-    public Path getTempPath() {
-        return tempPath;
+    public static Path getPath() {
+        return LazyHolder.INSTANCE.path;
     }
 
     private Logger getLogger() {

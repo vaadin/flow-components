@@ -14,11 +14,12 @@ public class TemporaryFileFactory implements FileFactory {
     public File createFile(String fileName) throws IOException {
 
         final String tempFileName = "upload_temp_file";
-        Path tempDirectory = TempDirectory.getInstance().getTempPath();
+        Path tempDirectory = TempDirectory.getPath();
 
         if (tempDirectory == null) {
             throw new IOException("Failed to create temp directory");
         }
-        return Files.createTempFile(tempDirectory, tempFileName, "").toFile();
+        return Files.createTempFile(tempDirectory, tempFileName, "tmp")
+                .toFile();
     }
 }
