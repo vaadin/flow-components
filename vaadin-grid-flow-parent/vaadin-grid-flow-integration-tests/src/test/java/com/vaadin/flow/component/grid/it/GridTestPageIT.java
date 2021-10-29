@@ -54,7 +54,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         String itemIdPrefix = "grid-with-component-renderers-";
 
         waitUntil(driver -> getItems(driver, grid).size() == 20);
-        assertItemsArePresent(grid, itemIdPrefix, 0, 20);
+        assertItemsArePresent(grid, itemIdPrefix, 0, 17);
 
         WebElement button = findElement(By.id(itemIdPrefix + "change-list"));
 
@@ -64,7 +64,7 @@ public class GridTestPageIT extends AbstractComponentIT {
 
         clickElementWithJs(button);
         waitUntil(driver -> getItems(driver, grid).size() == 20);
-        assertItemsArePresent(grid, itemIdPrefix, 0, 20);
+        assertItemsArePresent(grid, itemIdPrefix, 0, 17);
     }
 
     @Test
@@ -72,19 +72,19 @@ public class GridTestPageIT extends AbstractComponentIT {
         WebElement grid = findElement(By.id("grid-with-component-renderers"));
         String itemIdPrefix = "grid-with-component-renderers-";
 
-        assertItemsArePresent(grid, itemIdPrefix, 0, 20);
+        assertItemsArePresent(grid, itemIdPrefix, 0, 17);
 
         WebElement button = findElement(By.id(itemIdPrefix + "remove-0"));
         clickElementWithJs(button);
 
         assertItemIsNotPresent(grid, itemIdPrefix + "item-name-0");
-        assertItemsArePresent(grid, itemIdPrefix, 1, 19);
+        assertItemsArePresent(grid, itemIdPrefix, 1, 18);
 
-        button = findElement(By.id(itemIdPrefix + "remove-19"));
+        button = findElement(By.id(itemIdPrefix + "remove-18"));
         clickElementWithJs(button);
 
-        assertItemIsNotPresent(grid, itemIdPrefix + "item-name-19");
-        assertItemsArePresent(grid, itemIdPrefix, 1, 18);
+        assertItemIsNotPresent(grid, itemIdPrefix + "item-name-18");
+        assertItemsArePresent(grid, itemIdPrefix, 1, 17);
     }
 
     @Test
