@@ -350,15 +350,15 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> getNonEmptyOverlayContents().size() > 5);
 
         getNonEmptyOverlayContents().forEach(rendered -> {
-                Assert.assertTrue(rendered.contains("Person 2"));
+            Assert.assertTrue(rendered.contains("Person 2"));
         });
 
         beanBox.setFilter("oN 330");
 
         waitUntil(driver -> getOverlayContents().size() == 1);
 
-        Assert.assertEquals("Unexpected item after filtering.",
-                "Person 330", getNonEmptyOverlayContents().get(0));
+        Assert.assertEquals("Unexpected item after filtering.", "Person 330",
+                getNonEmptyOverlayContents().get(0));
     }
 
     @Test
