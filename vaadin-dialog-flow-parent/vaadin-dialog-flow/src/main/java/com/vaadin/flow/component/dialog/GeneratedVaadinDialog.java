@@ -50,7 +50,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/vaadin-dialog", version = "2.5.2")
+@NpmPackage(value = "@vaadin/vaadin-dialog", version = "2.6.0")
 @JsModule("@vaadin/vaadin-dialog/src/vaadin-dialog.js")
 @HtmlImport("frontend://bower_components/vaadin-dialog/src/vaadin-dialog.html")
 public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
