@@ -124,10 +124,12 @@ public class VirtualListIT extends AbstractComponentIT {
         // the items are preallocated in the list, but they are empty
         Assert.assertEquals(100, items.length());
 
-        assertItemsArePresent(items, 0, 32, "Item ");
+        // Last received index
+        int lastReceivedKey = 28;
+        assertItemsArePresent(items, 0, lastReceivedKey, "Item ");
 
         // all the remaining items should be empty
-        for (int i = 32; i < items.length(); i++) {
+        for (int i = lastReceivedKey; i < items.length(); i++) {
             MatcherAssert.assertThat(items.get(i),
                     CoreMatchers.instanceOf(JsonNull.class));
         }
@@ -138,11 +140,11 @@ public class VirtualListIT extends AbstractComponentIT {
         items = getItems(getDriver(), list);
 
         // all the initial items should be empty
-        assertItemsAreNotPresent(items, 0, items.length() - 32);
+        assertItemsAreNotPresent(items, 0, items.length() - lastReceivedKey);
 
-        // the last 32 items should have data
-        assertItemsArePresent(items, items.length() - 32, items.length(),
-                "Item ");
+        // the last [lastReceivedKey] items should have data
+        assertItemsArePresent(items, items.length() - lastReceivedKey,
+                items.length(), "Item ");
     }
 
     @Test
