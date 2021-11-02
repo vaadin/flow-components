@@ -264,6 +264,11 @@ public class GridSortingTest {
     }
 
     @Test
+    public void checkMultiSortDefaultValue() {
+        Assert.assertFalse(grid.isMultiSort());
+    }
+
+    @Test
     public void checkMultiSortFalse() {
         grid.setMultiSort(false);
         Assert.assertFalse(grid.isMultiSort());
