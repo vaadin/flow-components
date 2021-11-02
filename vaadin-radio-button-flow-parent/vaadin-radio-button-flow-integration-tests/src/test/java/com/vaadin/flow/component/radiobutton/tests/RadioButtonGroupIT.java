@@ -25,6 +25,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonElement;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -192,6 +193,38 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         // Nothing has changed
         Assert.assertEquals("bar", valueInfo.getText());
+    }
+
+    @Test
+    public void readOnlyGroup_disableReadOnly_clickOnButtonInput_buttonIsSelected() {
+        WebElement switchReadOnly = findElement(By.id("switch-read-only"));
+        switchReadOnly.click();
+
+        RadioButtonGroupElement group = $(RadioButtonGroupElement.class)
+                .id("button-group-read-only");
+        List<RadioButtonElement> buttons = group.$(RadioButtonElement.class)
+                .all();
+
+        buttons.get(0).$("input").first().click();
+
+        Assert.assertEquals("Group should have the 'foo' item selected", "foo",
+                group.getSelectedText());
+    }
+
+    @Test
+    public void readOnlyGroup_disableReadOnly_clickOnButtonLabel_buttonIsSelected() {
+        WebElement switchReadOnly = findElement(By.id("switch-read-only"));
+        switchReadOnly.click();
+
+        RadioButtonGroupElement group = $(RadioButtonGroupElement.class)
+                .id("button-group-read-only");
+        List<RadioButtonElement> buttons = group.$(RadioButtonElement.class)
+                .all();
+
+        buttons.get(0).$("label").first().click();
+
+        Assert.assertEquals("Group should have the 'foo' item selected", "foo",
+                group.getSelectedText());
     }
 
     @Test

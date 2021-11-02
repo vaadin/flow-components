@@ -105,8 +105,8 @@ public class TimePickerPage extends Div {
         TimePicker timePicker = new TimePicker();
         timePicker.setLabel("TimePicker Min & Max");
 
-        timePicker.setMin("05:00");
-        timePicker.setMax("18:00");
+        timePicker.setMin(LocalTime.of(5, 0));
+        timePicker.setMax(LocalTime.of(18, 0));
 
         timePicker.addValueChangeListener(
                 event -> updateMessage(message, timePicker));
