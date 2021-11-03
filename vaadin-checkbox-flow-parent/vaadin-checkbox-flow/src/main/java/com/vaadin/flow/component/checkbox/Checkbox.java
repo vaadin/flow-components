@@ -34,6 +34,8 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         implements HasSize {
 
+    private final Label labelElement = appendLabelElement();
+
     private static final PropertyChangeListener NO_OP = event -> {
     };
 
@@ -118,13 +120,11 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
                 .get().getText();
     }
 
-    private Label addNewLabel() {
-        // Clear all known child elements
-        getElement().getChildren().forEach(e -> getElement().removeChild(e));
+    private Label appendLabelElement() {
         // Create and add a new slotted label
         Label label = new Label();
         label.getElement().setAttribute("slot", "label");
-        this.getElement().appendChild(label.getElement());
+        getElement().appendChild(label.getElement());
         return label;
     }
 
@@ -135,7 +135,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *            the label text to set
      */
     public void setLabel(String label) {
-        addNewLabel().setText(label);
+        labelElement.setText(label);
     }
 
     /**
@@ -150,7 +150,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *            the label html to set
      */
     public void setLabelAsHtml(String htmlContent) {
-        addNewLabel().getElement().setProperty("innerHTML", htmlContent);
+        labelElement.getElement().setProperty("innerHTML", htmlContent);
     }
 
     /**

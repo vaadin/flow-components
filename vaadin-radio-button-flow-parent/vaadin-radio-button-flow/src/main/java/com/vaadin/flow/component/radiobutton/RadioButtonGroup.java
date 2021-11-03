@@ -69,7 +69,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "22.0.0-alpha9")
+@NpmPackage(value = "@vaadin/radio-group", version = "22.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "22.0.0-beta1")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -509,12 +510,9 @@ public class RadioButtonGroup<T>
 
     private void updateButton(RadioButton<T> button) {
         updateEnabled(button);
-        button.getElement().getChildren()
-                .forEach(e -> button.getElement().removeChild(e));
-        Label label = new Label();
-        label.getElement().setAttribute("slot", "label");
-        label.add(getItemRenderer().createComponent(button.getItem()));
-        button.add(label);
+        Component labelComponent = getItemRenderer()
+                .createComponent(button.getItem());
+        button.setLabelComponent(labelComponent);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
