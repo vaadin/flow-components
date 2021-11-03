@@ -4243,7 +4243,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
-        updateClientSideSorterIndicators(sortOrder);
+        updateClientSideSorterIndicators(sortOrder, true);
         fireColumnReorderEvent(getColumns());
     }
 
