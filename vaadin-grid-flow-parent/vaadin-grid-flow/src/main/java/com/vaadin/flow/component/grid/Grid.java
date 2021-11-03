@@ -3262,7 +3262,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (!userOriginated) {
-            updateClientSideSorterIndicators(order);
+            updateClientSideSorterIndicators(order, true);
         }
 
         sortOrder.clear();
@@ -3297,6 +3297,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateClientSideSorterIndicators(
             List<GridSortOrder<T>> order) {
+        updateClientSideSorterIndicators(order, false);
+    }
+
+    private void updateClientSideSorterIndicators(List<GridSortOrder<T>> order,
+            boolean clear) {
         JsonArray directions = Json.createArray();
 
         for (int i = 0; i < order.size(); i++) {
@@ -3322,7 +3327,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             directions.set(i, direction);
         }
         getElement().callJsFunction("$connector.setSorterDirections",
-                directions);
+                directions, clear);
     }
 
     /**
