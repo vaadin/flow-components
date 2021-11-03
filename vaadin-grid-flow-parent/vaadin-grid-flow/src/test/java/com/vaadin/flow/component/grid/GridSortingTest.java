@@ -263,6 +263,23 @@ public class GridSortingTest {
                 grid.getDataCommunicator().getBackEndSorting());
     }
 
+    @Test
+    public void checkMultiSortDefaultValue() {
+        Assert.assertFalse(grid.isMultiSort());
+    }
+
+    @Test
+    public void checkMultiSortFalse() {
+        grid.setMultiSort(false);
+        Assert.assertFalse(grid.isMultiSort());
+    }
+
+    @Test
+    public void checkMultiSortTrue() {
+        grid.setMultiSort(true);
+        Assert.assertTrue(grid.isMultiSort());
+    }
+
     private void setTestSorting() {
         JsonArray sortersArray = Json.createArray();
         sortersArray.set(0, createSortObject(getColumnId(nameColumn), "asc"));
