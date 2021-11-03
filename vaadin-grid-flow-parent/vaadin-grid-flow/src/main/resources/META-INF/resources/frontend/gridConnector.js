@@ -410,14 +410,16 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
         }
       })
 
-      grid.$connector.setSorterDirections = tryCatchWrapper(function(directions) {
+      grid.$connector.setSorterDirections = tryCatchWrapper(function(directions, clear) {
         sorterDirectionsSetFromServer = true;
         setTimeout(tryCatchWrapper(() => {
           try {
             const sorters = Array.from(grid.querySelectorAll('vaadin-grid-sorter'));
 
             sorters.forEach(sorter => {
-              sorter.direction = null;
+              if (clear || !directions.filter(d => d.column === sorter.getAttribute('path'))[0]) {
+                sorter.direction = null;
+              }
             });
 
             directions.reverse().forEach(({column, direction}) => {
