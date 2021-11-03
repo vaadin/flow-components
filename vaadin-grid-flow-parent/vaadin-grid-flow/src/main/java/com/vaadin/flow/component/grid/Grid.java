@@ -3092,9 +3092,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *         {@code false} otherwise
      */
     public boolean isMultiSort() {
-        return Optional.ofNullable(getElement().getAttribute("multi-sort"))
-                .map(multiSort -> multiSort.equals("") ? "true" : multiSort)
-                .map(Boolean::parseBoolean).orElse(false);
+        String multiSort = getElement().getAttribute("multi-sort");
+        if (multiSort != null && multiSort.length() == 0) {
+            multiSort = "true";
+        }
+        return Boolean.parseBoolean(multiSort);
     }
 
     @ClientCallable
