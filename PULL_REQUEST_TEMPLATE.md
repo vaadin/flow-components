@@ -1,4 +1,4 @@
-# PLEASE READ AND FOLLOW THE TEMPLATE! THE PR CAN BE REJECTED OTHERWISE (This line should be removed when submitting)
+<!-- PLEASE READ AND FOLLOW THE TEMPLATE! THE PR CAN BE REJECTED OTHERWISE (This line should be removed when submitting) -->
 
 ## Description
 
