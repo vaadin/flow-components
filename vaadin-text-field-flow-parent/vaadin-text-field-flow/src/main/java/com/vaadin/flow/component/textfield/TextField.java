@@ -245,6 +245,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

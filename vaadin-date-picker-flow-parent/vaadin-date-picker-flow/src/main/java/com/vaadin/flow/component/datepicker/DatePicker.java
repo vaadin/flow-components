@@ -504,6 +504,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return super.isClearButtonVisibleBoolean();
     }
 
+    /**
+     * Sets the label for the datepicker.
+     *
+     * @param label
+     *            value for the {@code label} property in the datepicker
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -514,6 +520,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the {@code label} property of the datePicker
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

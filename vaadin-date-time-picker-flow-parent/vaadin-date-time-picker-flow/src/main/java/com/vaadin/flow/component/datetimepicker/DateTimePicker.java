@@ -316,6 +316,7 @@ public class DateTimePicker
      * @param label
      *            the String value to set
      */
+    @Override
     public void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -325,6 +326,7 @@ public class DateTimePicker
      *
      * @return the {@code label} property of the date time picker
      */
+    @Override
     public String getLabel() {
         return getElement().getProperty("label");
     }

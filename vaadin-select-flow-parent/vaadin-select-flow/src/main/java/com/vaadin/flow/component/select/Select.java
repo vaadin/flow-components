@@ -413,6 +413,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @return the label string, or {@code null} if not set
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

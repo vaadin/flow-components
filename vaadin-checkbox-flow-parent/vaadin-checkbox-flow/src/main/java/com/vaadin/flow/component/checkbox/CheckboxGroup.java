@@ -367,6 +367,12 @@ public class CheckboxGroup<T>
         return itemLabelGenerator;
     }
 
+    /**
+     * Sets the label for the checkbox group.
+     *
+     * @param label
+     *            value for the {@code label} property in the checkbox group
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -377,6 +383,7 @@ public class CheckboxGroup<T>
      *
      * @return the {@code label} property of the checkbox group
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

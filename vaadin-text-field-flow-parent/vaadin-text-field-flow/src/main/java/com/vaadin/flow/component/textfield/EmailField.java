@@ -216,6 +216,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

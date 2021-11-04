@@ -394,6 +394,12 @@ public class RadioButtonGroup<T>
         return super.getErrorMessageString();
     }
 
+    /**
+     * Sets the label for the field.
+     *
+     * @param label
+     *            value for the {@code label} property in the webcomponent
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -404,6 +410,7 @@ public class RadioButtonGroup<T>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

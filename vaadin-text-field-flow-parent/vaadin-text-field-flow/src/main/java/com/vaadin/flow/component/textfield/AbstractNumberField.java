@@ -185,6 +185,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

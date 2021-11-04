@@ -1378,6 +1378,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return isRequiredBoolean();
     }
 
+    /**
+     * Sets the label for the combobox.
+     *
+     * @param label
+     *            value for the {@code label} property in the combobox
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -1388,6 +1394,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the {@code label} property of the combobox
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

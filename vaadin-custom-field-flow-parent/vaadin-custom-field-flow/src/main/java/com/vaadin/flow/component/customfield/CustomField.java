@@ -213,6 +213,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getElement().getProperty("label", null);
     }
@@ -223,6 +224,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @param label
      *            value for the {@code label} property in the webcomponent
      */
+    @Override
     public void setLabel(String label) {
         getElement().setProperty("label", label);
     }

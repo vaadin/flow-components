@@ -143,6 +143,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         addValueChangeListener(listener);
     }
 
+    /**
+     * Sets the label for the time picker.
+     *
+     * @param label
+     *            value for the {@code label} property in the time picker
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -176,6 +182,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *
      * @return the {@code label} property of the time picker
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

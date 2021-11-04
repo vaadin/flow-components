@@ -227,6 +227,7 @@ public class PasswordField
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

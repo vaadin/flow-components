@@ -61,6 +61,7 @@ public class Tab extends GeneratedVaadinTab<Tab>
      *
      * @return the label
      */
+    @Override
     public final String getLabel() {
         return getElement().getText();
     }
@@ -71,6 +72,7 @@ public class Tab extends GeneratedVaadinTab<Tab>
      * @param label
      *            the label to display
      */
+    @Override
     public final void setLabel(String label) {
         getElement().setText(label);
     }
