@@ -21,6 +21,16 @@ import org.junit.Test;
 
 public class HasLabelTest {
 
+    @Before
+    public void setUp() {
+        UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
+
     @Test
     public void dateTimePicker() {
         DateTimePicker c = new DateTimePicker();
