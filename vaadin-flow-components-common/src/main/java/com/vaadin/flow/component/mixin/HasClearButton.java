@@ -26,24 +26,25 @@ import com.vaadin.flow.component.HasElement;
  */
 public interface HasClearButton extends HasElement {
 
-  /**
-   * Gets the visibility state of the button which clears the field.
-   *
-   * @return <code>true</code> if the button is visible, <code>false</code>
-   *         otherwise
-   */
-  default boolean isClearButtonVisible() {
-    return getElement().getProperty("clearButtonVisible", false);
-  }
+    /**
+     * Gets the visibility state of the button which clears the field.
+     *
+     * @return <code>true</code> if the button is visible, <code>false</code>
+     *         otherwise
+     */
+    default boolean isClearButtonVisible() {
+        return getElement().getProperty("clearButtonVisible", false);
+    }
 
-  /**
-   * Set to <code>false</code> to hide the clear button which clears the field.
-   *
-   * @param clearButtonVisible
-   *            <code>true</code> to set the button visible,
-   *            <code>false</code> otherwise
-   */
-  default void setClearButtonVisible(boolean clearButtonVisible) {
-    getElement().setProperty("clearButtonVisible", clearButtonVisible);
-  }
+    /**
+     * Set to <code>false</code> to hide the clear button which clears the
+     * field.
+     *
+     * @param clearButtonVisible
+     *            <code>true</code> to set the button visible,
+     *            <code>false</code> otherwise
+     */
+    default void setClearButtonVisible(boolean clearButtonVisible) {
+        getElement().setProperty("clearButtonVisible", clearButtonVisible);
+    }
 }

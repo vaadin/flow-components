@@ -38,13 +38,17 @@ public class SlotUtilsTest {
 
         HasElement hasElement = () -> div;
 
-        assertEquals(1, SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
-        assertEquals(1, SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
+        assertEquals(1,
+                SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
+        assertEquals(1,
+                SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
 
         SlotUtils.clearSlot(hasElement, TEST_SLOT);
 
-        assertEquals(0, SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
-        assertEquals(0, SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
+        assertEquals(0,
+                SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
+        assertEquals(0,
+                SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
     }
 
     private static Element span(String slot) {
