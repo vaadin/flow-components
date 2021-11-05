@@ -33,6 +33,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.mixin.HasClearButton;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -56,7 +57,8 @@ public class BigDecimalField
         extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
         HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
         InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel {
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasClearButton {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -303,34 +305,6 @@ public class BigDecimalField
     @Override
     public void setAutoselect(boolean autoselect) {
         super.setAutoselect(autoselect);
-    }
-
-    /**
-     * Gets the visibility state of the button which clears the field.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isClearButtonVisible() {
-        return isClearButtonVisibleBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the clear button which clears the text
-     * field.
-     *
-     * @param clearButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
-    }
-
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
     }
 
     /**

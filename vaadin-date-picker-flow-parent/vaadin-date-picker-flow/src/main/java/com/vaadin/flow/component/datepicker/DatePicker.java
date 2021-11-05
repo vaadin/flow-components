@@ -35,6 +35,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.mixin.HasClearButton;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -62,7 +63,7 @@ import elemental.json.JsonType;
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.28.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel {
+        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -482,32 +483,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         final boolean isSmallerThenMin = value != null && min != null
                 && value.isBefore(min);
         return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
-    }
-
-    /**
-     * Sets displaying a clear button in the datepicker when it has value.
-     * <p>
-     * The clear button is an icon, which can be clicked to set the datepicker
-     * value to {@code null}.
-     *
-     * @param clearButtonVisible
-     *            {@code true} to display the clear button, {@code false} to
-     *            hide it
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
-    }
-
-    /**
-     * Gets whether this datepicker displays a clear button when it has value.
-     *
-     * @return {@code true} if this datepicker displays a clear button,
-     *         {@code false} otherwise
-     * @see #setClearButtonVisible(boolean)
-     */
-    public boolean isClearButtonVisible() {
-        return super.isClearButtonVisibleBoolean();
     }
 
     /**

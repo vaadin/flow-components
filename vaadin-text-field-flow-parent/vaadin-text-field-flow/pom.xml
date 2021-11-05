@@ -12,6 +12,11 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <scope>provided</scope>
         </dependency>

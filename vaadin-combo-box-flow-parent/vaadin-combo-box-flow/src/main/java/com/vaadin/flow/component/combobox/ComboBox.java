@@ -40,6 +40,7 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.mixin.HasClearButton;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -108,7 +109,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
         HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
-        HasTheme, HasLabel {
+        HasTheme, HasLabel, HasClearButton {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -1538,34 +1539,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         runBeforeClientResponse(ui -> getElement().callJsFunction(
                 "$connector.enableClientValidation",
                 !requiredIndicatorVisible));
-    }
-
-    /**
-     * Allows displaying a clear button in the combo box when a value is
-     * selected.
-     * <p>
-     * The clear button is an icon, which can be clicked to set the combo box
-     * value to {@code null}.
-     *
-     * @param clearButtonVisible
-     *            {@code true} to display the clear button, {@code false} to
-     *            hide it
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
-    }
-
-    /**
-     * Gets whether this combo box displays a clear button when a value is
-     * selected.
-     *
-     * @return {@code true} if this combo box displays a clear button,
-     *         {@code false} otherwise
-     * @see #setClearButtonVisible(boolean)
-     */
-    public boolean isClearButtonVisible() {
-        return super.isClearButtonVisibleBoolean();
     }
 
     /**

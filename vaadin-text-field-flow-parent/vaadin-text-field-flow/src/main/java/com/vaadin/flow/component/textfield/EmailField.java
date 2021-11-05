@@ -24,6 +24,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.mixin.HasClearButton;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -44,7 +45,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
-        HasLabel {
+        HasLabel, HasClearButton {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld
@@ -368,29 +369,6 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     @Override
     public void setAutoselect(boolean autoselect) {
         super.setAutoselect(autoselect);
-    }
-
-    /**
-     * Gets the visibility state of the button which clears the email field.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isClearButtonVisible() {
-        return isClearButtonVisibleBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the clear button which clears the email
-     * field.
-     *
-     * @param clearButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
     }
 
     @Override
