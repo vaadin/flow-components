@@ -47,7 +47,7 @@ public class SlotUtilsTest {
 
         assertEquals(0,
                 SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
-        assertEquals(0,
+        assertEquals(1,
                 SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
     }
 
