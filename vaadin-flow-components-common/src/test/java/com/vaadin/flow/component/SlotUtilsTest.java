@@ -13,20 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield;
+package com.vaadin.flow.component;
 
-import com.vaadin.flow.component.HasElement;
+import static org.junit.Assert.assertEquals;
+
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
+
 import org.junit.Test;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 /**
- * Tests for the {@link SlotHelpers}.
+ * Tests for the {@link SlotUtils}.
  */
-public class SlotHelpersTest {
+public class SlotUtilsTest {
 
     private static final String TEST_SLOT = "testSlot";
     private static final String OTHER_SLOT = "otherSlot";
@@ -39,19 +38,13 @@ public class SlotHelpersTest {
 
         HasElement hasElement = () -> div;
 
-        assertThat(SlotHelpers.getElementsInSlot(hasElement, TEST_SLOT).count(),
-                is(1L));
-        assertThat(
-                SlotHelpers.getElementsInSlot(hasElement, OTHER_SLOT).count(),
-                is(1L));
+        assertEquals(1, SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
+        assertEquals(1, SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
 
-        SlotHelpers.clearSlot(hasElement, TEST_SLOT);
+        SlotUtils.clearSlot(hasElement, TEST_SLOT);
 
-        assertThat(SlotHelpers.getElementsInSlot(hasElement, TEST_SLOT).count(),
-                is(0L));
-        assertThat(
-                SlotHelpers.getElementsInSlot(hasElement, OTHER_SLOT).count(),
-                is(1L));
+        assertEquals(0, SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
+        assertEquals(0, SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
     }
 
     private static Element span(String slot) {
