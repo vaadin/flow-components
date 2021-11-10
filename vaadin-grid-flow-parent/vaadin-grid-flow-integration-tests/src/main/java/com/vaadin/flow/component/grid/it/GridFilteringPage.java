@@ -1,23 +1,22 @@
 package com.vaadin.flow.component.grid.it;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
+import org.apache.commons.lang3.StringUtils;
 
 @Route("vaadin-grid/grid-filtering")
 public class GridFilteringPage extends Div {
@@ -50,6 +49,7 @@ public class GridFilteringPage extends Div {
         add(field, grid);
 
         createLazyLoadingAndFilterableGrid();
+        createCheckBoxFilterGrid();
     }
 
     private void createLazyLoadingAndFilterableGrid() {
@@ -75,6 +75,32 @@ public class GridFilteringPage extends Div {
         grid.setId(LAZY_FILTERABLE_GRID_ID);
 
         add(filterField, grid);
+    }
+
+    private void createCheckBoxFilterGrid() {
+
+        Span message = new Span();
+        message.setId("notification-message");
+
+        Grid<String> grid = new Grid<>();
+        grid.setDataProvider(new ListDataProvider<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")));
+        grid.addColumn(x -> x).setHeader("Header");
+        ComboBox<String> filter = new ComboBox<>();
+        filter.addValueChangeListener(evt -> {
+            ListDataProvider<String> dataProvider = (ListDataProvider<String>) grid.getDataProvider();
+            dataProvider.clearFilters();
+            if (filter.getValue() != null) {
+                dataProvider
+                        .addFilter(item -> StringUtils.containsIgnoreCase(item,
+                                filter.getValue())
+                        );
+            }
+        });
+        filter.setClearButtonVisible(true);
+        filter.setItems(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"));
+        grid.prependHeaderRow().getCells().get(0).setComponent(filter);
+        grid.addItemClickListener(ev -> message.setText("column=" + ev.getColumn() + " item=" + ev.getItem()));
+        add(grid, message);
     }
 
     private Collection<String> findAnyMatching(Optional<String> filter) {

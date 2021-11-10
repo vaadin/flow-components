@@ -628,7 +628,7 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
           cache[pkey][page] = slice;
 
           grid.$connector.doSelection(slice.filter(
-            item => item.selected && !isSelectedOnGrid(item)));
+            item => item.selected && !isSelectedOnGrid(item)), true);
           grid.$connector.doDeselection(slice.filter(
             item => !item.selected  && (selectedKeys[item.key] || isSelectedOnGrid(item))));
 
