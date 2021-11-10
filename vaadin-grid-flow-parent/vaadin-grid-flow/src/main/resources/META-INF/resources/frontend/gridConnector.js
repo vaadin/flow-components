@@ -168,11 +168,11 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
               grid.$server.select(item.key);
             }
           }
-          const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
-          if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
-            grid.activeItem = item;
-            grid.$connector.activeItem = item;
-          }
+//          const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
+//          if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
+//            grid.activeItem = item;
+//            grid.$connector.activeItem = item;
+//          }
         });
       });
 
@@ -628,7 +628,7 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
           cache[pkey][page] = slice;
 
           grid.$connector.doSelection(slice.filter(
-            item => item.selected && !isSelectedOnGrid(item)), true);
+            item => item.selected && !isSelectedOnGrid(item)));
           grid.$connector.doDeselection(slice.filter(
             item => !item.selected  && (selectedKeys[item.key] || isSelectedOnGrid(item))));
 
