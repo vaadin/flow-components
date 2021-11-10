@@ -373,6 +373,58 @@ public class MenuBarPageIT extends AbstractComponentIT {
         verifyClosed();
     }
 
+    @Test
+    public void toggleMenuBarTheme_themeIsToggled() {
+        Assert.assertFalse(menuBar.hasAttribute("theme"));
+        click("toggle-theme");
+        Assert.assertEquals(menuBar.getAttribute("theme"),
+                MenuBarTestPage.MENU_BAR_THEME);
+        click("toggle-theme");
+        Assert.assertFalse(menuBar.hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleMenuItemTheme_themeIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("theme"));
+        click("toggle-item-theme");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("theme"),
+                MenuBarTestPage.MENU_ITEM_THEME);
+        click("toggle-item-theme");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleSubMenuItemTheme_themeIsToggled() {
+        menuBar.getButtons().get(0).click();
+        Assert.assertFalse(getOverlayMenuItems().get(1).hasAttribute("theme"));
+
+        click("toggle-sub-theme");
+        verifyClosed();
+
+        menuBar.getButtons().get(0).click();
+        Assert.assertEquals(getOverlayMenuItems().get(1).getAttribute("theme"),
+                MenuBarTestPage.SUB_ITEM_THEME);
+
+        click("toggle-sub-theme");
+        verifyClosed();
+
+        menuBar.getButtons().get(0).click();
+        Assert.assertFalse(getOverlayMenuItems().get(1).hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleMenuBarTheme_toggleMenuItemTheme_themeIsOverridden() {
+        click("toggle-theme");
+        click("toggle-item-theme");
+
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
+                menuButton1.getAttribute("theme"));
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();
