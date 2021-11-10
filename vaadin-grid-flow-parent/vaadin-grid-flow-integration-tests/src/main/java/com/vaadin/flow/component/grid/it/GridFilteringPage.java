@@ -83,23 +83,25 @@ public class GridFilteringPage extends Div {
         message.setId("notification-message");
 
         Grid<String> grid = new Grid<>();
-        grid.setDataProvider(new ListDataProvider<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")));
+        grid.setDataProvider(new ListDataProvider<>(Arrays.asList("a", "b", "c",
+                "d", "e", "f", "g", "h", "i", "j", "k")));
         grid.addColumn(x -> x).setHeader("Header");
         ComboBox<String> filter = new ComboBox<>();
         filter.addValueChangeListener(evt -> {
-            ListDataProvider<String> dataProvider = (ListDataProvider<String>) grid.getDataProvider();
+            ListDataProvider<String> dataProvider = (ListDataProvider<String>) grid
+                    .getDataProvider();
             dataProvider.clearFilters();
             if (filter.getValue() != null) {
-                dataProvider
-                        .addFilter(item -> StringUtils.containsIgnoreCase(item,
-                                filter.getValue())
-                        );
+                dataProvider.addFilter(item -> StringUtils
+                        .containsIgnoreCase(item, filter.getValue()));
             }
         });
         filter.setClearButtonVisible(true);
-        filter.setItems(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"));
+        filter.setItems(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h",
+                "i", "j", "k"));
         grid.prependHeaderRow().getCells().get(0).setComponent(filter);
-        grid.addItemClickListener(ev -> message.setText("column=" + ev.getColumn() + " item=" + ev.getItem()));
+        grid.addItemClickListener(ev -> message
+                .setText("column=" + ev.getColumn() + " item=" + ev.getItem()));
         add(grid, message);
     }
 
