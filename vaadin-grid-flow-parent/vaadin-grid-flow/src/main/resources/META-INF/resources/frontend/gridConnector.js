@@ -1015,21 +1015,21 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }));
       }));
 
-    function _fireClickEvent(event, eventName) {
-      const target = event.target;
-      const eventContext = grid.getEventContext(event);
-      const section = eventContext.section;
+      function _fireClickEvent(event, eventName) {
+        const target = event.target;
+        const eventContext = grid.getEventContext(event);
+        const section = eventContext.section;
 
-      if (eventContext.item && !isFocusable(target) && section !== 'details') {
-        event.itemKey = eventContext.item.key;
-        // if you have a details-renderer, getEventContext().column is undefined
-        if (eventContext.column) {
-          event.internalColumnId = eventContext.column._flowId;
+        if (eventContext.item && !isFocusable(target) && section !== 'details') {
+          event.itemKey = eventContext.item.key;
+          // if you have a details-renderer, getEventContext().column is undefined
+          if (eventContext.column) {
+            event.internalColumnId = eventContext.column._flowId;
+          }
+          grid.dispatchEvent(new CustomEvent(eventName,
+            { detail: event }));
         }
-        grid.dispatchEvent(new CustomEvent(eventName,
-          { detail: event }));
       }
-    }
 
       grid.cellClassNameGenerator = tryCatchWrapper(function(column, rowData) {
           const style = rowData.item.style;
