@@ -12,7 +12,7 @@
     </parent>
     <properties>
         <flow.version>9.0-SNAPSHOT</flow.version>
-        <testbench.version>7.0.2</testbench.version>
+        <testbench.version>7.0.3</testbench.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
