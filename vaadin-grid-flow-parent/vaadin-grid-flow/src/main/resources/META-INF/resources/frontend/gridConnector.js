@@ -2,6 +2,7 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
+import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -168,11 +169,10 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
               grid.$server.select(item.key);
             }
           }
-//          const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
-//          if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
-//            grid.activeItem = item;
-//            grid.$connector.activeItem = item;
-//          }
+          const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
+          if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
+            grid.activeItem = item;
+          }
         });
       });
 
@@ -966,10 +966,6 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
         };
       });
 
-      grid.addEventListener('cell-activate', tryCatchWrapper(e => {
-        grid.$connector.activeItem = e.detail.model.item;
-        setTimeout(() => grid.$connector.activeItem = undefined);
-      }));
       grid.addEventListener('click', tryCatchWrapper(e => _fireClickEvent(e, 'item-click')));
       grid.addEventListener('dblclick', tryCatchWrapper(e => _fireClickEvent(e, 'item-double-click')));
 
@@ -1019,18 +1015,21 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
         }));
       }));
 
-      function _fireClickEvent(event, eventName) {
-        if (grid.$connector.activeItem) {
-          event.itemKey = grid.$connector.activeItem.key;
-          const eventContext = grid.getEventContext(event);
-          // if you have a details-renderer, getEventContext().column is undefined
-          if (eventContext.column) {
-            event.internalColumnId = eventContext.column._flowId;
-          }
-          grid.dispatchEvent(new CustomEvent(eventName,
-            { detail: event }));
+    function _fireClickEvent(event, eventName) {
+      const target = event.target;
+      const eventContext = grid.getEventContext(event);
+      const section = eventContext.section;
+
+      if (eventContext.item && !isFocusable(target) && section !== 'details') {
+        event.itemKey = eventContext.item.key;
+        // if you have a details-renderer, getEventContext().column is undefined
+        if (eventContext.column) {
+          event.internalColumnId = eventContext.column._flowId;
         }
+        grid.dispatchEvent(new CustomEvent(eventName,
+          { detail: event }));
       }
+    }
 
       grid.cellClassNameGenerator = tryCatchWrapper(function(column, rowData) {
           const style = rowData.item.style;
