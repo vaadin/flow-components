@@ -1030,7 +1030,6 @@
         }));
       }));
 
-
       function _fireClickEvent(event, eventName) {
         if (grid.$connector.activeItem) {
           event.itemKey = grid.$connector.activeItem.key;
