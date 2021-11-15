@@ -105,14 +105,14 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                         + (GridMultiSelectionColumnPage.ITEM_COUNT),
                 message_selectionMode.getText());
         selectAllCheckbox_selectionMode.click();
-        WebElement selectCheckbox15_multiSelection = gridSelectionMode
-                .findElements(By.tagName("vaadin-checkbox")).get(15);
-        selectCheckbox15_multiSelection.click();
+        WebElement selectCheckbox12_multiSelection = gridSelectionMode
+                .findElements(By.tagName("vaadin-checkbox")).get(12);
+        selectCheckbox12_multiSelection.click();
         WebElement selectCheckbox6_multiSelection = gridSelectionMode
                 .findElements(By.tagName("vaadin-checkbox")).get(6);
         selectCheckbox6_multiSelection.click();
         Assert.assertEquals("true",
-                selectCheckbox15_multiSelection.getAttribute("checked"));
+                selectCheckbox12_multiSelection.getAttribute("checked"));
         Assert.assertEquals("true",
                 selectCheckbox6_multiSelection.getAttribute("checked"));
     }
