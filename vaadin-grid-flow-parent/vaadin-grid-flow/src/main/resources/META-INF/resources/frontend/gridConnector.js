@@ -24,6 +24,7 @@
         window.Vaadin.Flow.Legacy.animationFrame = Polymer.Async.animationFrame;
         window.Vaadin.Flow.Legacy.GridElement = Vaadin.GridElement;
         window.Vaadin.Flow.Legacy.ItemCache = Vaadin.Grid.ItemCache;
+        window.Vaadin.Flow.Legacy.isFocusable = Vaadin.Grid.isFocusable;
       }  else if (!window.Vaadin.Flow.Legacy.Debouncer) {
         console.log("Grid is unable to load Polymer helpers.");
         return;
@@ -189,7 +190,6 @@
           const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
           if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
             grid.activeItem = item;
-            grid.$connector.activeItem = item;
           }
         });
       });
@@ -979,10 +979,6 @@
         };
       });
 
-      grid.addEventListener('cell-activate', tryCatchWrapper(e => {
-        grid.$connector.activeItem = e.detail.model.item;
-        setTimeout(() => grid.$connector.activeItem = undefined);
-      }));
       grid.addEventListener('click', tryCatchWrapper(e => _fireClickEvent(e, 'item-click')));
       grid.addEventListener('dblclick', tryCatchWrapper(e => _fireClickEvent(e, 'item-double-click')));
 
@@ -1010,9 +1006,12 @@
       }));
 
       function _fireClickEvent(event, eventName) {
-        if (grid.$connector.activeItem) {
-          event.itemKey = grid.$connector.activeItem.key;
-          const eventContext = grid.getEventContext(event);
+        const target = event.target;
+        const eventContext = grid.getEventContext(event);
+        const section = eventContext.section;
+
+        if (eventContext.item && !isFocusable(target) && section !== 'details') {
+          event.itemKey = eventContext.item.key;
           // if you have a details-renderer, getEventContext().column is undefined
           if (eventContext.column) {
             event.internalColumnId = eventContext.column._flowId;
