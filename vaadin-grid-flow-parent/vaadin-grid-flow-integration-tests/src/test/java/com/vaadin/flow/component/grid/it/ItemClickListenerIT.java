@@ -121,6 +121,7 @@ public class ItemClickListenerIT extends AbstractComponentIT {
         Assert.assertEquals("", getDoubleClickMessage());
         Assert.assertEquals("", getClickMessage());
     }
+
     // Regression test for this issue:
     // https://github.com/vaadin/flow-components/issues/2247
     @Test
@@ -138,7 +139,8 @@ public class ItemClickListenerIT extends AbstractComponentIT {
         gridElement.select(0);
 
         // Trigger key change on grid items by filtering
-        TestBenchElement filterButton = $(TestBenchElement.class).id("filterButton");
+        TestBenchElement filterButton = $(TestBenchElement.class)
+                .id("filterButton");
         TestBenchElement clearFilterButton = $(TestBenchElement.class)
                 .id("clearFilterButton");
         filterButton.click();

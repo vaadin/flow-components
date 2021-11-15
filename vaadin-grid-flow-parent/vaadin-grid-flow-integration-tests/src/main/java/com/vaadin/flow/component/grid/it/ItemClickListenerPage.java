@@ -77,6 +77,7 @@ public class ItemClickListenerPage extends Div {
         result.setId("details-" + s);
         return result;
     }
+
     private void createGridWithChangingKeysOfItemsAndFocusableHeader() {
         Span message = new Span();
         message.setId("item-click-event-log");
@@ -105,7 +106,7 @@ public class ItemClickListenerPage extends Div {
     }
 
     private void filterGrid(ListDataProvider<String> dataProvider,
-                            String filterValue) {
+            String filterValue) {
         dataProvider.clearFilters();
         if (filterValue != null) {
             dataProvider.addFilter(
