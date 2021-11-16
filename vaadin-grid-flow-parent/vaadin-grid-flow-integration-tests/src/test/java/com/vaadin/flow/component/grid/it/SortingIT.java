@@ -94,6 +94,13 @@ public class SortingIT extends AbstractComponentIT {
     }
 
     @Test
+    public void emptyGrid_sort_noClientErrors() {
+        findElement(By.id("clear-items")).click();
+        grid.findElements(By.tagName("vaadin-grid-sorter")).get(0).click();
+        checkLogsForErrors();
+    }
+
+    @Test
     public void indicatorsSortStateNumbersAndDirectionsAndContentOfRow() {
         WebElement btnAttach = findElement(By.id("btn-attach"));
         WebElement btnRemove = findElement(By.id("btn-detach"));
