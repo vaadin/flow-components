@@ -138,7 +138,7 @@ public class ItemClickListenerIT extends AbstractComponentIT {
         // Select an item with specific key
         gridElement.select(0);
 
-        // Trigger key change on grid items by filtering
+        // Trigger key change on grid items by filtering.
         TestBenchElement filterButton = $(TestBenchElement.class)
                 .id("filterButton");
         TestBenchElement clearFilterButton = $(TestBenchElement.class)
