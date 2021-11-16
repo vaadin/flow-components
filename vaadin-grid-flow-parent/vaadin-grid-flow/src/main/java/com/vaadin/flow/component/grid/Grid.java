@@ -124,7 +124,7 @@ import org.slf4j.LoggerFactory;
  * @author Vaadin Ltd
  *
  * @param <T>
- *            the grid bean type
+ *            the grid bean type.
  *
  */
 @Tag("vaadin-grid")
