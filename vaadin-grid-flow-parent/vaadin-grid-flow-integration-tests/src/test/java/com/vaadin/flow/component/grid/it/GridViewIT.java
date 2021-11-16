@@ -82,7 +82,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertFalse(grid.getHeaderCell(1).isDisplayed());
     }
 
-    @Test
+    @Ignore
     public void lazyDataIsShown() throws InterruptedException {
         openTabAndCheckForErrors("");
         GridElement grid = $(GridElement.class).id("lazy-loading");
