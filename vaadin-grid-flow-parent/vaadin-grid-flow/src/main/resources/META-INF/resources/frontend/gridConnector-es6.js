@@ -10,4 +10,4 @@ window.Vaadin.Flow.Legacy.timeOut = timeOut;
 window.Vaadin.Flow.Legacy.animationFrame = animationFrame;
 window.Vaadin.Flow.Legacy.GridElement = GridElement;
 window.Vaadin.Flow.Legacy.ItemCache = ItemCache;
-window.Vaadin.Flow.Legacy.isFocusable = Vaadin.Grid.isFocusable;
+window.Vaadin.Flow.Legacy.isFocusable = isFocusable;
