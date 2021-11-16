@@ -91,6 +91,10 @@ public class ComboBoxElement extends TestBenchElement
                 + "  return selectedItem.label;", this);
     }
 
+    public String getInputElementValue() {
+        return this.getPropertyString("_inputElementValue");
+    }
+
     /**
      * Opens the popup with options, if it is not already open.
      */
