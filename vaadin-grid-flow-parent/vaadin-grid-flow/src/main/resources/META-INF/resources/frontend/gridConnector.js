@@ -35,7 +35,7 @@
       const animationFrame = window.Vaadin.Flow.Legacy.animationFrame;
       const GridElement = window.Vaadin.Flow.Legacy.GridElement;
       const ItemCache = window.Vaadin.Flow.Legacy.ItemCache;
-      const isFocusable = window.Vaadin.Flow.Legacy.ItemCache;
+      const isFocusable = window.Vaadin.Flow.Legacy.isFocusable;
 
       // Make sure ItemCache patching is done only once, but delay it for when
       // a server grid is initialized
