@@ -261,6 +261,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 setItems();
             }
         });
+
+        // Synchronize input element value property state when setting a custom
+        // value. This is necessary to allow clearing the input value in
+        // `ComboBox.refreshValue`. If the input element value is not
+        // synchronized here, then setting the property to an empty value would
+        // not trigger a client update. Need to use `super` here, in order to
+        // avoid enabling custom values, which is a side effect of
+        // `ComboBox.addCustomValueSetListener`.
+        super.addCustomValueSetListener(e -> this.getElement()
+                .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
     }
 
     /**
@@ -842,7 +852,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
-     * 
+     *
      * @param allowCustomValue
      *            {@code true} to enable custom value set events, {@code false}
      *            to disable them
@@ -871,7 +881,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Enables or disables the dropdown opening automatically. If {@code false}
      * the dropdown is only opened when clicking the toggle button or pressing
      * Up or Down arrow keys.
-     * 
+     *
      * @param autoOpen
      *            {@code false} to prevent the dropdown from opening
      *            automatically
@@ -1040,7 +1050,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The clear button is an icon, which can be clicked to set the combo box
      * value to {@code null}.
-     * 
+     *
      * @param clearButtonVisible
      *            {@code true} to display the clear button, {@code false} to
      *            hide it
@@ -1053,7 +1063,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Gets whether this combo box displays a clear button when a value is
      * selected.
-     * 
+     *
      * @return {@code true} if this combo box displays a clear button,
      *         {@code false} otherwise
      * @see #setClearButtonVisible(boolean)
