@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import elemental.html.ButtonElement;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
