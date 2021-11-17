@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -116,6 +117,68 @@ public class AbstractGridMultiSelectionModelTest {
         grid.getSelectionModel().selectFromClient("foo");
 
         Assert.assertEquals(1, grid.getSelectedItems().size());
+    }
+
+    @Test // related to #2354
+    public void selectItem_dataProviderWithIdentifierProvider_identityUsedForEqualsComparison() {
+        final CallbackDataProvider<String, Void> dataProvider = new CallbackDataProvider<>(
+                query -> Stream.of("Foo", "Bar", "Baz"), query -> 3,
+                String::toString);
+        final CallbackDataProvider<String, Void> spy = Mockito
+                .spy(dataProvider);
+        grid.setItems(spy);
+        final GridSelectionModel<String> selectionModel = grid
+                .getSelectionModel();
+
+        grid.select("Foo");
+
+        // called 2 times - once by selection model and twice by KeyMapper
+        Mockito.verify(spy, Mockito.times(2)).getId("Foo");
+        Mockito.verify(spy, Mockito.never()).getId("Bar");
+
+        Mockito.reset(spy);
+        grid.select("Bar");
+
+        // called 2 times - once by selection model and twice by KeyMapper
+        Mockito.verify(spy, Mockito.times(2)).getId("Bar");
+        // called 2 times - once by selection model and once by KeyMapper
+        Mockito.verify(spy, Mockito.times(2)).getId("Foo");
+
+        Mockito.reset(spy);
+        grid.select(null);
+
+        // called 2 times - once by selection model and once by KeyMapper
+        Mockito.verify(spy, Mockito.times(2)).getId("Bar");
+        Mockito.verify(spy, Mockito.never()).getId(null);
+    }
+
+    @Test // related to #2354
+    public void selectFromClient_dataProviderWithIdentifierProvider_identityUsedForEqualsComparison() {
+        final CallbackDataProvider<String, Void> dataProvider = new CallbackDataProvider<>(
+                query -> Stream.of("Foo", "Bar", "Baz"), query -> 3,
+                String::toString);
+        final CallbackDataProvider<String, Void> spy = Mockito
+                .spy(dataProvider);
+        grid.setItems(spy);
+        final GridSelectionModel<String> selectionModel = grid
+                .getSelectionModel();
+
+        selectionModel.selectFromClient("Foo");
+
+        Mockito.verify(spy, Mockito.times(1)).getId("Foo");
+        Mockito.verify(spy, Mockito.never()).getId("Bar");
+
+        Mockito.reset(spy);
+        selectionModel.selectFromClient("Bar");
+
+        Mockito.verify(spy, Mockito.times(1)).getId("Bar");
+        Mockito.verify(spy, Mockito.times(1)).getId("Foo");
+
+        Mockito.reset(spy);
+        selectionModel.selectFromClient(null);
+
+        Mockito.verify(spy, Mockito.times(1)).getId("Bar");
+        Mockito.verify(spy, Mockito.never()).getId(null);
     }
 
     @Test
