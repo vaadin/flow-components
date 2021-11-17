@@ -324,8 +324,8 @@ import { isFocusable } from '@vaadin/vaadin-grid/src/vaadin-grid-active-item-mix
         // if he needs to reduce the number of items sent to the Grid to improve performance
         // or to increase it to make Grid smoother when scrolling
         const visibleRows = grid._getVisibleRows();
-        let start = visibleRows[0].index;
-        let end = visibleRows[visibleRows.length - 1].index;
+        let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+        let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
         let buffer = end - start;
 
         let firstNeededIndex = Math.max(0, start - buffer);

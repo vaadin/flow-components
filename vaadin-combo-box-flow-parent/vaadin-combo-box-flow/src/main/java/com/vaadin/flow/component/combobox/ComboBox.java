@@ -294,6 +294,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(new DataCommunicator.EmptyDataProvider<>());
 
         getElement().setAttribute("suppress-template-warning", true);
+
+        // Synchronize input element value property state when setting a custom
+        // value. This is necessary to allow clearing the input value in
+        // `ComboBox.refreshValue`. If the input element value is not
+        // synchronized here, then setting the property to an empty value would
+        // not trigger a client update. Need to use `super` here, in order to
+        // avoid enabling custom values, which is a side effect of
+        // `ComboBox.addCustomValueSetListener`.
+        super.addCustomValueSetListener(e -> this.getElement()
+                .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
     }
 
     /**
