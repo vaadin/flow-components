@@ -29,6 +29,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.WebElement;
 
+import static com.vaadin.flow.component.grid.it.ItemClickListenerPage.GRID_FILTER_FOCUSABLE_HEADER;
+
 @TestPath("vaadin-grid/item-click-listener")
 public class ItemClickListenerIT extends AbstractComponentIT {
 
@@ -117,6 +119,38 @@ public class ItemClickListenerIT extends AbstractComponentIT {
         Assert.assertEquals("", getColumnDoubleClickMessage());
         Assert.assertEquals("", getDoubleClickMessage());
         Assert.assertEquals("", getClickMessage());
+    }
+
+    // Regression test for this issue:
+    // https://github.com/vaadin/flow-components/issues/2247
+    @Test
+    public void gridItemKeysChanged_whenFocusableHeaderElementClicked_shouldNotRaiseItemClickEvent() {
+        open();
+
+        // wait for grid to be loaded
+        waitUntil(driver -> $(GridElement.class)
+                .id(GRID_FILTER_FOCUSABLE_HEADER).getRowCount() > 0);
+
+        GridElement gridElement = $(GridElement.class)
+                .id(GRID_FILTER_FOCUSABLE_HEADER);
+
+        // Select an item with specific key
+        gridElement.select(0);
+
+        // Trigger key change on grid items by filtering.
+        TestBenchElement filterButton = $(TestBenchElement.class)
+                .id("filterButton");
+        TestBenchElement clearFilterButton = $(TestBenchElement.class)
+                .id("clearFilterButton");
+        filterButton.click();
+        clearFilterButton.click();
+
+        WebElement focusableHeader = gridElement
+                .findElement(By.id("focusableHeader"));
+        focusableHeader.click();
+
+        TestBenchElement span = $("span").id("item-click-event-log");
+        Assert.assertEquals("", span.getText());
     }
 
     private String getColumnDoubleClickMessage() {
