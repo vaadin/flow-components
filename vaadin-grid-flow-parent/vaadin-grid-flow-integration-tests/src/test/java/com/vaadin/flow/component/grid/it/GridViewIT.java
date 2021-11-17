@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
