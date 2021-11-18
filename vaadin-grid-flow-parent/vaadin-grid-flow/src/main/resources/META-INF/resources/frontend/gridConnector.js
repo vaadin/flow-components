@@ -1006,6 +1006,27 @@
         }));
       }));
 
+      grid.addEventListener('cell-focus', tryCatchWrapper(e => {
+        const eventContext = grid.getEventContext(e);
+        const expectedSectionValues = ['header', 'body', 'footer'];
+
+        if(expectedSectionValues.indexOf(eventContext.section) === -1) {
+          throw new Error('Unexpected value for section: ' + eventContext.section);
+        }
+
+        grid.dispatchEvent(new CustomEvent('grid-cell-focus', {
+          detail: {
+            itemKey: eventContext.item
+              ? eventContext.item.key
+              : null,
+            internalColumnId: eventContext.column
+              ? eventContext.column._flowId
+              : null,
+            section: eventContext.section
+          }
+        }));
+      }));
+
       function _fireClickEvent(event, eventName) {
         const target = event.target;
         const eventContext = grid.getEventContext(event);
