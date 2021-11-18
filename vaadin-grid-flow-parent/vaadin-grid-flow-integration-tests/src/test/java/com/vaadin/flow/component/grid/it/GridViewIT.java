@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -89,9 +88,9 @@ public class GridViewIT extends TabbedComponentDemoTest {
         scrollToElement(grid);
 
         Assert.assertEquals("Name", grid.getHeaderCell(0).getText());
-        scroll(grid, 1010);
-        waitUntil(driver -> grid.getFirstVisibleRowIndex() >= 1010);
-        Assert.assertEquals("Person 1011", grid.getCell(1010, 0).getText());
+        scroll(grid, 900);
+        waitUntil(driver -> grid.getFirstVisibleRowIndex() >= 900);
+        Assert.assertEquals("Person 901", grid.getCell(900, 0).getText());
     }
 
     @Test
