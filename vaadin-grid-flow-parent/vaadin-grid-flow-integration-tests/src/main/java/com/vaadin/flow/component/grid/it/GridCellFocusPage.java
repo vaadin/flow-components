@@ -48,16 +48,13 @@ public class GridCellFocusPage extends Div {
         Grid<String> grid = new Grid<>();
         grid.setId(ID_GRID);
 
-        grid.addColumn(s -> s + "1")
-                .setKey(KEY_FIRST_COLUMN)
+        grid.addColumn(s -> s + "1").setKey(KEY_FIRST_COLUMN)
                 .setHeader("First column header")
                 .setFooter("First column footer");
-        grid.addColumn(s -> s + "2")
-                .setKey(KEY_SECOND_COLUMN)
+        grid.addColumn(s -> s + "2").setKey(KEY_SECOND_COLUMN)
                 .setHeader("Second column header")
                 .setFooter("Second column footer");
-        grid.addColumn(s -> s + "3")
-                .setKey(KEY_THIRD_COLUMN)
+        grid.addColumn(s -> s + "3").setKey(KEY_THIRD_COLUMN)
                 .setHeader("Third column header")
                 .setFooter("Third column footer");
 
@@ -75,13 +72,9 @@ public class GridCellFocusPage extends Div {
         add(itemResult, colResult, sectionResult, grid);
 
         grid.addCellFocusListener(event -> {
-            String item = event
-                    .getItem()
-                    .orElse(NO_ITEM);
+            String item = event.getItem().orElse(NO_ITEM);
 
-            String column = event
-                    .getColumn()
-                    .map(Column::getKey)
+            String column = event.getColumn().map(Column::getKey)
                     .orElse(NO_COLUMN);
 
             itemResult.setText(item);

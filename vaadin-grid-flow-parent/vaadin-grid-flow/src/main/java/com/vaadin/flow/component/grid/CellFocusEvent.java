@@ -25,9 +25,10 @@ import com.vaadin.flow.component.EventData;
 /**
  * Event fired when a cell in the Grid is focused.
  *
- * @param <T> the grid bean type
+ * @param <T>
+ *            the grid bean type
  * @author Vaadin Ltd
- * <p>
+ *         <p>
  * @see Grid#addCellFocusListener(com.vaadin.flow.component.ComponentEventListener)
  */
 @DomEvent("grid-cell-focus")
@@ -40,15 +41,15 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
     /**
      * Creates a new cell focus event.
      *
-     * @param source     the source component
-     * @param fromClient <code>true</code> if the event originated from the
-     *                   client
+     * @param source
+     *            the source component
+     * @param fromClient
+     *            <code>true</code> if the event originated from the client
      */
     public CellFocusEvent(Grid<T> source, boolean fromClient,
-                          @EventData("event.detail.itemKey") String itemKey,
-                          @EventData("event.detail.internalColumnId")
-                                  String internalColumnId,
-                          @EventData("event.detail.section") String sectionName) {
+            @EventData("event.detail.itemKey") String itemKey,
+            @EventData("event.detail.internalColumnId") String internalColumnId,
+            @EventData("event.detail.section") String sectionName) {
         super(source, fromClient);
 
         item = source.getDataCommunicator().getKeyMapper().get(itemKey);
@@ -85,6 +86,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Returns the grid section, where this cell is located. Never null.
+     * 
      * @return section
      */
     public GridSection getSection() {
@@ -103,8 +105,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Returns the column represented by the focused cell. Is empty, when the
-     * focused cell is a header group (a
-     * cell with a cellspan > 1).
+     * focused cell is a header group (a cell with a cellspan > 1).
      *
      * @return column or empty
      */
@@ -131,7 +132,6 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
          */
         FOOTER("footer");
 
-
         private final String clientSideName;
 
         GridSection(String clientSideName) {
@@ -139,24 +139,31 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
         }
 
         /**
-         * Returns the matching {@link GridSection} for the given client side name.
-         * An unknown client side name will lead to an exception.
-         * @param clientSideName client side name to lookup
-         * @throws IllegalArgumentException on an unknown client side section name
+         * Returns the matching {@link GridSection} for the given client side
+         * name. An unknown client side name will lead to an exception.
+         * 
+         * @param clientSideName
+         *            client side name to lookup
+         * @throws IllegalArgumentException
+         *             on an unknown client side section name
          * @return matching section instance
          */
         public static GridSection ofClientSideName(String clientSideName) {
             for (GridSection section : values()) {
-                if (Objects.equals(clientSideName, section.getClientSideName())) {
+                if (Objects.equals(clientSideName,
+                        section.getClientSideName())) {
                     return section;
                 }
             }
 
-            throw new IllegalArgumentException("Unknown section client side section name: " + clientSideName);
+            throw new IllegalArgumentException(
+                    "Unknown section client side section name: "
+                            + clientSideName);
         }
 
         /**
          * Returns the client side name of the section.
+         * 
          * @return client side name
          */
         public String getClientSideName() {
