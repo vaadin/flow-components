@@ -91,7 +91,11 @@
       const getChildItems = function(parent) {
         const container = getContainer(parent._containerNodeId);
         const items = container && Array.from(container.children).map(child => {
-          const item = {component: child, checked: child._checked};
+          const item = {
+              component: child,
+              checked: child._checked,
+              theme: child._theme
+          };
           if (child.tagName == "VAADIN-CONTEXT-MENU-ITEM" && child._containerNodeId) {
             item.children = getChildItems(child);
           }
@@ -109,6 +113,13 @@
       if (component._item) {
         component._item.checked = checked;
       }
-    })(component, checked)
+    })(component, checked),
+
+    setTheme: (component, theme) =>
+        tryCatchWrapper((component, theme) => {
+            if (component._item) {
+                component._item.theme = theme;
+            }
+        })(component, theme)
   };
 })();
