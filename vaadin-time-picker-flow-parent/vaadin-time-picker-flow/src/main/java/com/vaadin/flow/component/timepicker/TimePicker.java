@@ -55,8 +55,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return valueFromModel == null ? "" : valueFromModel.toString();
     };
 
-    private static final long MILLISECONDS_IN_A_DAY = 86400000L;
-    private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
@@ -149,16 +147,27 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.setLabel(label);
     }
 
-    // This is needed because the LocalTime format is not the same depending on
-    // the platform.
+    /**
+     * Sets the selected time value of the component. The value can be cleared
+     * by setting null.
+     *
+     * <p>
+     * The value will be truncated to millisecond precision, as that is the
+     * maximum that the time picker supports. This means that
+     * {@link #getValue()} might return a different value than what was passed
+     * in.
+     *
+     * @param value
+     *            the LocalTime instance representing the selected time, or null
+     */
     @Override
     public void setValue(LocalTime value) {
-        if (value == null) {
-            super.setValue(null);
-        } else {
-            LocalTime truncatedValue = value.truncatedTo(ChronoUnit.MILLIS);
-            super.setValue(truncatedValue);
+        // Truncate the value to millisecond precision, as the is the maximum
+        // that the time picker web component supports.
+        if (value != null) {
+            value = value.truncatedTo(ChronoUnit.MILLIS);
         }
+        super.setValue(value);
     }
 
     /**
@@ -285,20 +294,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public void setStep(Duration step) {
         Objects.requireNonNull(step, "Step cannot be null");
-        long stepAsMilliseconds = step.getSeconds() * 1000
-                + (long) (step.getNano() / 1E6);
-        if (step.isNegative() || stepAsMilliseconds == 0) {
-            throw new IllegalArgumentException(
-                    "Step cannot be negative and must be larger than 0 milliseconds");
-        }
 
-        if (MILLISECONDS_IN_A_DAY % stepAsMilliseconds != 0
-                && MILLISECONDS_IN_AN_HOUR % stepAsMilliseconds != 0) {
-            throw new IllegalArgumentException("Given step " + step.toString()
-                    + " does not divide evenly a day or an hour.");
-        }
-
-        super.setStep(step.getSeconds() + (step.getNano() / 1E9));
+        super.setStep(StepsUtil.convertDurationToStepsValue(step));
     }
 
     /**
@@ -311,12 +308,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @return the {@code step} property from the picker, unit seconds
      */
     public Duration getStep() {
-        // the web component doesn't have a default value defined, but it is an
-        // hour, not 0.0 like in the generated class
+        // if step was not set by the user, then assume default value of the
+        // time picker web component
         if (!getElement().hasProperty("step")) {
-            return Duration.ofHours(1);
+            return StepsUtil.DEFAULT_WEB_COMPONENT_STEP;
         }
-        return Duration.ofNanos((long) (getStepDouble() * 1E9));
+        return StepsUtil.convertStepsValueToDuration(getStepDouble());
     }
 
     @Override
@@ -418,44 +415,28 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * Sets the minimum time in the time picker. Times before that will be
      * disabled in the popup.
      *
-     * @deprecated use {@link #setMinTime(LocalTime)} instead.
-     *
      * @param min
      *            the minimum time that is allowed to be selected, or
      *            <code>null</code> to remove any minimum constraints
      */
-    @Override
-    @Deprecated
-    public void setMin(String min) {
-        this.min = parse(min, initializeAndReturnFormatter());
-        super.setMin(min);
+    public void setMin(LocalTime min) {
+        this.min = min;
+        super.setMin(format(min));
     }
 
     /**
      * Sets the minimum time in the time picker. Times before that will be
      * disabled in the popup.
      *
+     * @deprecated Since 22.0, this API is deprecated in favor of
+     *             {@link TimePicker#setMin(LocalTime)}
      * @param min
      *            the minimum time that is allowed to be selected, or
      *            <code>null</code> to remove any minimum constraints
      */
-    public void setMinTime(LocalTime min) {
-        this.min = min;
-        super.setMin(format(min));
-    }
-
-    /**
-     * Gets the minimum time in the time picker. Time before that will be
-     * disabled in the popup.
-     *
-     * @deprecated use {@link #getMinTime()} instead.
-     *
-     * @return the minimum time that is allowed to be selected, or
-     *         <code>null</code> if there's no minimum
-     */
     @Deprecated
-    public String getMin() {
-        return super.getMinString();
+    public void setMinTime(LocalTime min) {
+        this.setMin(min);
     }
 
     /**
@@ -465,25 +446,23 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @return the minimum time that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
      */
-    public LocalTime getMinTime() {
+    public LocalTime getMin() {
         return this.min;
     }
 
     /**
-     * Sets the maximum time in the time picker. Times after that will be
+     * Gets the minimum time in the time picker. Time before that will be
      * disabled in the popup.
      *
-     * @deprecated use {@link #setMaxTime(LocalTime)} instead.
+     * @deprecated Since 22.0, this API is deprecated in favor of
+     *             {@link TimePicker#getMin()}
      *
-     * @param max
-     *            the maximum time that is allowed to be selected, or
-     *            <code>null</code> to remove any maximum constraints
+     * @return the minimum time that is allowed to be selected, or
+     *         <code>null</code> if there's no minimum
      */
-    @Override
     @Deprecated
-    public void setMax(String max) {
-        this.max = parse(max, initializeAndReturnFormatter());
-        super.setMax(max);
+    public LocalTime getMinTime() {
+        return this.getMin();
     }
 
     /**
@@ -494,23 +473,25 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *            the maximum time that is allowed to be selected, or
      *            <code>null</code> to remove any maximum constraints
      */
-    public void setMaxTime(LocalTime max) {
+    public void setMax(LocalTime max) {
         this.max = max;
         super.setMax(format(max));
     }
 
     /**
-     * Gets the maximum time in the time picker. Times after that will be
+     * Sets the maximum time in the time picker. Times after that will be
      * disabled in the popup.
      *
-     * @deprecated use {@link #getMaxTime()} instead.
+     * @deprecated Since 22.0, this API is deprecated in favor of
+     *             {@link TimePicker#setMax(LocalTime)}
      *
-     * @return the maximum time that is allowed to be selected, or
-     *         <code>null</code> if there's no maximum
+     * @param max
+     *            the maximum time that is allowed to be selected, or
+     *            <code>null</code> to remove any maximum constraints
      */
     @Deprecated
-    public String getMax() {
-        return super.getMaxString();
+    public void setMaxTime(LocalTime max) {
+        this.setMax(max);
     }
 
     /**
@@ -520,8 +501,23 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @return the maximum time that is allowed to be selected, or
      *         <code>null</code> if there's no maximum
      */
-    public LocalTime getMaxTime() {
+    public LocalTime getMax() {
         return this.max;
+    }
+
+    /**
+     * Gets the maximum time in the time picker. Times after that will be
+     * disabled in the popup.
+     *
+     * @deprecated Since 22.0, this API is deprecated in favor of
+     *             {@link TimePicker#getMax()}
+     *
+     * @return the maximum time that is allowed to be selected, or
+     *         <code>null</code> if there's no maximum
+     */
+    @Deprecated
+    public LocalTime getMaxTime() {
+        return this.getMax();
     }
 
     /**
@@ -559,7 +555,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * Enables or disables the dropdown opening automatically. If {@code false}
      * the dropdown is only opened when clicking the toggle button or pressing
      * Up or Down arrow keys.
-     * 
+     *
      * @param autoOpen
      *            {@code false} to prevent the dropdown from opening
      *            automatically
@@ -607,10 +603,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     private static String format(LocalTime time) {
         return time != null ? time.toString() : null;
-    }
-
-    private static LocalTime parse(String time, DateTimeFormatter formatter) {
-        return time != null ? LocalTime.parse(time, formatter) : null;
     }
 
 }

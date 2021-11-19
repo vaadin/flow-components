@@ -29,9 +29,7 @@ public class CrudTest {
                 .addDeleteListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addEditListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addSaveListener(e -> Assert.assertNotNull(e.getItem()));
-
-        // Client side new should not come with an item
-        systemUnderTest.addNewListener(e -> Assert.assertNull(e.getItem()));
+        systemUnderTest.addNewListener(e -> Assert.assertNotNull(e.getItem()));
 
         // A client-side Grid item.
         final JsonObject selectedItem = new JreJsonFactory()
@@ -52,9 +50,47 @@ public class CrudTest {
     }
 
     @Test
+    public void newItemPreFilledValueIsTheSameInEditor() {
+        String value = "thing";
+
+        systemUnderTest.addNewListener(e -> {
+            Thing item = e.getItem();
+            item.name = value;
+        });
+
+        ComponentUtil.fireEvent(systemUnderTest,
+                new Crud.NewEvent<>(systemUnderTest, false, null));
+
+        Assert.assertEquals("thing",
+                systemUnderTest.getEditor().getItem().name);
+    }
+
+    @Test
+    public void crudEditorIsItemEqualNewEventItem() {
+        systemUnderTest.addNewListener(e -> {
+            Assert.assertEquals(systemUnderTest.getEditor().getItem(),
+                    e.getItem());
+        });
+
+        ComponentUtil.fireEvent(systemUnderTest,
+                new Crud.NewEvent<>(systemUnderTest, false, null));
+    }
+
+    @Test
     public void getEditorPosition_defaultOVERLAY() {
         Assert.assertEquals(CrudEditorPosition.OVERLAY,
                 systemUnderTest.getEditorPosition());
+    }
+
+    @Test
+    public void getToolbarVisible_defaultTrue() {
+        Assert.assertTrue(systemUnderTest.getToolbarVisible());
+    }
+
+    @Test
+    public void getToolbarVisible_setVisibleToFalse_returnsFalse() {
+        systemUnderTest.setToolbarVisible(false);
+        Assert.assertEquals(false, systemUnderTest.getToolbarVisible());
     }
 
     private Grid<Thing> createFakeGrid() {

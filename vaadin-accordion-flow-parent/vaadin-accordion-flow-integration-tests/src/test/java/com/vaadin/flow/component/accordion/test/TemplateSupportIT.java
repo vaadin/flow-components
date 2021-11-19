@@ -4,6 +4,8 @@ import com.vaadin.flow.component.accordion.testbench.AccordionElement;
 import com.vaadin.flow.component.accordion.testbench.AccordionPanelElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.testbench.ElementQuery;
+import com.vaadin.tests.AbstractParallelTest;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

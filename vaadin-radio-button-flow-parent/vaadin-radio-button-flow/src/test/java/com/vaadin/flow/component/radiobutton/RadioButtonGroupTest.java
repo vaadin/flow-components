@@ -33,16 +33,18 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.DataProviderListenersTest;
 
 public class RadioButtonGroupTest {
 
-    private static final String OUTER_HTML = "<vaadin-radio-button>\n <span>%s</span>\n</vaadin-radio-button>";
+    private static final String OUTER_HTML = "<vaadin-radio-button>\n <label slot=\"label\"><span>%s</span></label>\n</vaadin-radio-button>";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -416,5 +418,13 @@ public class RadioButtonGroupTest {
         group.setItems("enabled", "disabled", null);
         group.setValue(null);
         Assert.assertEquals(group.getValue(), null);
+    }
+
+    @Test
+    public void dataProviderListeners_radioButtonGroupAttachedAndDetached_oldDataProviderListenerRemoved() {
+        DataProviderListenersTest
+                .checkOldListenersRemovedOnComponentAttachAndDetach(
+                        new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
+                        new DataCommunicatorTest.MockUI());
     }
 }

@@ -42,6 +42,7 @@ public class MenuBarView extends DemoView {
         createBasicDemo();
         createOpenOnHover();
         createOverflowingButtons();
+        createOverflowI18n();
         createDisabledItems();
         createCheckableItems();
         createUsingComponents();
@@ -49,6 +50,7 @@ public class MenuBarView extends DemoView {
         createTertiaryThemeVariant();
         createTertiaryInlineThemeVariant();
         createSmallThemeVariant();
+        createSingleButtonPrimaryThemeVariant();
     }
 
     private void createBasicDemo() {
@@ -132,6 +134,20 @@ public class MenuBarView extends DemoView {
         // end-source-example
 
         addCard("Overflowing Buttons", menuBar);
+    }
+
+    private void createOverflowI18n() {
+        // begin-source-example
+        // source-example-heading: Overflow Button Accessible i18n
+        MenuBar menuBar = new MenuBar();
+        Stream.of("Home", "Dashboard", "Content", "Structure", "Appearance",
+                "Modules", "Users", "Configuration", "Reports", "Help")
+                .forEach(menuBar::addItem);
+        menuBar.setI18n(
+                new MenuBar.MenuBarI18n().setMoreOptions("Lisää vaihtoehtoja"));
+        // end-source-example
+
+        addCard("Overflow Button Accessible i18n", menuBar);
     }
 
     private void createDisabledItems() {
@@ -383,4 +399,40 @@ public class MenuBarView extends DemoView {
         addCard("Theme Variants", "Small Buttons", menuBar, message);
     }
 
+    private void createSingleButtonPrimaryThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Individual Button Themes
+        MenuBar menuBar = new MenuBar();
+
+        Text selected = new Text("");
+        Div message = new Div(new Text("Selected: "), selected);
+
+        MenuItem project = menuBar.addItem("Project");
+        project.addThemeNames(MenuBarVariant.LUMO_PRIMARY.getVariantName());
+        MenuItem account = menuBar.addItem("Account");
+        MenuItem signOut = menuBar.addItem(VaadinIcon.SIGN_OUT.create(),
+                e -> selected.setText("Sign Out"));
+        signOut.addThemeNames(MenuBarVariant.LUMO_TERTIARY.getVariantName());
+
+        SubMenu projectSubMenu = project.getSubMenu();
+        MenuItem users = projectSubMenu.addItem("Users");
+        MenuItem billing = projectSubMenu.addItem("Billing");
+
+        SubMenu usersSubMenu = users.getSubMenu();
+        usersSubMenu.addItem("List", e -> selected.setText("List"));
+        usersSubMenu.addItem("Add", e -> selected.setText("Add"));
+
+        SubMenu billingSubMenu = billing.getSubMenu();
+        billingSubMenu.addItem("Invoices", e -> selected.setText("Invoices"));
+        billingSubMenu.addItem("Balance Events",
+                e -> selected.setText("Balance Events"));
+
+        account.getSubMenu().addItem("Edit Profile",
+                e -> selected.setText("Edit Profile"));
+        account.getSubMenu().addItem("Privacy Settings",
+                e -> selected.setText("Privacy Settings"));
+
+        // end-source-example
+        addCard("Theme Variants", "Individual Button Themes", menuBar, message);
+    }
 }

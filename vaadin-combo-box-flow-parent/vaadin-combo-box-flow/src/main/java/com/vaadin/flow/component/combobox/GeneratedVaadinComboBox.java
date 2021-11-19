@@ -290,10 +290,12 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/combo-box", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "22.0.0-beta2")
+@JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {
@@ -1111,18 +1113,6 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      */
     protected void clearCache() {
         getElement().callJsFunction("clearCache");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Manually invoke existing renderer.
-     * </p>
-     */
-    protected void render() {
-        getElement().callJsFunction("render");
     }
 
     /**

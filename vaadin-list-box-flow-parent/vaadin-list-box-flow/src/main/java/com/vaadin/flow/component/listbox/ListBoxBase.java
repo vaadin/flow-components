@@ -63,8 +63,11 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/list-box", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "22.0.0-beta2")
+@JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
         implements HasItemComponents<ITEM>, HasSize,
@@ -102,6 +105,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
+        rebuild();
         setupDataProviderListener(this.dataProvider.get());
     }
 
@@ -118,14 +122,12 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                         rebuild();
                     }
                 });
-        rebuild();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null
-                && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null) {
             setupDataProviderListener(getDataProvider());
         }
     }

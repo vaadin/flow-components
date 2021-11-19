@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
@@ -123,6 +124,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         getElement().setProperty("invalid", false);
         getElement().setProperty("opened", false);
+        getElement().setAttribute("suppress-template-warning", true);
         // Trigger model-to-presentation conversion in constructor, so that
         // the client side component has a correct initial value of an empty
         // string
@@ -183,6 +185,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-list-box")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox<T> extends Component
             implements HasItemComponents<T> {
 
@@ -823,7 +827,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
         updateItemEnabled(vaadinItem);
 
-        callClientSideRenderIfNotPending();
+        requestClientSideContentUpdateIfNotPending();
     }
 
     private void updateItemEnabled(VaadinItem<T> item) {
@@ -853,7 +857,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         keyMapper.removeAll();
         listBox.removeAll();
         clear();
-        callClientSideRenderIfNotPending();
+        requestClientSideContentUpdateIfNotPending();
 
         if (isEmptySelectionAllowed()) {
             addEmptySelectionItem();
@@ -882,13 +886,14 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
     }
 
-    private void callClientSideRenderIfNotPending() {
+    private void requestClientSideContentUpdateIfNotPending() {
 
         // reset added at this point to avoid unnecessary selected item update
         if (!resetPending) {
             resetPending = true;
             runBeforeClientResponse(ui -> {
-                ui.getPage().executeJs("$0.render();", getElement());
+                ui.getPage().executeJs("$0.requestContentUpdate();",
+                        getElement());
                 resetPending = false;
             });
         }

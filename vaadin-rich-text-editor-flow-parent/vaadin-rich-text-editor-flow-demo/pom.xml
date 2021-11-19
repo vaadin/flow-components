@@ -4,12 +4,17 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
-        <version>21.0-SNAPSHOT</version>
+        <version>22.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-rich-text-editor-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
     <name>Vaadin Rich Text Editor Flow Demo</name>
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

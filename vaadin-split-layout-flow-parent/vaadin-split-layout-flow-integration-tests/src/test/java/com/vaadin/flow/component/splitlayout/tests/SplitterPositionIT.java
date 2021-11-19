@@ -103,16 +103,18 @@ public class SplitterPositionIT extends AbstractComponentIT {
                 .id("splitLayout" + testId);
         TestBenchElement primaryElement = getPrimaryElement(layout, testId);
         TestBenchElement secondaryElement = getSecondaryElement(layout, testId);
-        assertElementWidth(primaryElement,
-                (int) SplitterPositionView.INITIAL_POSITION + "%");
-        assertElementWidth(secondaryElement,
-                (int) SplitterPositionView.FINAL_POSITION + "%");
+        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
+                primaryElement, SplitterPositionView.INITIAL_POSITION);
+        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
+                secondaryElement, SplitterPositionView.FINAL_POSITION);
+
         modifyState.accept(layout);
         $(NativeButtonElement.class).id("setSplitPosition" + testId).click();
-        assertElementWidth(primaryElement,
-                (int) SplitterPositionView.FINAL_POSITION + "%");
-        assertElementWidth(secondaryElement,
-                (int) SplitterPositionView.INITIAL_POSITION + "%");
+
+        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
+                primaryElement, SplitterPositionView.FINAL_POSITION);
+        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
+                secondaryElement, SplitterPositionView.INITIAL_POSITION);
     }
 
     private TestBenchElement getPrimaryElement(SplitLayoutElement layout,
@@ -124,14 +126,4 @@ public class SplitterPositionIT extends AbstractComponentIT {
             String testId) {
         return layout.$(SpanElement.class).id("secondary" + testId);
     }
-
-    private void assertElementWidth(TestBenchElement element, String expected) {
-        executeScript("console.log(arguments[0])", element);
-        executeScript("console.log(arguments[0].style)", element);
-        executeScript("console.log(arguments[0].style.width)", element);
-        Assert.assertEquals(expected,
-                element.getPropertyString("style", "width"));
-        Assert.assertEquals("", element.getPropertyString("style", "flex"));
-    }
-
 }

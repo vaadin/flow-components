@@ -124,10 +124,12 @@ public class VirtualListIT extends AbstractComponentIT {
         // the items are preallocated in the list, but they are empty
         Assert.assertEquals(100, items.length());
 
-        assertItemsArePresent(items, 0, 32, "Item ");
+        // Last received index
+        int lastReceivedKey = 28;
+        assertItemsArePresent(items, 0, lastReceivedKey, "Item ");
 
         // all the remaining items should be empty
-        for (int i = 32; i < items.length(); i++) {
+        for (int i = lastReceivedKey; i < items.length(); i++) {
             MatcherAssert.assertThat(items.get(i),
                     CoreMatchers.instanceOf(JsonNull.class));
         }
@@ -138,11 +140,11 @@ public class VirtualListIT extends AbstractComponentIT {
         items = getItems(getDriver(), list);
 
         // all the initial items should be empty
-        assertItemsAreNotPresent(items, 0, items.length() - 32);
+        assertItemsAreNotPresent(items, 0, items.length() - lastReceivedKey);
 
-        // the last 32 items should have data
-        assertItemsArePresent(items, items.length() - 32, items.length(),
-                "Item ");
+        // the last [lastReceivedKey] items should have data
+        assertItemsArePresent(items, items.length() - lastReceivedKey,
+                items.length(), "Item ");
     }
 
     @Test
@@ -380,7 +382,8 @@ public class VirtualListIT extends AbstractComponentIT {
     @Test
     public void numberRenderer() {
         List<TestBenchElement> items = $("vaadin-virtual-list")
-                .id("list-with-numbers").$("span").all();
+                .id("list-with-numbers")
+                .$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
         IntStream.range(0, 3).forEach(i -> {
             Assert.assertEquals("" + (i + 1), items.get(i).getText());
@@ -390,7 +393,8 @@ public class VirtualListIT extends AbstractComponentIT {
     @Test
     public void localDateRenderer() {
         List<TestBenchElement> items = $("vaadin-virtual-list")
-                .id("list-with-local-dates").$("span").all();
+                .id("list-with-local-dates")
+                .$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
 
         Assert.assertEquals("January 1, 2001", items.get(0).getText());
@@ -401,12 +405,17 @@ public class VirtualListIT extends AbstractComponentIT {
     @Test
     public void localDateTimeRenderer() {
         List<TestBenchElement> items = $("vaadin-virtual-list")
-                .id("list-with-local-date-times").$("span").all();
+                .id("list-with-local-date-times")
+                .$("div[style*=\"position: absolute;\"]").all();
         Assert.assertEquals(3, items.size());
 
-        Assert.assertEquals("January 1, 2001 1:01 AM", items.get(0).getText());
-        Assert.assertEquals("February 2, 2002 2:02 AM", items.get(1).getText());
-        Assert.assertEquals("March 3, 2003 3:03 AM", items.get(2).getText());
+        // JDK16 adds extra comma after year in en_US
+        Assert.assertTrue(
+                items.get(0).getText().matches("January 1, 2001,? 1:01 AM"));
+        Assert.assertTrue(
+                items.get(1).getText().matches("February 2, 2002,? 2:02 AM"));
+        Assert.assertTrue(
+                items.get(2).getText().matches("March 3, 2003,? 3:03 AM"));
     }
 
     @Test

@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -61,11 +63,40 @@ public class DateTimePickerTest {
     }
 
     @Test
+    public void setInitialValue_truncatesToMilliseconds() {
+        Duration oneMillisecondAndOneNano = Duration.ofMillis(1).plusNanos(1);
+        Duration oneMillisecond = Duration.ofMillis(1);
+        LocalDateTime baseDateTime = LocalDateTime.of(2018, 4, 25, 13, 45, 10);
+        LocalDateTime dateTimeWithMillisAndNanos = baseDateTime
+                .plus(oneMillisecondAndOneNano);
+        LocalDateTime dateTimeWithMillisOnly = baseDateTime
+                .plus(oneMillisecond);
+
+        DateTimePicker picker = new DateTimePicker(dateTimeWithMillisAndNanos);
+        assertEquals(dateTimeWithMillisOnly, picker.getValue());
+    }
+
+    @Test
     public void setValue() {
         DateTimePicker picker = new DateTimePicker();
         picker.setValue(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
                 picker.getValue());
+    }
+
+    @Test
+    public void setValue_truncatesToMilliseconds() {
+        Duration oneMillisecondAndOneNano = Duration.ofMillis(1).plusNanos(1);
+        Duration oneMillisecond = Duration.ofMillis(1);
+        LocalDateTime baseDateTime = LocalDateTime.of(2018, 4, 25, 13, 45, 10);
+        LocalDateTime dateTimeWithMillisAndNanos = baseDateTime
+                .plus(oneMillisecondAndOneNano);
+        LocalDateTime dateTimeWithMillisOnly = baseDateTime
+                .plus(oneMillisecond);
+
+        DateTimePicker picker = new DateTimePicker();
+        picker.setValue(dateTimeWithMillisAndNanos);
+        assertEquals(dateTimeWithMillisOnly, picker.getValue());
     }
 
     @Test

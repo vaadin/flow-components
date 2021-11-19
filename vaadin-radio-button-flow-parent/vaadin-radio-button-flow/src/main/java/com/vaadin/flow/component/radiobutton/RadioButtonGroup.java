@@ -34,6 +34,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -68,7 +69,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "21.0.0-alpha6")
+@NpmPackage(value = "@vaadin/radio-group", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "22.0.0-beta2")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -245,8 +247,7 @@ public class RadioButtonGroup<T>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getDataProvider() != null
-                && dataProviderListenerRegistration == null) {
+        if (getDataProvider() != null) {
             setupDataProviderListener(getDataProvider());
         }
         FieldValidationUtil.disableClientValidation(this);
@@ -509,8 +510,9 @@ public class RadioButtonGroup<T>
 
     private void updateButton(RadioButton<T> button) {
         updateEnabled(button);
-        button.removeAll();
-        button.add(getItemRenderer().createComponent(button.getItem()));
+        Component labelComponent = getItemRenderer()
+                .createComponent(button.getItem());
+        button.setLabelComponent(labelComponent);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {

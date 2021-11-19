@@ -76,8 +76,8 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertValueWithoutListener() {
-        WebElement field = findElement(By.id("value-change"));
-        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
+        TextFieldElement field = $(TextFieldElement.class).id("value-change");
+        WebElement input = field.$("input").first();
         input.sendKeys("foo");
         blur();
         WebElement button = findElement(By.id("get-value"));
@@ -92,13 +92,13 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-        WebElement field = findElement(By.id("clear-text-field"));
-        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
+        TextFieldElement field = $(TextFieldElement.class)
+                .id("clear-text-field");
+        WebElement input = field.$("input").first();
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("div").id("clearButton");
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();

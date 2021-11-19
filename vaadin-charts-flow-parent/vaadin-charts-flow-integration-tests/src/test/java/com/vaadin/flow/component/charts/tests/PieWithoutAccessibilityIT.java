@@ -23,7 +23,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 public class PieWithoutAccessibilityIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return PieWithoutAccessibility.class;
     }
 

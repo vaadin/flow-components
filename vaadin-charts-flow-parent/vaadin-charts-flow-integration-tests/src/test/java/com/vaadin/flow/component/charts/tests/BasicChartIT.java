@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 public class BasicChartIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends AbstractChartExample> getTestView() {
+    protected Class<? extends AbstractChartExample> getView() {
         return AreaChart.class;
     }
 

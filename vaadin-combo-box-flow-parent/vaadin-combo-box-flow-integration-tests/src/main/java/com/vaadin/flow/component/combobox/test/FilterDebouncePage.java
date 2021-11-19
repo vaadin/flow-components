@@ -31,6 +31,7 @@ public class FilterDebouncePage extends VerticalLayout {
         });
         combo.setAutofocus(true);
         Input tf = new Input();
+        tf.setId("external-input");
         add(combo, tf);
     }
 

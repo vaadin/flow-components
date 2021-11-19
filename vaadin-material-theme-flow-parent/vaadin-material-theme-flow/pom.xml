@@ -4,11 +4,14 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-material-theme-flow-parent</artifactId>
-        <version>21.0-SNAPSHOT</version>
+        <version>22.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-material-theme</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Material Theme</name>
+    <properties>
+        <osgi.export.package>com.vaadin.flow.theme.material</osgi.export.package>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

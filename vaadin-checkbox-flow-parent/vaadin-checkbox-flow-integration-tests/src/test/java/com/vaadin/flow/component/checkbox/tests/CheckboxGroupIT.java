@@ -25,6 +25,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.tests.ComponentDemoTest;
 
@@ -166,7 +167,8 @@ public class CheckboxGroupIT extends ComponentDemoTest {
                 group.getAttribute("label"), "Group label");
 
         TestBenchElement errorMessage = group.$("div")
-                .attributeContains("part", "error-message").first();
+                .attributeContains("slot", "error-message").first();
+
         verifyGroupValid(group, errorMessage);
 
         layout.findElement(By.id("group-with-label-button")).click();
@@ -186,8 +188,9 @@ public class CheckboxGroupIT extends ComponentDemoTest {
         TestBenchElement group = $(TestBenchElement.class)
                 .id("checkbox-helper-text");
 
-        TestBenchElement helperText = group.$("slot")
-                .attributeContains("name", "helper").first();
+        TestBenchElement helperText = group.$("div")
+                .attributeContains("slot", "helper").first();
+
         Assert.assertEquals("Helper text", helperText.getText());
 
         $("button").id("button-clear-helper").click();
@@ -205,16 +208,16 @@ public class CheckboxGroupIT extends ComponentDemoTest {
 
         $("button").id("button-clear-component").click();
 
-        Assert.assertFalse(group.$("span").exists());
+        waitUntil(ExpectedConditions
+                .invisibilityOfElementLocated(By.id("helper-component")));
     }
 
     private void verifyGroupInvalid(TestBenchElement group,
             TestBenchElement errorMessage) {
         Assert.assertEquals("Checkbox group is invalid.", true,
                 group.getPropertyBoolean("invalid"));
-        Assert.assertEquals("Error message should be shown.",
-                Boolean.FALSE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
+        Assert.assertFalse("Error message should be shown.",
+                errorMessage.getText().isEmpty());
     }
 
     private void verifyGroupValid(TestBenchElement group,
@@ -223,8 +226,7 @@ public class CheckboxGroupIT extends ComponentDemoTest {
         Assert.assertThat("Checkbox group is not invalid.", isInvalid,
                 CoreMatchers.anyOf(CoreMatchers.equalTo(isInvalid),
                         CoreMatchers.equalTo(false)));
-        Assert.assertEquals("Error message should be hidden.",
-                Boolean.TRUE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
+        Assert.assertTrue("Error message should be empty.",
+                errorMessage.getText().isEmpty());
     }
 }

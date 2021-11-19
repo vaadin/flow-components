@@ -1,6 +1,8 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
@@ -18,6 +20,18 @@ public class CheckboxGroupDisabledItemPage extends VerticalLayout {
         group.select("bar");
         group.setItemEnabledProvider(item -> !"bar".equals(item));
         group.setId("checkbox-group-disabled-item");
-        add(group);
+
+        NativeButton toggleBarButton = new NativeButton("Toggle \"bar\"",
+                event -> {
+                    boolean isBarSelected = group.isSelected("bar");
+                    if (isBarSelected) {
+                        group.deselect("bar");
+                    } else {
+                        group.select("bar");
+                    }
+                });
+        toggleBarButton.setId("toggle-bar-button");
+
+        add(group, new Div(toggleBarButton));
     }
 }

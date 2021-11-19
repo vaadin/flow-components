@@ -1,7 +1,8 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
-import { GridElement } from '@vaadin/vaadin-grid/src/vaadin-grid.js';
-import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mixin.js';
+import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
+import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
+import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -171,7 +172,6 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
           const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
           if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
             grid.activeItem = item;
-            grid.$connector.activeItem = item;
           }
         });
       });
@@ -324,8 +324,8 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         // if he needs to reduce the number of items sent to the Grid to improve performance
         // or to increase it to make Grid smoother when scrolling
         const visibleRows = grid._getVisibleRows();
-        let start = visibleRows[0].index;
-        let end = visibleRows[visibleRows.length - 1].index;
+        let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+        let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
         let buffer = end - start;
 
         let firstNeededIndex = Math.max(0, start - buffer);
@@ -437,7 +437,7 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       grid._createPropertyObserver("_previousSorters", sorterChangeListener);
 
       grid._updateItem = tryCatchWrapper(function(row, item) {
-        GridElement.prototype._updateItem.call(grid, row, item);
+        Grid.prototype._updateItem.call(grid, row, item);
 
         // There might be inactive component renderers on hidden rows that still refer to the
         // same component instance as one of the renderers on a visible row. Making the
@@ -492,12 +492,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       // itemExpandedChanged run when either happens.
       grid.expandItem = tryCatchWrapper(function(item) {
         itemExpandedChanged(item, true);
-        GridElement.prototype.expandItem.call(grid, item);
+        Grid.prototype.expandItem.call(grid, item);
       });
 
       grid.collapseItem = tryCatchWrapper(function(item) {
         itemExpandedChanged(item, false);
-        GridElement.prototype.collapseItem.call(grid, item);
+        Grid.prototype.collapseItem.call(grid, item);
       });
 
       const itemsUpdated = function(items) {
@@ -927,10 +927,6 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       grid.$connector.setVerticalScrollingEnabled = tryCatchWrapper(function(enabled) {
         // There are two scollable containers in grid so apply the changes for both
         setVerticalScrollingEnabled(grid.$.table, enabled);
-
-        // Since the scrollbars were toggled, there might have been some changes to layout
-        // size. Notify grid of the resize to ensure everything is in place.
-        grid.notifyResize();
       });
 
       const setVerticalScrollingEnabled = function(scrollable, enabled) {
@@ -971,10 +967,6 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
         };
       });
 
-      grid.addEventListener('cell-activate', tryCatchWrapper(e => {
-        grid.$connector.activeItem = e.detail.model.item;
-        setTimeout(() => grid.$connector.activeItem = undefined);
-      }));
       grid.addEventListener('click', tryCatchWrapper(e => _fireClickEvent(e, 'item-click')));
       grid.addEventListener('dblclick', tryCatchWrapper(e => _fireClickEvent(e, 'item-double-click')));
 
@@ -1025,9 +1017,12 @@ import { ItemCache } from '@vaadin/vaadin-grid/src/vaadin-grid-data-provider-mix
       }));
 
       function _fireClickEvent(event, eventName) {
-        if (grid.$connector.activeItem) {
-          event.itemKey = grid.$connector.activeItem.key;
-          const eventContext = grid.getEventContext(event);
+        const target = event.target;
+        const eventContext = grid.getEventContext(event);
+        const section = eventContext.section;
+
+        if (eventContext.item && !isFocusable(target) && section !== 'details') {
+          event.itemKey = eventContext.item.key;
           // if you have a details-renderer, getEventContext().column is undefined
           if (eventContext.column) {
             event.internalColumnId = eventContext.column._flowId;

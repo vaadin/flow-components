@@ -1,6 +1,6 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
-import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-box-placeholder.js';
+import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
 
 (function () {
     const tryCatchWrapper = function (callback) {
@@ -240,10 +240,10 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
             });
 
             customElements.whenDefined('vaadin-combo-box').then(tryCatchWrapper(() => {
-                const _isItemSelected = comboBox.$.overlay._isItemSelected;
+                const isItemSelected = comboBox.$.dropdown._scroller.__isItemSelected;
                 // Override comboBox's _isItemSelected logic to handle remapped items
-                comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
-                    let selected = _isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
+                comboBox.$.dropdown._scroller.__isItemSelected = (item, selectedItem, itemIdPath) => {
+                    let selected = isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
 
                     if (comboBox._selectedKey) {
                         if (comboBox.filteredItems.indexOf(selectedItem) > -1) {
@@ -259,18 +259,12 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
 
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
-                let input = null;
                 if ( comboBox.$ ){
-                    input = comboBox.$["input"];
-                }
-                if (input){
                     if ( enable){
                         enableClientValidation(comboBox);
-                        enableTextFieldClientValidation(input);
                     }
                     else {
                         disableClientValidation(comboBox);
-                        disableTextFieldClientValidation(input,comboBox );
                     }
 
                     comboBox.validate();
@@ -292,20 +286,6 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
                     combo.validate = function() {
                         return !(comboBox.focusElement.invalid = comboBox.invalid);
                     };
-                }
-            });
-
-            const disableTextFieldClientValidation =  tryCatchWrapper(function (field, comboBox){
-                if ( typeof field.$checkValidity == 'undefined'){
-                    field.$checkValidity = field.checkValidity;
-                    field.checkValidity = function() { return !comboBox.invalid; };
-                }
-            });
-
-            const enableTextFieldClientValidation = tryCatchWrapper(function (field){
-                if ( field.$checkValidity ){
-                    field.checkValidity = field.$checkValidity;
-                    delete field.$checkValidity;
                 }
             });
 
@@ -352,10 +332,6 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
 
                 callback(filteredItems, filteredItems.length);
             });
-
-            // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
-            comboBox.addEventListener('opened-changed', tryCatchWrapper(e =>
-                {e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {})}));
 
             // Prevent setting the custom value as the 'value'-prop automatically
             comboBox.addEventListener('custom-value-set', tryCatchWrapper(e => e.preventDefault()));

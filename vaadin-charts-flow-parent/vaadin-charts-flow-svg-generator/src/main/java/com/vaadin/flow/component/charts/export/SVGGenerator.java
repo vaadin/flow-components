@@ -31,6 +31,10 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
  * </p>
  * <br />
  * <p>
+ * CSS styling is not supported.
+ * </p>
+ * <br />
+ * <p>
  * Example usage:
  * </p>
  *
@@ -75,8 +79,15 @@ public class SVGGenerator implements AutoCloseable {
     private final Path bundleTempPath;
 
     /**
+     * <p>
      * Creates a new instance of {@link SVGGenerator} which allocates resources
      * used to transform a {@link Configuration} object to an SVG string.
+     * </p>
+     * <p>
+     * <b>You must close the generator when you're done using it.</b> Use a
+     * <code>try-with-resources</code> block or call the
+     * {@link SVGGenerator#close()} method.
+     * </p>
      *
      * @throws IOException
      *             if there's any issue allocating resources needed.
@@ -111,6 +122,8 @@ public class SVGGenerator implements AutoCloseable {
      *             virtually render the chart.
      * @throws InterruptedException
      *             if the rendering process gets interrupted.
+     * 
+     * @see SVGGenerator#generate(Configuration, ExportOptions)
      */
     public String generate(Configuration chartConfiguration)
             throws IOException, InterruptedException {

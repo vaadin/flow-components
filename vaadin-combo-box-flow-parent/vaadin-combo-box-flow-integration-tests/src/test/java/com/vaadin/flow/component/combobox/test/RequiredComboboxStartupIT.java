@@ -35,10 +35,7 @@ public class RequiredComboboxStartupIT extends AbstractComponentIT {
         Assert.assertEquals(Boolean.TRUE.toString(),
                 comboBox.getAttribute("invalid"));
 
-        TestBenchElement textField = comboBox.$("vaadin-text-field").first();
-
-        TestBenchElement error = textField.$(TestBenchElement.class)
-                .id("vaadin-text-field-error-0");
+        TestBenchElement error = comboBox.$("[part='error-message']").first();
 
         Assert.assertTrue(error.getSize().getHeight() > 0);
         Assert.assertEquals("Must be false", error.getText());

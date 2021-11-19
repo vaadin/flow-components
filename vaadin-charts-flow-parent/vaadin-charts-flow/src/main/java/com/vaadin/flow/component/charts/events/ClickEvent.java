@@ -34,6 +34,9 @@ public interface ClickEvent extends Serializable {
      * implementation. If you have used Date object as value, you most likely
      * want to pass the value thru {@link Util#toServerDate(double)} method
      * before actually using the value.
+     * <p>
+     * Legend items are outside of the plot area and legend item click events
+     * have no significant xAxisValue.
      *
      * @return the X coordinate of the click.
      */
@@ -42,6 +45,11 @@ public interface ClickEvent extends Serializable {
     }
 
     /**
+     * Gets the y axis value of the clicked point.
+     * <p>
+     * Legend items are outside of the plot area and legend item click events
+     * have no significant yAxisValue.
+     * 
      * @return the Y coordinate of the click
      */
     default double getyAxisValue() {
@@ -66,6 +74,14 @@ public interface ClickEvent extends Serializable {
         return getMouseDetails().getAbsoluteY();
     }
 
+    /**
+     * Gets the {@link MouseEventDetails.MouseButton} of the click event.
+     * <p>
+     * Note that the charting library only allows MouseButton.LEFT clicks in
+     * most cases.
+     * 
+     * @return the {@link MouseEventDetails.MouseButton} of the click event.
+     */
     default MouseEventDetails.MouseButton getButton() {
         return getMouseDetails().getButton();
     }

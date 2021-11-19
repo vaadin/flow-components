@@ -36,7 +36,7 @@ public class FilterDebounceIT extends AbstractComboBoxIT {
     public void init() {
         open();
         combo = $(ComboBoxElement.class).first();
-        input = $("input").first();
+        input = $("input").id("external-input");
     }
 
     /**

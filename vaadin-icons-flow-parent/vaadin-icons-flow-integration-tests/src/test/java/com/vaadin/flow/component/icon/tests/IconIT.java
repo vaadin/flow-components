@@ -18,18 +18,26 @@ package com.vaadin.flow.component.icon.tests;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.icon.demo.IconView;
-import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link IconView}.
  */
-public class IconIT extends ComponentDemoTest {
+@TestPath("vaadin-icons/icon-view")
+public class IconIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void basicIcons() {
@@ -45,22 +53,21 @@ public class IconIT extends ComponentDemoTest {
         assertCssValue(icon, "width", "100px");
         assertCssValue(icon, "height", "100px");
 
-        // Selenium returns the color in rgba-format for some reason
-        assertCssValue(icon, "color", "rgba(255, 165, 0, 1)");
+        assertCssValue(icon, "fill", "rgb(255, 165, 0)");
     }
 
     @Test
     public void clickableIcon() {
-        WebElement message = layout.findElement(By.id("clickable-message"));
+        WebElement message = findElement(By.id("clickable-message"));
         Assert.assertEquals("", message.getText());
 
-        WebElement icon = layout.findElement(By.id("clickable-v-icon"));
+        WebElement icon = findElement(By.id("clickable-v-icon"));
         icon.click();
 
         Assert.assertEquals("The VAADIN_V icon was clicked!",
                 message.getText());
 
-        icon = layout.findElement(By.id("clickable-h-icon"));
+        icon = findElement(By.id("clickable-h-icon"));
         icon.click();
 
         Assert.assertEquals("The VAADIN_H icon was clicked!",
@@ -69,9 +76,10 @@ public class IconIT extends ComponentDemoTest {
 
     @Test
     public void allAvailableIcons() {
-        WebElement allIcons = layout.findElement(By.id("all-icons"));
+        WebElement allIcons = findElement(By.id("all-icons"));
         List<WebElement> labels = allIcons.findElements(By.tagName("label"));
-        List<WebElement> icons = allIcons.findElements(By.tagName("iron-icon"));
+        List<WebElement> icons = allIcons
+                .findElements(By.tagName("vaadin-icon"));
 
         Assert.assertEquals(VaadinIcon.values().length, labels.size());
         Assert.assertEquals(VaadinIcon.values().length, icons.size());
@@ -100,10 +108,5 @@ public class IconIT extends ComponentDemoTest {
     private void assertCssValue(WebElement element, String propertyName,
             String expectedValue) {
         Assert.assertEquals(expectedValue, element.getCssValue(propertyName));
-    }
-
-    @Override
-    protected String getTestPath() {
-        return ("/vaadin-icons");
     }
 }

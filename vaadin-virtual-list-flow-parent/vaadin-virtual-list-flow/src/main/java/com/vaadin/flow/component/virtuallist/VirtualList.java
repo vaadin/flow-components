@@ -44,6 +44,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
@@ -51,14 +52,11 @@ import elemental.json.JsonValue;
 
 /**
  * Component that encapsulates the functionality of the
- * {@code <vaadin-virtual-list>} webcomponent.
+ * {@code <vaadin-virtual-list>} web component.
  * <p>
  * It supports {@link DataProvider}s to load data asynchronously and
- * {@link TemplateRenderer}s to render the markup for each item.
+ * {@link Renderer}s to render the markup for each item.
  * <p>
- * For this component to work properly, it needs to have a well defined
- * {@code height}. It can be an absolute height, like {@code 100px}, or a
- * relative height inside a container with well defined height.
  *
  *
  * @author Vaadin Ltd.
@@ -67,10 +65,12 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-template-renderer/vaadin-template-renderer.js")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-virtual-list/vaadin-virtual-list.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
+@NpmPackage(value = "@vaadin/virtual-list", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "22.0.0-beta2")
+@JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
 public class VirtualList<T> extends Component implements HasDataProvider<T>,
@@ -125,7 +125,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     private boolean templateUpdateRegistered;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private Registration dataGeneratorRegistration;
+    private final List<Registration> renderingRegistrations = new ArrayList<>();
     private transient T placeholderItem;
 
     private final DataCommunicator<T> dataCommunicator = new PagelessDataCommunicator<>(
@@ -137,15 +137,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * Creates an empty list.
      */
     public VirtualList() {
-        dataGenerator.addDataGenerator(
-                (item, jsonObject) -> renderer.getValueProviders()
-                        .forEach((property, provider) -> jsonObject.put(
-                                property,
-                                JsonSerializer.toJson(provider.apply(item)))));
-
+        getElement().setAttribute("suppress-template-warning", true);
         template = new Element("template");
-        getElement().appendChild(template);
-        setRenderer(String::valueOf);
+        setRenderer((ValueProvider<T, String>) String::valueOf);
     }
 
     private void initConnector() {
@@ -197,9 +191,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     }
 
     /**
-     * Sets a renderer for the items in the list, by using a
-     * {@link TemplateRenderer}. The template returned by the renderer is used
-     * to render each item.
+     * Sets a renderer for the items in the list.
      * <p>
      * When set, a same renderer is used for the placeholder item. See
      * {@link #setPlaceholderItem(Object)} for details.
@@ -210,17 +202,33 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
 
-        if (dataGeneratorRegistration != null) {
-            dataGeneratorRegistration.remove();
-            dataGeneratorRegistration = null;
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
+
+        Rendering<T> rendering;
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
+        } else {
+            // TemplateRenderer or ComponentRenderer
+            if (template.getParent() == null) {
+                getElement().appendChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), template);
         }
 
-        Rendering<T> rendering = renderer.render(getElement(),
-                dataCommunicator.getKeyMapper(), template);
-        if (rendering.getDataGenerator().isPresent()) {
-            dataGeneratorRegistration = dataGenerator
-                    .addDataGenerator(rendering.getDataGenerator().get());
-        }
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            Registration renderingDataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(renderingDataGenerator);
+            renderingRegistrations.add(renderingDataGeneratorRegistration);
+        });
+
+        renderingRegistrations.add(rendering.getRegistration());
 
         this.renderer = renderer;
 
@@ -236,16 +244,16 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * <p>
      * Setting a placeholder item improves the user experience of the list while
      * scrolling, since the placeholder uses the same renderer set with
-     * {@link #setRenderer(TemplateRenderer)}, maintaining the same height for
+     * {@link #setRenderer(Renderer)}, maintaining the same height for
      * placeholders and actual items.
      * <p>
      * When no placeholder item is set (or when set to <code>null</code>), an
      * empty placeholder element is created with <code>100px</code> of width and
      * <code>18px</code> of height.
      * <p>
-     * Note: when using {@link ComponentTemplateRenderer}s, the component used
-     * for the placeholder is statically stamped in the list. It can not be
-     * modified, nor receives any events.
+     * Note: when using {@link ComponentRenderer}s, the component used for the
+     * placeholder is statically stamped in the list. It can not be modified,
+     * nor receives any events.
      *
      * @param placeholderItem
      *            the item used as placeholder in the list, while the real data
@@ -278,7 +286,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         /*
          * The actual registration is done inside another beforeClientResponse
          * registration to make sure it runs last, after ComponentRenderer and
-         * BasicRenderes have executed their rendering operations, which also
+         * BasicRenderer have executed their rendering operations, which also
          * happen beforeClientResponse and might be registered after this.
          */
         runBeforeClientResponse(
@@ -318,17 +326,15 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             placeholderTemplate = originalTemplate;
         }
 
-        /**
+        /*
          * The placeholder is used by the client connector to create temporary
          * elements that are populated on demand (when the user scrolls to that
          * item).
          */
         template.setProperty("innerHTML", String.format(
         //@formatter:off
-            "<span>"
-                + "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
-                + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>"
-            + "</span>",
+            "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
+            + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>",
         //@formatter:on
                 placeholderTemplate, originalTemplate));
     }

@@ -77,14 +77,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     public void testAllAvailableLocalesWhenValueChangedFromDropDown_step30Minutes_pickerValuesMatchesBrowserFormatted() {
         // same stuff as the previous test, but instead use a different step
 
-        selectStep("30m"); // could test with eg. 15 minutes, but after
-        // scrolling down, the iron-list ditches the first items and the indexes
-        // are f'ckd, thus after
-        // certain point it is too fragile to test based on indexes, index 0
-        // might not be the top most item
-
-        // cannot test further than 13:00, otherwise the item at index 0 will be
-        // 00:30 instead of 00:00 ...
+        selectStep("30m");
         runLocalisationTestPattern(
                 new String[] { "00:00", "00:30", "01:00", "06:00", "06:30" },
                 Arrays.asList(0, 1, 2, 12, 13));
@@ -373,7 +366,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormat() {
-        String timePickerInputValue = getTimePickerTextFieldValueWithNormalSpaces();
+        String timePickerInputValue = getTimePickerInputValueWithNormalSpaces();
         String formattedTextValue = getLabelValue();
         if (formattedTextValue.equals(timePickerInputValue)) {
             return null;
@@ -384,7 +377,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormatIncludingMilliseconds(String amPmString) {
-        String timePickerInputValue = getTimePickerTextFieldValueWithNormalSpaces();
+        String timePickerInputValue = getTimePickerInputValueWithNormalSpaces();
         String[] splitInputValue = timePickerInputValue.replace(amPmString, "")
                 .split("\\.");
         String millisecondsInputValue = amPmString != null
@@ -444,15 +437,15 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     /**
-     * Calls {@code getTimePickerTextFieldValue()} for {@code
+     * Calls {@code getTimePickerInputValue()} for {@code
      * TimePickerElement} and replaces non-breaking space characters (char 160)
      * with normal spaces (char 32) for easier comparison. Small number of
      * locales (such as es-PA) seem to use those for their localized timestamps.
      *
      * @return space-normalized timestamp
      */
-    private String getTimePickerTextFieldValueWithNormalSpaces() {
-        return getTimePickerElement().getTimePickerTextFieldValue()
+    private String getTimePickerInputValueWithNormalSpaces() {
+        return getTimePickerElement().getTimePickerInputValue()
                 .replace((char) 160, (char) 32);
     }
 }

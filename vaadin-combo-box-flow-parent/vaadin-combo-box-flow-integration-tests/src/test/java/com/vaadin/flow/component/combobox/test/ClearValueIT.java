@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 @TestPath("vaadin-combo-box/clear-value")
 public class ClearValueIT extends AbstractComponentIT {
@@ -50,8 +51,7 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBoxId), ClearValuePage.INITIAL_VALUE,
                 comboBox.getSelectedText());
 
-        comboBox.$("vaadin-text-field").get(0).$("[part~='clear-button']")
-                .get(0).click();
+        comboBox.$("[part~='clear-button']").get(0).click();
 
         Assert.assertEquals(String.format(
                 "Combo box with id '%s' should have its value empty after the test",
@@ -70,18 +70,60 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void valueIsCorrectlyCleared_allowCustomValue() {
+    public void allowCustomValue_setInitialValue_valueIsCorrectlyCleared() {
         checkEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID,
                 ClearValuePage.BUTTON_CUSTOM_VALUE_CLEAR_ID, true);
     }
 
     @Test
-    public void valueIsCorrectlySetToNull_allowCustomValue() {
+    public void allowCustomValue_setInitialValue_valueIsCorrectlySetToNull() {
         Assert.assertNull(
                 "Combobox empty value is not null, add clear tests also",
                 new ComboBox<>().getEmptyValue());
         checkEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID,
                 ClearValuePage.BUTTON_CUSTOM_VALUE_SET_NULL_ID, true);
+    }
+
+    @Test
+    public void allowCustomValue_enterCustomValue_clearValue_inputElementValueIsCleared() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID);
+        TestBenchElement clearButton = $("button")
+                .id(ClearValuePage.BUTTON_CUSTOM_VALUE_CLEAR_ID);
+
+        // Clear initial value to set the state of the input element value
+        // property to an empty value
+        clearButton.click();
+        Assert.assertEquals("", comboBox.getInputElementValue());
+
+        // Enter custom value
+        comboBox.sendKeys("foo", Keys.ENTER);
+        Assert.assertEquals("foo", comboBox.getInputElementValue());
+
+        // Clear value
+        clearButton.click();
+        Assert.assertEquals("", comboBox.getInputElementValue());
+    }
+
+    @Test
+    public void allowCustomValue_enterCustomValue_setNullValue_inputElementValueIsCleared() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID);
+        TestBenchElement setNullButton = $("button")
+                .id(ClearValuePage.BUTTON_CUSTOM_VALUE_SET_NULL_ID);
+
+        // Set null value to set the state of the input element value property
+        // to an empty value
+        setNullButton.click();
+        Assert.assertEquals("", comboBox.getInputElementValue());
+
+        // Enter custom value
+        comboBox.sendKeys("foo", Keys.ENTER);
+        Assert.assertEquals("foo", comboBox.getInputElementValue());
+
+        // Set null value
+        setNullButton.click();
+        Assert.assertEquals("", comboBox.getInputElementValue());
     }
 
     private void checkEmptyValue(String comboBoxId, String buttonId,

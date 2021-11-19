@@ -14,6 +14,7 @@
 package com.vaadin.flow.component.charts.export;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,8 +90,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(configuration);
         Path emptyConfigChart = Paths.get("src", "test", "resources",
                 "empty.svg");
-        String emptyChartContent = new String(
-                Files.readAllBytes(emptyConfigChart));
+        String emptyChartContent = readUtf8File(emptyConfigChart);
         assertEquals(replaceIds(emptyChartContent), replaceIds(svg));
     }
 
@@ -100,7 +100,7 @@ public class SVGGeneratorTest {
         Configuration conf = createPieChartConfiguration();
         String svg = svgGenerator.generate(conf);
         Path pieChartPath = Paths.get("src", "test", "resources", "pie.svg");
-        String expectedSVG = new String(Files.readAllBytes(pieChartPath));
+        String expectedSVG = readUtf8File(pieChartPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
@@ -113,7 +113,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(conf, options);
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-width.svg");
-        String expectedSVG = new String(Files.readAllBytes(pieChartPath));
+        String expectedSVG = readUtf8File(pieChartPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
@@ -126,7 +126,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(conf, options);
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-height.svg");
-        String expectedSVG = new String(Files.readAllBytes(pieChartPath));
+        String expectedSVG = readUtf8File(pieChartPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
@@ -139,7 +139,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(conf, options);
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "lumo-dark.svg");
-        String expectedSVG = new String(Files.readAllBytes(pieChartPath));
+        String expectedSVG = readUtf8File(pieChartPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
@@ -153,7 +153,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(conf, options);
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-lang.svg");
-        String expectedSVG = new String(Files.readAllBytes(pieChartPath));
+        String expectedSVG = readUtf8File(pieChartPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
@@ -174,7 +174,7 @@ public class SVGGeneratorTest {
         options.setTimeline(true);
         Path expectedFilePath = Paths.get("src", "test", "resources",
                 "timeline.svg");
-        String expectedSVG = new String(Files.readAllBytes(expectedFilePath));
+        String expectedSVG = readUtf8File(expectedFilePath);
         String actualSVG = svgGenerator.generate(configuration, options);
         assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
     }
@@ -190,7 +190,7 @@ public class SVGGeneratorTest {
         String actualSVG = svgGenerator.generate(configuration, options);
         Path expectedResultPath = Paths.get("src", "test", "resources",
                 "enabled-functions.svg");
-        String expectedSVG = new String(Files.readAllBytes(expectedResultPath));
+        String expectedSVG = readUtf8File(expectedResultPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
     }
 
@@ -292,5 +292,9 @@ public class SVGGeneratorTest {
                     "id-" + index++);
         }
         return svg;
+    }
+
+    private String readUtf8File(Path path) throws IOException {
+        return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
     }
 }

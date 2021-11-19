@@ -121,6 +121,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -140,13 +141,15 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "21.0.0-alpha6")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
-@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
-@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
-@JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
-@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/grid", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "22.0.0-beta2")
+@JsModule("@vaadin/grid/src/vaadin-grid.js")
+@JsModule("@vaadin/grid/src/vaadin-grid-column.js")
+@JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
+@JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
@@ -332,6 +335,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
         private final String columnInternalId; // for internal implementation
@@ -391,6 +396,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
+
+            getElement().setAttribute("suppress-template-warning", true);
         }
 
         protected void destroyDataGenerators() {
@@ -754,6 +761,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 defaultHeaderRow = getGrid().addFirstHeaderRow();
             }
             defaultHeaderRow.getCell(this).setText(labelText);
+            grid.updateClientSideSorterIndicators();
             return this;
         }
 
@@ -793,6 +801,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 defaultHeaderRow = getGrid().addFirstHeaderRow();
             }
             defaultHeaderRow.getCell(this).setComponent(headerComponent);
+            grid.updateClientSideSorterIndicators();
             return this;
         }
 
@@ -1178,6 +1187,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private PropertySet<T> propertySet;
 
     private DataGenerator<T> itemDetailsDataGenerator;
+    private List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -1366,6 +1376,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
+
+        getElement().setAttribute("suppress-template-warning", true);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -2776,28 +2788,47 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code null} to remove the current renderer
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
-        detailsManager.destroyAllData();
-        itemDetailsDataGenerator = null;
+        detailsRenderingRegistrations.forEach(Registration::remove);
+        detailsRenderingRegistrations.clear();
+
         if (renderer == null) {
             return;
         }
 
         Rendering<T> rendering;
-        if (detailsTemplate == null) {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper());
-            detailsTemplate = rendering.getTemplateElement();
-            detailsTemplate.setAttribute("class", "row-details");
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (detailsTemplate != null
+                    && detailsTemplate.getParent() != null) {
+                getElement().removeChild(detailsTemplate);
+            }
+            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
-            rendering = renderer.render(getElement(),
-                    getDataCommunicator().getKeyMapper(), detailsTemplate);
+            // TemplateRenderer or ComponentRenderer
+            if (detailsTemplate == null) {
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper());
+                detailsTemplate = rendering.getTemplateElement();
+                detailsTemplate.setAttribute("class", "row-details");
+            } else {
+                getElement().appendChild(detailsTemplate);
+                rendering = renderer.render(getElement(),
+                        getDataCommunicator().getKeyMapper(), detailsTemplate);
+            }
         }
 
-        Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            itemDetailsDataGenerator = renderingDataGenerator;
+            Registration detailsRenderingDataGeneratorRegistration = () -> {
+                detailsManager.destroyAllData();
+                itemDetailsDataGenerator = null;
+            };
+            detailsRenderingRegistrations
+                    .add(detailsRenderingDataGeneratorRegistration);
+        });
 
-        if (dataGenerator.isPresent()) {
-            itemDetailsDataGenerator = dataGenerator.get();
-        }
+        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**
@@ -3062,7 +3093,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public boolean isMultiSort() {
         String multiSort = getElement().getAttribute("multi-sort");
-        return multiSort == null ? false : Boolean.valueOf(multiSort);
+        if (multiSort != null && multiSort.length() == 0) {
+            multiSort = "true";
+        }
+        return Boolean.parseBoolean(multiSort);
     }
 
     @ClientCallable
@@ -3195,8 +3229,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
-        if (getDataProvider() != null
-                && dataProviderChangeRegistration == null) {
+        if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
     }
@@ -3259,6 +3292,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public List<GridSortOrder<T>> getSortOrder() {
         return Collections.unmodifiableList(sortOrder);
+    }
+
+    private void updateClientSideSorterIndicators() {
+        updateClientSideSorterIndicators(sortOrder);
     }
 
     private void updateClientSideSorterIndicators(
@@ -3349,12 +3386,48 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * large number of items, using the feature is discouraged to avoid
      * performance issues.
      *
+     * @deprecated since 14.7 - use {@link #setAllRowsVisible(boolean)}
+     * @see #setAllRowsVisible(boolean)
+     *
      * @param heightByRows
      *            <code>true</code> to make Grid compute its height by the
      *            number of rows, <code>false</code> for the default behavior
      */
+    @Deprecated
     public void setHeightByRows(boolean heightByRows) {
-        getElement().setProperty("heightByRows", heightByRows);
+        setAllRowsVisible(heightByRows);
+    }
+
+    /**
+     * Gets whether grid's height is defined by the number of its rows.
+     *
+     * @deprecated since 14.7 - use {@link #isAllRowsVisible()}
+     * @see #isAllRowsVisible()
+     *
+     * @return <code>true</code> if Grid computes its height by the number of
+     *         rows, <code>false</code> otherwise
+     */
+    @Deprecated
+    public boolean isHeightByRows() {
+        return isAllRowsVisible();
+    }
+
+    /**
+     * If <code>true</code>, the grid's height is defined by its rows. All items
+     * are fetched from the {@link DataProvider}, and the Grid shows no vertical
+     * scroll bar.
+     * <p>
+     * Note: <code>setAllRowsVisible</code> disables the grid's virtual
+     * scrolling so that all the rows are rendered in the DOM at once. If the
+     * grid has a large number of items, using the feature is discouraged to
+     * avoid performance issues.
+     *
+     * @param allRowsVisible
+     *            <code>true</code> to make Grid compute its height by the
+     *            number of rows, <code>false</code> for the default behavior
+     */
+    public void setAllRowsVisible(boolean allRowsVisible) {
+        getElement().setProperty("allRowsVisible", allRowsVisible);
     }
 
     /**
@@ -3363,9 +3436,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return <code>true</code> if Grid computes its height by the number of
      *         rows, <code>false</code> otherwise
      */
-    @Synchronize("height-by-rows-changed")
-    public boolean isHeightByRows() {
-        return getElement().getProperty("heightByRows", false);
+    @Synchronize("all-rows-visible-changed")
+    public boolean isAllRowsVisible() {
+        return getElement().getProperty("allRowsVisible", false);
     }
 
     @Override

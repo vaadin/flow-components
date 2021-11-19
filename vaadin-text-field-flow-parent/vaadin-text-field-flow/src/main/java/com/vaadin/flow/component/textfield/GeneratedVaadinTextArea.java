@@ -142,8 +142,11 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/text-area", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.0-beta2")
+@JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R>, HasTheme {
@@ -720,7 +723,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      * <p>
      * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
+     * with the given {@code maxlength} or {@code minlength} properties.
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
@@ -738,7 +741,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      * <p>
      * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
+     * with the given {@code maxlength} or {@code minlength} properties.
      * </p>
      *
      * @param preventInvalidInput

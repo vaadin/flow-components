@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.board.testbench.RowElement;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractParallelTest;
 
 public abstract class AbstractDemoIT extends AbstractParallelTest {
 

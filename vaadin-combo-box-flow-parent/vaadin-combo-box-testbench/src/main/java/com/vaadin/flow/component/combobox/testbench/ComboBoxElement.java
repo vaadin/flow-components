@@ -17,6 +17,8 @@ package com.vaadin.flow.component.combobox.testbench;
 
 import java.util.List;
 
+import org.openqa.selenium.By;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasSelectByText;
@@ -91,6 +93,10 @@ public class ComboBoxElement extends TestBenchElement
                 + "  return selectedItem.label;", this);
     }
 
+    public String getInputElementValue() {
+        return this.getPropertyString("_inputElementValue");
+    }
+
     /**
      * Opens the popup with options, if it is not already open.
      */
@@ -156,5 +162,10 @@ public class ComboBoxElement extends TestBenchElement
      */
     public boolean isAutoOpen() {
         return !getPropertyBoolean("autoOpenDisabled");
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 }

@@ -74,8 +74,11 @@ import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/vaadin-charts", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-charts/src/vaadin-chart.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/charts", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-charts", version = "22.0.0-beta2")
+@JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize {
 
     private Configuration configuration;
@@ -189,7 +192,7 @@ public class Chart extends Component implements HasStyle, HasSize {
         final JsonObject configurationNode = getJsonFactory()
                 .parse(ChartSerialization.toJSON(configuration));
 
-        getElement().callJsFunction("update", configurationNode,
+        getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
     }
 

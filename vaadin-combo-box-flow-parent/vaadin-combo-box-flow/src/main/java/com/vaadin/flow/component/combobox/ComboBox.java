@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -30,6 +31,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
@@ -66,6 +68,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -104,7 +107,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
-        HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper {
+        HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
+        HasTheme {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -250,7 +254,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-    private Registration dataGeneratorRegistration;
+    private List<Registration> renderingRegistrations = new ArrayList<>();
 
     private Element template;
 
@@ -292,6 +296,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         addAttachListener(e -> initConnector());
 
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        getElement().setAttribute("suppress-template-warning", true);
+
+        // Synchronize input element value property state when setting a custom
+        // value. This is necessary to allow clearing the input value in
+        // `ComboBox.refreshValue`. If the input element value is not
+        // synchronized here, then setting the property to an empty value would
+        // not trigger a client update. Need to use `super` here, in order to
+        // avoid enabling custom values, which is a side effect of
+        // `ComboBox.addCustomValueSetListener`.
+        super.addCustomValueSetListener(e -> this.getElement()
+                .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
     }
 
     /**
@@ -400,12 +416,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
+        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
+                generateLabel(value));
     }
 
     /**
-     * Sets the TemplateRenderer responsible to render the individual items in
-     * the list of possible choices of the ComboBox. It doesn't affect how the
-     * selected item is rendered - that can be configured by using
+     * Sets the Renderer responsible to render the individual items in the list
+     * of possible choices of the ComboBox. It doesn't affect how the selected
+     * item is rendered - that can be configured by using
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      *
      * @param renderer
@@ -421,10 +439,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(renderer, "The renderer must not be null");
         this.renderer = renderer;
 
-        if (template == null) {
-            template = new Element("template");
-            getElement().appendChild(template);
-        }
         scheduleRender();
     }
 
@@ -940,7 +954,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider != null && dataProviderListener == null) {
+        if (dataProvider != null) {
             setupDataProviderListener(dataProvider);
         }
 
@@ -1596,18 +1610,44 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         renderScheduled = true;
         runBeforeClientResponse(ui -> {
-            if (dataGeneratorRegistration != null) {
-                dataGeneratorRegistration.remove();
-                dataGeneratorRegistration = null;
-            }
-            Rendering<T> rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
-            if (rendering.getDataGenerator().isPresent()) {
-                dataGeneratorRegistration = dataGenerator
-                        .addDataGenerator(rendering.getDataGenerator().get());
-            }
-            reset();
+            render();
+            renderScheduled = false;
         });
+    }
+
+    private void render() {
+        renderingRegistrations.forEach(Registration::remove);
+        renderingRegistrations.clear();
+
+        Rendering<T> rendering;
+        if (renderer instanceof LitRenderer) {
+            // LitRenderer
+            if (template != null && template.getParent() != null) {
+                getElement().removeChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper());
+        } else {
+            // TemplateRenderer or ComponentRenderer
+            if (template == null) {
+                template = new Element("template");
+            }
+            if (template.getParent() == null) {
+                getElement().appendChild(template);
+            }
+            rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), template);
+        }
+
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            Registration renderingDataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(renderingDataGenerator);
+            renderingRegistrations.add(renderingDataGeneratorRegistration);
+        });
+
+        renderingRegistrations.add(rendering.getRegistration());
+
+        reset();
     }
 
     @ClientCallable
@@ -1697,4 +1737,27 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         reset();
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(ComboBoxVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(ComboBoxVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(ComboBoxVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(ComboBoxVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 }

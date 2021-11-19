@@ -363,6 +363,102 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertButtonContents("item 1");
     }
 
+    @Test
+    public void setI18n_i18nIsUpdated() {
+        click("set-width");
+        click("add-root-item");
+        TestBenchElement overflowButton = menuBar.getOverflowButton();
+
+        Assert.assertEquals("More options",
+                overflowButton.getAttribute("aria-label"));
+
+        click("set-i18n");
+
+        Assert.assertEquals("more-options",
+                overflowButton.getAttribute("aria-label"));
+    }
+
+    @Test
+    public void setI18n_detach_attach_i18nIsPersisted() {
+        click("set-width");
+        click("add-root-item");
+        click("set-i18n");
+        TestBenchElement overflowButton = menuBar.getOverflowButton();
+
+        Assert.assertEquals("more-options",
+                overflowButton.getAttribute("aria-label"));
+
+        click("toggle-attached");
+        click("toggle-attached");
+
+        menuBar = $(MenuBarElement.class).first();
+        overflowButton = menuBar.getOverflowButton();
+
+        Assert.assertEquals("more-options",
+                overflowButton.getAttribute("aria-label"));
+    }
+
+    @Test
+    public void addSubItem_clickMenuItem_clickButton_subMenuOpenedAndClosed() {
+        click("add-sub-item");
+        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
+                .click();
+        verifyOpened();
+        menuBar.getButtons().get(1).click();
+        verifyClosed();
+    }
+
+    public void toggleMenuBarTheme_themeIsToggled() {
+        Assert.assertFalse(menuBar.hasAttribute("theme"));
+        click("toggle-theme");
+        Assert.assertEquals(menuBar.getAttribute("theme"),
+                MenuBarTestPage.MENU_BAR_THEME);
+        click("toggle-theme");
+        Assert.assertFalse(menuBar.hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleMenuItemTheme_themeIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("theme"));
+        click("toggle-item-theme");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("theme"),
+                MenuBarTestPage.MENU_ITEM_THEME);
+        click("toggle-item-theme");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleSubMenuItemTheme_themeIsToggled() {
+        menuBar.getButtons().get(0).click();
+        Assert.assertFalse(getOverlayMenuItems().get(1).hasAttribute("theme"));
+
+        click("toggle-sub-theme");
+        verifyClosed();
+
+        menuBar.getButtons().get(0).click();
+        Assert.assertEquals(getOverlayMenuItems().get(1).getAttribute("theme"),
+                MenuBarTestPage.SUB_ITEM_THEME);
+
+        click("toggle-sub-theme");
+        verifyClosed();
+
+        menuBar.getButtons().get(0).click();
+        Assert.assertFalse(getOverlayMenuItems().get(1).hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleMenuBarTheme_toggleMenuItemTheme_themeIsOverridden() {
+        click("toggle-theme");
+        click("toggle-item-theme");
+
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
+                menuButton1.getAttribute("theme"));
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();

@@ -185,10 +185,12 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/vaadin-select", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-select/src/vaadin-select.js")
-@NpmPackage(value = "@vaadin/vaadin-template-renderer", version = "21.0.0-alpha6")
-@JsModule("@vaadin/vaadin-template-renderer/src/vaadin-template-renderer.js")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/select", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "22.0.0-beta2")
+@JsModule("@vaadin/select/src/vaadin-select.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {
@@ -520,18 +522,6 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      */
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Manually invoke existing renderer.
-     * </p>
-     */
-    protected void render() {
-        getElement().callJsFunction("render");
     }
 
     /**

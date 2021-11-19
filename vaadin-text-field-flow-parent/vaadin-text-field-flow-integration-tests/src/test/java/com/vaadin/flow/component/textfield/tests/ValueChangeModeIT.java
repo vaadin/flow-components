@@ -23,6 +23,15 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
+import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
+
 import com.vaadin.tests.AbstractComponentIT;
 
 import static org.junit.Assert.assertTrue;
@@ -39,78 +48,71 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     private WebElement message;
     private String lastMessageText = "";
 
-    private WebElement textField;
-    private WebElement textArea;
-    private WebElement passwordField;
-    private WebElement emailField;
-    private WebElement numberField;
-    private WebElement integerField;
-    private WebElement bigDecimalField;
+    private TextFieldElement textField;
+    private TextAreaElement textArea;
+    private PasswordFieldElement passwordField;
+    private EmailFieldElement emailField;
+    private NumberFieldElement numberField;
+    private IntegerFieldElement integerField;
+    private BigDecimalFieldElement bigDecimalField;
 
     @Before
     public void init() {
         open();
         waitForElementPresent(By.id("message"));
         message = findElement(By.id("message"));
-        textField = findElement(By.tagName("vaadin-text-field"));
-        textArea = findElement(By.tagName("vaadin-text-area"));
-        passwordField = findElement(By.tagName("vaadin-password-field"));
-        emailField = findElement(By.tagName("vaadin-email-field"));
-        numberField = findElement(By.tagName("vaadin-number-field"));
-        integerField = findElement(By.tagName("vaadin-integer-field"));
-        bigDecimalField = findElement(By.tagName("vaadin-big-decimal-field"));
+        textField = $(TextFieldElement.class).first();
+        textArea = $(TextAreaElement.class).first();
+        passwordField = $(PasswordFieldElement.class).first();
+        emailField = $(EmailFieldElement.class).first();
+        numberField = $(NumberFieldElement.class).first();
+        integerField = $(IntegerFieldElement.class).first();
+        bigDecimalField = $(BigDecimalFieldElement.class).first();
     }
 
     @Test
-
     public void testValueChangeModesForTextField() throws InterruptedException {
-        testValueChangeModes(textField, "textfield");
+        testValueChangeModes(textField.$("input").first(), "textfield");
     }
 
     @Test
-
     public void testValueChangeModesForTextArea() throws InterruptedException {
         testValueChangeModes(textArea, "textarea");
     }
 
     @Test
-
     public void testValueChangeModesForPasswordField()
             throws InterruptedException {
         testValueChangeModes(passwordField, "passwordfield");
     }
 
     @Test
-
     public void testValueChangeModesForEmailField()
             throws InterruptedException {
         testValueChangeModes(emailField, "emailfield");
     }
 
     @Test
-
     public void testValueChangeModesForNumberField()
             throws InterruptedException {
         testValueChangeModes(numberField, "numberfield");
     }
 
     @Test
-
     public void testValueChangeModesForIntegerField()
             throws InterruptedException {
         testValueChangeModes(integerField, "integerfield");
     }
 
     @Test
-
     public void testValueChangeModesForBigDecimalField()
             throws InterruptedException {
-        testValueChangeModes(bigDecimalField, "bigdecimalfield");
+        testValueChangeModes(bigDecimalField.$("input").first(),
+                "bigdecimalfield");
     }
 
-    private void testValueChangeModes(WebElement field, String componentName)
-            throws InterruptedException {
-
+    private void testValueChangeModes(TestBenchElement field,
+            String componentName) throws InterruptedException {
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");

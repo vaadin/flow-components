@@ -154,8 +154,7 @@ public class DatePickerIT extends ComponentDemoTest {
                 .findElement(By.id("locale-change-picker"));
         WebElement message = layout
                 .findElement(By.id("Customize-locale-picker-message"));
-        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
-                .get(0);
+        WebElement displayText = localePicker.findElement(By.tagName("input"));
         executeScript("arguments[0].value = '2018-03-27'", localePicker);
 
         waitUntil(driver -> message.getText()

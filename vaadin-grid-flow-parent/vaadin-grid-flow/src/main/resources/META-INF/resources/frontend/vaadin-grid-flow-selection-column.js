@@ -1,7 +1,7 @@
-import '@vaadin/vaadin-grid/vaadin-grid-column.js';
-import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js';
+import '@vaadin/grid/vaadin-grid-column.js';
+import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 {
-  class GridFlowSelectionColumnElement extends GridColumnElement {
+  class GridFlowSelectionColumnElement extends GridColumn {
 
     static get is() {
       return 'vaadin-grid-flow-selection-column';
@@ -117,14 +117,13 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
     }
 
     _onSelectClick(e) {
-      e.target.checked ? this._grid.$connector.doDeselection([e.target.__item], true) : this._grid.$connector.doSelection([e.target.__item], true);
-      e.target.checked = !e.target.checked;
+      e.currentTarget.checked ? this._grid.$connector.doDeselection([e.currentTarget.__item], true) : this._grid.$connector.doSelection([e.currentTarget.__item], true);
     }
 
     _onSelectAllClick(e) {
       e.preventDefault();
       if (this._grid.hasAttribute('disabled')) {
-        e.target.checked = !e.target.checked;
+        e.currentTarget.checked = !e.currentTarget.checked;
         return;
       }
       this.selectAll ? this.$server.deselectAll() : this.$server.selectAll();

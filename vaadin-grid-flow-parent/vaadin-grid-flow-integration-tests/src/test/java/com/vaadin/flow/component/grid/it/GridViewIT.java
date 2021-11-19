@@ -256,14 +256,14 @@ public class GridViewIT extends GridViewBase {
         grid.findElement(By.id("selectAllCheckbox")).click();
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been deselected", "false",
+        Assert.assertEquals("Select all should have been deselected", false,
                 grid.findElement(By.id("selectAllCheckbox"))
-                        .getAttribute("aria-checked"));
+                        .getPropertyBoolean("checked"));
 
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been reselected", "true",
+        Assert.assertEquals("Select all should have been reselected", true,
                 grid.findElement(By.id("selectAllCheckbox"))
-                        .getAttribute("aria-checked"));
+                        .getPropertyBoolean("checked"));
 
     }
 
@@ -330,13 +330,13 @@ public class GridViewIT extends GridViewBase {
         WebElement toggleIdColumnVisibility = findElement(
                 By.id("toggle-id-column-visibility"));
         String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('tr')[1].querySelectorAll('td').length;";
-        Assert.assertEquals(4l, getCommandExecutor()
+        Assert.assertEquals(4L, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(3l, getCommandExecutor()
+        waitUntil(c -> 3L == (long) getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
-        Assert.assertEquals(4l, getCommandExecutor()
+        waitUntil(c -> 4L == (long) getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
@@ -778,8 +778,8 @@ public class GridViewIT extends GridViewBase {
 
         Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
         Assert.assertEquals("$ 73.10", grid.getCell(0, 1).getText());
-        Assert.assertEquals("1/10/18 11:43:59 AM",
-                grid.getCell(0, 2).getText());
+        Assert.assertTrue(
+                grid.getCell(0, 2).getText().matches("1/10/18,? 11:43:59 AM"));
         Assert.assertEquals("Jan 11, 2018", grid.getCell(0, 3).getText());
         assertRendereredContent("$$$", grid.getCell(0, 4).getInnerHTML());
         Assert.assertEquals("<button>Remove</button>",
@@ -787,8 +787,8 @@ public class GridViewIT extends GridViewBase {
 
         Assert.assertEquals("Item 2", grid.getCell(1, 0).getText());
         Assert.assertEquals("$ 24.05", grid.getCell(1, 1).getText());
-        Assert.assertEquals("1/10/18 11:07:31 AM",
-                grid.getCell(1, 2).getText());
+        Assert.assertTrue(
+                grid.getCell(1, 2).getText().matches("1/10/18,? 11:07:31 AM"));
         Assert.assertEquals("Jan 24, 2018", grid.getCell(1, 3).getText());
         assertRendereredContent("$", grid.getCell(1, 4).getInnerHTML());
         Assert.assertEquals("<button>Remove</button>",
@@ -803,7 +803,7 @@ public class GridViewIT extends GridViewBase {
         waitUntil(driver -> grid.getRowCount() == 50);
 
         Assert.assertEquals("Grid should have heightByRows set to true", "true",
-                grid.getAttribute("heightByRows"));
+                grid.getAttribute("allRowsVisible"));
     }
 
     @Test
@@ -953,8 +953,9 @@ public class GridViewIT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
+        nameInput.sendKeys(Keys.END);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 

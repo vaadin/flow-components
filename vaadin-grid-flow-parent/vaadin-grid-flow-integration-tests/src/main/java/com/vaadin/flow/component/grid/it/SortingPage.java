@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -55,14 +56,13 @@ public class SortingPage extends Div {
         NativeButton showGridBtn = new NativeButton("Show grid", e -> {
             grid.getStyle().set("display", "block");
             grid.getStyle().remove("max-height");
-            grid.getElement().executeJs("$0.notifyResize();");
         });
         showGridBtn.setId("show-hidden-grid");
 
         add(grid, showGridBtn);
     }
 
-    private Grid createGrid(String gridId, String sortBtnId) {
+    private Grid<Person> createGrid(String gridId, String sortBtnId) {
         Grid<Person> grid = new Grid<>();
         grid.setMultiSort(true);
         grid.setId(gridId);
@@ -96,7 +96,24 @@ public class SortingPage extends Div {
         });
         reOrder.setId("reorder-button");
 
-        add(button, reOrder);
+        NativeButton changeHeaderText = new NativeButton("Change header text",
+                e -> {
+                    ageColumn.setHeader("Age (updated)");
+                });
+        changeHeaderText.setId("change-header-text");
+
+        NativeButton changeHeaderTextComponent = new NativeButton(
+                "Change header text component", e -> {
+                    ageColumn.setHeader(new Span("Age (updated)"));
+                });
+        changeHeaderTextComponent.setId("change-header-text-component");
+
+        NativeButton clearButton = new NativeButton("Clear items",
+                e -> grid.setItems(new ArrayList<Person>()));
+        clearButton.setId("clear-items");
+
+        add(button, reOrder, changeHeaderText, changeHeaderTextComponent,
+                clearButton);
 
         return grid;
     }
