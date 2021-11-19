@@ -172,6 +172,19 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         addValueChangeListener(listener);
     }
 
+    /**
+     * <p>
+     * A pattern to validate the {@code input} with.
+     * </p>
+     *
+     * @param pattern
+     *            the String value to set
+     */
+    public void setPattern(String pattern) {
+        super.setPattern(pattern);
+        this.getValidationSupport().setPattern(pattern);
+    }
+
     private TextFieldValidationSupport getValidationSupport() {
         if (validationSupport == null) {
             validationSupport = new TextFieldValidationSupport(this);

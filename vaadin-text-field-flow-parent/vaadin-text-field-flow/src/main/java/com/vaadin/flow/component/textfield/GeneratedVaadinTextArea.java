@@ -152,6 +152,29 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
         implements HasStyle, Focusable<R>, HasTheme {
 
     /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * A pattern to validate the {@code input} with.
+     * </p>
+     *
+     * @param pattern
+     *            the String value to set
+     */
+    protected void setPattern(String pattern) {
+        this.getElement().setProperty("pattern",
+                pattern == null ? "" : pattern);
+    }
+
+    /**
+     * The validation pattern.
+     */
+    public String getPattern() {
+        return this.getElement().getProperty("pattern", null);
+    }
+
+    /**
      * Adds theme variants to the component.
      *
      * @param variants
