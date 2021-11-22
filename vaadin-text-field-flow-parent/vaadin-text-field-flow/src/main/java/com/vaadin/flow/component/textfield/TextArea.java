@@ -172,19 +172,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         addValueChangeListener(listener);
     }
 
-    /**
-     * <p>
-     * A pattern to validate the {@code input} with.
-     * </p>
-     *
-     * @param pattern
-     *            the String value to set
-     */
-    public void setPattern(String pattern) {
-        super.setPattern(pattern);
-        this.getValidationSupport().setPattern(pattern);
-    }
-
     private TextFieldValidationSupport getValidationSupport() {
         if (validationSupport == null) {
             validationSupport = new TextFieldValidationSupport(this);
@@ -407,6 +394,37 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
+    }
+
+    /**
+     * Sets a regular expression for the value to pass on the client-side. The
+     * pattern must be a valid JavaScript Regular Expression that matches the
+     * entire value, not just some subset.
+     *
+     * @param pattern
+     *            the new String pattern
+     *
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
+     *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
+     *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
+     */
+    @Override
+    public void setPattern(String pattern) {
+        super.setPattern(pattern);
+        getValidationSupport().setPattern(pattern);
+    }
+
+    /**
+     * A regular expression that the value is checked against. The pattern must
+     * match the entire value, not just some subset.
+     *
+     * @return the {@code pattern} property from the webcomponent
+     */
+    public String getPattern() {
+        return getPatternString();
     }
 
     @Override

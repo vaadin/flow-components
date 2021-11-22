@@ -152,29 +152,6 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
         implements HasStyle, Focusable<R>, HasTheme {
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * A pattern to validate the {@code input} with.
-     * </p>
-     *
-     * @param pattern
-     *            the String value to set
-     */
-    protected void setPattern(String pattern) {
-        this.getElement().setProperty("pattern",
-                pattern == null ? "" : pattern);
-    }
-
-    /**
-     * The validation pattern.
-     */
-    public String getPattern() {
-        return this.getElement().getProperty("pattern", null);
-    }
-
-    /**
      * Adds theme variants to the component.
      *
      * @param variants
@@ -772,6 +749,40 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      */
     protected void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * A regular expression that the value is checked against. The pattern must
+     * match the entire value, not just some subset.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code pattern} property from the webcomponent
+     */
+    protected String getPatternString() {
+        return getElement().getProperty("pattern");
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * A regular expression that the value is checked against. The pattern must
+     * match the entire value, not just some subset.
+     * </p>
+     *
+     * @param pattern
+     *            the String value to set
+     */
+    protected void setPattern(String pattern) {
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
     }
 
     /**

@@ -90,8 +90,6 @@ public class TextAreaTest {
         assertEquals(testPattern, textArea.getPattern());
         assertEquals(testPattern,
                 textArea.getElement().getProperty("pattern", ""));
-
-        textArea.setPattern(testPattern);
     }
 
     public void assertAutoselectPropertyValueEquals(TextArea textArea,
