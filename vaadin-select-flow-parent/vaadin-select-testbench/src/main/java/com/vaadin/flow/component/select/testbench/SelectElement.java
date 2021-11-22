@@ -57,7 +57,8 @@ public class SelectElement extends TestBenchElement
         }
 
         // used to convert in streams
-        SelectItemElement(WebElement item, TestBenchCommandExecutor commandExecutor) {
+        SelectItemElement(WebElement item,
+                TestBenchCommandExecutor commandExecutor) {
             super(item, commandExecutor);
         }
     }
@@ -124,11 +125,14 @@ public class SelectElement extends TestBenchElement
     public ItemElement getSelectedItem() {
         TestBenchElement valueElement = $("vaadin-select-value-button").first();
 
-        // TODO: Remove after aligning flow-components with changes from https://github.com/vaadin/web-components/pull/2990
-        ElementQuery<SelectItemElement> selectItemElementQuery = valueElement.$(SelectItemElement.class);
+        // TODO: Remove after aligning flow-components with changes from
+        // https://github.com/vaadin/web-components/pull/2990
+        ElementQuery<SelectItemElement> selectItemElementQuery = valueElement
+                .$(SelectItemElement.class);
 
         // Check for vaadin-select-item first
-        if(selectItemElementQuery.exists()) return selectItemElementQuery.first();
+        if (selectItemElementQuery.exists())
+            return selectItemElementQuery.first();
 
         // Alternatively look for vaadin-item
         return valueElement.$(ItemElement.class).first();
