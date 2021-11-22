@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -45,6 +46,18 @@ public class SelectElement extends TestBenchElement
 
         // used to convert in streams
         ItemElement(WebElement item, TestBenchCommandExecutor commandExecutor) {
+            super(item, commandExecutor);
+        }
+    }
+
+    @Element("vaadin-select-item")
+    public static class SelectItemElement extends ItemElement {
+        public SelectItemElement() {
+            // needed for creating instances inside TB
+        }
+
+        // used to convert in streams
+        SelectItemElement(WebElement item, TestBenchCommandExecutor commandExecutor) {
             super(item, commandExecutor);
         }
     }
@@ -110,6 +123,14 @@ public class SelectElement extends TestBenchElement
 
     public ItemElement getSelectedItem() {
         TestBenchElement valueElement = $("vaadin-select-value-button").first();
+
+        // TODO: Remove after aligning flow-components with changes from https://github.com/vaadin/web-components/pull/2990
+        ElementQuery<SelectItemElement> selectItemElementQuery = valueElement.$(SelectItemElement.class);
+
+        // Check for vaadin-select-item first
+        if(selectItemElementQuery.exists()) return selectItemElementQuery.first();
+
+        // Alternatively look for vaadin-item
         return valueElement.$(ItemElement.class).first();
     }
 }
