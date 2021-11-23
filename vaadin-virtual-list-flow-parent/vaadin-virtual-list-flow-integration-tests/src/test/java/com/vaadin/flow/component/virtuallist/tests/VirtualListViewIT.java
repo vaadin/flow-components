@@ -112,8 +112,6 @@ public class VirtualListViewIT extends AbstractComponentIT {
                 By.id("switch-enabled-state-string-list"));
         new Actions(getDriver()).moveToElement(switchEnabled).click().perform();
 
-        getCommandExecutor().executeScript(
-                "arguments[0].scrollToIndex(0); return null;", list);
         // Check that an item gets removed
         list.findElement(By.tagName("button")).click();
         Assert.assertFalse(
