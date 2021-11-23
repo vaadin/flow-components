@@ -420,7 +420,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * A regular expression that the value is checked against. The pattern must
      * match the entire value, not just some subset.
      *
-     * @return the {@code pattern} property from the webcomponent
+     * @return the {@code pattern} property
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
