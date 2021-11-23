@@ -24,6 +24,7 @@ import java.util.Optional;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -54,10 +55,10 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
-        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
+        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
+        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
+        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -263,6 +264,7 @@ public class BigDecimalField
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

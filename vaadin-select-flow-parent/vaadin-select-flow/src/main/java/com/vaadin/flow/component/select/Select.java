@@ -20,6 +20,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -78,7 +79,7 @@ import java.util.stream.Stream;
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasDataView<T, Void, SelectDataView<T>>, HasHelper {
+        HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -412,6 +413,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @return the label string, or {@code null} if not set
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

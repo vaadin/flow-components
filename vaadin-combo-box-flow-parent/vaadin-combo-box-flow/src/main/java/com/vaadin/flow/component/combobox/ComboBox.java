@@ -30,6 +30,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
@@ -108,7 +109,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
         HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
-        HasTheme {
+        HasTheme, HasLabel {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -1387,6 +1388,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return isRequiredBoolean();
     }
 
+    /**
+     * Sets the label for the combobox.
+     *
+     * @param label
+     *            value for the {@code label} property in the combobox
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -1397,6 +1404,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the {@code label} property of the combobox
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }
