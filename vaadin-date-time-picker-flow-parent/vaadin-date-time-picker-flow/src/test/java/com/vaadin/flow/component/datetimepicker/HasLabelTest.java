@@ -23,14 +23,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class HasLabelTest {
 
+    private UI ui;
+
     @Before
     public void setUp() {
-        UI.setCurrent(new UI());
+        ui = new UI();
+        UI.setCurrent(ui);
     }
 
     @After
