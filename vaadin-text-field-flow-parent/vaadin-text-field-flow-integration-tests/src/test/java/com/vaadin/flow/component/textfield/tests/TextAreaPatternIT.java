@@ -115,11 +115,8 @@ public class TextAreaPatternIT extends AbstractComponentIT {
         assertServerSideValid();
     }
 
-    // Ignored: Currently changing a constraint on a Flow component does not
-    // trigger validation, so the component stays invalid even after clearing a
-    // constraint.
     @Test
-    @Ignore
+    @Ignore("Missing logic, see https://github.com/vaadin/flow-components/issues/2370")
     public void validPattern_invalidInput_clearPattern_isValid() {
         setNumberPattern.click();
         textArea.sendKeys("abcd");
