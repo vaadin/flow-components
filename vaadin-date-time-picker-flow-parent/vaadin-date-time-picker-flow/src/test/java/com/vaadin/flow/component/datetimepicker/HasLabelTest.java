@@ -23,6 +23,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
+@NotThreadSafe
 public class HasLabelTest {
 
     @Before
