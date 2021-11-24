@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -52,5 +56,32 @@ public class GridFilteringIT extends AbstractComponentIT {
                 .toString().equals("3"));
 
         waitUntil(driver -> "false".equals(grid.getAttribute("loading")));
+    }
+
+    @Test
+    public void gridShouldRenderCorrectly_whenColumnAndFilter_() {
+        open();
+
+        GridElement grid = $(GridElement.class).id("simple-grid-filtering");
+        TestBenchElement filterButton = $(TestBenchElement.class)
+                .id("filter-grid-and-hide-column");
+        TestBenchElement clearButton = $(TestBenchElement.class)
+                .id("clear-filter-and-show-column");
+
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridColumnElement columnElement = grid.getColumn("firstName");
+
+        GridTHTDElement cell = grid.getRow(0).getCell(columnElement);
+
+        Assert.assertEquals("Person 1", cell.getText());
+
+        filterButton.click();
+        clearButton.click();
+
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        cell = grid.getRow(0).getCell(columnElement);
+        Assert.assertEquals("Person 1", cell.getText());
     }
 }
