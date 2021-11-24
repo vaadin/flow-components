@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -107,7 +108,12 @@ public class SortingPage extends Div {
                 });
         changeHeaderTextComponent.setId("change-header-text-component");
 
-        add(button, reOrder, changeHeaderText, changeHeaderTextComponent);
+        NativeButton clearButton = new NativeButton("Clear items",
+                e -> grid.setItems(new ArrayList<Person>()));
+        clearButton.setId("clear-items");
+
+        add(button, reOrder, changeHeaderText, changeHeaderTextComponent,
+                clearButton);
 
         return grid;
     }

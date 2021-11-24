@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -34,7 +35,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
+        HasLabel {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -243,6 +245,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }
@@ -394,6 +397,36 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
+    }
+
+    /**
+     * Sets a regular expression for the value to pass on the client-side. The
+     * pattern must be a valid JavaScript Regular Expression that matches the
+     * entire value, not just some subset.
+     *
+     * @param pattern
+     *            the new String pattern
+     *
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
+     *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
+     *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
+     */
+    public void setPattern(String pattern) {
+        getElement().setProperty("pattern", pattern);
+        getValidationSupport().setPattern(pattern);
+    }
+
+    /**
+     * A regular expression that the value is checked against. The pattern must
+     * match the entire value, not just some subset.
+     *
+     * @return the {@code pattern} property
+     */
+    public String getPattern() {
+        return getElement().getProperty("pattern");
     }
 
     @Override

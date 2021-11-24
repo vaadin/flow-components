@@ -23,6 +23,7 @@ package com.vaadin.flow.component.customfield;
 import java.util.Objects;
 
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import org.slf4j.LoggerFactory;
@@ -50,13 +51,14 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "22.0.0-alpha10")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/custom-field", version = "23.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.0.0-alpha1")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper {
+        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
+        HasLabel {
 
     /**
      * Default constructor.
@@ -211,6 +213,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getElement().getProperty("label", null);
     }
@@ -221,6 +224,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @param label
      *            value for the {@code label} property in the webcomponent
      */
+    @Override
     public void setLabel(String label) {
         getElement().setProperty("label", label);
     }

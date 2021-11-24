@@ -31,7 +31,7 @@ import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -46,7 +46,7 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -66,15 +66,15 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "22.0.0-alpha10")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "22.0.0-alpha10")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "23.0.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.0.0-alpha1")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper {
+        Focusable<DateTimePicker>, HasHelper, HasLabel {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -316,6 +316,7 @@ public class DateTimePicker
      * @param label
      *            the String value to set
      */
+    @Override
     public void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -325,6 +326,7 @@ public class DateTimePicker
      *
      * @return the {@code label} property of the date time picker
      */
+    @Override
     public String getLabel() {
         return getElement().getProperty("label");
     }
