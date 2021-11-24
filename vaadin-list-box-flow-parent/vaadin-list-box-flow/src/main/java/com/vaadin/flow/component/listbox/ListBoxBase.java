@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -72,7 +73,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         extends AbstractSinglePropertyField<C, VALUE>
         implements HasItemComponents<ITEM>, HasSize,
         HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
-        HasDataView<ITEM, Void, ListBoxDataView<ITEM>> {
+        HasDataView<ITEM, Void, ListBoxDataView<ITEM>>, HasStyle {
 
     private final AtomicReference<DataProvider<ITEM, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
