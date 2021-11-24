@@ -73,6 +73,17 @@ public class TextAreaTest {
         assertAutoselectPropertyValueEquals(textArea, false);
     }
 
+    @Test
+    public void patternPropertyValue() {
+        String testPattern = "TEST";
+        TextArea textArea = new TextArea();
+
+        textArea.setPattern(testPattern);
+        assertEquals(testPattern, textArea.getPattern());
+        assertEquals(testPattern,
+                textArea.getElement().getProperty("pattern", ""));
+    }
+
     public void assertAutoselectPropertyValueEquals(TextArea textArea,
             Boolean value) {
         textArea.setAutoselect(value);

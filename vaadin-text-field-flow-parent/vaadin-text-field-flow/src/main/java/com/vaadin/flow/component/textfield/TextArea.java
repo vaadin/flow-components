@@ -379,6 +379,36 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         super.setPreventInvalidInput(preventInvalidInput);
     }
 
+    /**
+     * Sets a regular expression for the value to pass on the client-side. The
+     * pattern must be a valid JavaScript Regular Expression that matches the
+     * entire value, not just some subset.
+     *
+     * @param pattern
+     *            the new String pattern
+     *
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
+     *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
+     *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
+     */
+    public void setPattern(String pattern) {
+        getElement().setProperty("pattern", pattern);
+        getValidationSupport().setPattern(pattern);
+    }
+
+    /**
+     * A regular expression that the value is checked against. The pattern must
+     * match the entire value, not just some subset.
+     *
+     * @return the {@code pattern} property
+     */
+    public String getPattern() {
+        return getElement().getProperty("pattern");
+    }
+
     @Override
     public String getEmptyValue() {
         return "";
