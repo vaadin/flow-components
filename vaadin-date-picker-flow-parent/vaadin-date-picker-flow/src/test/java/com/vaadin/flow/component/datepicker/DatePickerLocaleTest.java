@@ -26,9 +26,7 @@ public class DatePickerLocaleTest {
     }
 
     @Test
-    public void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
-
-        datePicker = new DatePicker();
+    public void newDatePicker_getLocaleIsNotNull() {
         Objects.requireNonNull(datePicker.getLocale());
     }
 
