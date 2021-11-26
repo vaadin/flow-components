@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
+import com.vaadin.flow.component.charts.model.Global;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -27,6 +28,7 @@ public class ChartOptions extends AbstractConfigurationObject {
     @JsonUnwrapped
     private Theme theme;
     private Lang lang;
+    private Global global;
     private transient JreJsonFactory jsonFactory;
 
     protected ChartOptions() {
@@ -95,6 +97,30 @@ public class ChartOptions extends AbstractConfigurationObject {
         this.theme = theme;
         updateOptions();
     }
+
+    /**
+     * Returns the {@link Global} in use or {@code null} if no global configuration
+     * has been set.
+     *
+     * @return the {@link Global} in use or {@code null}.
+     */
+    public Global getGlobal() {
+        return global;
+    }
+
+    /**
+     * Changes the Global params of all charts.
+     * <p/>
+     * Note that if the view is already drawn, all existing {@link Chart}s will
+     * be redrawn.
+     *
+     * @param global
+     */
+    public void setGlobal(Global global) {
+        this.global = global;
+        updateOptions();
+    }
+
 
     /**
      * Returns a ChartOptions instance for the given UI. If a ChartOptions
