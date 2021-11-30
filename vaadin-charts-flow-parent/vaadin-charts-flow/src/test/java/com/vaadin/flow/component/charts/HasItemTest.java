@@ -18,7 +18,14 @@
 package com.vaadin.flow.component.charts;
 
 import com.vaadin.flow.component.charts.events.HasItem;
-import com.vaadin.flow.component.charts.model.*;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.ListSeries;
+import com.vaadin.flow.component.charts.model.Node;
+import com.vaadin.flow.component.charts.model.NodeSeries;
+import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.TreeSeries;
+import com.vaadin.flow.component.charts.model.TreeSeriesItem;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -112,6 +119,11 @@ public class HasItemTest {
         @Override
         public int getItemIndex() {
             return this.itemIndex;
+        }
+
+        @Override
+        public String getItemId() {
+            return null;
         }
 
         @Override
