@@ -327,7 +327,8 @@ public class SelectTest {
         select.setEmptySelectionAllowed(true);
         select.setEmptySelectionCaption("EMPTY");
 
-        Assert.assertEquals("<vaadin-select-item value>\n EMPTY\n</vaadin-select-item>",
+        Assert.assertEquals(
+                "<vaadin-select-item value>\n EMPTY\n</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
         validateItem(0, "EMPTY", null, true);
