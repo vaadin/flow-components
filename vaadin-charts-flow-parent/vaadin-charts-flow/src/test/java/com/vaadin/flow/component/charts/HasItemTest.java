@@ -96,11 +96,8 @@ public class HasItemTest {
         private final int itemIndex;
         private final int seriesItemIndex;
 
-        public HasItemTestImpl(
-                Chart chart,
-                int itemIndex,
-                int seriesItemIndex
-        ) {
+        public HasItemTestImpl(Chart chart, int itemIndex,
+                int seriesItemIndex) {
             this.chart = chart;
             this.itemIndex = itemIndex;
             this.seriesItemIndex = seriesItemIndex;
