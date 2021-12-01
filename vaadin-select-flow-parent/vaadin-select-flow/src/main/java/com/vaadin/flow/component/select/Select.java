@@ -185,10 +185,10 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * are not the correct ones, e.g. the list box is the only child of select,
      * even though that is not visible from the component level.
      */
-    @Tag("vaadin-list-box")
+    @Tag("vaadin-select-list-box")
     @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    private class InternalListBox<T> extends Component
+    private class InternalListBox extends Component
             implements HasItemComponents<T> {
 
         @Override
