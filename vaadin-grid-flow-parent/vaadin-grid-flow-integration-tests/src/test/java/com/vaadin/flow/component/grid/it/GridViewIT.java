@@ -705,7 +705,8 @@ public class GridViewIT extends GridViewBase {
         grid.findElement(By.tagName("vaadin-text-field")).sendKeys("100");
         waitUntil(driver -> grid.getRowCount() == 1);
 
-        // Expect the one remaining row's first cell to contain text "Person 100"
+        // Expect the one remaining row's first cell to contain
+        // text "Person 100"
         Assert.assertEquals("Person 100", grid.getCell(0, 0).getText());
     }
 
