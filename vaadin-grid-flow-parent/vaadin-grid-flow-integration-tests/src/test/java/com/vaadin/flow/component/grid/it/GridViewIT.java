@@ -694,7 +694,7 @@ public class GridViewIT extends GridViewBase {
     }
 
     @Test
-    public void gridWithFiltering_scrolledToEnd() {
+    public void scrollToEnd_filter_rowsUpdated() {
         // Open /vaadin-grid-it-demo/filtering
         openTabAndCheckForErrors("filtering");
         GridElement grid = $(GridElement.class).id("grid-with-filters");
