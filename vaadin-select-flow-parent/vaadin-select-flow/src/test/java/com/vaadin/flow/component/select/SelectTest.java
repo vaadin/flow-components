@@ -256,13 +256,13 @@ public class SelectTest {
         select.setTextRenderer(bean -> "!" + bean.getProperty());
 
         Assert.assertEquals(
-                "<vaadin-item value=\"1\">\n <span>!foo</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"1\">\n <span>!foo</span>\n</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-item value=\"2\">\n <span>!bar</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"2\">\n <span>!bar</span>\n</vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-item value=\"3\">\n <span>!baz</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"3\">\n <span>!baz</span>\n</vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
     }
 
@@ -273,21 +273,21 @@ public class SelectTest {
                 (SerializableFunction<String, Span>) Span::new));
 
         Assert.assertEquals(
-                "<vaadin-item value=\"1\">\n <span>foo</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"1\">\n <span>foo</span>\n</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-item value=\"2\">\n <span>bar</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"2\">\n <span>bar</span>\n</vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-item value=\"3\">\n <span>baz</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"3\">\n <span>baz</span>\n</vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
 
         select.setItems("1", "2");
         Assert.assertEquals(
-                "<vaadin-item value=\"4\">\n <span>1</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"4\">\n <span>1</span>\n</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-item value=\"5\">\n <span>2</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"5\">\n <span>2</span>\n</vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
     }
 
@@ -298,7 +298,7 @@ public class SelectTest {
                 (SerializableFunction<String, Span>) Span::new));
         select.setItemLabelGenerator(item -> "bar");
         Assert.assertEquals(
-                "<vaadin-item value=\"1\" label=\"bar\">\n <span>foo</span>\n</vaadin-item>",
+                "<vaadin-select-item value=\"1\" label=\"bar\">\n <span>foo</span>\n</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
     }
 
@@ -312,7 +312,7 @@ public class SelectTest {
 
         // getOuterHTML jsoup interprets the property value with "" as value as
         // a boolean
-        Assert.assertEquals("<vaadin-item value></vaadin-item>",
+        Assert.assertEquals("<vaadin-select-item value></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
         validateItem(0, "", null, true);
@@ -327,7 +327,8 @@ public class SelectTest {
         select.setEmptySelectionAllowed(true);
         select.setEmptySelectionCaption("EMPTY");
 
-        Assert.assertEquals("<vaadin-item value>\n EMPTY\n</vaadin-item>",
+        Assert.assertEquals(
+                "<vaadin-select-item value>\n EMPTY\n</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
         validateItem(0, "EMPTY", null, true);

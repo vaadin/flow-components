@@ -112,12 +112,12 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.SORT_BUTTON)).click();
 
         Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
-                select.$("vaadin-item").all().stream()
+                select.$("vaadin-select-item").all().stream()
                         .map(TestBenchElement::getText)
                         .collect(Collectors.joining(",")));
 
         Assert.assertEquals("Unexpected sort order", "John,Paul,Mike",
-                otherSelect.$("vaadin-item").all().stream()
+                otherSelect.$("vaadin-select-item").all().stream()
                         .map(TestBenchElement::getText)
                         .collect(Collectors.joining(",")));
     }
@@ -127,15 +127,15 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.FILTER_BUTTON)).click();
 
         Assert.assertEquals("Unexpected filtered items count", 1,
-                select.$("vaadin-item").all().size());
+                select.$("vaadin-select-item").all().size());
         Assert.assertEquals("Unexpected filtered item", "Paul",
-                select.$("vaadin-item").all().get(0).getText());
+                select.$("vaadin-select-item").all().get(0).getText());
 
         Assert.assertEquals("No filter expected", 3,
-                otherSelect.$("vaadin-item").all().size());
+                otherSelect.$("vaadin-select-item").all().size());
         Assert.assertArrayEquals("No filter expected",
                 new String[] { "John", "Paul", "Mike" },
-                otherSelect.$("vaadin-item").all().stream()
+                otherSelect.$("vaadin-select-item").all().stream()
                         .map(TestBenchElement::getText).toArray());
     }
 }
