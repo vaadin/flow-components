@@ -21,8 +21,6 @@ import com.vaadin.flow.component.charts.events.HasItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.ListSeries;
-import com.vaadin.flow.component.charts.model.Node;
-import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.TreeSeriesItem;
@@ -53,19 +51,6 @@ public class HasItemTest {
         DataSeriesItem result = hasItem.getItem();
 
         Assert.assertEquals(item, result);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getItemWithNodeSeriesThrowsUnsupportedOperationException() {
-        Chart chart = new Chart();
-        Node node1 = new Node("Node1");
-        Node node2 = new Node("Node2");
-        NodeSeries series = new NodeSeries();
-        series.add(node1, node2);
-        chart.getConfiguration().addSeries(series);
-
-        HasItem hasItem = new HasItemTestImpl(chart, 0, 0);
-        hasItem.getItem();
     }
 
     @Test(expected = UnsupportedOperationException.class)

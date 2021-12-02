@@ -22,9 +22,8 @@ import com.vaadin.flow.component.charts.model.AbstractSeriesItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.ListSeries;
-import com.vaadin.flow.component.charts.model.Node;
-import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.TreeSeries;
 
 /**
  * Indicates that an event has an associated item
@@ -58,17 +57,17 @@ public interface HasItem extends HasSeries {
      * The ID of the series item that is associated with the event. Can be used
      * to identify the item within the series.
      * <p>
-     * Example for {@link NodeSeries}:
+     * Example for {@link TreeSeries}:
      *
      * <pre>
      * String id = this.getItemId();
-     * NodeSeries series = (NodeSeries) this.getSeries();
-     * Optional&lt;Node&gt; nodeForId = series.getNodes().stream()
-     *   .filter(node -> node.getId().equals(id))
+     * TreeSeries series = (TreeSeries) this.getSeries();
+     * Optional&lt;TreeSeriesItem&gt; treeItem = series.getData().stream()
+     *   .filter(item -> item.getId().equals(id))
      *   .findFirst();
      * </pre>
      * <p>
-     * Only {@link AbstractSeriesItem} and {@link Node} support setting an ID.
+     * Only {@link AbstractSeriesItem} supports setting an ID.
      * For other types of series items this property will always return null.
      * For {@link AbstractSeriesItem} the ID is optional. Unless the developer
      * has explicitly set an ID for the item associated with the event, this
