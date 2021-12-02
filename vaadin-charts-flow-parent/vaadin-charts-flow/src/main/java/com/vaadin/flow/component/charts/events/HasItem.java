@@ -67,10 +67,10 @@ public interface HasItem extends HasSeries {
      *   .findFirst();
      * </pre>
      * <p>
-     * Only {@link AbstractSeriesItem} supports setting an ID.
-     * For other types of series items this property will always return null.
-     * For {@link AbstractSeriesItem} the ID is optional. Unless the developer
-     * has explicitly set an ID for the item associated with the event, this
+     * Only {@link AbstractSeriesItem} supports setting an ID. For other types
+     * of series items this property will always return null. For
+     * {@link AbstractSeriesItem} the ID is optional. Unless the developer has
+     * explicitly set an ID for the item associated with the event, this
      * property will be null. See {@link #getItem()} or {@link #getItemIndex()}
      * for alternatives.
      *
