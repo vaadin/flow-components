@@ -25,8 +25,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
- * Internal representation of {@code <vaadin-item>}. vaadin-select.html imports
- * vaadin-item.html.
+ * Internal representation of {@code <vaadin-select-item>}.
  *
  * @param <T>
  *            the type of the bean
