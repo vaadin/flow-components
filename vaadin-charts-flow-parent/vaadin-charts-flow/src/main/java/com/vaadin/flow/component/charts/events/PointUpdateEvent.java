@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.events;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -32,11 +32,13 @@ public class PointUpdateEvent extends ComponentEvent<Chart> implements HasItem {
     private final Double newXValue;
     private final Double newYValue;
     private final int pointIndex;
+    private final String pointId;
 
     public PointUpdateEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.target.series.index") int seriesIndex,
             @EventData("event.detail.originalEvent.target.category") String category,
             @EventData("event.detail.originalEvent.target.index") int pointIndex,
+            @EventData("event.detail.originalEvent.target.id") String pointId,
             @EventData("event.detail.originalEvent.target.x") Double oldXValue,
             @EventData("event.detail.originalEvent.target.y") Double oldYValue,
             @EventData("event.detail.originalEvent.options.x") Double newXValue,
@@ -49,6 +51,7 @@ public class PointUpdateEvent extends ComponentEvent<Chart> implements HasItem {
         this.newXValue = newXValue;
         this.newYValue = newYValue;
         this.pointIndex = pointIndex;
+        this.pointId = pointId;
     }
 
     public Double getOldXValue() {
@@ -80,5 +83,10 @@ public class PointUpdateEvent extends ComponentEvent<Chart> implements HasItem {
     @Override
     public int getItemIndex() {
         return pointIndex;
+    }
+
+    @Override
+    public String getItemId() {
+        return pointId;
     }
 }
