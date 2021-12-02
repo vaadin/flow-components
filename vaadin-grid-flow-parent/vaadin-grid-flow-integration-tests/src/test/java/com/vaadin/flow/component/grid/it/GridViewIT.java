@@ -727,6 +727,25 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void scrollToEnd_filter_rowsUpdated() {
+        // Open /vaadin-grid-it-demo/filtering
+        openTabAndCheckForErrors("filtering");
+        GridElement grid = $(GridElement.class).id("grid-with-filters");
+
+        // Scroll to the end of the grid
+        grid.scrollToRow(grid.getRowCount() - 1);
+        // Filter "Name" column with "100"
+        grid.findElement(By.tagName("vaadin-text-field")).sendKeys("100");
+        waitUntil(driver -> grid.getRowCount() == 1);
+
+        waitUntil(driver -> !"Person 489".equals(grid.getCell(0, 0).getText()));
+
+        // Expect the one remaining row's first cell to contain
+        // text "Person 100"
+        Assert.assertEquals("Person 100", grid.getCell(0, 0).getText());
+    }
+
+    @Test
     public void beanGrid_columnsForPropertiesAddedWithCorrectHeaders() {
         openTabAndCheckForErrors("configuring-columns");
         GridElement grid = $(GridElement.class).id("bean-grid");
