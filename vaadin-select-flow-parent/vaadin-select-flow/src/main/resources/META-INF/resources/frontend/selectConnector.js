@@ -8,7 +8,7 @@
             const _findListBoxElement = tryCatchWrapper(function () {
                 for (let i = 0; i < select.childElementCount; i++) {
                     const child = select.children[i];
-                    if ("VAADIN-LIST-BOX" === child.tagName.toUpperCase()) {
+                    if ("VAADIN-SELECT-LIST-BOX" === child.tagName.toUpperCase()) {
                         return child;
                     }
                 }
