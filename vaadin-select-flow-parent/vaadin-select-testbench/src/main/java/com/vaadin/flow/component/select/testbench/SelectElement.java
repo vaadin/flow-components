@@ -38,7 +38,7 @@ import org.openqa.selenium.WebElement;
 public class SelectElement extends TestBenchElement
         implements HasSelectByText, HasLabel, HasPlaceholder, HasHelper {
 
-    @Element("vaadin-item")
+    @Element("vaadin-select-item")
     public static class ItemElement extends TestBenchElement {
         public ItemElement() {
             // needed for creating instances inside TB
@@ -46,19 +46,6 @@ public class SelectElement extends TestBenchElement
 
         // used to convert in streams
         ItemElement(WebElement item, TestBenchCommandExecutor commandExecutor) {
-            super(item, commandExecutor);
-        }
-    }
-
-    @Element("vaadin-select-item")
-    public static class SelectItemElement extends ItemElement {
-        public SelectItemElement() {
-            // needed for creating instances inside TB
-        }
-
-        // used to convert in streams
-        SelectItemElement(WebElement item,
-                TestBenchCommandExecutor commandExecutor) {
             super(item, commandExecutor);
         }
     }
@@ -89,8 +76,8 @@ public class SelectElement extends TestBenchElement
     public Stream<ItemElement> getItemsStream() {
         openPopup();
         List<WebElement> elements = getPropertyElement("_overlayElement")
-                .findElement(By.tagName("vaadin-list-box"))
-                .findElements(By.tagName("vaadin-item"));
+                .findElement(By.tagName("vaadin-select-list-box"))
+                .findElements(By.tagName("vaadin-select-item"));
         if (elements.size() == 0) {
             return Stream.<ItemElement> builder().build();
         }
@@ -124,17 +111,6 @@ public class SelectElement extends TestBenchElement
 
     public ItemElement getSelectedItem() {
         TestBenchElement valueElement = $("vaadin-select-value-button").first();
-
-        // TODO: Remove after aligning flow-components with changes from
-        // https://github.com/vaadin/web-components/pull/2990
-        ElementQuery<SelectItemElement> selectItemElementQuery = valueElement
-                .$(SelectItemElement.class);
-
-        // Check for vaadin-select-item first
-        if (selectItemElementQuery.exists())
-            return selectItemElementQuery.first();
-
-        // Alternatively look for vaadin-item
         return valueElement.$(ItemElement.class).first();
     }
 }
