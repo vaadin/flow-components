@@ -145,8 +145,8 @@ public class DateTimePicker
             synchronizeChildComponentValues(initialDateTime);
         }
 
-        addToSlot(datePicker, "date-picker");
-        addToSlot(timePicker, "time-picker");
+        replaceDefaultSlotContent("date-picker", datePicker);
+        replaceDefaultSlotContent("time-picker", timePicker);
 
         setLocale(UI.getCurrent().getLocale());
 
@@ -292,11 +292,21 @@ public class DateTimePicker
     }
 
     /**
-     * Adds the given Component to the specified slot of this component.
+     * Removes the web components default slot contents, and adds the given
+     * component to it.
      */
-    private void addToSlot(Component component, String slot) {
+    private void replaceDefaultSlotContent(String slot, Component component) {
         Objects.requireNonNull(component, "Component to add cannot be null");
         component.getElement().setAttribute("slot", slot);
+        component.getElement().setAttribute("is-flow-slotted-child", "");
+
+        // executeJs call to remove the default slot contents. executeJs
+        // actually runs after appendChild, so the removal logic would also
+        // remove the replacement component we add below. To fix that we check
+        // for a custom attribute and only remove children that do not have it.
+        getElement().executeJs(
+                "this.querySelectorAll(`[slot=\"${$0}\"]`).forEach(child => !child.hasAttribute('is-flow-slotted-child') && child.remove());",
+                slot);
         getElement().appendChild(component.getElement());
     }
 
