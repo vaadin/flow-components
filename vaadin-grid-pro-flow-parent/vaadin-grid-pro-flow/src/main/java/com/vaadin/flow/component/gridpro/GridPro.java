@@ -179,7 +179,9 @@ public class GridPro<E> extends Grid<E> {
             super.onAttach(attachEvent);
             // Detaching GridPro will clear editor field reference from client,
             // re-register it.
-            setEditModeRenderer(editorField);
+            if (getEditorType().equals("custom")) {
+                setEditModeRenderer(editorField);
+            }
         }
 
         private void setEditModeRenderer(AbstractField component) {
