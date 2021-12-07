@@ -172,6 +172,20 @@ public class GridPro<E> extends Grid<E> {
             super(grid, columnId, renderer);
         }
 
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            super.onAttach(attachEvent);
+            // Detaching GridPro will clear editor field reference from client,
+            // re-register it.
+            setEditModeRenderer(editorField);
+        }
+
+        private void setEditModeRenderer(AbstractField component) {
+            UI.getCurrent().getPage().executeJavaScript(
+                    "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
+                    getElement(), component.getElement());
+        }
+
         /**
          * Sets the itemUpdater function that will be called on item changed.
          *
