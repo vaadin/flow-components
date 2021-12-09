@@ -397,14 +397,15 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // This has been caught by DatePickerValidationPage::invalidLocale test
         // when running on
         // Chrome(73+)/FireFox(66)/Edge(42.17134).
-        Locale locale = getLocale();
+        Locale appliedLocale = getLocale();
         String languageTag;
-        if (!locale.toLanguageTag().contains("lvariant")) {
-            languageTag = locale.toLanguageTag();
-        } else if (locale.getCountry().isEmpty()) {
-            languageTag = locale.getLanguage();
+        if (!appliedLocale.toLanguageTag().contains("lvariant")) {
+            languageTag = appliedLocale.toLanguageTag();
+        } else if (appliedLocale.getCountry().isEmpty()) {
+            languageTag = appliedLocale.getLanguage();
         } else {
-            languageTag = locale.getLanguage() + "-" + locale.getCountry();
+            languageTag = appliedLocale.getLanguage() + "-"
+                    + appliedLocale.getCountry();
         }
 
         // Call update function in connector with locale and I18N settings
