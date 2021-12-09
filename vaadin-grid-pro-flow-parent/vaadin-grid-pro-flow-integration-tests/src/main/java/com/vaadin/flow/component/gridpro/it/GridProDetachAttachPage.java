@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "grid-detach-attach")
+@Route(value = "gridpro-detach-attach")
 public class GridProDetachAttachPage extends Div {
 
     public GridProDetachAttachPage() {
