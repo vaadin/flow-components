@@ -46,7 +46,7 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
 
         grid = $(GridProElement.class).waitForFirst();
         assertCellEnterEditModeOnDoubleClick(0, 0, "vaadin-text-field",
-                beanGrid, true);
+                grid, true);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
