@@ -45,14 +45,14 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
         toggleAttachedButton.click();
 
         grid = $(GridProElement.class).waitForFirst();
-        assertCellEnterEditModeOnDoubleClick(0, 0, "vaadin-text-field",
-                grid, true);
+        assertCellEnterEditModeOnDoubleClick(0, 0, "vaadin-text-field", grid,
+                true);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag) {
-        assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag, grid,
-                true);
+        assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
+                grid, true);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
