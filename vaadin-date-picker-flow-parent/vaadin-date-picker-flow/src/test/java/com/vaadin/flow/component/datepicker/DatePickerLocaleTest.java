@@ -16,12 +16,12 @@ public class DatePickerLocaleTest {
 
     private DatePicker datePicker;
     private MockUI ui;
-    
+
     @Before
     public void initTest() {
         ui = new MockUI();
         UI.setCurrent(ui);
-        
+
         datePicker = new DatePicker();
     }
 
