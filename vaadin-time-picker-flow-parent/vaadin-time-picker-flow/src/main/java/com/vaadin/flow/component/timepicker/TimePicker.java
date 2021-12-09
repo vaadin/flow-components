@@ -346,9 +346,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getLocale() == null) {
-            setLocale(attachEvent.getUI().getLocale());
-        }
         initConnector();
         requestLocaleUpdate();
         FieldValidationUtil.disableClientValidation(this);
