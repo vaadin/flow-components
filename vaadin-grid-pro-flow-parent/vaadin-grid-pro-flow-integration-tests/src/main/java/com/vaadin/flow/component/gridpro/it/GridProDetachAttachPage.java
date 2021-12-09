@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2000-2019 Vaadin Ltd.
  *
@@ -14,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.devday.demo.views;
+package com.vaadin.flow.component.gridpro.it;
 
 import java.util.ArrayList;
 import java.util.List;
