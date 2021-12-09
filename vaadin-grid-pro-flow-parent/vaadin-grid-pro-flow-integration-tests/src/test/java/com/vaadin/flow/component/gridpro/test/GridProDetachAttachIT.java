@@ -51,8 +51,8 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag) {
-        assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
-                grid, true);
+        assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag, grid,
+                true);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
