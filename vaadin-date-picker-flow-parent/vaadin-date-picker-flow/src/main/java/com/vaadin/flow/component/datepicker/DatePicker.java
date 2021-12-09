@@ -71,7 +71,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     };
 
     private Locale locale;
-    private String languageTag;
 
     private LocalDate max;
     private LocalDate min;
@@ -305,20 +304,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
-        // For ill-formed locales, Locale.toLanguageTag() will append subtag
-        // "lvariant" to it, which will cause the client side
-        // Date().toLocaleDateString()
-        // fallback to the system default locale silently.
-        // This has been caught by DatePickerValidationPage::invalidLocale test
-        // when running on
-        // Chrome(73+)/FireFox(66)/Edge(42.17134).
-        if (!locale.toLanguageTag().contains("lvariant")) {
-            languageTag = locale.toLanguageTag();
-        } else if (locale.getCountry().isEmpty()) {
-            languageTag = locale.getLanguage();
-        } else {
-            languageTag = locale.getLanguage() + "-" + locale.getCountry();
-        }
         requestI18nUpdate();
     }
 
@@ -340,14 +325,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if (locale == null) {
-            getUI().ifPresent(ui -> setLocale(ui.getLocale()));
-        } else if (languageTag != null) {
-            requestI18nUpdate();
-        }
-        if (i18n != null) {
-            requestI18nUpdate();
-        }
+        requestI18nUpdate();
         FieldValidationUtil.disableClientValidation(this);
     }
 
@@ -410,6 +388,23 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // component
         if (i18nObject != null) {
             removeNullValuesFromJsonObject(i18nObject);
+        }
+
+        // For ill-formed locales, Locale.toLanguageTag() will append subtag
+        // "lvariant" to it, which will cause the client side
+        // Date().toLocaleDateString()
+        // fallback to the system default locale silently.
+        // This has been caught by DatePickerValidationPage::invalidLocale test
+        // when running on
+        // Chrome(73+)/FireFox(66)/Edge(42.17134).
+        Locale locale = getLocale();
+        String languageTag;
+        if (!locale.toLanguageTag().contains("lvariant")) {
+            languageTag = locale.toLanguageTag();
+        } else if (locale.getCountry().isEmpty()) {
+            languageTag = locale.getLanguage();
+        } else {
+            languageTag = locale.getLanguage() + "-" + locale.getCountry();
         }
 
         // Call update function in connector with locale and I18N settings
