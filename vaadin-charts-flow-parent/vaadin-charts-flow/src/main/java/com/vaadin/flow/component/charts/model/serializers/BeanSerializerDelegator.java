@@ -72,7 +72,8 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     }
 
     @Override
-    protected BeanSerializerBase withByNameInclusion(Set<String> set, Set<String> set1) {
+    protected BeanSerializerBase withByNameInclusion(Set<String> set,
+            Set<String> set1) {
         return null;
     }
 
@@ -82,7 +83,9 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     }
 
     @Override
-    protected BeanSerializerBase withProperties(BeanPropertyWriter[] beanPropertyWriters, BeanPropertyWriter[] beanPropertyWriters1) {
+    protected BeanSerializerBase withProperties(
+            BeanPropertyWriter[] beanPropertyWriters,
+            BeanPropertyWriter[] beanPropertyWriters1) {
         return null;
     }
 
