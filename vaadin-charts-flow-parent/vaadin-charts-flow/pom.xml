@@ -18,10 +18,10 @@
             <artifactId>flow-data</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- this dependency comes from flow-server, no version needs here -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
