@@ -143,8 +143,6 @@ public class DateTimePicker
         addToSlot(datePicker, "date-picker");
         addToSlot(timePicker, "time-picker");
 
-        setLocale(UI.getCurrent().getLocale());
-
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
@@ -459,7 +457,11 @@ public class DateTimePicker
      */
     @Override
     public Locale getLocale() {
-        return locale;
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
     }
 
     /**

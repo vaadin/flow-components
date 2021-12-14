@@ -35,6 +35,7 @@ import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -65,6 +66,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private LocalTime max;
     private LocalTime min;
     private boolean required;
+    private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
     /**
      * Default constructor.
@@ -321,10 +323,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getLocale() == null) {
-            setLocale(attachEvent.getUI().getLocale());
-        }
         initConnector();
+        requestLocaleUpdate();
         FieldValidationUtil.disableClientValidation(this);
     }
 
@@ -370,17 +370,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         }
 
         this.locale = locale;
-        this.dateTimeFormatter = null;
-        // we could support script & variant, but that requires more work on
-        // client side to detect the different
-        // number characters for other scripts (current only Arabic there)
-        StringBuilder bcp47LanguageTag = new StringBuilder(
-                locale.getLanguage());
-        if (!locale.getCountry().isEmpty()) {
-            bcp47LanguageTag.append("-").append(locale.getCountry());
-        }
-        runBeforeClientResponse(ui -> getElement().callFunction(
-                "$connector.setLocale", bcp47LanguageTag.toString()));
+        requestLocaleUpdate();
     }
 
     /**
@@ -394,7 +384,37 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     @Override
     public Locale getLocale() {
-        return locale;
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
+    }
+
+    private void requestLocaleUpdate() {
+        getUI().ifPresent(ui -> {
+            if (pendingLocaleUpdate != null) {
+                pendingLocaleUpdate.remove();
+            }
+            pendingLocaleUpdate = ui.beforeClientResponse(this, context -> {
+                pendingLocaleUpdate = null;
+                executeLocaleUpdate();
+            });
+        });
+    }
+
+    private void executeLocaleUpdate() {
+        Locale appliedLocale = getLocale();
+        // we could support script & variant, but that requires more work on
+        // client side to detect the different
+        // number characters for other scripts (current only Arabic there)
+        StringBuilder bcp47LanguageTag = new StringBuilder(
+                appliedLocale.getLanguage());
+        if (!appliedLocale.getCountry().isEmpty()) {
+            bcp47LanguageTag.append("-").append(appliedLocale.getCountry());
+        }
+        runBeforeClientResponse(ui -> getElement().callJsFunction(
+                "$connector.setLocale", bcp47LanguageTag.toString()));
     }
 
     /**
@@ -542,7 +562,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * Enables or disables the dropdown opening automatically. If {@code false}
      * the dropdown is only opened when clicking the toggle button or pressing
      * Up or Down arrow keys.
-     * 
+     *
      * @param autoOpen
      *            {@code false} to prevent the dropdown from opening
      *            automatically
