@@ -17,7 +17,6 @@ package com.vaadin.flow.component.timepicker;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
@@ -34,6 +33,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -58,11 +58,11 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
-    private transient DateTimeFormatter dateTimeFormatter;
 
     private LocalTime max;
     private LocalTime min;
     private boolean required;
+    private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
     /**
      * Default constructor.
@@ -335,10 +335,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getLocale() == null) {
-            setLocale(attachEvent.getUI().getLocale());
-        }
         initConnector();
+        requestLocaleUpdate();
         FieldValidationUtil.disableClientValidation(this);
     }
 
@@ -384,17 +382,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         }
 
         this.locale = locale;
-        this.dateTimeFormatter = null;
-        // we could support script & variant, but that requires more work on
-        // client side to detect the different
-        // number characters for other scripts (current only Arabic there)
-        StringBuilder bcp47LanguageTag = new StringBuilder(
-                locale.getLanguage());
-        if (!locale.getCountry().isEmpty()) {
-            bcp47LanguageTag.append("-").append(locale.getCountry());
-        }
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.setLocale", bcp47LanguageTag.toString()));
+        requestLocaleUpdate();
     }
 
     /**
@@ -408,7 +396,37 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     @Override
     public Locale getLocale() {
-        return locale;
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
+    }
+
+    private void requestLocaleUpdate() {
+        getUI().ifPresent(ui -> {
+            if (pendingLocaleUpdate != null) {
+                pendingLocaleUpdate.remove();
+            }
+            pendingLocaleUpdate = ui.beforeClientResponse(this, context -> {
+                pendingLocaleUpdate = null;
+                executeLocaleUpdate();
+            });
+        });
+    }
+
+    private void executeLocaleUpdate() {
+        Locale appliedLocale = getLocale();
+        // we could support script & variant, but that requires more work on
+        // client side to detect the different
+        // number characters for other scripts (current only Arabic there)
+        StringBuilder bcp47LanguageTag = new StringBuilder(
+                appliedLocale.getLanguage());
+        if (!appliedLocale.getCountry().isEmpty()) {
+            bcp47LanguageTag.append("-").append(appliedLocale.getCountry());
+        }
+        runBeforeClientResponse(ui -> getElement().callJsFunction(
+                "$connector.setLocale", bcp47LanguageTag.toString()));
     }
 
     /**
@@ -590,15 +608,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public static Stream<Locale> getSupportedAvailableLocales() {
         return Stream.of(Locale.getAvailableLocales())
                 .filter(locale -> !locale.getLanguage().isEmpty());
-    }
-
-    private DateTimeFormatter initializeAndReturnFormatter() {
-        if (dateTimeFormatter == null) {
-            dateTimeFormatter = locale == null
-                    ? DateTimeFormatter.ISO_LOCAL_TIME
-                    : DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
-        }
-        return dateTimeFormatter;
     }
 
     private static String format(LocalTime time) {
