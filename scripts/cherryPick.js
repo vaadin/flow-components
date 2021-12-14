@@ -80,7 +80,7 @@ async function getCommit(commitURL){
   }
 }
 
-function filterCommits(commits){
+async function filterCommits(commits){
   for (let commit of commits) {
     let target = false;
     let picked = false;
