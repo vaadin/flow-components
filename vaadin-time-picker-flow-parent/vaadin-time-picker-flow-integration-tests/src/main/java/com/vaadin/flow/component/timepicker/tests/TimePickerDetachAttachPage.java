@@ -20,6 +20,9 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
 
+import java.time.LocalTime;
+import java.util.Locale;
+
 /**
  * Test view for attaching / detaching {@link TimePicker}.
  */
@@ -44,5 +47,18 @@ public class TimePickerDetachAttachPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
         add(toggleAttached);
+
+        NativeButton setValue = new NativeButton("set value", e -> {
+            timePicker.setValue(LocalTime.of(2, 0));
+        });
+        setValue.setId("set-value");
+        add(setValue);
+
+        NativeButton setCaliforniaLocale = new NativeButton(
+                "set California locale", e -> {
+                    timePicker.setLocale(new Locale("en-CA"));
+                });
+        setCaliforniaLocale.setId("set-california-locale");
+        add(setCaliforniaLocale);
     }
 }
