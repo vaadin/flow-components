@@ -66,7 +66,7 @@ public class ThemeGradientColorBeanSerializer extends BeanSerializerBase {
     @Override
     protected BeanSerializerBase withByNameInclusion(Set<String> set,
             Set<String> set1) {
-        return null;
+        throw new IllegalArgumentException("Method has not been implemented.");
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ThemeGradientColorBeanSerializer extends BeanSerializerBase {
     protected BeanSerializerBase withProperties(
             BeanPropertyWriter[] beanPropertyWriters,
             BeanPropertyWriter[] beanPropertyWriters1) {
-        return null;
+        throw new IllegalArgumentException("Method has not been implemented.");
     }
 
     @Override
