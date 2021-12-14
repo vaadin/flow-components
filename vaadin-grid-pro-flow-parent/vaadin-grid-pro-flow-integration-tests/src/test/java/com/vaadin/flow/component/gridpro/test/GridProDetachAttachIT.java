@@ -40,34 +40,26 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
 
     @Test
     public void detach_attach_customEditOpens() {
-
         toggleAttachedButton.click();
         toggleAttachedButton.click();
 
         grid = $(GridProElement.class).waitForFirst();
-        assertCellEnterEditModeOnDoubleClick(0, 0, "vaadin-text-field", grid,
-                true);
+        assertCellEnterEditModeOnDoubleClick(grid, 0, 0, "vaadin-text-field");
     }
 
-    private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
-            Integer colIndex, String editorTag) {
-        assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
-                grid, true);
-    }
-
-    private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
-            Integer colIndex, String editorTag, GridProElement grid,
-            boolean editingEnabled) {
+    private void assertCellEnterEditModeOnDoubleClick(GridProElement grid,
+            Integer rowIndex, Integer colIndex, String editorTag) {
         GridTHTDElement cell = grid.getCell(rowIndex, colIndex);
 
         // Not in edit mode initially
         Assert.assertFalse(cell.innerHTMLContains(editorTag));
 
         // Entering edit mode with double click
-        // Workaround(yuriy-fix): doubleClick is not working on IE11
         executeScript(
                 "arguments[0].dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));",
                 cell);
-        Assert.assertEquals(editingEnabled, cell.innerHTMLContains(editorTag));
+        Assert.assertTrue(cell.innerHTMLContains(editorTag));
+        // Assert there are no null reference errors
+        checkLogsForErrors();
     }
 }
