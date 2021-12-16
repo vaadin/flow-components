@@ -2,6 +2,7 @@ package com.vaadin.tests;
 
 import java.util.List;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -25,6 +26,10 @@ public abstract class ComponentDemoTest
     @Override
     protected List<DesiredCapabilities> getHubBrowsersToTest() {
         return browser.getGridBrowsers().orElse(super.getHubBrowsersToTest());
+    }
+
+    public TestBenchElement getInShadowRoot(TestBenchElement tbElement, String id) {
+        return tbElement.$("*").id(id);
     }
 
     @Override

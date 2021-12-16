@@ -93,9 +93,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
     public void dialogWithContentMargin_wrapperDoesNotCollapse() {
         findElement(By.id("dialog-open")).click();
 
-        WebElement overlay = findElement(By.id("overlay"));
-        TestBenchElement content = (TestBenchElement) findInShadowRoot(overlay,
-                By.id("content")).get(0);
+        TestBenchElement overlay = (TestBenchElement) findElement(By.id("overlay"));
+        TestBenchElement content = getInShadowRoot(overlay, "content");
 
         Assert.assertEquals(content.getProperty("offsetHeight"),
                 content.getProperty("scrollHeight"));
@@ -105,9 +104,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
     public void dialogWithVerticalLayout_noScrollbar() {
         findElement(By.id("dialog-with-vertical-layout")).click();
 
-        WebElement overlay = findElement(By.id("overlay"));
-        TestBenchElement content = (TestBenchElement) findInShadowRoot(overlay,
-                By.id("content")).get(0);
+        TestBenchElement overlay = (TestBenchElement) findElement(By.id("overlay"));
+        TestBenchElement content = getInShadowRoot(overlay, "content");
 
         Assert.assertEquals(content.getProperty("offsetHeight"),
                 content.getProperty("scrollHeight"));
@@ -211,24 +209,24 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         waitForElementPresent(By.id("empty-dialog"));
 
-        WebElement element = findElement(By.id("overlay"));
-        List<WebElement> content = findInShadowRoot(element, By.id("content"));
+        TestBenchElement element = (TestBenchElement) findElement(By.id("overlay"));
+        TestBenchElement content = element.$("*").id("content");
 
         Assert.assertFalse("Couldn't find content for dialog",
-                content.isEmpty());
+                !content.$("*").exists());
 
         Long contentPadding = getLongValue(
-                content.get(0).getCssValue("padding-left"))
-                + getLongValue(content.get(0).getCssValue("padding-right"));
+                content.getCssValue("padding-left"))
+                + getLongValue(content.getCssValue("padding-right"));
 
         Long contentMargin = getLongValue(
-                content.get(0).getCssValue("margin-left"))
-                + getLongValue(content.get(0).getCssValue("margin-right"));
+                content.getCssValue("margin-left"))
+                + getLongValue(content.getCssValue("margin-right"));
 
         Long endpoint = contentPadding + contentMargin;
 
         assertThat("Content didn't have a with over the padding and margin",
-                getLongValue(content.get(0).getCssValue("width")),
+                getLongValue(content.getCssValue("width")),
                 greaterThan(endpoint));
     }
 
@@ -236,7 +234,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
     public void verifyDialogFullSize() {
         findElement(By.id("button-for-dialog-with-div")).click();
         WebElement overlay = getInShadowRoot(getOverlayContent(),
-                By.id("overlay"));
+                "overlay");
         Assert.assertTrue(
                 overlay.getAttribute("style").contains("width: 100%;"));
         Assert.assertTrue(
@@ -277,8 +275,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
     public void resizableDialogShouldPreserveWidthAndHeight() {
         findElement(By.id("dialog-resizable-draggable-open-button")).click();
 
-        WebElement overlayContent = getOverlayContent();
-        WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
+        TestBenchElement overlayContent = getOverlayContent();
+        WebElement overlay = getInShadowRoot(overlayContent, "overlay");
 
         Long overLayHeightBeforeResize = getSizeFromElement(overlay,
                 ElementConstants.STYLE_HEIGHT);
@@ -301,7 +299,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
         findElement(By.id("dialog-resizable-draggable-open-button")).click();
 
-        overlay = getInShadowRoot(getOverlayContent(), By.id("overlay"));
+        overlay = getInShadowRoot(getOverlayContent(), "overlay");
 
         Long overLayHeightAfterReopen = getSizeFromElement(overlay,
                 ElementConstants.STYLE_HEIGHT);
@@ -320,8 +318,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
         Long maxValue = 225l;
         Long minValue = 175l;
 
-        WebElement overlayContent = getOverlayContent();
-        WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
+        TestBenchElement overlayContent = getOverlayContent();
+        WebElement overlay = getInShadowRoot(overlayContent, "overlay");
 
         resizeDialog(overlayContent, 50, 50);
 
@@ -354,7 +352,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 "Initial size with width (200px) and height (200px)",
                 message.getText());
 
-        WebElement overlayContent = getOverlayContent();
+        TestBenchElement overlayContent = getOverlayContent();
 
         resizeDialog(overlayContent, 50, 50);
 
@@ -363,11 +361,10 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 message.getText());
     }
 
-    private void resizeDialog(WebElement overlayContent, int xOffset,
+    private void resizeDialog(TestBenchElement overlayContent, int xOffset,
             int yOffset) {
-        WebElement resizerSE = getInShadowRoot(overlayContent,
-                By.cssSelector(".resizer.se"));
 
+        WebElement resizerSE = overlayContent.$("div").attribute("class", "resizer se").get(0);
         Actions resizeAction = new Actions(getDriver());
         resizeAction.dragAndDropBy(resizerSE, xOffset, yOffset);
         resizeAction.perform();
@@ -382,7 +379,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         findElement(By.id("dimension-change-size-self-attached")).click();
 
         WebElement overlay = getInShadowRoot(getOverlayContent(),
-                By.id("overlay"));
+                "overlay");
         String overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
         String overlayHeight = overlay
                 .getCssValue(ElementConstants.STYLE_HEIGHT);
@@ -394,7 +391,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         findElement(By.id("dimension-open-self-attached-button")).click();
         waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
 
-        overlay = getInShadowRoot(getOverlayContent(), By.id("overlay"));
+        overlay = getInShadowRoot(getOverlayContent(), "overlay");
         overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
         overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
 
@@ -410,7 +407,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         findElement(By.id("dimension-open-attached-button")).click();
 
         WebElement overlay = getInShadowRoot(getOverlayContent(),
-                By.id("overlay"));
+                "overlay");
         String overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
         String overlayHeight = overlay
                 .getCssValue(ElementConstants.STYLE_HEIGHT);
@@ -422,7 +419,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         findElement(By.id("dimension-open-attached-button")).click();
         waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
 
-        overlay = getInShadowRoot(getOverlayContent(), By.id("overlay"));
+        overlay = getInShadowRoot(getOverlayContent(), "overlay");
         overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
         overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
 
@@ -434,9 +431,9 @@ public class DialogTestPageIT extends AbstractComponentIT {
     public void draggableDialog_shouldAllowDraggingFromDivContainer() {
         findElement(By.id("dialog-resizable-draggable-open-button")).click();
 
-        WebElement overlayContent = getOverlayContent();
+        TestBenchElement overlayContent = getOverlayContent();
         WebElement container = overlayContent.findElement(By.tagName("div"));
-        WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
+        WebElement overlay = getInShadowRoot((TestBenchElement) overlayContent, "overlay");
 
         // resizing only to force component to set top/left values
         resizeDialog(overlayContent, 50, 50);
@@ -475,7 +472,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         return Long.parseLong(number.toString());
     }
 
-    private WebElement getOverlayContent() {
-        return findElement(By.tagName(DIALOG_OVERLAY_TAG));
+    private TestBenchElement getOverlayContent() {
+        return $(DIALOG_OVERLAY_TAG).first();
     }
 }

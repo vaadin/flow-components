@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -124,8 +125,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = getInShadowRoot(field,"part", "clear-button");
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -134,10 +134,10 @@ public class NumberFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertStepValue() {
-        WebElement field = findElement(By.id("step-number-field"));
+        TestBenchElement field = $(NumberFieldElement.class).id("step-number-field");
 
-        WebElement increaseButton = getInShadowRoot(field,
-                By.cssSelector("[part~='increase-button']"));
+        WebElement increaseButton = getInShadowRoot(field,"part", "increase-button");
+
         increaseButton.click();
 
         String value = findElement(By.id("step-message")).getText();

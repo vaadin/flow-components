@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.upload.tests;
 
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -56,7 +57,7 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
         }
     }
 
-    WebElement getInput(WebElement upload) {
-        return getInShadowRoot(upload, By.id("fileInput"));
+    TestBenchElement getInput(TestBenchElement upload) {
+        return getInShadowRoot(upload, "fileInput");
     }
 }

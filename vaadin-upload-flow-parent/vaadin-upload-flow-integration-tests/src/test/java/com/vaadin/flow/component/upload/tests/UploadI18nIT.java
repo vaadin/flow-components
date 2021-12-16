@@ -40,10 +40,8 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        WebElement addButton = findInShadowRoot(upload, By.id("addButton"))
-                .get(0);
-        WebElement dropLabel = findInShadowRoot(upload, By.id("dropLabel"))
-                .get(0);
+        WebElement addButton = getInShadowRoot(upload, "addButton");
+        WebElement dropLabel = getInShadowRoot(upload, "dropLabel");
 
         Assert.assertEquals(UploadTestsI18N.RUSSIAN_FULL.getAddFiles().getOne(),
                 addButton.getText());
@@ -79,10 +77,8 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        WebElement addButton = findInShadowRoot(upload, By.id("addButton"))
-                .get(0);
-        WebElement dropLabel = findInShadowRoot(upload, By.id("dropLabel"))
-                .get(0);
+        WebElement addButton = getInShadowRoot(upload, "addButton");
+        WebElement dropLabel = getInShadowRoot(upload, "dropLabel");
 
         // This label should still be the default one
         Assert.assertEquals("Upload File...", addButton.getText());

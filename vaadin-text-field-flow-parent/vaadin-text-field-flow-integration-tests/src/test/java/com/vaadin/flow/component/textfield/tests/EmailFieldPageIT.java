@@ -118,8 +118,8 @@ public class EmailFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+
+        WebElement clearButton = getInShadowRoot(field,"part", "clear-button");
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();

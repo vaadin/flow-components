@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -39,7 +40,7 @@ public class DialogIT extends AbstractComponentIT {
         findElement(By.id("basic-dialog-button")).click();
 
         WebElement overlay = getInShadowRoot(getOverlayContent(),
-                By.id("overlay"));
+                "overlay");
 
         WebElement div = getOverlayContent().findElement(By.tagName("div"));
         WebElement content = overlay.findElement(By.id("content"));
@@ -134,16 +135,16 @@ public class DialogIT extends AbstractComponentIT {
         Assert.assertEquals("rgba(255, 0, 0, 1)", element.getCssValue("color"));
     }
 
-    private WebElement getOverlayContent() {
-        return findElement(By.tagName(DIALOG_OVERLAY_TAG));
-    }
-
     private void verifyDialogClosed() {
         waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
     private void verifyDialogOpened() {
         waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+    }
+
+    private TestBenchElement getOverlayContent() {
+        return $(DIALOG_OVERLAY_TAG).first();
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.vaadin.tests;
 
 import java.util.List;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 public abstract class AbstractComponentIT
@@ -24,6 +26,14 @@ public abstract class AbstractComponentIT
 
     protected int getDeploymentPort() {
         return 8080;
+    }
+
+    public TestBenchElement getInShadowRoot(TestBenchElement tbElement, String id) {
+        return tbElement.$("*").id(id);
+    }
+
+    public WebElement getInShadowRoot(TestBenchElement tbElement, String attributeName, String attributeValue) {
+        return tbElement.$("div").attribute(attributeName,attributeValue).get(0);
     }
 
     @Override

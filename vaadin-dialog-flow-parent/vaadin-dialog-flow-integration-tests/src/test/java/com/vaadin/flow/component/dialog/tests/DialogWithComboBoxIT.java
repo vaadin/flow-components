@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -50,8 +51,8 @@ public class DialogWithComboBoxIT extends AbstractComponentIT {
 
         findElement(By.id("open-dialog")).click();
 
-        WebElement combo = findElement(By.id("combo"));
-        getInShadowRoot(combo, By.id("toggleButton")).click();
+        TestBenchElement combo = $("*").id("combo");
+        getInShadowRoot(combo, "toggleButton").click();
 
         WebElement info = $("div").id("info");
         waitUntil(driver -> info.getText().equals(Boolean.TRUE.toString()));

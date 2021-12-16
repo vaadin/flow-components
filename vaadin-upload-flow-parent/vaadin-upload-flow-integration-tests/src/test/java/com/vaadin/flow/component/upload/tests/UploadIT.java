@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.AssumptionViolatedException;
@@ -132,8 +133,8 @@ public class UploadIT extends AbstractUploadIT {
      *
      * @return actual upload button
      */
-    private WebElement getInput() {
-        return getInput(getUpload());
+    private TestBenchElement getInput() {
+        return getInput((TestBenchElement) getUpload());
     }
 
 }
