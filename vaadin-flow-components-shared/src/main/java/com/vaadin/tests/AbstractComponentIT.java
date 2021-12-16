@@ -28,12 +28,15 @@ public abstract class AbstractComponentIT
         return 8080;
     }
 
-    public TestBenchElement getInShadowRoot(TestBenchElement tbElement, String id) {
+    public TestBenchElement getInShadowRoot(TestBenchElement tbElement,
+            String id) {
         return tbElement.$("*").id(id);
     }
 
-    public WebElement getInShadowRoot(TestBenchElement tbElement, String attributeName, String attributeValue) {
-        return tbElement.$("div").attribute(attributeName,attributeValue).get(0);
+    public WebElement getInShadowRoot(TestBenchElement tbElement,
+            String attributeName, String attributeValue) {
+        return tbElement.$("div").attribute(attributeName, attributeValue)
+                .get(0);
     }
 
     @Override

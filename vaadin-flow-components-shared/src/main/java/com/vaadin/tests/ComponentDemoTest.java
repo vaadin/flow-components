@@ -28,7 +28,8 @@ public abstract class ComponentDemoTest
         return browser.getGridBrowsers().orElse(super.getHubBrowsersToTest());
     }
 
-    public TestBenchElement getInShadowRoot(TestBenchElement tbElement, String id) {
+    public TestBenchElement getInShadowRoot(TestBenchElement tbElement,
+            String id) {
         return tbElement.$("*").id(id);
     }
 

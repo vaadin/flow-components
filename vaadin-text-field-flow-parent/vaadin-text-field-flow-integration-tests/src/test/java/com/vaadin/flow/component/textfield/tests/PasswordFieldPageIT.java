@@ -78,7 +78,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
                 .id("clear-password-field");
         field.setValue("foo");
 
-        WebElement clearButton = getInShadowRoot(field,"part", "clear-button");
+        WebElement clearButton = getInShadowRoot(field, "part", "clear-button");
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();

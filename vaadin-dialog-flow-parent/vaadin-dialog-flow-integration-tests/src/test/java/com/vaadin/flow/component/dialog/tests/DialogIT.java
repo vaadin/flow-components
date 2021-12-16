@@ -39,8 +39,7 @@ public class DialogIT extends AbstractComponentIT {
 
         findElement(By.id("basic-dialog-button")).click();
 
-        WebElement overlay = getInShadowRoot(getOverlayContent(),
-                "overlay");
+        WebElement overlay = getInShadowRoot(getOverlayContent(), "overlay");
 
         WebElement div = getOverlayContent().findElement(By.tagName("div"));
         WebElement content = overlay.findElement(By.id("content"));

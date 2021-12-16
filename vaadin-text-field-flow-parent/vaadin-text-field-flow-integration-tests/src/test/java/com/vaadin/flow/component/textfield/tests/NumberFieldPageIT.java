@@ -125,7 +125,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,"part", "clear-button");
+        WebElement clearButton = getInShadowRoot(field, "part", "clear-button");
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -134,9 +134,11 @@ public class NumberFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertStepValue() {
-        TestBenchElement field = $(NumberFieldElement.class).id("step-number-field");
+        TestBenchElement field = $(NumberFieldElement.class)
+                .id("step-number-field");
 
-        WebElement increaseButton = getInShadowRoot(field,"part", "increase-button");
+        WebElement increaseButton = getInShadowRoot(field, "part",
+                "increase-button");
 
         increaseButton.click();
 
