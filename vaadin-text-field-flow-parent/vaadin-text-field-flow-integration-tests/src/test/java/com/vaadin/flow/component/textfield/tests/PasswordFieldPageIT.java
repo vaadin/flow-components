@@ -80,8 +80,8 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("*")
+                .attributeContains("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();

@@ -27,6 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntry;
 
+import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertThat;
@@ -122,8 +123,8 @@ public class UploadIT extends AbstractUploadIT {
         fillPathToUploadInput(getInput(), tempFileNames);
     }
 
-    private WebElement getUpload() {
-        return getDriver().findElement(By.id("test-upload"));
+    private UploadElement getUpload() {
+        return $(UploadElement.class).id("test-upload");
     }
 
     /**
