@@ -47,12 +47,12 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void assertClearValue() {
         TextAreaElement field = $(TextAreaElement.class).id("clear-text-area");
 
-        WebElement input = field.$("textarea").first();
+        TestBenchElement input = field.$("textarea").first();
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("*")
+                .attributeContains("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
