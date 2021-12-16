@@ -76,8 +76,8 @@ public class DetailsGridIT extends AbstractComponentIT {
                 grid.findElements(By.className("custom-details")).size());
     }
 
-    private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+    private WebElement getRow(GridElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
+                .get(row);
     }
 }

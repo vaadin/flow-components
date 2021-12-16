@@ -124,9 +124,9 @@ public class GridDetailsRowIT extends AbstractComponentIT {
 
     }
 
-    private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+    private WebElement getRow(TestBenchElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
+                .get(row);
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,

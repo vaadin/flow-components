@@ -79,7 +79,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getHeaderCells() {
-        WebElement thead = findInShadowRoot(grid, By.id("header")).get(0);
+        WebElement thead = grid.$("*").id("header");
         List<WebElement> headers = thead.findElements(By.tagName("th"));
 
         List<String> cellNames = headers.stream().map(header -> header
