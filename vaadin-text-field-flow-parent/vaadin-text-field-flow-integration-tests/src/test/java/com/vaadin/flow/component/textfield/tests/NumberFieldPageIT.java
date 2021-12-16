@@ -137,8 +137,8 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     public void assertStepValue() {
         TestBenchElement field = $("*").id("step-number-field");
 
-        WebElement increaseButton = field.$("*").attributeContains("part",
-                "increase-button").first();
+        WebElement increaseButton = field.$("*")
+                .attributeContains("part", "increase-button").first();
         increaseButton.click();
 
         String value = findElement(By.id("step-message")).getText();
