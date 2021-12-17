@@ -45,7 +45,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-        WebElement field = findElement(By.id("clear-text-area"));
+        TextAreaElement field = $(TextAreaElement.class).id("clear-text-area");
 
         TestBenchElement input = field.$("textarea").first();
         input.sendKeys("foo");

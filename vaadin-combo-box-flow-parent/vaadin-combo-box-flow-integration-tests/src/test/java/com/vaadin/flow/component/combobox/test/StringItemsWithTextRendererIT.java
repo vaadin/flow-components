@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -36,14 +37,12 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
 
         $("vaadin-combo-box").id("list").sendKeys(Keys.ARROW_DOWN);
 
-        WebElement overlay = findElement(
-                By.tagName("vaadin-combo-box-overlay"));
-        WebElement content = getInShadowRoot(overlay, By.id("content"));
-        WebElement selector = getInShadowRoot(content, By.id("selector"));
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        TestBenchElement content = overlay.$("*").id("content");
+        TestBenchElement selector = content.$("*").id("selector");
         List<String> items = selector
                 .findElements(By.tagName("vaadin-combo-box-item")).stream()
-                .map(item -> getInShadowRoot(item,
-                        By.cssSelector("flow-component-renderer")))
+                .map(item -> item.findElement(By.cssSelector("flow-component-renender")))
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
