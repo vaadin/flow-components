@@ -40,10 +40,8 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
         TestBenchElement content = overlay.$("*").id("content");
         TestBenchElement selector = content.$("*").id("selector");
-        List<String> items = selector
-                .findElements(By.tagName("vaadin-combo-box-item")).stream()
-                .map(item -> item
-                        .findElement(By.cssSelector("flow-component-renderer")))
+        List<String> items = selector.$("vaadin-combo-box-item").all().stream()
+                .map(item -> item.$("flow-component-renderer").first())
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
