@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 
 import com.google.common.base.Strings;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,9 +116,8 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
 
         waitUntil(driver -> getLogEntries(Level.WARNING).toString().contains(
                 "The locale is not supported, using default locale setting(en-US)."));
-        WebElement picker = findElement(By.id("field"));
-        WebElement displayText = findInShadowRoot(picker, By.id("input"))
-                .get(0);
+        TestBenchElement picker = $("*").id("field");
+        WebElement displayText = picker.$("*").id("input");
 
         executeScript("arguments[0].value = '2018-12-26'", picker);
         Assert.assertEquals(
@@ -142,9 +142,8 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
 
     @Test
     public void testDifferentLocales() {
-        WebElement localePicker = findElement(By.id("locale-picker"));
-        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
-                .get(0);
+        TestBenchElement localePicker = $("*").id("locale-picker");
+        WebElement displayText = localePicker.$("*").id("input");
         findElement(By.id("polish-locale")).click();
 
         executeScript("arguments[0].value = '2018-03-26'", localePicker);
@@ -161,9 +160,8 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
 
     @Test
     public void testPickerWithValueAndLocaleFromServerSide() {
-        WebElement localePicker = findElement(By.id("locale-picker-server"));
-        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
-                .get(0);
+        TestBenchElement localePicker = $("*").id("locale-picker-server");
+        WebElement displayText = localePicker.$("*").id("input");
 
         Assert.assertEquals("Initial date is 5/23/2018", true, executeScript(
                 "return arguments[0].value === '5/23/2018'", displayText));
