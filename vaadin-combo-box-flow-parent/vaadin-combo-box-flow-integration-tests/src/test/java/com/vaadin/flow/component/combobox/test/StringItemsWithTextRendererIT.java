@@ -43,7 +43,7 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         List<String> items = selector
                 .findElements(By.tagName("vaadin-combo-box-item")).stream()
                 .map(item -> item
-                        .findElement(By.cssSelector("flow-component-renender")))
+                        .findElement(By.cssSelector("flow-component-renderer")))
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
