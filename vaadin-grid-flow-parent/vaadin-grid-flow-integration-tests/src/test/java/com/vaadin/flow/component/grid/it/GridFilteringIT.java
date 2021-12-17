@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -31,8 +32,8 @@ public class GridFilteringIT extends AbstractComponentIT {
     public void gridInNotLoadingState() {
         open();
 
-        WebElement filter = $("vaadin-text-field").id("filter");
-        WebElement input = getInShadowRoot(filter, By.cssSelector("input"));
+        TestBenchElement filter = $("vaadin-text-field").id("filter");
+        TestBenchElement input = filter.$("input").first();
         input.sendKeys("w");
 
         // Blur input to get value change

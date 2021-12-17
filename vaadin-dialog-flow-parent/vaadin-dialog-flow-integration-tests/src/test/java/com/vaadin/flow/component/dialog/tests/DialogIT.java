@@ -18,6 +18,7 @@ package com.vaadin.flow.component.dialog.tests;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +42,7 @@ public class DialogIT extends AbstractComponentIT {
     public void openAndCloseBasicDialog_labelRendered() {
         findElement(By.id("basic-dialog-button")).click();
 
-        WebElement overlay = getInShadowRoot(getOverlayContent(),
-                By.id("overlay"));
+        WebElement overlay = getOverlayContent().$("*").id("overlay");
 
         WebElement div = getOverlayContent().findElement(By.tagName("div"));
         WebElement content = overlay.findElement(By.id("content"));
@@ -129,8 +129,8 @@ public class DialogIT extends AbstractComponentIT {
         Assert.assertEquals("rgba(255, 0, 0, 1)", element.getCssValue("color"));
     }
 
-    private WebElement getOverlayContent() {
-        return findElement(By.tagName(DIALOG_OVERLAY_TAG));
+    private TestBenchElement getOverlayContent() {
+        return $(DIALOG_OVERLAY_TAG).first();
     }
 
     private void verifyDialogClosed() {

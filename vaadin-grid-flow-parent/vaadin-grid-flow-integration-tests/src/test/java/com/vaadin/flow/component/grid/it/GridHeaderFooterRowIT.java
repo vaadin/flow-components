@@ -358,7 +358,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getHeaderCells() {
-        WebElement thead = findInShadowRoot(grid, By.id("header")).get(0);
+        WebElement thead = grid.$("*").id("header");
 
         List<WebElement> headers = thead.findElements(By.tagName("tr")).stream()
                 .filter(tr -> tr.getAttribute("hidden") == null)
@@ -395,7 +395,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getFooterCells() {
-        WebElement tfoot = findInShadowRoot(grid, By.id("footer")).get(0);
+        WebElement tfoot = grid.$("*").id("footer");
 
         List<WebElement> footers = tfoot.findElements(By.tagName("tr")).stream()
                 .filter(tr -> tr.getAttribute("hidden") == null)

@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
 
+import com.vaadin.testbench.ElementQuery;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,12 +107,10 @@ public class DatePickerIT extends ComponentDemoTest {
         executeScript("arguments[0].setAttribute(\"opened\", true)", picker);
         waitForElementPresent(By.tagName(DATEPICKER_OVERLAY));
 
-        WebElement overlay = findElement(By.tagName(DATEPICKER_OVERLAY));
-        WebElement content = findInShadowRoot(overlay, By.id("content")).get(0);
-        WebElement overlayContent = findInShadowRoot(content,
-                By.id("overlay-content")).get(0);
-        WebElement todayButton = findInShadowRoot(overlayContent,
-                By.id("todayButton")).get(0);
+        TestBenchElement overlay = $(DATEPICKER_OVERLAY).first();
+        TestBenchElement content = overlay.$("*").id("content");
+        TestBenchElement overlayContent = content.$("*").id("overlay-content");
+        WebElement todayButton = overlayContent.$("*").id("todayButton");
 
         waitUntil(driver -> "tänään".equals(todayButton.getText()));
     }
@@ -148,12 +147,11 @@ public class DatePickerIT extends ComponentDemoTest {
 
     @Test
     public void selectDatesOnCustomLocaleDatePickers() {
-        WebElement localePicker = layout
-                .findElement(By.id("locale-change-picker"));
+        TestBenchElement view = $("*").attribute("class", "demo-view").first();
+        TestBenchElement localePicker = view.$("*").id("locale-change-picker");
         WebElement message = layout
                 .findElement(By.id("Customize-locale-picker-message"));
-        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
-                .get(0);
+        WebElement displayText = localePicker.$("*").id("input");
         executeScript("arguments[0].value = '2018-03-27'", localePicker);
 
         waitUntil(driver -> message.getText()

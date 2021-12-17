@@ -511,7 +511,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridWithComponentRenderer_detailsAreRenderered() {
         openTabAndCheckForErrors("using-components");
-        WebElement grid = findElement(By.id("component-renderer"));
+        GridElement grid = $(GridElement.class).id("component-renderer");
         scrollToElement(grid);
 
         clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
@@ -1635,9 +1635,9 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 rowIndex -> Assert.assertTrue(isRowSelected(grid, rowIndex)));
     }
 
-    private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+    private WebElement getRow(TestBenchElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
+                .get(row);
     }
 
     private boolean isRowSelected(GridElement grid, int row) {

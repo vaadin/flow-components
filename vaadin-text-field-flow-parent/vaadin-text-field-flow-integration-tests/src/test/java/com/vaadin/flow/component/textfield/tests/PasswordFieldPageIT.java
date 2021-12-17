@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield.tests;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
@@ -74,14 +75,14 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-        WebElement field = findElement(By.id("clear-password-field"));
+        TestBenchElement field = $("*").id("clear-password-field");
 
-        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
+        WebElement input = field.$("input").first();
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("*")
+                .attributeContains("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
