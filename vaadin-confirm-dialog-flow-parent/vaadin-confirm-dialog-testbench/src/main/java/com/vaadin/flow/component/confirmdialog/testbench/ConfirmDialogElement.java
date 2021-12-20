@@ -30,6 +30,10 @@ public class ConfirmDialogElement extends TestBenchElement {
                 "content");
     }
 
+    public TestBenchElement getOverlayContent() {
+        return getPropertyElement("$", "dialog", "$", "overlay");
+    }
+
     public TestBenchElement getConfirmButton() {
         return getPropertyElement("_confirmButton");
     }
