@@ -8,10 +8,10 @@ package com.vaadin.flow.component.confirmdialog.testbench;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -28,8 +28,7 @@ public class ConfirmDialogElement extends TestBenchElement {
 
     @Override
     public SearchContext getContext() {
-        return getPropertyElement("$", "dialog", "$", "overlay", "$",
-                "content");
+        return getPropertyElement("$", "dialog", "$", "overlay");
     }
 
     private TestBenchElement getButton(String buttonId, String slotName) {
