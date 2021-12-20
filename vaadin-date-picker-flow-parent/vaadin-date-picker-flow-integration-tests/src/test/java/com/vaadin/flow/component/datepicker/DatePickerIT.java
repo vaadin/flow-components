@@ -17,7 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
 
-import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

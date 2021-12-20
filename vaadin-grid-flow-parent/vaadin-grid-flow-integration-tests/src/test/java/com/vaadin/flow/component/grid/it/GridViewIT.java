@@ -150,7 +150,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 messageDiv.getText());
         // scroll back up
         scroll(grid, 100);
-        WebElement table = findInShadowRoot(grid, By.id("table")).get(0);
+        WebElement table = grid.$("*").id("table");
         // Actually scroll up to have grid do a correct event.
         while (!getCells(grid).stream()
                 .filter(cell -> "Person 1".equals(cell.getText())).findFirst()
@@ -235,7 +235,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 messageDiv.getText());
         // scroll back up
         scroll(grid, 100);
-        WebElement table = findInShadowRoot(grid, By.id("table")).get(0);
+        WebElement table = grid.$("*").id("table");
         // Actually scroll up to have grid do a correct event.
         while (!getCells(grid).stream()
                 .filter(cell -> "Person 1".equals(cell.getText())).findFirst()
