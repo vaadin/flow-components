@@ -24,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/treegrid-details-row")
@@ -126,9 +127,9 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
         assertElementHasButton(detailsElement.get(1), "parent2-child2");
     }
 
-    private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+    private WebElement getRow(TestBenchElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
+                .get(row);
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,
