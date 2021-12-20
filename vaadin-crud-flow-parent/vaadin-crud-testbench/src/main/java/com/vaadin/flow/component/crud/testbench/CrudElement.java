@@ -16,7 +16,6 @@ package com.vaadin.flow.component.crud.testbench;
  * #L%
  */
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
@@ -102,7 +101,7 @@ public class CrudElement extends TestBenchElement {
      *
      * @return the editor save button
      */
-    public ButtonElement getEditorSaveButton() {
+    public TestBenchElement getEditorSaveButton() {
         return getPropertyElement("_saveButton");
     }
 
@@ -111,7 +110,7 @@ public class CrudElement extends TestBenchElement {
      *
      * @return the editor cancel button
      */
-    public ButtonElement getEditorCancelButton() {
+    public TestBenchElement getEditorCancelButton() {
         return getPropertyElement("_cancelButton");
     }
 
@@ -120,7 +119,7 @@ public class CrudElement extends TestBenchElement {
      *
      * @return the editor delete button
      */
-    public ButtonElement getEditorDeleteButton() {
+    public TestBenchElement getEditorDeleteButton() {
         return getPropertyElement("_deleteButton");
     }
 
