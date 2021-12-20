@@ -102,14 +102,12 @@ public class DimensionsIT extends AbstractParallelTest {
     public void testChangeOpenedDialogDimensions() {
         openDialog();
 
-        ConfirmDialogElement confirmDialog = getConfirmDialog();
+        TestBenchElement overlay = getOverlay();
 
-        ButtonElement changeWidth = confirmDialog.getContext()
-                .$(ButtonElement.class)
+        ButtonElement changeWidth = overlay.$(ButtonElement.class)
                 .id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID);
 
-        ButtonElement changeHeight = confirmDialog.getContext()
-                .$(ButtonElement.class)
+        ButtonElement changeHeight = overlay.$(ButtonElement.class)
                 .id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID);
 
         changeWidth.click();
@@ -131,6 +129,10 @@ public class DimensionsIT extends AbstractParallelTest {
 
     private TestBenchElement getContent() {
         return getConfirmDialog().getOverlayContent();
+    }
+
+    private TestBenchElement getOverlay() {
+        return ((TestBenchElement) getConfirmDialog().getContext());
     }
 
     private void attachDialog() {
