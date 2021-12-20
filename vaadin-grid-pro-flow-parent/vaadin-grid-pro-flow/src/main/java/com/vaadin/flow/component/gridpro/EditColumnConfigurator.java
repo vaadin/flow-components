@@ -8,10 +8,10 @@ package com.vaadin.flow.component.gridpro;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -32,6 +32,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Configuration for the editor of an edit column.
@@ -43,6 +44,8 @@ import com.vaadin.flow.function.ValueProvider;
 public class EditColumnConfigurator<T> implements Serializable {
 
     private final EditColumn<T> column;
+
+    private Registration attachRegistration;
 
     /**
      * Creates a new configurator for the given column.
@@ -107,16 +110,21 @@ public class EditColumnConfigurator<T> implements Serializable {
     public <V> Column<T> custom(AbstractField<?, V> component,
             ItemUpdater<T, V> itemUpdater) {
         column.getElement().appendVirtualChild(component.getElement());
-        column.getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                        context -> setEditModeRenderer(component)));
+        if (attachRegistration != null) {
+            attachRegistration.remove();
+            attachRegistration = null;
+        }
+        attachRegistration = column.getElement()
+                .addAttachListener(e -> column.getUI()
+                        .ifPresent(ui -> ui.beforeClientResponse(column,
+                                context -> setEditModeRenderer(component))));
 
         return configureColumn((item, ignore) -> itemUpdater.accept(item,
                 component.getValue()), EditorType.CUSTOM, component);
     }
 
     private <V> void setEditModeRenderer(AbstractField<?, V> component) {
-        UI.getCurrent().getPage().executeJavaScript(
+        UI.getCurrent().getPage().executeJs(
                 "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
                 column.getElement(), component.getElement());
     }
