@@ -28,9 +28,13 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.router.RouterLayout;
 
+import java.io.Serializable;
 import java.util.Objects;
+
+import elemental.json.JsonObject;
 
 /**
  * Server-side component for the {@code <vaadin-app-layout>} element. Provides a
@@ -50,6 +54,36 @@ public class AppLayout extends Component implements RouterLayout {
             .propertyWithDefault("overlay", false);
 
     private Component content;
+
+    private AppLayoutI18n i18n;
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the object content that is gotten from this method will
+     * not update the lang on the component if not set back using
+     * {@link AppLayout#setI18n(AppLayoutI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, if the i18n
+     *         properties are not set.
+     */
+    public AppLayoutI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(AppLayoutI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        getElement().setPropertyJson("i18n", i18nObject);
+    }
 
     /**
      * @see #setPrimarySection(Section)
@@ -282,6 +316,38 @@ public class AppLayout extends Component implements RouterLayout {
             return webcomponentValue != null
                     ? valueOf(webcomponentValue.toUpperCase())
                     : null;
+        }
+    }
+
+    /**
+     * The internationalization properties for {@link AppLayout}
+     */
+    public static class AppLayoutI18n implements Serializable {
+        private String drawer;
+
+        /**
+         * Gets the text for the `aria-label` attribute on the drawer. The
+         * attribute is set when the drawer is in the overlay mode and announced
+         * once the drawer is opened.
+         *
+         * @return the overflow button aria-label
+         */
+        public String getDrawer() {
+            return drawer;
+        }
+
+        /**
+         * Sets the text for the `aria-label` attribute on the drawer. The
+         * attribute is set when the drawer is in the overlay mode and announced
+         * once the drawer is opened.
+         *
+         * @param drawer
+         *            the drawer aria-label
+         * @return this instance for method chaining
+         */
+        public AppLayoutI18n setDrawer(String drawer) {
+            this.drawer = drawer;
+            return this;
         }
     }
 }

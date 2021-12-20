@@ -171,6 +171,14 @@ public class AppLayoutTest {
         testDrawerOpened(false);
     }
 
+    @Test
+    public void setI18n() {
+        AppLayout.AppLayoutI18n i18n = new AppLayout.AppLayoutI18n()
+                .setDrawer("Custom Drawer");
+        systemUnderTest.setI18n(i18n);
+        assertEquals(i18n, systemUnderTest.getI18n());
+    }
+
     private void testDrawerOpened(boolean expectedDrawerOpened) {
         assertEquals(expectedDrawerOpened, systemUnderTest.getElement()
                 .getProperty("drawerOpened", false));

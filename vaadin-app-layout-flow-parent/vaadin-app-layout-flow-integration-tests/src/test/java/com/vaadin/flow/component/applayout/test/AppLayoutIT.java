@@ -6,6 +6,10 @@ import static com.vaadin.flow.component.applayout.examples.AppRouterLayout.CUSTO
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import elemental.json.Json;
 
 import com.vaadin.flow.component.applayout.testbench.AppLayoutElement;
 import com.vaadin.flow.component.applayout.testbench.DrawerToggleElement;
@@ -72,5 +76,15 @@ public class AppLayoutIT extends AbstractParallelTest {
         TestBenchElement iconElement = customToggle.$("vaadin-icon")
                 .id(CUSTOM_ICON_ID);
         Assert.assertTrue(iconElement.isDisplayed());
+    }
+
+    @Test
+    public void i18n_setI18n_i18nPropertyIsUpdated() {
+        AppLayoutElement layout = $(AppLayoutElement.class).waitForFirst();
+        layout.$("button").id("set-i18n").click();
+
+        Assert.assertEquals("Custom drawer",
+                layout.getPropertyString("i18n", "drawer"),
+                "The i18n drawer property should contain a custom value");
     }
 }
