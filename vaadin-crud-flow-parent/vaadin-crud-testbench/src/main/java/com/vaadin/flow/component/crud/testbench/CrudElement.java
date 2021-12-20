@@ -137,8 +137,8 @@ public class CrudElement extends TestBenchElement {
      */
     public boolean isEditorOpen() {
         if (getEditorPosition().isEmpty()) {
-            return $("vaadin-crud-dialog-overlay").onPage().attribute("opened", "")
-                    .exists();
+            return $("vaadin-crud-dialog-overlay").onPage()
+                    .attribute("opened", "").exists();
         }
         return getPropertyBoolean("editorOpened");
     }
@@ -169,8 +169,8 @@ public class CrudElement extends TestBenchElement {
      */
     public TestBenchElement getEditor() {
         if (getEditorPosition().isEmpty()) {
-            return $("vaadin-crud-dialog-overlay").onPage().attribute("opened", "")
-                    .first();
+            return $("vaadin-crud-dialog-overlay").onPage()
+                    .attribute("opened", "").first();
         }
         return this;
     }
