@@ -26,11 +26,6 @@ public class ConfirmDialogElement extends TestBenchElement {
 
     @Override
     public SearchContext getContext() {
-        return getPropertyElement("$", "dialog", "$", "overlay", "$",
-                "content");
-    }
-
-    public TestBenchElement getOverlayContent() {
         return getPropertyElement("$", "dialog", "$", "overlay");
     }
 
