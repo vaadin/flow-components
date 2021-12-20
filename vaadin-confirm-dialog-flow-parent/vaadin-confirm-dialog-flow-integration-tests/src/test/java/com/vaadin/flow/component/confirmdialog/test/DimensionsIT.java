@@ -102,16 +102,12 @@ public class DimensionsIT extends AbstractParallelTest {
     public void testChangeOpenedDialogDimensions() {
         openDialog();
 
-        TestBenchElement overlay = getOverlay();
+        ConfirmDialogElement confirmDialog = getConfirmDialog();
 
-        ButtonElement changeWidth = overlay.$(ButtonElement.class)
-                .id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID);
-
-        ButtonElement changeHeight = overlay.$(ButtonElement.class)
-                .id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID);
-
-        changeWidth.click();
-        changeHeight.click();
+        confirmDialog.$(ButtonElement.class)
+                .id(Dimensions.CHANGE_DIALOG_ATTACHED_WIDTH_ID).click();
+        confirmDialog.$(ButtonElement.class)
+                .id(Dimensions.CHANGE_DIALOG_ATTACHED_HEIGHT_ID).click();
 
         waitUntil(driver -> Dimensions.DIMENSION_SMALLER
                 .equals(getCssContentValue("height"))
