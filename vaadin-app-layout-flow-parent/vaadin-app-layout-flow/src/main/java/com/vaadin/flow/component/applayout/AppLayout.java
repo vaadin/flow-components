@@ -101,7 +101,7 @@ public class AppLayout extends Component implements RouterLayout {
         removeNullValuesFromJsonObject(i18nJson);
 
         // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new MenuBarI18n instance,
+        // WC I18N, and the values from the new AppLayoutI18n instance,
         // into an empty object
         getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
                 i18nJson);
@@ -371,9 +371,7 @@ public class AppLayout extends Component implements RouterLayout {
         private String drawer;
 
         /**
-         * Gets the text for the `aria-label` attribute on the drawer. The
-         * attribute is set when the drawer is in the overlay mode and announced
-         * once the drawer is opened.
+         * Gets the text for the `aria-label` attribute on the drawer.
          *
          * @return the drawer aria-label
          */

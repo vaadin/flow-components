@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,7 +37,7 @@ public class AppLayoutI18nIT extends AbstractParallelTest {
 
     @Test
     public void setEmptyI18n_defaultI18nIsNotOverriden() {
-        click("set-empty-i18n");
+        clickButton("set-empty-i18n");
 
         Assert.assertNotNull(
                 "The i18n drawer property should contain the default value",
@@ -46,7 +46,7 @@ public class AppLayoutI18nIT extends AbstractParallelTest {
 
     @Test
     public void setI18n_i18nIsUpdated() {
-        click("set-i18n");
+        clickButton("set-i18n");
 
         Assert.assertEquals(
                 "The i18n drawer property should contain a custom value",
@@ -55,9 +55,9 @@ public class AppLayoutI18nIT extends AbstractParallelTest {
 
     @Test
     public void setI18n_detach_attach_i18nIsPersisted() {
-        click("set-i18n");
-        click("toggle-attached");
-        click("toggle-attached");
+        clickButton("set-i18n");
+        clickButton("toggle-attached");
+        clickButton("toggle-attached");
 
         layout = $(AppLayoutElement.class).first();
 
@@ -66,7 +66,7 @@ public class AppLayoutI18nIT extends AbstractParallelTest {
                 "Custom drawer", layout.getPropertyString("i18n", "drawer"));
     }
 
-    private void click(String id) {
-        findElement(By.id(id)).click();
+    private void clickButton(String id) {
+        $("button").id(id).click();
     }
 }
