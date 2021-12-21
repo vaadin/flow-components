@@ -63,6 +63,7 @@ public class PieWithLegendEventsIT extends AbstractTBTest {
     }
 
     private WebElement getLegendElement() {
-        return getChartElement().$("*").attributeContains("class", "highcharts-legend-item").first();
+        return getChartElement().$("*")
+                .attributeContains("class", "highcharts-legend-item").first();
     }
 }

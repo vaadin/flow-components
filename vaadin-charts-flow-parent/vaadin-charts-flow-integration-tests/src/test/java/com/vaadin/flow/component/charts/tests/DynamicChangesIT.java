@@ -32,7 +32,8 @@ public class DynamicChangesIT extends AbstractTBTest {
         ChartElement chart = getChartElement();
         int initialPointsCount = chart.$(".highcharts-point").all().size();
         findElement(By.id("addPointButton")).click();
-        assertEquals(initialPointsCount + 1, chart.getPoints().size());
+        assertEquals(initialPointsCount + 1,
+                chart.$(".highcharts-point").all().size());
     }
 
     @Test
@@ -40,7 +41,8 @@ public class DynamicChangesIT extends AbstractTBTest {
         ChartElement chart = getChartElement();
         int initialPointsCount = chart.$(".highcharts-point").all().size();
         findElement(By.id("removePointButton")).click();
-        assertEquals(initialPointsCount - 1, chart.getPoints().size());
+        assertEquals(initialPointsCount - 1,
+                chart.$(".highcharts-point").all().size());
     }
 
 }

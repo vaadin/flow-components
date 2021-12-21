@@ -37,7 +37,7 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
     }
 
     private WebElement getDrillUpButton(ChartElement chart) {
-        return getElementFromShadowRoot(chart,"button");
+        return getElementFromShadowRoot(chart, "button");
     }
 
     private void assertLogText(String text) {

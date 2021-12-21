@@ -27,7 +27,8 @@ public class DynamicChangingChartIT extends AbstractTBTest {
     }
 
     private void assertTitle(ChartElement chart, String expectedTitle) {
-        WebElement title = chart.$("*").attributeContains("class", "highcharts-title").first();
+        WebElement title = chart.$("*")
+                .attributeContains("class", "highcharts-title").first();
         waitUntil(e -> expectedTitle.equals(title.getText()), 2);
     }
 }

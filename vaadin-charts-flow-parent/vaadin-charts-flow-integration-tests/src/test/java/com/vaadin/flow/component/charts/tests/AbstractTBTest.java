@@ -38,11 +38,13 @@ public abstract class AbstractTBTest extends AbstractParallelTest {
         return $(ChartElement.class).waitForFirst();
     }
 
-    protected TestBenchElement getElementFromShadowRoot(TestBenchElement shadowRootOwner, String selector){
+    protected TestBenchElement getElementFromShadowRoot(
+            TestBenchElement shadowRootOwner, String selector) {
         return shadowRootOwner.$(selector).first();
     }
 
-    protected TestBenchElement getElementFromShadowRoot(TestBenchElement shadowRootOwner, String selector, int index){
+    protected TestBenchElement getElementFromShadowRoot(
+            TestBenchElement shadowRootOwner, String selector, int index) {
         ElementQuery<TestBenchElement> elements = shadowRootOwner.$(selector);
         if (elements.all().size() > index) {
             return elements.get(index);

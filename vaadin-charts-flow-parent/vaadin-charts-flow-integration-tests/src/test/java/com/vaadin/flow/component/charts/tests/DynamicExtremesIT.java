@@ -36,10 +36,10 @@ public class DynamicExtremesIT extends AbstractTBTest {
                 By.id("toggleExtremesButton"));
         int initialVisiblePointsCount = chart.getVisiblePoints().size();
         toggleExtremesButton.click();
-        assertNotEquals(initialVisiblePointsCount,
-                chart.getVisiblePoints().size());
+        assertNotEquals(initialVisiblePointsCount, chart
+                .$(":not([visibility=hidden]).highcharts-point").all().size());
         toggleExtremesButton.click();
-        assertEquals(initialVisiblePointsCount,
-                chart.getVisiblePoints().size());
+        assertEquals(initialVisiblePointsCount, chart
+                .$(":not([visibility=hidden]).highcharts-point").all().size());
     }
 }
