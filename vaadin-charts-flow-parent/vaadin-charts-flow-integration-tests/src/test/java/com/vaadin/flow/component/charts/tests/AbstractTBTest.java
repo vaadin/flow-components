@@ -16,6 +16,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -36,19 +38,15 @@ public abstract class AbstractTBTest extends AbstractParallelTest {
         return $(ChartElement.class).waitForFirst();
     }
 
-    protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-            By by) {
-        return getElementFromShadowRoot(shadowRootOwner, by, 0);
+    protected TestBenchElement getElementFromShadowRoot(
+            TestBenchElement shadowRootOwner, String selector) {
+        return shadowRootOwner.$(selector).first();
     }
 
-    protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-            By by, int index) {
-        WebElement shadowRoot = (WebElement) executeScript(
-                "return arguments[0].shadowRoot", shadowRootOwner);
-        assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
-
-        List<WebElement> elements = shadowRoot.findElements(by);
-        if (elements.size() > index) {
+    protected TestBenchElement getElementFromShadowRoot(
+            TestBenchElement shadowRootOwner, String selector, int index) {
+        ElementQuery<TestBenchElement> elements = shadowRootOwner.$(selector);
+        if (elements.all().size() > index) {
             return elements.get(index);
         }
 
