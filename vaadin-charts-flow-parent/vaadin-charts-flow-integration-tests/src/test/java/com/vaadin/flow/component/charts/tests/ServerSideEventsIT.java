@@ -190,7 +190,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     @Test
     public void select_occured_eventIsFired() {
         ChartElement chart = getChartElement();
-        List<WebElement> points = chart.getPoints();
+        List<TestBenchElement> points = chart.$(".highcharts-point").all();
         points.get(1).click();
 
         assertHasEventOfType(PointSelectEvent.class);
@@ -257,12 +257,12 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
     private WebElement findLastDataPointOfTheFirstSeries() {
         return getElementFromShadowRoot(getChartElement(),
-                By.cssSelector(".highcharts-markers > path"));
+                ".highcharts-markers > path");
     }
 
     private WebElement findLegendItem() {
-        return getElementFromShadowRoot(getChartElement(),
-                By.className("highcharts-legend-item"));
+        return getChartElement().$("*")
+                .attributeContains("class", "highcharts-legend-item").first();
     }
 
     private WebElement findCheckBox() {
@@ -274,8 +274,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findCheckBox(int index) {
-        return getElementFromShadowRoot(getChartElement(),
-                By.cssSelector("input[type=\"checkbox\"]"), index);
+        return getChartElement().$("input")
+                .attributeContains("type", "checkbox").get(index);
     }
 
     private WebElement findDisableVisibityToggle() {
