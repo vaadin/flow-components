@@ -26,8 +26,7 @@ public class EditorVerticalScrollingIT extends AbstractComponentIT {
 
     @Test
     public void editRow_scrollingIsDisabled_closeEditor_scrollingIsRestored() {
-        String overflow = grid.findInShadowRoot(By.id("table")).get(0)
-                .getCssValue("overflow-y");
+        String overflow = grid.$("*").id("table").getCssValue("overflow-y");
         Assert.assertEquals("auto", overflow);
 
         TestBenchElement editButton = grid.findElement(By.id("edit-1"));
@@ -35,8 +34,7 @@ public class EditorVerticalScrollingIT extends AbstractComponentIT {
 
         waitForElementPresent(By.id("cancel-1"));
 
-        overflow = grid.findInShadowRoot(By.id("table")).get(0)
-                .getCssValue("overflow-y");
+        overflow = grid.$("*").id("table").getCssValue("overflow-y");
         Assert.assertEquals("hidden", overflow);
 
         TestBenchElement cancelButton = grid.findElement(By.id("cancel-1"));
@@ -44,8 +42,7 @@ public class EditorVerticalScrollingIT extends AbstractComponentIT {
 
         waitForElementPresent(By.id("edit-1"));
 
-        overflow = grid.findInShadowRoot(By.id("table")).get(0)
-                .getCssValue("overflow-y");
+        overflow = grid.$("*").id("table").getCssValue("overflow-y");
         Assert.assertEquals("auto", overflow);
     }
 
