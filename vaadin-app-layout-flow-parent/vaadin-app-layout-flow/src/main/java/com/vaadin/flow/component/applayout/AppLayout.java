@@ -64,8 +64,8 @@ public class AppLayout extends Component implements RouterLayout {
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * Note: updating the i18n object that is returned from this method will
+     * not update the the component, unless it is set again using
      * {@link AppLayout#setI18n(AppLayoutI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, if the i18n
