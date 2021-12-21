@@ -260,7 +260,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findLegendItem() {
-        return getElementFromShadowRoot(getChartElement(), "highcharts-legend-item");
+        return getChartElement().$("*").attributeContains("class", "highcharts-legend-item").first();
     }
 
     private WebElement findCheckBox() {

@@ -32,7 +32,7 @@ public class BasicChartIT extends AbstractTBTest {
     @Test
     public void Chart_TitleDisplayed() {
         final TestBenchElement chart = getChartElement();
-        final WebElement title = getElementFromShadowRoot(chart, "highcharts-title");
+        final WebElement title = chart.$("*").attributeContains("class", "highcharts-title").first();
         assertTrue(title.getText().contains("First Chart for Flow"));
     }
 
@@ -40,13 +40,13 @@ public class BasicChartIT extends AbstractTBTest {
 
     public void Chart_TitleCanBeChanged() {
         final TestBenchElement chart = getChartElement();
-        final WebElement title = getElementFromShadowRoot(chart, "highcharts-title");
+        final WebElement title = chart.$("*").attributeContains("class", "highcharts-title").first();
         assertTrue(title.getText().contains("First Chart for Flow"));
 
         final WebElement changeTitleButton = findElement(By.id("change_title"));
         changeTitleButton.click();
 
-        final WebElement titleChanged = getElementFromShadowRoot(chart, "highcharts-title");
+        final WebElement titleChanged = chart.$("*").attributeContains("class", "highcharts-title").first();
         assertTrue(titleChanged.getText()
                 .contains("First Chart for Flow - title changed"));
     }
@@ -54,7 +54,7 @@ public class BasicChartIT extends AbstractTBTest {
     @Test
     public void Chart_SeriesNameIsSet() {
         final TestBenchElement chart = getChartElement();
-        final WebElement series = getElementFromShadowRoot(chart, "highcharts-legend-item");
+        final WebElement series = chart.$("*").attributeContains("class", "highcharts-legend-item").first();
         assertTrue(series.getText().contains("Tokyo"));
     }
 
