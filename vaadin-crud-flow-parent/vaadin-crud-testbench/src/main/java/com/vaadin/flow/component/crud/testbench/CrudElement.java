@@ -103,7 +103,8 @@ public class CrudElement extends TestBenchElement {
      * @return the editor save button
      */
     public ButtonElement getEditorSaveButton() {
-        return ((ButtonElement) getPropertyElement("_saveButton"));
+        return ((TestBenchElement) getPropertyElement("_saveButton"))
+                .wrap(ButtonElement.class);
     }
 
     /**
@@ -112,7 +113,8 @@ public class CrudElement extends TestBenchElement {
      * @return the editor cancel button
      */
     public ButtonElement getEditorCancelButton() {
-        return ((ButtonElement) getPropertyElement("_cancelButton"));
+        return ((TestBenchElement) getPropertyElement("_cancelButton"))
+                .wrap(ButtonElement.class);
     }
 
     /**
@@ -121,7 +123,8 @@ public class CrudElement extends TestBenchElement {
      * @return the editor delete button
      */
     public ButtonElement getEditorDeleteButton() {
-        return ((ButtonElement) getPropertyElement("_deleteButton"));
+        return ((TestBenchElement) getPropertyElement("_deleteButton"))
+                .wrap(ButtonElement.class);
     }
 
     /**
