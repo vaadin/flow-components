@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -173,7 +174,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     @Test
     public void select_occured_eventIsFired() {
         ChartElement chart = getChartElement();
-        List<WebElement> points = chart.getPoints();
+        List<TestBenchElement> points = chart.$(".highcharts-point").all();
         points.get(1).click();
 
         assertNthHistoryEventIsType(PointSelectEvent.class, 1);
@@ -249,12 +250,12 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
     private WebElement findLastDataPointOfTheFirstSeries() {
         return getElementFromShadowRoot(getChartElement(),
-                By.cssSelector(".highcharts-markers > path"));
+                ".highcharts-markers > path");
     }
 
     private WebElement findLegendItem() {
-        return getElementFromShadowRoot(getChartElement(),
-                By.className("highcharts-legend-item"));
+        return getChartElement().$("*")
+                .attributeContains("class", "highcharts-legend-item").first();
     }
 
     private WebElement findCheckBox() {
@@ -266,8 +267,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findCheckBox(int index) {
-        return getElementFromShadowRoot(getChartElement(),
-                By.cssSelector("input[type=\"checkbox\"]"), index);
+        return getChartElement().$("input")
+                .attributeContains("type", "checkbox").get(index);
     }
 
     private WebElement findDisableVisibityToggle() {
