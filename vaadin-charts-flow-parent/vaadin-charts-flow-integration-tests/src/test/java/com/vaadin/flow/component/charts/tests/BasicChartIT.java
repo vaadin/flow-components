@@ -18,6 +18,7 @@ package com.vaadin.flow.component.charts.tests;
 
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.area.AreaChart;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -33,34 +34,34 @@ public class BasicChartIT extends AbstractTBTest {
 
     @Test
     public void Chart_TitleDisplayed() {
-        final WebElement chart = getChartElement();
-        final WebElement title = getElementFromShadowRoot(chart,
-                By.className("highcharts-title"));
+        final TestBenchElement chart = getChartElement();
+        final WebElement title = chart.$("*")
+                .attributeContains("class", "highcharts-title").first();
         assertTrue(title.getText().contains("First Chart for Flow"));
     }
 
     @Test
     @org.junit.Ignore("Unstable test when migrated to mono-repo")
     public void Chart_TitleCanBeChanged() {
-        final WebElement chart = getChartElement();
-        final WebElement title = getElementFromShadowRoot(chart,
-                By.className("highcharts-title"));
+        final TestBenchElement chart = getChartElement();
+        final WebElement title = chart.$("*")
+                .attributeContains("class", "highcharts-title").first();
         assertTrue(title.getText().contains("First Chart for Flow"));
 
         final WebElement changeTitleButton = findElement(By.id("change_title"));
         changeTitleButton.click();
 
-        final WebElement titleChanged = getElementFromShadowRoot(chart,
-                By.className("highcharts-title"));
+        final WebElement titleChanged = chart.$("*")
+                .attributeContains("class", "highcharts-title").first();
         assertTrue(titleChanged.getText()
                 .contains("First Chart for Flow - title changed"));
     }
 
     @Test
     public void Chart_SeriesNameIsSet() {
-        final WebElement chart = getChartElement();
-        final WebElement series = getElementFromShadowRoot(chart,
-                By.className("highcharts-legend-item"));
+        final TestBenchElement chart = getChartElement();
+        final WebElement series = chart.$("*")
+                .attributeContains("class", "highcharts-legend-item").first();
         assertTrue(series.getText().contains("Tokyo"));
     }
 

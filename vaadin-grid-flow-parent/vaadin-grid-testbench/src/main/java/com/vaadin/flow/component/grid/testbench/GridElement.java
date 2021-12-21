@@ -290,7 +290,7 @@ public class GridElement extends TestBenchElement {
      */
     public TestBenchElement getHeaderCellContent(int rowIndex,
             int columnIndex) {
-        WebElement thead = findInShadowRoot(By.id("header")).get(0);
+        WebElement thead = $("*").id("header");
         List<WebElement> headerRows = thead.findElements(By.tagName("tr"));
         List<WebElement> headerCells = headerRows.get(rowIndex)
                 .findElements(By.tagName("th"));
@@ -303,11 +303,14 @@ public class GridElement extends TestBenchElement {
 
     /**
      * Find all {@link WebElement}s using the given {@link By} selector.
-     *
+     * 
+     * @deprecated this method will not working for Chrome 96+, because of the
+     *             breaking changes in ChromeDriver.
      * @param by
      *            the selector used to find elements
      * @return a list of found elements
      */
+    @Deprecated
     public List<WebElement> findInShadowRoot(By by) {
         return getShadowRoot().findElements(by);
     }
