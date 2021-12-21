@@ -375,7 +375,7 @@ public class AppLayout extends Component implements RouterLayout {
          * attribute is set when the drawer is in the overlay mode and announced
          * once the drawer is opened.
          *
-         * @return the overflow button aria-label
+         * @return the drawer aria-label
          */
         public String getDrawer() {
             return drawer;
