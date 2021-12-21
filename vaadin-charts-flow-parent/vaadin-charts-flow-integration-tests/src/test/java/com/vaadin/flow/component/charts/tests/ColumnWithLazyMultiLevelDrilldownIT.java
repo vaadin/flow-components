@@ -33,12 +33,11 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
     }
 
     private WebElement getFirstDrilldownPoint(ChartElement chart) {
-        return getElementFromShadowRoot(chart,
-                By.cssSelector(".highcharts-drilldown-point"));
+        return getElementFromShadowRoot(chart, ".highcharts-drilldown-point");
     }
 
     private WebElement getDrillUpButton(ChartElement chart) {
-        return getElementFromShadowRoot(chart, By.cssSelector("button"));
+        return getElementFromShadowRoot(chart, "button");
     }
 
     private void assertLogText(String text) {
