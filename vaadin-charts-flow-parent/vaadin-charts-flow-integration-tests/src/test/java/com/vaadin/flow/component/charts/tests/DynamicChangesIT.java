@@ -30,7 +30,7 @@ public class DynamicChangesIT extends AbstractTBTest {
     @Test
     public void seriesFunction_addPoint_pointCreated() {
         ChartElement chart = getChartElement();
-        int initialPointsCount = chart.getPoints().size();
+        int initialPointsCount = chart.$(".highcharts-point").all().size();
         findElement(By.id("addPointButton")).click();
         assertEquals(initialPointsCount + 1, chart.getPoints().size());
     }
@@ -38,7 +38,7 @@ public class DynamicChangesIT extends AbstractTBTest {
     @Test
     public void pointFunction_removePoint_pointDeleted() {
         ChartElement chart = getChartElement();
-        int initialPointsCount = chart.getPoints().size();
+        int initialPointsCount = chart.$(".highcharts-point").all().size();
         findElement(By.id("removePointButton")).click();
         assertEquals(initialPointsCount - 1, chart.getPoints().size());
     }
