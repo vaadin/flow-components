@@ -24,8 +24,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
     @Test
     public void test() throws AssertionError {
         ChartElement chart = $(ChartElement.class).first();
-        waitUntil(e -> getElementFromShadowRoot(chart,
-                By.cssSelector(".highcharts-drilldown-point")) != null);
+        waitUntil(e -> getElementFromShadowRoot(chart, ".highcharts-drilldown-point") != null);
         clickDrilldownPoint(chart, 0);
         // Can't drilldown with null callback
         assertEquals(0, getLogMessages().size());
@@ -65,8 +64,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
     }
 
     private void clickDrilldownPoint(ChartElement chart, int index) {
-        getElementFromShadowRoot(chart,
-                By.cssSelector(".highcharts-drilldown-point"), index).click();
+        getElementFromShadowRoot(chart, ".highcharts-drilldown-point", index).click();
     }
 
     private WebElement getDrillUpButtonByTopItemName(ChartElement chart,
@@ -77,7 +75,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
     private WebElement getDrillUpButton(ChartElement chart, String label) {
         final String selector = String.format("button[aria-label=\"◁ %s\"",
                 label);
-        return getElementFromShadowRoot(chart, By.cssSelector(selector));
+        return getElementFromShadowRoot(chart, selector);
     }
 
     private void assertLastLogText(String text) {
