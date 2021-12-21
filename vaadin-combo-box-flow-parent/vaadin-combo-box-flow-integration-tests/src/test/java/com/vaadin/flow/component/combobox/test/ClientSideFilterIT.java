@@ -61,6 +61,8 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
         waitForItems(comboBox, items -> items.size() == 1
                 && "Option 3".equals(getItemLabel(items, 0)));
 
+        comboBox.closePopup();
+
         // Second combobox.
         comboBox = $(ComboBoxElement.class).id(CLIENT_FILTER_COMBO_BOX);
 

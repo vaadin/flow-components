@@ -20,14 +20,14 @@ public class CompositeIT extends AbstractParallelTest {
 
         Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
 
-        $("vaadin-dialog-overlay").first().$("div")
+        $("vaadin-crud-dialog-overlay").first().$("div")
                 .attribute("editor-role", "language").first()
                 .$(ButtonElement.class).first().click();
 
         $(TextFieldElement.class).attribute("editor-role", "language-field")
                 .first().setValue("English");
 
-        $("vaadin-dialog-overlay").first().$(ButtonElement.class)
+        $("vaadin-crud-dialog-overlay").first().$(ButtonElement.class)
                 .attribute("editor-role", "language-confirm").first().click();
 
         $(DialogElement.class).attribute("editor-role", "composite-dialog")

@@ -1,5 +1,4 @@
-import { GestureEventListeners } from "@polymer/polymer/lib/mixins/gesture-event-listeners.js";
-import * as Gestures from "@polymer/polymer/lib/utils/gestures.js";
+import * as Gestures from "@vaadin/component-base/src/gestures.js";
 (function() {
   const tryCatchWrapper = function(callback) {
     return window.Vaadin.Flow.tryCatchWrapper(
