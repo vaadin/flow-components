@@ -14,7 +14,6 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
 
 public class EditorButtonsIT extends AbstractParallelTest {
 
@@ -58,7 +57,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
                 .first();
         lastNameField.setValue("Otto");
 
-        TestBenchElement saveButton = crud.getEditorSaveButton();
+        ButtonElement saveButton = crud.getEditorSaveButton();
         assertTrue("Save button should be enabled", saveButton.isEnabled());
         getTestButton("disable-save-button").click();
         assertFalse("Save button should be disabled", saveButton.isEnabled());
@@ -69,7 +68,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
         CrudElement crud = getCrud();
 
         crud.getNewItemButton().get().click();
-        TestBenchElement saveButton = crud.getEditorSaveButton();
+        ButtonElement saveButton = crud.getEditorSaveButton();
         assertFalse(saveButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
@@ -88,7 +87,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertTrue(crud.isEditorOpen());
 
         getTestButton("disable-save-button").click();
-        TestBenchElement saveButton = crud.getEditorSaveButton();
+        ButtonElement saveButton = crud.getEditorSaveButton();
         assertFalse("Save button should be disabled", saveButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
@@ -111,7 +110,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertTrue(crud.isEditorOpen());
 
         getTestButton("disable-cancel-button").click();
-        TestBenchElement cancelButton = crud.getEditorCancelButton();
+        ButtonElement cancelButton = crud.getEditorCancelButton();
         assertFalse("Cancel button should be disabled",
                 cancelButton.isEnabled());
 
@@ -135,7 +134,7 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertTrue(crud.isEditorOpen());
 
         getTestButton("disable-delete-button").click();
-        TestBenchElement deleteButton = crud.getEditorDeleteButton();
+        ButtonElement deleteButton = crud.getEditorDeleteButton();
         assertFalse("Delete button should be disabled",
                 deleteButton.isEnabled());
 
