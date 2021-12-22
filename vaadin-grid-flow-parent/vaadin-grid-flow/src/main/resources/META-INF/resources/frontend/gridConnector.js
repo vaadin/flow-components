@@ -959,7 +959,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       };
 
       const contextMenuListener = function(e) {
-        const eventContext = grid.getEventContext(e);
+        // For `contextmenu` events, we need to access the source event,
+        // when using open on click we just use the click event itself
+        const sourceEvent = e.detail.sourceEvent || e;
+        const eventContext = grid.getEventContext(sourceEvent);
         const key = eventContext.item && eventContext.item.key;
         const colId = eventContext.column && eventContext.column.id;
         grid.$server.updateContextMenuTargetItem(key, colId);
@@ -970,7 +973,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       }));
 
       grid.getContextMenuBeforeOpenDetail = tryCatchWrapper(function(event) {
-        const eventContext = grid.getEventContext(event);
+        // For `contextmenu` events, we need to access the source event,
+        // when using open on click we just use the click event itself
+        const sourceEvent = event.detail.sourceEvent || event;
+        const eventContext = grid.getEventContext(sourceEvent);
         return {
           key: (eventContext.item && eventContext.item.key) || ""
         };
