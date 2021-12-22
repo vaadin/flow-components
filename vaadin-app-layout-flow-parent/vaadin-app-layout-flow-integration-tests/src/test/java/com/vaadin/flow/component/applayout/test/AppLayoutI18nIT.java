@@ -16,27 +16,25 @@
 package com.vaadin.flow.component.applayout.test;
 
 import com.vaadin.flow.component.applayout.testbench.AppLayoutElement;
-import com.vaadin.tests.AbstractParallelTest;
-
-import org.openqa.selenium.By;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Test;
 import org.junit.Assert;
 import org.junit.Before;
 
-public class AppLayoutI18nIT extends AbstractParallelTest {
+@TestPath("vaadin-app-layout/i18n")
+public class AppLayoutI18nIT extends AbstractComponentIT {
     private AppLayoutElement layout;
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-app-layout/i18n");
-        getDriver().get(url);
-        layout = $(AppLayoutElement.class).waitForFirst();
+        open();
+        layout = $(AppLayoutElement.class).first();
     }
 
     @Test
-    public void setEmptyI18n_defaultI18nIsNotOverriden() {
+    public void setEmptyI18n_defaultI18nIsNotOverridden() {
         clickButton("set-empty-i18n");
 
         Assert.assertNotNull(
