@@ -22,8 +22,8 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-app-layout/i18n")
-public class I18nPage extends Div {
-    public I18nPage() {
+public class AppLayoutI18nPage extends Div {
+    public AppLayoutI18nPage() {
         AppLayout layout = new AppLayout();
         add(layout);
 
