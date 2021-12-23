@@ -24,7 +24,7 @@ import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("tree-grid-expand-recursively")
-public class TreeGridEmptyIT extends AbstractComponentIT {
+public class TreeGridExpandRecursivelyIT extends AbstractComponentIT {
 
     @Test
     public void treegrid_item_expanded() {
