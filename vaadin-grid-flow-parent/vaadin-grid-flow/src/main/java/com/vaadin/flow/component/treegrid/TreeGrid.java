@@ -796,6 +796,10 @@ public class TreeGrid<T> extends Grid<T>
     public void expandRecursively(Collection<T> items, int depth) {
         getDataCommunicator()
                 .expand(getItemsWithChildrenRecursively(items, depth));
+        // Call with client roundtrip as expansion takes a while.
+        // This ensures that event is fired after exapnsion is complete.
+        getElement().executeJs("return 1;").then(result -> fireEvent(
+                new ExpandEvent<T, TreeGrid<T>>(this, false, items)));
     }
 
     /**
