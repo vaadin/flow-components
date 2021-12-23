@@ -17,9 +17,9 @@ package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.component.html.testbench.LabelElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -29,6 +29,7 @@ public class TreeGridExpandRecursivelyIT extends AbstractComponentIT {
     @Test
     public void treegrid_item_expanded() {
         open();
-        LabelElement label = $(LabelElement.class).waitForFirst();
+        TreeGridElement label = $(TreeGridElement.class).waitForFirst();
+        findElement(By.id("expanded"));
     }
 }
