@@ -26,11 +26,11 @@ import java.util.Collections;
 import java.util.Date;
 
 @Route("tree-grid-expand-recursively")
-public class TreeGridColumns extends VerticalLayout {
+public class TreeGridExpandRecursivelyPage extends VerticalLayout {
 
     TreeGrid<String> grid;
 
-    public TreeGridColumns() {
+    public TreeGridExpandRecursivelyPage() {
         grid = new TreeGrid<>();
         grid.setWidth("350px");
         grid.setMaxHeight("300px");
