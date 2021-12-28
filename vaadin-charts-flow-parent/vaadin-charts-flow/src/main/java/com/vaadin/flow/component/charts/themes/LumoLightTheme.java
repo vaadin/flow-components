@@ -49,21 +49,21 @@ public class LumoLightTheme extends Theme {
     protected final static SolidColor COLOR15 = new SolidColor(75, 86, 168);
     protected final static SolidColor COLOR16 = new SolidColor(154, 89, 61);
 
-    protected final static SolidColor TITLE_COLOR = new SolidColor(25, 36,
-            52);
+    protected final static SolidColor TITLE_COLOR = new SolidColor(25, 36, 52);
     protected final static SolidColor TOOLTIP_TEXT_COLOR = new SolidColor(24,
             39, 57, 0.94);
     protected final static SolidColor TOOLTIP_BACKGROUND_COLOR = new SolidColor(
             255, 255, 255);
-    protected final static SolidColor SUBTITLE_COLOR = new SolidColor(27, 43, 65, 0.72d);
+    protected final static SolidColor SUBTITLE_COLOR = new SolidColor(27, 43,
+            65, 0.72d);
     protected final static SolidColor LINE_COLOR = new SolidColor(223, 223,
             223);
     protected final static SolidColor TEXT_COLOR = new SolidColor(128, 128,
             128);
-    protected final static SolidColor GRID_COLOR = new SolidColor(28, 55,
-            90, 0.16d);
-    protected final static SolidColor LABEL_COLOR = new SolidColor(24, 39,
-            57, 0.94d);
+    protected final static SolidColor GRID_COLOR = new SolidColor(28, 55, 90,
+            0.16d);
+    protected final static SolidColor LABEL_COLOR = new SolidColor(24, 39, 57,
+            0.94d);
 
     protected final static SolidColor BGCOLOR = new SolidColor(255, 255, 255);
     protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(0, 0,
