@@ -32,16 +32,16 @@ import com.vaadin.flow.component.charts.model.style.TickIntervalStyle;
 public class LumoLightTheme extends Theme {
 
     protected static final int BORDER_RADIUS = 5;
-    protected final static SolidColor COLOR1 = new SolidColor(48, 144, 240);
-    protected final static SolidColor COLOR2 = new SolidColor(236, 100, 100);
-    protected final static SolidColor COLOR3 = new SolidColor(152, 223, 88);
-    protected final static SolidColor COLOR4 = new SolidColor(249, 221, 81);
-    protected final static SolidColor COLOR5 = new SolidColor(36, 220, 212);
-    protected final static SolidColor COLOR6 = new SolidColor(236, 100, 165);
-    protected final static SolidColor COLOR7 = new SolidColor(104, 92, 176);
-    protected final static SolidColor COLOR8 = new SolidColor(255, 125, 66);
-    protected final static SolidColor COLOR9 = new SolidColor(51, 97, 144);
-    protected final static SolidColor COLOR10 = new SolidColor(170, 81, 77);
+    protected final static SolidColor COLOR1 = new SolidColor(90, 194, 247);
+    protected final static SolidColor COLOR2 = new SolidColor(22, 118, 243);
+    protected final static SolidColor COLOR3 = new SolidColor(255, 125, 148);
+    protected final static SolidColor COLOR4 = new SolidColor(197, 22, 78);
+    protected final static SolidColor COLOR5 = new SolidColor(21, 193, 93);
+    protected final static SolidColor COLOR6 = new SolidColor(14, 129, 81);
+    protected final static SolidColor COLOR7 = new SolidColor(193, 142, 210);
+    protected final static SolidColor COLOR8 = new SolidColor(146, 51, 179);
+    protected final static SolidColor COLOR9 = new SolidColor(253, 162, 83);
+    protected final static SolidColor COLOR10 = new SolidColor(226, 73, 50);
     protected final static SolidColor COLOR11 = new SolidColor(127, 176, 83);
     protected final static SolidColor COLOR12 = new SolidColor(187, 168, 91);
     protected final static SolidColor COLOR13 = new SolidColor(36, 121, 129);
@@ -49,22 +49,21 @@ public class LumoLightTheme extends Theme {
     protected final static SolidColor COLOR15 = new SolidColor(75, 86, 168);
     protected final static SolidColor COLOR16 = new SolidColor(154, 89, 61);
 
-    protected final static SolidColor TITLE_COLOR = new SolidColor(25, 125,
-            225);
-    protected final static SolidColor TOOLTIP_TEXT_COLOR = new SolidColor(51,
-            51, 51);
+    protected final static SolidColor TITLE_COLOR = new SolidColor(25, 36,
+            52);
+    protected final static SolidColor TOOLTIP_TEXT_COLOR = new SolidColor(24,
+            39, 57, 0.94);
     protected final static SolidColor TOOLTIP_BACKGROUND_COLOR = new SolidColor(
             255, 255, 255);
-    protected final static SolidColor SUBTITLE_COLOR = new SolidColor(128, 128,
-            128);
+    protected final static SolidColor SUBTITLE_COLOR = new SolidColor(27, 43, 65, 0.72d);
     protected final static SolidColor LINE_COLOR = new SolidColor(223, 223,
             223);
     protected final static SolidColor TEXT_COLOR = new SolidColor(128, 128,
             128);
-    protected final static SolidColor GRID_COLOR = new SolidColor(250, 250,
-            250);
-    protected final static SolidColor LABEL_COLOR = new SolidColor(128, 128,
-            128);
+    protected final static SolidColor GRID_COLOR = new SolidColor(28, 55,
+            90, 0.16d);
+    protected final static SolidColor LABEL_COLOR = new SolidColor(24, 39,
+            57, 0.94d);
 
     protected final static SolidColor BGCOLOR = new SolidColor(255, 255, 255);
     protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(0, 0,
@@ -73,8 +72,8 @@ public class LumoLightTheme extends Theme {
             255, 255, 0.0);
 
     protected final static String DEFAULT_FONT_FAMILIES = "var(--lumo-font-family)";
-    protected static final Color LEGEND_TEXT_COLOR = new SolidColor(128, 128,
-            128);
+    protected static final Color LEGEND_TEXT_COLOR = new SolidColor(255, 255,
+            255, 0.94);
 
     public LumoLightTheme() {
         setColors(COLOR1, COLOR2, COLOR3, COLOR4, COLOR5, COLOR6, COLOR7,
