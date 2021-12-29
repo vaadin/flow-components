@@ -269,7 +269,8 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     }
 
     /**
-     * Test that aria-multiselectable=true & the selectable children should have aria-selected=true|false depending on their state
+     * Test that aria-multiselectable=true & the selectable children should have
+     * aria-selected=true|false depending on their state
      */
     @Test
     public void testAriaSelectionModeMulti() {
@@ -278,9 +279,12 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
         TestBenchElement table = grid.$("table").first();
         // table should have aria-multiselectable set to true
-        Assert.assertTrue(Boolean.parseBoolean(table.getAttribute("aria-multiselectable")));
+        Assert.assertTrue(Boolean
+                .parseBoolean(table.getAttribute("aria-multiselectable")));
 
-        Assert.assertFalse(Boolean.parseBoolean(grid.getRow(0).getAttribute("aria-selected")));
-        Assert.assertTrue(Boolean.parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
+        Assert.assertFalse(Boolean
+                .parseBoolean(grid.getRow(0).getAttribute("aria-selected")));
+        Assert.assertTrue(Boolean
+                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
     }
 }
