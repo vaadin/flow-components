@@ -19,6 +19,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.By;
@@ -133,5 +135,44 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
 
         WebElement text2 = findElement(By.id("item2"));
         Assert.assertTrue("Row 2 is selected", text2.isDisplayed());
+    }
+
+    /**
+     * Test that aria-multiselectable and aria-selected should NOT be present
+     * when SelectionMode is set to NONE.
+     */
+    @Test
+    public void testAriaSelectionModeNone() {
+        open();
+        GridElement grid = $(GridElement.class).id(GridSingleSelectionPage.DESELECT_ALLOWED_GRID_ID);
+        TestBenchElement table = grid.$("table").first();
+        // table should not have aria-multiselectable attribute
+        Assert.assertFalse(table.hasAttribute("aria-multiselectable"));
+
+        for (int i = 0; i < grid.getRowCount(); i++) {
+            GridTRElement row = grid.getRow(i);
+            Assert.assertFalse(row.hasAttribute("aria-selected"));
+        }
+    }
+
+    /**
+     * Test that aria-multiselectable=false & the selectable children should have aria-selected=true|false depending on their state
+     */
+    @Test
+    public void testAriaSelectionModeSingle() {
+        open();
+
+        GridElement grid = $(GridElement.class).id(GridSingleSelectionPage.DESELECT_ALLOWED_GRID_ID);
+        GridTRElement firstRow = grid.getRow(0);
+        firstRow.select();
+        TestBenchElement table = grid.$("table").first();
+        // table should have aria-multiselectable
+        Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
+        // aria-multiselectable should be set to false
+        Assert.assertFalse(Boolean.parseBoolean(table.getAttribute("aria-multiselectable")));
+
+        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
+        Assert.assertTrue(Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
+        Assert.assertFalse(Boolean.parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
     }
 }
