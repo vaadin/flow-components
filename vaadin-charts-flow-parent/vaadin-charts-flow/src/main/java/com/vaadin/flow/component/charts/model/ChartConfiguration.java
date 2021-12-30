@@ -19,4 +19,6 @@ public interface ChartConfiguration extends Serializable {
 
     void fireAxesRescaled(Axis axis, Number minimum, Number maximum,
             boolean redraw, boolean animate);
+
+    void fireScrollbarVisibilityChanged(boolean visible);
 }

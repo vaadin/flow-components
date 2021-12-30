@@ -3,17 +3,9 @@ package com.vaadin.flow.component.charts;
 import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
 import static org.junit.Assert.assertEquals;
 
+import com.vaadin.flow.component.charts.events.internal.*;
 import org.junit.Test;
 
-import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
-import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
-import com.vaadin.flow.component.charts.events.internal.DataAddedEvent;
-import com.vaadin.flow.component.charts.events.internal.DataRemovedEvent;
-import com.vaadin.flow.component.charts.events.internal.DataUpdatedEvent;
-import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Inactive;
 import com.vaadin.flow.component.charts.model.ListSeries;
@@ -84,6 +76,11 @@ public class ConfigurationJSONSerializationTest {
             @Override
             public void resetZoom(boolean redraw, boolean animate) {
                 // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void scrollStateChanged(ScrollbarVisibilityChanged event) {
 
             }
         });

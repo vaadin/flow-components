@@ -15,15 +15,7 @@ package com.vaadin.flow.component.charts.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
-import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
-import com.vaadin.flow.component.charts.events.internal.DataAddedEvent;
-import com.vaadin.flow.component.charts.events.internal.DataRemovedEvent;
-import com.vaadin.flow.component.charts.events.internal.DataUpdatedEvent;
-import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
+import com.vaadin.flow.component.charts.events.internal.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -736,6 +728,7 @@ public class Configuration extends AbstractConfigurationObject
     public Scrollbar getScrollbar() {
         if (scrollbar == null) {
             scrollbar = new Scrollbar();
+            scrollbar.setConfiguration(this);
         }
         return scrollbar;
     }
@@ -1166,6 +1159,13 @@ public class Configuration extends AbstractConfigurationObject
             axis.setConfiguration(this);
         }
         colorAxis.addAxis(axis);
+    }
+
+    public void fireScrollbarVisibilityChanged(boolean visible) {
+        ScrollbarVisibilityChanged event = new ScrollbarVisibilityChanged(visible);
+        for (ConfigurationChangeListener listener : changeListeners) {
+            listener.scrollStateChanged(event);
+        }
     }
 
 }

@@ -13,16 +13,7 @@ package com.vaadin.flow.component.charts;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.events.internal.AbstractSeriesEvent;
-import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
-import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
-import com.vaadin.flow.component.charts.events.internal.DataAddedEvent;
-import com.vaadin.flow.component.charts.events.internal.DataRemovedEvent;
-import com.vaadin.flow.component.charts.events.internal.DataUpdatedEvent;
-import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
-import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
+import com.vaadin.flow.component.charts.events.internal.*;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.AxisDimension;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -122,6 +113,12 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
                     "setExtremes", AxisDimension.Y_AXIS.getIndex(), i, null,
                     null, redraw, animate);
         }
+    }
+
+    @Override
+    public void scrollStateChanged(ScrollbarVisibilityChanged event) {
+        chart.getElement().executeJs(String.format("$0.configuration.update({\"scrollbar\":{\"enabled\":%s}})",
+                event.getVisibility()));
     }
 
     private int getSeriesIndex(AbstractSeriesEvent event) {

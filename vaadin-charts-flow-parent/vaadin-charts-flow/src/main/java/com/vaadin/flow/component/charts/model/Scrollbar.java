@@ -13,6 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
@@ -55,9 +56,33 @@ public class Scrollbar extends AbstractConfigurationObject {
     private Number trackBorderRadius;
     private Number zIndex;
     private Number height;
+    @JsonIgnore
+    private ChartConfiguration configuration;
+
 
     public Scrollbar() {
     }
+
+    /**
+     * Returns the configuration that this scrollbar is bound to
+     *
+     * @return The configuration.
+     */
+    public ChartConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * Sets the configuration this scrollbar is bound to. This method is
+     * automatically called by configuration, when the scrollbar is created.
+     *
+     * @param configuration
+     *            Configuration this object is linked to.
+     */
+    public void setConfiguration(ChartConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
 
     /**
      * @see #setBarBackgroundColor(Color)
@@ -221,6 +246,7 @@ public class Scrollbar extends AbstractConfigurationObject {
      */
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+        this.getConfiguration().fireScrollbarVisibilityChanged(enabled);
     }
 
     /**

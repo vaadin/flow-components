@@ -93,4 +93,10 @@ public interface ConfigurationChangeListener extends Serializable {
      * @param animate
      */
     void resetZoom(boolean redraw, boolean animate);
+
+    /**
+     * Toggles visibility of chart's scrollbar
+     * @param event
+     */
+    void scrollStateChanged(ScrollbarVisibilityChanged event);
 }
