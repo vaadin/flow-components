@@ -96,6 +96,7 @@ public interface ConfigurationChangeListener extends Serializable {
 
     /**
      * Toggles visibility of chart's scrollbar
+     * 
      * @param event
      */
     void scrollStateChanged(ScrollbarVisibilityChanged event);

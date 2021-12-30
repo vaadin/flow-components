@@ -1162,7 +1162,8 @@ public class Configuration extends AbstractConfigurationObject
     }
 
     public void fireScrollbarVisibilityChanged(boolean visible) {
-        ScrollbarVisibilityChanged event = new ScrollbarVisibilityChanged(visible);
+        ScrollbarVisibilityChanged event = new ScrollbarVisibilityChanged(
+                visible);
         for (ConfigurationChangeListener listener : changeListeners) {
             listener.scrollStateChanged(event);
         }

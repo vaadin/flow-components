@@ -117,7 +117,8 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     @Override
     public void scrollStateChanged(ScrollbarVisibilityChanged event) {
-        chart.getElement().executeJs(String.format("$0.configuration.update({\"scrollbar\":{\"enabled\":%s}})",
+        chart.getElement().executeJs(String.format(
+                "$0.configuration.update({\"scrollbar\":{\"enabled\":%s}})",
                 event.getVisibility()));
     }
 

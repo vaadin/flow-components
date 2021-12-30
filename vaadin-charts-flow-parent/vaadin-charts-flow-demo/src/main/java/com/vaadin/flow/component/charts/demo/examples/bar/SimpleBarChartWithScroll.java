@@ -18,7 +18,6 @@ public class SimpleBarChartWithScroll extends AbstractChartExample {
         ListSeries series = new ListSeries(10, 10, 10);
         conf.addSeries(series);
 
-
         Button toggle = new Button("Toggle scrollbar", event -> {
             enabled = !enabled;
             conf.getScrollbar().setEnabled(enabled);

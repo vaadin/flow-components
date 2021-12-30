@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class SimpleBarChartWithScrollIT extends AbstractTBTest{
+public class SimpleBarChartWithScrollIT extends AbstractTBTest {
     @Override
     protected Class<? extends AbstractChartExample> getView() {
         return SimpleBarChartWithScroll.class;

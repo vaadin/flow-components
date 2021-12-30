@@ -59,7 +59,6 @@ public class Scrollbar extends AbstractConfigurationObject {
     @JsonIgnore
     private ChartConfiguration configuration;
 
-
     public Scrollbar() {
     }
 
@@ -82,7 +81,6 @@ public class Scrollbar extends AbstractConfigurationObject {
     public void setConfiguration(ChartConfiguration configuration) {
         this.configuration = configuration;
     }
-
 
     /**
      * @see #setBarBackgroundColor(Color)
