@@ -267,24 +267,4 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
         Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
     }
-
-    /**
-     * Test that aria-multiselectable=true & the selectable children should have
-     * aria-selected=true|false depending on their state
-     */
-    @Test
-    public void testAriaSelectionModeMulti() {
-        open();
-        GridElement grid = $(GridElement.class).id(
-                GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
-        TestBenchElement table = grid.$("table").first();
-        // table should have aria-multiselectable set to true
-        Assert.assertTrue(Boolean
-                .parseBoolean(table.getAttribute("aria-multiselectable")));
-
-        Assert.assertFalse(Boolean
-                .parseBoolean(grid.getRow(0).getAttribute("aria-selected")));
-        Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
-    }
 }

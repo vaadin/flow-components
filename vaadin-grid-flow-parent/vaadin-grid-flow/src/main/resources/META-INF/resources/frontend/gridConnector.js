@@ -463,6 +463,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           });
         }
+        if (selectionMode === validSelectionModes[1]) { // NONE
+          row.removeAttribute('aria-selected');
+        }
       })
 
       const itemExpandedChanged = tryCatchWrapper(function(item, expanded) {
@@ -926,6 +929,16 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             && validSelectionModes.indexOf(mode) >= 0) {
           selectionMode = mode;
           selectedKeys = {};
+          if (mode === validSelectionModes[0]) { // SINGLE
+            grid.$.table.setAttribute('aria-multiselectable', false);
+          } else if (mode === validSelectionModes[1]) { // NONE
+            grid.$.table.removeAttribute('aria-multiselectable');
+            // TODO: remove aria-selected from all rows
+          } else { // MULTI
+            grid.$.table.setAttribute('aria-multiselectable', true);
+          }
+          // re-run renderers for all items visible
+          grid.requestContentUpdate();
         } else {
           throw 'Attempted to set an invalid selection mode';
         }
