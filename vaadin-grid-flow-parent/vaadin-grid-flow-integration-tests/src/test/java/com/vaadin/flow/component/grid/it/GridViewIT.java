@@ -341,7 +341,8 @@ public class GridViewIT extends GridViewBase {
         // table should not have aria-multiselectable attribute
         Assert.assertFalse(table.hasAttribute("aria-multiselectable"));
 
-        for (int i = grid.getFirstVisibleRowIndex(); i < grid.getLastVisibleRowIndex(); i++) {
+        for (int i = grid.getFirstVisibleRowIndex(); i < grid
+                .getLastVisibleRowIndex(); i++) {
             GridTRElement row = grid.getRow(i);
             Assert.assertFalse(row.hasAttribute("aria-selected"));
         }
