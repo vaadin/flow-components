@@ -31,7 +31,7 @@ import com.vaadin.flow.component.charts.model.style.TickIntervalStyle;
 @SuppressWarnings("serial")
 public class LumoLightTheme extends Theme {
 
-    protected static final int BORDER_RADIUS = 5;
+    protected static final int BORDER_RADIUS = 4;
     protected final static SolidColor COLOR1 = new SolidColor(90, 194, 247);
     protected final static SolidColor COLOR2 = new SolidColor(22, 118, 243);
     protected final static SolidColor COLOR3 = new SolidColor(255, 125, 148);
@@ -56,18 +56,18 @@ public class LumoLightTheme extends Theme {
             255, 255, 255);
     protected final static SolidColor SUBTITLE_COLOR = new SolidColor(27, 43,
             65, 0.72d);
-    protected final static SolidColor LINE_COLOR = new SolidColor(223, 223,
-            223);
-    protected final static SolidColor TEXT_COLOR = new SolidColor(128, 128,
-            128);
+    protected final static SolidColor LINE_COLOR = new SolidColor(28, 55, 90,
+            0.16);
+    protected final static SolidColor TEXT_COLOR = new SolidColor(27, 43, 65,
+            0.69);
     protected final static SolidColor GRID_COLOR = new SolidColor(28, 55, 90,
             0.16d);
     protected final static SolidColor LABEL_COLOR = new SolidColor(24, 39, 57,
             0.94d);
 
     protected final static SolidColor BGCOLOR = new SolidColor(255, 255, 255);
-    protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(0, 0,
-            0, 0.02);
+    protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(25, 59,
+            103, 0.05);
     protected final static SolidColor TRANSPARENT_COLOR = new SolidColor(255,
             255, 255, 0.0);
 
