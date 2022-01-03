@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
