@@ -66,8 +66,8 @@ public class LumoLightTheme extends Theme {
             0.94d);
 
     protected final static SolidColor BGCOLOR = new SolidColor(255, 255, 255);
-    protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(25, 59,
-            103, 0.05);
+    protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(25,
+            59, 103, 0.05);
     protected final static SolidColor TRANSPARENT_COLOR = new SolidColor(255,
             255, 255, 0.0);
 
