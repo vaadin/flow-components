@@ -55,15 +55,15 @@ public class LumoLightTheme extends Theme {
     protected final static SolidColor TOOLTIP_BACKGROUND_COLOR = new SolidColor(
             255, 255, 255);
     protected final static SolidColor SUBTITLE_COLOR = new SolidColor(27, 43,
-            65, 0.72d);
+            65, 0.72);
     protected final static SolidColor LINE_COLOR = new SolidColor(28, 55, 90,
             0.16);
     protected final static SolidColor TEXT_COLOR = new SolidColor(27, 43, 65,
-            0.72d);
+            0.72);
     protected final static SolidColor GRID_COLOR = new SolidColor(28, 55, 90,
-            0.16d);
+            0.16);
     protected final static SolidColor LABEL_COLOR = new SolidColor(27, 43, 65,
-            0.72d);
+            0.72);
 
     protected final static SolidColor BGCOLOR = new SolidColor(255, 255, 255);
     protected final static SolidColor BGCOLOR_LIGHT_GRAY = new SolidColor(25,
@@ -72,8 +72,8 @@ public class LumoLightTheme extends Theme {
             255, 255, 0.0);
 
     protected final static String DEFAULT_FONT_FAMILIES = "var(--lumo-font-family)";
-    protected static final Color LEGEND_TEXT_COLOR = new SolidColor(27, 43,
-              65, 0.72d)128,0.94);
+    protected static final Color LEGEND_TEXT_COLOR = new SolidColor(27, 43, 128,
+            0.94);
 
     public LumoLightTheme() {
         setColors(COLOR1, COLOR2, COLOR3, COLOR4, COLOR5, COLOR6, COLOR7,
