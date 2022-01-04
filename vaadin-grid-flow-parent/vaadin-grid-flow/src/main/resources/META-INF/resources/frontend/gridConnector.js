@@ -463,7 +463,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           });
         }
-        if (selectionMode === validSelectionModes[1]) { // NONE
+        // since no row can be selected when selection mode is NONE
+        // if selectionMode is set to NONE, remove aria-selected attribute from the row
+        if (selectionMode === validSelectionModes[1]) { // selectionMode === NONE
           row.removeAttribute('aria-selected');
         }
       })
@@ -929,16 +931,19 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             && validSelectionModes.indexOf(mode) >= 0) {
           selectionMode = mode;
           selectedKeys = {};
-          if (mode === validSelectionModes[0]) { // SINGLE
+          // manage aria-multiselectable attribute depending on the selection mode
+          // see more: https://github.com/vaadin/web-components/issues/1536
+          // or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+          // For selection mode SINGLE, set the aria-multiselectable attribute to false
+          if (mode === validSelectionModes[0]) {
             grid.$.table.setAttribute('aria-multiselectable', false);
-          } else if (mode === validSelectionModes[1]) { // NONE
+            // For selection mode NONE, remove the aria-multiselectable attribute
+          } else if (mode === validSelectionModes[1]) {
             grid.$.table.removeAttribute('aria-multiselectable');
-            // TODO: remove aria-selected from all rows
-          } else { // MULTI
+            // For selection mode MULTI, set aria-multiselectable to true
+          } else {
             grid.$.table.setAttribute('aria-multiselectable', true);
           }
-          // re-run renderers for all items visible
-          grid.requestContentUpdate();
         } else {
           throw 'Attempted to set an invalid selection mode';
         }

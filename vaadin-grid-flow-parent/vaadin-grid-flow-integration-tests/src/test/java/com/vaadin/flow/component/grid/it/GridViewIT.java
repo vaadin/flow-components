@@ -143,31 +143,6 @@ public class GridViewIT extends GridViewBase {
                 getLogEntries(Level.SEVERE).stream().findAny().isPresent());
     }
 
-    /**
-     * Test that aria-multiselectable=false & the selectable children should
-     * have aria-selected=true|false depending on their state
-     */
-    @Test
-    public void testAriaSelectionModeSingle() {
-        openTabAndCheckForErrors("selection");
-        GridElement grid = $(GridElement.class).id("single-selection");
-        scrollToElement(grid);
-        GridTRElement firstRow = grid.getRow(0);
-        firstRow.select();
-        TestBenchElement table = grid.$("table").first();
-        // table should have aria-multiselectable
-        Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
-        // aria-multiselectable should be set to false
-        Assert.assertFalse(Boolean
-                .parseBoolean(table.getAttribute("aria-multiselectable")));
-
-        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
-        Assert.assertTrue(
-                Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
-        Assert.assertFalse(Boolean
-                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
-    }
-
     @Test
     public void gridAsSingleSelectTestBenchAPI() {
         openTabAndCheckForErrors("selection");
@@ -293,11 +268,56 @@ public class GridViewIT extends GridViewBase {
     }
 
     /**
+     * Test that aria-multiselectable and aria-selected should NOT be present
+     * when SelectionMode is set to NONE.
+     */
+    @Test
+    public void gridAriaSelectionAttributesWhenSelectionModeIsNone() {
+        openTabAndCheckForErrors("selection");
+        GridElement grid = $(GridElement.class).id("none-selection");
+        scrollToElement(grid);
+        TestBenchElement table = grid.$("table").first();
+        // table should not have aria-multiselectable attribute
+        Assert.assertFalse(table.hasAttribute("aria-multiselectable"));
+
+        for (int i = grid.getFirstVisibleRowIndex(); i < grid
+                .getLastVisibleRowIndex(); i++) {
+            GridTRElement row = grid.getRow(i);
+            Assert.assertFalse(row.hasAttribute("aria-selected"));
+        }
+    }
+
+    /**
+     * Test that aria-multiselectable=false & the selectable children should
+     * have aria-selected=true|false depending on their state
+     */
+    @Test
+    public void gridAriaSelectionAttributesWhenSelectionModeIsSingle() {
+        openTabAndCheckForErrors("selection");
+        GridElement grid = $(GridElement.class).id("single-selection");
+        scrollToElement(grid);
+        GridTRElement firstRow = grid.getRow(0);
+        firstRow.select();
+        TestBenchElement table = grid.$("table").first();
+        // table should have aria-multiselectable
+        Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
+        // aria-multiselectable should be set to false
+        Assert.assertFalse(Boolean
+                .parseBoolean(table.getAttribute("aria-multiselectable")));
+
+        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
+        Assert.assertTrue(
+                Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
+        Assert.assertFalse(Boolean
+                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
+    }
+
+    /**
      * Test that aria-multiselectable=true & the selectable children should have
      * aria-selected=true|false depending on their state
      */
     @Test
-    public void testAriaSelectionModeMulti() {
+    public void gridAriaSelectionAttributesWhenSelectionModeIsMulti() {
         openTabAndCheckForErrors("selection");
         GridElement grid = $(GridElement.class).id("multi-selection");
         scrollToElement(grid);
@@ -326,26 +346,6 @@ public class GridViewIT extends GridViewBase {
         clickElementWithJs(grid
                 .findElements(By.tagName("vaadin-grid-cell-content")).get(3));
         Assert.assertFalse(isRowSelected(grid, 1));
-    }
-
-    /**
-     * Test that aria-multiselectable and aria-selected should NOT be present
-     * when SelectionMode is set to NONE.
-     */
-    @Test
-    public void testAriaSelectionModeNone() {
-        openTabAndCheckForErrors("selection");
-        GridElement grid = $(GridElement.class).id("none-selection");
-        scrollToElement(grid);
-        TestBenchElement table = grid.$("table").first();
-        // table should not have aria-multiselectable attribute
-        Assert.assertFalse(table.hasAttribute("aria-multiselectable"));
-
-        for (int i = grid.getFirstVisibleRowIndex(); i < grid
-                .getLastVisibleRowIndex(); i++) {
-            GridTRElement row = grid.getRow(i);
-            Assert.assertFalse(row.hasAttribute("aria-selected"));
-        }
     }
 
     @Test
