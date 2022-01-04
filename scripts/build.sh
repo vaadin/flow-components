@@ -104,6 +104,23 @@ type npm && npm --version
 type pnpm && pnpm --version
 uname -a
 
+## check Java_home used for this branch
+grep -q '<maven.compiler.source>1.8</maven.compiler.source>' pom.xml && java11=false || java11=true
+
+if [ $java11 = 'false' ]
+then
+  echo "set JAVA_HOME to JDK 8"
+  export JAVA_HOME=%JDK_HOME%
+  export PATH=$PATH:$JAVA_HOME/bin
+else
+  echo "set JAVA_HOME to JDK 11"
+  export JAVA_HOME=%JDK_11_OPENJDK_x64%
+  export PATH=$PATH:$JAVA_HOME/bin
+fi
+
+type java && java -version
+
+
 ## Compile all java files including tests in ITs modules
 cmd="mvn clean test-compile -DskipFrontend $args"
 tcLog "Compiling flow components - $cmd"
