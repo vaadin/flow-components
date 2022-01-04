@@ -110,12 +110,12 @@ grep -q '<maven.compiler.source>1.8</maven.compiler.source>' pom.xml && java11=f
 if [ $java11 = 'false' ]
 then
   echo "set JAVA_HOME to JDK 8"
-  export JAVA_HOME=%env.JDK_HOME%
-  export PATH=$PATH:$JAVA_HOME/bin
+  JAVA_HOME=%env.JDK_HOME%
+  PATH=$PATH:$JAVA_HOME/bin
 else
   echo "set JAVA_HOME to JDK 11"
-  export JAVA_HOME=%env.JDK_11_OPENJDK_x64%
-  export PATH=$PATH:$JAVA_HOME/bin
+  JAVA_HOME=%env.JDK_11_OPENJDK_x64%
+  PATH=$PATH:$JAVA_HOME/bin
 fi
 
 type java && java -version
