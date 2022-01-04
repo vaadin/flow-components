@@ -114,7 +114,7 @@ then
   PATH=$PATH:$JAVA_HOME/bin
 else
   echo "set JAVA_HOME to JDK 11"
-  echo %env.JDK_11_OPENJDK_x64%
+  echo %JDK_11_OPENJDK_x64%
   JAVA_HOME=%env.JDK_11_OPENJDK_x64%
   PATH=$PATH:$JAVA_HOME/bin
 fi
