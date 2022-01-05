@@ -72,8 +72,8 @@ public class LumoLightTheme extends Theme {
             255, 255, 0.0);
 
     protected final static String DEFAULT_FONT_FAMILIES = "var(--lumo-font-family)";
-    protected static final Color LEGEND_TEXT_COLOR = new SolidColor(27, 43, 128,
-            0.94);
+    protected static final Color LEGEND_TEXT_COLOR = new SolidColor(27, 43, 65,
+            0.72);
 
     public LumoLightTheme() {
         setColors(COLOR1, COLOR2, COLOR3, COLOR4, COLOR5, COLOR6, COLOR7,
