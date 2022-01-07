@@ -66,7 +66,17 @@ public class GridLitRendererPage extends Div {
                 });
         toggleEditButton.setId("toggleEditButton");
 
-        add(componentRendererButton, litRendererButton, toggleEditButton);
+        NativeButton toggleAttachedButton = new NativeButton("Toggle attached",
+                e -> {
+                    if (grid.isAttached()) {
+                        remove(grid);
+                    } else {
+                        add(grid);
+                    }
+                });
+        toggleAttachedButton.setId("toggleAttachedButton");
+
+        add(componentRendererButton, litRendererButton, toggleEditButton, toggleAttachedButton);
     }
 
     private void setLitRenderer(Grid<Integer> grid) {
