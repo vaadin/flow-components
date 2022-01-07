@@ -467,6 +467,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         // if selectionMode is set to NONE, remove aria-selected attribute from the row
         if (selectionMode === validSelectionModes[1]) { // selectionMode === NONE
           row.removeAttribute('aria-selected');
+          Array.from(row.children).forEach(cell => cell.removeAttribute('aria-selected'));
         }
       })
 

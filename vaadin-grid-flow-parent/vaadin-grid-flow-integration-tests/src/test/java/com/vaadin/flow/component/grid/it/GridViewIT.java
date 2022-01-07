@@ -280,10 +280,13 @@ public class GridViewIT extends GridViewBase {
         // table should not have aria-multiselectable attribute
         Assert.assertFalse(table.hasAttribute("aria-multiselectable"));
 
+        // the aria-selected attribute must have been removed from the row
         for (int i = grid.getFirstVisibleRowIndex(); i < grid
                 .getLastVisibleRowIndex(); i++) {
             GridTRElement row = grid.getRow(i);
             Assert.assertFalse(row.hasAttribute("aria-selected"));
+            // make sure the attribute was removed from all cells in the row as well
+            Assert.assertFalse(row.$("td").all().stream().anyMatch(cell -> cell.hasAttribute("aria-selected")));
         }
     }
 
