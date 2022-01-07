@@ -76,7 +76,8 @@ public class GridLitRendererPage extends Div {
                 });
         toggleAttachedButton.setId("toggleAttachedButton");
 
-        add(componentRendererButton, litRendererButton, toggleEditButton, toggleAttachedButton);
+        add(componentRendererButton, litRendererButton, toggleEditButton,
+                toggleAttachedButton);
     }
 
     private void setLitRenderer(Grid<Integer> grid) {

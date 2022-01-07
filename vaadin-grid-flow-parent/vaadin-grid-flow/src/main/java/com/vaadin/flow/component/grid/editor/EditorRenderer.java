@@ -156,7 +156,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
         // Also run editor renderer setup whenever the component gets attached
         container.addAttachListener(event -> {
             runBeforeClientResponse(container,
-                context -> setupEditorRenderer(container, context));
+                    context -> setupEditorRenderer(container, context));
         });
 
         return new EditorRendering(contentTemplate);
