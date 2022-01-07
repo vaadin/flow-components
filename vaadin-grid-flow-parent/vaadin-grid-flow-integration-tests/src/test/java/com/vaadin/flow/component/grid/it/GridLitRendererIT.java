@@ -23,6 +23,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-grid/lit-renderer")
@@ -65,5 +66,18 @@ public class GridLitRendererIT extends AbstractComponentIT {
         clickElementWithJs("item-0");
         WebElement item = grid.findElement(By.id("details-0"));
         Assert.assertEquals("Lit: Item details 0", item.getText());
+    }
+
+    @Test
+    public void shouldEnterEditMode() {
+        clickElementWithJs("toggleEditButton");
+        Assert.assertEquals("Editor component", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void shouldExitEditMode() {
+        clickElementWithJs("toggleEditButton");
+        clickElementWithJs("toggleEditButton");
+        Assert.assertEquals("Lit: Item 0", grid.getCell(0, 0).getText());
     }
 }

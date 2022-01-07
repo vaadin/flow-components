@@ -22,6 +22,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
@@ -36,7 +38,9 @@ public class GridLitRendererPage extends Div {
         grid.addColumn(LitRenderer
                 .<Integer> of(
                         "<span id=\"item-${index}\">Lit: ${item.name}</span>")
-                .withProperty("name", item -> "Item " + item));
+                .withProperty("name", item -> "Item " + item))
+                .setEditorComponent(new Span("Editor component"));
+        grid.getEditor().setBinder(new Binder<>());
         setLitRenderer(grid);
         add(grid);
 
@@ -51,7 +55,18 @@ public class GridLitRendererPage extends Div {
                     setLitRenderer(grid);
                 });
         litRendererButton.setId("litRendererButton");
-        add(componentRendererButton, litRendererButton);
+
+        NativeButton toggleEditButton = new NativeButton("Toggle edit mode",
+                e -> {
+                    if (grid.getEditor().isOpen()) {
+                        grid.getEditor().cancel();
+                    } else {
+                        grid.getEditor().editItem(0);
+                    }
+                });
+        toggleEditButton.setId("toggleEditButton");
+
+        add(componentRendererButton, litRendererButton, toggleEditButton);
     }
 
     private void setLitRenderer(Grid<Integer> grid) {
