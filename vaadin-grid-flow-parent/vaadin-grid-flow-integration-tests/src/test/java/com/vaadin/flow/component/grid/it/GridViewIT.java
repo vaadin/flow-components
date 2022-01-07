@@ -285,8 +285,10 @@ public class GridViewIT extends GridViewBase {
                 .getLastVisibleRowIndex(); i++) {
             GridTRElement row = grid.getRow(i);
             Assert.assertFalse(row.hasAttribute("aria-selected"));
-            // make sure the attribute was removed from all cells in the row as well
-            Assert.assertFalse(row.$("td").all().stream().anyMatch(cell -> cell.hasAttribute("aria-selected")));
+            // make sure the attribute was removed from all cells in the row as
+            // well
+            Assert.assertFalse(row.$("td").all().stream()
+                    .anyMatch(cell -> cell.hasAttribute("aria-selected")));
         }
     }
 
