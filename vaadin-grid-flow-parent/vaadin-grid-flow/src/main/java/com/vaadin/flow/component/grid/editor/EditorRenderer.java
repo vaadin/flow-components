@@ -185,8 +185,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                 "if (root.__editing) { root.innerHTML = `" + editorTemplate + "` }" +
                 "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
                 "else { originalRender(root, container, model); }" +
-            "};" +
-            "this.renderer.__rendererId = originalRender.__rendererId;");
+            "};");
         //@formatter:on
 
         // clear the path property, since we are using an explicit renderer
