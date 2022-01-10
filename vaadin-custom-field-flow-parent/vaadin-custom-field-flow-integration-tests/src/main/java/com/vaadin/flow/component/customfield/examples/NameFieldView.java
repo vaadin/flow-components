@@ -23,6 +23,7 @@ public class NameFieldView extends Div {
         fieldHelperComponent.setId("custom-field-helper-component");
 
         Span span = new Span("Helper component");
+        span.getElement().setAttribute("name", "helper-component");
         span.setId("helper-component");
 
         NativeButton clearComponent = new NativeButton("Clear helper component",

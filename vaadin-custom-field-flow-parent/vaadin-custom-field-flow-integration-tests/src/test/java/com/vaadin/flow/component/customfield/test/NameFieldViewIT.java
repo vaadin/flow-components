@@ -31,7 +31,7 @@ public class NameFieldViewIT extends AbstractParallelTest {
                 CustomFieldElement.class).id("custom-field-helper-component");
 
         Assert.assertEquals("helper-component", customFieldHelperComponent
-                .getHelperComponent().getAttribute("id"));
+                .getHelperComponent().getAttribute("name"));
         $("button").id("button-clear-helper-component").click();
 
         Assert.assertEquals(
