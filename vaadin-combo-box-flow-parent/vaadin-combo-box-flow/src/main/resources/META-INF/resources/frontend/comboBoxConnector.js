@@ -239,7 +239,10 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
                 comboBox.$server.confirmUpdate(id);
             });
 
-            customElements.whenDefined('vaadin-combo-box').then(tryCatchWrapper(() => {
+            comboBox.addEventListener('opened-changed', () => {
+                // Patch once the instance is ready and vaadin-combo-box has
+                // been finalized (i.e. opened-changed is emitted)
+
                 const isItemSelected = comboBox.$.dropdown._scroller.__isItemSelected;
                 // Override comboBox's _isItemSelected logic to handle remapped items
                 comboBox.$.dropdown._scroller.__isItemSelected = (item, selectedItem, itemIdPath) => {
@@ -255,7 +258,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
                     return selected;
                 }
-            }));
+            }, { once: true });
 
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
