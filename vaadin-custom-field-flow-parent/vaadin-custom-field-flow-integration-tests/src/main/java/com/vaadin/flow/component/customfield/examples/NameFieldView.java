@@ -37,6 +37,7 @@ public class NameFieldView extends Div {
                 });
         addComponent.setId("button-add-helper-component");
 
-        add(fieldHelper, clearText, fieldHelperComponent, clearComponent, addComponent);
+        add(fieldHelper, clearText, fieldHelperComponent, clearComponent,
+                addComponent);
     }
 }
