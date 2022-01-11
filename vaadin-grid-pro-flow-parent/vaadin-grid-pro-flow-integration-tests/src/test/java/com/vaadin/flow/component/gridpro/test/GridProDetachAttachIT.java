@@ -36,6 +36,7 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
         open();
         grid = $(GridProElement.class).first();
         toggleAttachedButton = $("button").id("toggle-attached");
+        addColumnButton = $("button").id("add-column");
     }
 
     @Test
@@ -45,6 +46,14 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
 
         grid = $(GridProElement.class).waitForFirst();
         assertCellEnterEditModeOnDoubleClick(grid, 0, 0, "vaadin-text-field");
+    }
+
+    @Test
+    public void detach_attach_customEditOpens() {
+        addColumnButton.click();
+
+        grid = $(GridProElement.class).waitForFirst();
+        assertCellEnterEditModeOnDoubleClick(grid, 0, 1, "vaadin-text-field");
     }
 
     private void assertCellEnterEditModeOnDoubleClick(GridProElement grid,
