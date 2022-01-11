@@ -25,6 +25,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
@@ -49,14 +50,14 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.0.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.0.0-alpha2")
+@NpmPackage(value = "@vaadin/menu-bar", version = "23.0.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.0.0-alpha3")
 public class MenuBar extends Component
-        implements HasMenuItems, HasSize, HasStyle, HasTheme {
+        implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
