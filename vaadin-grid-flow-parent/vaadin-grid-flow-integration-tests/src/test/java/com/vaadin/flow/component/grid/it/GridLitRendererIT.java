@@ -66,4 +66,26 @@ public class GridLitRendererIT extends AbstractComponentIT {
         WebElement item = grid.findElement(By.id("details-0"));
         Assert.assertEquals("Lit: Item details 0", item.getText());
     }
+
+    @Test
+    public void shouldEnterEditMode() {
+        clickElementWithJs("toggleEditButton");
+        Assert.assertEquals("Editor component", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void shouldExitEditMode() {
+        clickElementWithJs("toggleEditButton");
+        clickElementWithJs("toggleEditButton");
+        Assert.assertEquals("Lit: Item 0", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void shouldEnterEditModeAfterReattach() {
+        clickElementWithJs("toggleAttachedButton");
+        clickElementWithJs("toggleAttachedButton");
+        clickElementWithJs("toggleEditButton");
+        grid = $(GridElement.class).first();
+        Assert.assertEquals("Editor component", grid.getCell(0, 0).getText());
+    }
 }
