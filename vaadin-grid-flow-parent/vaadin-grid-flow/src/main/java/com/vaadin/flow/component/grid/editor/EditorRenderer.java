@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -149,46 +149,46 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
         editorContainer = createEditorContainer();
         container.appendVirtualChild(editorContainer);
 
-        /*
-         * The runBeforeClientResponse is needed because ComponentRenderers
-         * don't set the innerHTML of the <template> elements in advance, only
-         * before the client response.
-         */
+        // Run editor renderer setup
         runBeforeClientResponse(container,
-                context -> setupEditorTemplate(container, contentTemplate,
-                        context));
+                context -> setupEditorRenderer(container, context));
+
+        // Also run editor renderer setup whenever the component gets attached
+        container.addAttachListener(event -> {
+            runBeforeClientResponse(container,
+                    context -> setupEditorRenderer(container, context));
+        });
 
         return new EditorRendering(contentTemplate);
     }
 
-    private void setupEditorTemplate(Element container, Element contentTemplate,
+    private void setupEditorRenderer(Element container,
             ExecutionContext context) {
-        final String originalTemplate;
-        final Element attachedTemplate;
-
-        // the template can be null if the original renderer didn't use any
-        // template, such as the ColumnPathRenderer
-        if (contentTemplate == null) {
-            originalTemplate = "[[item." + columnInternalId + "]]";
-            attachedTemplate = new Element("template");
-            container.appendChild(attachedTemplate);
-        } else {
-            attachedTemplate = contentTemplate;
-            originalTemplate = contentTemplate.getProperty("innerHTML");
-        }
         String appId = context.getUI().getInternals().getAppId();
         String editorTemplate = String.format(
-                "<flow-component-renderer appid='%s' nodeid='[[item._%s_editor]]'></flow-component-renderer>",
+                "<flow-component-renderer appid='%s' nodeid='${model.item._%s_editor}'></flow-component-renderer>",
                 appId, columnInternalId);
 
-        attachedTemplate.setProperty("innerHTML", String.format(
         //@formatter:off
-        "<template is='dom-if' if='[[item._editing]]' restamp>%s</template>" +
-        "<template is='dom-if' if='[[!item._editing]]' restamp>%s</template>",
-        //@formatter:on
-                editorTemplate, originalTemplate));
+        container.executeJs("const originalRender = this.renderer;" +
+            // Patch the container's renderer function to handle the editor
+            "this.renderer = (root, container, model) => {" +
+                "const editingChanged = root.__editing !== model.item._editing;" +
+                "root.__editing = model.item._editing;" +
 
-        // clear the path property, since we are using a explicit template
+                // If the editing state changed, the root needs to be cleared
+                "if (editingChanged) {" +
+                    "delete root._$litPart$; root.innerHTML = ''" +
+                "}" +
+
+                // If editing, render the editor, otherwise use the original renderer
+                "if (root.__editing) { root.innerHTML = `" + editorTemplate + "` }" +
+                "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
+                "else { originalRender(root, container, model); }" +
+            "};");
+        //@formatter:on
+
+        // clear the path property, since we are using an explicit renderer
         container.removeProperty("path");
     }
 

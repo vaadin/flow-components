@@ -463,6 +463,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           });
         }
+        // since no row can be selected when selection mode is NONE
+        // if selectionMode is set to NONE, remove aria-selected attribute from the row
+        if (selectionMode === validSelectionModes[1]) { // selectionMode === NONE
+          row.removeAttribute('aria-selected');
+          Array.from(row.children).forEach(cell => cell.removeAttribute('aria-selected'));
+        }
       })
 
       const itemExpandedChanged = tryCatchWrapper(function(item, expanded) {
@@ -926,6 +932,19 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             && validSelectionModes.indexOf(mode) >= 0) {
           selectionMode = mode;
           selectedKeys = {};
+          // manage aria-multiselectable attribute depending on the selection mode
+          // see more: https://github.com/vaadin/web-components/issues/1536
+          // or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+          // For selection mode SINGLE, set the aria-multiselectable attribute to false
+          if (mode === validSelectionModes[0]) {
+            grid.$.table.setAttribute('aria-multiselectable', false);
+            // For selection mode NONE, remove the aria-multiselectable attribute
+          } else if (mode === validSelectionModes[1]) {
+            grid.$.table.removeAttribute('aria-multiselectable');
+            // For selection mode MULTI, set aria-multiselectable to true
+          } else {
+            grid.$.table.setAttribute('aria-multiselectable', true);
+          }
         } else {
           throw 'Attempted to set an invalid selection mode';
         }
@@ -959,7 +978,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       };
 
       const contextMenuListener = function(e) {
-        const eventContext = grid.getEventContext(e);
+        // For `contextmenu` events, we need to access the source event,
+        // when using open on click we just use the click event itself
+        const sourceEvent = e.detail.sourceEvent || e;
+        const eventContext = grid.getEventContext(sourceEvent);
         const key = eventContext.item && eventContext.item.key;
         const colId = eventContext.column && eventContext.column.id;
         grid.$server.updateContextMenuTargetItem(key, colId);
@@ -970,7 +992,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       }));
 
       grid.getContextMenuBeforeOpenDetail = tryCatchWrapper(function(event) {
-        const eventContext = grid.getEventContext(event);
+        // For `contextmenu` events, we need to access the source event,
+        // when using open on click we just use the click event itself
+        const sourceEvent = event.detail.sourceEvent || event;
+        const eventContext = grid.getEventContext(sourceEvent);
         return {
           key: (eventContext.item && eventContext.item.key) || ""
         };

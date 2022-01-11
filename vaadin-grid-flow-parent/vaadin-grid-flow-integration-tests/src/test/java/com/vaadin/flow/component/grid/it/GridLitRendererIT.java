@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -65,5 +65,27 @@ public class GridLitRendererIT extends AbstractComponentIT {
         clickElementWithJs("item-0");
         WebElement item = grid.findElement(By.id("details-0"));
         Assert.assertEquals("Lit: Item details 0", item.getText());
+    }
+
+    @Test
+    public void shouldEnterEditMode() {
+        clickElementWithJs("toggleEditButton");
+        Assert.assertEquals("Editor component", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void shouldExitEditMode() {
+        clickElementWithJs("toggleEditButton");
+        clickElementWithJs("toggleEditButton");
+        Assert.assertEquals("Lit: Item 0", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void shouldEnterEditModeAfterReattach() {
+        clickElementWithJs("toggleAttachedButton");
+        clickElementWithJs("toggleAttachedButton");
+        clickElementWithJs("toggleEditButton");
+        grid = $(GridElement.class).first();
+        Assert.assertEquals("Editor component", grid.getCell(0, 0).getText());
     }
 }

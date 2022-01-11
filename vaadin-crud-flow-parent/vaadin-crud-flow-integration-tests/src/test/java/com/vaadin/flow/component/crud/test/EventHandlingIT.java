@@ -98,11 +98,7 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         dismissDialog();
         Assert.assertFalse(crud.isEditorOpen());
-        try {
-            dismissConfirmDialog(crud, ConfirmDialogType.CANCEL);
-            Assert.fail("There should be no confirm dialog open");
-        } catch (Exception ignored) {
-        }
+        Assert.assertFalse(isConfirmDialogOpen(crud, ConfirmDialogType.CANCEL));
 
         // Ensure editor is marked dirty on edit
         getTestButton("editServerItem").click();
@@ -111,11 +107,7 @@ public class EventHandlingIT extends AbstractParallelTest {
                 .setValue("Vaadin");
 
         dismissDialog();
-
-        // Send keys not working as expected in Firefox
-        if (!BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            dismissConfirmDialog(crud, ConfirmDialogType.CANCEL);
-        }
+        dismissConfirmDialog(crud, ConfirmDialogType.CANCEL);
     }
 
     @Test
@@ -243,6 +235,15 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
+    }
+
+    private boolean isConfirmDialogOpen(CrudElement crud,
+            ConfirmDialogType type) {
+        ConfirmDialogElement confirmDialog = crud.$(ConfirmDialogElement.class)
+                .id(type.getId());
+        TestBenchElement overlay = ((TestBenchElement) confirmDialog
+                .getContext());
+        return overlay.getPropertyBoolean("opened");
     }
 
     private enum ConfirmDialogType {

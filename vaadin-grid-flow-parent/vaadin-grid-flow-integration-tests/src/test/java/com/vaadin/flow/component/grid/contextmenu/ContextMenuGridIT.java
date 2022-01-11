@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,16 +19,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import org.openqa.selenium.interactions.Actions;
 
 @TestPath("vaadin-grid/context-menu-grid")
 public class ContextMenuGridIT extends AbstractComponentIT {
@@ -47,6 +50,23 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     @Test
     public void contextClickOnRow_itemClickGetsTargetItem() {
         grid.getCell(56, 1).contextClick();
+        $("vaadin-context-menu-item").first().click();
+        assertMessage("Person 56");
+        verifyClosed();
+    }
+
+    @Test
+    public void contextClickOnEdgeOfCell_itemClickGetsTargetItem() {
+        GridTHTDElement cell = grid.getCell(56, 0);
+        // Move cursor to upper edge of the cell
+        // moveToElement moves to center, so we subtract half of the height to
+        // approximately get to the cells edge
+        Rectangle cellRectangle = cell.getWrappedElement().getRect();
+        int offsetToCellStart = (int) Math
+                .ceil((float) cellRectangle.height / 2);
+        (new Actions(this.getDriver()))
+                .moveToElement(cell, 0, -offsetToCellStart).contextClick()
+                .build().perform();
         $("vaadin-context-menu-item").first().click();
         assertMessage("Person 56");
         verifyClosed();

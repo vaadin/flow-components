@@ -103,7 +103,8 @@ public class CrudElement extends TestBenchElement {
      * @return the editor save button
      */
     public ButtonElement getEditorSaveButton() {
-        return getEditorButton(0);
+        return ((TestBenchElement) getPropertyElement("_saveButton"))
+                .wrap(ButtonElement.class);
     }
 
     /**
@@ -112,7 +113,8 @@ public class CrudElement extends TestBenchElement {
      * @return the editor cancel button
      */
     public ButtonElement getEditorCancelButton() {
-        return getEditorButton(1);
+        return ((TestBenchElement) getPropertyElement("_cancelButton"))
+                .wrap(ButtonElement.class);
     }
 
     /**
@@ -121,12 +123,8 @@ public class CrudElement extends TestBenchElement {
      * @return the editor delete button
      */
     public ButtonElement getEditorDeleteButton() {
-        return getEditorButton(2);
-    }
-
-    private ButtonElement getEditorButton(int index) {
-        return getEditor().$(ButtonElement.class).attribute("slot", "footer")
-                .get(index);
+        return ((TestBenchElement) getPropertyElement("_deleteButton"))
+                .wrap(ButtonElement.class);
     }
 
     /**
@@ -137,8 +135,8 @@ public class CrudElement extends TestBenchElement {
      */
     public boolean isEditorOpen() {
         if (getEditorPosition().isEmpty()) {
-            return $("vaadin-dialog-overlay").onPage().attribute("opened", "")
-                    .exists();
+            return $("vaadin-crud-dialog-overlay").onPage()
+                    .attribute("opened", "").exists();
         }
         return getPropertyBoolean("editorOpened");
     }
@@ -169,9 +167,9 @@ public class CrudElement extends TestBenchElement {
      */
     public TestBenchElement getEditor() {
         if (getEditorPosition().isEmpty()) {
-            return $("vaadin-dialog-overlay").onPage().attribute("opened", "")
-                    .first();
+            return $("vaadin-crud-dialog-overlay").onPage()
+                    .attribute("opened", "").first();
         }
-        return this.$("vaadin-dialog-layout").first();
+        return this;
     }
 }
