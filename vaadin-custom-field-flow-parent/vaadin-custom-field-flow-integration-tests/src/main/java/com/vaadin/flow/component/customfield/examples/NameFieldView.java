@@ -22,17 +22,22 @@ public class NameFieldView extends Div {
         NameField fieldHelperComponent = new NameField();
         fieldHelperComponent.setId("custom-field-helper-component");
 
-        Span span = new Span("Helper component");
-        span.setId("helper-component");
-
         NativeButton clearComponent = new NativeButton("Clear helper component",
                 e -> {
                     fieldHelperComponent.setHelperComponent(null);
                 });
         clearComponent.setId("button-clear-helper-component");
 
-        fieldHelperComponent.setHelperComponent(span);
+        NativeButton addComponent = new NativeButton("Add helper component",
+                e -> {
+                    Span span = new Span("Helper component");
+                    span.getElement().setAttribute("name", "helper-component");
+                    span.setId("helper-component");
+                    fieldHelperComponent.setHelperComponent(span);
+                });
+        addComponent.setId("button-add-helper-component");
 
-        add(fieldHelper, clearText, fieldHelperComponent, clearComponent);
+        add(fieldHelper, clearText, fieldHelperComponent, clearComponent,
+                addComponent);
     }
 }

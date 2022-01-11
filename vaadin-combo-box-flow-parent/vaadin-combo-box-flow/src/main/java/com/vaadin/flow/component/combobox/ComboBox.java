@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
@@ -108,7 +109,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
         HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
-        HasTheme {
+        HasTheme, HasLabel {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -298,6 +299,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(new DataCommunicator.EmptyDataProvider<>());
 
         getElement().setAttribute("suppress-template-warning", true);
+
+        // Synchronize input element value property state when setting a custom
+        // value. This is necessary to allow clearing the input value in
+        // `ComboBox.refreshValue`. If the input element value is not
+        // synchronized here, then setting the property to an empty value would
+        // not trigger a client update. Need to use `super` here, in order to
+        // avoid enabling custom values, which is a side effect of
+        // `ComboBox.addCustomValueSetListener`.
+        super.addCustomValueSetListener(e -> this.getElement()
+                .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
     }
 
     /**
@@ -1377,6 +1388,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return isRequiredBoolean();
     }
 
+    /**
+     * Sets the label for the combobox.
+     *
+     * @param label
+     *            value for the {@code label} property in the combobox
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -1387,6 +1404,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the {@code label} property of the combobox
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -112,8 +112,6 @@ public class VirtualListViewIT extends AbstractComponentIT {
                 By.id("switch-enabled-state-string-list"));
         new Actions(getDriver()).moveToElement(switchEnabled).click().perform();
 
-        getCommandExecutor().executeScript(
-                "arguments[0].scrollToIndex(0); return null;", list);
         // Check that an item gets removed
         list.findElement(By.tagName("button")).click();
         Assert.assertFalse(

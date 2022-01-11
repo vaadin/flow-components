@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -31,10 +32,11 @@ public class TemplateButtonIT extends AbstractComponentIT {
     public void setText_overridesAllContent() {
         open();
 
-        WebElement template = waitUntil(ExpectedConditions
+        waitUntil(ExpectedConditions
                 .presenceOfElementLocated(By.id("button-template")));
+        TestBenchElement template = $("*").id("button-template");
 
-        WebElement button = findInShadowRoot(template, By.id("button")).get(0);
+        WebElement button = template.$("*").id("button");
 
         Assert.assertTrue("Button should have displayed", button.isDisplayed());
         Assert.assertEquals("Button should contain caption", "Template caption",
@@ -42,14 +44,13 @@ public class TemplateButtonIT extends AbstractComponentIT {
 
         button.click();
 
-        button = findInShadowRoot(template, By.id("button")).get(0);
+        button = template.$("*").id("button");
 
         Assert.assertEquals(
                 "Button caption should only be the server side caption",
                 "clicked", button.getText());
 
-        WebElement iconButton = findInShadowRoot(template, By.id("icon-button"))
-                .get(0);
+        WebElement iconButton = template.$("*").id("icon-button");
         Assert.assertTrue("Button should have displayed",
                 iconButton.isDisplayed());
         Assert.assertTrue("Button should contain icon.",
@@ -60,7 +61,7 @@ public class TemplateButtonIT extends AbstractComponentIT {
 
         iconButton.click();
 
-        iconButton = findInShadowRoot(template, By.id("icon-button")).get(0);
+        iconButton = template.$("*").id("icon-button");
 
         Assert.assertEquals("Icon button should only have server side caption",
                 "clicked", iconButton.getText());

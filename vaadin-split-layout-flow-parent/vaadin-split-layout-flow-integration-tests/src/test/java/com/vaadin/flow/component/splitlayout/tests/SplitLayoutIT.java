@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.splitlayout.demo.SplitLayoutView;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.commands.TestBenchCommandExecutor;
+import com.vaadin.testbench.elementsbase.Element;
 import com.vaadin.tests.ComponentDemoTest;
 
 /**
@@ -60,8 +63,10 @@ public class SplitLayoutIT extends ComponentDemoTest {
         WebElement splitLayout = layout
                 .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(3);
         WebElement resizeMessage = layout.findElement(By.id("resize-message"));
-        WebElement splitter = getInShadowRoot(splitLayout, By.id("splitter"))
-                .findElement(By.tagName("div"));
+
+        WebElement splitter = new TestBenchWrapper(splitLayout,
+                getCommandExecutor()).$("*").id("splitter")
+                        .findElement(By.tagName("div"));
 
         new Actions(getDriver()).dragAndDropBy(splitter, 1, 1).clickAndHold()
                 .moveByOffset(200, 0).release().build().perform();
@@ -94,8 +99,9 @@ public class SplitLayoutIT extends ComponentDemoTest {
     public void min_and_max_width_splitter() {
         WebElement splitLayout = layout
                 .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(5);
-        WebElement splitter = getInShadowRoot(splitLayout, By.id("splitter"))
-                .findElement(By.tagName("div"));
+        WebElement splitter = new TestBenchWrapper(splitLayout,
+                getCommandExecutor()).$("*").id("splitter")
+                        .findElement(By.tagName("div"));
         WebElement primaryComponent = findElement(
                 By.id("min-max-first-component"));
 
@@ -120,5 +126,18 @@ public class SplitLayoutIT extends ComponentDemoTest {
     @Override
     protected String getTestPath() {
         return "/vaadin-split-layout";
+    }
+
+    @Element("*")
+    public static class TestBenchWrapper extends TestBenchElement {
+        public TestBenchWrapper() {
+            // needed for creating instances inside TB
+        }
+
+        // used to convert in streams
+        TestBenchWrapper(WebElement item,
+                TestBenchCommandExecutor commandExecutor) {
+            super(item, commandExecutor);
+        }
     }
 }

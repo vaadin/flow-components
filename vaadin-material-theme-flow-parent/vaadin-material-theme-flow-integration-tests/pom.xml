@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-material-theme-flow-parent</artifactId>
-        <version>22.0-SNAPSHOT</version>
+        <version>23.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-material-theme-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -13,7 +13,7 @@
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
-            <version>4.4.1</version>
+            <version>5.0.3</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

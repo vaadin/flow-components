@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
+
+import java.time.LocalTime;
+import java.util.Locale;
 
 /**
  * Test view for attaching / detaching {@link TimePicker}.
@@ -44,5 +47,18 @@ public class TimePickerDetachAttachPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
         add(toggleAttached);
+
+        NativeButton setValue = new NativeButton("set value", e -> {
+            timePicker.setValue(LocalTime.of(2, 0));
+        });
+        setValue.setId("set-value");
+        add(setValue);
+
+        NativeButton setCaliforniaLocale = new NativeButton(
+                "set California locale", e -> {
+                    timePicker.setLocale(new Locale("en-CA"));
+                });
+        setCaliforniaLocale.setId("set-california-locale");
+        add(setCaliforniaLocale);
     }
 }

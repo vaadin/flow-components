@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -63,16 +64,16 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/list-box", version = "22.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "22.0.0-beta1")
+@NpmPackage(value = "@vaadin/list-box", version = "23.0.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "23.0.0-alpha4")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
         implements HasItemComponents<ITEM>, HasSize,
         HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
-        HasDataView<ITEM, Void, ListBoxDataView<ITEM>> {
+        HasDataView<ITEM, Void, ListBoxDataView<ITEM>>, HasStyle {
 
     private final AtomicReference<DataProvider<ITEM, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());

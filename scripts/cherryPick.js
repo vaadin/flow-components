@@ -23,6 +23,7 @@ let arrURL = [];
 let arrSHA = [];
 let arrBranch = [];
 let arrUser = [];
+let arrMergedBy = [];
 
 const repo = "vaadin/flow-components";
 const token = process.env['GITHUB_TOKEN'];
@@ -58,7 +59,28 @@ async function getAllCommits(){
   }
 }
 
-function filterCommits(commits){
+async function getCommit(commitURL){
+  try {
+    const options = {
+      headers:
+      {
+        'User-Agent': 'Vaadin Cherry Pick',
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json',
+      }
+    };
+    
+    res = await axios.get(commitURL, options);
+    data = res.data;
+
+    return data;
+  } catch (error) {
+    console.error(`Cannot get the commit. ${error}`);
+    process.exit(1);
+  }
+}
+
+async function filterCommits(commits){
   for (let commit of commits) {
     let target = false;
     let picked = false;
@@ -71,16 +93,18 @@ function filterCommits(commits){
       }
     }
     if(target === true && picked === false){
+      let singleCommit = await getCommit(commit.url);
       commit.labels.forEach(label => {
         let branch = /target\/(.*)/.exec(label.name);
         if (branch){
-          console.log(commit.number, commit.user.login, commit.url, commit.merge_commit_sha, branch[1]);
+          console.log(commit.number, commit.user.login, commit.url, commit.merge_commit_sha, branch[1], singleCommit.merged_by.login);
           arrPR.push(commit.number);
           arrSHA.push(commit.merge_commit_sha);
           arrURL.push(commit.url);
           arrBranch.push(branch[1]);
           arrTitle.push(`${commit.title} (#${commit.number}) (CP: ${branch[1]})`);
           arrUser.push(`@${commit.user.login}`);
+          arrMergedBy.push(`@${singleCommit.merged_by.login}`);
         }
       })
     }
@@ -106,12 +130,12 @@ async function cherryPickCommits(){
     try{
       let {stdout, stderr} = await exec(`git cherry-pick ${arrSHA[i]}`);
     } catch (err) {
+      console.error(`Cannot Pick the Commit:${arrSHA[i]} to ${arrBranch[i]}, error :${err}`);
+      await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
+      await postComment(arrURL[i], arrUser[i], arrMergedBy[i], arrBranch[i], err);
       await exec(`git cherry-pick --abort`);
       await exec(`git checkout master`);
       await exec(`git branch -D ${branchName}`);
-      await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
-      await postComment(arrURL[i], arrUser[i], arrBranch[i]);
-      console.error(`Cannot Pick the Commit:${arrSHA[i]}, error :${err}`);
       continue;
     }
     await exec(`git push origin HEAD:${branchName}`);
@@ -135,7 +159,7 @@ async function labelCommit(url, label){
   await axios.post(issueURL, {"labels":[label]}, options);
 }
 
-async function postComment(url, userName, branch){
+async function postComment(url, userName, mergedBy, branch, message){
   let issueURL = url.replace("pulls", "issues") + "/comments";
   const options = {
     headers:{
@@ -144,7 +168,7 @@ async function postComment(url, userName, branch){
     }
   };
 
-  await axios.post(issueURL, {"body":`Hi ${userName} , this commit cannot be picked to ${branch} by this bot, can you take a look and pick it manually?`}, options);
+  await axios.post(issueURL, {"body":`Hi ${userName} and ${mergedBy}, when i performed cherry-pick to this commit to ${branch}, i have encountered the following issue. Can you take a look and pick it manually?\n Error Message:\n ${message}`}, options);
 }
 
 async function createPR(title, head, base){
@@ -181,7 +205,7 @@ async function createPR(title, head, base){
 
 async function main(){
   let allCommits = await getAllCommits();
-  filterCommits(allCommits);
+  await filterCommits(allCommits);
   await cherryPickCommits();
 
 }

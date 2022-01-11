@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -37,7 +38,7 @@ import org.openqa.selenium.WebElement;
 public class SelectElement extends TestBenchElement
         implements HasSelectByText, HasLabel, HasPlaceholder, HasHelper {
 
-    @Element("vaadin-item")
+    @Element("vaadin-select-item")
     public static class ItemElement extends TestBenchElement {
         public ItemElement() {
             // needed for creating instances inside TB
@@ -75,8 +76,8 @@ public class SelectElement extends TestBenchElement
     public Stream<ItemElement> getItemsStream() {
         openPopup();
         List<WebElement> elements = getPropertyElement("_overlayElement")
-                .findElement(By.tagName("vaadin-list-box"))
-                .findElements(By.tagName("vaadin-item"));
+                .findElement(By.tagName("vaadin-select-list-box"))
+                .findElements(By.tagName("vaadin-select-item"));
         if (elements.size() == 0) {
             return Stream.<ItemElement> builder().build();
         }

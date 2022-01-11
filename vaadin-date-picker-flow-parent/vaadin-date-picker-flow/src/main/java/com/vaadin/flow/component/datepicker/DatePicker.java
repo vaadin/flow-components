@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
@@ -55,7 +56,7 @@ import elemental.json.JsonType;
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.23.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasTheme {
+        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -70,7 +71,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     };
 
     private Locale locale;
-    private String languageTag;
 
     private LocalDate max;
     private LocalDate min;
@@ -304,20 +304,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
-        // For ill-formed locales, Locale.toLanguageTag() will append subtag
-        // "lvariant" to it, which will cause the client side
-        // Date().toLocaleDateString()
-        // fallback to the system default locale silently.
-        // This has been caught by DatePickerValidationPage::invalidLocale test
-        // when running on
-        // Chrome(73+)/FireFox(66)/Edge(42.17134).
-        if (!locale.toLanguageTag().contains("lvariant")) {
-            languageTag = locale.toLanguageTag();
-        } else if (locale.getCountry().isEmpty()) {
-            languageTag = locale.getLanguage();
-        } else {
-            languageTag = locale.getLanguage() + "-" + locale.getCountry();
-        }
         requestI18nUpdate();
     }
 
@@ -328,21 +314,18 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     @Override
     public Locale getLocale() {
-        return locale;
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if (locale == null) {
-            getUI().ifPresent(ui -> setLocale(ui.getLocale()));
-        } else if (languageTag != null) {
-            requestI18nUpdate();
-        }
-        if (i18n != null) {
-            requestI18nUpdate();
-        }
+        requestI18nUpdate();
         FieldValidationUtil.disableClientValidation(this);
     }
 
@@ -405,6 +388,24 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // component
         if (i18nObject != null) {
             removeNullValuesFromJsonObject(i18nObject);
+        }
+
+        // For ill-formed locales, Locale.toLanguageTag() will append subtag
+        // "lvariant" to it, which will cause the client side
+        // Date().toLocaleDateString()
+        // fallback to the system default locale silently.
+        // This has been caught by DatePickerValidationPage::invalidLocale test
+        // when running on
+        // Chrome(73+)/FireFox(66)/Edge(42.17134).
+        Locale appliedLocale = getLocale();
+        String languageTag;
+        if (!appliedLocale.toLanguageTag().contains("lvariant")) {
+            languageTag = appliedLocale.toLanguageTag();
+        } else if (appliedLocale.getCountry().isEmpty()) {
+            languageTag = appliedLocale.getLanguage();
+        } else {
+            languageTag = appliedLocale.getLanguage() + "-"
+                    + appliedLocale.getCountry();
         }
 
         // Call update function in connector with locale and I18N settings
@@ -503,6 +504,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return super.isClearButtonVisibleBoolean();
     }
 
+    /**
+     * Sets the label for the datepicker.
+     *
+     * @param label
+     *            value for the {@code label} property in the datepicker
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -513,6 +520,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the {@code label} property of the datePicker
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

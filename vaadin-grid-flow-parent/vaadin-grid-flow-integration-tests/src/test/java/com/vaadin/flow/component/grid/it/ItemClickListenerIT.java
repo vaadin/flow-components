@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
@@ -28,6 +29,8 @@ import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.WebElement;
+
+import static com.vaadin.flow.component.grid.it.ItemClickListenerPage.GRID_FILTER_FOCUSABLE_HEADER;
 
 @TestPath("vaadin-grid/item-click-listener")
 public class ItemClickListenerIT extends AbstractComponentIT {
@@ -117,6 +120,37 @@ public class ItemClickListenerIT extends AbstractComponentIT {
         Assert.assertEquals("", getColumnDoubleClickMessage());
         Assert.assertEquals("", getDoubleClickMessage());
         Assert.assertEquals("", getClickMessage());
+    }
+
+    // Regression test for this issue:
+    // https://github.com/vaadin/flow-components/issues/2247
+    @Test
+    public void gridItemKeysChanged_whenFocusableHeaderElementClicked_shouldNotRaiseItemClickEvent() {
+        open();
+
+        // wait for grid to be loaded
+        waitUntil(driver -> $(GridElement.class)
+                .id(GRID_FILTER_FOCUSABLE_HEADER).getRowCount() > 0);
+
+        GridElement gridElement = $(GridElement.class)
+                .id(GRID_FILTER_FOCUSABLE_HEADER);
+
+        // Select an item with specific key
+        gridElement.select(0);
+
+        // Trigger key change on grid items by filtering
+        ButtonElement filterButton = $(ButtonElement.class).id("filterButton");
+        ButtonElement clearFilterButton = $(ButtonElement.class)
+                .id("clearFilterButton");
+        filterButton.click();
+        clearFilterButton.click();
+
+        WebElement focusableHeader = gridElement
+                .findElement(By.id("focusableHeader"));
+        focusableHeader.click();
+
+        TestBenchElement span = $("span").id("item-click-event-log");
+        Assert.assertEquals("", span.getText());
     }
 
     private String getColumnDoubleClickMessage() {

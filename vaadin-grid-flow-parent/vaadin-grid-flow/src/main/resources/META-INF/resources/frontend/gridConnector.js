@@ -2,6 +2,7 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
+import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -171,7 +172,6 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
           const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
           if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
             grid.activeItem = item;
-            grid.$connector.activeItem = item;
           }
         });
       });
@@ -324,8 +324,8 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
         // if he needs to reduce the number of items sent to the Grid to improve performance
         // or to increase it to make Grid smoother when scrolling
         const visibleRows = grid._getVisibleRows();
-        let start = visibleRows[0].index;
-        let end = visibleRows[visibleRows.length - 1].index;
+        let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+        let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
         let buffer = end - start;
 
         let firstNeededIndex = Math.max(0, start - buffer);
@@ -462,6 +462,12 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
              });
             }
           });
+        }
+        // since no row can be selected when selection mode is NONE
+        // if selectionMode is set to NONE, remove aria-selected attribute from the row
+        if (selectionMode === validSelectionModes[1]) { // selectionMode === NONE
+          row.removeAttribute('aria-selected');
+          Array.from(row.children).forEach(cell => cell.removeAttribute('aria-selected'));
         }
       })
 
@@ -879,7 +885,17 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
           const callback = rootPageCallbacks[page];
           if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
             delete rootPageCallbacks[page];
-            callback(cache[root][page] || new Array(grid.pageSize));
+
+            if (cache[root][page]) {
+              // Cached data is available, resolve the callback
+              callback(cache[root][page]);
+            } else {
+              // No cached data, resolve the callback with an empty array
+              callback(new Array(grid.pageSize));
+              // Request grid for content update
+              grid.requestContentUpdate();
+            }
+
             // Makes sure to push all new rows before this stack execution is done so any timeout expiration called after will be applied on a fully updated grid
             //Resolves https://github.com/vaadin/vaadin-grid-flow/issues/511
             if(grid._debounceIncreasePool){
@@ -916,6 +932,19 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
             && validSelectionModes.indexOf(mode) >= 0) {
           selectionMode = mode;
           selectedKeys = {};
+          // manage aria-multiselectable attribute depending on the selection mode
+          // see more: https://github.com/vaadin/web-components/issues/1536
+          // or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+          // For selection mode SINGLE, set the aria-multiselectable attribute to false
+          if (mode === validSelectionModes[0]) {
+            grid.$.table.setAttribute('aria-multiselectable', false);
+            // For selection mode NONE, remove the aria-multiselectable attribute
+          } else if (mode === validSelectionModes[1]) {
+            grid.$.table.removeAttribute('aria-multiselectable');
+            // For selection mode MULTI, set aria-multiselectable to true
+          } else {
+            grid.$.table.setAttribute('aria-multiselectable', true);
+          }
         } else {
           throw 'Attempted to set an invalid selection mode';
         }
@@ -949,7 +978,10 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
       };
 
       const contextMenuListener = function(e) {
-        const eventContext = grid.getEventContext(e);
+        // For `contextmenu` events, we need to access the source event,
+        // when using open on click we just use the click event itself
+        const sourceEvent = e.detail.sourceEvent || e;
+        const eventContext = grid.getEventContext(sourceEvent);
         const key = eventContext.item && eventContext.item.key;
         const colId = eventContext.column && eventContext.column.id;
         grid.$server.updateContextMenuTargetItem(key, colId);
@@ -960,16 +992,15 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
       }));
 
       grid.getContextMenuBeforeOpenDetail = tryCatchWrapper(function(event) {
-        const eventContext = grid.getEventContext(event);
+        // For `contextmenu` events, we need to access the source event,
+        // when using open on click we just use the click event itself
+        const sourceEvent = event.detail.sourceEvent || event;
+        const eventContext = grid.getEventContext(sourceEvent);
         return {
           key: (eventContext.item && eventContext.item.key) || ""
         };
       });
 
-      grid.addEventListener('cell-activate', tryCatchWrapper(e => {
-        grid.$connector.activeItem = e.detail.model.item;
-        setTimeout(() => grid.$connector.activeItem = undefined);
-      }));
       grid.addEventListener('click', tryCatchWrapper(e => _fireClickEvent(e, 'item-click')));
       grid.addEventListener('dblclick', tryCatchWrapper(e => _fireClickEvent(e, 'item-double-click')));
 
@@ -1020,9 +1051,12 @@ import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
       }));
 
       function _fireClickEvent(event, eventName) {
-        if (grid.$connector.activeItem) {
-          event.itemKey = grid.$connector.activeItem.key;
-          const eventContext = grid.getEventContext(event);
+        const target = event.target;
+        const eventContext = grid.getEventContext(event);
+        const section = eventContext.section;
+
+        if (eventContext.item && !isFocusable(target) && section !== 'details') {
+          event.itemKey = eventContext.item.key;
           // if you have a details-renderer, getEventContext().column is undefined
           if (eventContext.column) {
             event.internalColumnId = eventContext.column._flowId;

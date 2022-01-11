@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,6 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntry;
 
+import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertThat;
@@ -122,8 +123,8 @@ public class UploadIT extends AbstractUploadIT {
         fillPathToUploadInput(getInput(), tempFileNames);
     }
 
-    private WebElement getUpload() {
-        return getDriver().findElement(By.id("test-upload"));
+    private UploadElement getUpload() {
+        return $(UploadElement.class).id("test-upload");
     }
 
     /**

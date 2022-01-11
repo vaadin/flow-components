@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -79,7 +79,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getHeaderCells() {
-        WebElement thead = findInShadowRoot(grid, By.id("header")).get(0);
+        WebElement thead = grid.$("*").id("header");
         List<WebElement> headers = thead.findElements(By.tagName("th"));
 
         List<String> cellNames = headers.stream().map(header -> header

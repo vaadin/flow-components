@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -91,6 +91,13 @@ public class SortingIT extends AbstractComponentIT {
         assertAscendingSorter("Age");
         findElement(By.id("change-header-text-component")).click();
         assertAscendingSorter("Age (updated)");
+    }
+
+    @Test
+    public void emptyGrid_sort_noClientErrors() {
+        findElement(By.id("clear-items")).click();
+        grid.findElements(By.tagName("vaadin-grid-sorter")).get(0).click();
+        checkLogsForErrors();
     }
 
     @Test

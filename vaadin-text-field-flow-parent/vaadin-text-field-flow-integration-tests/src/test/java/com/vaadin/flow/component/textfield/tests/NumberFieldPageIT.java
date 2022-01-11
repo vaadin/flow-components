@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -124,8 +125,8 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("*")
+                .attributeContains("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -134,10 +135,10 @@ public class NumberFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertStepValue() {
-        WebElement field = findElement(By.id("step-number-field"));
+        TestBenchElement field = $("*").id("step-number-field");
 
-        WebElement increaseButton = getInShadowRoot(field,
-                By.cssSelector("[part~='increase-button']"));
+        WebElement increaseButton = field.$("*")
+                .attributeContains("part", "increase-button").first();
         increaseButton.click();
 
         String value = findElement(By.id("step-message")).getText();

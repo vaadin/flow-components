@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -74,7 +75,7 @@ public class CheckboxGroup<T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper {
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel {
 
     private static final String VALUE = "value";
 
@@ -366,6 +367,12 @@ public class CheckboxGroup<T>
         return itemLabelGenerator;
     }
 
+    /**
+     * Sets the label for the checkbox group.
+     *
+     * @param label
+     *            value for the {@code label} property in the checkbox group
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -376,6 +383,7 @@ public class CheckboxGroup<T>
      *
      * @return the {@code label} property of the checkbox group
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

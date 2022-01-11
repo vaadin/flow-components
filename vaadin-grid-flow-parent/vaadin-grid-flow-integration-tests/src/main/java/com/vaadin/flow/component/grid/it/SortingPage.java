@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -107,7 +108,12 @@ public class SortingPage extends Div {
                 });
         changeHeaderTextComponent.setId("change-header-text-component");
 
-        add(button, reOrder, changeHeaderText, changeHeaderTextComponent);
+        NativeButton clearButton = new NativeButton("Clear items",
+                e -> grid.setItems(new ArrayList<Person>()));
+        clearButton.setId("clear-items");
+
+        add(button, reOrder, changeHeaderText, changeHeaderTextComponent,
+                clearButton);
 
         return grid;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -267,6 +267,82 @@ public class GridViewIT extends GridViewBase {
 
     }
 
+    /**
+     * Test that aria-multiselectable and aria-selected should NOT be present
+     * when SelectionMode is set to NONE.
+     */
+    @Test
+    public void gridAriaSelectionAttributesWhenSelectionModeIsNone() {
+        openTabAndCheckForErrors("selection");
+        GridElement grid = $(GridElement.class).id("none-selection");
+        scrollToElement(grid);
+        TestBenchElement table = grid.$("table").first();
+        // table should not have aria-multiselectable attribute
+        Assert.assertFalse(table.hasAttribute("aria-multiselectable"));
+
+        // the aria-selected attribute must have been removed from the row
+        for (int i = grid.getFirstVisibleRowIndex(); i < grid
+                .getLastVisibleRowIndex(); i++) {
+            GridTRElement row = grid.getRow(i);
+            Assert.assertFalse(row.hasAttribute("aria-selected"));
+            // make sure the attribute was removed from all cells in the row as
+            // well
+            Assert.assertFalse(row.$("td").all().stream()
+                    .anyMatch(cell -> cell.hasAttribute("aria-selected")));
+        }
+    }
+
+    /**
+     * Test that aria-multiselectable=false & the selectable children should
+     * have aria-selected=true|false depending on their state
+     */
+    @Test
+    public void gridAriaSelectionAttributesWhenSelectionModeIsSingle() {
+        openTabAndCheckForErrors("selection");
+        GridElement grid = $(GridElement.class).id("single-selection");
+        scrollToElement(grid);
+        GridTRElement firstRow = grid.getRow(0);
+        firstRow.select();
+        TestBenchElement table = grid.$("table").first();
+        // table should have aria-multiselectable
+        Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
+        // aria-multiselectable should be set to false
+        Assert.assertFalse(Boolean
+                .parseBoolean(table.getAttribute("aria-multiselectable")));
+
+        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
+        Assert.assertTrue(
+                Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
+        Assert.assertFalse(Boolean
+                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
+    }
+
+    /**
+     * Test that aria-multiselectable=true & the selectable children should have
+     * aria-selected=true|false depending on their state
+     */
+    @Test
+    public void gridAriaSelectionAttributesWhenSelectionModeIsMulti() {
+        openTabAndCheckForErrors("selection");
+        GridElement grid = $(GridElement.class).id("multi-selection");
+        scrollToElement(grid);
+        TestBenchElement table = grid.$("table").first();
+        // table should have aria-multiselectable set to true
+        Assert.assertTrue(Boolean
+                .parseBoolean(table.getAttribute("aria-multiselectable")));
+
+        Assert.assertTrue(Boolean
+                .parseBoolean(grid.getRow(0).getAttribute("aria-selected")));
+        Assert.assertTrue(Boolean
+                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
+        Assert.assertFalse(Boolean
+                .parseBoolean(grid.getRow(2).getAttribute("aria-selected")));
+
+        grid.select(2);
+        Assert.assertTrue(Boolean
+                .parseBoolean(grid.getRow(2).getAttribute("aria-selected")));
+    }
+
     @Test
     public void gridWithDisabledSelection() {
         openTabAndCheckForErrors("selection");
@@ -478,7 +554,7 @@ public class GridViewIT extends GridViewBase {
     @Test
     public void gridWithComponentRenderer_detailsAreRenderered() {
         openTabAndCheckForErrors("using-components");
-        WebElement grid = findElement(By.id("component-renderer"));
+        GridElement grid = $(GridElement.class).id("component-renderer");
         scrollToElement(grid);
 
         clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
@@ -691,6 +767,23 @@ public class GridViewIT extends GridViewBase {
 
         grid.findElement(By.tagName("vaadin-text-field")).sendKeys("6");
         waitUntil(driver -> grid.getCell(0, 0).getText().contains("Person 6"));
+    }
+
+    @Test
+    public void scrollToEnd_filter_rowsUpdated() {
+        // Open /vaadin-grid-it-demo/filtering
+        openTabAndCheckForErrors("filtering");
+        GridElement grid = $(GridElement.class).id("grid-with-filters");
+
+        // Scroll to the end of the grid
+        grid.scrollToRow(grid.getRowCount() - 1);
+        // Filter "Name" column with "100"
+        grid.findElement(By.tagName("vaadin-text-field")).sendKeys("100");
+        waitUntil(driver -> grid.getRowCount() == 1);
+
+        // Expect the one remaining row's first cell to contain
+        // text "Person 100"
+        Assert.assertEquals("Person 100", grid.getCell(0, 0).getText());
     }
 
     @Test
@@ -1102,9 +1195,9 @@ public class GridViewIT extends GridViewBase {
                 rowIndex -> Assert.assertTrue(isRowSelected(grid, rowIndex)));
     }
 
-    private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+    private WebElement getRow(TestBenchElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
+                .get(row);
     }
 
     private boolean isRowSelected(GridElement grid, int row) {

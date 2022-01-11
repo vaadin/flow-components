@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,8 +26,8 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "22.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "22.0.0-beta1")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.0.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.0-alpha4")
 class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
         implements HasItemComponents.ItemComponent<T>, HasComponents {
 

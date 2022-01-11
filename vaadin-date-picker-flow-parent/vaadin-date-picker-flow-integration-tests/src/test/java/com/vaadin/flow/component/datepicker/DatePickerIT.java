@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -108,12 +108,10 @@ public class DatePickerIT extends ComponentDemoTest {
         executeScript("arguments[0].setAttribute(\"opened\", true)", picker);
         waitForElementPresent(By.tagName(DATEPICKER_OVERLAY));
 
-        WebElement overlay = findElement(By.tagName(DATEPICKER_OVERLAY));
-        WebElement content = findInShadowRoot(overlay, By.id("content")).get(0);
-        WebElement overlayContent = findInShadowRoot(content,
-                By.id("overlay-content")).get(0);
-        WebElement todayButton = findInShadowRoot(overlayContent,
-                By.id("todayButton")).get(0);
+        TestBenchElement overlay = $(DATEPICKER_OVERLAY).first();
+        TestBenchElement content = overlay.$("*").id("content");
+        TestBenchElement overlayContent = content.$("*").id("overlay-content");
+        WebElement todayButton = overlayContent.$("*").id("todayButton");
 
         waitUntil(driver -> "tänään".equals(todayButton.getText()));
     }
