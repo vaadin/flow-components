@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.upload;
+package com.vaadin.flow.component.upload.tests;
 
 import static org.junit.Assert.*;
 
@@ -21,11 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
-import com.vaadin.flow.data.provider.DataCommunictorAsyncTest.AlwaysLockedVaadinSession;
-import com.vaadin.flow.data.provider.DataCommunictorAsyncTest.MockVaadinSession;
-import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServlet;
