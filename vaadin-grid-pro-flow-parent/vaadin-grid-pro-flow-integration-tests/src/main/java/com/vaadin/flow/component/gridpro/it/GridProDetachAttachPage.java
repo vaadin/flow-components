@@ -60,7 +60,7 @@ public class GridProDetachAttachPage extends Div {
                     grid.addEditColumn(SamplePerson::getName)
                             .custom(newEditColumn, SamplePerson::setName);
                 });
-        addColumnButton.setClassName("add-column");
+        addColumnButton.setId("add-column");
 
         add(grid, attachDetachButton, addColumnButton);
     }
