@@ -49,11 +49,11 @@ public class UploadClearFilesTest {
     }
 
     @Test
-    public void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
+    public void uploadClearFilelist() {
         String files = upload.getElement().getProperty("files");
         assertNotNull(files);
         assertFalse(files.isEmpty());
-        upload.getElement().setPropertyJson("files", Json.createArray());
+        upload.clearFileList();
         files = upload.getElement().getProperty("files");
         assertTrue(files.equals("[]"));
     }
