@@ -50,7 +50,7 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
     }
 
     @Test
-    public void detach_attach_customEditOpens() {
+    public void addColumn_customEditOpens() {
         addColumnButton.click();
 
         grid = $(GridProElement.class).waitForFirst();
