@@ -107,8 +107,8 @@ public class EditColumnConfigurator<T> implements Serializable {
             ItemUpdater<T, V> itemUpdater) {
         column.getElement().appendVirtualChild(component.getElement());
         column.getElement().getNode()
-        .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                context -> setEditModeRenderer(component)));
+                .runWhenAttached(ui -> ui.beforeClientResponse(column,
+                        context -> setEditModeRenderer(component)));
 
         return configureColumn((item, ignore) -> itemUpdater.accept(item,
                 component.getValue()), EditorType.CUSTOM, component);
