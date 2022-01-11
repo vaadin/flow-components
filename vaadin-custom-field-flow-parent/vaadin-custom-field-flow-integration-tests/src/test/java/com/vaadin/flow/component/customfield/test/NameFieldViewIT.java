@@ -42,4 +42,16 @@ public class NameFieldViewIT extends AbstractParallelTest {
                 customFieldHelperComponent.getHelperComponent().getText());
     }
 
+    @Test
+    public void assertHelperComponentLazy() {
+        final CustomFieldElement customFieldHelperComponent = $(
+                CustomFieldElement.class)
+                        .id("custom-field-helper-component-lazy");
+
+        $("button").id("button-add-helper-component").click();
+
+        Assert.assertEquals("helper-component-lazy", customFieldHelperComponent
+                .getHelperComponent().getAttribute("id"));
+    }
+
 }
