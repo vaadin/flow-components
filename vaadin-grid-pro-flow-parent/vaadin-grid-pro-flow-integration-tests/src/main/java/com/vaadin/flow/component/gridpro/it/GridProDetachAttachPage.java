@@ -54,11 +54,12 @@ public class GridProDetachAttachPage extends Div {
         });
         attachDetachButton.setId("toggle-attached");
 
-        NativeButton addColumnButton = new NativeButton("Add new Column", event -> {
-            TextField newEditColumn = new TextField();
-            grid.addEditColumn(SamplePerson::getName).custom(newEditColumn,
-                    SamplePerson::setName);
-        });
+        NativeButton addColumnButton = new NativeButton("Add new Column",
+                event -> {
+                    TextField newEditColumn = new TextField();
+                    grid.addEditColumn(SamplePerson::getName)
+                            .custom(newEditColumn, SamplePerson::setName);
+                });
         addColumnButton.setClassName("add-column");
 
         add(grid, attachDetachButton, addColumnButton);
