@@ -30,6 +30,7 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
 
     private GridProElement grid;
     private TestBenchElement toggleAttachedButton;
+    private TestBenchElement addColumnButton;
 
     @Before
     public void before() {
