@@ -239,7 +239,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
                 comboBox.$server.confirmUpdate(id);
             });
 
-            comboBox.addEventListener('opened-changed', () => {
+            comboBox.addEventListener('opened-changed', tryCatchWrapper(() => {
                 // Patch once the instance is ready and vaadin-combo-box has
                 // been finalized (i.e. opened-changed is emitted)
 
@@ -258,7 +258,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
                     return selected;
                 }
-            }, { once: true });
+            }), { once: true });
 
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
