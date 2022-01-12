@@ -283,7 +283,6 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         Assert.assertEquals(9, getTreeGrid().getRowCount());
 
         getTreeGrid().expandWithClick(7);
-        getTreeGrid().expandWithClick(8);
         getTreeGrid().collapseWithClick(7);
         getTreeGrid().collapseWithClick(0);
         getTreeGrid().expandWithClick(1);
