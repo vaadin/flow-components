@@ -8,21 +8,23 @@ package com.vaadin.flow.component.gridpro;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -47,6 +49,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
@@ -106,6 +109,21 @@ public class GridPro<E> extends Grid<E> {
     public GridPro(int pageSize) {
         super(pageSize);
         setup();
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    @Override
+    protected void initConnector() {
+        super.initConnector();
+        getUI().orElseThrow(() -> new IllegalStateException("Connector can only be initialized for an attached GridPro"))
+                .getPage()
+                .executeJs("window.Vaadin.Flow.gridProConnector.initLazy($0)($0)", getElement());
+
     }
 
     @Override
@@ -672,5 +690,94 @@ public class GridPro<E> extends Grid<E> {
             };
         }
 
+    }
+
+    /**
+     * Triggers the cell editor for a given cell.
+     *
+     * @param rowIdx
+     *            the index of the row (starts at 0)
+     * @param colIdx
+     *            the index of the col (starts at 0)
+     */
+    public void editCell(int rowIdx, int colIdx) {
+        if(rowIdx >= getPageSize()) {
+            throw new IndexOutOfBoundsException("The rowIdx value provided is greater than the page size.");
+        }
+
+        if(colIdx >= getColumns().stream().filter(c -> c.isVisible()).count()) {
+            throw new IndexOutOfBoundsException("The colIdx value provided is greater than the number of visible columns.");
+        }
+
+        this.getElement().callJsFunction("$connector.editCell", new Serializable[]{
+                Integer.valueOf(rowIdx),
+                Integer.valueOf(colIdx),
+                false
+        });
+    }
+
+    /**
+     * Triggers the cell editor for a given cell.
+     *
+     * @param rowIdx
+     *            the index of the row (starts at 0)
+     * @param colId
+     *            the id of the col (must be defined using setId)
+     */
+    public void editCell(int rowIdx, String colId) {
+        if(rowIdx >= getPageSize()) {
+            throw new IndexOutOfBoundsException("The rowIdx value provided is greater than the page size.");
+        }
+
+        if(! getColumns().stream()
+                .filter(c -> c.getId().isPresent() ? (c.isVisible() && c.getId().get().equals(colId)) : false)
+                .findFirst()
+                .isPresent()
+        ) {
+            throw new IllegalArgumentException("The column with id " + colId + "was not found or it is not visible.");
+        }
+
+        this.getElement().callJsFunction("$connector.editCell", new Serializable[]{ rowIdx, colId, false });
+    }
+
+    /**
+     * Triggers the cell editor for a given cell.
+     *
+     * @param item
+     *            the item, for selecting the row
+     * @param colIdx
+     *            the index of the col (starts at 0)
+     */
+    public void editCell(E item, int colIdx) {
+        if(colIdx >= getColumns().stream().filter(c -> c.isVisible()).count()) {
+            throw new IndexOutOfBoundsException("The colIdx value provided is greater than the number of visible columns.");
+        }
+
+        JsonObject json = Json.createObject();
+        json.put("key", getDataCommunicator().getKeyMapper().key(item));
+        this.getElement().callJsFunction("$connector.editCell", new Serializable[]{ json, colIdx, false });
+    }
+
+    /**
+     * Triggers the cell editor for a given cell.
+     *
+     * @param item
+     *            the item, for selecting the row
+     * @param colId
+     *            the id of the col (must be defined using setId)
+     */
+    public void editCell(E item, String colId) {
+        if(! getColumns().stream()
+                .filter(c ->
+                        c.getId().isPresent() ? (c.isVisible() && c.getId().get().equals(colId)) : false
+                ).findFirst()
+                .isPresent()
+        ) {
+            throw new IllegalArgumentException("The column with id " + colId + "was not found or it is not visible.");
+        }
+
+        JsonObject json = Json.createObject();
+        json.put("key", getDataCommunicator().getKeyMapper().key(item));
+        this.getElement().callJsFunction("$connector.editCell", new Serializable[]{ json, colId, false });
     }
 }
