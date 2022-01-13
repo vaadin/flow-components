@@ -764,7 +764,6 @@ public class TreeGrid<T> extends Grid<T>
      * the given items while {@code expandRecursively(items, 2)} expands the
      * given items as well as their children and grandchildren.
      * <p>
-     * This method will <i>not</i> fire events for expanded nodes.
      *
      * @param items
      *            the items to expand recursively
@@ -784,8 +783,6 @@ public class TreeGrid<T> extends Grid<T>
      * descendant, meaning that {@code expandRecursively(items, 0)} expands only
      * the given items while {@code expandRecursively(items, 2)} expands the
      * given items as well as their children and grandchildren.
-     * <p>
-     * This method will <i>not</i> fire events for expanded nodes.
      *
      * @param items
      *            the items to expand recursively
@@ -796,10 +793,7 @@ public class TreeGrid<T> extends Grid<T>
     public void expandRecursively(Collection<T> items, int depth) {
         getDataCommunicator()
                 .expand(getItemsWithChildrenRecursively(items, depth));
-        // Call with client roundtrip as expansion takes a while.
-        // This ensures that event is fired after exapnsion is complete.
-        getElement().executeJs("return 1;").then(result -> fireEvent(
-                new ExpandEvent<T, TreeGrid<T>>(this, false, items)));
+        fireEvent(new ExpandEvent<T, TreeGrid<T>>(this, false, null));
     }
 
     /**
@@ -851,7 +845,6 @@ public class TreeGrid<T> extends Grid<T>
      * only the given items while {@code collapseRecursively(items, 2)}
      * collapses the given items as well as their children and grandchildren.
      * <p>
-     * This method will <i>not</i> fire events for collapsed nodes.
      *
      * @param items
      *            the items to collapse recursively
@@ -872,7 +865,6 @@ public class TreeGrid<T> extends Grid<T>
      * only the given items while {@code collapseRecursively(items, 2)}
      * collapses the given items as well as their children and grandchildren.
      * <p>
-     * This method will <i>not</i> fire events for collapsed nodes.
      *
      * @param items
      *            the items to collapse recursively
@@ -883,6 +875,7 @@ public class TreeGrid<T> extends Grid<T>
     public void collapseRecursively(Collection<T> items, int depth) {
         getDataCommunicator()
                 .collapse(getItemsWithChildrenRecursively(items, depth));
+        fireEvent(new CollapseEvent<T, TreeGrid<T>>(this, false, null));
     }
 
     /**
