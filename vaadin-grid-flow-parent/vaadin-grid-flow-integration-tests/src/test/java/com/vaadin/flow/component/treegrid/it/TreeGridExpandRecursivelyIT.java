@@ -29,7 +29,16 @@ public class TreeGridExpandRecursivelyIT extends AbstractComponentIT {
     @Test
     public void treegrid_item_expanded() {
         open();
-        TreeGridElement label = $(TreeGridElement.class).waitForFirst();
+        TreeGridElement grid = $(TreeGridElement.class).waitForFirst();
+        findElement(By.id("expand")).click();
         findElement(By.id("expanded"));
+    }
+
+    @Test
+    public void treegrid_item_collapsed() {
+        open();
+        TreeGridElement grid = $(TreeGridElement.class).waitForFirst();
+        findElement(By.id("collapse")).click();
+        findElement(By.id("collapsed"));
     }
 }
