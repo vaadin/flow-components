@@ -36,11 +36,11 @@ public class TreeGridExpandRecursivelyPage extends VerticalLayout {
         grid.setWidth("350px");
         grid.setMaxHeight("300px");
 
-        grid.addComponentHierarchyColumn(value -> new Label(value))
+        grid.addComponentHierarchyColumn(value -> new Span(value))
                 .setHeader("Name").setAutoWidth(true).setFlexGrow(0);
-        grid.addComponentColumn(value -> new Label(new Date().toString()))
+        grid.addComponentColumn(value -> new Span(new Date().toString()))
                 .setHeader("Datum");
-        grid.addComponentColumn(value -> new Label(new Date().toString()))
+        grid.addComponentColumn(value -> new Span(new Date().toString()))
                 .setHeader("Datum 2");
 
         grid.addExpandListener(event -> {
