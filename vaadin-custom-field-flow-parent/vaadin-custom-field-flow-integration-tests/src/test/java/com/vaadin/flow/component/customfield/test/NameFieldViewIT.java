@@ -32,12 +32,25 @@ public class NameFieldViewIT extends AbstractParallelTest {
 
         Assert.assertEquals("helper-component", customFieldHelperComponent
                 .getHelperComponent().getAttribute("id"));
+
         $("button").id("button-clear-helper-component").click();
 
         Assert.assertEquals(
                 "Removing the helper component should revert to helper text if set",
                 "Your full first and last names",
                 customFieldHelperComponent.getHelperComponent().getText());
+    }
+
+    @Test
+    public void assertHelperComponentLazy() {
+        final CustomFieldElement customFieldHelperComponent = $(
+                CustomFieldElement.class)
+                        .id("custom-field-helper-component-lazy");
+
+        $("button").id("button-add-helper-component").click();
+
+        Assert.assertEquals("helper-component-lazy", customFieldHelperComponent
+                .getHelperComponent().getAttribute("id"));
     }
 
 }
