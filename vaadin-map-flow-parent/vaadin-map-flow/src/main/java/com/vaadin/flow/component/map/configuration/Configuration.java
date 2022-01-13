@@ -3,11 +3,12 @@ package com.vaadin.flow.component.map.configuration;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Configuration extends AbstractConfigurationObject {
-    private List<Layer> layers = new ArrayList<>();
-    private View view = new View();
+    private final List<Layer> layers = new ArrayList<>();
 
     @Override
     public String getType() {
@@ -15,18 +16,24 @@ public class Configuration extends AbstractConfigurationObject {
     }
 
     public List<Layer> getLayers() {
-        return layers;
+        return Collections.unmodifiableList(layers);
     }
 
-    public void setLayers(List<Layer> layers) {
-        this.layers = layers;
+    public void addLayer(Layer layer) {
+        Objects.requireNonNull(layer);
+
+        layer.addPropertyChangeListener(this::notifyChange);
+
+        layers.add(layer);
+        notifyChange();
     }
 
-    public View getView() {
-        return view;
-    }
+    public void removeLayer(Layer layer) {
+        Objects.requireNonNull(layer);
 
-    public void setView(View view) {
-        this.view = view;
+        layer.removePropertyChangeListener(this::notifyChange);
+
+        layers.remove(layer);
+        notifyChange();
     }
 }
