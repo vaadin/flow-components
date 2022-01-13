@@ -1,8 +1,8 @@
 package com.vaadin.flow.component.map.configuration;
 
 public class Coordinate {
-    private double x;
-    private double y;
+    private final double x;
+    private final double y;
 
     public Coordinate() {
         this(0, 0);
@@ -17,15 +17,7 @@ public class Coordinate {
         return x;
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
     public double getY() {
         return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
     }
 }

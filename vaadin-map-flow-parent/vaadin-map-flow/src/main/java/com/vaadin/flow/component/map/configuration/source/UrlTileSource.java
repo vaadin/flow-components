@@ -16,5 +16,6 @@ public abstract class UrlTileSource extends Source {
 
     public void setUrl(String url) {
         this.url = url;
+        notifyChange();
     }
 }
