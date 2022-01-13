@@ -78,6 +78,7 @@
         <module>vaadin-cookie-consent-flow-parent</module>
         <module>vaadin-crud-flow-parent</module>
         <module>vaadin-grid-pro-flow-parent</module>
+        <module>vaadin-map-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
     </modules>
     <profiles>
