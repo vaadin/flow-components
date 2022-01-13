@@ -49,7 +49,7 @@ public class TreeGridExpandRecursivelyPage extends VerticalLayout {
             add(label);
         });
 
-        grid.addExpandListener(event -> {
+        grid.addCollapseListener(event -> {
             Span label = new Span("Collapsed");
             label.setId("collapsed");
             add(label);
