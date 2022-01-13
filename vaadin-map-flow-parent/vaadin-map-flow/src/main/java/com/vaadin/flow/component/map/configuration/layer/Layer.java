@@ -17,8 +17,9 @@ public abstract class Layer extends AbstractConfigurationObject {
         return opacity;
     }
 
-    public void setOpacity(float opacity) {
+    public void setOpacity(float opacity, boolean markDirty) {
         this.opacity = opacity;
+        notifyChange();
     }
 
     public boolean isVisible() {
@@ -27,5 +28,6 @@ public abstract class Layer extends AbstractConfigurationObject {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+        notifyChange();
     }
 }

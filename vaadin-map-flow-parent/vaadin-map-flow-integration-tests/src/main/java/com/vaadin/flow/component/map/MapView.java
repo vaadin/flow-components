@@ -16,11 +16,8 @@ public class MapView extends Div {
 
         OSMSource source = new OSMSource();
         TileLayer layer = new TileLayer();
-        layer.setId("layer1");
         layer.setSource(source);
-
-        configuration.getLayers().add(layer);
-        configuration.getView().setZoom(3);
+        configuration.addLayer(layer);
 
         add(map);
         map.setWidthFull();
@@ -28,13 +25,11 @@ public class MapView extends Div {
 
         NativeButton toggleLayerVisible = new NativeButton("Toggle Layer", e -> {
             layer.setVisible(!layer.isVisible());
-            map.render();
         });
 
         NativeButton showNuremberg = new NativeButton("Show Nuremberg", e -> {
-            configuration.getView().setCenter(new Coordinate(1233058.1696443919, 6351912.406929109));
-            configuration.getView().setZoom(10);
-            map.render();
+            map.getView().setCenter(new Coordinate(1233058.1696443919, 6351912.406929109));
+            map.getView().setZoom(10);
         });
 
         add(new Div(

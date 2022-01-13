@@ -23,6 +23,7 @@ public class View extends AbstractConfigurationObject {
 
     public void setCenter(Coordinate center) {
         this.center = center;
+        this.notifyChange();
     }
 
     public float getRotation() {
@@ -31,6 +32,7 @@ public class View extends AbstractConfigurationObject {
 
     public void setRotation(float rotation) {
         this.rotation = rotation;
+        this.notifyChange();
     }
 
     public float getZoom() {
@@ -39,5 +41,6 @@ public class View extends AbstractConfigurationObject {
 
     public void setZoom(float zoom) {
         this.zoom = zoom;
+        this.notifyChange();
     }
 }
