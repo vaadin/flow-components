@@ -251,7 +251,14 @@
                 comboBox.$server.confirmUpdate(id);
             });
 
-            customElements.whenDefined('vaadin-combo-box').then(tryCatchWrapper(() => {
+            const patchIsItemSelected = tryCatchWrapper(() => {
+                // IE11 doesn't support {once: true} with event listeners. Need to
+                // remove the listener manually on the first invocation
+                comboBox.removeEventListener('opened-changed', patchIsItemSelected)
+
+                // Patch once the instance is ready and vaadin-combo-box has
+                // been finalized (i.e. opened-changed is emitted)
+
                 const _isItemSelected = comboBox.$.overlay._isItemSelected;
                 // Override comboBox's _isItemSelected logic to handle remapped items
                 comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
@@ -267,7 +274,9 @@
 
                     return selected;
                 }
-            }));
+            });
+
+            comboBox.addEventListener('opened-changed', patchIsItemSelected);
 
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
