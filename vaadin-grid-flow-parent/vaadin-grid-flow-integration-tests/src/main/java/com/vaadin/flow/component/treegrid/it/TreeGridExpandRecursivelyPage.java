@@ -15,7 +15,8 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
@@ -43,8 +44,14 @@ public class TreeGridExpandRecursivelyPage extends VerticalLayout {
                 .setHeader("Datum 2");
 
         grid.addExpandListener(event -> {
-            Label label = new Label("Expanded");
+            Span label = new Span("Expanded");
             label.setId("expanded");
+            add(label);
+        });
+
+        grid.addExpandListener(event -> {
+            Span label = new Span("Collapsed");
+            label.setId("collapsed");
             add(label);
         });
 
@@ -58,8 +65,16 @@ public class TreeGridExpandRecursivelyPage extends VerticalLayout {
                         "Child C which may has a long title"));
         grid.setTreeData(treeData);
 
-        grid.expandRecursively(Collections.singleton("A"), 2);
+        NativeButton expand = new NativeButton("Expand", e -> {
+            grid.expandRecursively(Collections.singleton("A"), 2);
+        });
+        expand.setId("expand");
 
-        add(grid);
+        NativeButton collapse = new NativeButton("Collapse", e -> {
+            grid.collapseRecursively(Collections.singleton("A"), 2);
+        });
+        collapse.setId("collapse");
+
+        add(grid, expand, collapse);
     }
 }
