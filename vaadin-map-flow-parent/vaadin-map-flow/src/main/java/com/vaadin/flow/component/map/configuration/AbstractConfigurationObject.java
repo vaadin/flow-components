@@ -38,7 +38,9 @@ public abstract class AbstractConfigurationObject implements Serializable {
         if (oldValue != null) {
             oldValue.removePropertyChangeListener(this::notifyChange);
         }
-        newValue.addPropertyChangeListener(this::notifyChange);
+        if(newValue != null) {
+            newValue.addPropertyChangeListener(this::notifyChange);
+        }
     }
 
     protected void notifyChange() {

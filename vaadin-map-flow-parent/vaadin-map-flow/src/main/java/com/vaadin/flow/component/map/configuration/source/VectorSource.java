@@ -1,0 +1,40 @@
+package com.vaadin.flow.component.map.configuration.source;
+
+import com.vaadin.flow.component.map.configuration.Constants;
+import com.vaadin.flow.component.map.configuration.Feature;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+public class VectorSource extends Source {
+    private final List<Feature> features = new ArrayList<>();
+
+    @Override
+    public String getType() {
+        return Constants.OL_SOURCE_VECTOR;
+    }
+
+    public List<Feature> getFeatures() {
+        return Collections.unmodifiableList(features);
+    }
+
+    public void addFeature(Feature feature) {
+        Objects.requireNonNull(feature);
+
+        feature.addPropertyChangeListener(this::notifyChange);
+
+        features.add(feature);
+        notifyChange();
+    }
+
+    public void removeFeature(Feature feature) {
+        Objects.requireNonNull(feature);
+
+        feature.removePropertyChangeListener(this::notifyChange);
+
+        features.remove(feature);
+        notifyChange();
+    }
+}
