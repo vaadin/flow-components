@@ -2,8 +2,8 @@ package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.router.Route;
@@ -12,27 +12,24 @@ import com.vaadin.flow.router.Route;
 public class MapView extends Div {
     public MapView() {
         Map map = new Map();
-        Configuration configuration = map.getConfiguration();
-
-        OSMSource source = new OSMSource();
-        TileLayer layer = new TileLayer();
-        layer.setSource(source);
-        configuration.addLayer(layer);
-
-        add(map);
         map.setWidthFull();
         map.setHeight("400px");
 
         NativeButton toggleLayerVisible = new NativeButton("Toggle Layer", e -> {
+            Layer layer = map.getBaseLayer();
             layer.setVisible(!layer.isVisible());
         });
 
-        NativeButton useOpenStreetMap = new NativeButton("Use OpenStreetMap", e -> {
-            source.setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+        NativeButton useOpenCycleMap = new NativeButton("Use OpenCycleMap", e -> {
+            OSMSource source = new OSMSource(new OSMSource.Options().setUrl("https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499"));
+            TileLayer layer = new TileLayer();
+            layer.setSource(source);
+            map.setBaseLayer(layer);
         });
 
-        NativeButton useOpenCycleMap = new NativeButton("Use OpenCycleMap", e -> {
-            source.setUrl("https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499");
+        NativeButton useOpenStreetMap = new NativeButton("Use OpenStreetMap", e -> {
+            TileLayer layer = (TileLayer) map.getBaseLayer();
+            layer.getSource().setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
         });
 
         NativeButton addSeaMapLayer = new NativeButton("Add OpenSeaMap layer", e -> {
@@ -42,7 +39,7 @@ public class MapView extends Div {
                             .setOpaque(false));
             TileLayer seaMapLayer = new TileLayer();
             seaMapLayer.setSource(seaMapSource);
-            configuration.addLayer(seaMapLayer);
+            map.addLayer(seaMapLayer);
         });
 
         NativeButton showNuremberg = new NativeButton("Show Nuremberg", e -> {
@@ -55,10 +52,11 @@ public class MapView extends Div {
             map.getView().setZoom(15);
         });
 
+        add(map);
         add(new Div(
                 toggleLayerVisible,
-                useOpenStreetMap,
                 useOpenCycleMap,
+                useOpenStreetMap,
                 addSeaMapLayer,
                 showNuremberg,
                 showSaintNazaire

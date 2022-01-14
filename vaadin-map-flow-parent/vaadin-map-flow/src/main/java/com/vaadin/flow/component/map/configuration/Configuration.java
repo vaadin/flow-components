@@ -28,6 +28,15 @@ public class Configuration extends AbstractConfigurationObject {
         notifyChange();
     }
 
+    public void prependLayer(Layer layer) {
+        Objects.requireNonNull(layer);
+
+        layer.addPropertyChangeListener(this::notifyChange);
+
+        layers.add(0, layer);
+        notifyChange();
+    }
+
     public void removeLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
