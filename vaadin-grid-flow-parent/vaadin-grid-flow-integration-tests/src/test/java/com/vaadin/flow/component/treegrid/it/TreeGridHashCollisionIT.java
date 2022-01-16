@@ -22,7 +22,7 @@ import org.junit.Test;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-grid/treegrid-hash-collision")
-public class TreeGridInitialExpandIT extends TreeGridHashCollisionIT {
+public class TreeGridHashCollisionIT extends AbstractTreeGridIT {
 
     @Before
     public void before() {
@@ -31,7 +31,7 @@ public class TreeGridInitialExpandIT extends TreeGridHashCollisionIT {
     }
 
     @Test
-    public void initial_expand_of_items() {
+    public void treegrid_opens_correctly() {
         // Test that child has opened
         Assert.assertEquals("BB", getTreeGrid().getCell(1, 0).getText());
     }
