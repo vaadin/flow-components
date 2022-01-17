@@ -79,7 +79,7 @@ public class RadioButtonGroupTest {
         group.setItems("foo", "bar");
         group.setValue("foo");
         group.setReadOnly(true);
-        
+
         long disabledChildCount = group.getChildren().filter(
                 child -> child.getElement().getProperty("disabled", false))
                 .count();
@@ -92,7 +92,7 @@ public class RadioButtonGroupTest {
         group.setItems("foo", "bar");
         group.setReadOnly(true);
         group.setValue("foo");
-        
+
         long disabledChildCount = group.getChildren().filter(
                 child -> child.getElement().getProperty("disabled", false))
                 .count();
