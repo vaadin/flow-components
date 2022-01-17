@@ -83,13 +83,13 @@ public abstract class MapBase extends Component implements HasSize {
     private void synchronizeConfiguration() {
         JsonObject jsonConfiguration = (JsonObject) JsonSerializer.toJson(configuration);
 
-        this.getElement().executeJs("this.updateConfigurationJson($0)", jsonConfiguration);
+        this.getElement().executeJs("this.synchronize($0)", jsonConfiguration);
     }
 
     private void synchronizeView() {
         JsonObject jsonView = (JsonObject) JsonSerializer.toJson(view);
 
-        this.getElement().executeJs("this.updateViewJson($0)", jsonView);
+        this.getElement().executeJs("this.synchronize($0, this.configuration.getView())", jsonView);
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {
