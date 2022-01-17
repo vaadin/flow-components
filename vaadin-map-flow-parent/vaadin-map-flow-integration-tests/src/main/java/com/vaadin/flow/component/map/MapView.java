@@ -38,7 +38,7 @@ public class MapView extends Div {
         vectorSource.addFeature(nurembergMarker);
 
         NativeButton toggleLayerVisible = new NativeButton("Toggle Layer", e -> {
-            Layer layer = map.getBaseLayer();
+            Layer layer = map.getBackgroundLayer();
             layer.setVisible(!layer.isVisible());
         });
 
@@ -46,11 +46,11 @@ public class MapView extends Div {
             OSMSource source = new OSMSource(new OSMSource.Options().setUrl("https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499"));
             TileLayer layer = new TileLayer();
             layer.setSource(source);
-            map.setBaseLayer(layer);
+            map.setBackgroundLayer(layer);
         });
 
         NativeButton useOpenStreetMap = new NativeButton("Use OpenStreetMap", e -> {
-            TileLayer layer = (TileLayer) map.getBaseLayer();
+            TileLayer layer = (TileLayer) map.getBackgroundLayer();
             layer.getSource().setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
         });
 
