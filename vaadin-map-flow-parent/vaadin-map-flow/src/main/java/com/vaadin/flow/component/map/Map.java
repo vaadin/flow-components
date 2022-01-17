@@ -14,30 +14,30 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 @JsModule("@vaadin/map/vaadin-map.js")
 public class Map extends MapBase {
 
-    private Layer baseLayer;
+    private Layer backgroundLayer;
 
     public Map() {
         super();
         OSMSource source = new OSMSource();
         TileLayer baseLayer = new TileLayer();
         baseLayer.setSource(source);
-        setBaseLayer(baseLayer);
+        setBackgroundLayer(baseLayer);
     }
 
     public Configuration getRawConfiguration() {
         return getConfiguration();
     }
 
-    public Layer getBaseLayer() {
-        return baseLayer;
+    public Layer getBackgroundLayer() {
+        return backgroundLayer;
     }
 
-    public void setBaseLayer(Layer baseLayer) {
-        if (this.baseLayer != null) {
-            getConfiguration().removeLayer(this.baseLayer);
+    public void setBackgroundLayer(Layer backgroundLayer) {
+        if (this.backgroundLayer != null) {
+            getConfiguration().removeLayer(this.backgroundLayer);
         }
-        this.baseLayer = baseLayer;
-        getConfiguration().prependLayer(baseLayer);
+        this.backgroundLayer = backgroundLayer;
+        getConfiguration().prependLayer(backgroundLayer);
     }
 
     public void addLayer(Layer layer) {
