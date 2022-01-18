@@ -126,6 +126,28 @@ public class ClearValueIT extends AbstractComponentIT {
         Assert.assertEquals("", comboBox.getInputElementValue());
     }
 
+    @Test
+    public void allowCustomValue_openPopup_clearButton_selectedItemIsReset() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID);
+
+        comboBox.openPopup();
+        comboBox.closePopup();
+
+        comboBox.$("[part~='clear-button']").get(0).click();
+
+        comboBox.openPopup();
+
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        ElementQuery<TestBenchElement> items = overlay
+                .$("vaadin-combo-box-item");
+
+        items.all()
+                .forEach(item -> Assert.assertFalse(
+                        "Item is not selected after clear button click",
+                        item.hasAttribute("selected")));
+    }
+
     private void checkEmptyValue(String comboBoxId, String buttonId,
             boolean allowCustomValue) {
         ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
