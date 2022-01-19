@@ -37,7 +37,8 @@ public abstract class MapBase extends Component implements HasSize {
     protected MapBase() {
         this.configuration = new Configuration();
         this.view = new View();
-        this.configuration.addPropertyChangeListener(this::configurationPropertyChange);
+        this.configuration
+                .addPropertyChangeListener(this::configurationPropertyChange);
         this.view.addPropertyChangeListener(this::viewPropertyChange);
     }
 
@@ -64,24 +65,27 @@ public abstract class MapBase extends Component implements HasSize {
         if (pendingConfigurationSync != null) {
             return;
         }
-        getUI().ifPresent(ui -> pendingConfigurationSync = ui.beforeClientResponse(this, context -> {
-            pendingConfigurationSync = null;
-            synchronizeConfiguration();
-        }));
+        getUI().ifPresent(ui -> pendingConfigurationSync = ui
+                .beforeClientResponse(this, context -> {
+                    pendingConfigurationSync = null;
+                    synchronizeConfiguration();
+                }));
     }
 
     private void requestViewSync() {
         if (pendingViewSync != null) {
             return;
         }
-        getUI().ifPresent(ui -> pendingViewSync = ui.beforeClientResponse(this, context -> {
-            pendingViewSync = null;
-            synchronizeView();
-        }));
+        getUI().ifPresent(ui -> pendingViewSync = ui.beforeClientResponse(this,
+                context -> {
+                    pendingViewSync = null;
+                    synchronizeView();
+                }));
     }
 
     private void synchronizeConfiguration() {
-        JsonObject jsonConfiguration = (JsonObject) JsonSerializer.toJson(configuration);
+        JsonObject jsonConfiguration = (JsonObject) JsonSerializer
+                .toJson(configuration);
 
         this.getElement().executeJs("this.synchronize($0)", jsonConfiguration);
     }
@@ -89,7 +93,8 @@ public abstract class MapBase extends Component implements HasSize {
     private void synchronizeView() {
         JsonObject jsonView = (JsonObject) JsonSerializer.toJson(view);
 
-        this.getElement().executeJs("this.synchronize($0, this.configuration.getView())", jsonView);
+        this.getElement().executeJs(
+                "this.synchronize($0, this.configuration.getView())", jsonView);
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {
