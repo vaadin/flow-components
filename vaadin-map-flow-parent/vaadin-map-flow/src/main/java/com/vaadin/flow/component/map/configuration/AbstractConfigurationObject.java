@@ -26,7 +26,8 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     private String id;
 
-    protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
+            this);
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
@@ -50,11 +51,13 @@ public abstract class AbstractConfigurationObject implements Serializable {
         this.propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    protected void updateNestedPropertyObserver(AbstractConfigurationObject oldValue, AbstractConfigurationObject newValue) {
+    protected void updateNestedPropertyObserver(
+            AbstractConfigurationObject oldValue,
+            AbstractConfigurationObject newValue) {
         if (oldValue != null) {
             oldValue.removePropertyChangeListener(this::notifyChange);
         }
-        if(newValue != null) {
+        if (newValue != null) {
             newValue.addPropertyChangeListener(this::notifyChange);
         }
     }

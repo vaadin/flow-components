@@ -26,7 +26,8 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 @Tag("vaadin-map")
 // TODO: Enable once released
 // @NpmPackage(value = "@vaadin/map", version = "23.0.0-alpha4")
-// TODO: Include non-themed module `@vaadin/map/src/vaadin-map.js` when theme module is ready
+// TODO: Include non-themed module `@vaadin/map/src/vaadin-map.js` when theme
+// module is ready
 @JsModule("@vaadin/map/vaadin-map.js")
 public class Map extends MapBase {
 

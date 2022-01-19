@@ -23,7 +23,7 @@ public class View extends AbstractConfigurationObject {
     private float zoom;
 
     public View() {
-        this.center = new Coordinate(0,0);
+        this.center = new Coordinate(0, 0);
         this.rotation = 0;
         this.zoom = 0;
     }
