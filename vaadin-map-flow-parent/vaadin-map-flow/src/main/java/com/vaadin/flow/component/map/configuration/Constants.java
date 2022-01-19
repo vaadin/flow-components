@@ -21,7 +21,7 @@ public class Constants {
     public static final String OL_LAYER_TILE = "ol/layer/Tile";
     public static final String OL_LAYER_VECTOR = "ol/layer/Vector";
     // Sources
-    public static final String OL_SOURCE_URL_TILE = "ol/source/UrlTile";
+    public static final String OL_SOURCE_XYZ = "ol/source/XYZ";
     public static final String OL_SOURCE_OSM = "ol/source/OSM";
     public static final String OL_SOURCE_VECTOR = "ol/source/Vector";
     // Geometry
