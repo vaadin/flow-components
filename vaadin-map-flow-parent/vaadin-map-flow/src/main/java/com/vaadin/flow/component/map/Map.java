@@ -23,6 +23,8 @@ import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 
+import java.util.Objects;
+
 @Tag("vaadin-map")
 // TODO: Enable once released
 // @NpmPackage(value = "@vaadin/map", version = "23.0.0-alpha4")
@@ -45,11 +47,31 @@ public class Map extends MapBase {
         return getConfiguration();
     }
 
+    /**
+     * Background layer of the map. Every new instance of a {@link Map} is
+     * initialized with a background layer. By default, the background layer
+     * will be a {@link TileLayer} using an {@link OSMSource}, which means it
+     * will display tiled map data from the official OpenStreetMap server.
+     * 
+     * @return the background layer of the map
+     */
     public Layer getBackgroundLayer() {
         return backgroundLayer;
     }
 
+    /**
+     * Sets the background layer of the map. The layer will be prepended before
+     * all other layers, which means it will be rendered in the background by
+     * default. The background layer is not intended to be removed, and thus can
+     * not be set to null. For use-cases where you want to use a dynamic set of
+     * layers, consider setting the first layer as background layer, and then
+     * adding the remaining layers using {@link #addLayer(Layer)}.
+     * 
+     * @param backgroundLayer
+     *            the new background layer, not null
+     */
     public void setBackgroundLayer(Layer backgroundLayer) {
+        Objects.requireNonNull(backgroundLayer);
         if (this.backgroundLayer != null) {
             getConfiguration().removeLayer(this.backgroundLayer);
         }

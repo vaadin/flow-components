@@ -18,6 +18,7 @@
     <modules>
         <module>vaadin-map-flow</module>
         <module>vaadin-map-flow-integration-tests</module>
+        <module>vaadin-map-testbench</module>
     </modules>
     <profiles>
         <profile>

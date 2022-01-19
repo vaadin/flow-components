@@ -27,6 +27,14 @@ import java.util.Objects;
 public class VectorSource extends Source {
     private final List<Feature> features = new ArrayList<>();
 
+    public VectorSource() {
+        this(new Options());
+    }
+
+    public VectorSource(BaseOptions options) {
+        super(options);
+    }
+
     @Override
     public String getType() {
         return Constants.OL_SOURCE_VECTOR;
@@ -52,5 +60,12 @@ public class VectorSource extends Source {
 
         features.remove(feature);
         notifyChange();
+    }
+
+    protected static class BaseOptions<T extends BaseOptions<T>>
+            extends Source.BaseOptions<T> {
+    }
+
+    public static class Options extends BaseOptions<Options> {
     }
 }
