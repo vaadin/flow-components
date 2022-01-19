@@ -62,6 +62,28 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openPopup_clearButton_selectedItemIsReset() {
+        String comboBoxId = ClearValuePage.COMBO_BOX_WITH_CLEAR_BUTTON_ID;
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
+
+        comboBox.openPopup();
+        comboBox.closePopup();
+
+        comboBox.$("[part~='clear-button']").get(0).click();
+
+        comboBox.openPopup();
+
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        ElementQuery<TestBenchElement> items = overlay
+                .$("vaadin-combo-box-item");
+
+        items.all()
+                .forEach(item -> Assert.assertFalse(
+                        "Item is not selected after clear button click",
+                        item.hasAttribute("selected")));
+    }
+
+    @Test
     public void valueIsCorrectlySetToNull() {
         Assert.assertNull(
                 "Combobox empty value is not null, add clear tests also",
@@ -125,28 +147,6 @@ public class ClearValueIT extends AbstractComponentIT {
         // Set null value
         setNullButton.click();
         Assert.assertEquals("", comboBox.getInputElementValue());
-    }
-
-    @Test
-    public void allowCustomValue_openPopup_clearButton_selectedItemIsReset() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class)
-                .id(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID);
-
-        comboBox.openPopup();
-        comboBox.closePopup();
-
-        comboBox.$("[part~='clear-button']").get(0).click();
-
-        comboBox.openPopup();
-
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-combo-box-item");
-
-        items.all()
-                .forEach(item -> Assert.assertFalse(
-                        "Item is not selected after clear button click",
-                        item.hasAttribute("selected")));
     }
 
     private void checkEmptyValue(String comboBoxId, String buttonId,
