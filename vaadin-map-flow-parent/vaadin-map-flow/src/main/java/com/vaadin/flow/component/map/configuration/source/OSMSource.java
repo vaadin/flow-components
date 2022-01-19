@@ -18,7 +18,12 @@ package com.vaadin.flow.component.map.configuration.source;
 
 import com.vaadin.flow.component.map.configuration.Constants;
 
-public class OSMSource extends UrlTileSource {
+/**
+ * Map source for loading tiled images from an OpenStreetMap service. The source
+ * will use the official OpenStreetMap service by default. A custom URL can be
+ * configured to load data from a different service.
+ */
+public class OSMSource extends XYZSource {
 
     public OSMSource() {
         this(new Options());
@@ -33,7 +38,7 @@ public class OSMSource extends UrlTileSource {
         return Constants.OL_SOURCE_OSM;
     }
 
-    public static class Options extends UrlTileSource.BaseOptions<Options> {
+    public static class Options extends XYZSource.BaseOptions<Options> {
         public Options() {
             setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
         }

@@ -16,56 +16,46 @@ package com.vaadin.flow.component.map.configuration.source;
  * #L%
  */
 
-import com.vaadin.flow.component.map.configuration.Constants;
-
-import java.util.Objects;
-
-public abstract class UrlTileSource extends Source {
+/**
+ * Abstract base class for map sources providing tiled map data from a URL
+ */
+public abstract class UrlTileSource extends TileSource {
 
     private String url;
 
-    private final boolean opaque;
-
-    protected UrlTileSource(BaseOptions options) {
-        Objects.requireNonNull(options);
-
+    protected UrlTileSource(BaseOptions<?> options) {
+        super(options);
         this.url = options.url;
-        this.opaque = options.opaque;
     }
 
-    @Override
-    public String getType() {
-        return Constants.OL_SOURCE_URL_TILE;
-    }
-
+    /**
+     * @return the URL to load tile data from
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Sets the URL from which to load tile data.
+     *
+     * @param url
+     *            the new URL
+     */
     public void setUrl(String url) {
         this.url = url;
         notifyChange();
     }
 
-    public boolean isOpaque() {
-        return opaque;
-    }
-
-    protected static class BaseOptions<T extends BaseOptions<T>> {
+    protected static class BaseOptions<T extends BaseOptions<T>>
+            extends TileSource.BaseOptions<T> {
         private String url;
-        private boolean opaque = true;
 
+        /**
+         * @see UrlTileSource#setUrl(String)
+         */
         public T setUrl(String url) {
             this.url = url;
-            return (T) this;
+            return getThis();
         }
-
-        public T setOpaque(boolean opaque) {
-            this.opaque = opaque;
-            return (T) this;
-        }
-    }
-
-    public static class Options extends BaseOptions<Options> {
     }
 }
