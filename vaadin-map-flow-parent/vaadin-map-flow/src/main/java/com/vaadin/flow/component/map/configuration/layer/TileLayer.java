@@ -23,7 +23,7 @@ import com.vaadin.flow.component.map.configuration.source.UrlTileSource;
 import java.util.Objects;
 
 /**
- * Layer for displayed tiled map data
+ * Layer for displaying tiled map data
  */
 public class TileLayer extends Layer {
     private TileSource source;
