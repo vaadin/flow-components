@@ -11,6 +11,7 @@ import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.feature.CircleFeature;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
+import com.vaadin.flow.component.map.configuration.source.UrlTileSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.style.CircleStyle;
 import com.vaadin.flow.component.map.configuration.style.Fill;
@@ -56,7 +57,7 @@ public class MapView extends Div {
         NativeButton useOpenStreetMap = new NativeButton("Use OpenStreetMap",
                 e -> {
                     TileLayer layer = (TileLayer) map.getBackgroundLayer();
-                    layer.getSource().setUrl(
+                    ((UrlTileSource) layer.getSource()).setUrl(
                             "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
                 });
 
@@ -64,8 +65,7 @@ public class MapView extends Div {
                 e -> {
                     OSMSource seaMapSource = new OSMSource(
                             new OSMSource.Options().setUrl(
-                                    "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png")
-                                    .setOpaque(false));
+                                    "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png"));
                     TileLayer seaMapLayer = new TileLayer();
                     seaMapLayer.setSource(seaMapSource);
                     map.addLayer(seaMapLayer);
