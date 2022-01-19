@@ -38,6 +38,9 @@ public class View extends AbstractConfigurationObject {
     }
 
     public void setCenter(Coordinate center) {
+        if (center == null) {
+            throw new IllegalArgumentException("Center cannot be null");
+        }
         this.center = center;
         this.notifyChange();
     }
