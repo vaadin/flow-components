@@ -8,10 +8,12 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-map/map-defaults")
+@Route("vaadin-map/background-layer")
 public class BackgroundLayerPage extends Div {
     public BackgroundLayerPage() {
         Map map = new Map();
+        map.setWidthFull();
+        map.setHeight("400px");
 
         NativeButton setCustomOsmSource = new NativeButton(
                 "Set custom OSM source", e -> {

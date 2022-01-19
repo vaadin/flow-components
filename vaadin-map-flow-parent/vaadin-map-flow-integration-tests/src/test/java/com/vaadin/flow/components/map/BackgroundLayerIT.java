@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("vaadin-map/map-defaults")
+@TestPath("vaadin-map/background-layer")
 public class BackgroundLayerIT extends AbstractComponentIT {
     @Before
     public void init() {
