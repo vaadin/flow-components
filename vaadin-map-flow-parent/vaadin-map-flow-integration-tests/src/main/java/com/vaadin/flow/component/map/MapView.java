@@ -65,8 +65,7 @@ public class MapView extends Div {
                 e -> {
                     OSMSource seaMapSource = new OSMSource(
                             new OSMSource.Options().setUrl(
-                                    "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png")
-                                    .setOpaque(false));
+                                    "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png"));
                     TileLayer seaMapLayer = new TileLayer();
                     seaMapLayer.setSource(seaMapSource);
                     map.addLayer(seaMapLayer);

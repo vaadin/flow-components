@@ -30,7 +30,8 @@ public abstract class TileSource extends Source {
 
     /**
      * Whether the source has an opaque background or not. A non-opaque source
-     * has a transparent background, which is useful for overlay layers.
+     * has a transparent background, which is useful for overlay layers. Default
+     * value is {@code false}.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
@@ -43,7 +44,7 @@ public abstract class TileSource extends Source {
 
     protected static class BaseOptions<T extends BaseOptions<T>>
             extends Source.BaseOptions<T> {
-        private boolean opaque;
+        private boolean opaque = false;
 
         /**
          * @see TileSource#isOpaque()
