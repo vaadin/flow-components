@@ -31,6 +31,7 @@ import java.util.Objects;
 // TODO: Include non-themed module `@vaadin/map/src/vaadin-map.js` when theme
 // module is ready
 @JsModule("@vaadin/map/vaadin-map.js")
+@JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
 
     private Layer backgroundLayer;
@@ -52,7 +53,7 @@ public class Map extends MapBase {
      * initialized with a background layer. By default, the background layer
      * will be a {@link TileLayer} using an {@link OSMSource}, which means it
      * will display tiled map data from the official OpenStreetMap server.
-     * 
+     *
      * @return the background layer of the map
      */
     public Layer getBackgroundLayer() {
@@ -66,7 +67,7 @@ public class Map extends MapBase {
      * not be set to null. For use-cases where you want to use a dynamic set of
      * layers, consider setting the first layer as background layer, and then
      * adding the remaining layers using {@link #addLayer(Layer)}.
-     * 
+     *
      * @param backgroundLayer
      *            the new background layer, not null
      */
