@@ -80,12 +80,14 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
         grid.expandWithClick(0);
         useAutoWidthColumnButton.click();
 
-        Integer columnOffsetWidth = grid.getCell(0, 0).getPropertyInteger("offsetWidth");
+        Integer columnOffsetWidth = grid.getCell(0, 0)
+                .getPropertyInteger("offsetWidth");
 
         toggleAttachedButton.click();
         toggleAttachedButton.click();
 
         grid = $(TreeGridElement.class).first();
-        Assert.assertEquals(columnOffsetWidth, grid.getCell(0, 0).getPropertyInteger("offsetWidth"));
+        Assert.assertEquals(columnOffsetWidth,
+                grid.getCell(0, 0).getPropertyInteger("offsetWidth"));
     }
 }

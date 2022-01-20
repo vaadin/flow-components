@@ -43,11 +43,13 @@ public class TreeGridDetachAttachPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
         add(toggleAttached);
-        
-        NativeButton useAutoWidthColumn = new NativeButton("use auto-width column", e -> {
-            grid.removeAllColumns();
-            grid.addHierarchyColumn(HierarchicalTestBean::toString).setAutoWidth(true).setFlexGrow(0);
-        });
+
+        NativeButton useAutoWidthColumn = new NativeButton(
+                "use auto-width column", e -> {
+                    grid.removeAllColumns();
+                    grid.addHierarchyColumn(HierarchicalTestBean::toString)
+                            .setAutoWidth(true).setFlexGrow(0);
+                });
         useAutoWidthColumn.setId("use-auto-width-column");
         add(useAutoWidthColumn);
     }
