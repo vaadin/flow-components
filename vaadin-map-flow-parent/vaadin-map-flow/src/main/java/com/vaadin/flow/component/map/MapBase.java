@@ -57,6 +57,7 @@ public abstract class MapBase extends Component implements HasSize {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
         requestConfigurationSync();
         requestViewSync();
     }
@@ -87,14 +88,16 @@ public abstract class MapBase extends Component implements HasSize {
         JsonObject jsonConfiguration = (JsonObject) JsonSerializer
                 .toJson(configuration);
 
-        this.getElement().executeJs("this.synchronize($0)", jsonConfiguration);
+        this.getElement().executeJs("this.$connector.synchronize($0)",
+                jsonConfiguration);
     }
 
     private void synchronizeView() {
         JsonObject jsonView = (JsonObject) JsonSerializer.toJson(view);
 
         this.getElement().executeJs(
-                "this.synchronize($0, this.configuration.getView())", jsonView);
+                "this.$connector.synchronize($0, this.configuration.getView())",
+                jsonView);
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {
