@@ -29,12 +29,14 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
 
     private TreeGridElement grid;
     private TestBenchElement toggleAttachedButton;
+    private TestBenchElement useAutoWidthColumnButton;
 
     @Before
     public void before() {
         open();
         grid = $(TreeGridElement.class).first();
         toggleAttachedButton = $("button").id("toggle-attached");
+        useAutoWidthColumnButton = $("button").id("use-auto-width-column");
     }
 
     @Test
@@ -71,5 +73,19 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
 
         grid = $(TreeGridElement.class).first();
         Assert.assertTrue(grid.isRowExpanded(2, 0));
+    }
+
+    @Test
+    public void useAutoWidthColumn_detach_attach_shouldHaveProperColumnWidth() {
+        grid.expandWithClick(0);
+        useAutoWidthColumnButton.click();
+
+        Integer columnOffsetWidth = grid.getCell(0, 0).getPropertyInteger("offsetWidth");
+
+        toggleAttachedButton.click();
+        toggleAttachedButton.click();
+
+        grid = $(TreeGridElement.class).first();
+        Assert.assertEquals(columnOffsetWidth, grid.getCell(0, 0).getPropertyInteger("offsetWidth"));
     }
 }
