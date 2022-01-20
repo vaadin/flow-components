@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>flow-project</artifactId>
-        <version>10.0-SNAPSHOT</version>
+        <artifactId>vaadin-flow-components</artifactId>
+        <version>23.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>flow-component-demo-helpers</artifactId>
-    <name>Flow component demo helpers</name>
+    <artifactId>vaadin-component-demo-helpers</artifactId>
+    <name>Vaadin component demo helpers</name>
     <description>Includes a server and a base view for creating component demos</description>
 
     <dependencies>
@@ -44,18 +44,25 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench-core</artifactId>
+            <version>${testbench.version}</version>
             <scope>provided</scope>
         </dependency>
 

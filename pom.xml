@@ -37,6 +37,7 @@
         <osgi.export.package>default</osgi.export.package>
     </properties>
     <modules>
+        <module>vaadin-component-demo-helpers</module>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
@@ -483,21 +484,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-polymer-template</artifactId>
                 <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-component-demo-helpers</artifactId>
-                <version>${flow.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.hamcrest</groupId>
-                        <artifactId>hamcrest-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
               <groupId>com.vaadin</groupId>
