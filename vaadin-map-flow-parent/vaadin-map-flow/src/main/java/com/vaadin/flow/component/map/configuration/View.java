@@ -16,10 +16,24 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import java.util.Objects;
+
+/**
+ * View is responsible for centering of the map, rotation or zoom level
+ */
 public class View extends AbstractConfigurationObject {
 
+    /**
+     * Coordinates of the center of the map in epsg:3857 (Web Mercator) format
+     */
     private Coordinate center;
+    /**
+     * Rotation of map in radian
+     */
     private float rotation;
+    /**
+     * Zoom level of the map
+     */
     private float zoom;
 
     public View() {
@@ -28,36 +42,62 @@ public class View extends AbstractConfigurationObject {
         this.zoom = 0;
     }
 
+    /**
+     * This method is used for internal synchronization of map configuration.
+     */
     @Override
     public String getType() {
         return Constants.OL_VIEW;
     }
 
+    /**
+     * Gets center coordinates of the map in epsg:3857 format
+     * @return center of the map in epsg:3857 format
+     */
     public Coordinate getCenter() {
         return center;
     }
 
+    /**
+     * Sets the center of the map
+     * @param center coordinates of the center in epsg:3857 format
+     */
     public void setCenter(Coordinate center) {
-        if (center == null) {
-            throw new IllegalArgumentException("Center cannot be null");
-        }
+        Objects.requireNonNull(center, "Center cannot be null");
+
         this.center = center;
         this.notifyChange();
     }
 
+    /**
+     * Get rotation of the map
+     * @return current rotation in radians
+     */
     public float getRotation() {
         return rotation;
     }
 
+    /**
+     * Sets the rotation of the map
+     * @param rotation the rotation in radians format
+     */
     public void setRotation(float rotation) {
         this.rotation = rotation;
         this.notifyChange();
     }
 
+    /**
+     * Gets zoom level of the map
+     * @return the zoom level of the map
+     */
     public float getZoom() {
         return zoom;
     }
 
+    /**
+     * Sets the zoom level of the map
+     * @param zoom the zoom level in decimal format
+     */
     public void setZoom(float zoom) {
         this.zoom = zoom;
         this.notifyChange();

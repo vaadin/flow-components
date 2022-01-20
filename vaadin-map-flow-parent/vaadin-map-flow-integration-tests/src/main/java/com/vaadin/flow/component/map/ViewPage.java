@@ -5,9 +5,9 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-map/view-methods")
-public class MapSetView extends Div {
-    public MapSetView() {
+@Route("vaadin-map/view")
+public class ViewPage extends Div {
+    public ViewPage() {
         Map map = new Map();
         map.setWidthFull();
         map.setHeight("400px");
