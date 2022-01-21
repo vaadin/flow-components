@@ -19,48 +19,48 @@ package com.vaadin.flow.component.map.configuration;
 import java.util.Objects;
 
 /**
- * View is responsible for centering of the map, rotation or zoom level
+ * A class representing a view of the map, responsible for changing center, rotation ...
+ * of the view
  */
 public class View extends AbstractConfigurationObject {
 
-    /**
-     * Coordinates of the center of the map in epsg:3857 (Web Mercator) format
-     */
+
     private Coordinate center;
-    /**
-     * Rotation of map in radian
-     */
     private float rotation;
-    /**
-     * Zoom level of the map
-     */
     private float zoom;
+    private String projection;
 
     public View() {
         this.center = new Coordinate(0, 0);
         this.rotation = 0;
         this.zoom = 0;
+        this.projection = "EPSG:3857";
     }
 
-    /**
-     * This method is used for internal synchronization of map configuration.
-     */
+    public View(String projection) {
+        this();
+        this.projection = projection;
+    }
+
     @Override
     public String getType() {
         return Constants.OL_VIEW;
     }
 
     /**
-     * Gets center coordinates of the map in epsg:3857 format
-     * @return center of the map in epsg:3857 format
+     * Gets center coordinates of the view
+     * 
+     * @return center of the view
      */
     public Coordinate getCenter() {
         return center;
     }
 
     /**
-     * Sets the center of the map
-     * @param center coordinates of the center in epsg:3857 format
+     * Sets the center of the view in format specified by projection set on the view which defaults to EPSG:3857
+     * 
+     * @param center
+     *            coordinates of the center of the view
      */
     public void setCenter(Coordinate center) {
         Objects.requireNonNull(center, "Center cannot be null");
@@ -70,7 +70,8 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Get rotation of the map
+     * Get rotation of the view
+     * 
      * @return current rotation in radians
      */
     public float getRotation() {
@@ -78,8 +79,10 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Sets the rotation of the map
-     * @param rotation the rotation in radians format
+     * Sets the rotation of the view, default to zero
+     * 
+     * @param rotation
+     *            the rotation in radians format
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;
@@ -87,19 +90,30 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Gets zoom level of the map
-     * @return the zoom level of the map
+     * Gets zoom level of the view
+     * 
+     * @return the zoom level of the view
      */
     public float getZoom() {
         return zoom;
     }
 
     /**
-     * Sets the zoom level of the map
-     * @param zoom the zoom level in decimal format
+     * Sets the zoom level of the view, default to 0
+     * 
+     * @param zoom
+     *            the zoom level in decimal format
      */
     public void setZoom(float zoom) {
         this.zoom = zoom;
         this.notifyChange();
+    }
+
+    /**
+     * Gets the projection of the view, default to EPSG:3857
+     * @return
+     */
+    public String getProjection() {
+        return projection;
     }
 }
