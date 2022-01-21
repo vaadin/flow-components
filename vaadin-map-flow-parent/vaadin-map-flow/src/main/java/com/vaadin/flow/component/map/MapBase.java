@@ -47,8 +47,10 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     /**
-     * Gets the view of the map, A view gives access to properties like center, rotation ...
-     * @return map's view
+     * Gets the view of the map. The view gives access to properties like center
+     * and zoom level of the viewport.
+     *
+     * @return the map's view
      */
     public View getView() {
         return view;
