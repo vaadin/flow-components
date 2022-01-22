@@ -27,6 +27,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -35,8 +36,9 @@ import elemental.json.JsonObject;
 import java.beans.PropertyChangeEvent;
 
 public abstract class MapBase extends Component implements HasSize {
-    private Configuration configuration;
-    private View view;
+    private final Configuration configuration;
+    private final View view;
+    private final Assets assets;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
     private StateTree.ExecutionRegistration pendingViewSync;
@@ -44,6 +46,7 @@ public abstract class MapBase extends Component implements HasSize {
     protected MapBase() {
         this.configuration = new Configuration();
         this.view = new View();
+        this.assets = new Assets();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
         this.view.addPropertyChangeListener(this::viewPropertyChange);
@@ -73,6 +76,7 @@ public abstract class MapBase extends Component implements HasSize {
         super.onAttach(attachEvent);
         checkFeatureFlag();
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
+        synchronizeAssets();
         requestConfigurationSync();
         requestViewSync();
     }
@@ -113,6 +117,20 @@ public abstract class MapBase extends Component implements HasSize {
         this.getElement().executeJs(
                 "this.$connector.synchronize($0, this.configuration.getView())",
                 jsonView);
+    }
+
+    private void synchronizeAssets() {
+        assets.getImageAssets().forEach(imageAsset -> {
+            // Add image element as virtual child, if it hasn't been added
+            // already
+            Element imageElement = imageAsset.getImage().getElement();
+            if (imageElement.getParentNode() == null) {
+                getElement().appendVirtualChild(imageElement);
+            }
+            // Pass image element reference to connector
+            getElement().executeJs("this.$connector.addImageAsset($0, $1)",
+                    imageAsset.getName(), imageAsset.getImage().getElement());
+        });
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {

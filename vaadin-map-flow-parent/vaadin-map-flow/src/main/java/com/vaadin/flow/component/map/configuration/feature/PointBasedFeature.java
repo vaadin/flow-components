@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.map.configuration.geometry;
+package com.vaadin.flow.component.map.configuration.feature;
 
 /*
  * #%L
@@ -16,31 +16,31 @@ package com.vaadin.flow.component.map.configuration.geometry;
  * #L%
  */
 
-import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Feature;
+import com.vaadin.flow.component.map.configuration.geometry.Point;
 
 import java.util.Objects;
 
-public class Point extends SimpleGeometry {
+public abstract class PointBasedFeature extends Feature {
 
-    private Coordinate coordinates;
+    private final Point point;
 
-    @Override
-    public String getType() {
-        return Constants.OL_GEOMETRY_POINT;
+    protected PointBasedFeature() {
+        this(new Coordinate(0, 0));
     }
 
-    public Point(Coordinate coordinates) {
-        this.coordinates = coordinates;
+    protected PointBasedFeature(Coordinate coordinates) {
+        point = new Point(coordinates);
+        setGeometry(point);
     }
 
     public Coordinate getCoordinates() {
-        return coordinates;
+        return point.getCoordinates();
     }
 
     public void setCoordinates(Coordinate coordinates) {
         Objects.requireNonNull(coordinates);
-        this.coordinates = coordinates;
-        notifyChange();
+        point.setCoordinates(coordinates);
     }
 }

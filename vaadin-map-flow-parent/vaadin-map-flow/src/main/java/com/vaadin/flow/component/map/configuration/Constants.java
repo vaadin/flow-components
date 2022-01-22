@@ -27,7 +27,7 @@ public class Constants {
     // Geometry
     public static final String OL_GEOMETRY_POINT = "ol/geom/Point";
     // Style
-    public static final String OL_STYLE_CIRCLE = "ol/style/Circle";
+    public static final String OL_STYLE_ICON = "ol/style/Icon";
     public static final String OL_STYLE_FILL = "ol/style/Fill";
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";
     public static final String OL_STYLE_STYLE = "ol/style/Style";
@@ -37,5 +37,4 @@ public class Constants {
     public static final String OL_FEATURE = "ol/Feature";
 
     // Vaadin-specific abstractions
-    public static final String VAADIN_FEATURE_CIRCLE = "vaadin/feature/Circle";
 }
