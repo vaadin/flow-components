@@ -16,53 +16,43 @@ package com.vaadin.flow.component.map;
  * #L%
  */
 
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Assets {
-
     public static final ImageAsset DEFAULT_MARKER = new ImageAsset(
-            "defaultMarker", "default-marker.png",
+            "default-marker.png",
             "/META-INF/resources/frontend/vaadin-map/assets/default-marker.png",
             100, 146);
 
-    private final List<ImageAsset> imageAssets;
+    public static class Asset {
+        private final String fileName;
+        private final StreamResource resource;
 
-    public List<ImageAsset> getImageAssets() {
-        return imageAssets;
+        private Asset(String fileName, String resourcePath) {
+            StreamResource resource = new StreamResource(fileName,
+                    () -> getClass().getResourceAsStream(resourcePath));
+
+            this.fileName = fileName;
+            this.resource = resource;
+        }
+
+        private Asset(String fileName, StreamResource resource) {
+            this.fileName = fileName;
+            this.resource = resource;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        public StreamResource getResource() {
+            return resource;
+        }
     }
 
-    public Assets() {
-        imageAssets = new ArrayList<>();
-        imageAssets.add(DEFAULT_MARKER);
-    }
-
-    public static class ImageAsset {
-        private final String name;
-        private final Image image;
+    public static class ImageAsset extends Asset {
         private final int width;
         private final int height;
-
-        private ImageAsset(String name, String fileName, String resourcePath,
-                int width, int height) {
-            this.name = name;
-            this.width = width;
-            this.height = height;
-            StreamResource streamResource = new StreamResource(fileName,
-                    () -> getClass().getResourceAsStream(resourcePath));
-            image = new Image(streamResource, "");
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Image getImage() {
-            return image;
-        }
 
         public int getWidth() {
             return width;
@@ -70,6 +60,13 @@ public class Assets {
 
         public int getHeight() {
             return height;
+        }
+
+        private ImageAsset(String fileName, String resourcePath, int width,
+                int height) {
+            super(fileName, resourcePath);
+            this.width = width;
+            this.height = height;
         }
     }
 }

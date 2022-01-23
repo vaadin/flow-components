@@ -29,16 +29,18 @@ import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
+import elemental.json.JsonValue;
 
 import java.beans.PropertyChangeEvent;
 
 public abstract class MapBase extends Component implements HasSize {
     private final Configuration configuration;
     private final View view;
-    private final Assets assets;
+    private final MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
     private StateTree.ExecutionRegistration pendingViewSync;
@@ -46,7 +48,7 @@ public abstract class MapBase extends Component implements HasSize {
     protected MapBase() {
         this.configuration = new Configuration();
         this.view = new View();
-        this.assets = new Assets();
+        this.serializer = new MapSerializer();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
         this.view.addPropertyChangeListener(this::viewPropertyChange);
@@ -76,7 +78,6 @@ public abstract class MapBase extends Component implements HasSize {
         super.onAttach(attachEvent);
         checkFeatureFlag();
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
-        synchronizeAssets();
         requestConfigurationSync();
         requestViewSync();
     }
@@ -104,33 +105,18 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     private void synchronizeConfiguration() {
-        JsonObject jsonConfiguration = (JsonObject) JsonSerializer
-                .toJson(configuration);
+        JsonValue jsonConfiguration = serializer.toJson(configuration);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonConfiguration);
     }
 
     private void synchronizeView() {
-        JsonObject jsonView = (JsonObject) JsonSerializer.toJson(view);
+        JsonValue jsonView = serializer.toJson(view);
 
         this.getElement().executeJs(
                 "this.$connector.synchronize($0, this.configuration.getView())",
                 jsonView);
-    }
-
-    private void synchronizeAssets() {
-        assets.getImageAssets().forEach(imageAsset -> {
-            // Add image element as virtual child, if it hasn't been added
-            // already
-            Element imageElement = imageAsset.getImage().getElement();
-            if (imageElement.getParentNode() == null) {
-                getElement().appendVirtualChild(imageElement);
-            }
-            // Pass image element reference to connector
-            getElement().executeJs("this.$connector.addImageAsset($0, $1)",
-                    imageAsset.getName(), imageAsset.getImage().getElement());
-        });
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {

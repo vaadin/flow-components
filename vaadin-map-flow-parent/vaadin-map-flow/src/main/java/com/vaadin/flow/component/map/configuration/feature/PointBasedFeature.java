@@ -16,6 +16,7 @@ package com.vaadin.flow.component.map.configuration.feature;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
@@ -35,6 +36,7 @@ public abstract class PointBasedFeature extends Feature {
         setGeometry(point);
     }
 
+    @JsonIgnore
     public Coordinate getCoordinates() {
         return point.getCoordinates();
     }

@@ -16,7 +16,9 @@ package com.vaadin.flow.component.map.configuration.style;
  * #L%
  */
 
+import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Constants;
+import com.vaadin.flow.server.StreamResource;
 
 public class Icon extends ImageStyle {
 
@@ -25,7 +27,7 @@ public class Icon extends ImageStyle {
     private final String color;
     private final String crossOrigin;
     private final String src;
-    private final String imgName;
+    private final StreamResource img;
     private final ImageSize imgSize;
 
     @Override
@@ -58,8 +60,8 @@ public class Icon extends ImageStyle {
         return src;
     }
 
-    public String getImgName() {
-        return imgName;
+    public StreamResource getImg() {
+        return img;
     }
 
     public ImageSize getImgSize() {
@@ -73,7 +75,7 @@ public class Icon extends ImageStyle {
         color = options.color;
         crossOrigin = options.crossOrigin;
         src = options.src;
-        imgName = options.imgName;
+        img = options.img;
         imgSize = options.imgSize;
     }
 
@@ -83,7 +85,7 @@ public class Icon extends ImageStyle {
         private String color;
         private String crossOrigin;
         private String src;
-        private String imgName;
+        private StreamResource img;
         private ImageSize imgSize;
 
         public Options setAnchor(Anchor anchor) {
@@ -111,8 +113,8 @@ public class Icon extends ImageStyle {
             return getThis();
         }
 
-        public Options setImgName(String imgName) {
-            this.imgName = imgName;
+        public Options setImg(StreamResource img) {
+            this.img = img;
             return getThis();
         }
 

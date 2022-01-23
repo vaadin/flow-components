@@ -16,6 +16,7 @@ package com.vaadin.flow.component.map.configuration.layer;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
@@ -50,6 +51,7 @@ public class FeatureLayer extends VectorLayer {
     /**
      * @return the features managed by the layer
      */
+    @JsonIgnore
     public List<Feature> getFeatures() {
         return getSource().getFeatures();
     }

@@ -53,14 +53,12 @@ function convertAnchorOrigin(anchorOrigin) {
 
 export function synchronizeIcon(target, source, context) {
   if (!target) {
-    let img = source.imgName ? context.imageAssets[source.imgName] : null;
-    if (!(img instanceof HTMLImageElement)) {
-      img = undefined;
-    }
+    const src = source.img || source.src;
     target = new Icon(
       createOptions({
         ...source,
-        img,
+        img: undefined,
+        src,
         imgSize: source.imgSize
           ? convertToSizeArray(source.imgSize)
           : undefined,

@@ -16,6 +16,7 @@ package com.vaadin.flow.component.map.configuration.feature;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.style.Icon;
@@ -31,7 +32,7 @@ public class MarkerFeature extends PointBasedFeature {
                 Assets.DEFAULT_MARKER.getHeight());
 
         DEFAULT_MARKER_ICON = new Icon(
-                new Icon.Options().setImgName(Assets.DEFAULT_MARKER.getName())
+                new Icon.Options().setImg(Assets.DEFAULT_MARKER.getResource())
                         .setImgSize(imageSize).setScale(0.3f)
                         .setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT)
                         .setAnchor(new Icon.Anchor(0.5f, 0)));
@@ -52,6 +53,7 @@ public class MarkerFeature extends PointBasedFeature {
         setStyle(style);
     }
 
+    @JsonIgnore
     public Icon getIcon() {
         return (Icon) getStyle().getImage();
     }
