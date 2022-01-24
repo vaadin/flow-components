@@ -36,7 +36,9 @@ function synchronizeMap(target, source, context) {
 
 function synchronizeView(target, source, _context) {
   if (!target) {
-    target = new View();
+    target = new View({
+      projection: source.projection
+    });
   }
 
   target.setCenter(
