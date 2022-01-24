@@ -25,12 +25,14 @@ import java.util.UUID;
 public abstract class AbstractConfigurationObject implements Serializable {
 
     private String id;
+    private final ThreadLocal<Boolean> notifyChanges = new ThreadLocal<>();
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
+        notifyChanges.set(true);
     }
 
     public String getId() {
@@ -63,10 +65,23 @@ public abstract class AbstractConfigurationObject implements Serializable {
     }
 
     protected void notifyChange() {
+        if (!this.notifyChanges.get())
+            return;
         this.propertyChangeSupport.firePropertyChange("property", null, null);
     }
 
     protected void notifyChange(PropertyChangeEvent event) {
+        if (!this.notifyChanges.get())
+            return;
         this.propertyChangeSupport.firePropertyChange("property", null, null);
+    }
+
+    public void update(Runnable updater, boolean notifyChanges) {
+        this.notifyChanges.set(notifyChanges);
+        try {
+            updater.run();
+        } finally {
+            this.notifyChanges.set(true);
+        }
     }
 }
