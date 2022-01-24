@@ -16,12 +16,15 @@ package com.vaadin.flow.component.map;
  * #L%
  */
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
+import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
+import com.vaadin.flow.shared.Registration;
 
 import java.util.Objects;
 
@@ -42,6 +45,14 @@ public class Map extends MapBase {
         TileLayer baseLayer = new TileLayer();
         baseLayer.setSource(source);
         setBackgroundLayer(baseLayer);
+        registerEventListeners();
+    }
+
+    private void registerEventListeners() {
+        addViewMoveEndEventListener(event -> {
+            float rotation = event.getRotation();
+            getView().setRotation(rotation);
+        });
     }
 
     public Configuration getRawConfiguration() {
@@ -68,8 +79,7 @@ public class Map extends MapBase {
      * layers, consider setting the first layer as background layer, and then
      * adding the remaining layers using {@link #addLayer(Layer)}.
      *
-     * @param backgroundLayer
-     *            the new background layer, not null
+     * @param backgroundLayer the new background layer, not null
      */
     public void setBackgroundLayer(Layer backgroundLayer) {
         Objects.requireNonNull(backgroundLayer);
@@ -86,5 +96,9 @@ public class Map extends MapBase {
 
     public void removeLayer(Layer layer) {
         getConfiguration().removeLayer(layer);
+    }
+
+    public Registration addViewMoveEndEventListener(ComponentEventListener<MapViewMoveEndEvent> listener) {
+        return addListener(MapViewMoveEndEvent.class, listener);
     }
 }
