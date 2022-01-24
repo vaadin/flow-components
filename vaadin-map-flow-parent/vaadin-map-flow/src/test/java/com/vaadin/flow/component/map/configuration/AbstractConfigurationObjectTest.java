@@ -73,7 +73,9 @@ public class AbstractConfigurationObjectTest {
     @Test
     public void updateWithoutNotifyChanges_doesNotNotifyNestedChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
-        testConfiguration.update(() -> testConfiguration.getNestedConfiguration().setFoo("test"), false);
+        testConfiguration.update(
+                () -> testConfiguration.getNestedConfiguration().setFoo("test"),
+                false);
 
         Mockito.verify(changeListenerMock, Mockito.times(0))
                 .propertyChange(Mockito.any());
