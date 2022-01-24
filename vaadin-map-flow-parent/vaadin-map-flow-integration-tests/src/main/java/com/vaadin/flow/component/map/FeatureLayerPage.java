@@ -1,0 +1,52 @@
+package com.vaadin.flow.component.map;
+
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Feature;
+import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.router.Route;
+
+@Route("vaadin-map/feature-layer")
+public class FeatureLayerPage extends Div {
+    public FeatureLayerPage() {
+        Map map = new Map();
+        map.setWidthFull();
+        map.setHeight("400px");
+
+        NativeButton addDefaultMarkerFeature = new NativeButton(
+                "Add default marker feature", e -> {
+                    MarkerFeature feature = new MarkerFeature();
+                    map.getFeatureLayer().addFeature(feature);
+                });
+        addDefaultMarkerFeature.setId("add-default-marker-feature");
+
+        NativeButton addCustomMarkerFeature = new NativeButton(
+                "Add custom marker feature", e -> {
+                    Coordinate coordinate = new Coordinate(1233058.1696443919,
+                            6351912.406929109);
+                    Icon icon = new Icon(new Icon.Options()
+                            .setSrc("assets/custom-marker.png").setColor("blue")
+                            .setOpacity(0.8f).setScale(2f)
+                            .setRotation((float) Math.PI));
+                    MarkerFeature feature = new MarkerFeature(coordinate, icon);
+                    map.getFeatureLayer().addFeature(feature);
+                });
+        addCustomMarkerFeature.setId("add-custom-marker-feature");
+
+        NativeButton removeFirstFeature = new NativeButton(
+                "Remove first feature", e -> {
+                    if (map.getFeatureLayer().getFeatures().size() > 0) {
+                        Feature feature = map.getFeatureLayer().getFeatures()
+                                .get(0);
+                        map.getFeatureLayer().removeFeature(feature);
+                    }
+                });
+        removeFirstFeature.setId("remove-first-feature");
+
+        add(map);
+        add(new Div(addDefaultMarkerFeature, addCustomMarkerFeature,
+                removeFirstFeature));
+    }
+}

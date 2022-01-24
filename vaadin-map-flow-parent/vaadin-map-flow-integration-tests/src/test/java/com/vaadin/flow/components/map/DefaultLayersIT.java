@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-map/default-layers")
-public class DefaultLayers extends AbstractComponentIT {
+public class DefaultLayersIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();

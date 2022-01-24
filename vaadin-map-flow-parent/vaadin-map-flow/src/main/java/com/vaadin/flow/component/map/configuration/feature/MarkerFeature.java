@@ -22,6 +22,8 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
+import java.util.Objects;
+
 public class MarkerFeature extends PointBasedFeature {
 
     private static final Icon DEFAULT_MARKER_ICON;
@@ -48,6 +50,10 @@ public class MarkerFeature extends PointBasedFeature {
 
     public MarkerFeature(Coordinate coordinates, Icon icon) {
         super(coordinates);
+
+        Objects.requireNonNull(coordinates);
+        Objects.requireNonNull(icon);
+
         Style style = new Style();
         style.setImage(icon);
         setStyle(style);

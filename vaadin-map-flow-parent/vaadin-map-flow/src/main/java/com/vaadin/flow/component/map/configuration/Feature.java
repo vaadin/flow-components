@@ -19,6 +19,8 @@ package com.vaadin.flow.component.map.configuration;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
+import java.util.Objects;
+
 /**
  * A geographic feature to be displayed on a map. A feature can be anything that
  * should be displayed on top of a map, such as points of interest, vehicles or
@@ -39,6 +41,7 @@ public abstract class Feature extends AbstractConfigurationObject {
     }
 
     public void setGeometry(SimpleGeometry geometry) {
+        Objects.requireNonNull(geometry);
         updateNestedPropertyObserver(this.geometry, geometry);
         this.geometry = geometry;
         notifyChange();

@@ -31,6 +31,7 @@ public class Point extends SimpleGeometry {
     }
 
     public Point(Coordinate coordinates) {
+        Objects.requireNonNull(coordinates);
         this.coordinates = coordinates;
     }
 

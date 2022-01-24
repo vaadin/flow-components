@@ -16,7 +16,6 @@ package com.vaadin.flow.component.map.configuration.style;
  * #L%
  */
 
-import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.server.StreamResource;
 
@@ -70,6 +69,15 @@ public class Icon extends ImageStyle {
 
     public Icon(Options options) {
         super(options);
+        if (options.src == null && options.img == null) {
+            throw new NullPointerException(
+                    "Either a source URL or an image must be specified in the options");
+        }
+        if (options.src != null && options.img != null) {
+            throw new IllegalStateException(
+                    "Both a source URL or an image were specified in the options. You must only specify one of these options.");
+        }
+
         anchor = options.anchor;
         anchorOrigin = options.anchorOrigin;
         color = options.color;
@@ -77,6 +85,7 @@ public class Icon extends ImageStyle {
         src = options.src;
         img = options.img;
         imgSize = options.imgSize;
+
     }
 
     public static class Options extends ImageStyle.BaseOptions<Options> {

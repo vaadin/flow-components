@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
+import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 
 import java.util.Objects;
 
@@ -32,6 +33,7 @@ public abstract class PointBasedFeature extends Feature {
     }
 
     protected PointBasedFeature(Coordinate coordinates) {
+        Objects.requireNonNull(coordinates);
         point = new Point(coordinates);
         setGeometry(point);
     }
@@ -44,5 +46,19 @@ public abstract class PointBasedFeature extends Feature {
     public void setCoordinates(Coordinate coordinates) {
         Objects.requireNonNull(coordinates);
         point.setCoordinates(coordinates);
+    }
+
+    @Override
+    public Point getGeometry() {
+        return (Point) super.getGeometry();
+    }
+
+    @Override
+    public void setGeometry(SimpleGeometry geometry) {
+        Objects.requireNonNull(geometry);
+        if (!(geometry instanceof Point)) {
+            throw new IllegalArgumentException("Geometry must be a point");
+        }
+        super.setGeometry(geometry);
     }
 }

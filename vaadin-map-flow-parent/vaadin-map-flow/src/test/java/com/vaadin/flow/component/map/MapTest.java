@@ -3,14 +3,13 @@ package com.vaadin.flow.component.map;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
-import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class MapTest {
     @Test
-    public void defaultLayers() {
+    public void defaults() {
         Map map = new Map();
 
         Assert.assertEquals(2, map.getConfiguration().getLayers().size());
