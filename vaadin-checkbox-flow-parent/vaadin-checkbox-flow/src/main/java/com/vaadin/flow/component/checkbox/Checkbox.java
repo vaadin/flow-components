@@ -132,6 +132,9 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     @Override
     public void setLabel(String label) {
+        if (getElement().equals(labelElement.getElement().getParent())) {
+            getElement().removeChild(labelElement.getElement());
+        }
         getElement().setProperty("label", label == null ? "" : label);
     }
 
