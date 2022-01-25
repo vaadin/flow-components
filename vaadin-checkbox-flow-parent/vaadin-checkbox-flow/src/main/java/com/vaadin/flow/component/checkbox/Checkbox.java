@@ -35,7 +35,7 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         implements HasSize, HasLabel {
 
-    private final Label labelElement = appendLabelElement();
+    private final Label labelElement;
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
@@ -52,6 +52,10 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
                 NO_OP);
         // https://github.com/vaadin/vaadin-checkbox/issues/25
         setIndeterminate(false);
+
+        // Initialize custom label
+        labelElement = new Label();
+        labelElement.getElement().setAttribute("slot", "label");
     }
 
     /**
@@ -117,17 +121,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     @Override
     public String getLabel() {
-        return getElement().getChildren()
-                .filter(child -> child.getTag().equals("label")).findFirst()
-                .get().getText();
-    }
-
-    private Label appendLabelElement() {
-        // Create and add a new slotted label
-        Label label = new Label();
-        label.getElement().setAttribute("slot", "label");
-        getElement().appendChild(label.getElement());
-        return label;
+        return getElement().getProperty("label");
     }
 
     /**
@@ -138,7 +132,10 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     @Override
     public void setLabel(String label) {
-        labelElement.setText(label);
+        if (getElement().equals(labelElement.getElement().getParent())) {
+            getElement().removeChild(labelElement.getElement());
+        }
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -153,7 +150,9 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *            the label html to set
      */
     public void setLabelAsHtml(String htmlContent) {
+        setLabel("");
         labelElement.getElement().setProperty("innerHTML", htmlContent);
+        getElement().appendChild(labelElement.getElement());
     }
 
     /**

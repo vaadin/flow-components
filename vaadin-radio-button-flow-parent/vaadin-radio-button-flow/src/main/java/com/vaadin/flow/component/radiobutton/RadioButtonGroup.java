@@ -70,8 +70,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.0.0-alpha4")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.0-alpha4")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.0.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.0-alpha5")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -87,8 +87,6 @@ public class RadioButtonGroup<T>
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
-
-    private boolean isReadOnly;
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
@@ -243,6 +241,7 @@ public class RadioButtonGroup<T>
         super.setValue(value);
         getRadioButtons().forEach(
                 rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        refreshButtons();
     }
 
     @Override
@@ -331,26 +330,19 @@ public class RadioButtonGroup<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        if (isReadOnly()) {
-            setDisabled(true);
-        } else {
-            setDisabled(!enabled);
-        }
+        setDisabled(!enabled);
         refreshButtons();
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        isReadOnly = readOnly;
-        if (isEnabled()) {
-            setDisabled(readOnly);
-            refreshButtons();
-        }
+        super.setReadonly(readOnly);
+        refreshButtons();
     }
 
     @Override
     public boolean isReadOnly() {
-        return isReadOnly;
+        return super.isReadonlyBoolean();
     }
 
     /**
@@ -571,6 +563,12 @@ public class RadioButtonGroup<T>
     private void updateEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
+
+        if (this.isReadOnly() && !button.isCheckedBoolean()) {
+            // Mark non-checked radio buttons in a readonly group as disabled.
+            disabled = true;
+        }
+
         button.setEnabled(!disabled);
         Serializable rawValue = button.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
