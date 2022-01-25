@@ -40,7 +40,7 @@ import { synchronize } from "./synchronization";
       },
     };
 
-    mapElement.configuration.on("moveend", (event) => {
+    mapElement.configuration.on("moveend", (_event) => {
       const view = mapElement.configuration.getView();
 
       const center = view.getCenter();
