@@ -38,13 +38,15 @@ public class DisabledItemsPage extends Div {
                 event -> radioButtonGroup.setEnabled(true));
         enableButton.setId("enable-button");
 
-        NativeButton rendererEnabledButton = new NativeButton("set renderer and enabled",
-                event -> {
-                    radioButtonGroup.setRenderer(new TextRenderer<String>(item  -> item));
+        NativeButton rendererEnabledButton = new NativeButton(
+                "set renderer and enabled", event -> {
+                    radioButtonGroup.setRenderer(
+                            new TextRenderer<String>(item -> item));
                     radioButtonGroup.setEnabled(true);
                 });
         rendererEnabledButton.setId("set-renderer-and-enabled-button");
 
-        add(radioButtonGroup, nativeButton, enableButton, rendererEnabledButton);
+        add(radioButtonGroup, nativeButton, enableButton,
+                rendererEnabledButton);
     }
 }

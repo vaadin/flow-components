@@ -570,8 +570,9 @@ public class RadioButtonGroup<T>
 
         button.setEnabled(!disabled);
         button.setDisabled(disabled);
-        // When enabling a disabled radio group, individual button Web Components that should
-        // remain disabled (due to itemEnabledProvider), may end up rendering as enabled.
+        // When enabling a disabled radio group, individual button Web
+        // Components that should remain disabled (due to itemEnabledProvider),
+        // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
         button.getElement().executeJs("this.disabled = $0", disabled);
     }
