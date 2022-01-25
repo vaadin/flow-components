@@ -170,6 +170,9 @@
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
+                        <configuration>
+                            <scanIntervalSeconds>5</scanIntervalSeconds>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
