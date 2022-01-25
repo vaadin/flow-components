@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.map.configuration.Configuration;
+import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
@@ -51,7 +52,11 @@ public class Map extends MapBase {
     private void registerEventListeners() {
         addViewMoveEndEventListener(event -> {
             float rotation = event.getRotation();
+            float zoom = event.getZoom();
+            Coordinate center = event.getCenter();
             getView().setRotation(rotation);
+            getView().setZoom(zoom);
+            getView().setCenter(center);
         });
     }
 

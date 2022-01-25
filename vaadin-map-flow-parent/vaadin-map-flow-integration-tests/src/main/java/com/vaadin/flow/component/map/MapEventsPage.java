@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.router.Route;
 
 import javax.lang.model.element.ModuleElement;
@@ -13,10 +14,13 @@ public class MapEventsPage extends Div {
         map.setWidthFull();
 
         map.addViewMoveEndEventListener(event -> {
-            System.out.println("MapMoveEndEvent");
-            System.out.println(event.getRotation());
+            View mapView = map.getView();
 
-            System.out.println(map.getView().getRotation());
+            System.out.println(mapView.getRotation());
+            System.out.println(mapView.getZoom());
+            System.out.println(mapView.getRotation());
+            System.out.println(mapView.getRotation());
+            System.out.println(mapView.getCenter().getX() + " " + mapView.getCenter().getY());
         });
 
         add(map);
