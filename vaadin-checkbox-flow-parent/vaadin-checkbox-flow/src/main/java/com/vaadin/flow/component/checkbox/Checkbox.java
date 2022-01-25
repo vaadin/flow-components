@@ -120,14 +120,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
                 .get().getText();
     }
 
-    private Label appendLabelElement() {
-        // Create and add a new slotted label
-        Label label = new Label();
-        label.getElement().setAttribute("slot", "label");
-        getElement().appendChild(label.getElement());
-        return label;
-    }
-
     /**
      * Set the current label text of this checkbox.
      *
