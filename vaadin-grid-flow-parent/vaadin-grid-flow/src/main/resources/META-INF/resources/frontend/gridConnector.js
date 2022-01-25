@@ -603,7 +603,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
        * @param array items the items to update in DOM
        */
       const updateGridItemsInDomBasedOnCache = function(items) {
-        if (!items || grid.$.items.childElementCount === 0) {
+        if (!items || !grid.$ || grid.$.items.childElementCount === 0) {
           return;
         }
 
@@ -932,25 +932,38 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             && validSelectionModes.indexOf(mode) >= 0) {
           selectionMode = mode;
           selectedKeys = {};
-          // manage aria-multiselectable attribute depending on the selection mode
-          // see more: https://github.com/vaadin/web-components/issues/1536
-          // or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
-          // For selection mode SINGLE, set the aria-multiselectable attribute to false
-          if (mode === validSelectionModes[0]) {
-            grid.$.table.setAttribute('aria-multiselectable', false);
-            // For selection mode NONE, remove the aria-multiselectable attribute
-          } else if (mode === validSelectionModes[1]) {
-            grid.$.table.removeAttribute('aria-multiselectable');
-            // For selection mode MULTI, set aria-multiselectable to true
-          } else {
-            grid.$.table.setAttribute('aria-multiselectable', true);
-          }
+          grid.$connector.updateMultiSelectable();
         } else {
           throw 'Attempted to set an invalid selection mode';
         }
       });
 
       grid.$connector.deselectAllowed = true;
+
+      /*
+       * Manage aria-multiselectable attribute depending on the selection mode.
+       * see more: https://github.com/vaadin/web-components/issues/1536
+       * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+       * For selection mode SINGLE, set the aria-multiselectable attribute to false
+       */
+      grid.$connector.updateMultiSelectable = tryCatchWrapper(function() {
+        if (!grid.$) {
+          return;
+        }
+
+        if (selectionMode === validSelectionModes[0]) {
+          grid.$.table.setAttribute('aria-multiselectable', false);
+          // For selection mode NONE, remove the aria-multiselectable attribute
+        } else if (selectionMode === validSelectionModes[1]) {
+          grid.$.table.removeAttribute('aria-multiselectable');
+          // For selection mode MULTI, set aria-multiselectable to true
+        } else {
+          grid.$.table.setAttribute('aria-multiselectable', true);
+        }
+      });
+
+      // Have the multi-selectable state updated on attach
+      grid._createPropertyObserver("isAttached", () => grid.$connector.updateMultiSelectable());
 
       // TODO: should be removed once https://github.com/vaadin/vaadin-grid/issues/1471 gets implemented
       grid.$connector.setVerticalScrollingEnabled = tryCatchWrapper(function(enabled) {
