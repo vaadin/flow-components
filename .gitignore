@@ -24,3 +24,4 @@ pnpm*
 error-screenshots
 
 **/frontend/generated
+**/frontend/index.html
