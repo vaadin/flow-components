@@ -25,14 +25,14 @@ import java.util.UUID;
 public abstract class AbstractConfigurationObject implements Serializable {
 
     private String id;
-    private final ThreadLocal<Boolean> notifyChanges = new ThreadLocal<>();
+    private final ThreadLocal<Boolean> notifyChanges = ThreadLocal
+            .withInitial(() -> true);
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
-        notifyChanges.set(true);
     }
 
     public String getId() {
