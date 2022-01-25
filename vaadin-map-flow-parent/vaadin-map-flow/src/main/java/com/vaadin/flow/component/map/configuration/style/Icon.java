@@ -21,7 +21,8 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
 
 /**
- * An icon or image that can be used to visually represent a {@link Feature}, by using it as the feature's {@link Style#setImage(ImageStyle)}
+ * An icon or image that can be used to visually represent a {@link Feature}, by
+ * using it as the feature's {@link Style#setImage(ImageStyle)}
  */
 public class Icon extends ImageStyle {
 
@@ -39,9 +40,13 @@ public class Icon extends ImageStyle {
     }
 
     /**
-     * The anchor position of the image. This defines how the image should be aligned from the {@link #getAnchorOrigin()}.
-     * The anchor position is specified in relative units, based on the size of the image. Valid values range from {@code 0} to {@code 1}, where {@code 1} moves the image by its full width or height from the anchor origin.
-     * Default value is {@code {x: 0.5, y: 0.5}}, which centers the image.
+     * The anchor position of the image. This defines how the image should be
+     * aligned from the {@link #getAnchorOrigin()}. The anchor position is
+     * specified in relative units, based on the size of the image. Valid values
+     * range from {@code 0} to {@code 1}, where {@code 1} moves the image by its
+     * full width or height from the anchor origin. Default value is {@code {x:
+     * 0.5, y: 0.5}}, which centers the image.
+     * 
      * @return the current anchor
      */
     public Anchor getAnchor() {
@@ -50,7 +55,9 @@ public class Icon extends ImageStyle {
 
     /**
      * Sets the anchor position of the icon's image
-     * @param anchor the new anchor
+     * 
+     * @param anchor
+     *            the new anchor
      */
     public void setAnchor(Anchor anchor) {
         this.anchor = anchor;
@@ -58,10 +65,12 @@ public class Icon extends ImageStyle {
     }
 
     /**
-     * The origin of the {@link #getAnchor()} position. Defaults to {@link AnchorOrigin#TOP_LEFT}.
+     * The origin of the {@link #getAnchor()} position. Defaults to
+     * {@link AnchorOrigin#TOP_LEFT}.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
+     * 
      * @return the current anchor origin
      */
     public AnchorOrigin getAnchorOrigin() {
@@ -69,10 +78,12 @@ public class Icon extends ImageStyle {
     }
 
     /**
-     * Color to tint the icon's image with. If not specified, the image will not be modified.
+     * Color to tint the icon's image with. If not specified, the image will not
+     * be modified.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
+     * 
      * @return the current color tint
      */
     public String getColor() {
@@ -84,6 +95,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
+     * 
      * @return the cross-origin attribute value
      */
     public String getCrossOrigin() {
@@ -91,10 +103,13 @@ public class Icon extends ImageStyle {
     }
 
     /**
-     * The source URL from which the icon's image should be loaded. Either this or {@link #getImg()} must be specified in the options for the icon, and only one of the two options must be provided.
+     * The source URL from which the icon's image should be loaded. Either this
+     * or {@link #getImg()} must be specified in the options for the icon, and
+     * only one of the two options must be provided.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
+     * 
      * @return the source URL for the icon's image
      */
     public String getSrc() {
@@ -102,10 +117,13 @@ public class Icon extends ImageStyle {
     }
 
     /**
-     * The stream resource from which the icon's image should be loaded. Either this or {@link #getSrc()} must be specified in the options for the icon, and only one of the two options must be provided.
+     * The stream resource from which the icon's image should be loaded. Either
+     * this or {@link #getSrc()} must be specified in the options for the icon,
+     * and only one of the two options must be provided.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
+     * 
      * @return the stream resource containing the icon's image
      */
     public StreamResource getImg() {
@@ -117,6 +135,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
+     * 
      * @return the size of the image
      */
     public ImageSize getImgSize() {

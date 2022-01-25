@@ -29,7 +29,9 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
     private float scale;
 
     /**
-     * The opacity of the image. Value values range from {@code 0} to {@code 1}. Defaults to {@code 1}.
+     * The opacity of the image. Value values range from {@code 0} to {@code 1}.
+     * Defaults to {@code 1}.
+     * 
      * @return the current opacity
      */
     public float getOpacity() {
@@ -38,7 +40,9 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the opacity for the image.
-     * @param opacity the new opacity
+     * 
+     * @param opacity
+     *            the new opacity
      */
     public void setOpacity(float opacity) {
         this.opacity = opacity;
@@ -46,7 +50,8 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
     }
 
     /**
-     * Whether to rotate the image together with the view. Defaults to {@code false}.
+     * Whether to rotate the image together with the view. Defaults to
+     * {@code false}.
      */
     public boolean isRotateWithView() {
         return rotateWithView;
@@ -62,6 +67,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
     /**
      * The rotation of the image in radians. Defaults to {@code 0}.
+     * 
      * @return the current rotation
      */
     public float getRotation() {
@@ -70,7 +76,9 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the rotation of the image in radians.
-     * @param rotation the new rotation
+     * 
+     * @param rotation
+     *            the new rotation
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;
@@ -79,6 +87,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
     /**
      * The scaling of the image's size. Defaults to {@code 1}.
+     * 
      * @return the current scaling
      */
     public float getScale() {
@@ -87,7 +96,9 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the scaling of the image's size.
-     * @param scale the new scaling
+     * 
+     * @param scale
+     *            the new scaling
      */
     public void setScale(float scale) {
         this.scale = scale;
