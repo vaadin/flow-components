@@ -4,9 +4,19 @@ import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.beans.PropertyChangeListener;
 
 public class MarkerFeatureTest {
+    private PropertyChangeListener propertyChangeListenerMock;
+
+    @Before
+    public void setup() {
+        propertyChangeListenerMock = Mockito.mock(PropertyChangeListener.class);
+    }
 
     @Test
     public void defaults() {
@@ -56,10 +66,32 @@ public class MarkerFeatureTest {
     }
 
     @Test
-    public void doesNotAcceptNullValues() {
+    public void constructorDoesNotAcceptNullValues() {
         Assert.assertThrows(NullPointerException.class,
                 () -> new MarkerFeature(null));
         Assert.assertThrows(NullPointerException.class,
                 () -> new MarkerFeature(new Coordinate(), null));
+    }
+
+    @Test
+    public void setIcon() {
+        MarkerFeature markerFeature = new MarkerFeature();
+        markerFeature.addPropertyChangeListener(propertyChangeListenerMock);
+
+        Icon icon = new Icon(
+                new Icon.Options().setSrc("assets/custom-marker.png"));
+        markerFeature.setIcon(icon);
+
+        Assert.assertEquals(icon, markerFeature.getIcon());
+        Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
+                .propertyChange(Mockito.any());
+    }
+
+    @Test
+    public void setIcon_failsWithNullValue() {
+        MarkerFeature markerFeature = new MarkerFeature();
+
+        Assert.assertThrows(NullPointerException.class,
+                () -> markerFeature.setIcon(null));
     }
 }

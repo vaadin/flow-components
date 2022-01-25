@@ -24,13 +24,11 @@ import java.util.List;
 
 /**
  * Layer that allows to conveniently display a number of geographic features. A
- * feature can be anything that should be displayed on top of a map, such as
- * points of interest, vehicles or people.
+ * {@link Feature} can be anything that should be displayed on top of a map,
+ * such as points of interest, vehicles or people.
  * <p>
  * The layer is a high-level abstraction built on top of {@link VectorLayer},
  * and uses a {@link VectorSource} by default.
- *
- * @see Feature
  */
 public class FeatureLayer extends VectorLayer {
 
@@ -38,18 +36,23 @@ public class FeatureLayer extends VectorLayer {
         this.setSource(new VectorSource());
     }
 
+    /**
+     * The source for this layer. For the feature layer this must always be a
+     * {@link VectorSource}
+     *
+     * @return the source of the layer
+     */
     @Override
     public VectorSource getSource() {
         return (VectorSource) super.getSource();
     }
 
-    @Override
-    public void setSource(VectorSource source) {
-        super.setSource(source);
-    }
-
     /**
-     * @return the features managed by the layer
+     * The features managed by this layer. This returns an immutable collection,
+     * which means it can not be modified. Use {@link #addFeature(Feature)} and
+     * {@link #removeFeature(Feature)} instead.
+     *
+     * @return the features managed by the layer, immutable
      */
     @JsonIgnore
     public List<Feature> getFeatures() {

@@ -18,6 +18,9 @@ package com.vaadin.flow.component.map.configuration.style;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
+/**
+ * Abstract base class for drawing image-based features
+ */
 public abstract class ImageStyle extends AbstractConfigurationObject {
 
     private float opacity;
@@ -25,37 +28,67 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
     private float rotation;
     private float scale;
 
+    /**
+     * The opacity of the image. Value values range from {@code 0} to {@code 1}. Defaults to {@code 1}.
+     * @return the current opacity
+     */
     public float getOpacity() {
         return opacity;
     }
 
+    /**
+     * Sets the opacity for the image.
+     * @param opacity the new opacity
+     */
     public void setOpacity(float opacity) {
         this.opacity = opacity;
         notifyChange();
     }
 
+    /**
+     * Whether to rotate the image together with the view. Defaults to {@code false}.
+     */
     public boolean isRotateWithView() {
         return rotateWithView;
     }
 
+    /**
+     * Sets whether to rotate the image together with the view.
+     */
     public void setRotateWithView(boolean rotateWithView) {
         this.rotateWithView = rotateWithView;
         notifyChange();
     }
 
+    /**
+     * The rotation of the image in radians. Defaults to {@code 0}.
+     * @return the current rotation
+     */
     public float getRotation() {
         return rotation;
     }
 
+    /**
+     * Sets the rotation of the image in radians.
+     * @param rotation the new rotation
+     */
     public void setRotation(float rotation) {
         this.rotation = rotation;
         notifyChange();
     }
 
+    /**
+     * The scaling of the image's size. Defaults to {@code 1}.
+     * @return the current scaling
+     */
     public float getScale() {
         return scale;
     }
 
+    /**
+     * Sets the scaling of the image's size.
+     * @param scale the new scaling
+     */
     public void setScale(float scale) {
         this.scale = scale;
         notifyChange();
@@ -78,21 +111,33 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
             return (T) this;
         }
 
+        /**
+         * @see ImageStyle#getOpacity()
+         */
         public T setOpacity(float opacity) {
             this.opacity = opacity;
             return getThis();
         }
 
+        /**
+         * @see ImageStyle#isRotateWithView()
+         */
         public T setRotateWithView(boolean rotateWithView) {
             this.rotateWithView = rotateWithView;
             return getThis();
         }
 
+        /**
+         * @see ImageStyle#getRotation()
+         */
         public T setRotation(float rotation) {
             this.rotation = rotation;
             return getThis();
         }
 
+        /**
+         * @see ImageStyle#getScale()
+         */
         public T setScale(float scale) {
             this.scale = scale;
             return getThis();

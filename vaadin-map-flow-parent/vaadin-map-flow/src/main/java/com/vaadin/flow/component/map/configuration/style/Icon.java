@@ -17,8 +17,12 @@ package com.vaadin.flow.component.map.configuration.style;
  */
 
 import com.vaadin.flow.component.map.configuration.Constants;
+import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
 
+/**
+ * An icon or image that can be used to visually represent a {@link Feature}, by using it as the feature's {@link Style#setImage(ImageStyle)}
+ */
 public class Icon extends ImageStyle {
 
     private Anchor anchor;
@@ -34,35 +38,87 @@ public class Icon extends ImageStyle {
         return Constants.OL_STYLE_ICON;
     }
 
+    /**
+     * The anchor position of the image. This defines how the image should be aligned from the {@link #getAnchorOrigin()}.
+     * The anchor position is specified in relative units, based on the size of the image. Valid values range from {@code 0} to {@code 1}, where {@code 1} moves the image by its full width or height from the anchor origin.
+     * Default value is {@code {x: 0.5, y: 0.5}}, which centers the image.
+     * @return the current anchor
+     */
     public Anchor getAnchor() {
         return anchor;
     }
 
+    /**
+     * Sets the anchor position of the icon's image
+     * @param anchor the new anchor
+     */
     public void setAnchor(Anchor anchor) {
         this.anchor = anchor;
         notifyChange();
     }
 
+    /**
+     * The origin of the {@link #getAnchor()} position. Defaults to {@link AnchorOrigin#TOP_LEFT}.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     * @return the current anchor origin
+     */
     public AnchorOrigin getAnchorOrigin() {
         return anchorOrigin;
     }
 
+    /**
+     * Color to tint the icon's image with. If not specified, the image will not be modified.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     * @return the current color tint
+     */
     public String getColor() {
         return color;
     }
 
+    /**
+     * The cross-origin attribute value for loaded images.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     * @return the cross-origin attribute value
+     */
     public String getCrossOrigin() {
         return crossOrigin;
     }
 
+    /**
+     * The source URL from which the icon's image should be loaded. Either this or {@link #getImg()} must be specified in the options for the icon, and only one of the two options must be provided.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     * @return the source URL for the icon's image
+     */
     public String getSrc() {
         return src;
     }
 
+    /**
+     * The stream resource from which the icon's image should be loaded. Either this or {@link #getSrc()} must be specified in the options for the icon, and only one of the two options must be provided.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     * @return the stream resource containing the icon's image
+     */
     public StreamResource getImg() {
         return img;
     }
 
+    /**
+     * The size of the image in pixels.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     * @return the size of the image
+     */
     public ImageSize getImgSize() {
         return imgSize;
     }
@@ -85,7 +141,6 @@ public class Icon extends ImageStyle {
         src = options.src;
         img = options.img;
         imgSize = options.imgSize;
-
     }
 
     public static class Options extends ImageStyle.BaseOptions<Options> {
@@ -97,36 +152,57 @@ public class Icon extends ImageStyle {
         private StreamResource img;
         private ImageSize imgSize;
 
+        /**
+         * @see Icon#getAnchor()
+         */
         public Options setAnchor(Anchor anchor) {
             this.anchor = anchor;
             return getThis();
         }
 
+        /**
+         * @see Icon#getAnchorOrigin()
+         */
         public Options setAnchorOrigin(AnchorOrigin anchorOrigin) {
             this.anchorOrigin = anchorOrigin;
             return getThis();
         }
 
+        /**
+         * @see Icon#getColor()
+         */
         public Options setColor(String color) {
             this.color = color;
             return getThis();
         }
 
+        /**
+         * @see Icon#getCrossOrigin()
+         */
         public Options setCrossOrigin(String crossOrigin) {
             this.crossOrigin = crossOrigin;
             return getThis();
         }
 
+        /**
+         * @see Icon#getSrc()
+         */
         public Options setSrc(String src) {
             this.src = src;
             return getThis();
         }
 
+        /**
+         * @see Icon#getImg()
+         */
         public Options setImg(StreamResource img) {
             this.img = img;
             return getThis();
         }
 
+        /**
+         * @see Icon#getImgSize()
+         */
         public Options setImgSize(ImageSize imgSize) {
             this.imgSize = imgSize;
             return getThis();

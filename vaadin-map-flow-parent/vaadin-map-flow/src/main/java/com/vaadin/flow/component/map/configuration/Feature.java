@@ -16,6 +16,7 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
@@ -36,10 +37,22 @@ public abstract class Feature extends AbstractConfigurationObject {
         return Constants.OL_FEATURE;
     }
 
+    /**
+     * The geometry representing the feature, for example a {@link Point} or a
+     * polygon.
+     *
+     * @return the current geometry
+     */
     public SimpleGeometry getGeometry() {
         return geometry;
     }
 
+    /**
+     * Sets the geometry representing the feature.
+     *
+     * @param geometry
+     *            the new geometry, not null
+     */
     public void setGeometry(SimpleGeometry geometry) {
         Objects.requireNonNull(geometry);
         updateNestedPropertyObserver(this.geometry, geometry);
@@ -47,11 +60,23 @@ public abstract class Feature extends AbstractConfigurationObject {
         notifyChange();
     }
 
+    /**
+     * The {@link Style} defines how the feature should be visually displayed.
+     *
+     * @return the current style
+     */
     public Style getStyle() {
         return style;
     }
 
+    /**
+     * Sets the style that defines how the feature should be visually displayed.
+     *
+     * @param style
+     *            the new style, not null
+     */
     public void setStyle(Style style) {
+        Objects.requireNonNull(style);
         updateNestedPropertyObserver(this.style, style);
         this.style = style;
         notifyChange();

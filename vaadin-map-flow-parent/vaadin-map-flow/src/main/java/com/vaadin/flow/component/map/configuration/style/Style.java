@@ -18,7 +18,11 @@ package com.vaadin.flow.component.map.configuration.style;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
+import com.vaadin.flow.component.map.configuration.Feature;
 
+/**
+ * Defines how to visually represent a {@link Feature}
+ */
 public class Style extends AbstractConfigurationObject {
 
     private ImageStyle image;

@@ -20,6 +20,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
     private MapElement map;
     private TestBenchElement addDefaultMarkerFeature;
     private TestBenchElement addCustomMarkerFeature;
+    private TestBenchElement updateMarkerCoordinates;
+    private TestBenchElement updateMarkerIcon;
     private TestBenchElement removeFirstFeature;
 
     @Before
@@ -28,6 +30,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         map = $(MapElement.class).first();
         addDefaultMarkerFeature = $("button").id("add-default-marker-feature");
         addCustomMarkerFeature = $("button").id("add-custom-marker-feature");
+        updateMarkerCoordinates = $("button").id("update-marker-coordinates");
+        updateMarkerIcon = $("button").id("update-marker-icon");
         removeFirstFeature = $("button").id("remove-first-feature");
     }
 
@@ -65,6 +69,52 @@ public class FeatureLayerIT extends AbstractComponentIT {
         ExpectedMarkerFeatureValues expected = new ExpectedMarkerFeatureValues();
         expected.coordinate = new Coordinate(1233058.1696443919,
                 6351912.406929109);
+        expected.iconOpacity = 0.8f;
+        expected.iconRotation = Math.PI;
+        expected.iconScale = 2;
+        expected.iconColor = new ColorValue(0L, 0L, 255L); // "blue"
+        expected.iconSource = Pattern.compile("assets/custom-marker.png");
+
+        String firstFeature = map.getFeatureCollectionExpression() + ".item(0)";
+        assertMarkerFeature(firstFeature, expected);
+    }
+
+    @Test
+    public void updateMarkerCoordinates() {
+        addDefaultMarkerFeature.click();
+        updateMarkerCoordinates.click();
+
+        long numFeatures = (long) map.evaluateOLExpression(
+                map.getFeatureCollectionExpression() + ".getLength()");
+        Assert.assertEquals(1, numFeatures);
+
+        // Default values except for custom coordinates
+        ExpectedMarkerFeatureValues expected = new ExpectedMarkerFeatureValues();
+        expected.coordinate = new Coordinate(1233058.1696443919,
+                6351912.406929109);
+        expected.iconOpacity = 1;
+        expected.iconRotation = 0;
+        expected.iconScale = 0.3;
+        expected.iconColor = null;
+        expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
+                + Assets.DEFAULT_MARKER.getFileName());
+
+        String firstFeature = map.getFeatureCollectionExpression() + ".item(0)";
+        assertMarkerFeature(firstFeature, expected);
+    }
+
+    @Test
+    public void updateMarkerIcon() {
+        addDefaultMarkerFeature.click();
+        updateMarkerIcon.click();
+
+        long numFeatures = (long) map.evaluateOLExpression(
+                map.getFeatureCollectionExpression() + ".getLength()");
+        Assert.assertEquals(1, numFeatures);
+
+        // Default values except for custom icon
+        ExpectedMarkerFeatureValues expected = new ExpectedMarkerFeatureValues();
+        expected.coordinate = new Coordinate(0, 0);
         expected.iconOpacity = 0.8f;
         expected.iconRotation = Math.PI;
         expected.iconScale = 2;

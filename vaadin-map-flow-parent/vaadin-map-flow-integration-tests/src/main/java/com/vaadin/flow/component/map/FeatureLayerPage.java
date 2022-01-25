@@ -26,14 +26,32 @@ public class FeatureLayerPage extends Div {
                 "Add custom marker feature", e -> {
                     Coordinate coordinate = new Coordinate(1233058.1696443919,
                             6351912.406929109);
-                    Icon icon = new Icon(new Icon.Options()
-                            .setSrc("assets/custom-marker.png").setColor("blue")
-                            .setOpacity(0.8f).setScale(2f)
-                            .setRotation((float) Math.PI));
+                    Icon icon = createCustomIcon();
                     MarkerFeature feature = new MarkerFeature(coordinate, icon);
                     map.getFeatureLayer().addFeature(feature);
                 });
         addCustomMarkerFeature.setId("add-custom-marker-feature");
+
+        NativeButton updateMarkerCoordinates = new NativeButton("Update marker coordinates", e -> {
+            if (map.getFeatureLayer().getFeatures().size() > 0) {
+                MarkerFeature feature = (MarkerFeature) map.getFeatureLayer().getFeatures()
+                        .get(0);
+                Coordinate coordinate = new Coordinate(1233058.1696443919,
+                        6351912.406929109);
+                feature.setCoordinates(coordinate);
+            }
+        });
+        updateMarkerCoordinates.setId("update-marker-coordinates");
+
+        NativeButton updateMarkerIcon = new NativeButton("Update marker icon", e -> {
+            if (map.getFeatureLayer().getFeatures().size() > 0) {
+                MarkerFeature feature = (MarkerFeature) map.getFeatureLayer().getFeatures()
+                        .get(0);
+                Icon icon = createCustomIcon();
+                feature.setIcon(icon);
+            }
+        });
+        updateMarkerIcon.setId("update-marker-icon");
 
         NativeButton removeFirstFeature = new NativeButton(
                 "Remove first feature", e -> {
@@ -47,6 +65,13 @@ public class FeatureLayerPage extends Div {
 
         add(map);
         add(new Div(addDefaultMarkerFeature, addCustomMarkerFeature,
-                removeFirstFeature));
+                updateMarkerCoordinates, updateMarkerIcon, removeFirstFeature));
+    }
+
+    private static Icon createCustomIcon() {
+        return new Icon(new Icon.Options()
+                .setSrc("assets/custom-marker.png").setColor("blue")
+                .setOpacity(0.8f).setScale(2f)
+                .setRotation((float) Math.PI));
     }
 }
