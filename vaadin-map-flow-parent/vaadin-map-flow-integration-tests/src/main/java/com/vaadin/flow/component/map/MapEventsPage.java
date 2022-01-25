@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.router.Route;
 
@@ -21,6 +22,7 @@ public class MapEventsPage extends Div {
             System.out.println(mapView.getRotation());
             System.out.println(mapView.getRotation());
             System.out.println(mapView.getCenter().getX() + " " + mapView.getCenter().getY());
+            System.out.println(mapView.getExtent().getMinX() + " " + mapView.getExtent().getMinY() + " " + mapView.getExtent().getMaxY() + " " + mapView.getExtent().getMaxX());
         });
 
         add(map);

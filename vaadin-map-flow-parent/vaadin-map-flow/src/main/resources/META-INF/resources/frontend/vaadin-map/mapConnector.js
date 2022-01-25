@@ -39,6 +39,26 @@ import { synchronize } from "./synchronization";
         mapElement.configuration.updateSize();
       },
     };
+
+    mapElement.configuration.on("moveend", (event) => {
+      const view = mapElement.configuration.getView();
+
+      const center = view.getCenter();
+      const rotation = view.getRotation();
+      const zoom = view.getZoom();
+      const extent = view.calculateExtent();
+
+      const customEvent = new CustomEvent("map-view-moveend", {
+        detail: {
+          center,
+          rotation,
+          zoom,
+          extent,
+        },
+      });
+
+      mapElement.dispatchEvent(customEvent);
+    });
   }
 
   window.Vaadin.Flow.mapConnector = {
