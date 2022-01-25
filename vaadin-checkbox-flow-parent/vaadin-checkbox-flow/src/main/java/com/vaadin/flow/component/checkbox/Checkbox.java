@@ -115,9 +115,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     @Override
     public String getLabel() {
-        return getElement().getChildren()
-                .filter(child -> child.getTag().equals("label")).findFirst()
-                .get().getText();
+        return getElement().getProperty("label");
     }
 
     /**
