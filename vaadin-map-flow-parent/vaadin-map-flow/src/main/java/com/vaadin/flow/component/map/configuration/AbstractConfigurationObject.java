@@ -25,7 +25,8 @@ import java.util.UUID;
 public abstract class AbstractConfigurationObject implements Serializable {
 
     private String id;
-    private final ThreadLocal<Boolean> notifyChanges = ThreadLocal.withInitial(() -> true);
+    private final ThreadLocal<Boolean> notifyChanges = ThreadLocal
+            .withInitial(() -> true);
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
