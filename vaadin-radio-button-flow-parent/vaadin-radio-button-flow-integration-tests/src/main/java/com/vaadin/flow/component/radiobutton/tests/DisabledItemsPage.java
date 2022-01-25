@@ -18,6 +18,7 @@ package com.vaadin.flow.component.radiobutton.tests;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-radio-button/disabled-items")
@@ -37,6 +38,13 @@ public class DisabledItemsPage extends Div {
                 event -> radioButtonGroup.setEnabled(true));
         enableButton.setId("enable-button");
 
-        add(radioButtonGroup, nativeButton, enableButton);
+        NativeButton rendererEnabledButton = new NativeButton("set renderer and enabled",
+                event -> {
+                    radioButtonGroup.setRenderer(new TextRenderer<String>(item  -> item));
+                    radioButtonGroup.setEnabled(true);
+                });
+        rendererEnabledButton.setId("set-renderer-and-enabled-button");
+
+        add(radioButtonGroup, nativeButton, enableButton, rendererEnabledButton);
     }
 }
