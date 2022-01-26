@@ -143,9 +143,10 @@ public class View extends AbstractConfigurationObject {
      */
     public void updateInternalViewState(Coordinate center, float rotation,
             float zoom, Extent extent) {
-        setCenter(center);
-        setRotation(rotation);
-        setZoom(zoom);
+        this.center = center;
+        this.rotation = rotation;
+        this.zoom = zoom;
         this.extent = extent;
+        notifyChange();
     }
 }
