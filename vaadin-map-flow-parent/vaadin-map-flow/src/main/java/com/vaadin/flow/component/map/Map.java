@@ -87,4 +87,5 @@ public class Map extends MapBase {
     public void removeLayer(Layer layer) {
         getConfiguration().removeLayer(layer);
     }
+
 }
