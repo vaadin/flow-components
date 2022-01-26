@@ -18,6 +18,7 @@ package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
@@ -26,8 +27,7 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import java.util.Objects;
 
 @Tag("vaadin-map")
-// TODO: Enable once released
-// @NpmPackage(value = "@vaadin/map", version = "23.0.0-alpha4")
+@NpmPackage(value = "@vaadin/map", version = "23.0.0-beta1")
 // TODO: Include non-themed module `@vaadin/map/src/vaadin-map.js` when theme
 // module is ready
 @JsModule("@vaadin/map/vaadin-map.js")
