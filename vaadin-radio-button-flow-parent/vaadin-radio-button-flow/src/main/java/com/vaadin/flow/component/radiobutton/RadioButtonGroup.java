@@ -35,7 +35,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -570,16 +569,12 @@ public class RadioButtonGroup<T>
         }
 
         button.setEnabled(!disabled);
-        Serializable rawValue = button.getElement().getPropertyRaw("disabled");
-        if (rawValue instanceof Boolean) {
-            // convert the boolean value to a String to force update the
-            // property value. Otherwise since the provided value is the same as
-            // the current one the update don't do anything.
-            button.getElement().setProperty("disabled",
-                    disabled ? Boolean.TRUE.toString() : null);
-        } else {
-            button.setDisabled(disabled);
-        }
+        button.setDisabled(disabled);
+        // When enabling a disabled radio group, individual button Web
+        // Components that should remain disabled (due to itemEnabledProvider),
+        // may end up rendering as enabled.
+        // Enforce the Web Component state using JS.
+        button.getElement().executeJs("this.disabled = $0", disabled);
     }
 
     private T getValue(Serializable key) {
