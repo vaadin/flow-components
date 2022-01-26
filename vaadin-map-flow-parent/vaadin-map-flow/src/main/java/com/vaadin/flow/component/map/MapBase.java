@@ -47,6 +47,7 @@ public abstract class MapBase extends Component implements HasSize {
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
         this.view.addPropertyChangeListener(this::viewPropertyChange);
+        registerEventListeners();
     }
 
     protected Configuration getConfiguration() {
@@ -74,7 +75,6 @@ public abstract class MapBase extends Component implements HasSize {
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
         requestConfigurationSync();
         requestViewSync();
-        registerEventListeners();
     }
 
     private void requestConfigurationSync() {
@@ -147,9 +147,8 @@ public abstract class MapBase extends Component implements HasSize {
      * Checks whether the map component feature flag is active. Succeeds if the
      * flag is enabled, and throws otherwise.
      *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
-     *             enabled
+     * @throws ExperimentalFeatureException when the {@link FeatureFlags#MAP_COMPONENT} feature is not
+     *                                      enabled
      */
     private void checkFeatureFlag() {
         boolean enabled = getFeatureFlags()
