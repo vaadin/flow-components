@@ -117,7 +117,7 @@ public class TimePickerIT extends AbstractComponentIT {
                 "5:00 AM", picker.getItemText(0));
         Assert.assertEquals(
                 "The last item in the dropdown should be the max value",
-                "4:00 PM", picker.getLastItemText());
+                "6:00 PM", picker.getLastItemText());
     }
 
     @Test
