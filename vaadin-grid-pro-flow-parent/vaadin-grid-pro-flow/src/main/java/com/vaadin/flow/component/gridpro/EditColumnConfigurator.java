@@ -31,6 +31,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Configuration for the editor of an edit column.
