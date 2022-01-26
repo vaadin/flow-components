@@ -23,18 +23,22 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
      * Creates a new event using the given source and indicator whether the
      * event originated from the client side or the server side.
      *
-     * @param source     the source component
-     * @param fromClient <code>true</code> if the event originated from the client
+     * @param source
+     *            the source component
+     * @param fromClient
+     *            <code>true</code> if the event originated from the client
      */
-    public MapViewMoveEndEvent(Map source, boolean fromClient, @EventData("event.detail.rotation") double rotation,
-                               @EventData("event.detail.zoom") double zoom,
-                               @EventData("event.detail.center") JsonArray center,
-                               @EventData("event.detail.extent") JsonArray extent) {
+    public MapViewMoveEndEvent(Map source, boolean fromClient,
+            @EventData("event.detail.rotation") double rotation,
+            @EventData("event.detail.zoom") double zoom,
+            @EventData("event.detail.center") JsonArray center,
+            @EventData("event.detail.extent") JsonArray extent) {
         super(source, fromClient);
         this.rotation = (float) rotation;
         this.zoom = (float) zoom;
         this.center = new Coordinate(center.getNumber(0), center.getNumber(1));
-        this.viewExtent = new ViewExtent(extent.getNumber(0), extent.getNumber(1), extent.getNumber(2), extent.getNumber(3));
+        this.viewExtent = new ViewExtent(extent.getNumber(0),
+                extent.getNumber(1), extent.getNumber(2), extent.getNumber(3));
     }
 
     /**
@@ -47,7 +51,8 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
     }
 
     /**
-     * Gets the view's updated zoom level coordinates after map's "moveend" event.
+     * Gets the view's updated zoom level coordinates after map's "moveend"
+     * event.
      *
      * @return latest zoom level
      */
@@ -73,5 +78,3 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
         return viewExtent;
     }
 }
-
-

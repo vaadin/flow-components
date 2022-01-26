@@ -60,7 +60,8 @@ public class View extends AbstractConfigurationObject {
      * Sets the center of the view in format specified by projection set on the
      * view, which defaults to {@code "EPSG:3857}
      *
-     * @param center coordinates of the center of the view
+     * @param center
+     *            coordinates of the center of the view
      */
     public void setCenter(Coordinate center) {
         Objects.requireNonNull(center, "Center cannot be null");
@@ -81,7 +82,8 @@ public class View extends AbstractConfigurationObject {
     /**
      * Sets the rotation of the view, default to {@code 0}
      *
-     * @param rotation the rotation in radians format
+     * @param rotation
+     *            the rotation in radians format
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;
@@ -100,7 +102,8 @@ public class View extends AbstractConfigurationObject {
     /**
      * Sets the zoom level of the view, default to {@code 0}
      *
-     * @param zoom the zoom level in decimal format
+     * @param zoom
+     *            the zoom level in decimal format
      */
     public void setZoom(float zoom) {
         this.zoom = zoom;
@@ -117,7 +120,8 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Gets the coordinates of the view's extent, default value is {@code 0} for all coordinates
+     * Gets the coordinates of the view's extent, default value is {@code 0} for
+     * all coordinates
      *
      * @return the coordinates of the view's extent
      */
@@ -128,7 +132,8 @@ public class View extends AbstractConfigurationObject {
     /**
      * Sets the coordinate of current view's extent in EPSG:3857 format
      *
-     * @param extent the extent of the view in EPSG:3857 format
+     * @param extent
+     *            the extent of the view in EPSG:3857 format
      */
     public void setExtent(ViewExtent extent) {
         this.extent = extent;

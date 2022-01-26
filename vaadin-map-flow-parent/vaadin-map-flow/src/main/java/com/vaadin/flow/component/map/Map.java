@@ -89,7 +89,8 @@ public class Map extends MapBase {
      * layers, consider setting the first layer as background layer, and then
      * adding the remaining layers using {@link #addLayer(Layer)}.
      *
-     * @param backgroundLayer the new background layer, not null
+     * @param backgroundLayer
+     *            the new background layer, not null
      */
     public void setBackgroundLayer(Layer backgroundLayer) {
         Objects.requireNonNull(backgroundLayer);
@@ -108,7 +109,8 @@ public class Map extends MapBase {
         getConfiguration().removeLayer(layer);
     }
 
-    public Registration addViewMoveEndEventListener(ComponentEventListener<MapViewMoveEndEvent> listener) {
+    public Registration addViewMoveEndEventListener(
+            ComponentEventListener<MapViewMoveEndEvent> listener) {
         return addListener(MapViewMoveEndEvent.class, listener);
     }
 }
