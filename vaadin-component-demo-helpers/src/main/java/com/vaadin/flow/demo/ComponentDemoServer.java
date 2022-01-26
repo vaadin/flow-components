@@ -56,7 +56,7 @@ public class ComponentDemoServer {
 
         Server server = new Server();
 
-        final ServerConnector connector = new ServerConnector(server);
+        final ServerConnector connector = new ServerConnector(server); // NOSONAR
         connector.setPort(getPort());
         server.setConnectors(new Connector[] { connector });
 

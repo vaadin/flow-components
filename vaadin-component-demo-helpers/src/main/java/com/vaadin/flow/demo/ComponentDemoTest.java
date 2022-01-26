@@ -95,7 +95,7 @@ public abstract class ComponentDemoTest extends ChromeBrowserTest {
         List<WebElement> toggleThemeButtons = layout
                 .findElement(By.id(VARIANT_TOGGLE_BUTTONS_DIV_ID))
                 .findElements(By.tagName("button"));
-        Assert.assertFalse(
+        Assert.assertFalse( // NOSONAR
                 "Expected at least one toggle theme button in 'buttonDiv', but got none",
                 toggleThemeButtons.isEmpty());
         toggleThemeButtons.forEach(button -> toggleVariantAndCheck(
@@ -114,15 +114,15 @@ public abstract class ComponentDemoTest extends ChromeBrowserTest {
                 variantProducer.apply(button));
 
         button.click();
-        Assert.assertEquals(
+        Assert.assertEquals( // NOSONAR
                 "After two toggle variants button clicks, button text should be the same as before testing",
                 button.getText(), initialButtonText);
 
         List<String> currentThemes = getComponentThemes(component);
         String assertionMessage = "After two toggle variants button clicks, component 'theme' attribute should contain the same value as before testing";
-        Assert.assertEquals(assertionMessage, currentThemes.size(),
+        Assert.assertEquals(assertionMessage, currentThemes.size(), // NOSONAR
                 initialButtonThemes.size());
-        currentThemes.forEach(currentTheme -> Assert.assertTrue(
+        currentThemes.forEach(currentTheme -> Assert.assertTrue( // NOSONAR
                 assertionMessage + String.format(
                         " but theme variant '%s' is missing", currentTheme),
                 initialButtonThemes.contains(currentTheme)));
@@ -133,34 +133,34 @@ public abstract class ComponentDemoTest extends ChromeBrowserTest {
             String updatedButtonText, List<String> previousThemes,
             String previousButtonText, String variantName) {
         Assert.assertNotEquals("Button should change its text after toggling",
-                previousButtonText, updatedButtonText);
+                previousButtonText, updatedButtonText); // NOSONAR
 
         boolean shouldAddTheme = previousButtonText.startsWith("Add");
         if (shouldAddTheme) {
-            Assert.assertTrue(
+            Assert.assertTrue( // NOSONAR
                     "When a theme variant got added, toggle button text should start with 'Remove' word",
                     updatedButtonText.startsWith("Remove"));
-            Assert.assertEquals(
+            Assert.assertEquals( // NOSONAR
                     "When a theme variant got added, component 'theme' attribute should contain one more variant that before",
-                    previousThemes.size() + 1, updatedThemes.size());
-            Assert.assertTrue(
+                    previousThemes.size() + 1, updatedThemes.size()); // NOSONAR
+            Assert.assertTrue( // NOSONAR
                     "When a theme variant got added, component 'theme' attribute should contain all previous theme variants",
-                    updatedThemes.containsAll(previousThemes));
+                    updatedThemes.containsAll(previousThemes)); // NOSONAR
 
-            Assert.assertTrue("The selected theme variant:" + variantName
+            Assert.assertTrue("The selected theme variant:" + variantName // NOSONAR
                     + " should be added to the component 'theme' attribute.",
                     updatedThemes.contains(variantName));
         } else {
-            Assert.assertTrue(
+            Assert.assertTrue( // NOSONAR
                     "When a theme variant got removed, toggle button text should start with 'Add' word",
                     updatedButtonText.startsWith("Add"));
             Assert.assertEquals(
                     "When a theme variant got removed, component 'theme' attribute should contain one less variant than before",
-                    previousThemes.size() - 1, updatedThemes.size());
-            Assert.assertTrue(
+                    previousThemes.size() - 1, updatedThemes.size()); // NOSONAR
+            Assert.assertTrue( // NOSONAR
                     "When a theme variant got removed, previous theme variants should contain all theme variants from component 'theme' attribute",
-                    previousThemes.containsAll(updatedThemes));
-            Assert.assertFalse("The selected theme variant:" + variantName
+                    previousThemes.containsAll(updatedThemes)); // NOSONAR
+            Assert.assertFalse("The selected theme variant:" + variantName // NOSONAR
                     + " should be removed from the component 'theme' attribute.",
                     updatedThemes.contains(variantName));
         }
