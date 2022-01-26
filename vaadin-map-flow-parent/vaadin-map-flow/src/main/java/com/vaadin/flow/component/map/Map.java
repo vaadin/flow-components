@@ -16,17 +16,12 @@ package com.vaadin.flow.component.map;
  * #L%
  */
 
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.map.configuration.Configuration;
-import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.ViewExtent;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
-import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
-import com.vaadin.flow.shared.Registration;
 
 import java.util.Objects;
 
@@ -47,22 +42,6 @@ public class Map extends MapBase {
         TileLayer baseLayer = new TileLayer();
         baseLayer.setSource(source);
         setBackgroundLayer(baseLayer);
-        registerEventListeners();
-    }
-
-    private void registerEventListeners() {
-        addViewMoveEndEventListener(event -> {
-            float rotation = event.getRotation();
-            float zoom = event.getZoom();
-            Coordinate center = event.getCenter();
-            ViewExtent extent = event.getViewExtent();
-            getView().update(() -> {
-                getView().setCenter(center);
-                getView().setRotation(rotation);
-                getView().setZoom(zoom);
-                getView().setExtent(extent);
-            }, false);
-        });
     }
 
     public Configuration getRawConfiguration() {
@@ -109,8 +88,4 @@ public class Map extends MapBase {
         getConfiguration().removeLayer(layer);
     }
 
-    public Registration addViewMoveEndEventListener(
-            ComponentEventListener<MapViewMoveEndEvent> listener) {
-        return addListener(MapViewMoveEndEvent.class, listener);
-    }
 }

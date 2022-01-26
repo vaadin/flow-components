@@ -19,12 +19,17 @@ package com.vaadin.flow.component.map;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.configuration.Configuration;
+import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.View;
+import com.vaadin.flow.component.map.configuration.Extent;
+import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 import java.beans.PropertyChangeEvent;
@@ -69,6 +74,7 @@ public abstract class MapBase extends Component implements HasSize {
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
         requestConfigurationSync();
         requestViewSync();
+        registerEventListeners();
     }
 
     private void requestConfigurationSync() {
@@ -118,9 +124,29 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     /**
+     * Register an event listener before all the other listeners of this event
+     * to update view state data to latest values received from the client.
+     */
+    private void registerEventListeners() {
+        addViewMoveEndEventListener(event -> {
+            float rotation = event.getRotation();
+            float zoom = event.getZoom();
+            Coordinate center = event.getCenter();
+            Extent extent = event.getExtent();
+            getView().update(() -> getView().updateInternalViewState(center,
+                    rotation, zoom, extent), false);
+        });
+    }
+
+    public Registration addViewMoveEndEventListener(
+            ComponentEventListener<MapViewMoveEndEvent> listener) {
+        return addListener(MapViewMoveEndEvent.class, listener);
+    }
+
+    /**
      * Checks whether the map component feature flag is active. Succeeds if the
      * flag is enabled, and throws otherwise.
-     * 
+     *
      * @throws ExperimentalFeatureException
      *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
      *             enabled
@@ -138,7 +164,7 @@ public abstract class MapBase extends Component implements HasSize {
      * Gets the feature flags for the current UI.
      * <p>
      * Extracted with protected visibility to support mocking
-     * 
+     *
      * @return the current set of feature flags
      */
     protected FeatureFlags getFeatureFlags() {

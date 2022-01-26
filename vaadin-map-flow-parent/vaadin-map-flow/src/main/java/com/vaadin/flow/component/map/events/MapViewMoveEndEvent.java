@@ -5,11 +5,11 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.ViewExtent;
+import com.vaadin.flow.component.map.configuration.Extent;
 import elemental.json.JsonArray;
 
 /**
- * Fired when map movement has ended.
+ * Fired when viewport movement has ended.
  */
 @DomEvent("map-view-moveend")
 public class MapViewMoveEndEvent extends ComponentEvent<Map> {
@@ -17,7 +17,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
     private final float rotation;
     private final float zoom;
     private final Coordinate center;
-    private final ViewExtent viewExtent;
+    private final Extent extent;
 
     /**
      * Creates a new event using the given source and indicator whether the
@@ -37,12 +37,12 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
         this.rotation = (float) rotation;
         this.zoom = (float) zoom;
         this.center = new Coordinate(center.getNumber(0), center.getNumber(1));
-        this.viewExtent = new ViewExtent(extent.getNumber(0),
-                extent.getNumber(1), extent.getNumber(2), extent.getNumber(3));
+        this.extent = new Extent(extent.getNumber(0), extent.getNumber(1),
+                extent.getNumber(2), extent.getNumber(3));
     }
 
     /**
-     * Gets the view's updated rotation coordinates after map's "moveend" event.
+     * Gets the view's updated rotation after map's "moveend" event.
      *
      * @return latest rotation in radians
      */
@@ -51,8 +51,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
     }
 
     /**
-     * Gets the view's updated zoom level coordinates after map's "moveend"
-     * event.
+     * Gets the view's updated zoom level after map's "moveend" event.
      *
      * @return latest zoom level
      */
@@ -74,7 +73,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<Map> {
      *
      * @return latest view
      */
-    public ViewExtent getViewExtent() {
-        return viewExtent;
+    public Extent getExtent() {
+        return extent;
     }
 }

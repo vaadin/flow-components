@@ -42,7 +42,6 @@ import { synchronize } from "./synchronization";
 
     mapElement.configuration.on("moveend", (_event) => {
       const view = mapElement.configuration.getView();
-
       const center = view.getCenter();
       const rotation = view.getRotation();
       const zoom = view.getZoom();

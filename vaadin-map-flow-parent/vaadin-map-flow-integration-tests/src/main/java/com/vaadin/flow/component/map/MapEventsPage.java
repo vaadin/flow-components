@@ -20,19 +20,19 @@ public class MapEventsPage extends Div {
 
         map.addViewMoveEndEventListener(event -> {
             View mapView = map.getView();
-            String stateText = mapView.getCenter().getX() + ";" + mapView.getCenter().getY() + ";";
+            String stateText = mapView.getCenter().getX() + ";"
+                    + mapView.getCenter().getY() + ";";
             stateText += mapView.getRotation() + ";";
             stateText += mapView.getZoom();
 
             viewState.setText(stateText);
 
-            String eventDataText = event.getCenter().getX() + ";" + event.getCenter().getY() + ";" +
-                    event.getRotation() + ";" +
-                    event.getZoom();
+            String eventDataText = event.getCenter().getX() + ";"
+                    + event.getCenter().getY() + ";" + event.getRotation() + ";"
+                    + event.getZoom();
 
             eventData.setText(eventDataText);
         });
-
 
         add(map, viewState, eventData);
     }

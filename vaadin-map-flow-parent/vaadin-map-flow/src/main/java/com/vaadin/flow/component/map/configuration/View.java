@@ -27,7 +27,7 @@ public class View extends AbstractConfigurationObject {
     private Coordinate center;
     private float rotation;
     private float zoom;
-    private ViewExtent extent;
+    private Extent extent;
     private final String projection;
 
     public View() {
@@ -38,7 +38,7 @@ public class View extends AbstractConfigurationObject {
         this.center = new Coordinate(0, 0);
         this.rotation = 0;
         this.zoom = 0;
-        this.extent = new ViewExtent(0, 0, 0, 0);
+        this.extent = new Extent(0, 0, 0, 0);
         this.projection = projection;
     }
 
@@ -120,23 +120,32 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Gets the coordinates of the view's extent, default value is {@code 0} for
-     * all coordinates
+     * Gets the extent of the view's currently visible area, default value is
+     * {@code 0} for all coordinates
      *
      * @return the coordinates of the view's extent
      */
-    public ViewExtent getExtent() {
+    public Extent getExtent() {
         return extent;
     }
 
     /**
-     * Sets the coordinate of current view's extent in EPSG:3857 format
+     * Updates internal state of view to the latest values received from client
      *
+     * @param center
+     *            the updated center coordinates
+     * @param rotation
+     *            the updated rotation
+     * @param zoom
+     *            the updated zoom level
      * @param extent
-     *            the extent of the view in EPSG:3857 format
+     *            the updated extent
      */
-    public void setExtent(ViewExtent extent) {
+    public void updateInternalViewState(Coordinate center, float rotation,
+            float zoom, Extent extent) {
+        setCenter(center);
+        setRotation(rotation);
+        setZoom(zoom);
         this.extent = extent;
-        this.notifyChange();
     }
 }
