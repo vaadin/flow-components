@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -30,7 +29,6 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
@@ -172,22 +170,6 @@ public class GridPro<E> extends Grid<E> {
         public EditColumn(GridPro<T> grid, String columnId,
                 Renderer<T> renderer) {
             super(grid, columnId, renderer);
-        }
-
-        @Override
-        protected void onAttach(AttachEvent attachEvent) {
-            super.onAttach(attachEvent);
-            // Detaching GridPro will clear editor field reference from client,
-            // re-register it.
-            if (getEditorType().equals("custom")) {
-                setEditModeRenderer(editorField);
-            }
-        }
-
-        void setEditModeRenderer(AbstractField component) {
-            UI.getCurrent().getPage().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
-                    getElement(), component.getElement());
         }
 
         /**
