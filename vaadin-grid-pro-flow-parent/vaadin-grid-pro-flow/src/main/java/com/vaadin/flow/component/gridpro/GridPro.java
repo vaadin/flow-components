@@ -184,7 +184,7 @@ public class GridPro<E> extends Grid<E> {
             }
         }
 
-        private void setEditModeRenderer(AbstractField component) {
+        void setEditModeRenderer(AbstractField component) {
             UI.getCurrent().getPage().executeJs(
                     "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
                     getElement(), component.getElement());
