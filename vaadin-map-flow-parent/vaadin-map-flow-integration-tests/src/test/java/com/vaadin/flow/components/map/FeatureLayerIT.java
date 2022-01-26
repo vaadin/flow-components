@@ -61,9 +61,7 @@ public class FeatureLayerIT extends AbstractComponentIT {
     public void customMarkerFeature() {
         addCustomMarkerFeature.click();
 
-        long numFeatures = (long) map.evaluateOLExpression(
-                map.getFeatureCollectionExpression() + ".getLength()");
-        Assert.assertEquals(1, numFeatures);
+        assertNumberOfFeatures(1);
 
         // Custom values from test page
         ExpectedMarkerFeatureValues expected = new ExpectedMarkerFeatureValues();
@@ -84,9 +82,7 @@ public class FeatureLayerIT extends AbstractComponentIT {
         addDefaultMarkerFeature.click();
         updateMarkerCoordinates.click();
 
-        long numFeatures = (long) map.evaluateOLExpression(
-                map.getFeatureCollectionExpression() + ".getLength()");
-        Assert.assertEquals(1, numFeatures);
+        assertNumberOfFeatures(1);
 
         // Default values except for custom coordinates
         ExpectedMarkerFeatureValues expected = new ExpectedMarkerFeatureValues();
@@ -108,9 +104,7 @@ public class FeatureLayerIT extends AbstractComponentIT {
         addDefaultMarkerFeature.click();
         updateMarkerIcon.click();
 
-        long numFeatures = (long) map.evaluateOLExpression(
-                map.getFeatureCollectionExpression() + ".getLength()");
-        Assert.assertEquals(1, numFeatures);
+        assertNumberOfFeatures(1);
 
         // Default values except for custom icon
         ExpectedMarkerFeatureValues expected = new ExpectedMarkerFeatureValues();
@@ -133,9 +127,7 @@ public class FeatureLayerIT extends AbstractComponentIT {
             addDefaultMarkerFeature.click();
         }
 
-        long actualFeatures = (long) map.evaluateOLExpression(
-                map.getFeatureCollectionExpression() + ".getLength()");
-        Assert.assertEquals(expectedFeatures, actualFeatures);
+        assertNumberOfFeatures(expectedFeatures);
     }
 
     @Test
@@ -147,9 +139,13 @@ public class FeatureLayerIT extends AbstractComponentIT {
         removeFirstFeature.click();
         removeFirstFeature.click();
 
-        long actualFeatures = (long) map.evaluateOLExpression(
+        assertNumberOfFeatures(0);
+    }
+
+    private void assertNumberOfFeatures(int expectedNumber) {
+        long actualNumber = (long) map.evaluateOLExpression(
                 map.getFeatureCollectionExpression() + ".getLength()");
-        Assert.assertEquals(0, actualFeatures);
+        Assert.assertEquals(expectedNumber, actualNumber);
     }
 
     private void assertMarkerFeature(String featureExp,
