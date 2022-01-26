@@ -27,13 +27,13 @@ public class BackgroundLayerIT extends AbstractComponentIT {
         // Layer should be a tile layer
         String layerTypeName = (String) map.evaluateOLExpression(
                 map.getOLTypeNameExpression("map.getLayers().item(0)"));
-        Assert.assertEquals("TileLayer", layerTypeName);
+        Assert.assertEquals("ol/layer/Tile", layerTypeName);
 
         // Layer's source should be an OpenStreetMap source
         String sourceTypeName = (String) map
                 .evaluateOLExpression(map.getOLTypeNameExpression(
                         "map.getLayers().item(0).getSource()"));
-        Assert.assertEquals("OSM", sourceTypeName);
+        Assert.assertEquals("ol/source/OSM", sourceTypeName);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class BackgroundLayerIT extends AbstractComponentIT {
         String sourceTypeName = (String) map
                 .evaluateOLExpression(map.getOLTypeNameExpression(
                         "map.getLayers().item(0).getSource()"));
-        Assert.assertEquals("OSM", sourceTypeName);
+        Assert.assertEquals("ol/source/OSM", sourceTypeName);
 
         // Layer's source should use custom URL
         String sourceUrl = (String) map.evaluateOLExpression(
@@ -72,12 +72,12 @@ public class BackgroundLayerIT extends AbstractComponentIT {
         // Layer should be a vector layer
         String layerTypeName = (String) map.evaluateOLExpression(
                 map.getOLTypeNameExpression("map.getLayers().item(0)"));
-        Assert.assertEquals("VectorLayer", layerTypeName);
+        Assert.assertEquals("ol/layer/Vector", layerTypeName);
 
         // Layer's source should be a vector source
         String sourceTypeName = (String) map
                 .evaluateOLExpression(map.getOLTypeNameExpression(
                         "map.getLayers().item(0).getSource()"));
-        Assert.assertEquals("VectorSource", sourceTypeName);
+        Assert.assertEquals("ol/source/Vector", sourceTypeName);
     }
 }

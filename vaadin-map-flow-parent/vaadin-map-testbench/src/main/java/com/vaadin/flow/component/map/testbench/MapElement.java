@@ -30,6 +30,6 @@ public class MapElement extends TestBenchElement {
      * @return the Javascript expression that evaluates the type name
      */
     public String getOLTypeNameExpression(String jsExpression) {
-        return jsExpression + ".constructor.name";
+        return jsExpression + ".typeName";
     }
 }

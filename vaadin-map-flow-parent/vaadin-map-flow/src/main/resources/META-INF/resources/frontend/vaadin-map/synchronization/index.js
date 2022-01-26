@@ -229,6 +229,8 @@ export function synchronize(target, source, context) {
 
   // Store ID on the sync result for future updates
   result.id = source.id;
+  // Store type name on sync result for type checks in tests
+  result.typeName = type;
 
   return result;
 }
