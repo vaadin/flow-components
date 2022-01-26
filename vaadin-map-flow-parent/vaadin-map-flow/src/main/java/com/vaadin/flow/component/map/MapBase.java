@@ -123,18 +123,16 @@ public abstract class MapBase extends Component implements HasSize {
         this.requestViewSync();
     }
 
-    /**
-     * Register an event listener before all the other listeners of this event
-     * to update view state data to the latest values received from the client.
-     */
     private void registerEventListeners() {
+        // Register an event listener before all the other listeners of the view
+        // move end event to update view state to the latest values received
+        // from the client
         addViewMoveEndEventListener(event -> {
             float rotation = event.getRotation();
             float zoom = event.getZoom();
             Coordinate center = event.getCenter();
             Extent extent = event.getExtent();
-            getView().update(() -> getView().updateInternalViewState(center,
-                    rotation, zoom, extent), false);
+            getView().updateInternalViewState(center, rotation, zoom, extent);
         });
     }
 
@@ -147,8 +145,9 @@ public abstract class MapBase extends Component implements HasSize {
      * Checks whether the map component feature flag is active. Succeeds if the
      * flag is enabled, and throws otherwise.
      *
-     * @throws ExperimentalFeatureException when the {@link FeatureFlags#MAP_COMPONENT} feature is not
-     *                                      enabled
+     * @throws ExperimentalFeatureException
+     *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
+     *             enabled
      */
     private void checkFeatureFlag() {
         boolean enabled = getFeatureFlags()

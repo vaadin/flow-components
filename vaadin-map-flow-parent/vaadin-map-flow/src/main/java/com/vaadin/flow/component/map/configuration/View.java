@@ -16,6 +16,8 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 /**
@@ -121,10 +123,14 @@ public class View extends AbstractConfigurationObject {
 
     /**
      * Gets the extent of the view's currently visible area, default value is
-     * {@code 0} for all coordinates
-     *
+     * {@code 0} for all coordinates.
+     * <p>
+     * The extent is calculated on the client-side and will only be available
+     * after the first view change event.
+     * 
      * @return the coordinates of the view's extent
      */
+    @JsonIgnore
     public Extent getExtent() {
         return extent;
     }
@@ -143,10 +149,11 @@ public class View extends AbstractConfigurationObject {
      */
     public void updateInternalViewState(Coordinate center, float rotation,
             float zoom, Extent extent) {
-        this.center = center;
-        this.rotation = rotation;
-        this.zoom = zoom;
-        this.extent = extent;
-        notifyChange();
+        update(() -> {
+            this.center = center;
+            this.rotation = rotation;
+            this.zoom = zoom;
+            this.extent = extent;
+        }, false);
     }
 }
