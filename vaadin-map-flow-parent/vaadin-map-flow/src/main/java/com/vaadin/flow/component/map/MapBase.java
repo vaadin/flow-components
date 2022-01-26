@@ -125,7 +125,7 @@ public abstract class MapBase extends Component implements HasSize {
 
     /**
      * Register an event listener before all the other listeners of this event
-     * to update view state data to latest values received from the client.
+     * to update view state data to the latest values received from the client.
      */
     private void registerEventListeners() {
         addViewMoveEndEventListener(event -> {
