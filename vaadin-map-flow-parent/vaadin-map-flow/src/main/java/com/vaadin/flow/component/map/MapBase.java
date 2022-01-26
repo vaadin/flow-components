@@ -27,12 +27,9 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 import java.beans.PropertyChangeEvent;
