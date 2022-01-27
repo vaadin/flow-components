@@ -231,9 +231,18 @@
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
                         <systemProperties>
+                            <force>true</force>
                             <systemProperty>
                                 <name>project.basedir</name>
                                 <value>${project.basedir}</value>
+                            </systemProperty>
+                            <systemProperty>
+                                <name>vaadin.productionMode</name>
+                                <value>true</value>
+                            </systemProperty>
+                            <systemProperty>
+                                <name>vaadin.reuseDevServer</name>
+                                <value>true</value>
                             </systemProperty>
                         </systemProperties>
                     </configuration>
@@ -244,14 +253,6 @@
                             <goals>
                                 <goal>deploy-war</goal>
                             </goals>
-                            <configuration>
-                                <systemProperties>
-                                    <systemProperty>
-                                        <name>vaadin.productionMode</name>
-                                        <value>true</value>
-                                    </systemProperty>
-                                </systemProperties>
-                            </configuration>
                         </execution>
                         <execution>
                             <id>stop-jetty</id>
