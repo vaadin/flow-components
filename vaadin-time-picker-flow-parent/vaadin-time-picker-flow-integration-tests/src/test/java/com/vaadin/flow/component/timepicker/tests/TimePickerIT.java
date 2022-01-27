@@ -18,7 +18,6 @@ package com.vaadin.flow.component.timepicker.tests;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
@@ -109,7 +108,6 @@ public class TimePickerIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void timePickerWithMinAndMaxSetting() {
         TimePickerElement picker = $(TimePickerElement.class)
                 .id("time-picker-min-max");
