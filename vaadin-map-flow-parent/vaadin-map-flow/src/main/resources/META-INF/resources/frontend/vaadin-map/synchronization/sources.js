@@ -13,7 +13,10 @@ function synchronizeSource(target, source, _context) {
   if (!target) {
     throw new Error("Can not instantiate base class: ol/source/Source");
   }
-  target.setAttributions(source.attributions);
+  // Keep default attributions if there is no custom value
+  if(source.attributions) {
+    target.setAttributions(source.attributions);
+  }
 
   return target;
 }

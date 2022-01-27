@@ -38,16 +38,26 @@ public abstract class Source extends AbstractConfigurationObject {
     }
 
     /**
-     * @return list of attributions to display for this source
+     * The attributions to display for the source. Attributions can be
+     * copyrights and other information that needs to be displayed in order to
+     * use map data from a service.
+     * <p>
+     * This property uses a list to allow displaying a number of contributions.
+     * Multiple attributions will be displayed next to each other in the
+     * attribution container.
+     * <p>
+     * By default, the value is {@code null}, which means that default
+     * attributions will be displayed, if the specific type of source has any.
+     * This should only be the case for {@link OSMSource}.
+     *
+     * @return the list of current attributions
      */
     public List<String> getAttributions() {
         return attributions;
     }
 
     /**
-     * Sets the attributions to display for the source. Attributions can be
-     * copyrights and other information that needs to be displayed in order to
-     * use map data from a service.
+     * Sets the attributions to display for the source.
      *
      * @param attributions
      *            the new attributions
@@ -96,7 +106,7 @@ public abstract class Source extends AbstractConfigurationObject {
         }
 
         /**
-         * @see Source#setAttributions(List)
+         * @see Source#getAttributions()
          */
         public T setAttributions(List<String> attributions) {
             this.attributions = attributions;

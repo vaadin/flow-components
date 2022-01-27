@@ -3,6 +3,8 @@ package com.vaadin.flow.component.map.testbench;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
+import java.util.List;
+
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
     /**
@@ -59,5 +61,17 @@ public class MapElement extends TestBenchElement {
     public String getFeatureCollectionExpression() {
         return getFeatureLayerExpression()
                 + ".getSource().getFeaturesCollection()";
+    }
+
+    /**
+     * Gets the list of attributions list items in the attributions container
+     * div
+     *
+     * @return list of list items
+     */
+    public List<TestBenchElement> getAttributionItems() {
+        TestBenchElement attributions = $("div")
+                .attributeContains("class", "ol-attribution").first();
+        return attributions.$("li").all();
     }
 }
