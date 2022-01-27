@@ -176,22 +176,17 @@ then
     set +x
 fi
 
-reuse_browser() {
-    [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
-}
-
-
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none"
   tcLog "Running module ITs ($elements) - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
@@ -211,7 +206,7 @@ else
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dtest=none -Dit.test=$failed $(reuse_browser false)"
+        cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dtest=none -Dit.test=$failed"
         tcLog "Re-Running $nfailed failed IT classes ..."
         echo $cmd
         $cmd

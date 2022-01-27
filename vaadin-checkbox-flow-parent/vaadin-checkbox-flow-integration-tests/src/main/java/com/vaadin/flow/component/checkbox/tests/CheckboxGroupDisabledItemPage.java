@@ -32,6 +32,10 @@ public class CheckboxGroupDisabledItemPage extends VerticalLayout {
                 });
         toggleBarButton.setId("toggle-bar-button");
 
-        add(group, new Div(toggleBarButton));
+        NativeButton toggleEnabledButton = new NativeButton("Toggle enabled",
+                event -> group.setEnabled(!group.isEnabled()));
+        toggleEnabledButton.setId("toggle-enabled-button");
+
+        add(group, new Div(toggleBarButton, toggleEnabledButton));
     }
 }
