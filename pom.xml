@@ -289,7 +289,7 @@
                     <configuration>
                         <forkCount>${failsafe.forkCount}</forkCount>
                         <argLine>-Xmx2048m</argLine>
-                        <reuseForks>true</reuseForks>
+                        <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
