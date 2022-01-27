@@ -78,4 +78,24 @@ public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
         firstCheckbox.click();
         Assert.assertNull(firstCheckbox.getAttribute("checked"));
     }
+
+    @Test
+    public void enablingTheGroupDoesnNotEnableItemDisabledWithItemEnabledProvider() {
+        open();
+        TestBenchElement group = $(TestBenchElement.class)
+                .id("checkbox-group-disabled-item");
+        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
+        TestBenchElement toggleEnabledButton = $("button").id("toggle-enabled-button");
+
+        // Disable group
+        toggleEnabledButton.click();
+
+        // Re-enable group
+        toggleEnabledButton.click();
+
+        Assert.assertEquals("Second checkbox should be disabled",
+                Boolean.TRUE.toString(), checkboxes.get(1).getAttribute("disabled"));
+    }
+
+
 }
