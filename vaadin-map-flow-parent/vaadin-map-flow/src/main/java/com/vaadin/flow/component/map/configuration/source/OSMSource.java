@@ -38,9 +38,32 @@ public class OSMSource extends XYZSource {
         return Constants.OL_SOURCE_OSM;
     }
 
+    /**
+     * Determines whether attributions are collapsible on smaller screen sizes.
+     * For {@link OSMSource} the default is {@code false}, and this value can
+     * not be changed in the options.
+     *
+     * @return whether attributions are collapsible
+     */
+    @Override
+    public boolean isAttributionsCollapsible() {
+        return super.isAttributionsCollapsible();
+    }
+
     public static class Options extends XYZSource.BaseOptions<Options> {
         public Options() {
             setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+            setAttributionsCollapsible(false);
+        }
+
+        @Override
+        public Options setAttributionsCollapsible(
+                boolean attributionsCollapsible) {
+            if (attributionsCollapsible) {
+                throw new IllegalArgumentException(
+                        "OSMSource does not allow to collapse attributions");
+            }
+            return getThis();
         }
     }
 }
