@@ -248,7 +248,7 @@ public class TreeGridBasicFeaturesPage extends Div {
         button.setId(button.getText().replace(" ", ""));
         return button;
     }
-    
+
     public class CustomTreeDataProvider
             extends TreeDataProvider<HierarchicalTestBean> {
         public CustomTreeDataProvider(TreeData<HierarchicalTestBean> treeData) {
@@ -261,5 +261,5 @@ public class TreeGridBasicFeaturesPage extends Div {
                     "Cannot provide an id for a null item.");
             return item.getId();
         }
-    }    
+    }
 }
