@@ -85,7 +85,8 @@ public class LazyHierarchicalDataProvider extends
 
     @Override
     public Object getId(HierarchicalTestBean item) {
-        Objects.requireNonNull(item, "Cannot provide an id for a null item.");
+        Objects.requireNonNull(item,
+                "Cannot provide an id for a null item.");
         return item.getId();
     }
 }
