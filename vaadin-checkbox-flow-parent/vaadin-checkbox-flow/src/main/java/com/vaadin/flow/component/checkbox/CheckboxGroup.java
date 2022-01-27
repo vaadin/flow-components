@@ -380,17 +380,12 @@ public class CheckboxGroup<T>
     private void updateEnabled(CheckBoxItem<T> checkbox) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(checkbox.getItem());
-        Serializable rawValue = checkbox.getElement()
-                .getPropertyRaw("disabled");
-        if (rawValue instanceof Boolean) {
-            // convert the boolean value to a String to force update the
-            // property value. Otherwise since the provided value is the same as
-            // the current one the update don't do anything.
-            checkbox.getElement().setProperty("disabled",
-                    disabled ? Boolean.TRUE.toString() : null);
-        } else {
-            checkbox.setDisabled(disabled);
-        }
+        checkbox.setDisabled(disabled);
+        // When enabling a disabled checkbox group, individual checkbox Web
+        // Components that should remain disabled (due to itemEnabledProvider),
+        // may end up rendering as enabled.
+        // Enforce the Web Component state using JS.
+        checkbox.getElement().executeJs("this.disabled = $0", disabled);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
