@@ -39,9 +39,9 @@ public class OSMSource extends XYZSource {
     }
 
     /**
-     * Determines whether attributions are collapsible on smaller screen sizes.
-     * For {@link OSMSource} the default is {@code false}, and this value can
-     * not be changed in the options.
+     * Determines whether attributions are collapsible. For {@link OSMSource}
+     * the default is {@code false}, and this value can not be changed in the
+     * options.
      *
      * @return whether attributions are collapsible
      */

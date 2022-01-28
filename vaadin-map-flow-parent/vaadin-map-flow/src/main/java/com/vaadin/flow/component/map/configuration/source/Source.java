@@ -68,8 +68,7 @@ public abstract class Source extends AbstractConfigurationObject {
     }
 
     /**
-     * Determines whether attributions are collapsible on smaller screen sizes.
-     * Default is {@code true}.
+     * Determines whether attributions are collapsible. Default is {@code true}.
      * <p>
      * <b>NOTE:</b> Specific types of sources, such as {@link OSMSource}, might
      * not allow collapsing the attributions.
