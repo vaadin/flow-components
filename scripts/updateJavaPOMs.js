@@ -20,7 +20,8 @@ const proComponents = ['board',
                        'cookie-consent',
                        'crud',
                        'grid-pro',
-                       'rich-text-editor'];
+                       'rich-text-editor',
+                       'map'];
 
 function renameComponent(array, name) {
   for(let i = 0; array && i < array.length; i++) {
