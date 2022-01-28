@@ -33,7 +33,7 @@ public class XYZSource extends TileImageSource {
         return Constants.OL_SOURCE_XYZ;
     }
 
-    public static class BaseOptions<T extends BaseOptions<T>>
+    public static abstract class BaseOptions<T extends BaseOptions<T>>
             extends TileImageSource.BaseOptions<T> {
     }
 
