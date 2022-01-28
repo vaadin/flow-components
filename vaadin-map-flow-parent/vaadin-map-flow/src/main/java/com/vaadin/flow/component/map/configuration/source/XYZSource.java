@@ -19,8 +19,8 @@ package com.vaadin.flow.component.map.configuration.source;
 import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
- * Abstract base class for map sources loading tiled images from a map service
- * using the XYZ URL format
+ * Map source for loading tiled images from a map service using the XYZ URL
+ * format
  */
 public class XYZSource extends TileImageSource {
 
