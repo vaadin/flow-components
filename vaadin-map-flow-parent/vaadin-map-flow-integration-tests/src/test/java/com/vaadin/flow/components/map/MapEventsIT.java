@@ -7,6 +7,9 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.interactions.Actions;
+
+import java.util.List;
 
 @TestPath("vaadin-map/map-events")
 public class MapEventsIT extends AbstractComponentIT {
@@ -45,4 +48,34 @@ public class MapEventsIT extends AbstractComponentIT {
                 eventDataDiv.getText());
     }
 
+    @Test
+    public void mapClick_correctEventDataReceived() {
+
+    }
+
+//    /**
+//     * Performs a native click at the specified map coordinates. The method will
+//     * convert the coordinates into pixel values, and perform a click on the map
+//     * at the calculated pixel offset.
+//     *
+//     * @param x
+//     * @param y
+//     */
+//    private void clickAtCoordinates(double x, double y) {
+//        // Selenium click event offset starts from center, so we need to shift
+//        // the offset to the start of the element first
+//        Rectangle mapRectangle = this.getRect();
+//        int startLeft = -mapRectangle.width / 2;
+//        int startTop = -mapRectangle.height / 2;
+//
+//        // todo: use executeJS parameters instead of string concatenation
+//        List<Number> pixelCoordinates = (List<Number>) executeScript(
+//                "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
+//                this, x, y);
+//
+//        int clickX = startLeft + pixelCoordinates.get(0).intValue();
+//        int clickY = startTop + pixelCoordinates.get(1).intValue();
+//        new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
+//                .build().perform();
+//    }
 }

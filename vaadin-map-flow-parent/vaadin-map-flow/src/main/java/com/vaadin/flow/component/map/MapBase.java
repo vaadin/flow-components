@@ -26,6 +26,7 @@ import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.Extent;
+import com.vaadin.flow.component.map.events.MapClickEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
@@ -141,13 +142,16 @@ public abstract class MapBase extends Component implements HasSize {
         return addListener(MapViewMoveEndEvent.class, listener);
     }
 
+    public Registration addMapClickEventListener(ComponentEventListener<MapClickEvent> listener) {
+        return addListener(MapClickEvent.class, listener);
+    }
+
     /**
      * Checks whether the map component feature flag is active. Succeeds if the
      * flag is enabled, and throws otherwise.
      *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
-     *             enabled
+     * @throws ExperimentalFeatureException when the {@link FeatureFlags#MAP_COMPONENT} feature is not
+     *                                      enabled
      */
     private void checkFeatureFlag() {
         boolean enabled = getFeatureFlags()
