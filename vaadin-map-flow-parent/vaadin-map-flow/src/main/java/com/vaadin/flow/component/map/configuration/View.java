@@ -33,7 +33,7 @@ public class View extends AbstractConfigurationObject {
     private final String projection;
 
     public View() {
-        this("EPSG:3857");
+        this(Projection.EPSG_3857.stringValue());
     }
 
     public View(String projection) {
@@ -127,7 +127,7 @@ public class View extends AbstractConfigurationObject {
      * <p>
      * The extent is calculated on the client-side and will only be available
      * after the first view change event.
-     * 
+     *
      * @return the coordinates of the view's extent
      */
     @JsonIgnore
