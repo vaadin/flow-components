@@ -43,7 +43,7 @@ public class GridProDetachAttachPage extends Div {
                 SamplePerson::setName);
         grid.setItems(persons);
 
-        NativeButton button = new NativeButton("Detach", event -> {
+        NativeButton attachDetachButton = new NativeButton("Detach", event -> {
             if (grid.getParent().isPresent()) {
                 remove(grid);
                 event.getSource().setText("Reattach");
@@ -52,8 +52,17 @@ public class GridProDetachAttachPage extends Div {
                 event.getSource().setText("Detach");
             }
         });
-        button.setId("toggle-attached");
-        add(grid, button);
+        attachDetachButton.setId("toggle-attached");
+
+        NativeButton addColumnButton = new NativeButton("Add new Column",
+                event -> {
+                    TextField newEditColumn = new TextField();
+                    grid.addEditColumn(SamplePerson::getName)
+                            .custom(newEditColumn, SamplePerson::setName);
+                });
+        addColumnButton.setId("add-column");
+
+        add(grid, attachDetachButton, addColumnButton);
     }
 
     public class SamplePerson {
