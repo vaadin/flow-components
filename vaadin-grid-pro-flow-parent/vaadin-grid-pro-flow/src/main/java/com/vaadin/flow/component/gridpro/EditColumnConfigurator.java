@@ -43,7 +43,6 @@ import com.vaadin.flow.shared.Registration;
 public class EditColumnConfigurator<T> implements Serializable {
 
     private final EditColumn<T> column;
-
     private Registration attachRegistration;
 
     /**
@@ -114,10 +113,11 @@ public class EditColumnConfigurator<T> implements Serializable {
             attachRegistration = null;
         }
         attachRegistration = column.getElement()
-                .addAttachListener(e -> column.getUI()
-                        .ifPresent(ui -> ui.beforeClientResponse(column,
-                                context -> setEditModeRenderer(component))));
+                .addAttachListener(e -> setEditModeRenderer(component));
 
+        column.getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(column,
+                        context -> setEditModeRenderer(component)));
         return configureColumn((item, ignore) -> itemUpdater.accept(item,
                 component.getValue()), EditorType.CUSTOM, component);
     }
