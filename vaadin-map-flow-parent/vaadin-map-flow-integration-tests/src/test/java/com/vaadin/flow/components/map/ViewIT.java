@@ -28,8 +28,10 @@ public class ViewIT extends AbstractComponentIT {
 
         List<Number> center = (List<Number>) map
                 .evaluateOLExpression("map.getView().getCenter()");
-        Assert.assertEquals(center.get(0).doubleValue(), 2482424.644689998, 0.0001);
-        Assert.assertEquals(center.get(1).doubleValue(), 8500614.173537256, 0.0001);
+        Assert.assertEquals(center.get(0).doubleValue(), 2482424.644689998,
+                0.0001);
+        Assert.assertEquals(center.get(1).doubleValue(), 8500614.173537256,
+                0.0001);
 
         // Testing setZoom
         TestBenchElement setZoomButton = $("button").id("set-zoom-button");
