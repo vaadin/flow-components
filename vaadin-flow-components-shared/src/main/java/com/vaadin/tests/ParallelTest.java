@@ -11,6 +11,7 @@ public abstract class ParallelTest
 
     @BeforeClass
     public static void setupClass() {
+        System.gc();
         String sauceKey = System.getProperty("sauce.sauceAccessKey");
         String hubHost = System
                 .getProperty("com.vaadin.testbench.Parameters.hubHostname");
