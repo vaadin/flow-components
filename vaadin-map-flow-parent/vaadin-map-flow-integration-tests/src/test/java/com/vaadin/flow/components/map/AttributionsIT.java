@@ -94,10 +94,14 @@ public class AttributionsIT extends AbstractComponentIT {
 
         // Collapsed by default
         TestBenchElement attributionContainer = map.getAttributionContainer();
-        Assert.assertTrue("Attributions should have collapsed state", attributionContainer.getClassNames().contains("ol-collapsed"));
-        // Has collapse button to toggle collapsed state (no need to test button clicks, that is OpenLayers internal)
-        TestBenchElement collapseButton = attributionContainer.$("button").first();
-        Assert.assertTrue("Collapse button should be displayed", collapseButton.isDisplayed());
+        Assert.assertTrue("Attributions should have collapsed state",
+                attributionContainer.getClassNames().contains("ol-collapsed"));
+        // Has collapse button to toggle collapsed state (no need to test button
+        // clicks, that is OpenLayers internal)
+        TestBenchElement collapseButton = attributionContainer.$("button")
+                .first();
+        Assert.assertTrue("Collapse button should be displayed",
+                collapseButton.isDisplayed());
     }
 
     @Test
@@ -110,10 +114,13 @@ public class AttributionsIT extends AbstractComponentIT {
 
         // Not collapsed
         TestBenchElement attributionContainer = map.getAttributionContainer();
-        Assert.assertFalse("Attributions should not have collapsed state", attributionContainer.getClassNames().contains("ol-collapsed"));
+        Assert.assertFalse("Attributions should not have collapsed state",
+                attributionContainer.getClassNames().contains("ol-collapsed"));
         // No collapse button to toggle collapsed state
-        TestBenchElement collapseButton = attributionContainer.$("button").first();
-        Assert.assertFalse("Collapse button should not be displayed", collapseButton.isDisplayed());
+        TestBenchElement collapseButton = attributionContainer.$("button")
+                .first();
+        Assert.assertFalse("Collapse button should not be displayed",
+                collapseButton.isDisplayed());
     }
 
     public void waitUntilNumberOfAttributions(int expectedNumber) {

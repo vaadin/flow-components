@@ -45,25 +45,30 @@ public class AttributionsPage extends Div {
                 });
         clearAttributions.setId("clear-attributions");
 
-        NativeButton setupCollapsibleEnabled = new NativeButton("Setup collapsible enabled",
-                e -> {
-                    // Default OSMSource does not allow changing collapsible settings, so use something else
-                    XYZSource source = new XYZSource(new XYZSource.Options().setAttributionsCollapsible(true));
+        NativeButton setupCollapsibleEnabled = new NativeButton(
+                "Setup collapsible enabled", e -> {
+                    // Default OSMSource does not allow changing collapsible
+                    // settings, so use something else
+                    XYZSource source = new XYZSource(new XYZSource.Options()
+                            .setAttributionsCollapsible(true));
                     source.setAttributions(testAttributions);
                     ((TileLayer) map.getBackgroundLayer()).setSource(source);
                 });
         setupCollapsibleEnabled.setId("setup-collapsible-enabled");
 
-        NativeButton setupCollapsibleDisabled = new NativeButton("Setup collapsible disabled",
-                e -> {
-                    // Default OSMSource does not allow changing collapsible settings, so use something else
-                    XYZSource source = new XYZSource(new XYZSource.Options().setAttributionsCollapsible(false));
+        NativeButton setupCollapsibleDisabled = new NativeButton(
+                "Setup collapsible disabled", e -> {
+                    // Default OSMSource does not allow changing collapsible
+                    // settings, so use something else
+                    XYZSource source = new XYZSource(new XYZSource.Options()
+                            .setAttributionsCollapsible(false));
                     source.setAttributions(testAttributions);
                     ((TileLayer) map.getBackgroundLayer()).setSource(source);
                 });
         setupCollapsibleDisabled.setId("setup-collapsible-disabled");
 
         add(map, new Div(setupCustomAttributions, changeAttributions,
-                clearAttributions, setupCollapsibleEnabled,  setupCollapsibleDisabled));
+                clearAttributions, setupCollapsibleEnabled,
+                setupCollapsibleDisabled));
     }
 }

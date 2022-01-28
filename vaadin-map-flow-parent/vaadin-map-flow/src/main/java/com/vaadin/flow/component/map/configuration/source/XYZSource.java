@@ -37,5 +37,6 @@ public class XYZSource extends TileImageSource {
             extends TileImageSource.BaseOptions<T> {
     }
 
-    public static class Options extends BaseOptions<Options> {}
+    public static class Options extends BaseOptions<Options> {
+    }
 }

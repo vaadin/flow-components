@@ -69,13 +69,11 @@ public class MapElement extends TestBenchElement {
      * @return attribution container div
      */
     public TestBenchElement getAttributionContainer() {
-        return $("div")
-                .attributeContains("class", "ol-attribution").first();
+        return $("div").attributeContains("class", "ol-attribution").first();
     }
 
     /**
-     * Gets the list of attributions list items in the attribution container
-     * div
+     * Gets the list of attributions list items in the attribution container div
      *
      * @return list of list items
      */

@@ -14,7 +14,7 @@ function synchronizeSource(target, source, _context) {
     throw new Error("Can not instantiate base class: ol/source/Source");
   }
   // Keep default attributions if there is no custom value
-  if(source.attributions) {
+  if (source.attributions) {
     target.setAttributions(source.attributions);
   }
 
@@ -35,8 +35,9 @@ function synchronizeUrlTileSource(target, source, context) {
     throw new Error("Can not instantiate base class: ol/source/UrlTile");
   }
   synchronizeTileSource(target, source, context);
-
-  if(source.url) {
+  // Setting null URL is not supported. While not an actual use-case, it is useful to prevent errors here in order
+  // to keep the URL empty in integration tests
+  if (source.url) {
     target.setUrl(source.url);
   }
 
