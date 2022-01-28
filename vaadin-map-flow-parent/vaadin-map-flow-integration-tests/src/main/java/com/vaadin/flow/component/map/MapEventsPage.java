@@ -34,6 +34,11 @@ public class MapEventsPage extends Div {
             eventData.setText(eventDataText);
         });
 
+        map.addMapClickEventListener(event -> {
+            System.out.println(event.getCoordinate());
+            System.out.println(event.getMouseDetails());
+        });
+
         add(map, viewState, eventData);
     }
 }

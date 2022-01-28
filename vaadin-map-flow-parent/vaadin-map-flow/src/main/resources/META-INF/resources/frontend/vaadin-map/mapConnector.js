@@ -58,6 +58,19 @@ import { synchronize } from "./synchronization";
 
       mapElement.dispatchEvent(customEvent);
     });
+
+    mapElement.configuration.on("click", (event) => {
+      const coordinate = event.coordinate;
+
+      const customEvent = new CustomEvent("map-click", {
+        detail: {
+          coordinate,
+          originalEvent: event.originalEvent,
+        },
+      });
+
+      mapElement.dispatchEvent(customEvent);
+    });
   }
 
   window.Vaadin.Flow.mapConnector = {
