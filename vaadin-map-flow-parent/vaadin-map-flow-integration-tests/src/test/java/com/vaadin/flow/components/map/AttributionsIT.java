@@ -16,6 +16,8 @@ public class AttributionsIT extends AbstractComponentIT {
     private TestBenchElement setupCustomAttributions;
     private TestBenchElement changeAttributions;
     private TestBenchElement clearAttributions;
+    private TestBenchElement setupCollapsibleEnabled;
+    private TestBenchElement setupCollapsibleDisabled;
 
     @Before
     public void init() {
@@ -24,6 +26,8 @@ public class AttributionsIT extends AbstractComponentIT {
         setupCustomAttributions = $("button").id("setup-custom-attributions");
         changeAttributions = $("button").id("change-attributions");
         clearAttributions = $("button").id("clear-attributions");
+        setupCollapsibleEnabled = $("button").id("setup-collapsible-enabled");
+        setupCollapsibleDisabled = $("button").id("setup-collapsible-disabled");
     }
 
     @Test
@@ -78,6 +82,38 @@ public class AttributionsIT extends AbstractComponentIT {
         // Updating attributions might be async in OpenLayers, wait until we
         // have the correct number
         waitUntilNumberOfAttributions(0);
+    }
+
+    @Test
+    public void collapsibleEnabled() {
+        setupCollapsibleEnabled.click();
+
+        // Updating attributions might be async in OpenLayers, wait until we
+        // have the correct number
+        waitUntilNumberOfAttributions(2);
+
+        // Collapsed by default
+        TestBenchElement attributionContainer = map.getAttributionContainer();
+        Assert.assertTrue("Attributions should have collapsed state", attributionContainer.getClassNames().contains("ol-collapsed"));
+        // Has collapse button to toggle collapsed state (no need to test button clicks, that is OpenLayers internal)
+        TestBenchElement collapseButton = attributionContainer.$("button").first();
+        Assert.assertTrue("Collapse button should be displayed", collapseButton.isDisplayed());
+    }
+
+    @Test
+    public void collapsibleDisabled() {
+        setupCollapsibleDisabled.click();
+
+        // Updating attributions might be async in OpenLayers, wait until we
+        // have the correct number
+        waitUntilNumberOfAttributions(2);
+
+        // Not collapsed
+        TestBenchElement attributionContainer = map.getAttributionContainer();
+        Assert.assertFalse("Attributions should not have collapsed state", attributionContainer.getClassNames().contains("ol-collapsed"));
+        // No collapse button to toggle collapsed state
+        TestBenchElement collapseButton = attributionContainer.$("button").first();
+        Assert.assertFalse("Collapse button should not be displayed", collapseButton.isDisplayed());
     }
 
     public void waitUntilNumberOfAttributions(int expectedNumber) {

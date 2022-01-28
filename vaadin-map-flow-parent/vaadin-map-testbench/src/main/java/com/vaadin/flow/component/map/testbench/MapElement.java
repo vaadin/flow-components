@@ -64,14 +64,22 @@ public class MapElement extends TestBenchElement {
     }
 
     /**
-     * Gets the list of attributions list items in the attributions container
+     * Gets the attribution container div
+     *
+     * @return attribution container div
+     */
+    public TestBenchElement getAttributionContainer() {
+        return $("div")
+                .attributeContains("class", "ol-attribution").first();
+    }
+
+    /**
+     * Gets the list of attributions list items in the attribution container
      * div
      *
      * @return list of list items
      */
     public List<TestBenchElement> getAttributionItems() {
-        TestBenchElement attributions = $("div")
-                .attributeContains("class", "ol-attribution").first();
-        return attributions.$("li").all();
+        return getAttributionContainer().$("li").all();
     }
 }

@@ -35,7 +35,10 @@ function synchronizeUrlTileSource(target, source, context) {
     throw new Error("Can not instantiate base class: ol/source/UrlTile");
   }
   synchronizeTileSource(target, source, context);
-  target.setUrl(source.url || target.getUrl());
+
+  if(source.url) {
+    target.setUrl(source.url);
+  }
 
   return target;
 }
