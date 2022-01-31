@@ -18,6 +18,8 @@ then
         TBHUB=`echo $i | cut -d = -f2`;;
       image=*)
         SELENIUM_IMAGE=`echo $i | cut -d = -f2`;;
+      it)
+        IT_ONLY=true ;;
       *)
         modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
@@ -110,26 +112,29 @@ type npm && npm --version
 type pnpm && pnpm --version
 uname -a
 
-## Compile all java files including tests in ITs modules
-cmd="mvn clean test-compile -DskipFrontend $args"
-tcLog "Compiling flow components - $cmd"
-$cmd || tcStatus 1 "Compilation failed"
-
 ## Notify TC that we are going to run maven tests
 tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
-## Compile and install all modules excluding ITs
-cmd="mvn install -Drelease -T $FORK_COUNT $args"
-tcLog "Unit-Testing and Installing flow components - $cmd"
-$cmd
-if [ $? != 0 ]
+if [ -z "$IT_ONLY" ]
 then
-  ## Some times install fails because of maven multithread race condition
-  ## running a second time it is mitigated
-  tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
-  sleep 15
-  $cmd || tcStatus 1 "Unit-Testing failed"
+  ## Compile all java files including tests in ITs modules
+  cmd="mvn clean test-compile -DskipFrontend $args"
+  tcLog "Compiling flow components - $cmd"
+  $cmd || tcStatus 1 "Compilation failed"
+
+  ## Compile and install all modules excluding ITs
+  cmd="mvn install -Drelease -T $FORK_COUNT $args"
+  tcLog "Unit-Testing and Installing flow components - $cmd"
+  $cmd
+  if [ $? != 0 ]
+  then
+    ## Some times install fails because of maven multithread race condition
+    ## running a second time it is mitigated
+    tcLog "Unit-Testing and Installing flow components (2nd try) - $cmd"
+    sleep 15
+    $cmd || tcStatus 1 "Unit-Testing failed"
+  fi
 fi
 
 ## Skip IT's if developer passed [skip ci] labels in commit messages
@@ -141,15 +146,18 @@ then
   tcStatus 0 "" "Success - skip-ci"
 fi
 
-## Install node modules used for merging ITs
-cmd="npm install --silent --quiet --no-progress"
-tcLog "Install NPM packages - $cmd"
-$cmd || exit 1
+if [ -z "$modules" -o -n "$USE_MERGED_MODULE" ]
+then
+  ## Install node modules used for merging ITs
+  cmd="npm install --silent --quiet --no-progress"
+  tcLog "Install NPM packages - $cmd"
+  $cmd || exit 1
 
-## Create the integration-tests by coping all module ITs
-cmd="node scripts/mergeITs.js "`echo $elements`
-tcLog "Merge IT modules - $cmd"
-$cmd || tcStatus 1 "Merging ITs failed"
+  ## Create the integration-tests by coping all module ITs
+  cmd="node scripts/mergeITs.js "`echo $elements`
+  tcLog "Merge IT modules - $cmd"
+  $cmd || tcStatus 1 "Merging ITs failed"
+fi
 
 ## Compute variable to run tests
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
@@ -170,9 +178,12 @@ then
     tcLog "Starting docker container using the $SELENIUM_DOCKER_IMAGE image"
     set -x
     trap "echo Terminating docker; docker stop $DOCKER_CONTAINER_NAME" EXIT
-    docker pull "$SELENIUM_DOCKER_IMAGE" || exit 1
-    docker image prune -f || exit 1
-    docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE" || exit 1
+    if [ -z "$modules" ]
+    then
+      docker pull "$SELENIUM_DOCKER_IMAGE" || exit 1
+      docker image prune -f || exit 1
+    fi
+    docker run --name "$DOCKER_CONTAINER_NAME" -p 4444:4444 --rm -d "$SELENIUM_DOCKER_IMAGE" || exit 1
     set +x
 fi
 
@@ -186,7 +197,7 @@ then
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none"
+  cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode $mode $args -pl integration-tests -Dtest=none"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
