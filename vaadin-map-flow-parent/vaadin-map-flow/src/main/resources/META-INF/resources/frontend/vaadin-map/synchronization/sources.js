@@ -14,9 +14,7 @@ function synchronizeSource(target, source, _context) {
     throw new Error("Can not instantiate base class: ol/source/Source");
   }
 
-  // Using undefined causes OL to reset to default attributions
-  const attributions = source.attributions || undefined;
-  target.setAttributions(attributions);
+  target.setAttributions(source.attributions);
 
   return target;
 }
