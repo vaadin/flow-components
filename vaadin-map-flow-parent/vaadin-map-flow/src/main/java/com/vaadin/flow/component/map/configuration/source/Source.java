@@ -42,7 +42,7 @@ public abstract class Source extends AbstractConfigurationObject {
      * copyrights and other information that needs to be displayed in order to
      * use map data from a service.
      * <p>
-     * This property uses a list to allow displaying a number of contributions.
+     * This property uses a list to allow displaying a number of attributions.
      * Multiple attributions will be displayed next to each other in the
      * attribution container.
      * <p>
