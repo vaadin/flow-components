@@ -39,11 +39,11 @@ public class MapElement extends TestBenchElement {
      * <p>
      * Effectively this uses the first vector layer, which means that this
      * should only be used if no custom vector layers have been added.
-     * 
+     *
      * @return a Javascript expression evaluating the feature layer
      */
     public String getFeatureLayerExpression() {
-        return "map.getLayers().getArray().find(layer => layer.constructor.name === 'VectorLayer')";
+        return "map.getLayers().getArray().find(layer => layer.typeName === 'ol/layer/Vector')";
     }
 
     /**
@@ -52,7 +52,7 @@ public class MapElement extends TestBenchElement {
      * <p>
      * Effectively this uses the first vector layer, which means that this
      * should only be used if no custom vector layers have been added.
-     * 
+     *
      * @return a Javascript expression evaluating the feature collection of the
      *         feature layer's source
      */

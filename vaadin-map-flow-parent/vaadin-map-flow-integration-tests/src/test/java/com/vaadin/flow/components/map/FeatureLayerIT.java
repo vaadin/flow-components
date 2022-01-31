@@ -158,7 +158,7 @@ public class FeatureLayerIT extends AbstractComponentIT {
                 firstFeatureGeometry + ".getCoordinates()[0]"));
         double coordinateY = asDouble(map.evaluateOLExpression(
                 firstFeatureGeometry + ".getCoordinates()[1]"));
-        Assert.assertEquals("Point", geometryType);
+        Assert.assertEquals("ol/geom/Point", geometryType);
         Assert.assertEquals(expected.coordinate.getX(), coordinateX, 0.01);
         Assert.assertEquals(expected.coordinate.getY(), coordinateY, 0.01);
 
@@ -177,7 +177,7 @@ public class FeatureLayerIT extends AbstractComponentIT {
                 map.evaluateOLExpression(firstFeatureImage + ".getColor()"));
         String iconSource = (String) map
                 .evaluateOLExpression(firstFeatureImage + ".getSrc()");
-        Assert.assertEquals("Icon", imageType);
+        Assert.assertEquals("ol/style/Icon", imageType);
         Assert.assertEquals(expected.iconOpacity, iconOpacity, 0.01);
         Assert.assertEquals(expected.iconRotation, iconRotation, 0.01);
         Assert.assertEquals(expected.iconScale, iconScale, 0.01);
