@@ -154,10 +154,10 @@ public class FeatureLayerIT extends AbstractComponentIT {
         String firstFeatureGeometry = featureExp + ".getGeometry()";
         String geometryType = (String) map.evaluateOLExpression(
                 map.getOLTypeNameExpression(firstFeatureGeometry));
-        double coordinateX = asDouble(map.evaluateOLExpression(
-                firstFeatureGeometry + ".getCoordinates()[0]"));
-        double coordinateY = asDouble(map.evaluateOLExpression(
-                firstFeatureGeometry + ".getCoordinates()[1]"));
+        double coordinateX = ((Number) map.evaluateOLExpression(
+                firstFeatureGeometry + ".getCoordinates()[0]")).doubleValue();
+        double coordinateY = ((Number) map.evaluateOLExpression(
+                firstFeatureGeometry + ".getCoordinates()[1]")).doubleValue();
         Assert.assertEquals("ol/geom/Point", geometryType);
         Assert.assertEquals(expected.coordinate.getX(), coordinateX, 0.01);
         Assert.assertEquals(expected.coordinate.getY(), coordinateY, 0.01);
@@ -167,12 +167,15 @@ public class FeatureLayerIT extends AbstractComponentIT {
         String firstFeatureImage = firstFeatureStyle + ".getImage()";
         String imageType = (String) map.evaluateOLExpression(
                 map.getOLTypeNameExpression(firstFeatureImage));
-        double iconOpacity = asDouble(
-                map.evaluateOLExpression(firstFeatureImage + ".getOpacity()"));
-        double iconRotation = asDouble(
-                map.evaluateOLExpression(firstFeatureImage + ".getRotation()"));
-        double iconScale = asDouble(
-                map.evaluateOLExpression(firstFeatureImage + ".getScale()"));
+        double iconOpacity = ((Number) map
+                .evaluateOLExpression(firstFeatureImage + ".getOpacity()"))
+                        .doubleValue();
+        double iconRotation = ((Number) map
+                .evaluateOLExpression(firstFeatureImage + ".getRotation()"))
+                        .doubleValue();
+        double iconScale = ((Number) map
+                .evaluateOLExpression(firstFeatureImage + ".getScale()"))
+                        .doubleValue();
         ColorValue iconColor = ColorValue.fromObject(
                 map.evaluateOLExpression(firstFeatureImage + ".getColor()"));
         String iconSource = (String) map
@@ -189,16 +192,6 @@ public class FeatureLayerIT extends AbstractComponentIT {
                 "Icon source does not match pattern: value=" + iconSource
                         + "; pattern=" + expected.iconSource.toString(),
                 matcher.matches());
-    }
-
-    private static double asDouble(Object value) {
-        if (value instanceof Double)
-            return (double) value;
-        if (value instanceof Long)
-            return ((Long) value).doubleValue();
-
-        throw new IllegalArgumentException(
-                "Value is not convertible to double");
     }
 
     private static class ExpectedMarkerFeatureValues {
