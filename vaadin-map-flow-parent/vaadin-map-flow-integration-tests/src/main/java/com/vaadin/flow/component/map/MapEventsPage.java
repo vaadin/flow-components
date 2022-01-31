@@ -35,8 +35,10 @@ public class MapEventsPage extends Div {
         });
 
         map.addMapClickEventListener(event -> {
-            eventData.setText(event.getCoordinate().getX() + ";" + event.getCoordinate().getY());
-            viewState.setText(event.getMouseDetails().getAbsoluteX() + ";" + event.getMouseDetails().getAbsoluteY());
+            eventData.setText(event.getCoordinate().getX() + ";"
+                    + event.getCoordinate().getY());
+            viewState.setText(event.getMouseDetails().getAbsoluteX() + ";"
+                    + event.getMouseDetails().getAbsoluteY());
         });
 
         add(map, viewState, eventData);
