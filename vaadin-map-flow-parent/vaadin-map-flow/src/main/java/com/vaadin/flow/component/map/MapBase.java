@@ -142,7 +142,8 @@ public abstract class MapBase extends Component implements HasSize {
         return addListener(MapViewMoveEndEvent.class, listener);
     }
 
-    public Registration addMapClickEventListener(ComponentEventListener<MapClickEvent> listener) {
+    public Registration addMapClickEventListener(
+            ComponentEventListener<MapClickEvent> listener) {
         return addListener(MapClickEvent.class, listener);
     }
 
@@ -150,8 +151,9 @@ public abstract class MapBase extends Component implements HasSize {
      * Checks whether the map component feature flag is active. Succeeds if the
      * flag is enabled, and throws otherwise.
      *
-     * @throws ExperimentalFeatureException when the {@link FeatureFlags#MAP_COMPONENT} feature is not
-     *                                      enabled
+     * @throws ExperimentalFeatureException
+     *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
+     *             enabled
      */
     private void checkFeatureFlag() {
         boolean enabled = getFeatureFlags()

@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.map.events;
 
-
 /*-
  * #%L
  * Vaadin Charts for Flow
@@ -115,12 +114,12 @@ public class MouseEventDetails implements Serializable {
 
         public static MouseButton of(int button) {
             switch (button) {
-                case 0:
-                    return LEFT;
-                case 1:
-                    return MIDDLE;
-                default:
-                    return RIGHT;
+            case 0:
+                return LEFT;
+            case 1:
+                return MIDDLE;
+            default:
+                return RIGHT;
             }
         }
     }
