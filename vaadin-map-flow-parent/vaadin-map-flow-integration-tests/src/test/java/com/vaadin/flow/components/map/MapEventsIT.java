@@ -7,9 +7,7 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.interactions.Actions;
 
-import java.util.List;
 
 @TestPath("vaadin-map/map-events")
 public class MapEventsIT extends AbstractComponentIT {
