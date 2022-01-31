@@ -12,9 +12,9 @@ public class CoordinateTest {
             Coordinate result = Coordinate.fromLonLat(testCase.epsg_4326.getX(),
                     testCase.epsg_4326.getY());
             Assert.assertEquals(testCase.epsg_3857.getX(), result.getX(),
-                    0.000000001);
+                    0.00000001);
             Assert.assertEquals(testCase.epsg_3857.getY(), result.getY(),
-                    0.000000001);
+                    0.00000001);
         });
     }
 
@@ -24,9 +24,9 @@ public class CoordinateTest {
             Coordinate result = Coordinate.fromLonLat(testCase.epsg_4326.getX(),
                     testCase.epsg_4326.getY(), Projection.EPSG_3857);
             Assert.assertEquals(testCase.epsg_3857.getX(), result.getX(),
-                    0.000000001);
+                    0.00000001);
             Assert.assertEquals(testCase.epsg_3857.getY(), result.getY(),
-                    0.000000001);
+                    0.00000001);
         });
     }
 
