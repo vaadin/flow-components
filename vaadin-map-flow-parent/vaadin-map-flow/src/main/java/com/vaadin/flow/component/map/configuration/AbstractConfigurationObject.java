@@ -81,7 +81,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         try {
             updater.run();
         } finally {
-            this.notifyChanges.set(true);
+            this.notifyChanges.remove();
         }
     }
 }

@@ -130,9 +130,9 @@ public class MapView extends Div {
         Style pointStyle = new Style();
         pointStyle.setImage(circleStyle);
 
-        double x = ThreadLocalRandom.current().nextDouble(-20026376.39,
+        double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
                 20026376.39);
-        double y = ThreadLocalRandom.current().nextDouble(-20048966.10,
+        double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
                 20048966.10);
         Point point = new Point(new Coordinate(x, y));
 
@@ -144,9 +144,9 @@ public class MapView extends Div {
     }
 
     private Feature setupHighLevelCircle() {
-        double x = ThreadLocalRandom.current().nextDouble(-20026376.39,
+        double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
                 20026376.39);
-        double y = ThreadLocalRandom.current().nextDouble(-20048966.10,
+        double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
                 20048966.10);
         return new CircleFeature(new Coordinate(x, y));
     }
