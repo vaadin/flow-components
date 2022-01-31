@@ -94,9 +94,9 @@ public class MapView extends Div {
 
     private void createRandomMarkers(FeatureLayer layer, int count) {
         for (int i = 0; i < count; i++) {
-            double x = ThreadLocalRandom.current().nextDouble(-20026376.39,
+            double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
                     20026376.39);
-            double y = ThreadLocalRandom.current().nextDouble(-20048966.10,
+            double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
                     20048966.10);
 
             MarkerFeature markerFeature = new MarkerFeature(
