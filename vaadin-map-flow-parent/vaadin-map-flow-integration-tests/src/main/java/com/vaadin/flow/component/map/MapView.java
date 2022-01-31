@@ -131,9 +131,9 @@ public class MapView extends Div {
         pointStyle.setImage(circleStyle);
 
         double x = ThreadLocalRandom.current().nextDouble(-20026376.39,
-                20026376.39);
+                20026376.39); // NOSONAR
         double y = ThreadLocalRandom.current().nextDouble(-20048966.10,
-                20048966.10);
+                20048966.10); // NOSONAR
         Point point = new Point(new Coordinate(x, y));
 
         Feature feature = new Feature();
@@ -145,9 +145,9 @@ public class MapView extends Div {
 
     private Feature setupHighLevelCircle() {
         double x = ThreadLocalRandom.current().nextDouble(-20026376.39,
-                20026376.39);
+                20026376.39); // NOSONAR
         double y = ThreadLocalRandom.current().nextDouble(-20048966.10,
-                20048966.10);
+                20048966.10); // NOSONAR
         return new CircleFeature(new Coordinate(x, y));
     }
 }
