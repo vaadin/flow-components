@@ -58,6 +58,10 @@ public abstract class Source extends AbstractConfigurationObject {
 
     /**
      * Sets the attributions to display for the source.
+     * <p>
+     * Setting this to {@code null} displays the default attributions, if the
+     * specific type of source has any. This should only be the case for
+     * {@link OSMSource}. Otherwise, the attributions will be cleared.
      *
      * @param attributions
      *            the new attributions

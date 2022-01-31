@@ -4,7 +4,7 @@
  * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
 import Collection from "ol/Collection";
-import OSM from "ol/source/OSM";
+import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import XYZ from "ol/source/XYZ";
 import { createOptions, synchronizeCollection } from "./util.js";
@@ -13,10 +13,10 @@ function synchronizeSource(target, source, _context) {
   if (!target) {
     throw new Error("Can not instantiate base class: ol/source/Source");
   }
-  // Keep default attributions if there is no custom value
-  if (source.attributions) {
-    target.setAttributions(source.attributions);
-  }
+
+  // Using undefined causes OL to reset to default attributions
+  const attributions = source.attributions || undefined;
+  target.setAttributions(attributions);
 
   return target;
 }
@@ -65,6 +65,11 @@ export function synchronizeXYZSource(target, source, context) {
 export function synchronizeOSMSource(target, source, context) {
   if (!target) {
     target = new OSM(createOptions(source));
+  }
+
+  // For OSM source use default attributions as fallback
+  if (!source.attributions) {
+    source.attributions = OSM_ATTRIBUTION;
   }
   synchronizeXYZSource(target, source, context);
 

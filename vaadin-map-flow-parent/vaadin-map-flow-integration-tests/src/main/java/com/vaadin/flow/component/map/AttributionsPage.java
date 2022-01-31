@@ -7,7 +7,6 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.router.Route;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Route("vaadin-map/attributions")
@@ -22,26 +21,31 @@ public class AttributionsPage extends Div {
         map.setWidthFull();
         map.setHeight("400px");
 
-        NativeButton setupCustomAttributions = new NativeButton(
-                "Setup custom attributions", e -> {
-                    OSMSource source = new OSMSource();
-                    source.setAttributions(testAttributions);
-                    ((TileLayer) map.getBackgroundLayer()).setSource(source);
+        NativeButton setupOSMSource = new NativeButton("Setup OSM source",
+                e -> {
+                    ((TileLayer) map.getBackgroundLayer())
+                            .setSource(new OSMSource());
                 });
-        setupCustomAttributions.setId("setup-custom-attributions");
+        setupOSMSource.setId("setup-osm-source");
 
-        NativeButton changeAttributions = new NativeButton(
-                "Change attributions", e -> {
+        NativeButton setupXYZSource = new NativeButton("Setup XYZ source",
+                e -> {
+                    ((TileLayer) map.getBackgroundLayer())
+                            .setSource(new XYZSource());
+                });
+        setupXYZSource.setId("setup-xyz-source");
+
+        NativeButton setCustomAttributions = new NativeButton(
+                "Set custom attributions", e -> {
                     ((TileLayer) map.getBackgroundLayer()).getSource()
                             .setAttributions(testAttributions);
                 });
-        changeAttributions.setId("change-attributions");
+        setCustomAttributions.setId("set-custom-attributions");
 
         NativeButton clearAttributions = new NativeButton("Clear attributions",
                 e -> {
-                    List<String> emptyAttributions = new ArrayList<>();
                     ((TileLayer) map.getBackgroundLayer()).getSource()
-                            .setAttributions(emptyAttributions);
+                            .setAttributions(null);
                 });
         clearAttributions.setId("clear-attributions");
 
@@ -67,7 +71,7 @@ public class AttributionsPage extends Div {
                 });
         setupCollapsibleDisabled.setId("setup-collapsible-disabled");
 
-        add(map, new Div(setupCustomAttributions, changeAttributions,
+        add(map, new Div(setupOSMSource, setupXYZSource, setCustomAttributions,
                 clearAttributions, setupCollapsibleEnabled,
                 setupCollapsibleDisabled));
     }

@@ -24,6 +24,10 @@ import com.vaadin.flow.component.map.configuration.Constants;
  */
 public class XYZSource extends TileImageSource {
 
+    public XYZSource() {
+        this(new Options());
+    }
+
     public XYZSource(BaseOptions<?> options) {
         super(options);
     }
