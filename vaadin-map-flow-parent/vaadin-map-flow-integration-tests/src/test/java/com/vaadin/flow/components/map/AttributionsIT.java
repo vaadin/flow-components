@@ -23,7 +23,7 @@ public class AttributionsIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        map = $(MapElement.class).first();
+        map = $(MapElement.class).waitForFirst();
         setupOSMSource = $("button").id("setup-osm-source");
         setupXYZSource = $("button").id("setup-xyz-source");
         setCustomAttributions = $("button").id("set-custom-attributions");
