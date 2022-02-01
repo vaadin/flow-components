@@ -19,12 +19,16 @@ package com.vaadin.flow.component.map.configuration.source;
 import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
- * Abstract base class for map sources loading tiled images from a map service
- * using the XYZ URL format
+ * Map source for loading tiled images from a map service using the XYZ URL
+ * format
  */
-public abstract class XYZSource extends TileImageSource {
+public class XYZSource extends TileImageSource {
 
-    protected XYZSource(BaseOptions<?> options) {
+    public XYZSource() {
+        this(new Options());
+    }
+
+    public XYZSource(BaseOptions<?> options) {
         super(options);
     }
 
@@ -33,7 +37,10 @@ public abstract class XYZSource extends TileImageSource {
         return Constants.OL_SOURCE_XYZ;
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>>
+    public static abstract class BaseOptions<T extends BaseOptions<T>>
             extends TileImageSource.BaseOptions<T> {
+    }
+
+    public static class Options extends BaseOptions<Options> {
     }
 }

@@ -28,16 +28,17 @@ import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
+import elemental.json.JsonValue;
 
 import java.beans.PropertyChangeEvent;
 
 public abstract class MapBase extends Component implements HasSize {
-    private Configuration configuration;
-    private View view;
+    private final Configuration configuration;
+    private final View view;
+    private final MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
     private StateTree.ExecutionRegistration pendingViewSync;
@@ -45,6 +46,7 @@ public abstract class MapBase extends Component implements HasSize {
     protected MapBase() {
         this.configuration = new Configuration();
         this.view = new View();
+        this.serializer = new MapSerializer();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
         this.view.addPropertyChangeListener(this::viewPropertyChange);
@@ -101,15 +103,14 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     private void synchronizeConfiguration() {
-        JsonObject jsonConfiguration = (JsonObject) JsonSerializer
-                .toJson(configuration);
+        JsonValue jsonConfiguration = serializer.toJson(configuration);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonConfiguration);
     }
 
     private void synchronizeView() {
-        JsonObject jsonView = (JsonObject) JsonSerializer.toJson(view);
+        JsonValue jsonView = serializer.toJson(view);
 
         this.getElement().executeJs(
                 "this.$connector.synchronize($0, this.configuration.getView())",

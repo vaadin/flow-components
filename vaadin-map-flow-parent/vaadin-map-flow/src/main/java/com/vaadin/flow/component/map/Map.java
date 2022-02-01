@@ -20,6 +20,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
+import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
@@ -35,13 +36,22 @@ import java.util.Objects;
 public class Map extends MapBase {
 
     private Layer backgroundLayer;
+    private final FeatureLayer featureLayer;
 
     public Map() {
         super();
+        // Setup default background layer
         OSMSource source = new OSMSource();
-        TileLayer baseLayer = new TileLayer();
-        baseLayer.setSource(source);
-        setBackgroundLayer(baseLayer);
+        TileLayer backgroundLayer = new TileLayer();
+        backgroundLayer.setSource(source);
+        setBackgroundLayer(backgroundLayer);
+        // Setup default feature layer
+        featureLayer = new FeatureLayer();
+        addLayer(featureLayer);
+        // Simple solution for rendering the feature layer on top of custom
+        // layers by default. Developers can customize the z-index if they want
+        // a different rendering order.
+        featureLayer.setzIndex(100);
     }
 
     public Configuration getRawConfiguration() {
@@ -78,6 +88,10 @@ public class Map extends MapBase {
         }
         this.backgroundLayer = backgroundLayer;
         getConfiguration().prependLayer(backgroundLayer);
+    }
+
+    public FeatureLayer getFeatureLayer() {
+        return featureLayer;
     }
 
     public void addLayer(Layer layer) {

@@ -4,19 +4,13 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.Feature;
-import com.vaadin.flow.component.map.configuration.geometry.Point;
+import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
-import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
-import com.vaadin.flow.component.map.configuration.feature.CircleFeature;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.UrlTileSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
-import com.vaadin.flow.component.map.configuration.style.CircleStyle;
-import com.vaadin.flow.component.map.configuration.style.Fill;
-import com.vaadin.flow.component.map.configuration.style.Stroke;
-import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.router.Route;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -30,14 +24,9 @@ public class MapView extends Div {
         map.setWidthFull();
         map.setHeight("400px");
 
-        VectorLayer vectorLayer = new VectorLayer();
-        VectorSource vectorSource = new VectorSource();
-        vectorLayer.setSource(vectorSource);
-        map.addLayer(vectorLayer);
-
-        CircleFeature nurembergMarker = new CircleFeature(
+        MarkerFeature nurembergMarker = new MarkerFeature(
                 new Coordinate(1233058.1696443919, 6351912.406929109));
-        vectorSource.addFeature(nurembergMarker);
+        map.getFeatureLayer().addFeature(nurembergMarker);
 
         NativeButton toggleLayerVisible = new NativeButton("Toggle Layer",
                 e -> {
@@ -84,29 +73,16 @@ public class MapView extends Div {
                     map.getView().setZoom(15);
                 });
 
-        NativeButton addHighLevelMarker = new NativeButton(
-                "Add high-level marker", e -> {
-                    Feature marker = setupHighLevelCircle();
-                    vectorSource.addFeature(marker);
-                    updateNumMarkers(vectorSource);
-                });
-
-        NativeButton addLowLevelMarker = new NativeButton(
-                "Add low-level marker", e -> {
-                    Feature marker = setupLowLevelCircle();
-                    vectorSource.addFeature(marker);
-                    updateNumMarkers(vectorSource);
-                });
-
-        NativeButton changeMarkerColor = new NativeButton("Change marker color",
+        NativeButton addRandomMarkers = new NativeButton("Add random markers",
                 e -> {
-                    nurembergMarker.setFillColor("green");
+                    createRandomMarkers(map.getFeatureLayer(), 100);
+                    updateNumMarkers(map.getFeatureLayer().getSource());
                 });
 
         add(map);
         add(new Div(toggleLayerVisible, useOpenCycleMap, useOpenStreetMap,
-                addSeaMapLayer, addHighLevelMarker, addLowLevelMarker,
-                changeMarkerColor, showNuremberg, showSaintNazaire));
+                addSeaMapLayer, addRandomMarkers, showNuremberg,
+                showSaintNazaire));
 
         add(new Div(numMarkers));
     }
@@ -116,38 +92,16 @@ public class MapView extends Div {
                 "Number of markers: " + vectorSource.getFeatures().size());
     }
 
-    private Feature setupLowLevelCircle() {
-        CircleStyle circleStyle = new CircleStyle();
-        circleStyle.setRadius(7);
-        Fill fill = new Fill();
-        fill.setColor("hsla(214, 100%, 49%, 0.76)");
-        Stroke stroke = new Stroke();
-        stroke.setColor("hsla(214, 41%, 17%, 0.83)");
-        stroke.setWidth(2);
-        circleStyle.setFill(fill);
-        circleStyle.setStroke(stroke);
+    private void createRandomMarkers(FeatureLayer layer, int count) {
+        for (int i = 0; i < count; i++) {
+            double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
+                    20026376.39);
+            double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
+                    20048966.10);
 
-        Style pointStyle = new Style();
-        pointStyle.setImage(circleStyle);
-
-        double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
-                20026376.39);
-        double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
-                20048966.10);
-        Point point = new Point(new Coordinate(x, y));
-
-        Feature feature = new Feature();
-        feature.setGeometry(point);
-        feature.setStyle(pointStyle);
-
-        return feature;
-    }
-
-    private Feature setupHighLevelCircle() {
-        double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
-                20026376.39);
-        double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
-                20048966.10);
-        return new CircleFeature(new Coordinate(x, y));
+            MarkerFeature markerFeature = new MarkerFeature(
+                    new Coordinate(x, y));
+            layer.addFeature(markerFeature);
+        }
     }
 }

@@ -18,10 +18,16 @@ package com.vaadin.flow.component.map.configuration.style;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
+import com.vaadin.flow.component.map.configuration.Feature;
 
+/**
+ * Defines how to visually represent a {@link Feature}
+ */
 public class Style extends AbstractConfigurationObject {
 
     private ImageStyle image;
+    private Fill fill;
+    private Stroke stroke;
 
     @Override
     public String getType() {
@@ -35,6 +41,26 @@ public class Style extends AbstractConfigurationObject {
     public void setImage(ImageStyle image) {
         updateNestedPropertyObserver(this.image, image);
         this.image = image;
+        notifyChange();
+    }
+
+    public Fill getFill() {
+        return fill;
+    }
+
+    public void setFill(Fill fill) {
+        updateNestedPropertyObserver(this.fill, fill);
+        this.fill = fill;
+        notifyChange();
+    }
+
+    public Stroke getStroke() {
+        return stroke;
+    }
+
+    public void setStroke(Stroke stroke) {
+        updateNestedPropertyObserver(this.stroke, stroke);
+        this.stroke = stroke;
         notifyChange();
     }
 }

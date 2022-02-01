@@ -7,6 +7,8 @@ import org.openqa.selenium.interactions.Actions;
 
 import java.util.List;
 
+import java.util.List;
+
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
     /**
@@ -61,5 +63,51 @@ public class MapElement extends TestBenchElement {
         int clickY = startTop + pixelCoordinates.get(1).intValue();
         new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
                 .build().perform();
+    }
+  
+    /**
+     * Returns a Javascript expression that returns the feature layer of the
+     * map.
+     * <p>
+     * Effectively this uses the first vector layer, which means that this
+     * should only be used if no custom vector layers have been added.
+     *
+     * @return a Javascript expression evaluating the feature layer
+     */
+    public String getFeatureLayerExpression() {
+        return "map.getLayers().getArray().find(layer => layer.typeName === 'ol/layer/Vector')";
+    }
+
+    /**
+     * Returns a Javascript expression that evaluates the feature collection of
+     * the feature layers vector source.
+     * <p>
+     * Effectively this uses the first vector layer, which means that this
+     * should only be used if no custom vector layers have been added.
+     *
+     * @return a Javascript expression evaluating the feature collection of the
+     *         feature layer's source
+     */
+    public String getFeatureCollectionExpression() {
+        return getFeatureLayerExpression()
+                + ".getSource().getFeaturesCollection()";
+    }
+
+    /**
+     * Gets the attribution container div
+     *
+     * @return attribution container div
+     */
+    public TestBenchElement getAttributionContainer() {
+        return $("div").attributeContains("class", "ol-attribution").first();
+    }
+
+    /**
+     * Gets the list of attributions list items in the attribution container div
+     *
+     * @return list of list items
+     */
+    public List<TestBenchElement> getAttributionItems() {
+        return getAttributionContainer().$("li").all();
     }
 }
