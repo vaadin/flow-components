@@ -467,7 +467,7 @@ public class CheckboxGroup<T>
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        removeAll();
+        getCheckboxItems().forEach(this::remove);
         clear();
 
         // reinsert helper component
