@@ -48,8 +48,10 @@ public class RefreshItemsPageIT extends AbstractComponentIT {
 
         findElement(By.id("reset")).click();
 
-        RadioButtonGroupElement group = $(RadioButtonGroupElement.class).id("group");
-        String label = group.findElement(By.cssSelector("label[slot='label']")).getText();
+        RadioButtonGroupElement group = $(RadioButtonGroupElement.class)
+                .id("group");
+        String label = group.findElement(By.cssSelector("label[slot='label']"))
+                .getText();
         Assert.assertEquals("Label", label);
     }
 }

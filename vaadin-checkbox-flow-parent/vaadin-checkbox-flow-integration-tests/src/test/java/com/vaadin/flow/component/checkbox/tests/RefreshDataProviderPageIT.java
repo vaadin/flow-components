@@ -48,7 +48,8 @@ public class RefreshDataProviderPageIT extends AbstractComponentIT {
         findElement(By.id("reset")).click();
 
         TestBenchElement group = $(TestBenchElement.class).id("group");
-        String label = group.findElement(By.cssSelector("label[slot='label']")).getText();
+        String label = group.findElement(By.cssSelector("label[slot='label']"))
+                .getText();
         Assert.assertEquals("Label", label);
     }
 }
