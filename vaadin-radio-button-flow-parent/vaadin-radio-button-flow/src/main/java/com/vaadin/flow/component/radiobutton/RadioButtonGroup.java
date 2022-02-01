@@ -421,7 +421,8 @@ public class RadioButtonGroup<T>
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        getRadioButtons().forEach(this::remove);
+        // Remove all known children (doesn't remove client-side-only children such as the label)
+        getChildren().forEach(this::remove);
         clear();
 
         // reinsert helper component
