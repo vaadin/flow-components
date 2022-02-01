@@ -5,10 +5,6 @@
  */
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
-import CircleStyle from "ol/style/Circle";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Style from "ol/style/Style";
 import View from "ol/View";
 import { synchronizeTileLayer, synchronizeVectorLayer } from "./layers.js";
 import {
@@ -16,6 +12,12 @@ import {
   synchronizeVectorSource,
   synchronizeXYZSource,
 } from "./sources.js";
+import {
+  synchronizeIcon,
+  synchronizeFill,
+  synchronizeStroke,
+  synchronizeStyle,
+} from "./styles.js";
 import { convertToCoordinateArray, synchronizeCollection } from "./util.js";
 
 function synchronizeMap(target, source, context) {
@@ -50,52 +52,6 @@ function synchronizeView(target, source, _context) {
   return target;
 }
 
-function synchronizeFill(target, source, _context) {
-  if (!target) {
-    target = new Fill();
-  }
-
-  target.setColor(source.color);
-
-  return target;
-}
-
-function synchronizeStroke(target, source, _context) {
-  if (!target) {
-    target = new Stroke();
-  }
-
-  target.setColor(source.color);
-  target.setWidth(source.width);
-
-  return target;
-}
-
-function synchronizeCircleStyle(target, source, context) {
-  if (!target) {
-    target = new CircleStyle({
-      fill: context.synchronize(null, source.fill, context),
-      stroke: context.synchronize(null, source.stroke, context),
-    });
-  }
-
-  target.setRadius(source.radius);
-
-  return target;
-}
-
-function synchronizeStyle(target, source, context) {
-  if (!target) {
-    target = new Style();
-  }
-
-  target.setImage(
-    context.synchronize(target.getImage(), source.image, context)
-  );
-
-  return target;
-}
-
 function synchronizePoint(target, source, _context) {
   if (!target) {
     target = new Point(convertToCoordinateArray(source.coordinates));
@@ -121,49 +77,6 @@ function synchronizeFeature(target, source, context) {
   return target;
 }
 
-function synchronizeCircleFeature(target, source, _context) {
-  if (!target) {
-    target = new Feature();
-  }
-
-  let point = target.getGeometry();
-  if (!point) {
-    point = new Point(convertToCoordinateArray(source.coordinates));
-  }
-  point.setCoordinates(convertToCoordinateArray(source.coordinates));
-
-  let style = target.getStyle();
-  if (!style) {
-    style = new Style();
-  }
-
-  let circleStyle = style.getImage();
-
-  let fill = circleStyle ? circleStyle.getFill() : null;
-  if (!fill) {
-    fill = new Fill();
-  }
-  fill.setColor(source.fillColor);
-
-  let stroke = circleStyle ? circleStyle.getStroke() : null;
-  if (!stroke) {
-    stroke = new Stroke();
-  }
-  stroke.setColor(source.strokeColor);
-  stroke.setWidth(source.strokeWidth);
-
-  if (!circleStyle) {
-    circleStyle = new CircleStyle({ fill, stroke });
-  }
-  circleStyle.setRadius(source.radius);
-
-  style.setImage(circleStyle);
-  target.setStyle(style);
-  target.setGeometry(point);
-
-  return target;
-}
-
 const synchronizerLookup = {
   "ol/Feature": synchronizeFeature,
   "ol/Map": synchronizeMap,
@@ -178,12 +91,10 @@ const synchronizerLookup = {
   // Geometry
   "ol/geom/Point": synchronizePoint,
   // Styles
-  "ol/style/Circle": synchronizeCircleStyle,
+  "ol/style/Icon": synchronizeIcon,
   "ol/style/Fill": synchronizeFill,
   "ol/style/Stroke": synchronizeStroke,
   "ol/style/Style": synchronizeStyle,
-  // Vaadin-specific
-  "vaadin/feature/Circle": synchronizeCircleFeature,
 };
 
 /**

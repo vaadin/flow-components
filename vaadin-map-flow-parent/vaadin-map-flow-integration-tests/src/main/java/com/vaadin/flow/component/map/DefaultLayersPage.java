@@ -8,9 +8,9 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-map/background-layer")
-public class BackgroundLayerPage extends Div {
-    public BackgroundLayerPage() {
+@Route("vaadin-map/default-layers")
+public class DefaultLayersPage extends Div {
+    public DefaultLayersPage() {
         Map map = new Map();
         map.setWidthFull();
         map.setHeight("400px");

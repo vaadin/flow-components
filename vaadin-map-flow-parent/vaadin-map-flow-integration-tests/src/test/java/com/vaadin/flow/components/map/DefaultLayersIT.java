@@ -8,8 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("vaadin-map/background-layer")
-public class BackgroundLayerIT extends AbstractComponentIT {
+@TestPath("vaadin-map/default-layers")
+public class DefaultLayersIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
@@ -19,21 +19,26 @@ public class BackgroundLayerIT extends AbstractComponentIT {
     public void defaults() {
         MapElement map = $(MapElement.class).first();
 
-        // Initialized with one layer by default
+        // Initialized with two layers by default
         long numLayers = (long) map
                 .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(1, numLayers);
+        Assert.assertEquals(2, numLayers);
 
-        // Layer should be a tile layer
-        String layerTypeName = (String) map.evaluateOLExpression(
+        // First layer should be a tile layer
+        String backgroundLayerType = (String) map.evaluateOLExpression(
                 map.getOLTypeNameExpression("map.getLayers().item(0)"));
-        Assert.assertEquals("ol/layer/Tile", layerTypeName);
+        Assert.assertEquals("ol/layer/Tile", backgroundLayerType);
 
         // Layer's source should be an OpenStreetMap source
         String sourceTypeName = (String) map
                 .evaluateOLExpression(map.getOLTypeNameExpression(
                         "map.getLayers().item(0).getSource()"));
         Assert.assertEquals("ol/source/OSM", sourceTypeName);
+
+        // Second layer should be a vector layer
+        String featureLayerType = (String) map.evaluateOLExpression(
+                map.getOLTypeNameExpression("map.getLayers().item(1)"));
+        Assert.assertEquals("ol/layer/Vector", featureLayerType);
     }
 
     @Test
@@ -57,17 +62,17 @@ public class BackgroundLayerIT extends AbstractComponentIT {
     }
 
     @Test
-    public void replaceLayer() {
+    public void customBackgroundLayer() {
         MapElement map = $(MapElement.class).first();
         TestBenchElement replaceBackgroundLayer = $("button")
                 .id("replace-background-layer");
 
         replaceBackgroundLayer.click();
 
-        // Should still have a layer
+        // Should still have two layers
         long numLayers = (long) map
                 .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(1, numLayers);
+        Assert.assertEquals(2, numLayers);
 
         // Layer should be a vector layer
         String layerTypeName = (String) map.evaluateOLExpression(
