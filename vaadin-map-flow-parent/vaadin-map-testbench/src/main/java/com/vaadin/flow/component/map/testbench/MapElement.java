@@ -64,7 +64,7 @@ public class MapElement extends TestBenchElement {
         new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
                 .build().perform();
     }
-  
+
     /**
      * Returns a Javascript expression that returns the feature layer of the
      * map.

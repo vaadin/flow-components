@@ -45,7 +45,6 @@ public class Coordinate {
         return y;
     }
 
-
     @Override
     public String toString() {
         return "Coordinate{" + "x=" + x + ", y=" + y + '}';
