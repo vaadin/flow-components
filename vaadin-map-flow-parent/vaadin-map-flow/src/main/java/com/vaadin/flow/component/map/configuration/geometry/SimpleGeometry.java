@@ -18,5 +18,8 @@ package com.vaadin.flow.component.map.configuration.geometry;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
+/**
+ * Abstract base class for geometries
+ */
 public abstract class SimpleGeometry extends AbstractConfigurationObject {
 }

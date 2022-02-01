@@ -9,6 +9,16 @@ export function convertToCoordinateArray(coordinate) {
 }
 
 /**
+ * Helper to convert a size object with the shape { width: number, height: number}
+ * into a size array used by OpenLayers
+ * @param size
+ * @returns {*[]}
+ */
+export function convertToSizeArray(size) {
+  return [size.width, size.height];
+}
+
+/**
  * Synchronizes an OpenLayers collection with data from a Javascript array
  */
 export function synchronizeCollection(collection, jsonItems, options) {

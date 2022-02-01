@@ -37,7 +37,7 @@ import { synchronize } from "./synchronization";
         synchronize(target, configuration, context);
         // TODO: layers don't render on initialization in some cases, needs investigation
         mapElement.configuration.updateSize();
-      },
+      }
     };
 
     mapElement.configuration.on("moveend", (_event) => {

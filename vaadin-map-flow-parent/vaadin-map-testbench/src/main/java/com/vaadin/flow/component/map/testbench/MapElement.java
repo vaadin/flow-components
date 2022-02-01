@@ -32,4 +32,32 @@ public class MapElement extends TestBenchElement {
     public String getOLTypeNameExpression(String jsExpression) {
         return jsExpression + ".typeName";
     }
+
+    /**
+     * Returns a Javascript expression that returns the feature layer of the
+     * map.
+     * <p>
+     * Effectively this uses the first vector layer, which means that this
+     * should only be used if no custom vector layers have been added.
+     *
+     * @return a Javascript expression evaluating the feature layer
+     */
+    public String getFeatureLayerExpression() {
+        return "map.getLayers().getArray().find(layer => layer.typeName === 'ol/layer/Vector')";
+    }
+
+    /**
+     * Returns a Javascript expression that evaluates the feature collection of
+     * the feature layers vector source.
+     * <p>
+     * Effectively this uses the first vector layer, which means that this
+     * should only be used if no custom vector layers have been added.
+     *
+     * @return a Javascript expression evaluating the feature collection of the
+     *         feature layer's source
+     */
+    public String getFeatureCollectionExpression() {
+        return getFeatureLayerExpression()
+                + ".getSource().getFeaturesCollection()";
+    }
 }
