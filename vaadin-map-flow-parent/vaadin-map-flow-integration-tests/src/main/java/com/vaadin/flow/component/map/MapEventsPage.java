@@ -34,10 +34,10 @@ public class MapEventsPage extends Div {
             eventData.setText(eventDataText);
         });
 
-        map.addMapClickEventListener(event -> {
+        map.addClickEventListener(event -> {
             eventData.setText(event.getCoordinate().getX() + ";"
-                    + event.getCoordinate().getY());
-            viewState.setText(event.getMouseDetails().getAbsoluteX() + ";"
+                    + event.getCoordinate().getY() + ";"
+                    + event.getMouseDetails().getAbsoluteX() + ";"
                     + event.getMouseDetails().getAbsoluteY());
         });
 

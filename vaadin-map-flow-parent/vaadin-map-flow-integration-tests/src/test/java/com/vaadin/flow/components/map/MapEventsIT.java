@@ -63,7 +63,7 @@ public class MapEventsIT extends AbstractComponentIT {
 
     @Test
     public void mapClick_correctEventDataReceived() {
-        MapElement map = $(MapElement.class).first();
+        MapElement map = $(MapElement.class).waitForFirst();
         TestBenchElement eventDataDiv = $("div").id("event-data");
 
         map.clickAtCoordinates(-1956787.9241005122, 1956787.9241005122);
@@ -72,24 +72,13 @@ public class MapEventsIT extends AbstractComponentIT {
 
         double xCoordinate = Double.parseDouble(parts[0]);
         double yCoordinate = Double.parseDouble(parts[1]);
-
-        Assert.assertEquals(-1956787.9241005122, xCoordinate, 0.1);
-        Assert.assertEquals(1956787.9241005122, yCoordinate, 0.01);
-    }
-
-    @Test
-    public void mapClick_correctPixelReceived() {
-        MapElement map = $(MapElement.class).first();
-        TestBenchElement clickPixelDiv = $("div").id("view-state");
-
-        map.clickAtCoordinates(-1956787.9241005122, 1956787.9241005122);
-
-        String[] parts = clickPixelDiv.getText().split(";");
-
-        double xPixel = Double.parseDouble(parts[0]);
-        double yPixel = Double.parseDouble(parts[1]);
+        double xPixel = Double.parseDouble(parts[2]);
+        double yPixel = Double.parseDouble(parts[3]);
 
         Assert.assertEquals(100, xPixel, 0.1);
         Assert.assertEquals(100, yPixel, 0.1);
+        Assert.assertEquals(-1956787.9241005122, xCoordinate, 0.00000001);
+        Assert.assertEquals(1956787.9241005122, yCoordinate, 0.00000001);
     }
+
 }

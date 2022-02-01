@@ -137,12 +137,26 @@ public abstract class MapBase extends Component implements HasSize {
         });
     }
 
+    /**
+     * Adds event listener for OpenLayers' "moveend" event.
+     *
+     * @param listener
+     * @return a registration object for removing the added listener to the
+     *         source
+     */
     public Registration addViewMoveEndEventListener(
             ComponentEventListener<MapViewMoveEndEvent> listener) {
         return addListener(MapViewMoveEndEvent.class, listener);
     }
 
-    public Registration addMapClickEventListener(
+    /**
+     * Adds event listener for OpenLayers' @code{click} event.
+     *
+     * @param listener
+     * @return a registration object for removing the added listener to the
+     *         source
+     */
+    public Registration addClickEventListener(
             ComponentEventListener<MapClickEvent> listener) {
         return addListener(MapClickEvent.class, listener);
     }

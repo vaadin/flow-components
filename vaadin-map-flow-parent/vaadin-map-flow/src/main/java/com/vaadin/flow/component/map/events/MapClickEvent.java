@@ -7,6 +7,9 @@ import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import elemental.json.JsonArray;
 
+/**
+ * Representing OpenLayers' @code{click} event
+ */
 @DomEvent("map-click")
 public class MapClickEvent extends ComponentEvent<MapBase> {
 
@@ -14,14 +17,14 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
     private final MouseEventDetails details;
 
     public MapClickEvent(MapBase source, boolean fromClient,
-            @EventData("event.detail.coordinate") JsonArray coordinate,
-            @EventData("event.detail.originalEvent.pageX") int pageX,
-            @EventData("event.detail.originalEvent.pageY") int pageY,
-            @EventData("event.detail.originalEvent.altKey") boolean altKey,
-            @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
-            @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
-            @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
-            @EventData("event.detail.originalEvent.button") int button) {
+                         @EventData("event.detail.coordinate") JsonArray coordinate,
+                         @EventData("event.detail.originalEvent.pageX") int pageX,
+                         @EventData("event.detail.originalEvent.pageY") int pageY,
+                         @EventData("event.detail.originalEvent.altKey") boolean altKey,
+                         @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
+                         @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
+                         @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
+                         @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
         this.coordinate = new Coordinate(coordinate.getNumber(0),
@@ -38,10 +41,21 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
         details.setShiftKey(shiftKey);
     }
 
+    /**
+     * Gets the coordinate of the click on viewport
+     *
+     * @return coordinate of the click, this will be in the user projection if
+     * one is set. Otherwise, it will be in the view projection.
+     */
     public Coordinate getCoordinate() {
         return coordinate;
     }
 
+    /**
+     * Gets the click's mouse event details.
+     *
+     * @return mouse event details
+     */
     public MouseEventDetails getMouseDetails() {
         return details;
     }
