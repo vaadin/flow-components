@@ -459,7 +459,9 @@ public class CheckboxGroup<T>
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        removeAll();
+        // Remove all known children (doesn't remove client-side-only children
+        // such as the label)
+        getChildren().forEach(this::remove);
         clear();
 
         // reinsert helper component
