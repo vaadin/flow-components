@@ -175,7 +175,7 @@ public abstract class MapBase extends Component implements HasSize {
      * @see com.vaadin.flow.component.map.configuration.Feature
      */
     public Registration addFeatureClickListener(VectorLayer layer,
-                                                ComponentEventListener<MapFeatureClickEvent> listener) {
+            ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, event -> {
             // Filter events for specified layer
             if (!Objects.equals(layer, event.getLayer()))

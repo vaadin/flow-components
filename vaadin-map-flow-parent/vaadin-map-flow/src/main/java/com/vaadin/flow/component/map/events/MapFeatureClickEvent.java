@@ -23,15 +23,15 @@ public class MapFeatureClickEvent extends ComponentEvent<Map> {
     private final MouseEventDetails details;
 
     public MapFeatureClickEvent(Map source, boolean fromClient,
-                                @EventData("event.detail.feature.id") String featureId,
-                                @EventData("event.detail.layer.id") String layerId,
-                                @EventData("event.detail.originalEvent.pageX") int pageX,
-                                @EventData("event.detail.originalEvent.pageY") int pageY,
-                                @EventData("event.detail.originalEvent.altKey") boolean altKey,
-                                @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
-                                @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
-                                @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
-                                @EventData("event.detail.originalEvent.button") int button) {
+            @EventData("event.detail.feature.id") String featureId,
+            @EventData("event.detail.layer.id") String layerId,
+            @EventData("event.detail.originalEvent.pageX") int pageX,
+            @EventData("event.detail.originalEvent.pageY") int pageY,
+            @EventData("event.detail.originalEvent.altKey") boolean altKey,
+            @EventData("event.detail.originalEvent.ctrlKey") boolean ctrlKey,
+            @EventData("event.detail.originalEvent.metaKey") boolean metaKey,
+            @EventData("event.detail.originalEvent.shiftKey") boolean shiftKey,
+            @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
         Optional<VectorLayer> maybeLayer = source.getRawConfiguration()
