@@ -44,8 +44,7 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
     /**
      * Gets the coordinate of the click on viewport
      *
-     * @return coordinate of the click, this will be in the user projection if
-     *         one is set. Otherwise, it will be in the view projection.
+     * @return coordinate of the click, in the view's projection.
      */
     public Coordinate getCoordinate() {
         return coordinate;

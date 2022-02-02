@@ -142,8 +142,7 @@ public abstract class MapBase extends Component implements HasSize {
      * Adds event listener for OpenLayers' "moveend" event.
      *
      * @param listener
-     * @return a registration object for removing the added listener to the
-     *         source
+     * @return a registration object for removing the added listener
      */
     public Registration addViewMoveEndEventListener(
             ComponentEventListener<MapViewMoveEndEvent> listener) {
@@ -154,8 +153,7 @@ public abstract class MapBase extends Component implements HasSize {
      * Adds event listener for OpenLayers' @code{click} event.
      *
      * @param listener
-     * @return a registration object for removing the added listener to the
-     *         source
+     * @return a registration object for removing the added listener
      */
     public Registration addClickEventListener(
             ComponentEventListener<MapClickEvent> listener) {
