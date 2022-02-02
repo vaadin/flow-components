@@ -156,4 +156,21 @@ public class ListBoxIT extends ComponentDemoTest {
                 "true", item.getAttribute("disabled"));
     }
 
+    @Test
+    public void itemItemLabelGenerator() {
+        init("list-box-with-item-label-generator");
+        assertItemGenerator(items.get(0), BREAD);
+        assertItemGenerator(items.get(1), BUTTER);
+        assertItemGenerator(items.get(2), MILK);
+    }
+
+    private void assertItemGenerator(WebElement item, String itemName) {
+        List<WebElement> labels = item.findElements(By.tagName("span"));
+        String nameText = labels.get(0).getText();
+
+        Assert.assertThat(
+                "First label inside the item should contain the name of the item",
+                nameText, containsString(itemName));
+    }
+
 }
