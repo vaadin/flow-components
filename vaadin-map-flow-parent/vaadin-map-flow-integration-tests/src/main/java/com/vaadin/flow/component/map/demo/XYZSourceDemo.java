@@ -20,7 +20,8 @@ public class XYZSourceDemo extends Div {
 
         // Use XYZ source displaying the OSM humanitarian map
         String url = "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png";
-        XYZSource xyzSource = new XYZSource(new XYZSource.Options().setUrl(url));
+        XYZSource xyzSource = new XYZSource(
+                new XYZSource.Options().setUrl(url));
 
         TileLayer tileLayer = new TileLayer();
         tileLayer.setSource(xyzSource);
@@ -28,7 +29,8 @@ public class XYZSourceDemo extends Div {
         map.setBackgroundLayer(tileLayer);
 
         // Move viewport to Cap Haitien
-        map.getView().setCenter(new Coordinate(-8037267.235274345, 2244621.2004450094));
+        map.getView().setCenter(
+                new Coordinate(-8037267.235274345, 2244621.2004450094));
         map.getView().setZoom(12);
     }
 }

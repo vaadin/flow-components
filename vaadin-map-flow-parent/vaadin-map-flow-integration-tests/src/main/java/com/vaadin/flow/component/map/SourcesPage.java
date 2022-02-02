@@ -4,6 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.TileWMSSource;
+import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.router.Route;
 
 import java.util.HashMap;
@@ -34,6 +35,18 @@ public class SourcesPage extends Div {
                 });
         setupTileWMSSource.setId("setup-tile-wms-source");
 
-        add(new Div(setupTileWMSSource));
+        NativeButton setupXYZSource = new NativeButton("Setup XYZ source",
+                e -> {
+                    String url = "https://example.com/wms";
+                    XYZSource source = new XYZSource(
+                            new XYZSource.Options().setUrl(url));
+                    TileLayer layer = new TileLayer();
+                    layer.setId("background-layer");
+                    layer.setSource(source);
+                    map.setBackgroundLayer(layer);
+                });
+        setupXYZSource.setId("setup-xyz-source");
+
+        add(new Div(setupTileWMSSource, setupXYZSource));
     }
 }
