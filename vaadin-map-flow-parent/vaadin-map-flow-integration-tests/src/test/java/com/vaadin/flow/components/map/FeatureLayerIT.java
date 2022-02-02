@@ -40,7 +40,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         addDefaultMarkerFeature.click();
 
         long numFeatures = (long) map.evaluateOLExpression(
-                map.getFeatureCollectionExpression() + ".getLength()");
+                map.getFeatureCollectionExpression("feature-layer")
+                        + ".getLength()");
         Assert.assertEquals(1, numFeatures);
 
         // Default values for MarkerFeature
@@ -53,7 +54,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
                 + Assets.DEFAULT_MARKER.getFileName());
 
-        String firstFeature = map.getFeatureCollectionExpression() + ".item(0)";
+        String firstFeature = map
+                .getFeatureCollectionExpression("feature-layer") + ".item(0)";
         assertMarkerFeature(firstFeature, expected);
     }
 
@@ -73,7 +75,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.iconColor = new ColorValue(0L, 0L, 255L); // "blue"
         expected.iconSource = Pattern.compile("assets/custom-marker.png");
 
-        String firstFeature = map.getFeatureCollectionExpression() + ".item(0)";
+        String firstFeature = map
+                .getFeatureCollectionExpression("feature-layer") + ".item(0)";
         assertMarkerFeature(firstFeature, expected);
     }
 
@@ -95,7 +98,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
                 + Assets.DEFAULT_MARKER.getFileName());
 
-        String firstFeature = map.getFeatureCollectionExpression() + ".item(0)";
+        String firstFeature = map
+                .getFeatureCollectionExpression("feature-layer") + ".item(0)";
         assertMarkerFeature(firstFeature, expected);
     }
 
@@ -115,7 +119,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.iconColor = new ColorValue(0L, 0L, 255L); // "blue"
         expected.iconSource = Pattern.compile("assets/custom-marker.png");
 
-        String firstFeature = map.getFeatureCollectionExpression() + ".item(0)";
+        String firstFeature = map
+                .getFeatureCollectionExpression("feature-layer") + ".item(0)";
         assertMarkerFeature(firstFeature, expected);
     }
 
@@ -144,7 +149,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
 
     private void assertNumberOfFeatures(int expectedNumber) {
         long actualNumber = (long) map.evaluateOLExpression(
-                map.getFeatureCollectionExpression() + ".getLength()");
+                map.getFeatureCollectionExpression("feature-layer")
+                        + ".getLength()");
         Assert.assertEquals(expectedNumber, actualNumber);
     }
 

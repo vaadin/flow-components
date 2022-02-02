@@ -5,6 +5,7 @@
  */
 import Collection from "ol/Collection";
 import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from "ol/source/OSM";
+import TileWMS from "ol/source/TileWMS";
 import VectorSource from "ol/source/Vector";
 import XYZ from "ol/source/XYZ";
 import { createOptions, synchronizeCollection } from "./util.js";
@@ -47,6 +48,15 @@ function synchronizeTileImageSource(target, source, context) {
     throw new Error("Can not instantiate base class: ol/source/TileImage");
   }
   synchronizeUrlTileSource(target, source, context);
+
+  return target;
+}
+
+export function synchronizeTileWMSSource(target, source, context) {
+  if (!target) {
+    target = new TileWMS(createOptions(source));
+  }
+  synchronizeTileImageSource(target, source, context);
 
   return target;
 }

@@ -15,6 +15,8 @@ public class FeatureLayerPage extends Div {
         map.setWidthFull();
         map.setHeight("400px");
 
+        map.getFeatureLayer().setId("feature-layer");
+
         NativeButton addDefaultMarkerFeature = new NativeButton(
                 "Add default marker feature", e -> {
                     MarkerFeature feature = new MarkerFeature();

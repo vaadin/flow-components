@@ -7,8 +7,6 @@ import org.openqa.selenium.interactions.Actions;
 
 import java.util.List;
 
-import java.util.List;
-
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
     /**
@@ -66,30 +64,27 @@ public class MapElement extends TestBenchElement {
     }
 
     /**
-     * Returns a Javascript expression that returns the feature layer of the
-     * map.
-     * <p>
-     * Effectively this uses the first vector layer, which means that this
-     * should only be used if no custom vector layers have been added.
+     * Returns a Javascript expression that returns the layer with the specified
+     * ID.
      *
-     * @return a Javascript expression evaluating the feature layer
+     * @return a Javascript expression evaluating the layer
      */
-    public String getFeatureLayerExpression() {
-        return "map.getLayers().getArray().find(layer => layer.typeName === 'ol/layer/Vector')";
+    public String getLayerExpression(String layerId) {
+        return String.format(
+                "map.getLayers().getArray().find(layer => layer.id === '%s')",
+                layerId);
     }
 
     /**
      * Returns a Javascript expression that evaluates the feature collection of
-     * the feature layers vector source.
-     * <p>
-     * Effectively this uses the first vector layer, which means that this
-     * should only be used if no custom vector layers have been added.
+     * the layer with the specified ID. Assumes that the layer is a vector layer
+     * that has a feature collection.
      *
      * @return a Javascript expression evaluating the feature collection of the
      *         feature layer's source
      */
-    public String getFeatureCollectionExpression() {
-        return getFeatureLayerExpression()
+    public String getFeatureCollectionExpression(String layerId) {
+        return getLayerExpression(layerId)
                 + ".getSource().getFeaturesCollection()";
     }
 

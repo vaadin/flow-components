@@ -9,6 +9,7 @@ import View from "ol/View";
 import { synchronizeTileLayer, synchronizeVectorLayer } from "./layers.js";
 import {
   synchronizeOSMSource,
+  synchronizeTileWMSSource,
   synchronizeVectorSource,
   synchronizeXYZSource,
 } from "./sources.js";
@@ -39,7 +40,7 @@ function synchronizeMap(target, source, context) {
 function synchronizeView(target, source, _context) {
   if (!target) {
     target = new View({
-      projection: source.projection
+      projection: source.projection,
     });
   }
 
@@ -86,6 +87,7 @@ const synchronizerLookup = {
   "ol/layer/Vector": synchronizeVectorLayer,
   // Sources
   "ol/source/OSM": synchronizeOSMSource,
+  "ol/source/TileWMS": synchronizeTileWMSSource,
   "ol/source/Vector": synchronizeVectorSource,
   "ol/source/XYZ": synchronizeXYZSource,
   // Geometry
