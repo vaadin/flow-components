@@ -2,7 +2,9 @@ package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.map.configuration.layer.ImageLayer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
+import com.vaadin.flow.component.map.configuration.source.ImageWMSSource;
 import com.vaadin.flow.component.map.configuration.source.TileWMSSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.router.Route;
@@ -47,6 +49,25 @@ public class SourcesPage extends Div {
                 });
         setupXYZSource.setId("setup-xyz-source");
 
-        add(new Div(setupTileWMSSource, setupXYZSource));
+        NativeButton setupImageWMSSource = new NativeButton("Setup ImageWMS source",
+                e -> {
+                    String url = "https://example.com/wms";
+                    String serverType = "geoserver";
+                    HashMap<String, Object> params = new HashMap<>();
+                    params.put("LAYERS", "layer1");
+                    ImageWMSSource source = new ImageWMSSource(
+                            new ImageWMSSource.Options().setUrl(url)
+                                    .setServerType(serverType)
+                                    .setParams(params)
+                                    .setCrossOrigin("custom-cross-origin")
+                                    .setRatio(2));
+                    ImageLayer layer = new ImageLayer();
+                    layer.setId("background-layer");
+                    layer.setSource(source);
+                    map.setBackgroundLayer(layer);
+                });
+        setupImageWMSSource.setId("setup-image-wms-source");
+
+        add(new Div(setupTileWMSSource, setupXYZSource, setupImageWMSSource));
     }
 }
