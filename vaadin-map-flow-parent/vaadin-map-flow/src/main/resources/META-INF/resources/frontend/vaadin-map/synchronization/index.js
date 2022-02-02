@@ -6,8 +6,13 @@
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import View from "ol/View";
-import { synchronizeTileLayer, synchronizeVectorLayer } from "./layers.js";
 import {
+  synchronizeImageLayer,
+  synchronizeTileLayer,
+  synchronizeVectorLayer,
+} from "./layers.js";
+import {
+  synchronizeImageWMSSource,
   synchronizeOSMSource,
   synchronizeTileWMSSource,
   synchronizeVectorSource,
@@ -83,9 +88,11 @@ const synchronizerLookup = {
   "ol/Map": synchronizeMap,
   "ol/View": synchronizeView,
   // Layers
+  "ol/layer/Image": synchronizeImageLayer,
   "ol/layer/Tile": synchronizeTileLayer,
   "ol/layer/Vector": synchronizeVectorLayer,
   // Sources
+  "ol/source/ImageWMS": synchronizeImageWMSSource,
   "ol/source/OSM": synchronizeOSMSource,
   "ol/source/TileWMS": synchronizeTileWMSSource,
   "ol/source/Vector": synchronizeVectorSource,
