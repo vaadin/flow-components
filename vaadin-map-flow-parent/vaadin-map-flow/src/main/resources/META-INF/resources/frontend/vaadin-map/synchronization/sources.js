@@ -54,7 +54,12 @@ function synchronizeTileImageSource(target, source, context) {
 
 export function synchronizeTileWMSSource(target, source, context) {
   if (!target) {
-    target = new TileWMS(createOptions(source));
+    target = new TileWMS(
+      createOptions({
+        ...source,
+        tileGrid: context.synchronize(null, source.tileGrid, context),
+      })
+    );
   }
   synchronizeTileImageSource(target, source, context);
 
@@ -63,7 +68,12 @@ export function synchronizeTileWMSSource(target, source, context) {
 
 export function synchronizeXYZSource(target, source, context) {
   if (!target) {
-    target = new XYZ(createOptions(source));
+    target = new XYZ(
+      createOptions({
+        ...source,
+        tileGrid: context.synchronize(null, source.tileGrid, context),
+      })
+    );
   }
   synchronizeTileImageSource(target, source, context);
 
@@ -72,7 +82,12 @@ export function synchronizeXYZSource(target, source, context) {
 
 export function synchronizeOSMSource(target, source, context) {
   if (!target) {
-    target = new OSM(createOptions(source));
+    target = new OSM(
+      createOptions({
+        ...source,
+        tileGrid: context.synchronize(null, source.tileGrid, context),
+      })
+    );
   }
 
   // For OSM source use default attributions as fallback

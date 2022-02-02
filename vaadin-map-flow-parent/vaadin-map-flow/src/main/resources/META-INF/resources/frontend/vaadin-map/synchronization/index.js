@@ -6,6 +6,7 @@
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import View from "ol/View";
+import TileGrid from "ol/tilegrid/TileGrid";
 import { synchronizeTileLayer, synchronizeVectorLayer } from "./layers.js";
 import {
   synchronizeOSMSource,
@@ -19,7 +20,12 @@ import {
   synchronizeStroke,
   synchronizeStyle,
 } from "./styles.js";
-import { convertToCoordinateArray, synchronizeCollection } from "./util.js";
+import {
+  convertToCoordinateArray,
+  convertToExtentArray,
+  convertToSizeArray,
+  synchronizeCollection,
+} from "./util.js";
 
 function synchronizeMap(target, source, context) {
   if (!target) {
@@ -78,6 +84,18 @@ function synchronizeFeature(target, source, context) {
   return target;
 }
 
+function synchronizeTileGrid(target, source, _context) {
+  if (!target) {
+    target = new TileGrid({
+      extent: convertToExtentArray(source.extent),
+      size: convertToSizeArray(source.size),
+      resolutions: source.resolutions,
+    });
+  }
+
+  return target;
+}
+
 const synchronizerLookup = {
   "ol/Feature": synchronizeFeature,
   "ol/Map": synchronizeMap,
@@ -97,6 +115,8 @@ const synchronizerLookup = {
   "ol/style/Fill": synchronizeFill,
   "ol/style/Stroke": synchronizeStroke,
   "ol/style/Style": synchronizeStyle,
+  // Tile grids
+  "ol/tilegrid/TileGrid": synchronizeTileGrid,
 };
 
 /**

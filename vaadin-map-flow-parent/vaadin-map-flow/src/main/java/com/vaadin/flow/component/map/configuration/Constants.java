@@ -37,5 +37,7 @@ public class Constants {
     public static final String OL_VIEW = "ol/View";
     public static final String OL_FEATURE = "ol/Feature";
 
+    // Tile grids
+    public static final String OL_TILEGRID_TILEGRID = "ol/tilegrid/TileGrid";
     // Vaadin-specific abstractions
 }

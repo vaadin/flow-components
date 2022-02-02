@@ -19,6 +19,15 @@ export function convertToSizeArray(size) {
 }
 
 /**
+ * Helper to convert an extent object to an extent array used by OpenLayers.
+ * @param extent
+ * @returns {*[]}
+ */
+export function convertToExtentArray(extent) {
+  return [extent.minX, extent.minY, extent.maxX, extent.maxY];
+}
+
+/**
  * Synchronizes an OpenLayers collection with data from a Javascript array
  */
 export function synchronizeCollection(collection, jsonItems, options) {

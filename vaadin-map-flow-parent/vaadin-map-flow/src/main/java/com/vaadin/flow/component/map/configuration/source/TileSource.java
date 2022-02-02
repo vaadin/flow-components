@@ -16,6 +16,8 @@ package com.vaadin.flow.component.map.configuration.source;
  * #L%
  */
 
+import com.vaadin.flow.component.map.configuration.tilegrid.TileGrid;
+
 /**
  * Abstract base class for map sources providing tiled map data
  */
@@ -23,9 +25,12 @@ public abstract class TileSource extends Source {
 
     private final boolean opaque;
 
+    private final TileGrid tileGrid;
+
     protected TileSource(BaseOptions<?> options) {
         super(options);
         this.opaque = options.opaque;
+        this.tileGrid = options.tileGrid;
     }
 
     /**
@@ -42,15 +47,25 @@ public abstract class TileSource extends Source {
         return opaque;
     }
 
+    public TileGrid getTileGrid() {
+        return tileGrid;
+    }
+
     protected static class BaseOptions<T extends BaseOptions<T>>
             extends Source.BaseOptions<T> {
         private boolean opaque = false;
+        private TileGrid tileGrid;
 
         /**
          * @see TileSource#isOpaque()
          */
         public T setOpaque(boolean opaque) {
             this.opaque = opaque;
+            return getThis();
+        }
+
+        public T setTileGrid(TileGrid tileGrid) {
+            this.tileGrid = tileGrid;
             return getThis();
         }
     }
