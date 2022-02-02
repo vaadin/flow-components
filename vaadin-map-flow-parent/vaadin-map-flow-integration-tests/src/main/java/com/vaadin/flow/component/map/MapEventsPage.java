@@ -15,8 +15,8 @@ public class MapEventsPage extends Div {
 
         Map map = new Map();
         map.setHeight("400px");
+        map.setWidth("400px");
         map.getView().setZoom(3);
-        map.setWidthFull();
 
         map.addViewMoveEndEventListener(event -> {
             View mapView = map.getView();
@@ -32,6 +32,13 @@ public class MapEventsPage extends Div {
                     + event.getZoom();
 
             eventData.setText(eventDataText);
+        });
+
+        map.addClickEventListener(event -> {
+            eventData.setText(event.getCoordinate().getX() + ";"
+                    + event.getCoordinate().getY() + ";"
+                    + event.getMouseDetails().getAbsoluteX() + ";"
+                    + event.getMouseDetails().getAbsoluteY());
         });
 
         add(map, viewState, eventData);

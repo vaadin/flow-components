@@ -2,6 +2,10 @@ package com.vaadin.flow.component.map.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
+import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.interactions.Actions;
+
+import java.util.List;
 
 import java.util.List;
 
@@ -33,6 +37,32 @@ public class MapElement extends TestBenchElement {
      */
     public String getOLTypeNameExpression(String jsExpression) {
         return jsExpression + ".typeName";
+    }
+
+    /**
+     * Performs a native click at the specified map coordinates. The method will
+     * convert the coordinates into pixel values, and perform a click on the map
+     * at the calculated pixel offset.
+     *
+     * @param x
+     * @param y
+     */
+    public void clickAtCoordinates(double x, double y) {
+        // Selenium click event offset starts from center, so we need to shift
+        // the offset to the start of the element first
+        Rectangle mapRectangle = this.getRect();
+        int startLeft = -mapRectangle.width / 2;
+        int startTop = -mapRectangle.height / 2;
+
+        // todo: use executeJS parameters instead of string concatenation
+        List<Number> pixelCoordinates = (List<Number>) executeScript(
+                "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
+                this, x, y);
+
+        int clickX = startLeft + pixelCoordinates.get(0).intValue();
+        int clickY = startTop + pixelCoordinates.get(1).intValue();
+        new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
+                .build().perform();
     }
 
     /**

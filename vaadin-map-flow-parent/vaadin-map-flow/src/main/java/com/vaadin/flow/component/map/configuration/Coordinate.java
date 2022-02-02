@@ -45,6 +45,11 @@ public class Coordinate {
         return y;
     }
 
+    @Override
+    public String toString() {
+        return "Coordinate{" + "x=" + x + ", y=" + y + '}';
+    }
+
     /**
      * Creates a coordinate from a longitude and latitude, and converts it into
      * {@link Projection#EPSG_3857} projection.

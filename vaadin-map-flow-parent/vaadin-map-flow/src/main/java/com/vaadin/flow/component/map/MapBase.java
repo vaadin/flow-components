@@ -26,6 +26,7 @@ import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.Extent;
+import com.vaadin.flow.component.map.events.MapClickEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.internal.StateTree;
@@ -137,9 +138,26 @@ public abstract class MapBase extends Component implements HasSize {
         });
     }
 
+    /**
+     * Adds event listener for OpenLayers' "moveend" event.
+     *
+     * @param listener
+     * @return a registration object for removing the added listener
+     */
     public Registration addViewMoveEndEventListener(
             ComponentEventListener<MapViewMoveEndEvent> listener) {
         return addListener(MapViewMoveEndEvent.class, listener);
+    }
+
+    /**
+     * Adds event listener for OpenLayers' @code{click} event.
+     *
+     * @param listener
+     * @return a registration object for removing the added listener
+     */
+    public Registration addClickEventListener(
+            ComponentEventListener<MapClickEvent> listener) {
+        return addListener(MapClickEvent.class, listener);
     }
 
     /**

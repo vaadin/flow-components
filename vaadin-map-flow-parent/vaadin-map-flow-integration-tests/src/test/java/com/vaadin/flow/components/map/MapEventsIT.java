@@ -26,8 +26,16 @@ public class MapEventsIT extends AbstractComponentIT {
         map.evaluateOLExpression("map.getView().setRotation(5);");
         map.evaluateOLExpression("map.getView().setZoom(6)");
 
-        Assert.assertEquals("4849385.650796606;5487570.011434158;5.0;6.0",
-                stateTextDiv.getText());
+        String[] parts = stateTextDiv.getText().split(";");
+        double centerX = Double.parseDouble(parts[0]);
+        double centerY = Double.parseDouble(parts[1]);
+        float rotation = Float.parseFloat(parts[2]);
+        float zoom = Float.parseFloat(parts[3]);
+
+        Assert.assertEquals(4849385.650796606, centerX, 0.1);
+        Assert.assertEquals(5487570.011434158, centerY, 0.1);
+        Assert.assertEquals(5.0, rotation, 0.01);
+        Assert.assertEquals(6.0, zoom, 0.01);
     }
 
     @Test
@@ -41,8 +49,36 @@ public class MapEventsIT extends AbstractComponentIT {
         map.evaluateOLExpression("map.getView().setRotation(5);");
         map.evaluateOLExpression("map.getView().setZoom(6)");
 
-        Assert.assertEquals("4849385.650796606;5487570.011434158;5.0;6.0",
-                eventDataDiv.getText());
+        String[] parts = eventDataDiv.getText().split(";");
+        double centerX = Double.parseDouble(parts[0]);
+        double centerY = Double.parseDouble(parts[1]);
+        float rotation = Float.parseFloat(parts[2]);
+        float zoom = Float.parseFloat(parts[3]);
+
+        Assert.assertEquals(4849385.650796606, centerX, 0.1);
+        Assert.assertEquals(5487570.011434158, centerY, 0.1);
+        Assert.assertEquals(5.0, rotation, 0.01);
+        Assert.assertEquals(6.0, zoom, 0.01);
+    }
+
+    @Test
+    public void mapClick_correctEventDataReceived() {
+        MapElement map = $(MapElement.class).waitForFirst();
+        TestBenchElement eventDataDiv = $("div").id("event-data");
+
+        map.clickAtCoordinates(-1956787.9241005122, 1956787.9241005122);
+
+        String[] parts = eventDataDiv.getText().split(";");
+
+        double xCoordinate = Double.parseDouble(parts[0]);
+        double yCoordinate = Double.parseDouble(parts[1]);
+        double xPixel = Double.parseDouble(parts[2]);
+        double yPixel = Double.parseDouble(parts[3]);
+
+        Assert.assertEquals(100, xPixel, 0.1);
+        Assert.assertEquals(100, yPixel, 0.1);
+        Assert.assertEquals(-1956787.9241005122, xCoordinate, 0.00000001);
+        Assert.assertEquals(1956787.9241005122, yCoordinate, 0.00000001);
     }
 
 }
