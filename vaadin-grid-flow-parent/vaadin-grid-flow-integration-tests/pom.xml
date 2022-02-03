@@ -20,6 +20,10 @@
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -113,7 +117,8 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-component-demo-helpers</artifactId>
+            <artifactId>vaadin-component-demo-helpers</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -240,6 +245,9 @@
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
+                        <configuration>
+                            <scanIntervalSeconds>5</scanIntervalSeconds>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

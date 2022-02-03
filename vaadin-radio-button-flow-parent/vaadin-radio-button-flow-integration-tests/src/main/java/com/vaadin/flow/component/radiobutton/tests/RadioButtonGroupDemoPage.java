@@ -195,7 +195,7 @@ public class RadioButtonGroupDemoPage extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person("Joe"), new Person("John"),
                 new Person("Bill"));
-        group.setRenderer(new TextRenderer<>(Person::getName));
+        group.setItemLabelGenerator(Person::getName);
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));

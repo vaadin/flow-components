@@ -12,16 +12,17 @@
     </parent>
     <properties>
         <flow.version>10.0-SNAPSHOT</flow.version>
-        <testbench.version>7.0.3</testbench.version>
+        <testbench.version>8.0.0.beta2</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8
                 </project.reporting.outputEncoding>
-        <jetty.version>9.4.15.v20190215</jetty.version>
+        <jetty.version>9.4.44.v20210927</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
+        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
@@ -37,6 +38,7 @@
         <osgi.export.package>default</osgi.export.package>
     </properties>
     <modules>
+        <module>vaadin-component-demo-helpers</module>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
@@ -78,6 +80,7 @@
         <module>vaadin-cookie-consent-flow-parent</module>
         <module>vaadin-crud-flow-parent</module>
         <module>vaadin-grid-pro-flow-parent</module>
+        <module>vaadin-map-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
     </modules>
     <profiles>
@@ -230,9 +233,18 @@
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
                         <systemProperties>
+                            <force>true</force>
                             <systemProperty>
                                 <name>project.basedir</name>
                                 <value>${project.basedir}</value>
+                            </systemProperty>
+                            <systemProperty>
+                                <name>vaadin.productionMode</name>
+                                <value>true</value>
+                            </systemProperty>
+                            <systemProperty>
+                                <name>vaadin.reuseDevServer</name>
+                                <value>true</value>
                             </systemProperty>
                         </systemProperties>
                     </configuration>
@@ -243,14 +255,6 @@
                             <goals>
                                 <goal>deploy-war</goal>
                             </goals>
-                            <configuration>
-                                <systemProperties>
-                                    <systemProperty>
-                                        <name>vaadin.productionMode</name>
-                                        <value>true</value>
-                                    </systemProperty>
-                                </systemProperties>
-                            </configuration>
                         </execution>
                         <execution>
                             <id>stop-jetty</id>
@@ -260,6 +264,16 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>${exclude.tests}</exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -275,8 +289,8 @@
                     </executions>
                     <configuration>
                         <forkCount>${failsafe.forkCount}</forkCount>
-                        <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-                        <reuseForks>true</reuseForks>
+                        <argLine>-Xmx2048m</argLine>
+                        <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
@@ -286,6 +300,9 @@
                             <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
                             <sauce.options>${sauce.options}</sauce.options>
                         </systemPropertyVariables>
+                        <excludes>
+                            <exclude>${exclude.tests}</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -483,21 +500,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-polymer-template</artifactId>
                 <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-component-demo-helpers</artifactId>
-                <version>${flow.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.hamcrest</groupId>
-                        <artifactId>hamcrest-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
               <groupId>com.vaadin</groupId>

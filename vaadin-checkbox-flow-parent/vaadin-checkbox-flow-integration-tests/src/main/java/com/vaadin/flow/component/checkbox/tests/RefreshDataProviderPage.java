@@ -30,6 +30,7 @@ public class RefreshDataProviderPage extends Div {
 
     public RefreshDataProviderPage() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
+        group.setLabel("Label");
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar"));

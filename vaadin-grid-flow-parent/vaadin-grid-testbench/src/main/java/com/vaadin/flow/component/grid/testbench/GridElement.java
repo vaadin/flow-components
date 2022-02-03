@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.testbench;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -311,16 +310,6 @@ public class GridElement extends TestBenchElement {
     @Deprecated
     public List<WebElement> findInShadowRoot(By by) {
         return getShadowRoot().findElements(by);
-    }
-
-    private WebElement getShadowRoot() {
-        waitUntil(driver -> getCommandExecutor()
-                .executeScript("return arguments[0].shadowRoot", this) != null);
-        WebElement shadowRoot = (WebElement) getCommandExecutor()
-                .executeScript("return arguments[0].shadowRoot", this);
-        Assert.assertNotNull("Could not locate shadowRoot in the element",
-                shadowRoot);
-        return shadowRoot;
     }
 
     /**
