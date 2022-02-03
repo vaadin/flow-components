@@ -78,16 +78,15 @@ public class SourcesIT extends AbstractComponentIT {
 
         String sourceType = (String) map
                 .evaluateOLExpression(map.getOLTypeNameExpression(sourceEx));
-        String url = (String) map
-                .evaluateOLExpression(sourceEx + ".url_");
+        String url = (String) map.evaluateOLExpression(sourceEx + ".url_");
         String layersParam = (String) map
                 .evaluateOLExpression(sourceEx + ".params_.LAYERS");
         String serverType = (String) map
                 .evaluateOLExpression(sourceEx + ".serverType_");
         String crossOrigin = (String) map
                 .evaluateOLExpression(sourceEx + ".crossOrigin_");
-        float ratio = ((Number) map
-                .evaluateOLExpression(sourceEx + ".ratio_")).floatValue();
+        float ratio = ((Number) map.evaluateOLExpression(sourceEx + ".ratio_"))
+                .floatValue();
 
         Assert.assertEquals("ol/source/ImageWMS", sourceType);
         Assert.assertEquals("https://example.com/wms", url);

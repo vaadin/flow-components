@@ -4,7 +4,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.source.ImageSource;
 
 /**
- * Layer for server-rendered images that are available in arbitrary extents and resolutions.
+ * Layer for server-rendered images that are available in arbitrary extents and
+ * resolutions.
  */
 public class ImageLayer extends Layer {
 

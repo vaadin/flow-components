@@ -8,7 +8,8 @@ public abstract class ImageSource extends Source {
         super(options);
     }
 
-    public static abstract class BaseOptions<T extends BaseOptions<T>> extends Source.BaseOptions<T> {
+    public static abstract class BaseOptions<T extends BaseOptions<T>>
+            extends Source.BaseOptions<T> {
 
     }
 }

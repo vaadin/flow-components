@@ -36,6 +36,7 @@ public class ImageWMSSource extends ImageSource {
 
     /**
      * The WMS service URL
+     * 
      * @return the current URL
      */
     public String getUrl() {
@@ -44,7 +45,9 @@ public class ImageWMSSource extends ImageSource {
 
     /**
      * Sets the WMS service URL
-     * @param url the new URL
+     * 
+     * @param url
+     *            the new URL
      */
     public void setUrl(String url) {
         this.url = url;
@@ -95,9 +98,10 @@ public class ImageWMSSource extends ImageSource {
     }
 
     /**
-     * The ratio for the size of requested images compared to the map's viewport.
-     * Ratio {@code 1} means image requests are the size of the viewport, a ratio of {@code 2} means twice the size of the viewport, and so on.
-     * Default is {code 1.5}.
+     * The ratio for the size of requested images compared to the map's
+     * viewport. Ratio {@code 1} means image requests are the size of the
+     * viewport, a ratio of {@code 2} means twice the size of the viewport, and
+     * so on. Default is {code 1.5}.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.

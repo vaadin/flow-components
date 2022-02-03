@@ -49,16 +49,15 @@ public class SourcesPage extends Div {
                 });
         setupXYZSource.setId("setup-xyz-source");
 
-        NativeButton setupImageWMSSource = new NativeButton("Setup ImageWMS source",
-                e -> {
+        NativeButton setupImageWMSSource = new NativeButton(
+                "Setup ImageWMS source", e -> {
                     String url = "https://example.com/wms";
                     String serverType = "geoserver";
                     HashMap<String, Object> params = new HashMap<>();
                     params.put("LAYERS", "layer1");
                     ImageWMSSource source = new ImageWMSSource(
                             new ImageWMSSource.Options().setUrl(url)
-                                    .setServerType(serverType)
-                                    .setParams(params)
+                                    .setServerType(serverType).setParams(params)
                                     .setCrossOrigin("custom-cross-origin")
                                     .setRatio(2));
                     ImageLayer layer = new ImageLayer();
