@@ -54,10 +54,14 @@ function synchronizeTileImageSource(target, source, context) {
 
 export function synchronizeTileWMSSource(target, source, context) {
   if (!target) {
+    const tileGrid = source.tileGrid
+      ? context.synchronize(null, source.tileGrid, context)
+      : undefined;
+
     target = new TileWMS(
       createOptions({
         ...source,
-        tileGrid: context.synchronize(null, source.tileGrid, context),
+        tileGrid,
       })
     );
   }
@@ -68,10 +72,14 @@ export function synchronizeTileWMSSource(target, source, context) {
 
 export function synchronizeXYZSource(target, source, context) {
   if (!target) {
+    const tileGrid = source.tileGrid
+      ? context.synchronize(null, source.tileGrid, context)
+      : undefined;
+
     target = new XYZ(
       createOptions({
         ...source,
-        tileGrid: context.synchronize(null, source.tileGrid, context),
+        tileGrid,
       })
     );
   }
@@ -82,10 +90,13 @@ export function synchronizeXYZSource(target, source, context) {
 
 export function synchronizeOSMSource(target, source, context) {
   if (!target) {
+    const tileGrid = source.tileGrid
+      ? context.synchronize(null, source.tileGrid, context)
+      : undefined;
     target = new OSM(
       createOptions({
         ...source,
-        tileGrid: context.synchronize(null, source.tileGrid, context),
+        tileGrid,
       })
     );
   }
