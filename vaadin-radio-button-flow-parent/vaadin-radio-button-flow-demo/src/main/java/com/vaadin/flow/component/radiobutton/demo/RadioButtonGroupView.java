@@ -37,7 +37,6 @@ import com.vaadin.flow.component.radiobutton.demo.data.DepartmentData;
 import com.vaadin.flow.component.radiobutton.demo.entity.Department;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -106,7 +105,7 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setLabel("Department");
         List<Department> departmentList = getDepartments();
         radioGroup.setItems(departmentList);
-        radioGroup.setRenderer(new TextRenderer<>(Department::getName));
+        radioGroup.setItemLabelGenerator(Department::getName);
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         // end-source-example
 

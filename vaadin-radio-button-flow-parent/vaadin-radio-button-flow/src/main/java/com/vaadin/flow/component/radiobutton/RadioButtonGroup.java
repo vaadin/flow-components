@@ -31,6 +31,7 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
@@ -49,6 +50,7 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
@@ -85,7 +87,10 @@ public class RadioButtonGroup<T>
 
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
-    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
+    private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>(
+            itemLabelGenerator);
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
@@ -233,6 +238,33 @@ public class RadioButtonGroup<T>
                         reset();
                     }
                 });
+    }
+
+    /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the radio button group for each item. By default,
+     * {@link String#valueOf(Object)} is used.
+     * <p>
+     * 
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<T> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        setRenderer(new TextRenderer<>(itemLabelGenerator));
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the radio button group for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<T> getItemLabelGenerator() {
+        return itemLabelGenerator;
     }
 
     @Override
