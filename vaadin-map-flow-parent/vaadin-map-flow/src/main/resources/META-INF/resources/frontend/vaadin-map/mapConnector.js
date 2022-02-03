@@ -60,7 +60,7 @@ import { getLayerForFeature } from "./util";
       mapElement.dispatchEvent(customEvent);
     });
 
-    mapElement.configuration.on("click", (event) => {
+    mapElement.configuration.on("singleclick", (event) => {
       const coordinate = event.coordinate;
 
       // Map click event

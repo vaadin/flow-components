@@ -4,6 +4,7 @@ import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,8 +35,12 @@ public class FeatureEventsIT extends AbstractComponentIT {
 
         // Click on first marker
         map.clickAtCoordinates(0, 0);
+        // To prevent double-clicking, wait before we trigger the next event
+        waitSeconds(1);
         // Click on second marker
         map.clickAtCoordinates(2000000, 0);
+        // Click events are delayed by around 250ms, wait for last event
+        waitSeconds(1);
 
         // Should have two events, one from each marker
         assertEventLogHasNumberOfEvents(2);
@@ -51,8 +56,12 @@ public class FeatureEventsIT extends AbstractComponentIT {
 
         // Click on first marker
         map.clickAtCoordinates(0, 0);
+        // To prevent double-clicking, wait before we trigger the next event
+        waitSeconds(1);
         // Click on second marker
         map.clickAtCoordinates(2000000, 0);
+        // Click events are delayed by around 250ms, wait for last event
+        waitSeconds(1);
 
         // Should have only one event, from the first marker
         assertEventLogHasNumberOfEvents(1);
@@ -61,18 +70,22 @@ public class FeatureEventsIT extends AbstractComponentIT {
     }
 
     private void assertEventLogHasNumberOfEvents(int expectedEvents) {
-        waitUntil(driver -> {
-            String[] eventLines = eventLog.getText()
-                    .split(System.lineSeparator());
-            return expectedEvents == eventLines.length;
-        });
+        String[] eventLines = eventLog.getText().split(System.lineSeparator());
+        Assert.assertEquals(expectedEvents, eventLines.length);
     }
 
     private void assertEventLogContainsEvent(String expectedEvent) {
+        String[] eventLines = eventLog.getText().split(System.lineSeparator());
+        Assert.assertTrue("Event was not triggered: " + expectedEvent,
+                Arrays.asList(eventLines).contains(expectedEvent));
+    }
+
+    private void waitSeconds(int seconds) {
+        long start = System.currentTimeMillis();
         waitUntil(driver -> {
-            String[] eventLines = eventLog.getText()
-                    .split(System.lineSeparator());
-            return Arrays.asList(eventLines).contains(expectedEvent);
+            long now = System.currentTimeMillis();
+            double delta = Math.floor((now - start) / 1000f);
+            return delta > seconds;
         });
     }
 }
