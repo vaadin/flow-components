@@ -16,7 +16,7 @@ style.appendChild(
     }
   }
 
-  vaadin-grid-tree-toggle[leaf] {
+  [benchmark] vaadin-grid-tree-toggle[leaf] {
     transition: opacity 1s;
     opacity: 0.9;
   }
@@ -27,7 +27,7 @@ document.head.appendChild(style);
 registerStyles(
   'vaadin-grid',
   css`
-    [part~='body-cell'] {
+    :host([benchmark]) [part~='body-cell'] {
       height: 50px;
     }
 
@@ -37,15 +37,15 @@ registerStyles(
       }
     }
 
-    [part~='cell'] {
+    :host([benchmark]) [part~='cell'] {
       animation: content-ready 1s;
     }
 
-    :host {
+    :host([benchmark]) {
       transition: opacity 1s;
     }
 
-    :host[loading] {
+    :host([benchmark][loading]) {
       opacity: 0.9;
     }
   `
@@ -60,7 +60,7 @@ registerStyles(
       }
     }
 
-    :host {
+    :host([benchmark]) {
       animation: content-ready 1s;
     }
   `

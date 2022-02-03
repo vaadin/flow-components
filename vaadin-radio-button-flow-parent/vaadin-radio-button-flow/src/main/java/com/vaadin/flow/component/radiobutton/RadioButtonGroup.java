@@ -31,11 +31,11 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -50,6 +50,7 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
@@ -70,8 +71,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.0.0-alpha4")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.0-alpha4")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.0-beta1")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -86,9 +87,10 @@ public class RadioButtonGroup<T>
 
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
-    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
+    private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private boolean isReadOnly;
+    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>(
+            itemLabelGenerator);
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
@@ -238,11 +240,39 @@ public class RadioButtonGroup<T>
                 });
     }
 
+    /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the radio button group for each item. By default,
+     * {@link String#valueOf(Object)} is used.
+     * <p>
+     * 
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<T> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        setRenderer(new TextRenderer<>(itemLabelGenerator));
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the radio button group for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<T> getItemLabelGenerator() {
+        return itemLabelGenerator;
+    }
+
     @Override
     public void setValue(T value) {
         super.setValue(value);
         getRadioButtons().forEach(
                 rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        refreshButtons();
     }
 
     @Override
@@ -331,26 +361,19 @@ public class RadioButtonGroup<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        if (isReadOnly()) {
-            setDisabled(true);
-        } else {
-            setDisabled(!enabled);
-        }
+        setDisabled(!enabled);
         refreshButtons();
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        isReadOnly = readOnly;
-        if (isEnabled()) {
-            setDisabled(readOnly);
-            refreshButtons();
-        }
+        super.setReadonly(readOnly);
+        refreshButtons();
     }
 
     @Override
     public boolean isReadOnly() {
-        return isReadOnly;
+        return super.isReadonlyBoolean();
     }
 
     /**
@@ -430,7 +453,9 @@ public class RadioButtonGroup<T>
         // Cache helper component before removal
         Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        removeAll();
+        // Remove all known children (doesn't remove client-side-only children
+        // such as the label)
+        getChildren().forEach(this::remove);
         clear();
 
         // reinsert helper component
@@ -571,17 +596,19 @@ public class RadioButtonGroup<T>
     private void updateEnabled(RadioButton<T> button) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(button.getItem());
-        button.setEnabled(!disabled);
-        Serializable rawValue = button.getElement().getPropertyRaw("disabled");
-        if (rawValue instanceof Boolean) {
-            // convert the boolean value to a String to force update the
-            // property value. Otherwise since the provided value is the same as
-            // the current one the update don't do anything.
-            button.getElement().setProperty("disabled",
-                    disabled ? Boolean.TRUE.toString() : null);
-        } else {
-            button.setDisabled(disabled);
+
+        if (this.isReadOnly() && !button.isCheckedBoolean()) {
+            // Mark non-checked radio buttons in a readonly group as disabled.
+            disabled = true;
         }
+
+        button.setEnabled(!disabled);
+        button.setDisabled(disabled);
+        // When enabling a disabled radio group, individual button Web
+        // Components that should remain disabled (due to itemEnabledProvider),
+        // may end up rendering as enabled.
+        // Enforce the Web Component state using JS.
+        button.getElement().executeJs("this.disabled = $0", disabled);
     }
 
     private T getValue(Serializable key) {

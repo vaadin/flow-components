@@ -5,7 +5,7 @@ import '@vaadin/checkbox/vaadin-checkbox.js';
 class InjectChecbox extends PolymerElement {
     static get template() {
       return html`
-    <vaadin-checkbox id="accept">Accept</vaadin-checkbox>
+    <vaadin-checkbox id="accept" label="Accept"></vaadin-checkbox>
     <div id="div">A</div>
 `;
   }
