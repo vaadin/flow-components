@@ -77,6 +77,21 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
+    public void sorterHasAriaLabel() {
+        GridElement grid = $(GridElement.class).waitForFirst();
+        Assert.assertEquals("Sort by First Name",
+                grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").first()
+                        .getAttribute("aria-label"));
+    }
+
+    @Test
+    public void filterHasAriaLabel() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertEquals("Filter by First Name",
+                crud.getFilterFields().get(0).getAttribute("aria-label"));
+    }
+
+    @Test
     public void sortOrdersCorrect() {
         GridElement grid = $(GridElement.class).waitForFirst();
 
