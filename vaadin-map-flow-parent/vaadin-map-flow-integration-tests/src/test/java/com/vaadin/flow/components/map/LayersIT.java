@@ -102,9 +102,9 @@ public class LayersIT extends AbstractComponentIT {
                 .evaluateOLExpression("map.getLayers().getLength()");
         Assert.assertEquals(3, numLayers);
 
-        String customLayerEx = map
-                .getLayerExpression("custom-layer");
-        Boolean hasCustomLayer = (Boolean) map.evaluateOLExpression(customLayerEx + " != null");
+        String customLayerEx = map.getLayerExpression("custom-layer");
+        Boolean hasCustomLayer = (Boolean) map
+                .evaluateOLExpression(customLayerEx + " != null");
 
         Assert.assertTrue("Custom layer does not exist", hasCustomLayer);
     }
@@ -119,9 +119,9 @@ public class LayersIT extends AbstractComponentIT {
                 .evaluateOLExpression("map.getLayers().getLength()");
         Assert.assertEquals(2, numLayers);
 
-        String customLayerEx = map
-                .getLayerExpression("custom-layer");
-        Boolean hasCustomLayer = (Boolean) map.evaluateOLExpression(customLayerEx + " != null");
+        String customLayerEx = map.getLayerExpression("custom-layer");
+        Boolean hasCustomLayer = (Boolean) map
+                .evaluateOLExpression(customLayerEx + " != null");
 
         Assert.assertFalse("Custom layer still exists", hasCustomLayer);
     }
