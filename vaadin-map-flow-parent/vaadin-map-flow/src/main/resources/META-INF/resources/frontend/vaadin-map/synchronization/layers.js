@@ -1,3 +1,4 @@
+import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import { createOptions } from "./util.js";
@@ -38,6 +39,24 @@ export function synchronizeTileLayer(target, source, context) {
 export function synchronizeVectorLayer(target, source, context) {
   if (!target) {
     target = new VectorLayer(
+      createOptions({
+        ...source,
+        source: context.synchronize(null, source.source, context),
+      })
+    );
+  }
+
+  synchronizeLayer(target, source);
+  target.setSource(
+    context.synchronize(target.getSource(), source.source, context)
+  );
+
+  return target;
+}
+
+export function synchronizeImageLayer(target, source, context) {
+  if (!target) {
+    target = new ImageLayer(
       createOptions({
         ...source,
         source: context.synchronize(null, source.source, context),
