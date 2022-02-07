@@ -464,19 +464,21 @@ public class CheckboxGroup<T>
 
     @SuppressWarnings("unchecked")
     private void reset() {
-        // Cache helper component before removal
-        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        // Remove all known children (doesn't remove client-side-only children
-        // such as the label)
-        getChildren().forEach(this::remove);
         clear();
 
-        // reinsert helper component
-        // see https://github.com/vaadin/vaadin-checkbox/issues/191
-        setHelperComponent(helperComponent);
-
         synchronized (dataProvider) {
+            // Cache helper component before removal
+            Component helperComponent = getHelperComponent();
+
+            // Remove all known children (doesn't remove client-side-only
+            // children such as the label)
+            getChildren().forEach(this::remove);
+
+            // reinsert helper component
+            // see https://github.com/vaadin/vaadin-checkbox/issues/191
+            setHelperComponent(helperComponent);
+
             final AtomicInteger itemCounter = new AtomicInteger(0);
 
             getDataProvider().fetch(DataViewUtils.getQuery(this))
