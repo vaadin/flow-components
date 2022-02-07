@@ -474,7 +474,7 @@ public class CheckboxGroup<T>
             // Remove all known children (doesn't remove client-side-only
             // children such as the label)
             getChildren().forEach(this::remove);
-            
+
             // reinsert helper component
             // see https://github.com/vaadin/vaadin-checkbox/issues/191
             setHelperComponent(helperComponent);

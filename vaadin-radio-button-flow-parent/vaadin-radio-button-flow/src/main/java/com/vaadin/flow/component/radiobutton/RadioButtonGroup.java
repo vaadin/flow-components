@@ -456,7 +456,7 @@ public class RadioButtonGroup<T>
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();
-            
+
             // Remove all known children (doesn't remove client-side-only
             // children such as the label)
             getChildren().forEach(this::remove);
