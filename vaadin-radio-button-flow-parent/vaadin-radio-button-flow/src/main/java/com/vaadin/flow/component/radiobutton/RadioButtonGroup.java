@@ -418,18 +418,20 @@ public class RadioButtonGroup<T>
 
     @SuppressWarnings("unchecked")
     private void reset() {
-        // Cache helper component before removal
-        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        // Remove all known children (doesn't remove client-side-only children
-        // such as the label)
-        getChildren().forEach(this::remove);
         clear();
 
-        // reinsert helper component
-        setHelperComponent(helperComponent);
-
         synchronized (dataProvider) {
+            // Cache helper component before removal
+            Component helperComponent = getHelperComponent();
+
+            // Remove all known children (doesn't remove client-side-only
+            // children such as the label)
+            getChildren().forEach(this::remove);
+
+            // reinsert helper component
+            setHelperComponent(helperComponent);
+
             final AtomicInteger itemCounter = new AtomicInteger(0);
             getDataProvider().fetch(DataViewUtils.getQuery(this))
                     .map(item -> createRadioButton((T) item))
