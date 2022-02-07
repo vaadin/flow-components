@@ -6,6 +6,7 @@
 import Collection from "ol/Collection";
 import ImageWMS from "ol/source/ImageWMS";
 import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from "ol/source/OSM";
+import TileJSON from "ol/source/TileJSON";
 import TileWMS from "ol/source/TileWMS";
 import VectorSource from "ol/source/Vector";
 import XYZ from "ol/source/XYZ";
@@ -49,6 +50,15 @@ function synchronizeTileImageSource(target, source, context) {
     throw new Error("Can not instantiate base class: ol/source/TileImage");
   }
   synchronizeUrlTileSource(target, source, context);
+
+  return target;
+}
+
+export function synchronizeTileJSONSource(target, source, context) {
+  if (!target) {
+    target = new TileJSON(createOptions(source));
+  }
+  synchronizeTileImageSource(target, source, context);
 
   return target;
 }

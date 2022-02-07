@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.layer.ImageLayer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.ImageWMSSource;
+import com.vaadin.flow.component.map.configuration.source.TileJSONSource;
 import com.vaadin.flow.component.map.configuration.source.TileWMSSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.router.Route;
@@ -18,6 +19,18 @@ public class SourcesPage extends Div {
         map.setWidthFull();
         map.setHeight("400px");
         add(map);
+
+        NativeButton setupTileJSONSource = new NativeButton(
+                "Setup TileJSON source", e -> {
+                    String url = "https://example.com/tilejson";
+                    TileJSONSource source = new TileJSONSource(
+                            new TileJSONSource.Options().setUrl(url));
+                    TileLayer layer = new TileLayer();
+                    layer.setId("background-layer");
+                    layer.setSource(source);
+                    map.setBackgroundLayer(layer);
+                });
+        setupTileJSONSource.setId("setup-tile-json-source");
 
         NativeButton setupTileWMSSource = new NativeButton(
                 "Setup TileWMS source", e -> {
@@ -67,6 +80,7 @@ public class SourcesPage extends Div {
                 });
         setupImageWMSSource.setId("setup-image-wms-source");
 
-        add(new Div(setupTileWMSSource, setupXYZSource, setupImageWMSSource));
+        add(new Div(setupTileJSONSource, setupTileWMSSource, setupXYZSource,
+                setupImageWMSSource));
     }
 }

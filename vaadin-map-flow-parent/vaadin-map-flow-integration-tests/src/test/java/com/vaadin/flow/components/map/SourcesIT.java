@@ -18,14 +18,32 @@ public class SourcesIT extends AbstractComponentIT {
     private TestBenchElement setupTileWMSSource;
     private TestBenchElement setupXYZSource;
     private TestBenchElement setupImageWMSSource;
+    private TestBenchElement setupTileJSONSource;
 
     @Before
     public void init() {
         open();
         map = $(MapElement.class).waitForFirst();
+        setupTileJSONSource = $("button").id("setup-tile-json-source");
         setupTileWMSSource = $("button").id("setup-tile-wms-source");
         setupXYZSource = $("button").id("setup-xyz-source");
         setupImageWMSSource = $("button").id("setup-image-wms-source");
+    }
+
+    @Test
+    public void initializeTileJSONSource() {
+        setupTileJSONSource.click();
+
+        String backgroundLayerEx = map.getLayerExpression("background-layer");
+        String sourceEx = backgroundLayerEx + ".getSource()";
+
+        String sourceType = (String) map
+                .evaluateOLExpression(map.getOLTypeNameExpression(sourceEx));
+        String url = (String) map
+                .evaluateOLExpression(sourceEx + ".getUrls()[0]");
+
+        Assert.assertEquals("ol/source/TileJSON", sourceType);
+        Assert.assertEquals("https://example.com/tilejson", url);
     }
 
     @Test

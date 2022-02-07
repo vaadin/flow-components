@@ -14,6 +14,7 @@ import {
 import {
   synchronizeImageWMSSource,
   synchronizeOSMSource,
+  synchronizeTileJSONSource,
   synchronizeTileWMSSource,
   synchronizeVectorSource,
   synchronizeXYZSource,
@@ -94,6 +95,7 @@ const synchronizerLookup = {
   // Sources
   "ol/source/ImageWMS": synchronizeImageWMSSource,
   "ol/source/OSM": synchronizeOSMSource,
+  "ol/source/TileJSON": synchronizeTileJSONSource,
   "ol/source/TileWMS": synchronizeTileWMSSource,
   "ol/source/Vector": synchronizeVectorSource,
   "ol/source/XYZ": synchronizeXYZSource,
