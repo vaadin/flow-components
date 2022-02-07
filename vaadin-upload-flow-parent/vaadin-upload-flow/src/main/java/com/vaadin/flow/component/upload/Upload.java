@@ -654,7 +654,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Clear the fileList of the component.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", Json.createArray());
+        setFiles(Json.createArray());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
