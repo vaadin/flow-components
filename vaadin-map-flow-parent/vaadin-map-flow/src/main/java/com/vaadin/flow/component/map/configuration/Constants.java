@@ -18,6 +18,7 @@ package com.vaadin.flow.component.map.configuration;
 
 public class Constants {
     // Layers
+    public static final String OL_LAYER_IMAGE = "ol/layer/Image";
     public static final String OL_LAYER_TILE = "ol/layer/Tile";
     public static final String OL_LAYER_VECTOR = "ol/layer/Vector";
     // Sources
@@ -25,6 +26,7 @@ public class Constants {
     public static final String OL_SOURCE_OSM = "ol/source/OSM";
     public static final String OL_SOURCE_VECTOR = "ol/source/Vector";
     public static final String OL_SOURCE_TILE_WMS = "ol/source/TileWMS";
+    public static final String OL_SOURCE_IMAGE_WMS = "ol/source/ImageWMS";
     // Geometry
     public static final String OL_GEOMETRY_POINT = "ol/geom/Point";
     // Style

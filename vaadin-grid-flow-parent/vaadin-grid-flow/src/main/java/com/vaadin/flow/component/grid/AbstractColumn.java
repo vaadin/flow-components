@@ -241,8 +241,8 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         String escapedColumnId = HtmlUtils
                 .escape(getBottomLevelColumn().getInternalId());
         return String.format(
-                "<vaadin-grid-sorter path='%s'>%s</vaadin-grid-sorter>",
-                escapedColumnId, templateInnerHtml);
+                "<vaadin-grid-sorter path='%s' aria-label='Sort by %s'>%s</vaadin-grid-sorter>",
+                escapedColumnId, templateInnerHtml, templateInnerHtml);
     }
 
     /**

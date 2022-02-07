@@ -52,7 +52,6 @@ public class MapElement extends TestBenchElement {
         int startLeft = -mapRectangle.width / 2;
         int startTop = -mapRectangle.height / 2;
 
-        // todo: use executeJS parameters instead of string concatenation
         List<Number> pixelCoordinates = (List<Number>) executeScript(
                 "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
                 this, x, y);
@@ -104,5 +103,15 @@ public class MapElement extends TestBenchElement {
      */
     public List<TestBenchElement> getAttributionItems() {
         return getAttributionContainer().$("li").all();
+    }
+
+    /**
+     * Disables all interactions that could interfere with a test, such as
+     * double-click to zoom.
+     */
+    public void disableInteractions() {
+        String script = "const interactions = arguments[0].configuration.getInteractions();"
+                + "interactions.forEach(interaction => interaction.setActive && interaction.setActive(false));";
+        executeScript(script, this);
     }
 }
