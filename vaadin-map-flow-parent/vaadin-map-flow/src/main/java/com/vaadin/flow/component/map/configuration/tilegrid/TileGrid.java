@@ -2,6 +2,7 @@ package com.vaadin.flow.component.map.configuration.tilegrid;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
+import com.vaadin.flow.component.map.configuration.Extent;
 
 public class TileGrid extends AbstractConfigurationObject {
     public Extent getExtent() {

@@ -37,4 +37,11 @@ public class Extent {
         return maxY;
     }
 
+    public double getWidth() {
+        return maxX - minX;
+    }
+
+    public double getHeight() {
+        return maxY - minY;
+    }
 }

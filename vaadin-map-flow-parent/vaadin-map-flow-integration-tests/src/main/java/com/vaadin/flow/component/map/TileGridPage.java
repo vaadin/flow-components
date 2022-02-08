@@ -1,8 +1,6 @@
-package com.vaadin.flow.component.map.demo;
+package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.map.Map;
-import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.TileWMSSource;
@@ -12,16 +10,17 @@ import com.vaadin.flow.router.Route;
 
 import java.util.HashMap;
 
-@Route("vaadin-map/demo/tile-grid")
-public class TileGridDemo extends Div {
-    public TileGridDemo() {
+@Route("vaadin-map/tile-grid")
+public class TileGridPage extends Div {
+
+    public TileGridPage() {
         Map map = new Map();
-        map.setHeight("400px");
         map.setWidthFull();
-        map.getView().setCenter(new Coordinate(-10997148, 4569099));
-        map.getView().setZoom(4);
+        map.setHeight("400px");
+
         add(map);
 
+        // prepare tile grid
         int RADIUS = 6378137;
         double HALF_SIZE = Math.PI * RADIUS;
         Extent extent = new Extent(-HALF_SIZE, -HALF_SIZE, HALF_SIZE,
@@ -40,11 +39,11 @@ public class TileGridDemo extends Div {
         params.put("TILED", true);
 
         TileWMSSource source = new TileWMSSource(new TileWMSSource.Options()
-                .setUrl("https://ahocevar.com/geoserver/wms").setParams(params)
+                .setUrl("https://www.example.com").setParams(params)
                 .setTileGrid(tileGrid).setServerType("geoserver"));
 
+        // add layer with custom tile grid to the map
         layer.setSource(source);
-
         map.addLayer(layer);
     }
 }

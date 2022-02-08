@@ -88,7 +88,7 @@ function synchronizeTileGrid(target, source, _context) {
   if (!target) {
     target = new TileGrid({
       extent: convertToExtentArray(source.extent),
-      size: convertToSizeArray(source.size),
+      tileSize: convertToSizeArray(source.size),
       resolutions: source.resolutions,
     });
   }
@@ -144,7 +144,7 @@ export function synchronize(target, source, context) {
   if (!source.id) {
     throw new Error("Configuration object must have an ID");
   }
-
+  console.log(type);
   const synchronizer = synchronizerLookup[type];
   if (!synchronizer) {
     throw new Error(`Unsupported configuration object type: ${type}`);
