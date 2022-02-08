@@ -212,7 +212,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         Assert.assertFalse(item1.hasAttribute("selected"));
         Assert.assertTrue(item2.hasAttribute("selected"));
 
-        item2.click();
+        item1.click();
 
         combo.openPopup();
 
