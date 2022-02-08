@@ -260,8 +260,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
                 }
             }), { once: true });
 
-            comboBox.addEventListener('value-changed', tryCatchWrapper((event) => {
-                if (comboBox._selectedKey && !event.detail.value) {
+            comboBox.addEventListener('selected-item-changed', tryCatchWrapper((event) => {
+                const itemIdPath = comboBox.itemIdPath;
+                const selectedItem = event.detail.value;
+
+                if (comboBox._selectedKey && (!selectedItem || selectedItem[itemIdPath] !== comboBox._selectedKey)) {
                     delete comboBox._selectedKey;
                 }
             }));
