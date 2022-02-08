@@ -4,6 +4,7 @@
  * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
 import Collection from "ol/Collection";
+import ImageWMS from "ol/source/ImageWMS";
 import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from "ol/source/OSM";
 import TileWMS from "ol/source/TileWMS";
 import VectorSource from "ol/source/Vector";
@@ -106,6 +107,29 @@ export function synchronizeOSMSource(target, source, context) {
     source.attributions = OSM_ATTRIBUTION;
   }
   synchronizeXYZSource(target, source, context);
+
+  return target;
+}
+
+function synchronizeImageSource(target, source, context) {
+  if (!target) {
+    throw new Error("Can not instantiate base class: ol/source/Image");
+  }
+  synchronizeSource(target, source, context);
+
+  return target;
+}
+
+export function synchronizeImageWMSSource(target, source, context) {
+  if (!target) {
+    target = new ImageWMS(createOptions(source));
+  }
+  synchronizeImageSource(target, source, context);
+  // Setting null URL is not supported. While not an actual use-case, it is useful to prevent errors here in order
+  // to keep the URL empty in integration tests
+  if (source.url) {
+    target.setUrl(source.url);
+  }
 
   return target;
 }

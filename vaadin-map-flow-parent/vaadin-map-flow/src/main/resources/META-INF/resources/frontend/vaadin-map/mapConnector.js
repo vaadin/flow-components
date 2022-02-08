@@ -1,4 +1,5 @@
 import { synchronize } from "./synchronization";
+import { getLayerForFeature } from "./util";
 
 (function () {
   function init(mapElement) {
@@ -37,7 +38,7 @@ import { synchronize } from "./synchronization";
         synchronize(target, configuration, context);
         // TODO: layers don't render on initialization in some cases, needs investigation
         mapElement.configuration.updateSize();
-      }
+      },
     };
 
     mapElement.configuration.on("moveend", (_event) => {
@@ -59,9 +60,10 @@ import { synchronize } from "./synchronization";
       mapElement.dispatchEvent(customEvent);
     });
 
-    mapElement.configuration.on("click", (event) => {
+    mapElement.configuration.on("singleclick", (event) => {
       const coordinate = event.coordinate;
 
+      // Map click event
       const customEvent = new CustomEvent("map-click", {
         detail: {
           coordinate,
@@ -70,6 +72,24 @@ import { synchronize } from "./synchronization";
       });
 
       mapElement.dispatchEvent(customEvent);
+
+      // Feature click events
+      const pixelCoordinate = event.pixel;
+      const featuresAtPixel =
+        mapElement.configuration.getFeaturesAtPixel(pixelCoordinate);
+
+      featuresAtPixel.forEach((feature) => {
+        const layer = getLayerForFeature(mapElement.configuration, feature);
+        const customEvent = new CustomEvent("map-feature-click", {
+          detail: {
+            feature,
+            layer,
+            originalEvent: event.originalEvent,
+          },
+        });
+
+        mapElement.dispatchEvent(customEvent);
+      });
     });
   }
 

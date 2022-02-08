@@ -17,6 +17,7 @@ public class SourcesIT extends AbstractComponentIT {
     private MapElement map;
     private TestBenchElement setupTileWMSSource;
     private TestBenchElement setupXYZSource;
+    private TestBenchElement setupImageWMSSource;
 
     @Before
     public void init() {
@@ -24,6 +25,7 @@ public class SourcesIT extends AbstractComponentIT {
         map = $(MapElement.class).waitForFirst();
         setupTileWMSSource = $("button").id("setup-tile-wms-source");
         setupXYZSource = $("button").id("setup-xyz-source");
+        setupImageWMSSource = $("button").id("setup-image-wms-source");
     }
 
     @Test
@@ -65,5 +67,32 @@ public class SourcesIT extends AbstractComponentIT {
 
         Assert.assertEquals("ol/source/XYZ", sourceType);
         Assert.assertEquals("https://example.com/wms", url);
+    }
+
+    @Test
+    public void initializeImageWMSSource() {
+        setupImageWMSSource.click();
+
+        String backgroundLayerEx = map.getLayerExpression("background-layer");
+        String sourceEx = backgroundLayerEx + ".getSource()";
+
+        String sourceType = (String) map
+                .evaluateOLExpression(map.getOLTypeNameExpression(sourceEx));
+        String url = (String) map.evaluateOLExpression(sourceEx + ".url_");
+        String layersParam = (String) map
+                .evaluateOLExpression(sourceEx + ".params_.LAYERS");
+        String serverType = (String) map
+                .evaluateOLExpression(sourceEx + ".serverType_");
+        String crossOrigin = (String) map
+                .evaluateOLExpression(sourceEx + ".crossOrigin_");
+        float ratio = ((Number) map.evaluateOLExpression(sourceEx + ".ratio_"))
+                .floatValue();
+
+        Assert.assertEquals("ol/source/ImageWMS", sourceType);
+        Assert.assertEquals("https://example.com/wms", url);
+        Assert.assertEquals("layer1", layersParam);
+        Assert.assertEquals("geoserver", serverType);
+        Assert.assertEquals("custom-cross-origin", crossOrigin);
+        Assert.assertEquals(2, ratio, 0.1);
     }
 }

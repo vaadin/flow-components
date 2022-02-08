@@ -9,6 +9,12 @@ import View from "ol/View";
 import TileGrid from "ol/tilegrid/TileGrid";
 import { synchronizeTileLayer, synchronizeVectorLayer } from "./layers.js";
 import {
+  synchronizeImageLayer,
+  synchronizeTileLayer,
+  synchronizeVectorLayer,
+} from "./layers.js";
+import {
+  synchronizeImageWMSSource,
   synchronizeOSMSource,
   synchronizeTileWMSSource,
   synchronizeVectorSource,
@@ -101,9 +107,11 @@ const synchronizerLookup = {
   "ol/Map": synchronizeMap,
   "ol/View": synchronizeView,
   // Layers
+  "ol/layer/Image": synchronizeImageLayer,
   "ol/layer/Tile": synchronizeTileLayer,
   "ol/layer/Vector": synchronizeVectorLayer,
   // Sources
+  "ol/source/ImageWMS": synchronizeImageWMSSource,
   "ol/source/OSM": synchronizeOSMSource,
   "ol/source/TileWMS": synchronizeTileWMSSource,
   "ol/source/Vector": synchronizeVectorSource,
@@ -144,7 +152,6 @@ export function synchronize(target, source, context) {
   if (!source.id) {
     throw new Error("Configuration object must have an ID");
   }
-  console.log(type);
   const synchronizer = synchronizerLookup[type];
   if (!synchronizer) {
     throw new Error(`Unsupported configuration object type: ${type}`);
