@@ -7,7 +7,6 @@ import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import View from "ol/View";
 import TileGrid from "ol/tilegrid/TileGrid";
-import { synchronizeTileLayer, synchronizeVectorLayer } from "./layers.js";
 import {
   synchronizeImageLayer,
   synchronizeTileLayer,
