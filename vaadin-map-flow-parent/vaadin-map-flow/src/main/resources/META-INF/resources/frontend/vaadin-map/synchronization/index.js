@@ -88,7 +88,7 @@ function synchronizeTileGrid(target, source, _context) {
   if (!target) {
     target = new TileGrid({
       extent: convertToExtentArray(source.extent),
-      tileSize: convertToSizeArray(source.size),
+      tileSize: convertToSizeArray(source.tileSize),
       resolutions: source.resolutions,
     });
   }

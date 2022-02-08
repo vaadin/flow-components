@@ -4,43 +4,49 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Extent;
 
+/**
+ * Class for setting the grid pattern for sources accessing tiled-image servers
+ */
 public class TileGrid extends AbstractConfigurationObject {
-    public Extent getExtent() {
-        return extent;
-    }
-
-    public void setExtent(Extent extent) {
-        this.extent = extent;
-    }
-
-    public TileSize getSize() {
-        return size;
-    }
-
-    public void setSize(TileSize size) {
-        this.size = size;
-    }
-
-    public double[] getResolutions() {
-        return resolutions;
-    }
-
-    public void setResolutions(double[] resolutions) {
-        this.resolutions = resolutions;
-    }
-
     private Extent extent;
-    private TileSize size;
+    private TileSize tileSize;
     private double[] resolutions;
 
     public TileGrid(Extent extent, TileSize size, double[] resolutions) {
         this.extent = extent;
-        this.size = size;
+        this.tileSize = size;
         this.resolutions = resolutions;
     }
 
     @Override
     public String getType() {
         return Constants.OL_TILEGRID_TILEGRID;
+    }
+
+    /**
+     * Get the extent for this tile grid.
+     *
+     * @return extent of the tile grid.
+     */
+    public Extent getExtent() {
+        return extent;
+    }
+
+    /**
+     * Get the tile size of the grid
+     *
+     * @return tile size of the grid
+     */
+    public TileSize getTileSize() {
+        return tileSize;
+    }
+
+    /**
+     * Get the list of resolutions for the tile grid.
+     *
+     * @return the list of resolutions for the tile grid.
+     */
+    public double[] getResolutions() {
+        return resolutions;
     }
 }
