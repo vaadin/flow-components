@@ -62,6 +62,7 @@ public class ComboBoxPage extends Div {
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithUpdatableValue();
+        createWithUpdateOnValueChange();
         createWithPresetValue();
         createWithButtonRenderer();
         setLabelGeneratorAfterValue();
@@ -197,6 +198,20 @@ public class ComboBoxPage extends Div {
         message.setId("updatable-combo-message");
         button.setId("updatable-combo-button");
         add(combo, message, button);
+    }
+
+    private void createWithUpdateOnValueChange() {
+        ComboBox<String> combo = new ComboBox<>();
+        combo.setItems("1", "2", "3");
+        combo.setValue("2");
+
+        combo.addValueChangeListener(e -> {
+            String value = e.getValue();
+            combo.setValue(value);
+        });
+
+        combo.setId("update-on-change-combo");
+        add(combo);
     }
 
     private void setLabelGeneratorAfterValue() {
