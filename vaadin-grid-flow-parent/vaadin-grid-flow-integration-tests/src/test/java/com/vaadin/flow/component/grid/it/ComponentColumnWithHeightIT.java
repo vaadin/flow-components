@@ -43,7 +43,11 @@ public class ComponentColumnWithHeightIT extends AbstractComponentIT {
     @Test
     public void shouldPositionItemsCorrectlyAfterUpdatingComponentRenderers() {
         add.click();
-        // Expect the y position of the second row to equal the y position + the height of the first row
-        Assert.assertEquals(grid.getRow(0).getLocation().y + grid.getRow(0).getSize().height, grid.getRow(1).getLocation().y);
+        // Expect the y position of the second row to equal the y position + the
+        // height of the first row
+        Assert.assertEquals(
+                grid.getRow(0).getLocation().y
+                        + grid.getRow(0).getSize().height,
+                grid.getRow(1).getLocation().y);
     }
 }
