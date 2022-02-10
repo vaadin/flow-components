@@ -37,7 +37,8 @@ public class PreMultiSortedPage extends Div {
         grid.setMultiSort(true);
         grid.setColumns("firstName", "lastName");
 
-        List<GridSortOrder<Person>> sorting = new GridSortOrderBuilder<Person>().thenAsc(grid.getColumns().get(0))
+        List<GridSortOrder<Person>> sorting = new GridSortOrderBuilder<Person>()
+                .thenAsc(grid.getColumns().get(0))
                 .thenAsc(grid.getColumns().get(1)).build();
         grid.sort(sorting);
 
