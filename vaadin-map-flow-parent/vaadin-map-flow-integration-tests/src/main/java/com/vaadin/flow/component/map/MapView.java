@@ -28,6 +28,12 @@ public class MapView extends Div {
                 new Coordinate(1233058.1696443919, 6351912.406929109));
         map.getFeatureLayer().addFeature(nurembergMarker);
 
+        map.addFeatureClickListener(e -> {
+            System.out.println(
+                    "Feature click: featureId=" + e.getFeature().getId()
+                            + ", layerId=" + e.getLayer().getId());
+        });
+
         NativeButton toggleLayerVisible = new NativeButton("Toggle Layer",
                 e -> {
                     Layer layer = map.getBackgroundLayer();

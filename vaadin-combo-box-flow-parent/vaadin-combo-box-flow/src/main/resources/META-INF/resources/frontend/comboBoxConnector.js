@@ -260,12 +260,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
                 }
             }), { once: true });
 
-            comboBox.addEventListener('value-changed', tryCatchWrapper((event) => {
-                if (comboBox._selectedKey && !event.detail.value) {
-                    delete comboBox._selectedKey;
-                }
-            }));
-
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
                 if ( comboBox.$ ){
                     if ( enable){

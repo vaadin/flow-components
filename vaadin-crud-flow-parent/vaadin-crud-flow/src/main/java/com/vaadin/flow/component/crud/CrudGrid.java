@@ -23,6 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.util.List;
 
@@ -80,6 +81,8 @@ public class CrudGrid<E> extends Grid<E> {
         getColumns().forEach(column -> {
             final TextField field = new TextField();
             field.getElement().setAttribute("crud-role", "Search");
+            field.getElement().setAttribute("aria-label", "Filter by "
+                    + SharedUtil.propertyIdToHumanFriendly(column.getKey()));
 
             field.addValueChangeListener(event -> {
                 filter.getConstraints().remove(column.getKey());
