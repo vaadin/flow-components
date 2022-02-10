@@ -890,7 +890,17 @@
           const callback = rootPageCallbacks[page];
           if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
             delete rootPageCallbacks[page];
-            callback(cache[root][page] || new Array(grid.pageSize));
+            
+            if (cache[root][page]) {
+              // Cached data is available, resolve the callback
+              callback(cache[root][page]);
+            } else {
+              // No cached data, resolve the callback with an empty array
+              callback(new Array(grid.pageSize));
+              // Request grid for content update
+              grid._assignModels();
+            }
+
             // Makes sure to push all new rows before this stack execution is done so any timeout expiration called after will be applied on a fully updated grid
             //Resolves https://github.com/vaadin/vaadin-grid-flow/issues/511
             if(grid._debounceIncreasePool){
