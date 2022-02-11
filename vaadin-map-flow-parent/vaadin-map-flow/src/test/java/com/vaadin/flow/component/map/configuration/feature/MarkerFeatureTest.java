@@ -28,13 +28,13 @@ public class MarkerFeatureTest {
 
         Assert.assertNotNull(markerFeature.getIcon());
         Assert.assertNotNull(markerFeature.getIcon().getImg());
-        Assert.assertEquals(Assets.DEFAULT_MARKER.getFileName(),
+        Assert.assertEquals(Assets.PIN.getFileName(),
                 markerFeature.getIcon().getImg().getName());
 
         Assert.assertNotNull(markerFeature.getIcon().getImgSize());
-        Assert.assertEquals(Assets.DEFAULT_MARKER.getWidth(),
+        Assert.assertEquals(Assets.PIN.getWidth(),
                 markerFeature.getIcon().getImgSize().getWidth());
-        Assert.assertEquals(Assets.DEFAULT_MARKER.getHeight(),
+        Assert.assertEquals(Assets.PIN.getHeight(),
                 markerFeature.getIcon().getImgSize().getHeight());
 
         Assert.assertNull(markerFeature.getIcon().getSrc());
