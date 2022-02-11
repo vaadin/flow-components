@@ -51,8 +51,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.iconRotation = 0;
         expected.iconScale = 0.3;
         expected.iconColor = null;
-        expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
-                + Assets.PIN.getFileName());
+        expected.iconSource = Pattern.compile(
+                "VAADIN/dynamic/resource/.*/" + Assets.PIN.getFileName());
 
         String firstFeature = map
                 .getFeatureCollectionExpression("feature-layer") + ".item(0)";
@@ -95,8 +95,8 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.iconRotation = 0;
         expected.iconScale = 0.3;
         expected.iconColor = null;
-        expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
-                + Assets.PIN.getFileName());
+        expected.iconSource = Pattern.compile(
+                "VAADIN/dynamic/resource/.*/" + Assets.PIN.getFileName());
 
         String firstFeature = map
                 .getFeatureCollectionExpression("feature-layer") + ".item(0)";

@@ -40,7 +40,8 @@ import java.util.Objects;
 public class MarkerFeature extends PointBasedFeature {
 
     /**
-     * The default icon used for markers, which is a pin pointing at a location on the map
+     * The default icon used for markers, which is a pin pointing at a location
+     * on the map
      */
     public static final Icon PIN_ICON;
     /**
@@ -50,22 +51,18 @@ public class MarkerFeature extends PointBasedFeature {
 
     static {
         Icon.ImageSize markerImageSize = new Icon.ImageSize(
-                Assets.PIN.getWidth(),
-                Assets.PIN.getHeight());
-        PIN_ICON = new Icon(
-                new Icon.Options().setImg(Assets.PIN.getResource())
-                        .setImgSize(markerImageSize).setScale(0.5f)
-                        .setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT)
-                        .setAnchor(new Icon.Anchor(0.5f, 0)));
+                Assets.PIN.getWidth(), Assets.PIN.getHeight());
+        PIN_ICON = new Icon(new Icon.Options().setImg(Assets.PIN.getResource())
+                .setImgSize(markerImageSize).setScale(0.5f)
+                .setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT)
+                .setAnchor(new Icon.Anchor(0.5f, 0)));
 
         Icon.ImageSize pointImageSize = new Icon.ImageSize(
-                Assets.POINT.getWidth(),
-                Assets.POINT.getHeight());
-        POINT_ICON = new Icon(
-                new Icon.Options().setImg(Assets.POINT.getResource())
-                        .setImgSize(pointImageSize).setScale(0.25f)
-                        .setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT)
-                        .setAnchor(new Icon.Anchor(0.5f, 0.5f)));
+                Assets.POINT.getWidth(), Assets.POINT.getHeight());
+        POINT_ICON = new Icon(new Icon.Options()
+                .setImg(Assets.POINT.getResource()).setImgSize(pointImageSize)
+                .setScale(0.25f).setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT)
+                .setAnchor(new Icon.Anchor(0.5f, 0.5f)));
     }
 
     /**

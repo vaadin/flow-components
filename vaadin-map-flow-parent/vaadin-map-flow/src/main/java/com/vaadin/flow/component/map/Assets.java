@@ -19,14 +19,11 @@ package com.vaadin.flow.component.map;
 import com.vaadin.flow.server.StreamResource;
 
 public class Assets {
-    public static final ImageAsset PIN = new ImageAsset(
-            "pin.png",
-            "/META-INF/resources/frontend/vaadin-map/assets/pin.png",
-            80, 104);
-    public static final ImageAsset POINT = new ImageAsset(
-            "point.png",
-            "/META-INF/resources/frontend/vaadin-map/assets/point.png",
-            128, 128);
+    public static final ImageAsset PIN = new ImageAsset("pin.png",
+            "/META-INF/resources/frontend/vaadin-map/assets/pin.png", 80, 104);
+    public static final ImageAsset POINT = new ImageAsset("point.png",
+            "/META-INF/resources/frontend/vaadin-map/assets/point.png", 128,
+            128);
 
     public static class Asset {
         private final String fileName;
