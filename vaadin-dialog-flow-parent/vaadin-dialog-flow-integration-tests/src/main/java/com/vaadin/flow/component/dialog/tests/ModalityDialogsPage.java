@@ -33,21 +33,9 @@ public class ModalityDialogsPage extends Div {
     private Log log = new Log();
 
     public ModalityDialogsPage() {
-        Dialog modalDialog = new Dialog();
-        modalDialog.setCloseOnOutsideClick(false);
-        final NativeButton modalClose = new NativeButton("close",
-                e -> modalDialog.close());
-        modalClose.setId("close");
-        final NativeButton hide = new NativeButton("hide",
-                e -> modalDialog.setVisible(false));
-        hide.setId("hide");
-        modalDialog.add(modalClose, hide);
+        Dialog modalDialog = createModalDialog();
 
-        Dialog nonModalDialog = new Dialog();
-        nonModalDialog.setCloseOnOutsideClick(false);
-        nonModalDialog.setModal(false);
-        nonModalDialog
-                .add(new NativeButton("close", e -> nonModalDialog.close()));
+        Dialog nonModalDialog = setupNonModalDialog();
 
         NativeButton modalButton = new NativeButton("Open modal dialog",
                 event -> modalDialog.open());
@@ -65,6 +53,54 @@ public class ModalityDialogsPage extends Div {
                 e -> modalDialog.setVisible(true));
         showModal.setId("show");
         add(modalButton, showModal, button, logButton, new Hr(), log);
+    }
+
+    private Dialog setupNonModalDialog() {
+        final Dialog nonModalDialog = createNonModalDialog();
+        nonModalDialog
+                .add(new NativeButton("close", e -> nonModalDialog.close()));
+        return nonModalDialog;
+    }
+
+    private Dialog createModalDialog() {
+        Dialog modalDialog = new Dialog();
+        modalDialog.setCloseOnOutsideClick(false);
+        final NativeButton modalClose = new NativeButton("close",
+                e -> modalDialog.close());
+        modalClose.setId("close");
+        final NativeButton hide = new NativeButton("hide",
+                e -> modalDialog.setVisible(false));
+        hide.setId("hide");
+        modalDialog.add(modalClose, hide);
+
+        Dialog nonModalDialog = createNonModalDialog();
+
+        final NativeButton closeSub = new NativeButton("close",
+                e -> nonModalDialog.close());
+        closeSub.setId("close-sub");
+        final NativeButton logSub = new NativeButton("log",
+                e -> log.log("sub-click"));
+        logSub.setId("log-sub");
+        nonModalDialog.add(closeSub, logSub);
+
+        final NativeButton openSubDialog = new NativeButton("open dialog",
+                e -> {
+                    modalDialog.add(nonModalDialog);
+                    nonModalDialog.open();
+                });
+        openSubDialog.setId("open-sub");
+        modalDialog.add(openSubDialog);
+
+        return modalDialog;
+    }
+
+    private Dialog createNonModalDialog() {
+        Dialog nonModalDialog = new Dialog();
+
+        nonModalDialog.setCloseOnOutsideClick(false);
+        nonModalDialog.setModal(false);
+
+        return nonModalDialog;
     }
 
     public static class Log extends Div {

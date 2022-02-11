@@ -92,6 +92,27 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openModalDialog_openNonModalOnTop_nonModalCanBeUsed() {
+        $(NativeButtonElement.class).id("open-modal-dialog").click();
+
+        final DialogElement first = $(DialogElement.class).first();
+        first.$(NativeButtonElement.class).id("open-sub").click();
+
+        waitUntil(driver -> $(DialogElement.class).all().size() == 2);
+
+        final DialogElement subDialog = $(DialogElement.class).all().stream()
+                .filter(dialog -> !dialog.equals(first)).findFirst().get();
+        subDialog.$(NativeButtonElement.class).id("log-sub").click();
+
+        Assert.assertEquals("Click should have resulted in a log message", 1,
+                $(DivElement.class).id(LOG_ID).$("div").all().size());
+
+        subDialog.$(NativeButtonElement.class).id("close-sub").click();
+
+        first.$(NativeButtonElement.class).id("close").click();
+    }
+
+    @Test
     public void openModalDialog_hideComponent_logClickAccepted() {
         $(NativeButtonElement.class).id("open-modal-dialog").click();
 
