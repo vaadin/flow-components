@@ -58,6 +58,29 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
+    public void testClearFileList() throws Exception {
+        open();
+
+        waitUntil(driver -> getUpload().isDisplayed());
+
+        File tempFile = createTempFile();
+
+        fillPathToUploadInput(tempFile.getPath(), tempFile.getPath(),
+                tempFile.getPath());
+
+        $("button").id("print-file-list").click();
+
+        Assert.assertNotEquals("File list should contain files", "[]",
+                $("div").id("file-list").getText());
+
+        $("button").id("clear-file-list").click();
+        $("button").id("print-file-list").click();
+
+        Assert.assertEquals("File list should not contain files", "[]",
+                $("div").id("file-list").getText());
+    }
+
+    @Test
     public void testUploadMultipleEventOrder() throws Exception {
         if (getRunLocallyBrowser() == null) {
             // Multiple file upload does not work with Remotewebdriver

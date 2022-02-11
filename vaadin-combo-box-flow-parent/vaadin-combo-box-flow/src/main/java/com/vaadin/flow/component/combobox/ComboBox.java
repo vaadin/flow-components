@@ -309,6 +309,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // `ComboBox.addCustomValueSetListener`.
         super.addCustomValueSetListener(e -> this.getElement()
                 .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
+
+        super.addValueChangeListener(e -> updateSelectedKey());
     }
 
     /**
@@ -1658,6 +1660,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         reset();
     }
 
+    private void updateSelectedKey() {
+        // Send (possibly updated) key for the selected value
+        getElement().executeJs("this._selectedKey=$0",
+                getValue() != null ? getKeyMapper().key(getValue()) : "");
+    }
+
     @ClientCallable
     private void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);
@@ -1667,9 +1675,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void setRequestedRange(int start, int length, String filter) {
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
-        // Send (possibly updated) key for the selected value
-        getElement().executeJs("this._selectedKey=$0",
-                getValue() != null ? getKeyMapper().key(getValue()) : "");
+        updateSelectedKey();
     }
 
     @ClientCallable
