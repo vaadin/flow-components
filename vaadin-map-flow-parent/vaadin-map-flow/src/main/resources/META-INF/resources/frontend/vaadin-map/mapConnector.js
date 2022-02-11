@@ -1,5 +1,5 @@
 import { synchronize } from "./synchronization";
-import { getLayerForFeature } from "./util";
+import { findFirstFeaturePerLayer } from "./util";
 
 (function () {
   function init(mapElement) {
@@ -75,15 +75,27 @@ import { getLayerForFeature } from "./util";
 
       // Feature click events
       const pixelCoordinate = event.pixel;
+      // Get the features at the clicked pixel position
+      // In case multiple features exist at that position, OpenLayers
+      // returns the features sorted in the order that they are displayed,
+      // with the front-most feature as the first result, and the
+      // back-most feature as the last result.
+      // Additionally, if features exist in different layers, the features
+      // are grouped by layer.
       const featuresAtPixel =
         mapElement.configuration.getFeaturesAtPixel(pixelCoordinate);
-
-      featuresAtPixel.forEach((feature) => {
-        const layer = getLayerForFeature(mapElement.configuration, feature);
+      // Send a feature click event for each layer that contains a clicked
+      // feature, and only for the front-most feature in that layer. This
+      // avoids sending click events for features that are behind others.
+      const topLevelFeaturesPerLayer = findFirstFeaturePerLayer(
+        mapElement.configuration.getLayers().getArray(),
+        featuresAtPixel
+      );
+      topLevelFeaturesPerLayer.forEach((featureAndLayer) => {
         const customEvent = new CustomEvent("map-feature-click", {
           detail: {
-            feature,
-            layer,
+            feature: featureAndLayer.feature,
+            layer: featureAndLayer.layer,
             originalEvent: event.originalEvent,
           },
         });
