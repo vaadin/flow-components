@@ -84,7 +84,6 @@ public class FeatureEventsIT extends AbstractComponentIT {
                 "click: feature=overlapping-marker-feature-3 | layer=first-feature-layer | source=first-source");
     }
 
-
     private void assertEventLogHasNumberOfEvents(int expectedEvents) {
         String[] eventLines = eventLog.getText().split(System.lineSeparator());
         Assert.assertEquals(expectedEvents, eventLines.length);
