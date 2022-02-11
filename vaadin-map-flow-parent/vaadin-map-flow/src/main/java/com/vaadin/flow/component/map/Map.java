@@ -28,7 +28,7 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import java.util.Objects;
 
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/map", version = "23.0.0-beta2")
 // TODO: Include non-themed module `@vaadin/map/src/vaadin-map.js` when theme
 // module is ready
 @JsModule("@vaadin/map/vaadin-map.js")
