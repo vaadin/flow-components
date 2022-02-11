@@ -90,14 +90,39 @@ public class Map extends MapBase {
         getConfiguration().prependLayer(backgroundLayer);
     }
 
+    /**
+     * The feature layer of the map. Every new instance of a {@link Map} has a
+     * pre-configured {@link FeatureLayer} for convenience, to allow quickly
+     * adding geographical features without requiring to set up a layer. Note
+     * that it is possible to add additional feature layers with
+     * {@link #addLayer(Layer)} if splitting up features into different layers
+     * is beneficial for a use-case.
+     *
+     * @return the feature layer of the map
+     */
     public FeatureLayer getFeatureLayer() {
         return featureLayer;
     }
 
+    /**
+     * Adds a layer to the map. The layer will be appended to the list of
+     * layers, meaning that it will be rendered last / on top of previously
+     * added layers by default. For more fine-grained control of the layer
+     * rendering order, use {@link Layer#setzIndex(Integer)}.
+     *
+     * @param layer
+     *            the layer to be added
+     */
     public void addLayer(Layer layer) {
         getConfiguration().addLayer(layer);
     }
 
+    /**
+     * Remove a layer from the map
+     *
+     * @param layer
+     *            the layer to be removed
+     */
     public void removeLayer(Layer layer) {
         getConfiguration().removeLayer(layer);
     }
