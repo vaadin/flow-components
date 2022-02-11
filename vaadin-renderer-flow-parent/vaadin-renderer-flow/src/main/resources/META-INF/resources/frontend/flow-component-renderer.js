@@ -63,7 +63,6 @@ class FlowComponentRenderer extends PolymerElement {
     const renderedComponent = this._getRenderedComponent();
     if (this.firstChild) {
       if (!renderedComponent) {
-        this._clear();
         this._asyncAttachRenderedComponentIfAble();
       } else if (this.firstChild !== renderedComponent) {
         this.replaceChild(renderedComponent, this.firstChild);
@@ -96,12 +95,6 @@ class FlowComponentRenderer extends PolymerElement {
       console.error(error);
     }
     return null;
-  }
-
-  _clear() {
-    while (this.firstChild) {
-      this.removeChild(this.firstChild);
-    }
   }
 
   onComponentRendered() {

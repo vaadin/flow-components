@@ -31,10 +31,27 @@ public class Configuration extends AbstractConfigurationObject {
         return Constants.OL_MAP;
     }
 
+    /**
+     * The list of layers managed by this map. This returns an immutable list,
+     * meaning the list can not be modified. Instead, use
+     * {@link #addLayer(Layer)} and {@link #removeLayer(Layer)} to manage the
+     * layers of the list.
+     *
+     * @return the list of layers managed by this map
+     */
     public List<Layer> getLayers() {
         return Collections.unmodifiableList(layers);
     }
 
+    /**
+     * Adds a layer to the map. The layer will be appended to the list of
+     * layers, meaning that it will be rendered last / on top of previously
+     * added layers by default. For more fine-grained control of the layer
+     * rendering order, use {@link Layer#setzIndex(Integer)}.
+     *
+     * @param layer
+     *            the layer to be added
+     */
     public void addLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
@@ -44,6 +61,15 @@ public class Configuration extends AbstractConfigurationObject {
         notifyChange();
     }
 
+    /**
+     * Adds a layer to the map by prepending it to the list of layers. That
+     * means that it will be rendered first / behind all other layers by
+     * default. Consider using {@link Layer#setzIndex(Integer)} for more
+     * fine-grained control of the layer rendering order.
+     *
+     * @param layer
+     *            the layer to be added
+     */
     public void prependLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
@@ -53,6 +79,12 @@ public class Configuration extends AbstractConfigurationObject {
         notifyChange();
     }
 
+    /**
+     * Remove a layer from the map
+     *
+     * @param layer
+     *            the layer to be removed
+     */
     public void removeLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
