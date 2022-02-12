@@ -20,19 +20,25 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public abstract class AbstractConfigurationObject implements Serializable {
 
     private String id;
+    private boolean dirty;
     private final ThreadLocal<Boolean> notifyChanges = ThreadLocal
             .withInitial(() -> true);
+    private final Set<AbstractConfigurationObject> children = new HashSet<>();
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
+        this.dirty = true;
     }
 
     public String getId() {
@@ -44,6 +50,19 @@ public abstract class AbstractConfigurationObject implements Serializable {
     }
 
     public abstract String getType();
+
+    protected void addChild(AbstractConfigurationObject configurationObject) {
+        children.add(configurationObject);
+        configurationObject.addPropertyChangeListener(this::notifyChange);
+        notifyChange();
+    }
+
+    protected void removeChild(AbstractConfigurationObject configurationObject) {
+        if (configurationObject == null) return;
+        children.remove(configurationObject);
+        configurationObject.removePropertyChangeListener(this::notifyChange);
+        notifyChange();
+    }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         this.propertyChangeSupport.addPropertyChangeListener(listener);
@@ -67,6 +86,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
     protected void notifyChange() {
         if (!this.notifyChanges.get())
             return;
+        this.dirty = true;
         this.propertyChangeSupport.firePropertyChange("property", null, null);
     }
 
@@ -82,6 +102,14 @@ public abstract class AbstractConfigurationObject implements Serializable {
             updater.run();
         } finally {
             this.notifyChanges.remove();
+        }
+    }
+
+    public void collectChanges(Consumer<AbstractConfigurationObject> changeCollector) {
+        children.forEach(child -> child.collectChanges(changeCollector));
+        if (this.dirty) {
+            changeCollector.accept(this);
+            this.dirty = false;
         }
     }
 }

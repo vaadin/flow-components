@@ -37,7 +37,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 import java.beans.PropertyChangeEvent;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class MapBase extends Component implements HasSize {
     private final Configuration configuration;
@@ -107,18 +107,22 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     private void synchronizeConfiguration() {
-        JsonValue jsonConfiguration = serializer.toJson(configuration);
+        // Use a linked hash set to prevent object duplicates, but guarantee that the changes are synchronized in the order that they were added to the set
+        Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
+        configuration.collectChanges(changedObjects::add);
 
-        this.getElement().executeJs("this.$connector.synchronize($0)",
-                jsonConfiguration);
+        JsonValue jsonChanges = serializer.toJson(changedObjects);
+
+        this.getElement().executeJs("this.$connector.synchronizeChanges($0)",
+                jsonChanges);
     }
 
     private void synchronizeView() {
-        JsonValue jsonView = serializer.toJson(view);
+        JsonValue jsonChanges = serializer.toJson(List.of(view));
 
         this.getElement().executeJs(
-                "this.$connector.synchronize($0, this.configuration.getView())",
-                jsonView);
+                "this.$connector.synchronizeChanges($0)",
+                jsonChanges);
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {

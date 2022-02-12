@@ -74,10 +74,10 @@ function synchronizeFeature(target, source, context) {
   }
 
   target.setGeometry(
-    context.synchronize(target.getGeometry(), source.geometry, context)
+    context.lookup.get(source.geometry)
   );
   target.setStyle(
-    context.synchronize(target.getStyle(), source.style, context)
+      context.lookup.get(source.style)
   );
 
   return target;
@@ -122,35 +122,33 @@ const synchronizerLookup = {
  * @param context The context object providing global context for the synchronization
  * @returns {*}
  */
-export function synchronize(target, source, context) {
-  const type = source.type;
+export function synchronize(change, context) {
+  const type = change.type;
 
   if (!type) {
     throw new Error("Configuration object must have a type");
   }
-  if (!source.id) {
+  if (!change.id) {
     throw new Error("Configuration object must have an ID");
   }
+
+  let instance = context.lookup.get(change.id);
 
   const synchronizer = synchronizerLookup[type];
   if (!synchronizer) {
     throw new Error(`Unsupported configuration object type: ${type}`);
   }
 
-  // If IDs do not match, then we have a new configuration object, and we want
-  // a new matching OpenLayers instance
-  if (target && target.id !== source.id) {
-    target = null;
-  }
-
   // Call the type-specific synchronizer function to either create a new
   // OpenLayers instance, or update the existing one
-  const result = synchronizer(target, source, context);
+  instance = synchronizer(instance, change, context);
 
-  // Store ID on the sync result for future updates
-  result.id = source.id;
+  context.lookup.put(change.id, instance);
+
+  // Store id on synchronized instance
+  instance.id = change.id;
   // Store type name on sync result for type checks in tests
-  result.typeName = type;
+  instance.typeName = type;
 
-  return result;
+  return instance;
 }

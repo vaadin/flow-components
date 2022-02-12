@@ -16,6 +16,9 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 
 import java.util.ArrayList;
@@ -39,6 +42,8 @@ public class Configuration extends AbstractConfigurationObject {
      *
      * @return the list of layers managed by this map
      */
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
+    @JsonIdentityReference(alwaysAsId=true)
     public List<Layer> getLayers() {
         return Collections.unmodifiableList(layers);
     }
@@ -55,10 +60,8 @@ public class Configuration extends AbstractConfigurationObject {
     public void addLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
-        layer.addPropertyChangeListener(this::notifyChange);
-
         layers.add(layer);
-        notifyChange();
+        addChild(layer);
     }
 
     /**
@@ -73,10 +76,8 @@ public class Configuration extends AbstractConfigurationObject {
     public void prependLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
-        layer.addPropertyChangeListener(this::notifyChange);
-
         layers.add(0, layer);
-        notifyChange();
+        addChild(layer);
     }
 
     /**
@@ -88,9 +89,7 @@ public class Configuration extends AbstractConfigurationObject {
     public void removeLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
-        layer.removePropertyChangeListener(this::notifyChange);
-
         layers.remove(layer);
-        notifyChange();
+        removeChild(layer);
     }
 }

@@ -1,9 +1,26 @@
 import { synchronize } from "./synchronization";
 import { getLayerForFeature } from "./util";
 
+const debug = true;
+
+class Lookup {
+  constructor() {
+    this.map = new Map();
+  }
+
+  get(id) {
+    return this.map.get(id);
+  }
+
+  put(id, instance) {
+    this.map.set(id, instance);
+  }
+}
+
 (function () {
   function init(mapElement) {
     mapElement.$connector = {
+      lookup: new Lookup(),
       /**
        * Synchronize a configuration object into the internal OpenLayers map instance.
        *
@@ -38,6 +55,26 @@ import { getLayerForFeature } from "./util";
         synchronize(target, configuration, context);
         // TODO: layers don't render on initialization in some cases, needs investigation
         mapElement.configuration.updateSize();
+      },
+      synchronizeChanges(changes) {
+        const context = { synchronize, lookup: this.lookup };
+
+        if (debug) {
+          console.debug("Changeset", JSON.stringify(changes, null, 2));
+        }
+
+        changes.forEach((change) => {
+          // TODO improve sync of map ID
+          if (change.type === "ol/Map") {
+            this.lookup.put(change.id, mapElement.configuration);
+          }
+          // TODO improve sync of view ID
+          if (change.type === "ol/View") {
+            this.lookup.put(change.id, mapElement.configuration.getView());
+          }
+
+          synchronize(change, context);
+        });
       },
     };
 

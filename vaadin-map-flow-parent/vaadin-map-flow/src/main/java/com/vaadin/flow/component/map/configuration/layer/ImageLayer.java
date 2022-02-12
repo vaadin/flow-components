@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.map.configuration.layer;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.source.ImageSource;
 
@@ -19,6 +22,8 @@ public class ImageLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
+    @JsonIdentityReference(alwaysAsId=true)
     public ImageSource getSource() {
         return source;
     }

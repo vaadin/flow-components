@@ -21,27 +21,20 @@ export function convertToSizeArray(size) {
 /**
  * Synchronizes an OpenLayers collection with data from a Javascript array
  */
-export function synchronizeCollection(collection, jsonItems, options) {
-  // Remove items not present new JSON items
-  const itemsToRemove = collection
-    .getArray()
-    .filter(
-      (existingItem) =>
-        !jsonItems.find((jsonItem) => jsonItem.id === existingItem.id)
-    );
-  itemsToRemove.forEach((item) => collection.remove(item));
+export function synchronizeCollection(collection, updatedIds, options) {
+  const updatedItems = updatedIds.map((id) => options.lookup.get(id));
 
-  // Add / update items
-  jsonItems.forEach((jsonItem, index) => {
-    const existingItem = collection
-      .getArray()
-      .find((item) => item.id === jsonItem.id);
-    const syncedItem = options.synchronize(existingItem, jsonItem, options);
-    // Add item if it didn't exist before
-    if (!existingItem) {
-      collection.insertAt(index, syncedItem);
-    }
+  // Iterate updated items and update collection at indexes where reference doesn't match
+  updatedItems.forEach((updatedItem, i) => {
+    const existingItem = collection.item(i);
+    const isUnchanged = existingItem && existingItem.id === updatedItem.id;
+    if (isUnchanged) return;
+    collection.setAt(i, updatedItem);
   });
+  // Remove leftover collection elements
+  while (collection.getLength() > updatedItems.length) {
+    collection.pop();
+  }
 }
 
 /**
