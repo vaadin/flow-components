@@ -1,26 +1,12 @@
 import { synchronize } from "./synchronization";
-import { getLayerForFeature } from "./util";
+import { createLookup, getLayerForFeature } from "./util";
 
 const debug = true;
-
-class Lookup {
-  constructor() {
-    this.map = new Map();
-  }
-
-  get(id) {
-    return this.map.get(id);
-  }
-
-  put(id, instance) {
-    this.map.set(id, instance);
-  }
-}
 
 (function () {
   function init(mapElement) {
     mapElement.$connector = {
-      lookup: new Lookup(),
+      lookup: createLookup(),
       /**
        * Synchronize a configuration object into the internal OpenLayers map instance.
        *
