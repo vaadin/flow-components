@@ -62,7 +62,8 @@ public class PointBasedFeatureTest {
 
         feature.setGeometry(customPoint);
         Assert.assertEquals(customPoint, feature.getGeometry());
-        Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
+        // One event each for removing old geometry, and adding new one
+        Mockito.verify(propertyChangeListenerMock, Mockito.times(2))
                 .propertyChange(Mockito.any());
     }
 
