@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 
 import org.junit.Test;
 
-public class FormattedRenderersSerializableTest  {
+public class FormattedRenderersSerializableTest {
 
     @Test
     public void numberRendererIsSerializable() throws IOException {
