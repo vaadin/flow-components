@@ -1,5 +1,5 @@
 import { synchronize } from "./synchronization";
-import { findFirstFeaturePerLayer } from "./util";
+import { getLayerForFeature } from "./util";
 
 (function () {
   function init(mapElement) {
@@ -64,14 +64,14 @@ import { findFirstFeaturePerLayer } from "./util";
       const coordinate = event.coordinate;
 
       // Map click event
-      const customEvent = new CustomEvent("map-click", {
+      const mapClickEvent = new CustomEvent("map-click", {
         detail: {
           coordinate,
           originalEvent: event.originalEvent,
         },
       });
 
-      mapElement.dispatchEvent(customEvent);
+      mapElement.dispatchEvent(mapClickEvent);
 
       // Feature click events
       const pixelCoordinate = event.pixel;
@@ -79,29 +79,27 @@ import { findFirstFeaturePerLayer } from "./util";
       // In case multiple features exist at that position, OpenLayers
       // returns the features sorted in the order that they are displayed,
       // with the front-most feature as the first result, and the
-      // back-most feature as the last result.
-      // Additionally, if features exist in different layers, the features
-      // are grouped by layer.
+      // back-most feature as the last result
       const featuresAtPixel =
         mapElement.configuration.getFeaturesAtPixel(pixelCoordinate);
-      // Send a feature click event for each layer that contains a clicked
-      // feature, and only for the front-most feature in that layer. This
-      // avoids sending click events for features that are behind others.
-      const topLevelFeaturesPerLayer = findFirstFeaturePerLayer(
-        mapElement.configuration.getLayers().getArray(),
-        featuresAtPixel
-      );
-      topLevelFeaturesPerLayer.forEach((featureAndLayer) => {
-        const customEvent = new CustomEvent("map-feature-click", {
+
+      if (featuresAtPixel.length > 0) {
+        // Send a feature click event for the top-level feature
+        const feature = featuresAtPixel[0];
+        const layer = getLayerForFeature(
+          mapElement.configuration.getLayers().getArray(),
+          feature
+        );
+        const featureClickEvent = new CustomEvent("map-feature-click", {
           detail: {
-            feature: featureAndLayer.feature,
-            layer: featureAndLayer.layer,
+            feature,
+            layer,
             originalEvent: event.originalEvent,
           },
         });
 
-        mapElement.dispatchEvent(customEvent);
-      });
+        mapElement.dispatchEvent(featureClickEvent);
+      }
     });
   }
 
