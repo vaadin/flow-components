@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.data.renderer;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
@@ -33,7 +34,7 @@ import com.vaadin.flow.function.ValueProvider;
 public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
 
     private Locale locale;
-    private NumberFormat numberFormat;
+    private SerializableSupplier<NumberFormat> numberFormat;
     private String formatString;
     private String nullRepresentation;
 
@@ -93,7 +94,7 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         }
 
         locale = null;
-        this.numberFormat = numberFormat;
+        this.numberFormat = () -> numberFormat;
         formatString = null;
         this.nullRepresentation = nullRepresentation;
     }
@@ -204,7 +205,7 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         } else if (formatString != null && locale != null) {
             stringValue = String.format(locale, formatString, value);
         } else if (numberFormat != null) {
-            stringValue = numberFormat.format(value);
+            stringValue = numberFormat.get().format(value);
         } else {
             throw new IllegalStateException(String.format(
                     "Unable to format the given value: "
