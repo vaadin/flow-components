@@ -54,20 +54,24 @@ public abstract class AbstractConfigurationObject implements Serializable {
     protected void addChild(AbstractConfigurationObject configurationObject) {
         children.add(configurationObject);
         configurationObject.addPropertyChangeListener(this::notifyChange);
-        markAsDirty();
-        // When adding a sub-hierarchy, we need to make sure that the client receives
+        notifyChange();
+        // When adding a sub-hierarchy, we need to make sure that the client
+        // receives
         // the whole hierarchy. Otherwise objects that have been synced before,
-        // removed, and then added again, might not be in the client-side reference
+        // removed, and then added again, might not be in the client-side
+        // reference
         // lookup anymore, due to the client removing references from the lookup
         // during garbage collection.
         configurationObject.deepMarkAsDirty();
     }
 
-    protected void removeChild(AbstractConfigurationObject configurationObject) {
-        if (configurationObject == null) return;
+    protected void removeChild(
+            AbstractConfigurationObject configurationObject) {
+        if (configurationObject == null)
+            return;
         children.remove(configurationObject);
         configurationObject.removePropertyChangeListener(this::notifyChange);
-        markAsDirty();
+        notifyChange();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -87,11 +91,6 @@ public abstract class AbstractConfigurationObject implements Serializable {
         if (newValue != null) {
             newValue.addPropertyChangeListener(this::notifyChange);
         }
-    }
-
-    protected void markAsDirty() {
-        dirty = true;
-        notifyChange();
     }
 
     protected void deepMarkAsDirty() {
@@ -121,7 +120,8 @@ public abstract class AbstractConfigurationObject implements Serializable {
         }
     }
 
-    public void collectChanges(Consumer<AbstractConfigurationObject> changeCollector) {
+    public void collectChanges(
+            Consumer<AbstractConfigurationObject> changeCollector) {
         children.forEach(child -> child.collectChanges(changeCollector));
         if (this.dirty) {
             changeCollector.accept(this);

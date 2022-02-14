@@ -107,21 +107,22 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     private void synchronizeConfiguration() {
-        // Use a linked hash set to prevent object duplicates, but guarantee that the changes are synchronized in the order that they were added to the set
+        // Use a linked hash set to prevent object duplicates, but guarantee
+        // that the changes are synchronized in the order that they were added
+        // to the set
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
         JsonValue jsonChanges = serializer.toJson(changedObjects);
 
-        this.getElement().executeJs("this.$connector.synchronizeChanges($0)",
+        this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
     }
 
     private void synchronizeView() {
         JsonValue jsonChanges = serializer.toJson(List.of(view));
 
-        this.getElement().executeJs(
-                "this.$connector.synchronizeChanges($0)",
+        this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
     }
 

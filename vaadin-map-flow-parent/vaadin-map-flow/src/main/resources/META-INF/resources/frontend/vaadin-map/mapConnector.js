@@ -1,60 +1,33 @@
 import { synchronize } from "./synchronization";
 import { createLookup, getLayerForFeature } from "./util";
 
-const debug = true;
-
 (function () {
   function init(mapElement) {
     mapElement.$connector = {
+      /**
+       * Lookup for storing and retrieving every OL instance used in the map's configuration
+       * by its unique ID
+       */
       lookup: createLookup(),
       /**
-       * Synchronize a configuration object into the internal OpenLayers map instance.
-       *
-       * The target parameter can be left unspecified, in which case the OpenLayers
-       * map instance itself is used as synchronization target. This results in a
-       * full sync of the map configuration hierarchy.
-       * Specifying a target instance allows synchronizing only a part of the
-       * configuration. In that case the configuration parameter needs to be for the
-       * specific part that should be synchronized. For example, when passing an
-       * `ol/View` instance as target, then the configuration parameter should
-       * contain a configuration object for a view as well.
-       *
-       * @param configuration the configuration object to synchronize from
-       * @param target the OpenLayers configuration instance to synchronize into, or undefined if the root map instance should be used
+       * Synchronizes an array of Javascript objects into OL instances.
+       * It is expected that objects that are lower in the configuration hierarchy occur
+       * earlier in the array than objects that are higher in the hierarchy. That ensures
+       * that lower-level objects are synchronized first, before higher-level objects that
+       * reference them.
+       * @param changedObjects array of Javascript objects to be synchronized into OL instances
        */
-      synchronize(configuration, target) {
-        if (!configuration || typeof configuration !== "object") {
-          throw new Error("Configuration must be an object");
-        }
-        // Assume we want to sync the full map by default
-        if (!target) {
-          target = mapElement.configuration;
-        }
-
-        // We don't want the synchronization to return a new instance (we have no
-        // idea where to store it afterwards), so we adopt the ID from the
-        // configuration object and assume that the types will be the same
-        target.id = configuration.id;
-
-        const context = { synchronize };
-
-        synchronize(target, configuration, context);
-        // TODO: layers don't render on initialization in some cases, needs investigation
-        mapElement.configuration.updateSize();
-      },
-      synchronizeChanges(changes) {
+      synchronize(changedObjects) {
+        // Provide synchronization function and the OL instance lookup through context object
         const context = { synchronize, lookup: this.lookup };
 
-        if (debug) {
-          console.debug("Changeset", JSON.stringify(changes, null, 2));
-        }
-
-        changes.forEach((change) => {
-          // TODO improve sync of map ID
+        changedObjects.forEach((change) => {
+          // Some OL instances, such as the map and the view, already exist and should not be
+          // created by the synchronization mechanism. We need to be put these into the lookup
+          // manually.
           if (change.type === "ol/Map") {
             this.lookup.put(change.id, mapElement.configuration);
           }
-          // TODO improve sync of view ID
           if (change.type === "ol/View") {
             this.lookup.put(change.id, mapElement.configuration.getView());
           }

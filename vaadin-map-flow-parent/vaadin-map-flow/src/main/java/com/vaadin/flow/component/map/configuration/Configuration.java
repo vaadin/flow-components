@@ -42,8 +42,8 @@ public class Configuration extends AbstractConfigurationObject {
      *
      * @return the list of layers managed by this map
      */
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public List<Layer> getLayers() {
         return Collections.unmodifiableList(layers);
     }

@@ -77,8 +77,8 @@ public abstract class PointBasedFeature extends Feature {
      * @return the current point geometry
      */
     @Override
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Point getGeometry() {
         return (Point) super.getGeometry();
     }

@@ -43,8 +43,8 @@ public class VectorSource extends Source {
         return Constants.OL_SOURCE_VECTOR;
     }
 
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public List<Feature> getFeatures() {
         return Collections.unmodifiableList(features);
     }

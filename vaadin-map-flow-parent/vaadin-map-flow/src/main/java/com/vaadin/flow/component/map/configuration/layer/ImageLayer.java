@@ -24,8 +24,8 @@ public class ImageLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public ImageSource getSource() {
         return source;
     }

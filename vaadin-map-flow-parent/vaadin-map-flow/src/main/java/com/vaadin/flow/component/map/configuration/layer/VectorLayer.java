@@ -42,8 +42,8 @@ public class VectorLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Source getSource() {
         return source;
     }

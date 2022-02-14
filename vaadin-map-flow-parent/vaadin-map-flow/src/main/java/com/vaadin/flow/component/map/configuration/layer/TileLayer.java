@@ -39,8 +39,8 @@ public class TileLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public TileSource getSource() {
         return source;
     }

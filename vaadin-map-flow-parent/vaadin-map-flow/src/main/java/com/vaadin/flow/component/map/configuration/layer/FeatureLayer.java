@@ -46,8 +46,8 @@ public class FeatureLayer extends VectorLayer {
      * @return the source of the layer
      */
     @Override
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public VectorSource getSource() {
         return (VectorSource) super.getSource();
     }

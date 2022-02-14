@@ -46,8 +46,8 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @return the current geometry
      */
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public SimpleGeometry getGeometry() {
         return geometry;
     }
@@ -70,8 +70,8 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @return the current style
      */
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Style getStyle() {
         return style;
     }

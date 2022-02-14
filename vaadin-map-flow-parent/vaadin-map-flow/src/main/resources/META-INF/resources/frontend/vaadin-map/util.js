@@ -58,6 +58,10 @@ class WeakReferenceLookup {
 const supportsWeakReferenceLookup =
     window.WeakRef && window.FinalizationRegistry;
 
+/**
+ * Creates a lookup that is supported by the browser
+ * @returns {WeakReferenceLookup|SimpleLookup}
+ */
 export function createLookup() {
   return supportsWeakReferenceLookup ? new WeakReferenceLookup() : new SimpleLookup();
 }

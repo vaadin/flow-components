@@ -37,8 +37,8 @@ public class Style extends AbstractConfigurationObject {
         return Constants.OL_STYLE_STYLE;
     }
 
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public ImageStyle getImage() {
         return image;
     }
@@ -49,8 +49,8 @@ public class Style extends AbstractConfigurationObject {
         addChild(image);
     }
 
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Fill getFill() {
         return fill;
     }
@@ -61,8 +61,8 @@ public class Style extends AbstractConfigurationObject {
         addChild(fill);
     }
 
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-    @JsonIdentityReference(alwaysAsId=true)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Stroke getStroke() {
         return stroke;
     }
