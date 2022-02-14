@@ -67,13 +67,13 @@ public class MapSerializerTest {
         UI.setCurrent(ui);
         MapSerializer mapSerializer = new MapSerializer();
         Icon icon = new Icon(
-                new Icon.Options().setImg(Assets.DEFAULT_MARKER.getResource()));
+                new Icon.Options().setImg(Assets.PIN.getResource()));
 
         mapSerializer.toJson(icon);
         mapSerializer.toJson(icon);
         mapSerializer.toJson(icon);
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.DEFAULT_MARKER.getResource());
+                .registerResource(Assets.PIN.getResource());
     }
 }
