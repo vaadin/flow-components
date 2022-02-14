@@ -56,12 +56,10 @@ public abstract class AbstractConfigurationObject implements Serializable {
         configurationObject.addPropertyChangeListener(this::notifyChange);
         notifyChange();
         // When adding a sub-hierarchy, we need to make sure that the client
-        // receives
-        // the whole hierarchy. Otherwise objects that have been synced before,
-        // removed, and then added again, might not be in the client-side
-        // reference
-        // lookup anymore, due to the client removing references from the lookup
-        // during garbage collection.
+        // receives the whole hierarchy. Otherwise objects that have been synced
+        // before, removed, and then added again, might not be in the
+        // client-side reference lookup anymore, due to the client removing
+        // references from the lookup during garbage collection.
         configurationObject.deepMarkAsDirty();
     }
 
