@@ -143,8 +143,8 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private final ValueProvider<T, String> defaultUniqueKeyProvider = item -> String
-            .valueOf(item.hashCode());
+    private final ValueProvider<T, String> defaultUniqueKeyProvider = item -> getDataProvider()
+            .getId(item).toString();
 
     private Registration dataProviderRegistration;
 
