@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
@@ -35,7 +36,7 @@ import com.vaadin.flow.function.ValueProvider;
 public class LocalDateTimeRenderer<SOURCE>
         extends BasicRenderer<SOURCE, LocalDateTime> {
 
-    private DateTimeFormatter formatter;
+    private SerializableSupplier<DateTimeFormatter> formatter;
     private String nullRepresentation;
 
     /**
@@ -102,7 +103,7 @@ public class LocalDateTimeRenderer<SOURCE>
             throw new IllegalArgumentException("formatter may not be null");
         }
 
-        this.formatter = formatter;
+        this.formatter = () -> formatter;
         this.nullRepresentation = nullRepresentation;
     }
 
@@ -190,13 +191,13 @@ public class LocalDateTimeRenderer<SOURCE>
             throw new IllegalArgumentException("locale may not be null");
         }
 
-        formatter = DateTimeFormatter.ofPattern(formatPattern, locale);
+        formatter = () -> DateTimeFormatter.ofPattern(formatPattern, locale);
         this.nullRepresentation = nullRepresentation;
     }
 
     @Override
     protected String getFormattedValue(LocalDateTime dateTime) {
         return dateTime == null ? nullRepresentation
-                : formatter.format(dateTime);
+                 : formatter.get().format(dateTime);
     }
 }
