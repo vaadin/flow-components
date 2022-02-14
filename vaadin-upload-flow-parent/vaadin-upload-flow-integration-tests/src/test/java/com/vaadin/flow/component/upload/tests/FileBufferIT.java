@@ -35,30 +35,4 @@ public class FileBufferIT extends AbstractUploadIT {
                 expectedContent, content);
     }
 
-    @Test
-    public void testUploadMultipleEventOrder() throws Exception {
-        if (getRunLocallyBrowser() == null) {
-            // Multiple file upload does not work with Remotewebdriver
-            // https://github.com/SeleniumHQ/selenium/issues/7408
-            throw new AssumptionViolatedException(
-                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
-        }
-        open();
-
-        final UploadElement upload = $(UploadElement.class).id("multi-upload");
-        waitUntil(driver -> upload.isDisplayed());
-
-        File tempFile = createTempFile();
-
-        upload.upload(tempFile);
-        upload.upload(tempFile);
-        upload.upload(tempFile);
-
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("multi-upload-event-output"));
-
-        Assert.assertEquals("Upload event order does not match expected",
-                "-succeeded-succeeded-succeeded-finished",
-                eventsOutput.getText());
-    }
 }
