@@ -11,7 +11,7 @@ public class FormattedRenderersSerializableTest  {
     @Test
     public void numberRendererIsSerializable() throws IOException {
         final NumberRenderer renderer = new NumberRenderer(
-                value -> value.toString(),"");
+                value -> value.toString(), "");
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
@@ -19,7 +19,7 @@ public class FormattedRenderersSerializableTest  {
     @Test
     public void localDateTimeRendererIsSerializable() throws IOException {
         final LocalDateTimeRenderer renderer = new LocalDateTimeRenderer(
-                value -> value.toString(),"");
+                value -> value.toString(), "");
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
