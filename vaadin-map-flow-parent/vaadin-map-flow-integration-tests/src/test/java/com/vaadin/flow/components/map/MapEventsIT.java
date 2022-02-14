@@ -69,7 +69,7 @@ public class MapEventsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void mapClick_correctEventDataReceived() {
+    public void mapClick_correctCoordinatesAndPosition() {
         addClickListener.click();
 
         map.clickAtCoordinates(-1956787.9241005122, 1956787.9241005122);
@@ -77,17 +77,42 @@ public class MapEventsIT extends AbstractComponentIT {
         // Click events are delayed, so wait until event data shows up
         waitUntilHasText(eventDataDiv);
 
-        String[] parts = eventDataDiv.getText().split(";");
+        String[] eventParts = eventDataDiv.getText()
+                .split(System.lineSeparator());
+        String[] coordinateParts = eventParts[0].split(";");
+        String[] pixelPositionParts = eventParts[1].split(";");
 
-        double xCoordinate = Double.parseDouble(parts[0]);
-        double yCoordinate = Double.parseDouble(parts[1]);
-        double xPixel = Double.parseDouble(parts[2]);
-        double yPixel = Double.parseDouble(parts[3]);
+        double xCoordinate = Double.parseDouble(coordinateParts[0]);
+        double yCoordinate = Double.parseDouble(coordinateParts[1]);
+        double xPixel = Double.parseDouble(pixelPositionParts[0]);
+        double yPixel = Double.parseDouble(pixelPositionParts[1]);
 
         Assert.assertEquals(100, xPixel, 0.1);
         Assert.assertEquals(100, yPixel, 0.1);
         Assert.assertEquals(-1956787.9241005122, xCoordinate, 0.00000001);
         Assert.assertEquals(1956787.9241005122, yCoordinate, 0.00000001);
+    }
+
+    @Test
+    public void mapClick_containsAllFeaturesAtLocation() {
+        addClickListener.click();
+        // Click on location with markers
+        map.clickAtCoordinates(2000000, 0);
+
+        // Click events are delayed, so wait until event data shows up
+        waitUntilHasText(eventDataDiv);
+
+        String[] eventParts = eventDataDiv.getText()
+                .split(System.lineSeparator());
+        String[] featureIds = eventParts.length > 2 ? eventParts[2].split(";")
+                : new String[] {};
+
+        // Should have 3 features
+        Assert.assertEquals(3, featureIds.length);
+        // In the order that they are displayed
+        Assert.assertEquals("overlapping-marker-feature-3", featureIds[0]);
+        Assert.assertEquals("overlapping-marker-feature-2", featureIds[1]);
+        Assert.assertEquals("overlapping-marker-feature-1", featureIds[2]);
     }
 
     private void waitUntilHasText(TestBenchElement element) {
