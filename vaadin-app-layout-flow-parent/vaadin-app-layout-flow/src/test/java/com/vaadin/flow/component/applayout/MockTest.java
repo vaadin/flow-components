@@ -1,13 +1,9 @@
 package com.vaadin.flow.component.applayout;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Route;
@@ -15,17 +11,15 @@ import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ UI.class, VaadinService.class })
-public abstract class PowerMockTest {
+public abstract class MockTest {
 
     protected RouteRegistry registry;
 
     @Before
     public final void setupRoutingMocks() {
         // Isolate Flow's UI and routing mechanism for testing
-        PowerMockito.mockStatic(UI.class);
-        PowerMockito.mockStatic(VaadinService.class);
+        Mockito.mockStatic(UI.class);
+        Mockito.mockStatic(VaadinService.class);
 
         UI ui = Mockito.mock(UI.class);
         VaadinService vaadinService = Mockito.mock(VaadinService.class);
