@@ -13,7 +13,7 @@ public class LocalDateRendererSerializableTest extends ClassesSerializableTest {
     @Test
     public void localDateRendererIsSerializable() throws IOException {
         final LocalDateRenderer renderer = new LocalDateRenderer(
-                value -> value.toString(),"");
+                value -> value.toString(), "");
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
