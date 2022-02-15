@@ -1,6 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
+import * as dateFnsLocales from 'date-fns/locale';
 
 (function () {
     const tryCatchWrapper = function (callback) {
@@ -149,7 +150,7 @@ import dateFnsIsValid from 'date-fns/isValid';
                     const format = formats[0];
                     const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
-                    return dateFnsFormat(date, format, { locale: locale });
+                    return dateFnsFormat(date, format, { locale : dateFnsLocales[locale] });
                 }
 
                 function parseDate(dateString) {
