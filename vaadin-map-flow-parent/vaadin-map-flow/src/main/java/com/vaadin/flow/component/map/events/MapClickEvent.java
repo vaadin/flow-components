@@ -9,6 +9,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import elemental.json.JsonArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
 public class MapClickEvent extends ComponentEvent<MapBase> {
 
     private final Coordinate coordinate;
-    private final List<FeatureEventDetails> features = new ArrayList<>();
+    private final List<FeatureEventDetails> features;
     private final MouseEventDetails details;
 
     public MapClickEvent(Map source, boolean fromClient,
@@ -37,14 +38,16 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
         this.coordinate = new Coordinate(coordinate.getNumber(0),
                 coordinate.getNumber(1));
 
+        List<FeatureEventDetails> features = new ArrayList<>();
         for (int i = 0; i < featureIds.length(); i++) {
             String featureId = featureIds.getString(i);
             String layerId = layerIds.getString(i);
             FeatureEventDetails featureEventDetails = MapEventUtil
                     .getFeatureEventDetails(source.getRawConfiguration(),
                             layerId, featureId);
-            this.features.add(featureEventDetails);
+            features.add(featureEventDetails);
         }
+        this.features = Collections.unmodifiableList(features);
 
         details = new MouseEventDetails();
         details.setAbsoluteX(pageX);
