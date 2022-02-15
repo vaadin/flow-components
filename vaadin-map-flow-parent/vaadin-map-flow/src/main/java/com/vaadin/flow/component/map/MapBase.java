@@ -45,6 +45,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Base class for the map component. Contains all base functionality for the map
+ * component, but does not provide any defaults. This component should not be
+ * used directly, instead use {@link Map}, which also provides some
+ * out-of-the-box conveniences such as a pre-configured background layer, and a
+ * feature layer.
+ */
 public abstract class MapBase extends Component implements HasSize, HasTheme {
     private final Configuration configuration;
     private final MapSerializer serializer;
@@ -64,8 +71,8 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     }
 
     /**
-     * Gets the view of the map. The view gives access to properties like center
-     * and zoom level of the viewport.
+     * Gets the {@link View} of the map. The view allows controlling properties
+     * of the map's viewport, such as center, zoom level and rotation.
      *
      * @return the map's view
      */
@@ -96,6 +103,9 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
         requestConfigurationSync();
     }
 
+    /**
+     * Schedules a configuration sync, if there isn't a scheduled sync already
+     */
     private void requestConfigurationSync() {
         if (pendingConfigurationSync != null) {
             return;
@@ -107,6 +117,10 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
                 }));
     }
 
+    /**
+     * Synchronize the map configuration to the client-side, into OpenLayers
+     * class instances
+     */
     private void synchronizeConfiguration() {
         // Use a linked hash set to prevent object duplicates, but guarantee
         // that the changes are synchronized in the order that they were added
@@ -138,7 +152,10 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     }
 
     /**
-     * Adds event listener for OpenLayers' "moveend" event.
+     * Adds an event listener for changes to the map's viewport. The event will
+     * only be triggered after the user has finished manipulating the viewport,
+     * for example after letting go of the mouse button after a mouse drag
+     * interaction.
      *
      * @param listener
      * @return a registration object for removing the added listener

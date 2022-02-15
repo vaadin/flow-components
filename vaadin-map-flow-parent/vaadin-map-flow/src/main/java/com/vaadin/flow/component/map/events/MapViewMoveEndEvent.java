@@ -1,11 +1,28 @@
 package com.vaadin.flow.component.map.events;
 
+/*
+ * #%L
+ * Vaadin Map
+ * %%
+ * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
+ *
+ * See the file license.html distributed with this software for more
+ * information about licensing.
+ *
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
+ */
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
+import com.vaadin.flow.component.map.configuration.View;
 import elemental.json.JsonArray;
 
 /**
@@ -19,15 +36,6 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
     private final Coordinate center;
     private final Extent extent;
 
-    /**
-     * Creates a new event using the given source and indicator whether the
-     * event originated from the client side or the server side.
-     *
-     * @param source
-     *            the source component
-     * @param fromClient
-     *            <code>true</code> if the event originated from the client
-     */
     public MapViewMoveEndEvent(MapBase source, boolean fromClient,
             @EventData("event.detail.rotation") double rotation,
             @EventData("event.detail.zoom") double zoom,
@@ -42,36 +50,36 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
     }
 
     /**
-     * Gets the view's updated rotation after map's "moveend" event.
+     * Gets the {@link View}'s updated rotation
      *
-     * @return latest rotation in radians
+     * @return updated rotation in radians
      */
     public float getRotation() {
         return rotation;
     }
 
     /**
-     * Gets the view's updated zoom level after map's "moveend" event.
+     * Gets the {@link View}'s updated zoom level
      *
-     * @return latest zoom level
+     * @return updated zoom level
      */
     public float getZoom() {
         return zoom;
     }
 
     /**
-     * Gets the view's updated center coordinates after map's "moveend" event.
+     * Gets the {@link View}'s updated center coordinates
      *
-     * @return latest center coordinates
+     * @return updated center coordinates
      */
     public Coordinate getCenter() {
         return center;
     }
 
     /**
-     * Gets the view's updated extent after map's "moveend" event.
+     * Gets the {@link View}'s updated extent
      *
-     * @return latest view
+     * @return updated view
      */
     public Extent getExtent() {
         return extent;
