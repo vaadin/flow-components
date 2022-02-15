@@ -372,14 +372,18 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
             callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
+            // To eliminate flickering on eager fetch mode
+            updateAllGridRowsInDomBasedOnCache();
           } else {
             treePageCallbacks[parentUniqueKey][page] = callback;
+
+            // TODO: Can this be moved here?
+            grid.$connector.fetchPage(
+              (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
+              page,
+              parentUniqueKey
+            );
           }
-          grid.$connector.fetchPage(
-            (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
-            page,
-            parentUniqueKey
-          );
 
         } else {
           // workaround: sometimes grid-element gives page index that overflows
@@ -839,11 +843,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       })
 
       grid.$connector.confirmParent = tryCatchWrapper(function(id, parentKey, levelSize) {
-        if(!treePageCallbacks[parentKey]) {
-          return;
-        }
         if(cache[parentKey]) {
           cache[parentKey].size = levelSize;
+        }
+        if(!treePageCallbacks[parentKey]) {
+          return;
         }
         let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey]);
         for(let i = 0; i < outstandingRequests.length; i++) {

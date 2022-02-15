@@ -130,6 +130,12 @@ public class TreeGrid<T> extends Grid<T>
             initConnector();
             updateSelectionModeOnClient();
             getDataCommunicator().setRequestedRange(0, getPageSize());
+
+            getDataCommunicator().fetchFromProvider(0, EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE).forEach(parentItem -> {
+                if (viewportRemaining > 0) {
+                    recursiveSetParentRequestedRange(0, getPageSize(), getDataCommunicator().getKeyMapper().key(parentItem));    
+                }
+            });
         }
 
         @Override
@@ -677,17 +683,40 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
+    private int viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+
+    // TODO: This is never called from client! It's only called from setParentRequestedRanges
+    // @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {
+        recursiveSetParentRequestedRange(start, length, parentKey);
+    }
+
+    private void recursiveSetParentRequestedRange(int start, int length, String parentKey) {    
         T item = getDataCommunicator().getKeyMapper().get(parentKey);
         if (item != null) {
+            System.out.println("Sending: " + parentKey + " remaining: " + viewportRemaining);
             getDataCommunicator().setParentRequestedRange(start, length, item);
+
+            if (getDataCommunicator().hasChildren(item)) {
+                getDataProvider()
+                    .fetchChildren(new HierarchicalQuery<>(null, item))
+                    .forEach(child -> {
+                        viewportRemaining--;
+                        if (viewportRemaining > 0 && isExpanded(child)) {
+                            recursiveSetParentRequestedRange(0, getPageSize(), getDataCommunicator().getKeyMapper().key(child));
+                        }
+                    });
+            }
+
         }
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRanges(JsonArray array) {
+        viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+
         for (int index = 0; index < array.length(); index++) {
             JsonObject object = array.getObject(index);
             setParentRequestedRange((int) object.getNumber("firstIndex"),
