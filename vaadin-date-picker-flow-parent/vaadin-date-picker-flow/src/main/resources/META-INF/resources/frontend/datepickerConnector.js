@@ -140,7 +140,7 @@ import dateFnsIsValid from 'date-fns/isValid';
                 };
             });
 
-            const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats) {
+            const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats, locale) {
                 if (!formats || formats.length === 0) {
                     throw new Error("Array of custom date formats is null or empty");
                 }
@@ -149,7 +149,7 @@ import dateFnsIsValid from 'date-fns/isValid';
                     const format = formats[0];
                     const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
-                    return dateFnsFormat(date, format);
+                    return dateFnsFormat(date, format, { locale: locale });
                 }
 
                 function parseDate(dateString) {
@@ -175,7 +175,7 @@ import dateFnsIsValid from 'date-fns/isValid';
                 // Custom formats take priority over locale
                 const hasDateFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
                 const formatterAndParser = hasDateFormats
-                    ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats)
+                    ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats, locale)
                     : locale
                         ? createLocaleBasedFormatterAndParser(locale)
                         : null;
