@@ -24,6 +24,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
@@ -153,7 +154,11 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     /**
-     * Adds event listener for OpenLayers' @code{click} event.
+     * Adds a click listener for the map.
+     * <p>
+     * Note that the listener will also be invoked when clicking on a
+     * {@link Feature}. Use {@link MapClickEvent#getFeatures()} to distinguish
+     * whether a feature exists at the clicked location.
      *
      * @param listener
      * @return a registration object for removing the added listener
@@ -166,13 +171,13 @@ public abstract class MapBase extends Component implements HasSize {
     /**
      * Adds a click listener for geographical features. The listener will be
      * invoked for a click on any feature in the specified layer. For clicks on
-     * overlapping features, the listener will be invoked individually for each
-     * feature at the clicked position.
+     * overlapping features, the listener will be invoked only for the top-level
+     * feature at that location.
      *
      * @param listener
      *            the listener to trigger
      * @return registration for the listener
-     * @see com.vaadin.flow.component.map.configuration.Feature
+     * @see Feature
      */
     public Registration addFeatureClickListener(VectorLayer layer,
             ComponentEventListener<MapFeatureClickEvent> listener) {
@@ -189,13 +194,13 @@ public abstract class MapBase extends Component implements HasSize {
      * invoked for a click on any feature, in any layer. To listen for feature
      * clicks in a specific layer, see
      * {@link #addFeatureClickListener(VectorLayer, ComponentEventListener)}.
-     * For clicks on overlapping features, the listener will be invoked
-     * individually for each feature at the clicked position.
+     * For clicks on overlapping features, the listener will be invoked only for
+     * the top-level feature at that location.
      *
      * @param listener
      *            the listener to trigger
      * @return registration for the listener
-     * @see com.vaadin.flow.component.map.configuration.Feature
+     * @see Feature
      */
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
