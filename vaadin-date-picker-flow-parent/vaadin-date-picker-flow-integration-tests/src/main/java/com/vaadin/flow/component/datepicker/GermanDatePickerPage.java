@@ -30,7 +30,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-date-picker/german-picker-format")
-public class DatePickerView extends VerticalLayout {
+public class GermanDatePickerPage extends VerticalLayout {
 
     private DatePicker datePicker;
 
