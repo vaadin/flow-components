@@ -29,9 +29,7 @@ import java.util.Objects;
 
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "23.0.0-beta2")
-// TODO: Include non-themed module `@vaadin/map/src/vaadin-map.js` when theme
-// module is ready
-@JsModule("@vaadin/map/vaadin-map.js")
+@JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
 
