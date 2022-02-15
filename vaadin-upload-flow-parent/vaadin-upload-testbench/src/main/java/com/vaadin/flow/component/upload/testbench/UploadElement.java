@@ -174,7 +174,7 @@ public class UploadElement extends TestBenchElement {
 
     private static boolean isLocalDriver(WebDriver driver) {
         while (driver instanceof WrapsDriver) {
-            driver = ((WrapsDriver)driver).getWrappedDriver();
+            driver = ((WrapsDriver) driver).getWrappedDriver();
         }
         return driver instanceof ChromiumDriver
                 || driver instanceof FirefoxDriver
