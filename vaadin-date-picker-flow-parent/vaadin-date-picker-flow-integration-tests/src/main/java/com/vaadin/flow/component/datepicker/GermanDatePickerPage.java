@@ -34,7 +34,7 @@ public class GermanDatePickerPage extends VerticalLayout {
 
     private DatePicker datePicker;
 
-    public DatePickerView() {
+    public GermanDatePickerPage() {
         datePicker = new DatePicker();
         datePicker.setId("german-picker");
         Locale locale = Locale.GERMAN;
