@@ -32,7 +32,6 @@ public class GermanDatePickerIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("vaadin-date-picker"));
     }
 
     @Test
