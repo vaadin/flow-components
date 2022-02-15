@@ -27,7 +27,7 @@ import com.vaadin.testbench.TestBenchElement;
 import static org.junit.Assert.assertTrue;
 
 @TestPath("vaadin-date-picker/german-picker-format")
-public class GermanDatePickerIT extends AbstractComponentIT  {
+public class GermanDatePickerIT extends AbstractComponentIT {
 
     @Before
     public void init() {
