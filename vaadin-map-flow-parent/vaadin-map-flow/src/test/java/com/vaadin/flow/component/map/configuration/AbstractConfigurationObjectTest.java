@@ -229,6 +229,19 @@ public class AbstractConfigurationObjectTest {
         Mockito.verify(changeCollectorMock).accept(testConfiguration);
     }
 
+    /**
+     * For current use-cases there is no need to have deepMarkAsDirty trigger
+     * change events, especially considering that all nested objects would
+     * trigger a change event as well
+     */
+    @Test
+    public void deepMarkAsDirty_doesNotNotifyChanges() {
+        testConfiguration.addPropertyChangeListener(changeListenerMock);
+        testConfiguration.deepMarkAsDirty();
+        Mockito.verify(changeListenerMock, Mockito.times(0))
+                .propertyChange(Mockito.any());
+    }
+
     private static class TestConfiguration extends AbstractConfigurationObject {
         private String foo;
         private TestConfiguration nestedConfiguration;
