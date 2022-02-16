@@ -16,9 +16,6 @@ public class DetachAttachPage extends Div {
         map.getView().setCenter(
                 new Coordinate(2482424.644689998, 8500614.173537256));
         map.getView().setZoom(14);
-        // Set IDs on default layers for easier retrieval in ITs
-        map.getBackgroundLayer().setId("background-layer");
-        map.getFeatureLayer().setId("feature-layer");
 
         Div newContainer = new Div();
 
