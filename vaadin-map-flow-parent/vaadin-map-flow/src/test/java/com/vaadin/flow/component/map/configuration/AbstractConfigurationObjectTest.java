@@ -33,6 +33,18 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
+    public void collectChanges_resetsDirtyFlag() {
+        TestConfiguration testConfiguration = new TestConfiguration();
+        // Collect changes to clear dirty flag
+        testConfiguration.collectChanges(o -> {
+        });
+        // Collect second time to verify that there are no changes
+        testConfiguration.collectChanges(changeCollectorMock);
+        Mockito.verify(changeCollectorMock, Mockito.times(0))
+                .accept(Mockito.any());
+    }
+
+    @Test
     public void setProperty_notifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.setFoo("test");
