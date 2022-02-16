@@ -49,10 +49,10 @@ public class FeatureLayerIT extends AbstractComponentIT {
         expected.coordinate = new Coordinate(0, 0);
         expected.iconOpacity = 1;
         expected.iconRotation = 0;
-        expected.iconScale = 0.3;
+        expected.iconScale = 0.5;
         expected.iconColor = null;
-        expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
-                + Assets.DEFAULT_MARKER.getFileName());
+        expected.iconSource = Pattern.compile(
+                "VAADIN/dynamic/resource/.*/" + Assets.PIN.getFileName());
 
         String firstFeature = map
                 .getFeatureCollectionExpression("feature-layer") + ".item(0)";
@@ -93,10 +93,10 @@ public class FeatureLayerIT extends AbstractComponentIT {
                 6351912.406929109);
         expected.iconOpacity = 1;
         expected.iconRotation = 0;
-        expected.iconScale = 0.3;
+        expected.iconScale = 0.5;
         expected.iconColor = null;
-        expected.iconSource = Pattern.compile("VAADIN/dynamic/resource/.*/"
-                + Assets.DEFAULT_MARKER.getFileName());
+        expected.iconSource = Pattern.compile(
+                "VAADIN/dynamic/resource/.*/" + Assets.PIN.getFileName());
 
         String firstFeature = map
                 .getFeatureCollectionExpression("feature-layer") + ".item(0)";
