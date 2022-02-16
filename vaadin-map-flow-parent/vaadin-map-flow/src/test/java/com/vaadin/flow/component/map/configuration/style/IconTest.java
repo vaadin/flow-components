@@ -54,6 +54,6 @@ public class IconTest {
     public void failsWithBothSourceUrlAndImage() {
         Assert.assertThrows(IllegalStateException.class,
                 () -> new Icon(new Icon.Options().setSrc("test")
-                        .setImg(Assets.DEFAULT_MARKER.getResource())));
+                        .setImg(Assets.PIN.getResource())));
     }
 }

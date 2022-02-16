@@ -39,25 +39,39 @@ import java.util.Objects;
  */
 public class MarkerFeature extends PointBasedFeature {
 
-    private static final Icon DEFAULT_MARKER_ICON;
+    /**
+     * The default icon used for markers, which is a pin pointing at a location
+     * on the map
+     */
+    public static final Icon PIN_ICON;
+    /**
+     * An alternative icon that displays a point
+     */
+    public static final Icon POINT_ICON;
 
     static {
-        Icon.ImageSize imageSize = new Icon.ImageSize(
-                Assets.DEFAULT_MARKER.getWidth(),
-                Assets.DEFAULT_MARKER.getHeight());
+        Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
+                Assets.PIN.getHeight());
+        PIN_ICON = new Icon(new Icon.Options().setImg(Assets.PIN.getResource())
+                .setImgSize(pinImageSize).setScale(0.5f)
+                .setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT)
+                // Move image slightly downwards to compensate for whitespace at
+                // the bottom of the image
+                .setAnchor(new Icon.Anchor(0.5f, 0.12f)));
 
-        DEFAULT_MARKER_ICON = new Icon(
-                new Icon.Options().setImg(Assets.DEFAULT_MARKER.getResource())
-                        .setImgSize(imageSize).setScale(0.3f)
-                        .setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT)
-                        .setAnchor(new Icon.Anchor(0.5f, 0)));
+        Icon.ImageSize pointImageSize = new Icon.ImageSize(
+                Assets.POINT.getWidth(), Assets.POINT.getHeight());
+        POINT_ICON = new Icon(new Icon.Options()
+                .setImg(Assets.POINT.getResource()).setImgSize(pointImageSize)
+                .setScale(0.25f).setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT)
+                .setAnchor(new Icon.Anchor(0.5f, 0.5f)));
     }
 
     /**
      * Creates a new marker feature displaying a default marker icon.
      */
     public MarkerFeature() {
-        this(new Coordinate(0, 0), DEFAULT_MARKER_ICON);
+        this(new Coordinate(0, 0), PIN_ICON);
     }
 
     /**
@@ -70,7 +84,7 @@ public class MarkerFeature extends PointBasedFeature {
      *            the coordinates that locate the feature
      */
     public MarkerFeature(Coordinate coordinates) {
-        this(coordinates, DEFAULT_MARKER_ICON);
+        this(coordinates, PIN_ICON);
     }
 
     /**
