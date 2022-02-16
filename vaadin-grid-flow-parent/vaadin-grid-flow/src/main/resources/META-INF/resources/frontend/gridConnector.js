@@ -136,10 +136,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           itemkey: grid.getItemId(targetCache.items[scaledIndex]),
           level: targetCache.getLevel()
         });
+        // TODO: Check proper ordering
         // sort by ascending scaledIndex and level
-        ensureSubCacheQueue.sort(function(a, b) {
-          return a.scaledIndex - b.scaledIndex || a.level - b.level;
-        });
+        // ensureSubCacheQueue.sort(function(a, b) {
+        //   return a.scaledIndex - b.scaledIndex || a.level - b.level;
+        // });
 
         ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame,
           () => {
@@ -372,6 +373,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
             callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
+            
+            // To avoid unnecessary data requests
+            // TODO: filter sub cache queue by parents still inside the updated viewport?
+            updateAllGridRowsInDomBasedOnCache();
+            ensureSubCacheQueue = [];
             // To eliminate flickering on eager fetch mode
             updateAllGridRowsInDomBasedOnCache();
           } else {
