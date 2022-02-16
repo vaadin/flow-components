@@ -69,6 +69,18 @@ public abstract class MapBase extends Component implements HasSize {
         return configuration.getView();
     }
 
+    /**
+     * Sets the view of the map. This is only necessary when dealing with map
+     * services that use custom coordinate projection, in which case a view with
+     * a matching projection needs to be created and used.
+     *
+     * @param view
+     *            the new view
+     */
+    public void setView(View view) {
+        configuration.setView(view);
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);

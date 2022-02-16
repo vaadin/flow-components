@@ -29,7 +29,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     private String id;
     private boolean dirty;
-    private final ThreadLocal<Boolean> notifyChanges = ThreadLocal
+    private static final ThreadLocal<Boolean> trackObjectChanges = ThreadLocal
             .withInitial(() -> true);
     private final Set<AbstractConfigurationObject> children = new HashSet<>();
 
@@ -51,10 +51,24 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     public abstract String getType();
 
+    protected void markAsDirty() {
+        if (!trackObjectChanges.get())
+            return;
+        dirty = true;
+        notifyChange();
+    }
+
+    protected void deepMarkAsDirty() {
+        if (!trackObjectChanges.get())
+            return;
+        dirty = true;
+        children.forEach(AbstractConfigurationObject::deepMarkAsDirty);
+    }
+
     protected void addChild(AbstractConfigurationObject configurationObject) {
         children.add(configurationObject);
         configurationObject.addPropertyChangeListener(this::notifyChange);
-        notifyChange();
+        markAsDirty();
         // When adding a sub-hierarchy, we need to make sure that the client
         // receives the whole hierarchy. Otherwise objects that have been synced
         // before, removed, and then added again, might not be in the
@@ -69,61 +83,45 @@ public abstract class AbstractConfigurationObject implements Serializable {
             return;
         children.remove(configurationObject);
         configurationObject.removePropertyChangeListener(this::notifyChange);
-        notifyChange();
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.propertyChangeSupport.removePropertyChangeListener(listener);
-    }
-
-    protected void updateNestedPropertyObserver(
-            AbstractConfigurationObject oldValue,
-            AbstractConfigurationObject newValue) {
-        if (oldValue != null) {
-            oldValue.removePropertyChangeListener(this::notifyChange);
-        }
-        if (newValue != null) {
-            newValue.addPropertyChangeListener(this::notifyChange);
-        }
-    }
-
-    public void deepMarkAsDirty() {
-        dirty = true;
-        children.forEach(AbstractConfigurationObject::deepMarkAsDirty);
+        markAsDirty();
     }
 
     protected void notifyChange() {
-        if (!this.notifyChanges.get())
+        if (!trackObjectChanges.get())
             return;
-        this.dirty = true;
-        this.propertyChangeSupport.firePropertyChange("property", null, null);
+        propertyChangeSupport.firePropertyChange("property", null, null);
     }
 
     protected void notifyChange(PropertyChangeEvent event) {
-        if (!this.notifyChanges.get())
+        if (!trackObjectChanges.get())
             return;
-        this.propertyChangeSupport.firePropertyChange("property", null, null);
+        propertyChangeSupport.firePropertyChange("property", null, null);
     }
 
-    public void update(Runnable updater, boolean notifyChanges) {
-        this.notifyChanges.set(notifyChanges);
+    protected void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    protected void removePropertyChangeListener(
+            PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    public void update(Runnable updater, boolean trackObjectChanges) {
+        AbstractConfigurationObject.trackObjectChanges.set(trackObjectChanges);
         try {
             updater.run();
         } finally {
-            this.notifyChanges.remove();
+            AbstractConfigurationObject.trackObjectChanges.remove();
         }
     }
 
-    public void collectChanges(
+    protected void collectChanges(
             Consumer<AbstractConfigurationObject> changeCollector) {
         children.forEach(child -> child.collectChanges(changeCollector));
-        if (this.dirty) {
+        if (dirty) {
             changeCollector.accept(this);
-            this.dirty = false;
+            dirty = false;
         }
     }
 }

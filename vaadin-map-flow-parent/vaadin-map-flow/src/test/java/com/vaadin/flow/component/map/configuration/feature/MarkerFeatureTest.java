@@ -75,7 +75,7 @@ public class MarkerFeatureTest {
 
     @Test
     public void setIcon() {
-        MarkerFeature markerFeature = new MarkerFeature();
+        TestMarkerFeature markerFeature = new TestMarkerFeature();
         markerFeature.addPropertyChangeListener(propertyChangeListenerMock);
 
         Icon icon = new Icon(
@@ -94,5 +94,13 @@ public class MarkerFeatureTest {
 
         Assert.assertThrows(NullPointerException.class,
                 () -> markerFeature.setIcon(null));
+    }
+
+    private static class TestMarkerFeature extends MarkerFeature {
+        // Expose method for testing
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            super.addPropertyChangeListener(listener);
+        }
     }
 }

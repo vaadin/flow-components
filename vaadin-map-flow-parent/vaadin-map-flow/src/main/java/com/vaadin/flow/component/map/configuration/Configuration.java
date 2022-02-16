@@ -21,10 +21,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
@@ -115,11 +117,46 @@ public class Configuration extends AbstractConfigurationObject {
      * services that use custom coordinate projection, in which case a view with
      * a matching projection needs to be created and used.
      *
-     * @param view the new view
+     * @param view
+     *            the new view
      */
     public void setView(View view) {
         removeChild(this.view);
         this.view = view;
         addChild(view);
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Exposes the method to allow the map component to mark the full
+     * configuration hierarchy as changed.
+     */
+    @Override
+    public void deepMarkAsDirty() {
+        super.deepMarkAsDirty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Exposes the method to allow the map component to listen for changes to
+     * the configuration.
+     */
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Exposes the method to allow the map component to collect changes from the
+     * configuration.
+     */
+    @Override
+    public void collectChanges(
+            Consumer<AbstractConfigurationObject> changeCollector) {
+        super.collectChanges(changeCollector);
     }
 }
