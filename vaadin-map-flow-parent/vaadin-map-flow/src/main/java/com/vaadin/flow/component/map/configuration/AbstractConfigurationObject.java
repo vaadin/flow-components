@@ -91,7 +91,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         }
     }
 
-    protected void deepMarkAsDirty() {
+    public void deepMarkAsDirty() {
         dirty = true;
         children.forEach(AbstractConfigurationObject::deepMarkAsDirty);
     }

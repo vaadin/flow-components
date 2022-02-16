@@ -80,6 +80,9 @@ public abstract class MapBase extends Component implements HasSize {
         super.onAttach(attachEvent);
         checkFeatureFlag();
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
+        // Ensure the full configuration is synced when (re-)attaching the
+        // component
+        configuration.deepMarkAsDirty();
         requestConfigurationSync();
         requestViewSync();
     }
