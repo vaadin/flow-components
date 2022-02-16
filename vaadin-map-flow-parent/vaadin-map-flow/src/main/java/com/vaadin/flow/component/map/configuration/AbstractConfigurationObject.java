@@ -107,7 +107,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    public void update(Runnable updater, boolean trackObjectChanges) {
+    protected void update(Runnable updater, boolean trackObjectChanges) {
         AbstractConfigurationObject.trackObjectChanges.set(trackObjectChanges);
         try {
             updater.run();
