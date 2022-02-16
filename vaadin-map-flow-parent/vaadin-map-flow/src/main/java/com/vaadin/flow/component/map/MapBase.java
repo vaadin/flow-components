@@ -37,23 +37,21 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 import java.beans.PropertyChangeEvent;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 public abstract class MapBase extends Component implements HasSize {
     private final Configuration configuration;
-    private final View view;
     private final MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
-    private StateTree.ExecutionRegistration pendingViewSync;
 
     protected MapBase() {
-        this.configuration = new Configuration();
-        this.view = new View();
         this.serializer = new MapSerializer();
+        this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
-        this.view.addPropertyChangeListener(this::viewPropertyChange);
         registerEventListeners();
     }
 
@@ -68,11 +66,7 @@ public abstract class MapBase extends Component implements HasSize {
      * @return the map's view
      */
     public View getView() {
-        return view;
-    }
-
-    public void render() {
-        this.requestConfigurationSync();
+        return configuration.getView();
     }
 
     @Override
@@ -84,7 +78,6 @@ public abstract class MapBase extends Component implements HasSize {
         // component
         configuration.deepMarkAsDirty();
         requestConfigurationSync();
-        requestViewSync();
     }
 
     private void requestConfigurationSync() {
@@ -95,17 +88,6 @@ public abstract class MapBase extends Component implements HasSize {
                 .beforeClientResponse(this, context -> {
                     pendingConfigurationSync = null;
                     synchronizeConfiguration();
-                }));
-    }
-
-    private void requestViewSync() {
-        if (pendingViewSync != null) {
-            return;
-        }
-        getUI().ifPresent(ui -> pendingViewSync = ui.beforeClientResponse(this,
-                context -> {
-                    pendingViewSync = null;
-                    synchronizeView();
                 }));
     }
 
@@ -122,19 +104,8 @@ public abstract class MapBase extends Component implements HasSize {
                 jsonChanges);
     }
 
-    private void synchronizeView() {
-        JsonValue jsonChanges = serializer.toJson(List.of(view));
-
-        this.getElement().executeJs("this.$connector.synchronize($0)",
-                jsonChanges);
-    }
-
     private void configurationPropertyChange(PropertyChangeEvent e) {
         this.requestConfigurationSync();
-    }
-
-    private void viewPropertyChange(PropertyChangeEvent e) {
-        this.requestViewSync();
     }
 
     private void registerEventListeners() {

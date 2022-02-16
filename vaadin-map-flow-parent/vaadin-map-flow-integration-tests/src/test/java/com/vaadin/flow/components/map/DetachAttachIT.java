@@ -8,6 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 @TestPath("vaadin-map/detach-attach")
 public class DetachAttachIT extends AbstractComponentIT {
     private TestBenchElement detachMap;
@@ -56,5 +58,15 @@ public class DetachAttachIT extends AbstractComponentIT {
         long numLayers = (long) map
                 .evaluateOLExpression("map.getLayers().getLength()");
         Assert.assertEquals(2, numLayers);
+        // Also verify that the viewport is synchronized
+        List<Number> center = (List<Number>) map
+                .evaluateOLExpression("map.getView().getCenter()");
+        Number zoomLevel = (Number) map
+                .evaluateOLExpression("map.getView().getZoom()");
+        Assert.assertEquals(center.get(0).doubleValue(), 2482424.644689998,
+                0.0001);
+        Assert.assertEquals(center.get(1).doubleValue(), 8500614.173537256,
+                0.0001);
+        Assert.assertEquals(zoomLevel.doubleValue(), 14, 0.1);
     }
 }

@@ -31,13 +31,8 @@ function synchronizeMap(target, source, context) {
     throw new Error("Existing map instance must be provided");
   }
 
-  // Layers
   synchronizeCollection(target.getLayers(), source.layers, context);
-
-  // View
-  if (source.view) {
-    synchronizeView(target.getView(), source.view, context);
-  }
+  target.setView(context.lookup.get(source.view));
 
   return target;
 }

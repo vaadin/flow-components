@@ -2,6 +2,7 @@ package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/detach-attach")
@@ -11,6 +12,10 @@ public class DetachAttachPage extends Div {
         map.setWidthFull();
         map.setHeight("400px");
         add(map);
+        // Modify viewport, so we can test some non-default values
+        map.getView().setCenter(
+                new Coordinate(2482424.644689998, 8500614.173537256));
+        map.getView().setZoom(14);
         // Set IDs on default layers for easier retrieval in ITs
         map.getBackgroundLayer().setId("background-layer");
         map.getFeatureLayer().setId("feature-layer");

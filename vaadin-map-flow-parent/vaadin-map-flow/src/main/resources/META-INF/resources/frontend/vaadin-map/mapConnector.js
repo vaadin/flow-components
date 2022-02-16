@@ -22,14 +22,10 @@ import { createLookup, getLayerForFeature } from "./util";
         const context = { synchronize, lookup: this.lookup };
 
         changedObjects.forEach((change) => {
-          // Some OL instances, such as the map and the view, already exist and should not be
-          // created by the synchronization mechanism. We need to be put these into the lookup
-          // manually.
+          // The OL map instance already exists and should not be created by the
+          // synchronization mechanism. So we put it into the lookup manually.
           if (change.type === "ol/Map") {
             this.lookup.put(change.id, mapElement.configuration);
-          }
-          if (change.type === "ol/View") {
-            this.lookup.put(change.id, mapElement.configuration.getView());
           }
 
           synchronize(change, context);

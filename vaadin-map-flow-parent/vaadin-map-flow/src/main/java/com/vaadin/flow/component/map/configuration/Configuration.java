@@ -28,6 +28,11 @@ import java.util.Objects;
 
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
+    private View view;
+
+    public Configuration() {
+        setView(new View());
+    }
 
     @Override
     public String getType() {
@@ -91,5 +96,30 @@ public class Configuration extends AbstractConfigurationObject {
 
         layers.remove(layer);
         removeChild(layer);
+    }
+
+    /**
+     * Gets the view of the map. The view gives access to properties like center
+     * and zoom level of the viewport.
+     *
+     * @return the map's view
+     */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    public View getView() {
+        return view;
+    }
+
+    /**
+     * Sets the view of the map. This is only necessary when dealing with map
+     * services that use custom coordinate projection, in which case a view with
+     * a matching projection needs to be created and used.
+     *
+     * @param view the new view
+     */
+    public void setView(View view) {
+        removeChild(this.view);
+        this.view = view;
+        addChild(view);
     }
 }
