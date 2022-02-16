@@ -36,7 +36,7 @@ public class GermanDatePickerIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectDateOnFinnishDatePicker() {
+    public void verifyGermanTranslationWorks() {
         DatePickerElement picker = $(DatePickerElement.class)
                 .id("german-picker");
         String value = picker.getInputValue();
