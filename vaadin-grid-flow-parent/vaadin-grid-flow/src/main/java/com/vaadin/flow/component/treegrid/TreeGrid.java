@@ -133,7 +133,7 @@ public class TreeGrid<T> extends Grid<T>
 
             getDataCommunicator()
                     .fetchFromProvider(0, EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE)
-                    .forEach(parentItem -> {
+                    .filter(item -> isExpanded(item)).forEach(parentItem -> {
                         if (eagerFetchViewportRemaining > 0) {
                             recursiveSetParentRequestedRange(0, getPageSize(),
                                     getDataCommunicator().getKeyMapper()

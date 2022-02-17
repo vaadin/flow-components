@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.button.Button;
@@ -33,7 +34,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 
-@Route("vaadin-grid/treegrid-preload/:expandedRootIndex?([0-9]{1,9})")
+@Route("vaadin-grid/treegrid-preload/:expandedRootIndexes?([0-9,]{1,9})")
 public class TreeGridPreloadPage extends VerticalLayout
         implements BeforeEnterObserver {
 
@@ -44,12 +45,14 @@ public class TreeGridPreloadPage extends VerticalLayout
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        event.getRouteParameters().get("expandedRootIndex")
+        event.getRouteParameters().get("expandedRootIndexes")
                 .ifPresent(string -> {
-                    int expandedRootIndex = Integer.parseInt(string);
-                    grid.expandRecursively(
-                            Arrays.asList(new HierarchicalTestBean(null, 0,
-                                    expandedRootIndex)),
+                    List<HierarchicalTestBean> expandedRootItems = Arrays
+                            .stream(string.split(",")).map(Integer::parseInt)
+                            .map(expandedRootIndex -> new HierarchicalTestBean(
+                                    null, 0, expandedRootIndex))
+                            .collect(java.util.stream.Collectors.toList());
+                    grid.expandRecursively(expandedRootItems,
                             Integer.MAX_VALUE);
                 });
     }

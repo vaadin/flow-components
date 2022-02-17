@@ -135,6 +135,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         verifyRow(4, "/0/0/1/0/2/0/3/0/4/0");
     }
 
+    @Test
+    public void secondExpanded_shouldNotHaveDataForNonExpandedRootItems() {
+        open(1);
+        Assert.assertTrue(parentItemsReceived("/0/1"));
+        Assert.assertFalse(parentItemsReceived("/0/0"));
+    }
+
     private void verifyRow(int rowActualIndex, String itemId) {
         Assert.assertEquals("Invalid id at index " + rowActualIndex, itemId,
                 getTreeGrid().getCell(rowActualIndex, 0).getText());
