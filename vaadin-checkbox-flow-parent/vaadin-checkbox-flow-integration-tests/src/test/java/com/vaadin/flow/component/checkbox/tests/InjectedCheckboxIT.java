@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-checkbox/injected-checkbox")
@@ -28,8 +29,13 @@ public class InjectedCheckboxIT extends AbstractComponentIT {
     public void initialCheckboxValue() {
         open();
 
-        String isChecked = $("inject-checkbox").first().$("vaadin-checkbox")
-                .first().getAttribute("checked");
+        TestBenchElement checkbox = $("inject-checkbox").first()
+                .$("vaadin-checkbox").first();
+
+        String isChecked = checkbox.getAttribute("checked");
         Assert.assertEquals(Boolean.TRUE.toString(), isChecked);
+
+        Assert.assertEquals("Accept",
+                checkbox.getPropertyString("textContent").trim());
     }
 }

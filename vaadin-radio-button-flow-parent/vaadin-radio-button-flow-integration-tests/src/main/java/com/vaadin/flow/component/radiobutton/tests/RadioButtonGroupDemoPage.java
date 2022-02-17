@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -195,7 +195,7 @@ public class RadioButtonGroupDemoPage extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person("Joe"), new Person("John"),
                 new Person("Bill"));
-        group.setRenderer(new TextRenderer<>(Person::getName));
+        group.setItemLabelGenerator(Person::getName);
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));

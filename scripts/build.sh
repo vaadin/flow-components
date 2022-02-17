@@ -31,9 +31,15 @@ args="$args -B $quiet"
 ## compute modules that were modified in this PR
 if [ -z "$modules" -a -n "$PR" ]
 then
+  ## need to check whether changes in the root or not
+  modifiedAll=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
+    | jq -r '.[] | .filename' | sort -u | tr -d '[:space:]'`
+  modifiedComponent=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
+    | jq -r '.[] | .filename' | grep 'vaadin.*parent' | sort -u | tr -d '[:space:]'`
   modified=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
     | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
-  if [ `echo "$modified" | wc -w` -lt 5 ]
+
+  if [ `echo "$modified" | wc -w` -lt 5 ] && [ `echo ${#modifiedAll}` = `echo ${#modifiedComponent}` ]
   then
     for i in $modified
     do
@@ -114,7 +120,7 @@ tcLog "Running report watcher for Tests "
 tcMsg "importData type='surefire' path='**/*-reports/TEST*xml'";
 
 ## Compile and install all modules excluding ITs
-cmd="mvn install -Drelease -B -T $FORK_COUNT $args"
+cmd="mvn install -Drelease -T $FORK_COUNT $args"
 tcLog "Unit-Testing and Installing flow components - $cmd"
 $cmd
 if [ $? != 0 ]
@@ -170,22 +176,17 @@ then
     set +x
 fi
 
-reuse_browser() {
-    [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
-}
-
-
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn clean verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none"
   tcLog "Running module ITs ($elements) - mvn clean verify -pl ..."
   echo $cmd
   $cmd
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none $(reuse_browser $TESTBENCH_REUSE_BROWSER)"
+  cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none"
   tcLog "Running merged ITs - mvn verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
@@ -205,7 +206,7 @@ else
       then
         failed=`echo "$failed" | tr '\n' ','`
         mode="-Dfailsafe.forkCount=2 -Dcom.vaadin.testbench.Parameters.testsInParallel=3"
-        cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dtest=none -Dit.test=$failed $(reuse_browser false)"
+        cmd="mvn verify -Drun-it -Drelease -Dvaadin.productionMode -DskipFrontend $mode $args -pl integration-tests -Dtest=none -Dit.test=$failed"
         tcLog "Re-Running $nfailed failed IT classes ..."
         echo $cmd
         $cmd

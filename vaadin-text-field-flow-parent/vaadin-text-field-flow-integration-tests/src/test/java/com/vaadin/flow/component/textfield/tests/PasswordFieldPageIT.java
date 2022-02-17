@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -78,8 +78,8 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
                 .id("clear-password-field");
         field.setValue("foo");
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("*")
+                .attributeContains("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();

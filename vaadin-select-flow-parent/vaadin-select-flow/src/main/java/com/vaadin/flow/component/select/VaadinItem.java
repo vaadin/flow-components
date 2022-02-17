@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,14 +25,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
- * Internal representation of {@code <vaadin-item>}. vaadin-select.html imports
- * vaadin-item.html.
+ * Internal representation of {@code <vaadin-select-item>}.
  *
  * @param <T>
  *            the type of the bean
  */
-@Tag("vaadin-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@Tag("vaadin-select-item")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class VaadinItem<T> extends Component implements
         HasItemComponents.ItemComponent<T>, HasComponents, HasStyle, HasText {

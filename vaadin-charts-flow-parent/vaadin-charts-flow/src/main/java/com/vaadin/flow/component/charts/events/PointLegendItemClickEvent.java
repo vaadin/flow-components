@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.events;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -29,11 +29,12 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
     private final int seriesIndex;
     private final String category;
     private final int pointIndex;
+    private final String pointId;
     private final MouseEventDetails details;
 
     /**
      * Constructs a SeriesLegendItemClickEvent
-     * 
+     *
      * @param source
      * @param fromClient
      */
@@ -47,11 +48,13 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
             @EventData("event.detail.originalEvent.button") int button,
             @EventData("event.detail.point.series.index") int seriesIndex,
             @EventData("event.detail.point.category") String category,
-            @EventData("event.detail.point.index") int pointIndex) {
+            @EventData("event.detail.point.index") int pointIndex,
+            @EventData("event.detail.point.id") String pointId) {
         super(source, fromClient);
         this.seriesIndex = seriesIndex;
         this.category = category;
         this.pointIndex = pointIndex;
+        this.pointId = pointId;
 
         details = new MouseEventDetails();
         details.setAbsoluteX(pageX);
@@ -76,6 +79,11 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
     @Override
     public int getItemIndex() {
         return pointIndex;
+    }
+
+    @Override
+    public String getItemId() {
+        return pointId;
     }
 
     @Override

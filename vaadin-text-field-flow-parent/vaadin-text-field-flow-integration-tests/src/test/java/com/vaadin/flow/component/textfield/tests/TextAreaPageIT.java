@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -47,12 +47,12 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void assertClearValue() {
         TextAreaElement field = $(TextAreaElement.class).id("clear-text-area");
 
-        WebElement input = field.$("textarea").first();
+        TestBenchElement input = field.$("textarea").first();
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field,
-                By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = field.$("*")
+                .attributeContains("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();

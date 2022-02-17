@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,5 +39,17 @@ public class RefreshDataProviderPageIT extends AbstractComponentIT {
 
         Assert.assertEquals("bar", radioButtons.get(0).getText());
         Assert.assertEquals("baz", radioButtons.get(1).getText());
+    }
+
+    @Test
+    public void resetComponentExpectLabel() {
+        open();
+
+        findElement(By.id("reset")).click();
+
+        TestBenchElement group = $(TestBenchElement.class).id("group");
+        String label = group.findElement(By.cssSelector("label[slot='label']"))
+                .getText();
+        Assert.assertEquals("Label", label);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -66,6 +66,25 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
 
         // Click button to enable items
         findElement(By.id("enable-button")).click();
+        List<WebElement> radioButtons = group
+                .findElements(By.tagName("vaadin-radio-button"));
+        WebElement firstButton = radioButtons.get(0);
+        WebElement secondButton = radioButtons.get(1);
+        Assert.assertNull("First button should not be disabled",
+                firstButton.getAttribute("disabled"));
+        Assert.assertEquals("Second button should be disabled",
+                Boolean.TRUE.toString(), secondButton.getAttribute("disabled"));
+    }
+
+    @Test
+    public void disabled_items_with_item_enabled_provider_should_stay_disabled_after_adding_renderer_and_enabling_group() {
+        open();
+        WebElement group = findElement(By.id("button-group"));
+        // Click button to add items
+        findElement(By.id("add-button")).click();
+
+        // Click button to set renderer and enable items
+        findElement(By.id("set-renderer-and-enabled-button")).click();
         List<WebElement> radioButtons = group
                 .findElements(By.tagName("vaadin-radio-button"));
         WebElement firstButton = radioButtons.get(0);

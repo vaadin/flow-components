@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -63,21 +65,23 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/list-box", version = "22.0.0-beta2")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/list-box", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "23.0.0-beta3")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
         implements HasItemComponents<ITEM>, HasSize,
         HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
-        HasDataView<ITEM, Void, ListBoxDataView<ITEM>> {
+        HasDataView<ITEM, Void, ListBoxDataView<ITEM>>, HasStyle {
 
     private final AtomicReference<DataProvider<ITEM, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
     private List<ITEM> items;
-    private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>();
+    private ItemLabelGenerator<ITEM> itemLabelGenerator = String::valueOf;
+    private ComponentRenderer<? extends Component, ITEM> itemRenderer = new TextRenderer<>(
+            itemLabelGenerator);
     private SerializablePredicate<ITEM> itemEnabledProvider = item -> isEnabled();
     private Registration dataProviderListenerRegistration;
 
@@ -174,6 +178,32 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             ComponentRenderer<? extends Component, ITEM> itemRenderer) {
         this.itemRenderer = Objects.requireNonNull(itemRenderer);
         getItemComponents().forEach(this::refreshContent);
+    }
+
+    /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the ListBox for each item. By default, {@link String#valueOf(Object)}
+     * is used.
+     *
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<ITEM> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        setRenderer(new TextRenderer<>(this.itemLabelGenerator));
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the ListBox for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<ITEM> getItemLabelGenerator() {
+        return itemLabelGenerator;
     }
 
     /**

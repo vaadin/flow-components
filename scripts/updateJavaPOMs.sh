@@ -8,7 +8,7 @@
 
 set -e
 pom='pom.xml'
-mods=`grep '<module>' $pom  | grep -v '>integration-tests<' | grep -v shared | cut -d ">" -f2 | cut -d "<" -f1`
+mods=`grep '<module>' $pom  | egrep -v 'integration-tests|shared|helpers' | cut -d ">" -f2 | cut -d "<" -f1`
 
 for i in $mods
 do

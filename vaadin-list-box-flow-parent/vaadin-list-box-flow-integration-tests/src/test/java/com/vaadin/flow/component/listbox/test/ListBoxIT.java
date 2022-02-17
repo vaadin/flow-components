@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -154,6 +154,23 @@ public class ListBoxIT extends ComponentDemoTest {
         Assert.assertEquals(
                 "Item should be disabled after clicking the button enough times",
                 "true", item.getAttribute("disabled"));
+    }
+
+    @Test
+    public void itemItemLabelGenerator() {
+        init("list-box-with-item-label-generator");
+        assertItemGenerator(items.get(0), BREAD);
+        assertItemGenerator(items.get(1), BUTTER);
+        assertItemGenerator(items.get(2), MILK);
+    }
+
+    private void assertItemGenerator(WebElement item, String itemName) {
+        List<WebElement> labels = item.findElements(By.tagName("span"));
+        String nameText = labels.get(0).getText();
+
+        Assert.assertThat(
+                "First label inside the item should contain the name of the item",
+                nameText, containsString(itemName));
     }
 
 }

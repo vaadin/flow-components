@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,6 +38,7 @@ import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
@@ -647,6 +648,13 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
             }
         }
         return result;
+    }
+
+    /**
+     * Clear the list of files being processed, or already uploaded.
+     */
+    public void clearFileList() {
+        setFiles(Json.createArray());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

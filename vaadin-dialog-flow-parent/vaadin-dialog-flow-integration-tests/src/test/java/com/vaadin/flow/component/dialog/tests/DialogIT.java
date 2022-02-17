@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -38,8 +39,7 @@ public class DialogIT extends AbstractComponentIT {
 
         findElement(By.id("basic-dialog-button")).click();
 
-        WebElement overlay = getInShadowRoot(getOverlayContent(),
-                By.id("overlay"));
+        WebElement overlay = getOverlayContent().$("*").id("overlay");
 
         WebElement div = getOverlayContent().findElement(By.tagName("div"));
         WebElement content = overlay.findElement(By.id("content"));
@@ -134,8 +134,8 @@ public class DialogIT extends AbstractComponentIT {
         Assert.assertEquals("rgba(255, 0, 0, 1)", element.getCssValue("color"));
     }
 
-    private WebElement getOverlayContent() {
-        return findElement(By.tagName(DIALOG_OVERLAY_TAG));
+    private TestBenchElement getOverlayContent() {
+        return $(DIALOG_OVERLAY_TAG).first();
     }
 
     private void verifyDialogClosed() {

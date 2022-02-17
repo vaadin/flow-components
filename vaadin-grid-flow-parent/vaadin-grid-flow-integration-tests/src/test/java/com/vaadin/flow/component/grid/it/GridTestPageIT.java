@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -103,7 +104,7 @@ public class GridTestPageIT extends AbstractComponentIT {
 
     @Test
     public void openGridWithTemplateDetailsRow_clickOnItems_dataIsTransmitted() {
-        WebElement grid = findElement(By.id("grid-with-template-details-row"));
+        TestBenchElement grid = $("*").id("grid-with-template-details-row");
 
         Map<String, Map<String, ?>> items = getItems(driver, grid);
         // verify that the properties needed for the details row are not loaded
@@ -133,7 +134,7 @@ public class GridTestPageIT extends AbstractComponentIT {
 
     @Test
     public void openGridWithComponentDetailsRow_clickOnItems_dataIsTransmitted() {
-        WebElement grid = findElement(By.id("grid-with-component-details-row"));
+        TestBenchElement grid = $("*").id("grid-with-component-details-row");
 
         Map<String, Map<String, ?>> items = getItems(driver, grid);
         // verify that the nodeId of the details row is not loaded
@@ -245,14 +246,13 @@ public class GridTestPageIT extends AbstractComponentIT {
 
     @Test
     public void selectItemOnGrid_changeContainers_itemIsStillSelected() {
-        WebElement container1 = findElement(
-                By.id("detachable-grid-container-1"));
-        WebElement container2 = findElement(
-                By.id("detachable-grid-container-2"));
+        TestBenchElement container1 = $("*").id("detachable-grid-container-1");
+        TestBenchElement container2 = $("*").id("detachable-grid-container-2");
         WebElement attach1 = findElement(By.id("detachable-grid-attach-1"));
         WebElement attach2 = findElement(By.id("detachable-grid-attach-2"));
 
-        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        TestBenchElement grid = container1
+                .findElement(By.id("detachable-grid"));
         scrollToElement(grid);
 
         // click to select the first item
@@ -300,12 +300,12 @@ public class GridTestPageIT extends AbstractComponentIT {
 
     @Test
     public void selectItemOnGrid_detachAndReattach_itemIsStillSelected() {
-        WebElement container1 = findElement(
-                By.id("detachable-grid-container-1"));
+        TestBenchElement container1 = $("*").id("detachable-grid-container-1");
         WebElement attach1 = findElement(By.id("detachable-grid-attach-1"));
         WebElement detach = findElement(By.id("detachable-grid-detach"));
 
-        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        TestBenchElement grid = container1
+                .findElement(By.id("detachable-grid"));
         scrollToElement(grid);
 
         // click to select the first item
@@ -356,12 +356,12 @@ public class GridTestPageIT extends AbstractComponentIT {
 
     @Test
     public void detachableGrid_setInvisibleAndVisible_itemIsStillSelected() {
-        WebElement container1 = findElement(
-                By.id("detachable-grid-container-1"));
+        TestBenchElement container1 = $("*").id("detachable-grid-container-1");
         WebElement invisible = findElement(By.id("detachable-grid-invisible"));
         WebElement visible = findElement(By.id("detachable-grid-visible"));
 
-        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        TestBenchElement grid = container1
+                .findElement(By.id("detachable-grid"));
         scrollToElement(grid);
 
         // click to select the first item
@@ -479,9 +479,9 @@ public class GridTestPageIT extends AbstractComponentIT {
         return (Map<String, Map<String, ?>>) result;
     }
 
-    private WebElement getRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr")).get(row);
+    private WebElement getRow(TestBenchElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
+                .get(row);
     }
 
 }

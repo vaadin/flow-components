@@ -24,6 +24,7 @@ public class NameFieldView extends Div {
 
         Span span = new Span("Helper component");
         span.setId("helper-component");
+        fieldHelperComponent.setHelperComponent(span);
 
         NativeButton clearComponent = new NativeButton("Clear helper component",
                 e -> {
@@ -31,8 +32,18 @@ public class NameFieldView extends Div {
                 });
         clearComponent.setId("button-clear-helper-component");
 
-        fieldHelperComponent.setHelperComponent(span);
+        NameField fieldHelperComponentLazy = new NameField();
+        fieldHelperComponentLazy.setId("custom-field-helper-component-lazy");
 
-        add(fieldHelper, clearText, fieldHelperComponent, clearComponent);
+        NativeButton addComponent = new NativeButton("Add helper component",
+                e -> {
+                    Span lazyHelper = new Span("Lazy helper component");
+                    lazyHelper.setId("helper-component-lazy");
+                    fieldHelperComponentLazy.setHelperComponent(lazyHelper);
+                });
+        addComponent.setId("button-add-helper-component");
+
+        add(fieldHelper, clearText, fieldHelperComponent,
+                fieldHelperComponentLazy, clearComponent, addComponent);
     }
 }

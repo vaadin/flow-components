@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,6 +25,8 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
 
 import static org.junit.Assert.assertFalse;
 
@@ -192,6 +194,30 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
+    }
+
+    @Test
+    public void changeValue_oldSelectedItemKeyIsReset() {
+        ComboBoxElement combo = $(ComboBoxElement.class)
+                .id("update-on-change-combo");
+        combo.openPopup();
+
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        ElementQuery<TestBenchElement> items = overlay
+                .$("vaadin-combo-box-item");
+
+        TestBenchElement item1 = items.get(0);
+        TestBenchElement item2 = items.get(1);
+
+        Assert.assertFalse(item1.hasAttribute("selected"));
+        Assert.assertTrue(item2.hasAttribute("selected"));
+
+        item1.click();
+
+        combo.openPopup();
+
+        Assert.assertTrue(item1.hasAttribute("selected"));
+        Assert.assertFalse(item2.hasAttribute("selected"));
     }
 
     @Test

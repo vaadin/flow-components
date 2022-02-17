@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,6 +41,7 @@ import com.vaadin.flow.router.Route;
 
 import org.slf4j.LoggerFactory;
 
+// Example: http://localhost:8080/vaadin-grid/benchmark?variant=simple&metric=rendertime
 @Route("vaadin-grid/benchmark")
 @JsModule("./benchmark.js")
 public class GridBenchmark extends Div implements HasUrlParameter<String> {
@@ -173,12 +174,14 @@ public class GridBenchmark extends Div implements HasUrlParameter<String> {
     private Grid<String> getGrid() {
         Grid<String> result = new Grid<>();
         result.setItems(items);
+        result.getElement().setAttribute("benchmark", true);
         return result;
     }
 
     private TreeGrid<String> getTreeGrid() {
         TreeGrid<String> result = new TreeGrid<>();
         result.setTreeData(treeData);
+        result.getElement().setAttribute("benchmark", true);
         return result;
     }
 

@@ -20,27 +20,35 @@ package com.vaadin.flow.component.applayout;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.router.RouterLayout;
 
+import java.io.Serializable;
 import java.util.Objects;
+
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * Server-side component for the {@code <vaadin-app-layout>} element. Provides a
  * quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "22.0.0-beta2")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.0-beta3")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -50,6 +58,77 @@ public class AppLayout extends Component implements RouterLayout {
             .propertyWithDefault("overlay", false);
 
     private Component content;
+
+    private AppLayoutI18n i18n;
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the i18n object that is returned from this method will not
+     * update the the component, unless it is set again using
+     * {@link AppLayout#setI18n(AppLayoutI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, if the i18n
+     *         properties are not set.
+     */
+    public AppLayoutI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(AppLayoutI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+
+        runBeforeClientResponse(ui -> {
+            if (i18n == this.i18n) {
+                setI18nWithJS();
+            }
+        });
+    }
+
+    private void setI18nWithJS() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+
+        // Remove properties with null values to prevent errors in web
+        // component
+        removeNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new AppLayoutI18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
 
     /**
      * @see #setPrimarySection(Section)
@@ -282,6 +361,36 @@ public class AppLayout extends Component implements RouterLayout {
             return webcomponentValue != null
                     ? valueOf(webcomponentValue.toUpperCase())
                     : null;
+        }
+    }
+
+    /**
+     * The internationalization properties for {@link AppLayout}
+     */
+    public static class AppLayoutI18n implements Serializable {
+        private String drawer;
+
+        /**
+         * Gets the text for the `aria-label` attribute on the drawer.
+         *
+         * @return the drawer aria-label
+         */
+        public String getDrawer() {
+            return drawer;
+        }
+
+        /**
+         * Sets the text for the `aria-label` attribute on the drawer. The
+         * attribute is set when the drawer is in the overlay mode and announced
+         * once the drawer is opened.
+         *
+         * @param drawer
+         *            the drawer aria-label
+         * @return this instance for method chaining
+         */
+        public AppLayoutI18n setDrawer(String drawer) {
+            this.drawer = drawer;
+            return this;
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,6 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntry;
 
+import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertThat;
@@ -44,7 +45,7 @@ public class UploadIT extends AbstractUploadIT {
         waitUntil(driver -> getUpload().isDisplayed());
 
         File tempFile = createTempFile();
-        fillPathToUploadInput(tempFile.getPath());
+        getUpload().upload(tempFile);
 
         WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
 
@@ -54,6 +55,30 @@ public class UploadIT extends AbstractUploadIT {
 
         Assert.assertEquals("Upload content does not match expected",
                 expectedContent, content);
+    }
+
+    @Test
+    public void testClearFileList() throws Exception {
+        open();
+
+        waitUntil(driver -> getUpload().isDisplayed());
+
+        File tempFile = createTempFile();
+
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-list").click();
+
+        Assert.assertNotEquals("File list should contain files", "[]",
+                $("div").id("file-list").getText());
+
+        $("button").id("clear-file-list").click();
+        $("button").id("print-file-list").click();
+
+        Assert.assertEquals("File list should not contain files", "[]",
+                $("div").id("file-list").getText());
     }
 
     @Test
@@ -70,8 +95,9 @@ public class UploadIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(tempFile.getPath(), tempFile.getPath(),
-                tempFile.getPath());
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("test-events-output"));
@@ -89,7 +115,7 @@ public class UploadIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(tempFile.getPath());
+        getUpload().upload(tempFile);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("test-events-output"));
@@ -104,7 +130,7 @@ public class UploadIT extends AbstractUploadIT {
         waitUntil(driver -> getUpload().isDisplayed());
 
         File tempFile = createTempFile();
-        fillPathToUploadInput(tempFile.getPath());
+        getUpload().upload(tempFile);
 
         List<LogEntry> logList1 = getLogEntries(Level.SEVERE);
         assertThat("There should have no severe message in the console",
@@ -117,23 +143,8 @@ public class UploadIT extends AbstractUploadIT {
                 logList2.size(), CoreMatchers.is(0));
     }
 
-    private void fillPathToUploadInput(String... tempFileNames)
-            throws Exception {
-        fillPathToUploadInput(getInput(), tempFileNames);
-    }
-
-    private WebElement getUpload() {
-        return getDriver().findElement(By.id("test-upload"));
-    }
-
-    /**
-     * Get the web component for the actual upload button hidden in the upload
-     * component.
-     *
-     * @return actual upload button
-     */
-    private WebElement getInput() {
-        return getInput(getUpload());
+    private UploadElement getUpload() {
+        return $(UploadElement.class).id("test-upload");
     }
 
 }

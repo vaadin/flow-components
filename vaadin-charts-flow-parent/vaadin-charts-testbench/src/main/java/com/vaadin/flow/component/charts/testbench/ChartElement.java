@@ -12,13 +12,12 @@ import static org.junit.Assert.assertNotNull;
 @Element("vaadin-chart")
 public class ChartElement extends TestBenchElement {
 
-    public List<WebElement> getPoints() {
-        return getElementsFromShadowRootBySelector(".highcharts-point");
+    public List<TestBenchElement> getPoints() {
+        return $(".highcharts-point").all();
     }
 
-    public List<WebElement> getVisiblePoints() {
-        return getElementsFromShadowRootBySelector(
-                ":not([visibility=hidden]).highcharts-point");
+    public List<TestBenchElement> getVisiblePoints() {
+        return $(":not([visibility=hidden]).highcharts-point").all();
     }
 
     private List<WebElement> getElementsFromShadowRootBySelector(

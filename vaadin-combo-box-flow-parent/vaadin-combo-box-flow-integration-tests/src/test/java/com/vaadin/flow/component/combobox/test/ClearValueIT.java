@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -58,6 +59,28 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBoxId), "null",
                 $(TestBenchElement.class).id("value-messages").$("p").first()
                         .getText());
+    }
+
+    @Test
+    public void openPopup_clearButton_selectedItemIsReset() {
+        String comboBoxId = ClearValuePage.COMBO_BOX_WITH_CLEAR_BUTTON_ID;
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
+
+        comboBox.openPopup();
+        comboBox.closePopup();
+
+        comboBox.$("[part~='clear-button']").get(0).click();
+
+        comboBox.openPopup();
+
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        ElementQuery<TestBenchElement> items = overlay
+                .$("vaadin-combo-box-item");
+
+        items.all()
+                .forEach(item -> Assert.assertFalse(
+                        "Item is not selected after clear button click",
+                        item.hasAttribute("selected")));
     }
 
     @Test

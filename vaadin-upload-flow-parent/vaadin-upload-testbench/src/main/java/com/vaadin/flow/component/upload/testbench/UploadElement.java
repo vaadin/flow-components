@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,10 +19,16 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chromium.ChromiumDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.internal.WrapsElement;
+import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.safari.SafariDriver;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -63,7 +69,12 @@ public class UploadElement extends TestBenchElement {
         if (isMaxFilesReached()) {
             removeFile(0);
         }
-        TestBenchElement uploadElement = setLocalFileDetector();
+        TestBenchElement uploadElement;
+        if (isLocalDriver(getDriver())) {
+            uploadElement = getUploadElement();
+        } else {
+            uploadElement = setLocalFileDetector();
+        }
 
         // Element must be focusable for Edge and Firefox
         Boolean hidden = uploadElement.getPropertyBoolean("hidden");
@@ -159,6 +170,15 @@ public class UploadElement extends TestBenchElement {
         executeScript(
                 "arguments[0].files.forEach(function(file) { return arguments[0].dispatchEvent(new CustomEvent('file-abort', {detail: {file: file}}));})",
                 this);
+    }
+
+    private static boolean isLocalDriver(WebDriver driver) {
+        while (driver instanceof WrapsDriver) {
+            driver = ((WrapsDriver) driver).getWrappedDriver();
+        }
+        return driver instanceof ChromiumDriver
+                || driver instanceof FirefoxDriver
+                || driver instanceof SafariDriver;
     }
 
 }

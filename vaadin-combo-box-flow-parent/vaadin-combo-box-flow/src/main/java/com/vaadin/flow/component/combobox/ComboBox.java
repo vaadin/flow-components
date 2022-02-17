@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
@@ -108,7 +109,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
         HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
-        HasTheme {
+        HasTheme, HasLabel {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -308,6 +309,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // `ComboBox.addCustomValueSetListener`.
         super.addCustomValueSetListener(e -> this.getElement()
                 .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
+
+        super.addValueChangeListener(e -> updateSelectedKey());
     }
 
     /**
@@ -1387,6 +1390,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return isRequiredBoolean();
     }
 
+    /**
+     * Sets the label for the combobox.
+     *
+     * @param label
+     *            value for the {@code label} property in the combobox
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -1397,6 +1406,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the {@code label} property of the combobox
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }
@@ -1650,6 +1660,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         reset();
     }
 
+    private void updateSelectedKey() {
+        // Send (possibly updated) key for the selected value
+        getElement().executeJs("this._selectedKey=$0",
+                getValue() != null ? getKeyMapper().key(getValue()) : "");
+    }
+
     @ClientCallable
     private void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);
@@ -1659,9 +1675,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void setRequestedRange(int start, int length, String filter) {
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
-        // Send (possibly updated) key for the selected value
-        getElement().executeJs("this._selectedKey=$0",
-                getValue() != null ? getKeyMapper().key(getValue()) : "");
+        updateSelectedKey();
     }
 
     @ClientCallable

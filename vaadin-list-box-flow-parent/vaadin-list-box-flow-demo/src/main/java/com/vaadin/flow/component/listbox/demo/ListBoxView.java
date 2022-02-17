@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -61,6 +61,7 @@ public class ListBoxView extends DemoView {
         dataViewFiltering();
         separatorDemo();// Presentation
         customOptions();
+        usingItemLabelGenerator();
         usingTemplateRenderer();
         styling(); // Styling
     }
@@ -150,6 +151,20 @@ public class ListBoxView extends DemoView {
 
         DepartmentData departmentData = new DepartmentData();
         return departmentData.getDepartments();
+    }
+
+    private void usingItemLabelGenerator() {
+        // begin-source-example
+        // source-example-heading: Item Label Generator
+        ListBox<Department> listBox = new ListBox<>();
+        List<Department> listOfDepartments = getDepartments();
+        listBox.setItems(listOfDepartments);
+        listBox.setValue(listOfDepartments.get(0));
+
+        listBox.setItemLabelGenerator(Department::getName);
+        // end-source-example
+
+        addCard(PRESENTATION, "Item Label Generator", listBox);
     }
 
     private void usingTemplateRenderer() {

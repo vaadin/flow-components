@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,5 +43,14 @@ public class TreeGridDetachAttachPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
         add(toggleAttached);
+
+        NativeButton useAutoWidthColumn = new NativeButton(
+                "use auto-width column", e -> {
+                    grid.removeAllColumns();
+                    grid.addHierarchyColumn(HierarchicalTestBean::toString)
+                            .setAutoWidth(true).setFlexGrow(0);
+                });
+        useAutoWidthColumn.setId("use-auto-width-column");
+        add(useAutoWidthColumn);
     }
 }

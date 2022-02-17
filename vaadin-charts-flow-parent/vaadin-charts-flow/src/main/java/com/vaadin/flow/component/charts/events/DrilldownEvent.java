@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.events;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -30,7 +30,8 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
     private final Double x;
     private final Double y;
     private final int pointIndex;
-    private int seriesIndex;
+    private final String pointId;
+    private final int seriesIndex;
 
     /**
      * Construct a ChartDrilldownEvent
@@ -43,6 +44,7 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
             @EventData("event.detail.originalEvent.point.x") Double x,
             @EventData("event.detail.originalEvent.point.y") Double y,
             @EventData("event.detail.originalEvent.point.index") int pointIndex,
+            @EventData("event.detail.originalEvent.point.id") String pointId,
             @EventData("event.detail.originalEvent.point.series.index") int seriesIndex) {
         super(source, fromClient);
 
@@ -51,6 +53,7 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
         this.x = x;
         this.y = y;
         this.pointIndex = pointIndex;
+        this.pointId = pointId;
         this.seriesIndex = seriesIndex;
     }
 
@@ -84,5 +87,10 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
     @Override
     public int getItemIndex() {
         return pointIndex;
+    }
+
+    @Override
+    public String getItemId() {
+        return pointId;
     }
 }

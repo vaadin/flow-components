@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -45,6 +45,7 @@ public class ListBoxViewDemoPage extends DemoView {
         addComponentsBetween();
         addItemRenderer();
         addDisabledListBox();
+        addItemLabelGenerator();
 
         addCard("Example object used in the demo");
     }
@@ -88,6 +89,19 @@ public class ListBoxViewDemoPage extends DemoView {
         // end-source-example
         addCard("Adding components between items", listBox)
                 .setId("list-box-with-components-between");
+    }
+
+    private void addItemLabelGenerator() {
+        // begin-source-example
+        // source-example-heading: Using item label generator
+        ListBox<Item> listBox = new ListBox<>();
+        listBox.setItems(getItems());
+
+        listBox.setItemLabelGenerator(Item::getName);
+
+        // end-source-example
+        addCard("Using item label generator", listBox)
+                .setId("list-box-with-item-label-generator");
     }
 
     private void addItemRenderer() {

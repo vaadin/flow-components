@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -74,7 +75,7 @@ public class CheckboxGroup<T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper {
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel {
 
     private static final String VALUE = "value";
 
@@ -366,6 +367,12 @@ public class CheckboxGroup<T>
         return itemLabelGenerator;
     }
 
+    /**
+     * Sets the label for the checkbox group.
+     *
+     * @param label
+     *            value for the {@code label} property in the checkbox group
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -376,6 +383,7 @@ public class CheckboxGroup<T>
      *
      * @return the {@code label} property of the checkbox group
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }
@@ -456,17 +464,21 @@ public class CheckboxGroup<T>
 
     @SuppressWarnings("unchecked")
     private void reset() {
-        // Cache helper component before removal
-        Component helperComponent = getHelperComponent();
         keyMapper.removeAll();
-        removeAll();
         clear();
 
-        // reinsert helper component
-        // see https://github.com/vaadin/vaadin-checkbox/issues/191
-        setHelperComponent(helperComponent);
-
         synchronized (dataProvider) {
+            // Cache helper component before removal
+            Component helperComponent = getHelperComponent();
+
+            // Remove all known children (doesn't remove client-side-only
+            // children such as the label)
+            getChildren().forEach(this::remove);
+
+            // reinsert helper component
+            // see https://github.com/vaadin/vaadin-checkbox/issues/191
+            setHelperComponent(helperComponent);
+
             final AtomicInteger itemCounter = new AtomicInteger(0);
 
             getDataProvider().fetch(DataViewUtils.getQuery(this))
@@ -519,17 +531,12 @@ public class CheckboxGroup<T>
     private void updateEnabled(CheckBoxItem<T> checkbox) {
         boolean disabled = isDisabledBoolean()
                 || !getItemEnabledProvider().test(checkbox.getItem());
-        Serializable rawValue = checkbox.getElement()
-                .getPropertyRaw("disabled");
-        if (rawValue instanceof Boolean) {
-            // convert the boolean value to a String to force update the
-            // property value. Otherwise since the provided value is the same as
-            // the current one the update don't do anything.
-            checkbox.getElement().setProperty("disabled",
-                    disabled ? Boolean.TRUE.toString() : null);
-        } else {
-            checkbox.setDisabled(disabled);
-        }
+        checkbox.setDisabled(disabled);
+        // When enabling a disabled checkbox group, individual checkbox Web
+        // Components that should remain disabled (due to itemEnabledProvider),
+        // may end up rendering as enabled.
+        // Enforce the Web Component state using JS.
+        checkbox.getElement().executeJs("this.disabled = $0", disabled);
     }
 
     private void validateSelectionEnabledState(PropertyChangeEvent event) {

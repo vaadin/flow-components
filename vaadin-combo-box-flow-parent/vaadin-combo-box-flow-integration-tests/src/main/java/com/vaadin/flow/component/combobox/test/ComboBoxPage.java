@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -62,6 +62,7 @@ public class ComboBoxPage extends Div {
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithUpdatableValue();
+        createWithUpdateOnValueChange();
         createWithPresetValue();
         createWithButtonRenderer();
         setLabelGeneratorAfterValue();
@@ -197,6 +198,20 @@ public class ComboBoxPage extends Div {
         message.setId("updatable-combo-message");
         button.setId("updatable-combo-button");
         add(combo, message, button);
+    }
+
+    private void createWithUpdateOnValueChange() {
+        ComboBox<String> combo = new ComboBox<>();
+        combo.setItems("1", "2", "3");
+        combo.setValue("2");
+
+        combo.addValueChangeListener(e -> {
+            String value = e.getValue();
+            combo.setValue(value);
+        });
+
+        combo.setId("update-on-change-combo");
+        add(combo);
     }
 
     private void setLabelGeneratorAfterValue() {

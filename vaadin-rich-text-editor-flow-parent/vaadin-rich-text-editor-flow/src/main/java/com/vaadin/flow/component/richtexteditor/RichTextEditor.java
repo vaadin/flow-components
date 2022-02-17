@@ -20,6 +20,7 @@ import java.util.Objects;
  */
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.InputNotifier;
@@ -52,12 +53,12 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
         implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
-        CompositionNotifier {
+        CompositionNotifier, HasLabel {
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;

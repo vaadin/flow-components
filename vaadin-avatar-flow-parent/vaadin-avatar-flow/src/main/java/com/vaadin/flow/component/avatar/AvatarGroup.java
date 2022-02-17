@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -55,11 +55,11 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "22.0.0-beta2")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "22.0.0-beta2")
+@NpmPackage(value = "@vaadin/avatar-group", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.0.0-beta3")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasTheme {
 

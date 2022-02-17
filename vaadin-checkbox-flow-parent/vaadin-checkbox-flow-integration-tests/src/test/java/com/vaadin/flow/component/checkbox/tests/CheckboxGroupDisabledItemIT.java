@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -78,4 +78,25 @@ public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
         firstCheckbox.click();
         Assert.assertNull(firstCheckbox.getAttribute("checked"));
     }
+
+    @Test
+    public void enablingTheGroupDoesnNotEnableItemDisabledWithItemEnabledProvider() {
+        open();
+        TestBenchElement group = $(TestBenchElement.class)
+                .id("checkbox-group-disabled-item");
+        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
+        TestBenchElement toggleEnabledButton = $("button")
+                .id("toggle-enabled-button");
+
+        // Disable group
+        toggleEnabledButton.click();
+
+        // Re-enable group
+        toggleEnabledButton.click();
+
+        Assert.assertEquals("Second checkbox should be disabled",
+                Boolean.TRUE.toString(),
+                checkboxes.get(1).getAttribute("disabled"));
+    }
+
 }

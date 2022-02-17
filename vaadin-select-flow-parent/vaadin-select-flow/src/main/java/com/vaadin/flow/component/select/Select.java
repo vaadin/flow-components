@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -78,7 +79,7 @@ import java.util.stream.Stream;
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasDataView<T, Void, SelectDataView<T>>, HasHelper {
+        HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -168,7 +169,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     /*
      * Internal version of list box that is just used to delegate the child
-     * components to. vaadin-select.html imports vaadin-list-box.html.
+     * components to.
      *
      * Using this internally allows all events and updates to the children
      * (items, possible child components) to work even though the list box
@@ -184,10 +185,10 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * are not the correct ones, e.g. the list box is the only child of select,
      * even though that is not visible from the component level.
      */
-    @Tag("vaadin-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.0-beta2")
+    @Tag("vaadin-select-list-box")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    private class InternalListBox<T> extends Component
+    private class InternalListBox extends Component
             implements HasItemComponents<T> {
 
         @Override
@@ -412,6 +413,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @return the label string, or {@code null} if not set
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

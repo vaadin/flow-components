@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -58,19 +58,45 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void setReadOnlyRadioGroup_groupIsReadOnlyAndDisabled() {
+    public void setReadOnlyRadioGroup_groupIsReadOnly() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar");
         group.setReadOnly(true);
         Assert.assertTrue(group.isReadOnly());
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getElement().getProperty("disabled"));
+                group.getElement().getProperty("readonly"));
 
         long disabledChildCount = group.getChildren().filter(
                 child -> child.getElement().getProperty("disabled", false))
                 .count();
         Assert.assertEquals(group.getChildren().count(), disabledChildCount);
+    }
+
+    @Test
+    public void setReadOnlyRadioGroup_checkedButtonIsEnabled() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar");
+        group.setValue("foo");
+        group.setReadOnly(true);
+
+        long disabledChildCount = group.getChildren().filter(
+                child -> child.getElement().getProperty("disabled", false))
+                .count();
+        Assert.assertEquals(1, disabledChildCount);
+    }
+
+    @Test
+    public void setReadOnlyRadioGroup_checkedButtonIsEnabled2() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar");
+        group.setReadOnly(true);
+        group.setValue("foo");
+
+        long disabledChildCount = group.getChildren().filter(
+                child -> child.getElement().getProperty("disabled", false))
+                .count();
+        Assert.assertEquals(1, disabledChildCount);
     }
 
     @Test
@@ -105,14 +131,18 @@ public class RadioButtonGroupTest {
 
         Assert.assertTrue(group.isReadOnly());
         Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assert.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
+        Assert.assertEquals(Boolean.TRUE.toString(),
+                group.getElement().getProperty("readonly"));
 
         group.setReadOnly(false);
 
         Assert.assertTrue(group.isEnabled());
         Assert.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
+        Assert.assertEquals(Boolean.FALSE.toString(),
+                group.getElement().getProperty("readonly"));
     }
 
     @Test

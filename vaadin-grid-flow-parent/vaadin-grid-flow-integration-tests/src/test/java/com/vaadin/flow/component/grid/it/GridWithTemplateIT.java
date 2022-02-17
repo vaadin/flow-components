@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -38,10 +39,10 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
     @Test
     public void injectedGrid_cellWithTemplates_buttonIsClicked_cellIsUpdated() {
-        WebElement gridInATemplate = findElement(
-                By.id("injected-template-in-cells"));
-        WebElement grid = findInShadowRoot(gridInATemplate,
-                By.id("injected-template-in-cells")).get(0);
+        TestBenchElement gridInATemplate = $("*")
+                .id("injected-template-in-cells");
+        TestBenchElement grid = gridInATemplate.$("*")
+                .id("injected-template-in-cells");
         scrollToElement(gridInATemplate);
 
         for (int i = 1; i <= 3; i++) {
@@ -52,7 +53,7 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
     @Test
     public void standaloneGrid_cellWithTemplates_buttonIsClicked_cellIsUpdated() {
-        WebElement grid = findElement(By.id("standalone-template-in-cells"));
+        TestBenchElement grid = $("*").id("standalone-template-in-cells");
         scrollToElement(grid);
 
         for (int i = 1; i <= 3; i++) {
@@ -63,10 +64,10 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
     @Test
     public void injectedGrid_headerWithTemplates_buttonIsClicked_headerIsUpdated() {
-        WebElement gridInATemplate = findElement(
-                By.id("injected-template-in-header"));
-        WebElement grid = findInShadowRoot(gridInATemplate,
-                By.id("injected-template-in-header")).get(0);
+        TestBenchElement gridInATemplate = $("*")
+                .id("injected-template-in-header");
+        TestBenchElement grid = gridInATemplate.$("*")
+                .id("injected-template-in-header");
         scrollToElement(gridInATemplate);
 
         clickOnTheButtonInsideTheTestTemplate(grid,
@@ -77,7 +78,7 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
     @Test
     public void standaloneGrid_headerWithTemplates_buttonIsClicked_headerIsUpdated() {
-        WebElement grid = findElement(By.id("standalone-template-in-header"));
+        TestBenchElement grid = $("*").id("standalone-template-in-header");
         scrollToElement(grid);
 
         clickOnTheButtonInsideTheTestTemplate(grid,
@@ -91,10 +92,10 @@ public class GridWithTemplateIT extends AbstractComponentIT {
      * Test for the issue https://github.com/vaadin/vaadin-grid-flow/issues/71
      */
     public void injectedGrid_detailsWithTemplates_buttonIsClicked_detailIsUpdated() {
-        WebElement gridInATemplate = findElement(
-                By.id("injected-template-in-details"));
-        WebElement grid = findInShadowRoot(gridInATemplate,
-                By.id("injected-template-in-details")).get(0);
+        TestBenchElement gridInATemplate = $("*")
+                .id("injected-template-in-details");
+        TestBenchElement grid = gridInATemplate.$("*")
+                .id("injected-template-in-details");
         scrollToElement(gridInATemplate);
 
         for (int i = 1; i <= 3; i++) {
@@ -112,7 +113,7 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
     @Test
     public void standaloneGrid_detailsWithTemplates_buttonIsClicked_detailIsUpdated() {
-        WebElement grid = findElement(By.id("standalone-template-in-details"));
+        TestBenchElement grid = $("*").id("standalone-template-in-details");
         scrollToElement(grid);
 
         for (int i = 1; i <= 3; i++) {
@@ -137,10 +138,10 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
     @Test
     public void injectedGrid_columnsWithProperties() {
-        WebElement gridInATemplate = findElement(
-                By.id("injected-columns-with-properties"));
-        WebElement grid = findInShadowRoot(gridInATemplate,
-                By.id("injected-columns-with-properties")).get(0);
+        TestBenchElement gridInATemplate = $("*")
+                .id("injected-columns-with-properties");
+        WebElement grid = gridInATemplate.$("*")
+                .id("injected-columns-with-properties");
         assertColumnProperties(grid);
     }
 
@@ -175,17 +176,16 @@ public class GridWithTemplateIT extends AbstractComponentIT {
                 "true", columns.get(2).getAttribute("resizable"));
     }
 
-    private void clickOnTheButtonInsideTheTestTemplate(WebElement grid,
+    private void clickOnTheButtonInsideTheTestTemplate(TestBenchElement grid,
             String id, int numberOfClicks) {
-        WebElement template = findTestTemplateElement(grid, id);
-        WebElement container = findInShadowRoot(template, By.id("container"))
-                .get(0);
+        TestBenchElement template = findTestTemplateElement(grid, id);
+        WebElement container = template.$("*").id("container");
 
         List<WebElement> spans = container.findElements(By.tagName("span"));
         Assert.assertTrue(spans.isEmpty());
 
         for (int i = 0; i < numberOfClicks; i++) {
-            WebElement btn = findInShadowRoot(template, By.id("btn")).get(0);
+            WebElement btn = template.$("*").id("btn");
             clickElementWithJs(btn);
 
             int size = i + 1;
@@ -194,18 +194,18 @@ public class GridWithTemplateIT extends AbstractComponentIT {
         }
     }
 
-    private WebElement findTestTemplateElement(WebElement grid, String id) {
-        List<WebElement> list = grid.findElements(By.id(id));
-        Assert.assertFalse(
+    private TestBenchElement findTestTemplateElement(TestBenchElement grid,
+            String id) {
+        TestBenchElement list = grid.$("*").id(id);
+        Assert.assertNotNull(
                 "Could not find the <test-template> of id '" + id
                         + "' inside the grid '" + grid.getAttribute("id") + "'",
-                list.isEmpty());
-        return list.get(0);
+                list);
+        return list;
     }
 
-    private WebElement getFirstCellOfRow(WebElement grid, int row) {
-        return getInShadowRoot(grid, By.id("items"))
-                .findElements(By.tagName("tr")).get(row)
+    private WebElement getFirstCellOfRow(TestBenchElement grid, int row) {
+        return grid.$("*").id("items").findElements(By.tagName("tr")).get(row)
                 .findElement(By.tagName("td"));
     }
 
