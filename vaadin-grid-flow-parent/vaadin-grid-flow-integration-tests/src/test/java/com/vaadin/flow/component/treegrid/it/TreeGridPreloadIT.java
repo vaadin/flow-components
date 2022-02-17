@@ -33,10 +33,15 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     private ButtonElement requestCountReset;
     private TextAreaElement receivedParents;
 
-    private void open(Integer expandedRootIndex) {
+    private void open(Integer ...expandedRootIndexes) {
         String url = getRootURL() + getTestPath();
-        if (expandedRootIndex != null) {
-            url += "/" + expandedRootIndex;
+
+        if (expandedRootIndexes.length > 0) {
+            String expandedRootIndexesString = Arrays.stream(expandedRootIndexes)
+                    .map(Object::toString)
+                    .reduce((a, b) -> a + "," + b)
+                    .orElse("");
+            url += "/" + expandedRootIndexesString;
         }
         getDriver().get(url);
         waitForDevServer();
@@ -140,6 +145,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         open(1);
         Assert.assertTrue(parentItemsReceived("/0/1"));
         Assert.assertFalse(parentItemsReceived("/0/0"));
+    }
+
+    @Test
+    public void multipleExpanded_shouldNotHaveDataForExpandedRootItemsOutsideViewportEstimate() {
+        open(0, 2);
+        Assert.assertTrue(parentItemsReceived("/0/0"));
+        Assert.assertFalse(parentItemsReceived("/0/2"));
     }
 
     private void verifyRow(int rowActualIndex, String itemId) {
