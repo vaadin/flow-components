@@ -21,6 +21,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -39,7 +40,7 @@ import elemental.json.JsonValue;
 import java.beans.PropertyChangeEvent;
 import java.util.Objects;
 
-public abstract class MapBase extends Component implements HasSize {
+public abstract class MapBase extends Component implements HasSize, HasTheme {
     private final Configuration configuration;
     private final View view;
     private final MapSerializer serializer;
