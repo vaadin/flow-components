@@ -369,16 +369,16 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
             callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
             
-            // To avoid unnecessary data requests
-            // TODO: filter sub cache queue by parents still inside the updated viewport?
+            // Flush after the callback to have the grid rows up-to-date
             updateAllGridRowsInDomBasedOnCache();
+            // Prevent sub-caches from being created (& data requests sent) for items
+            // that may no longer be visible
             ensureSubCacheQueue = [];
-            // To eliminate flickering on eager fetch mode
-            updateAllGridRowsInDomBasedOnCache();
+            // Eliminate flickering on eager fetch mode
+            grid.requestContentUpdate();
           } else {
             treePageCallbacks[parentUniqueKey][page] = callback;
 
-            // TODO: Can this be moved here?
             grid.$connector.fetchPage(
               (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
               page,
