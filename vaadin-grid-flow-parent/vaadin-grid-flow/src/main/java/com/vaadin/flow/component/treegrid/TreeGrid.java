@@ -702,8 +702,8 @@ public class TreeGrid<T> extends Grid<T>
             String parentKey) {
         T item = getDataCommunicator().getKeyMapper().get(parentKey);
         if (item != null) {
-            System.out.println("Sending: " + parentKey + " remaining: "
-                    + viewportRemaining);
+            // System.out.println("Sending: " + parentKey + " remaining: "
+            //         + viewportRemaining);
             getDataCommunicator().setParentRequestedRange(start, length, item);
 
             if (getDataCommunicator().hasChildren(item)) {
