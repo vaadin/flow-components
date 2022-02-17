@@ -136,11 +136,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           itemkey: grid.getItemId(targetCache.items[scaledIndex]),
           level: targetCache.getLevel()
         });
-        // TODO: Check proper ordering
-        // sort by ascending scaledIndex and level
-        // ensureSubCacheQueue.sort(function(a, b) {
-        //   return a.scaledIndex - b.scaledIndex || a.level - b.level;
-        // });
 
         ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame,
           () => {
