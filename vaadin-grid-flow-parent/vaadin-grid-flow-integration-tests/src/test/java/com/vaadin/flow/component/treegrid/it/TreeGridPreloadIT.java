@@ -48,7 +48,8 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     private boolean parentItemsReceived(String parentId) {
-        return Arrays.stream(receivedParents.getValue().split("\n")).anyMatch(parentId::equals);
+        return Arrays.stream(receivedParents.getValue().split("\n"))
+                .anyMatch(parentId::equals);
     }
 
     @Test
@@ -80,7 +81,8 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     public void firstExpanded_scrollByViewportEstimate_shouldHaveItemRecursivelyExpanded() {
         open(0);
         getTreeGrid().scrollToRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
-        verifyRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE + 4, "/0/0/1/1/2/0/3/0/4/0");
+        verifyRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE + 4,
+                "/0/0/1/1/2/0/3/0/4/0");
     }
 
     @Test
@@ -99,7 +101,8 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
         getTreeGrid().collapseWithClick(0);
         getTreeGrid().expandWithClick(0);
-        // Expanding a recursively expanded parent doesn't yet trigger a preload so
+        // Expanding a recursively expanded parent doesn't yet trigger a preload
+        // so
         // a second request is made from client.
         Assert.assertEquals("2", requestCount.getValue());
     }
@@ -133,8 +136,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     private void verifyRow(int rowActualIndex, String itemId) {
-        Assert.assertEquals("Invalid id at index " + rowActualIndex,
-                itemId,
+        Assert.assertEquals("Invalid id at index " + rowActualIndex, itemId,
                 getTreeGrid().getCell(rowActualIndex, 0).getText());
     }
 }

@@ -34,7 +34,8 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 
 @Route("vaadin-grid/treegrid-preload/:expandedRootIndex?([0-9]{1,9})")
-public class TreeGridPreloadPage extends VerticalLayout implements BeforeEnterObserver {
+public class TreeGridPreloadPage extends VerticalLayout
+        implements BeforeEnterObserver {
 
     private TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
 
@@ -46,12 +47,16 @@ public class TreeGridPreloadPage extends VerticalLayout implements BeforeEnterOb
         event.getRouteParameters().get("expandedRootIndex")
                 .ifPresent(string -> {
                     int expandedRootIndex = Integer.parseInt(string);
-                    grid.expandRecursively(Arrays.asList(new HierarchicalTestBean(null, 0, expandedRootIndex)), Integer.MAX_VALUE);
+                    grid.expandRecursively(
+                            Arrays.asList(new HierarchicalTestBean(null, 0,
+                                    expandedRootIndex)),
+                            Integer.MAX_VALUE);
                 });
     }
 
     public TreeGridPreloadPage() {
-        TextField requestCountField = new TextField("Child item fetching requests");
+        TextField requestCountField = new TextField(
+                "Child item fetching requests");
         requestCountField.setId("request-count");
         requestCountField.setValue("0");
         requestCountField.setReadOnly(true);
@@ -61,33 +66,38 @@ public class TreeGridPreloadPage extends VerticalLayout implements BeforeEnterOb
             requestCountField.setValue("0");
         });
         requestCountResetButton.setId("request-count-reset");
-        HorizontalLayout requestCountLayout = new HorizontalLayout(requestCountField, requestCountResetButton);
+        HorizontalLayout requestCountLayout = new HorizontalLayout(
+                requestCountField, requestCountResetButton);
         requestCountLayout.setAlignItems(Alignment.END);
 
-        TextArea receivedParentsField = new TextArea("Parents with received children");
+        TextArea receivedParentsField = new TextArea(
+                "Parents with received children");
         receivedParentsField.setReadOnly(true);
         receivedParentsField.setId("received-parents");
         receivedParentsField.setHeight("200px");
         receivedParentsField.setWidth("300px");
 
-        grid.getElement().executeJs("const confirmParent = this.$connector.confirmParent;" +
-        "this.$connector.confirmParent = function(id, parentKey, levelSize) {" +
-        "  confirmParent.call(this.$connector, id, parentKey, levelSize);" +
-        "  window.receivedParents = window.receivedParents || new Set();" +
-        "  window.receivedParents.add(parentKey);" +
-        "  document.getElementById('received-parents').value = [...window.receivedParents].join('\\n');" +
-        "  document.getElementById('received-parents').helperText = 'Items: (' + window.receivedParents.size + ')';" +
-        "}");
+        grid.getElement().executeJs(
+                "const confirmParent = this.$connector.confirmParent;"
+                        + "this.$connector.confirmParent = function(id, parentKey, levelSize) {"
+                        + "  confirmParent.call(this.$connector, id, parentKey, levelSize);"
+                        + "  window.receivedParents = window.receivedParents || new Set();"
+                        + "  window.receivedParents.add(parentKey);"
+                        + "  document.getElementById('received-parents').value = [...window.receivedParents].join('\\n');"
+                        + "  document.getElementById('received-parents').helperText = 'Items: (' + window.receivedParents.size + ')';"
+                        + "}");
 
         grid.addHierarchyColumn(HierarchicalTestBean::getId).setHeader("Id");
         grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
-        grid.addColumn(HierarchicalTestBean::getIndex).setHeader("Index on level");
+        grid.addColumn(HierarchicalTestBean::getIndex)
+                .setHeader("Index on level");
         grid.addColumn(LitRenderer.of("${index}")).setHeader("Index");
         grid.setDataProvider(new LazyHierarchicalDataProvider(3, 4) {
             @Override
             protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
                     HierarchicalQuery<HierarchicalTestBean, Void> query) {
-                VaadinRequest currentRequest = VaadinService.getCurrentRequest();
+                VaadinRequest currentRequest = VaadinService
+                        .getCurrentRequest();
                 if (!currentRequest.equals(lastRequest)) {
                     requestCount++;
                 }

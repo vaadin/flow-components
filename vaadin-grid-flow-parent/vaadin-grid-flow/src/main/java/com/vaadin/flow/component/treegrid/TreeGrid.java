@@ -131,11 +131,15 @@ public class TreeGrid<T> extends Grid<T>
             updateSelectionModeOnClient();
             getDataCommunicator().setRequestedRange(0, getPageSize());
 
-            getDataCommunicator().fetchFromProvider(0, EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE).forEach(parentItem -> {
-                if (viewportRemaining > 0) {
-                    recursiveSetParentRequestedRange(0, getPageSize(), getDataCommunicator().getKeyMapper().key(parentItem));    
-                }
-            });
+            getDataCommunicator()
+                    .fetchFromProvider(0, EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE)
+                    .forEach(parentItem -> {
+                        if (viewportRemaining > 0) {
+                            recursiveSetParentRequestedRange(0, getPageSize(),
+                                    getDataCommunicator().getKeyMapper()
+                                            .key(parentItem));
+                        }
+                    });
         }
 
         @Override
@@ -686,28 +690,33 @@ public class TreeGrid<T> extends Grid<T>
     private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
     private int viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
 
-    // TODO: This is never called from client! It's only called from setParentRequestedRanges
+    // TODO: This is never called from client! It's only called from
+    // setParentRequestedRanges
     // @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {
         recursiveSetParentRequestedRange(start, length, parentKey);
     }
 
-    private void recursiveSetParentRequestedRange(int start, int length, String parentKey) {    
+    private void recursiveSetParentRequestedRange(int start, int length,
+            String parentKey) {
         T item = getDataCommunicator().getKeyMapper().get(parentKey);
         if (item != null) {
-            System.out.println("Sending: " + parentKey + " remaining: " + viewportRemaining);
+            System.out.println("Sending: " + parentKey + " remaining: "
+                    + viewportRemaining);
             getDataCommunicator().setParentRequestedRange(start, length, item);
 
             if (getDataCommunicator().hasChildren(item)) {
                 getDataProvider()
-                    .fetchChildren(new HierarchicalQuery<>(null, item))
-                    .forEach(child -> {
-                        viewportRemaining--;
-                        if (viewportRemaining > 0 && isExpanded(child)) {
-                            recursiveSetParentRequestedRange(0, getPageSize(), getDataCommunicator().getKeyMapper().key(child));
-                        }
-                    });
+                        .fetchChildren(new HierarchicalQuery<>(null, item))
+                        .forEach(child -> {
+                            viewportRemaining--;
+                            if (viewportRemaining > 0 && isExpanded(child)) {
+                                recursiveSetParentRequestedRange(0,
+                                        getPageSize(), getDataCommunicator()
+                                                .getKeyMapper().key(child));
+                            }
+                        });
             }
 
         }
