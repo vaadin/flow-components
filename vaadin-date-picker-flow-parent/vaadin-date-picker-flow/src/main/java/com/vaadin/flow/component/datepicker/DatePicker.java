@@ -971,8 +971,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Gets the translated word for {@code calendar}.
          *
+         * @deprecated the toggle button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @return the translated word for calendar
          */
+        @Deprecated
         public String getCalendar() {
             return calendar;
         }
@@ -980,10 +983,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Sets the translated word for {@code calendar}.
          *
+         * @deprecated the toggle button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @param calendar
          *            the translated word for calendar
          * @return this instance for method chaining
          */
+        @Deprecated
         public DatePickerI18n setCalendar(String calendar) {
             this.calendar = calendar;
             return this;
@@ -992,8 +998,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Gets the translated word for {@code clear}.
          *
+         * @deprecated the clear button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @return the translated word for clear
          */
+        @Deprecated
         public String getClear() {
             return clear;
         }
@@ -1001,10 +1010,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Sets the translated word for {@code clear}.
          *
+         * @deprecated the clear button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @param clear
          *            the translated word for clear
          * @return this instance for method chaining
          */
+        @Deprecated
         public DatePickerI18n setClear(String clear) {
             this.clear = clear;
             return this;
