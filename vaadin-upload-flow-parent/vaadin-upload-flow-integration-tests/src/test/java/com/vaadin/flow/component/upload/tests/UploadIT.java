@@ -45,7 +45,7 @@ public class UploadIT extends AbstractUploadIT {
         waitUntil(driver -> getUpload().isDisplayed());
 
         File tempFile = createTempFile();
-        fillPathToUploadInput(tempFile.getPath());
+        getUpload().upload(tempFile);
 
         WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
 
@@ -65,8 +65,9 @@ public class UploadIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(tempFile.getPath(), tempFile.getPath(),
-                tempFile.getPath());
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
 
         $("button").id("print-file-list").click();
 
@@ -94,8 +95,9 @@ public class UploadIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(tempFile.getPath(), tempFile.getPath(),
-                tempFile.getPath());
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
+        getUpload().upload(tempFile);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("test-events-output"));
@@ -113,7 +115,7 @@ public class UploadIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(tempFile.getPath());
+        getUpload().upload(tempFile);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("test-events-output"));
@@ -128,7 +130,7 @@ public class UploadIT extends AbstractUploadIT {
         waitUntil(driver -> getUpload().isDisplayed());
 
         File tempFile = createTempFile();
-        fillPathToUploadInput(tempFile.getPath());
+        getUpload().upload(tempFile);
 
         List<LogEntry> logList1 = getLogEntries(Level.SEVERE);
         assertThat("There should have no severe message in the console",
@@ -141,23 +143,8 @@ public class UploadIT extends AbstractUploadIT {
                 logList2.size(), CoreMatchers.is(0));
     }
 
-    private void fillPathToUploadInput(String... tempFileNames)
-            throws Exception {
-        fillPathToUploadInput(getInput(), tempFileNames);
-    }
-
     private UploadElement getUpload() {
         return $(UploadElement.class).id("test-upload");
-    }
-
-    /**
-     * Get the web component for the actual upload button hidden in the upload
-     * component.
-     *
-     * @return actual upload button
-     */
-    private WebElement getInput() {
-        return getInput(getUpload());
     }
 
 }
