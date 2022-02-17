@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -29,6 +30,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
     private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
     private TextFieldElement requestCount;
+    private ButtonElement requestCountReset;
     private TextAreaElement receivedParents;
 
     private void open(Integer expandedRootIndex) {
@@ -41,6 +43,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
         setupTreeGrid();
         requestCount = $(TextFieldElement.class).id("request-count");
+        requestCountReset = $(ButtonElement.class).id("request-count-reset");
         receivedParents = $(TextAreaElement.class).id("received-parents");
     }
 
@@ -58,7 +61,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void firstExpanded_shouldPreLoadDataForExpandedChildren() {
         open(0);
-        Assert.assertEquals(requestCount.getValue(), "1");
+        Assert.assertEquals("1", requestCount.getValue());
+    }
+
+    @Test
+    public void firstExpanded_shouldNotHaveDataForExpandedRootItemsOutsideViewportEstimate() {
+        open(0);
+        Assert.assertFalse(parentItemsReceived("/0/1"));
     }
 
     @Test
@@ -71,22 +80,28 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     public void firstExpanded_scrollByViewportEstimate_shouldHaveItemRecursivelyExpanded() {
         open(0);
         getTreeGrid().scrollToRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
-        verifyRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE + 4, "/0/0/1/1/2/0/3/0/4");
+        verifyRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE + 4, "/0/0/1/1/2/0/3/0/4/0");
     }
 
     @Test
     public void firstExpanded_scrollByViewportEstimate_shouldPreLoadDataForExpandedChildren() {
         open(0);
+        requestCountReset.click();
+
         getTreeGrid().scrollToRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
-        Assert.assertEquals(requestCount.getValue(), "2");
+        Assert.assertEquals("1", requestCount.getValue());
     }
 
     @Test
     public void firstExpanded_reExpand_shouldPreLoadDataForExpandedChildren() {
         open(0);
+        requestCountReset.click();
+
         getTreeGrid().collapseWithClick(0);
         getTreeGrid().expandWithClick(0);
-        Assert.assertEquals(requestCount.getValue(), "2");
+        // Expanding a recursively expanded parent doesn't yet trigger a preload so
+        // a second request is made from client.
+        Assert.assertEquals("2", requestCount.getValue());
     }
 
     @Test
@@ -101,9 +116,11 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void firstExpanded_reExpandChild_shouldPreLoadDataForExpandedChildren() {
         open(0);
-        getTreeGrid().collapseWithClick(1);
-        getTreeGrid().expandWithClick(1);
-        Assert.assertEquals(requestCount.getValue(), "2");
+        requestCountReset.click();
+
+        getTreeGrid().collapseWithClick(2);
+        getTreeGrid().expandWithClick(2);
+        Assert.assertEquals("1", requestCount.getValue());
     }
 
     @Test

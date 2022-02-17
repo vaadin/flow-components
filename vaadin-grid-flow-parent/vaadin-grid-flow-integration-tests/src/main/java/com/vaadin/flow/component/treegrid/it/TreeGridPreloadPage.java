@@ -18,6 +18,8 @@ package com.vaadin.flow.component.treegrid.it;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -54,6 +56,13 @@ public class TreeGridPreloadPage extends VerticalLayout implements BeforeEnterOb
         requestCountField.setValue("0");
         requestCountField.setReadOnly(true);
         requestCountField.setWidth("300px");
+        Button requestCountResetButton = new Button("Reset", event -> {
+            requestCount = 0;
+            requestCountField.setValue("0");
+        });
+        requestCountResetButton.setId("request-count-reset");
+        HorizontalLayout requestCountLayout = new HorizontalLayout(requestCountField, requestCountResetButton);
+        requestCountLayout.setAlignItems(Alignment.END);
 
         TextArea receivedParentsField = new TextArea("Parents with received children");
         receivedParentsField.setReadOnly(true);
@@ -64,10 +73,10 @@ public class TreeGridPreloadPage extends VerticalLayout implements BeforeEnterOb
         grid.getElement().executeJs("const confirmParent = this.$connector.confirmParent;" +
         "this.$connector.confirmParent = function(id, parentKey, levelSize) {" +
         "  confirmParent.call(this.$connector, id, parentKey, levelSize);" +
-        "  window.receivedParents = window.receivedParents || [];" +
-        "  window.receivedParents.push(parentKey);" +
-        "  document.getElementById('received-parents').value = window.receivedParents.join('\\n');" +
-        "  document.getElementById('received-parents').helperText = 'Items: (' + window.receivedParents.length + ')';" +
+        "  window.receivedParents = window.receivedParents || new Set();" +
+        "  window.receivedParents.add(parentKey);" +
+        "  document.getElementById('received-parents').value = [...window.receivedParents].join('\\n');" +
+        "  document.getElementById('received-parents').helperText = 'Items: (' + window.receivedParents.size + ')';" +
         "}");
 
         grid.addHierarchyColumn(HierarchicalTestBean::getId).setHeader("Id");
@@ -89,7 +98,7 @@ public class TreeGridPreloadPage extends VerticalLayout implements BeforeEnterOb
         });
 
         add(grid);
-        add(requestCountField);
+        add(requestCountLayout);
         add(receivedParentsField);
     }
 }
