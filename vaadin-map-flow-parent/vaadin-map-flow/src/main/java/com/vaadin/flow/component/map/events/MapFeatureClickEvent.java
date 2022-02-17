@@ -8,9 +8,6 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
-import java.util.Objects;
-import java.util.Optional;
-
 /**
  * Provides data for click events on geographic features
  */
@@ -34,21 +31,12 @@ public class MapFeatureClickEvent extends ComponentEvent<Map> {
             @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
-        Optional<VectorLayer> maybeLayer = source.getRawConfiguration()
-                .getLayers().stream()
-                .filter(layer -> layer instanceof VectorLayer
-                        && Objects.equals(layer.getId(), layerId))
-                .findFirst().map(layer -> (VectorLayer) layer);
-        Optional<VectorSource> maybeVectorSource = maybeLayer
-                .map(layer -> (VectorSource) layer.getSource());
-        Optional<Feature> maybeFeature = maybeVectorSource.flatMap(
-                vectorSource -> vectorSource.getFeatures().stream().filter(
-                        feature -> Objects.equals(feature.getId(), featureId))
-                        .findFirst());
-
-        this.layer = maybeLayer.orElse(null);
-        this.vectorSource = maybeVectorSource.orElse(null);
-        this.feature = maybeFeature.orElse(null);
+        FeatureEventDetails featureEventDetails = MapEventUtil
+                .getFeatureEventDetails(source.getRawConfiguration(), layerId,
+                        featureId);
+        this.layer = featureEventDetails.getLayer();
+        this.vectorSource = featureEventDetails.getSource();
+        this.feature = featureEventDetails.getFeature();
 
         details = new MouseEventDetails();
         details.setAbsoluteX(pageX);
