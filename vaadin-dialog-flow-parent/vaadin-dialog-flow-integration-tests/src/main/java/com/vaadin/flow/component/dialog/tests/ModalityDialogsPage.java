@@ -84,10 +84,7 @@ public class ModalityDialogsPage extends Div {
         nonModalDialog.add(closeSub, logSub);
 
         final NativeButton openSubDialog = new NativeButton("open dialog",
-                e -> {
-                    modalDialog.add(nonModalDialog);
-                    nonModalDialog.open();
-                });
+                e -> nonModalDialog.open());
         openSubDialog.setId("open-sub");
         modalDialog.add(openSubDialog);
 

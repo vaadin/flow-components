@@ -590,7 +590,7 @@ public class ConfirmDialog extends Component
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
                 updateWidth();
                 updateHeight();

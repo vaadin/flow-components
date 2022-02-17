@@ -412,7 +412,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (getElement().getNode().getParent() == null) {
             UI ui = getCurrentUI();
             ui.beforeClientResponse(ui, context -> {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
             });
         }

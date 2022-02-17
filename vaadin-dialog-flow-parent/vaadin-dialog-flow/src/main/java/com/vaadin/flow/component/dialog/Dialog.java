@@ -536,7 +536,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 ui.setChildComponentModal(this, isModal());
                 autoAddedToTheUi = true;
             }
