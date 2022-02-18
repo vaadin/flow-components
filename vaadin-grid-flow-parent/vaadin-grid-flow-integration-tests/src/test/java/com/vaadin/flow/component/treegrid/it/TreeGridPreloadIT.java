@@ -179,4 +179,17 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         Assert.assertEquals("Invalid id at index " + rowActualIndex, itemId,
                 getTreeGrid().getCell(rowActualIndex, 0).getText());
     }
+
+    @Test
+    public void multipleExpanded_shouldExpandWhenScrolledTo() {
+        open(0, 2);
+
+        waitUntil(w -> {
+            getTreeGrid().scrollToRow(Integer.MAX_VALUE);
+            return "/0/2/1/2/2/2/3/2/4/2".equals(getTreeGrid()
+                    .getCell(getTreeGrid().getLastVisibleRowIndex(), 0)
+                    .getText());
+        });
+    }
+
 }
