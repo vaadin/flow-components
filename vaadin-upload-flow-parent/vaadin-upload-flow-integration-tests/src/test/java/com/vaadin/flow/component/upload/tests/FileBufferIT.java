@@ -22,7 +22,7 @@ public class FileBufferIT extends AbstractUploadIT {
         waitUntil(driver -> upload.isDisplayed());
 
         File tempFile = createTempFile();
-        fillPathToUploadInput(getInput(upload), tempFile.getPath());
+        upload.upload(tempFile);
 
         WebElement uploadOutput = getDriver()
                 .findElement(By.id("single-upload-output"));
@@ -50,8 +50,9 @@ public class FileBufferIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        fillPathToUploadInput(getInput(upload), tempFile.getPath(),
-                tempFile.getPath(), tempFile.getPath());
+        upload.upload(tempFile);
+        upload.upload(tempFile);
+        upload.upload(tempFile);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("multi-upload-event-output"));
