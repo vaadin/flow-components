@@ -20,7 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -31,7 +31,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
     private boolean dirty;
     private static final ThreadLocal<Boolean> trackObjectChanges = ThreadLocal
             .withInitial(() -> true);
-    private final Set<AbstractConfigurationObject> children = new HashSet<>();
+    private final Set<AbstractConfigurationObject> children = new LinkedHashSet<>();
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
