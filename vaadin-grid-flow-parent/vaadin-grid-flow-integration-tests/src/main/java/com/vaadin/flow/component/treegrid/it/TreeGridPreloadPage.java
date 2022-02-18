@@ -28,17 +28,21 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.Location;
+import com.vaadin.flow.router.OptionalParameter;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 
-@Route("vaadin-grid/treegrid-preload/:expandedRootIndexes?([0-9,]{1,9})/:sortDirection?([ascending,descending]{1,10})")
+@Route("vaadin-grid/treegrid-preload")
 public class TreeGridPreloadPage extends VerticalLayout
-        implements BeforeEnterObserver {
+        implements HasUrlParameter<String> {
 
     private TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
 
@@ -46,27 +50,38 @@ public class TreeGridPreloadPage extends VerticalLayout
     private int requestCount = 0;
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        event.getRouteParameters().get("expandedRootIndexes")
-                .ifPresent(string -> {
-                    List<HierarchicalTestBean> expandedRootItems = Arrays
-                            .stream(string.split(",")).map(Integer::parseInt)
-                            .map(expandedRootIndex -> new HierarchicalTestBean(
-                                    null, 0, expandedRootIndex))
-                            .collect(java.util.stream.Collectors.toList());
-                    grid.expandRecursively(expandedRootItems,
-                            Integer.MAX_VALUE);
-                });
+    public void setParameter(BeforeEvent event,
+            @OptionalParameter String parameter) {
 
-        event.getRouteParameters().get("sortDirection").ifPresent(string -> {
+        Location location = event.getLocation();
+        QueryParameters queryParameters = location.getQueryParameters();
+
+        List<String> expandedRootIndexes = queryParameters.getParameters()
+                .get("expandedRootIndexes");
+        if (expandedRootIndexes != null) {
+            List<HierarchicalTestBean> expandedRootItems = Arrays
+                    .stream(expandedRootIndexes.get(0).split(","))
+                    .map(Integer::parseInt)
+                    .map(expandedRootIndex -> new HierarchicalTestBean(null, 0,
+                            expandedRootIndex))
+                    .collect(java.util.stream.Collectors.toList());
+            grid.expandRecursively(expandedRootItems, Integer.MAX_VALUE);
+        }
+
+        List<String> sortDirection = queryParameters.getParameters()
+                .get("sortDirection");
+        if (sortDirection != null) {
+            SortDirection direction = SortDirection
+                    .valueOf(sortDirection.get(0).toUpperCase());
             GridSortOrderBuilder<HierarchicalTestBean> sorting = new GridSortOrderBuilder<HierarchicalTestBean>();
             Column<HierarchicalTestBean> column = grid.getColumns().get(0);
-            if ("ascending".equals(string)) {
+            if (direction == SortDirection.ASCENDING) {
                 grid.sort(sorting.thenAsc(column).build());
             } else {
                 grid.sort(sorting.thenDesc(column).build());
             }
-        });
+        }
+
     }
 
     public TreeGridPreloadPage() {

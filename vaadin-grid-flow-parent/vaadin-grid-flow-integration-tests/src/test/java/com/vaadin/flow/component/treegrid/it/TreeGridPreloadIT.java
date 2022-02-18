@@ -40,17 +40,17 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
     private void open(SortDirection sortDirection,
             Integer... expandedRootIndexes) {
-        String url = getRootURL() + getTestPath();
+        String url = getRootURL() + getTestPath() + "/?foo=bar";
 
         if (expandedRootIndexes.length > 0) {
             String expandedRootIndexesString = Arrays
                     .stream(expandedRootIndexes).map(Object::toString)
                     .reduce((a, b) -> a + "," + b).orElse("");
-            url += "/" + expandedRootIndexesString;
+            url += "&expandedRootIndexes=" + expandedRootIndexesString;
         }
 
         if (sortDirection != null) {
-            url += "/" + sortDirection.name().toLowerCase();
+            url += "&sortDirection=" + sortDirection.name().toLowerCase();
         }
 
         getDriver().get(url);
