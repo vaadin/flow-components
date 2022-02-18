@@ -698,24 +698,33 @@ public class TreeGrid<T> extends Grid<T>
 
     private void recursiveSetParentRequestedRange(int start, int length,
             String parentKey) {
-        T item = getDataCommunicator().getKeyMapper().get(parentKey);
-        if (item != null) {
-            getDataCommunicator().setParentRequestedRange(start, length, item);
 
-            if (getDataCommunicator().hasChildren(item)) {
-                getDataProvider()
-                        .fetchChildren(new HierarchicalQuery<>(null, item))
-                        .forEach(child -> {
-                            eagerFetchViewportRemaining--;
-                            if (eagerFetchViewportRemaining > 0
-                                    && isExpanded(child)) {
-                                recursiveSetParentRequestedRange(0,
-                                        getPageSize(), getDataCommunicator()
-                                                .getKeyMapper().key(child));
-                            }
-                        });
-            }
+        HierarchicalDataCommunicator<T> dc = getDataCommunicator();
+        T item = dc.getKeyMapper().get(parentKey);
+        if (item == null) {
+            return;
+        }
 
+        // Set requested range for the item
+        dc.setParentRequestedRange(start, length, item);
+
+        if (dc.hasChildren(item)) {
+            HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
+                    0, getPageSize(), dc.getBackEndSorting(),
+                    dc.getInMemorySorting(), null, item);
+
+            // Make a query for the item children
+            getDataProvider().fetchChildren(query).forEach(child -> {
+                eagerFetchViewportRemaining -= 1;
+
+                if (eagerFetchViewportRemaining > 0 && isExpanded(child)) {
+                    // There's still room left in the viewport and the child is
+                    // expanded. Call recursively to have the requested range
+                    // set for the child also (pre-fetch the children)
+                    recursiveSetParentRequestedRange(0, getPageSize(),
+                            dc.getKeyMapper().key(child));
+                }
+            });
         }
     }
 

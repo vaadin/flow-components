@@ -23,6 +23,7 @@ import java.util.Arrays;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-grid/treegrid-preload")
@@ -34,6 +35,11 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     private TextAreaElement receivedParents;
 
     private void open(Integer... expandedRootIndexes) {
+        open(null, expandedRootIndexes);
+    }
+
+    private void open(SortDirection sortDirection,
+            Integer... expandedRootIndexes) {
         String url = getRootURL() + getTestPath();
 
         if (expandedRootIndexes.length > 0) {
@@ -42,6 +48,11 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
                     .reduce((a, b) -> a + "," + b).orElse("");
             url += "/" + expandedRootIndexesString;
         }
+
+        if (sortDirection != null) {
+            url += "/" + sortDirection.name().toLowerCase();
+        }
+
         getDriver().get(url);
         waitForDevServer();
 
@@ -150,6 +161,18 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         open(0, 2);
         Assert.assertTrue(parentItemsReceived("/0/0"));
         Assert.assertFalse(parentItemsReceived("/0/2"));
+    }
+
+    @Test
+    public void firstExpanded_initiallySorted_shouldHaveItemRecursivelyExpanded() {
+        open(SortDirection.DESCENDING, 0);
+        verifyRow(6, "/0/0/1/2/2/2/3/2/4/2");
+    }
+
+    @Test
+    public void firstExpanded_initiallySorted_shouldPreLoadDataForExpandedChildren() {
+        open(SortDirection.DESCENDING, 0);
+        Assert.assertEquals("1", requestCount.getValue());
     }
 
     private void verifyRow(int rowActualIndex, String itemId) {

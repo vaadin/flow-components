@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.GridSortOrderBuilder;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -34,7 +36,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 
-@Route("vaadin-grid/treegrid-preload/:expandedRootIndexes?([0-9,]{1,9})")
+@Route("vaadin-grid/treegrid-preload/:expandedRootIndexes?([0-9,]{1,9})/:sortDirection?([ascending,descending]{1,10})")
 public class TreeGridPreloadPage extends VerticalLayout
         implements BeforeEnterObserver {
 
@@ -55,6 +57,16 @@ public class TreeGridPreloadPage extends VerticalLayout
                     grid.expandRecursively(expandedRootItems,
                             Integer.MAX_VALUE);
                 });
+
+        event.getRouteParameters().get("sortDirection").ifPresent(string -> {
+            GridSortOrderBuilder<HierarchicalTestBean> sorting = new GridSortOrderBuilder<HierarchicalTestBean>();
+            Column<HierarchicalTestBean> column = grid.getColumns().get(0);
+            if ("ascending".equals(string)) {
+                grid.sort(sorting.thenAsc(column).build());
+            } else {
+                grid.sort(sorting.thenDesc(column).build());
+            }
+        });
     }
 
     public TreeGridPreloadPage() {
