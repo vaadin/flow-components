@@ -51,6 +51,13 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     public abstract String getType();
 
+    /**
+     * Marks this configuration object as dirty / as changed, so that it will be
+     * picked up for the next synchronization.
+     * <p>
+     * This also triggers {@link #notifyChange()} to notify observers that a
+     * change happened.
+     */
     protected void markAsDirty() {
         if (!trackObjectChanges.get())
             return;
@@ -58,6 +65,21 @@ public abstract class AbstractConfigurationObject implements Serializable {
         notifyChange();
     }
 
+    /**
+     * Marks this configuration object, as well as all nested objects, as dirty
+     * / as changed, so that the full nested hierarchy will be picked up for the
+     * next synchronization.
+     * <p>
+     * Unlike {@link #markAsDirty()} this does not trigger
+     * {@link #notifyChange()}. Currently, there are limited use-cases for this
+     * method, and in all of them a change event, or a map synchronization, will
+     * already be triggered through other means. Triggering a change event in
+     * this method would lead to recursively triggering change events from all
+     * nested objects, each of which would then bubble up through the hierarchy
+     * again, which seems wasteful and is unnecessary at the moment. If another
+     * use-case comes up in the future, consider just calling
+     * {@link #notifyChange()} manually after this method.
+     */
     protected void deepMarkAsDirty() {
         if (!trackObjectChanges.get())
             return;
