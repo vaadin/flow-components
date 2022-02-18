@@ -33,14 +33,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     private ButtonElement requestCountReset;
     private TextAreaElement receivedParents;
 
-    private void open(Integer ...expandedRootIndexes) {
+    private void open(Integer... expandedRootIndexes) {
         String url = getRootURL() + getTestPath();
 
         if (expandedRootIndexes.length > 0) {
-            String expandedRootIndexesString = Arrays.stream(expandedRootIndexes)
-                    .map(Object::toString)
-                    .reduce((a, b) -> a + "," + b)
-                    .orElse("");
+            String expandedRootIndexesString = Arrays
+                    .stream(expandedRootIndexes).map(Object::toString)
+                    .reduce((a, b) -> a + "," + b).orElse("");
             url += "/" + expandedRootIndexesString;
         }
         getDriver().get(url);
@@ -107,8 +106,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         getTreeGrid().collapseWithClick(0);
         getTreeGrid().expandWithClick(0);
         // Expanding a recursively expanded parent doesn't yet trigger a preload
-        // so
-        // a second request is made from client.
+        // so a second request is made from client.
         Assert.assertEquals("2", requestCount.getValue());
     }
 
