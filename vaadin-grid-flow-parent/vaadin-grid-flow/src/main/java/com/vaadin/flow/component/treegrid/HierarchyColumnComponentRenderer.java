@@ -83,7 +83,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
                 templateInnerHtml = "";
             }
         }
-        templateInnerHtml = "<vaadin-grid-tree-toggle class$='[[item.cssClassName]]' leaf='[[item.leaf]]' expanded='{{expanded}}' level='[[level]]'>"
+        templateInnerHtml = "<vaadin-grid-tree-toggle class$='[[item.cssClassName]]' leaf='[[!item.children]]' expanded='{{expanded}}' level='[[level]]'>"
                 + templateInnerHtml + "</vaadin-grid-tree-toggle>";
         templateElement.setProperty("innerHTML", templateInnerHtml);
     }
@@ -114,7 +114,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         @Override
         public void generateData(SOURCE item, JsonObject jsonObject) {
             super.generateData(item, jsonObject);
-            // in order to add item.leaf property
+            // in order to add item.children property
             getValueProviders().forEach((key, provider) -> jsonObject.put(key,
                     JsonSerializer.toJson(provider.apply(item))));
         }
