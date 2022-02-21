@@ -20,7 +20,7 @@ public class PointBasedFeatureTest {
 
     @Test
     public void defaults() {
-        PointBasedFeature feature = new TestFeature();
+        PointBasedFeature feature = new TestPointBasedFeature();
 
         Assert.assertNotNull(feature.getGeometry());
         Assert.assertNotNull(feature.getGeometry().getCoordinates());
@@ -34,7 +34,7 @@ public class PointBasedFeatureTest {
     public void setCoordinates() {
         Coordinate customCoordinate = new Coordinate(1233058.1696443919,
                 6351912.406929109);
-        PointBasedFeature feature = new TestFeature();
+        TestPointBasedFeature feature = new TestPointBasedFeature();
         feature.addPropertyChangeListener(propertyChangeListenerMock);
 
         feature.setCoordinates(customCoordinate);
@@ -48,7 +48,7 @@ public class PointBasedFeatureTest {
 
     @Test
     public void setCoordinates_failsWithNullValue() {
-        PointBasedFeature feature = new TestFeature();
+        PointBasedFeature feature = new TestPointBasedFeature();
 
         Assert.assertThrows(NullPointerException.class,
                 () -> feature.setCoordinates(null));
@@ -57,18 +57,19 @@ public class PointBasedFeatureTest {
     @Test
     public void setGeometry() {
         Point customPoint = new Point(new Coordinate());
-        PointBasedFeature feature = new TestFeature();
+        TestPointBasedFeature feature = new TestPointBasedFeature();
         feature.addPropertyChangeListener(propertyChangeListenerMock);
 
         feature.setGeometry(customPoint);
         Assert.assertEquals(customPoint, feature.getGeometry());
-        Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
+        // One event each for removing old geometry, and adding new one
+        Mockito.verify(propertyChangeListenerMock, Mockito.times(2))
                 .propertyChange(Mockito.any());
     }
 
     @Test
     public void setGeometry_requiresPoint() {
-        PointBasedFeature feature = new TestFeature();
+        PointBasedFeature feature = new TestPointBasedFeature();
 
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> feature.setGeometry(new TestGeometry()));
@@ -76,13 +77,18 @@ public class PointBasedFeatureTest {
 
     @Test
     public void setGeometry_failsWithNullValue() {
-        PointBasedFeature feature = new TestFeature();
+        PointBasedFeature feature = new TestPointBasedFeature();
 
         Assert.assertThrows(NullPointerException.class,
                 () -> feature.setGeometry(null));
     }
 
-    private static class TestFeature extends PointBasedFeature {
+    private static class TestPointBasedFeature extends PointBasedFeature {
+        // Expose method for testing
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            super.addPropertyChangeListener(listener);
+        }
     }
 
     private static class TestGeometry extends SimpleGeometry {

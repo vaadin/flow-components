@@ -43,7 +43,7 @@ public abstract class UrlTileSource extends TileSource {
      */
     public void setUrl(String url) {
         this.url = url;
-        notifyChange();
+        markAsDirty();
     }
 
     protected static class BaseOptions<T extends BaseOptions<T>>

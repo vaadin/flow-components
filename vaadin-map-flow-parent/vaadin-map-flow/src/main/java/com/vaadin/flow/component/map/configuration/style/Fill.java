@@ -34,6 +34,6 @@ public class Fill extends AbstractConfigurationObject {
 
     public void setColor(String color) {
         this.color = color;
-        notifyChange();
+        markAsDirty();
     }
 }
