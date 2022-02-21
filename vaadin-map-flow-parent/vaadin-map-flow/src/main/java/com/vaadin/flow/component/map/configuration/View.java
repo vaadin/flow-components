@@ -17,12 +17,13 @@ package com.vaadin.flow.component.map.configuration;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.component.map.configuration.source.Source;
 
 import java.util.Objects;
 
 /**
- * View of the map, responsible for changing properties like center and zoom
- * level of the view
+ * Represents a map's viewport, responsible for changing properties like center
+ * and zoom level
  */
 public class View extends AbstractConfigurationObject {
 
@@ -32,10 +33,24 @@ public class View extends AbstractConfigurationObject {
     private Extent extent;
     private final String projection;
 
+    /**
+     * Constructs a new view using {@code EPSG:3857} / Web Mercator Sphere
+     * coordinate projection by default. Unless you are using a custom map
+     * service that uses a different projection, this is what you want.
+     */
     public View() {
         this(Projection.EPSG_3857.stringValue());
     }
 
+    /**
+     * Constructs a new view using a custom coordinate projection. A custom
+     * projection is only necessary when using a map service and corresponding
+     * {@link Source} that uses a projection other than {@code EPSG:3857} / Web
+     * Mercator Sphere projection.
+     *
+     * @param projection
+     *            the custom coordinate projection to use
+     */
     public View(String projection) {
         this.center = new Coordinate(0, 0);
         this.rotation = 0;
@@ -60,7 +75,7 @@ public class View extends AbstractConfigurationObject {
 
     /**
      * Sets the center of the view in format specified by projection set on the
-     * view, which defaults to {@code "EPSG:3857}
+     * view, which defaults to {@code EPSG:3857}
      *
      * @param center
      *            coordinates of the center of the view
@@ -73,7 +88,7 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Get rotation of the view
+     * Get rotation of the view, defaults to {@code 0}
      *
      * @return current rotation in radians
      */
@@ -82,7 +97,7 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Sets the rotation of the view, default to {@code 0}
+     * Sets the rotation of the view in radians
      *
      * @param rotation
      *            the rotation in radians format
@@ -93,19 +108,24 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Gets zoom level of the view
+     * Gets zoom level of the view, defaults to {@code 0}
      *
-     * @return the zoom level of the view
+     * @return current zoom level
      */
     public float getZoom() {
         return zoom;
     }
 
     /**
-     * Sets the zoom level of the view, default to {@code 0}
+     * Sets the zoom level of the view. The zoom level is a decimal value that
+     * starts at {@code 0} as the most zoomed-out level, and then continually
+     * increases to zoom further in. By default, the maximum zoom level is
+     * currently restricted to {@code 28}. In practical terms, the level of
+     * detail of the map data that a map service provides determines how useful
+     * higher zoom levels are.
      *
      * @param zoom
-     *            the zoom level in decimal format
+     *            new zoom level
      */
     public void setZoom(float zoom) {
         this.zoom = zoom;
@@ -113,7 +133,8 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Gets the projection of the view, default to {@code "EPSG:3857"}
+     * Gets the projection of the view, which defaults to {@code EPSG:3857} /
+     * Web Mercator Sphere projection
      *
      * @return the projection of the view
      */
@@ -136,7 +157,9 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Updates internal state of view to the latest values received from client
+     * Updates internal state of view to the latest values received from client.
+     * <p>
+     * For internal use only.
      *
      * @param center
      *            the updated center coordinates
