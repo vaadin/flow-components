@@ -31,13 +31,8 @@ function synchronizeMap(target, source, context) {
     throw new Error("Existing map instance must be provided");
   }
 
-  // Layers
   synchronizeCollection(target.getLayers(), source.layers, context);
-
-  // View
-  if (source.view) {
-    synchronizeView(target.getView(), source.view, context);
-  }
+  target.setView(context.lookup.get(source.view));
 
   return target;
 }
@@ -73,12 +68,8 @@ function synchronizeFeature(target, source, context) {
     target = new Feature();
   }
 
-  target.setGeometry(
-    context.synchronize(target.getGeometry(), source.geometry, context)
-  );
-  target.setStyle(
-    context.synchronize(target.getStyle(), source.style, context)
-  );
+  target.setGeometry(context.lookup.get(source.geometry));
+  target.setStyle(context.lookup.get(source.style));
 
   return target;
 }
@@ -112,45 +103,44 @@ const synchronizerLookup = {
  * - a type property to specify which OpenLayers class / type to use
  * - an ID property to identify the instance in future syncs
  *
- * If the target instance is null, or if its ID does not match with the source
- * configuration object, then a new target instance will be created.
+ * The function uses a lookup map to retrieve the OL instance that should be
+ * synchronized into by the object's unique ID. If an instance for that ID
+ * does not exist yet, it will be created by the type-specific synchronization
+ * function and then stored in the lookup for later synchronizations.
  *
  * Only specific OpenLayers classes are supported for synchronization.
  *
- * @param target The OpenLayers instance into which to synchronize, or null if a new instance should be created
- * @param source The configuration object to synchronize from
- * @param context The context object providing global context for the synchronization
+ * @param updatedObject The configuration object to synchronize from
+ * @param context The map-specific context for the synchronization
  * @returns {*}
  */
-export function synchronize(target, source, context) {
-  const type = source.type;
+export function synchronize(updatedObject, context) {
+  const type = updatedObject.type;
 
   if (!type) {
     throw new Error("Configuration object must have a type");
   }
-  if (!source.id) {
+  if (!updatedObject.id) {
     throw new Error("Configuration object must have an ID");
   }
+
+  let instance = context.lookup.get(updatedObject.id);
 
   const synchronizer = synchronizerLookup[type];
   if (!synchronizer) {
     throw new Error(`Unsupported configuration object type: ${type}`);
   }
 
-  // If IDs do not match, then we have a new configuration object, and we want
-  // a new matching OpenLayers instance
-  if (target && target.id !== source.id) {
-    target = null;
-  }
-
   // Call the type-specific synchronizer function to either create a new
   // OpenLayers instance, or update the existing one
-  const result = synchronizer(target, source, context);
+  instance = synchronizer(instance, updatedObject, context);
 
-  // Store ID on the sync result for future updates
-  result.id = source.id;
+  context.lookup.put(updatedObject.id, instance);
+
+  // Store id on synchronized instance
+  instance.id = updatedObject.id;
   // Store type name on sync result for type checks in tests
-  result.typeName = type;
+  instance.typeName = type;
 
-  return result;
+  return instance;
 }

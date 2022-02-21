@@ -75,7 +75,7 @@ public class MarkerFeatureTest {
 
     @Test
     public void setIcon() {
-        MarkerFeature markerFeature = new MarkerFeature();
+        TestMarkerFeature markerFeature = new TestMarkerFeature();
         markerFeature.addPropertyChangeListener(propertyChangeListenerMock);
 
         Icon icon = new Icon(
@@ -83,7 +83,8 @@ public class MarkerFeatureTest {
         markerFeature.setIcon(icon);
 
         Assert.assertEquals(icon, markerFeature.getIcon());
-        Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
+        // One event each for removing old icon, and adding new one
+        Mockito.verify(propertyChangeListenerMock, Mockito.times(2))
                 .propertyChange(Mockito.any());
     }
 
@@ -93,5 +94,13 @@ public class MarkerFeatureTest {
 
         Assert.assertThrows(NullPointerException.class,
                 () -> markerFeature.setIcon(null));
+    }
+
+    private static class TestMarkerFeature extends MarkerFeature {
+        // Expose method for testing
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            super.addPropertyChangeListener(listener);
+        }
     }
 }

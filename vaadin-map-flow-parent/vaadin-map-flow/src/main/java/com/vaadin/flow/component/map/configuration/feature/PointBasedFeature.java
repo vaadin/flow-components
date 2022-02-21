@@ -16,7 +16,10 @@ package com.vaadin.flow.component.map.configuration.feature;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
@@ -74,6 +77,8 @@ public abstract class PointBasedFeature extends Feature {
      * @return the current point geometry
      */
     @Override
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Point getGeometry() {
         return (Point) super.getGeometry();
     }

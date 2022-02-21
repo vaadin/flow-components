@@ -16,6 +16,9 @@ package com.vaadin.flow.component.map.configuration.style;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
@@ -34,33 +37,39 @@ public class Style extends AbstractConfigurationObject {
         return Constants.OL_STYLE_STYLE;
     }
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public ImageStyle getImage() {
         return image;
     }
 
     public void setImage(ImageStyle image) {
-        updateNestedPropertyObserver(this.image, image);
+        removeChild(this.image);
         this.image = image;
-        notifyChange();
+        addChild(image);
     }
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Fill getFill() {
         return fill;
     }
 
     public void setFill(Fill fill) {
-        updateNestedPropertyObserver(this.fill, fill);
+        removeChild(this.fill);
         this.fill = fill;
-        notifyChange();
+        addChild(fill);
     }
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Stroke getStroke() {
         return stroke;
     }
 
     public void setStroke(Stroke stroke) {
-        updateNestedPropertyObserver(this.stroke, stroke);
+        removeChild(this.stroke);
         this.stroke = stroke;
-        notifyChange();
+        addChild(stroke);
     }
 }

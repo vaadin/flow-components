@@ -23,14 +23,14 @@ export function synchronizeTileLayer(target, source, context) {
     target = new TileLayer(
       createOptions({
         ...source,
-        source: context.synchronize(null, source.source, context),
+        source: context.lookup.get(source.source),
       })
     );
   }
 
   synchronizeLayer(target, source);
   target.setSource(
-    context.synchronize(target.getSource(), source.source, context)
+      context.lookup.get(source.source)
   );
 
   return target;
@@ -41,14 +41,14 @@ export function synchronizeVectorLayer(target, source, context) {
     target = new VectorLayer(
       createOptions({
         ...source,
-        source: context.synchronize(null, source.source, context),
+        source: context.lookup.get(source.source),
       })
     );
   }
 
   synchronizeLayer(target, source);
   target.setSource(
-    context.synchronize(target.getSource(), source.source, context)
+      context.lookup.get(source.source)
   );
 
   return target;
@@ -59,14 +59,14 @@ export function synchronizeImageLayer(target, source, context) {
     target = new ImageLayer(
       createOptions({
         ...source,
-        source: context.synchronize(null, source.source, context),
+        source: context.lookup.get(source.source),
       })
     );
   }
 
   synchronizeLayer(target, source);
   target.setSource(
-    context.synchronize(target.getSource(), source.source, context)
+      context.lookup.get(source.source)
   );
 
   return target;

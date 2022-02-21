@@ -16,6 +16,9 @@ package com.vaadin.flow.component.map.configuration.layer;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
@@ -39,6 +42,8 @@ public class VectorLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Source getSource() {
         return source;
     }
@@ -53,9 +58,8 @@ public class VectorLayer extends Layer {
     public void setSource(VectorSource source) {
         Objects.requireNonNull(source);
 
-        updateNestedPropertyObserver(this.source, source);
-
+        removeChild(this.source);
         this.source = source;
-        notifyChange();
+        addChild(this.source);
     }
 }

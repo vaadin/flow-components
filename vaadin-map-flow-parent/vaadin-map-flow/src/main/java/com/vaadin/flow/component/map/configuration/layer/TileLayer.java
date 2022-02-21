@@ -16,6 +16,9 @@ package com.vaadin.flow.component.map.configuration.layer;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.source.TileSource;
 import com.vaadin.flow.component.map.configuration.source.UrlTileSource;
@@ -36,6 +39,8 @@ public class TileLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public TileSource getSource() {
         return source;
     }
@@ -50,9 +55,8 @@ public class TileLayer extends Layer {
     public void setSource(UrlTileSource source) {
         Objects.requireNonNull(source);
 
-        updateNestedPropertyObserver(this.source, source);
-
+        removeChild(this.source);
         this.source = source;
-        notifyChange();
+        addChild(source);
     }
 }

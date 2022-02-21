@@ -84,7 +84,7 @@ public class View extends AbstractConfigurationObject {
         Objects.requireNonNull(center, "Center cannot be null");
 
         this.center = center;
-        this.notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -104,7 +104,7 @@ public class View extends AbstractConfigurationObject {
      */
     public void setRotation(float rotation) {
         this.rotation = rotation;
-        this.notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -129,7 +129,7 @@ public class View extends AbstractConfigurationObject {
      */
     public void setZoom(float zoom) {
         this.zoom = zoom;
-        this.notifyChange();
+        markAsDirty();
     }
 
     /**
