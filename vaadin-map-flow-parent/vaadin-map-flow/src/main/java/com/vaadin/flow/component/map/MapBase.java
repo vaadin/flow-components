@@ -42,6 +42,8 @@ import java.beans.PropertyChangeEvent;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class MapBase extends Component implements HasSize, HasTheme {
     private final Configuration configuration;
@@ -227,5 +229,29 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     protected FeatureFlags getFeatureFlags() {
         return FeatureFlags
                 .get(UI.getCurrent().getSession().getService().getContext());
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(MapVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(MapVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(MapVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(MapVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }
