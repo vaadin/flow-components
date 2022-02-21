@@ -131,15 +131,7 @@ public class TreeGrid<T> extends Grid<T>
             updateSelectionModeOnClient();
             getDataCommunicator().setRequestedRange(0, getPageSize());
 
-            getDataCommunicator()
-                    .fetchFromProvider(0, EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE)
-                    .filter(item -> isExpanded(item)).forEach(parentItem -> {
-                        if (eagerFetchViewportRemaining > 0) {
-                            recursiveSetParentRequestedRange(0, getPageSize(),
-                                    getDataCommunicator().getKeyMapper()
-                                            .key(parentItem));
-                        }
-                    });
+            recursiveSetParentRequestedRange(0, getPageSize(), null);
         }
 
         @Override
@@ -690,59 +682,41 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    private void recursiveSetParentRequestedRange(int start, int length,
+            String parentKey) {
+
+        HierarchicalDataCommunicator<T> dc = getDataCommunicator();
+
+        T parentItem = parentKey != null ? dc.getKeyMapper().get(parentKey) : null;
+        if (parentItem != null) {
+            // Set requested range for the parent item
+            dc.setParentRequestedRange(start, length, parentItem);
+        }
+
+        // Make a query for the item children
+        HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
+                start, getPageSize(), dc.getBackEndSorting(),
+                dc.getInMemorySorting(), null, parentItem);
+
+        getDataProvider().fetchChildren(query).forEach(child -> {
+            eagerFetchViewportRemaining -= 1;
+
+            if (eagerFetchViewportRemaining > 0 && isExpanded(child)) {
+                // There's still room left in the viewport and the child is
+                // expanded. Call recursively to have the requested range
+                // set for the child also.
+                recursiveSetParentRequestedRange(0, getPageSize(),
+                        dc.getKeyMapper().key(child));
+            }
+        });
+    }
 
     @Override
     protected void setRequestedRange(int start, int length) {
         super.setRequestedRange(start, length);
         
         eagerFetchViewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
-        getDataCommunicator()
-                    .fetchFromProvider(start, length)
-                    .filter(item -> isExpanded(item)).forEach(parentItem -> {
-                        if (eagerFetchViewportRemaining > 0) {
-                            recursiveSetParentRequestedRange(0, getPageSize(),
-                                    getDataCommunicator().getKeyMapper()
-                                            .key(parentItem));
-                        }
-                    });
-    }
-
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setParentRequestedRange(int start, int length,
-            String parentKey) {
-        recursiveSetParentRequestedRange(start, length, parentKey);
-    }
-
-    private void recursiveSetParentRequestedRange(int start, int length,
-            String parentKey) {
-
-        HierarchicalDataCommunicator<T> dc = getDataCommunicator();
-        T item = dc.getKeyMapper().get(parentKey);
-        if (item == null) {
-            return;
-        }
-
-        // Set requested range for the item
-        dc.setParentRequestedRange(start, length, item);
-
-        if (dc.hasChildren(item)) {
-            HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
-                    0, getPageSize(), dc.getBackEndSorting(),
-                    dc.getInMemorySorting(), null, item);
-
-            // Make a query for the item children
-            getDataProvider().fetchChildren(query).forEach(child -> {
-                eagerFetchViewportRemaining -= 1;
-
-                if (eagerFetchViewportRemaining > 0 && isExpanded(child)) {
-                    // There's still room left in the viewport and the child is
-                    // expanded. Call recursively to have the requested range
-                    // set for the child also (pre-fetch the children)
-                    recursiveSetParentRequestedRange(0, getPageSize(),
-                            dc.getKeyMapper().key(child));
-                }
-            });
-        }
+        recursiveSetParentRequestedRange(start, length, null);
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
@@ -751,9 +725,7 @@ public class TreeGrid<T> extends Grid<T>
 
         for (int index = 0; index < array.length(); index++) {
             JsonObject object = array.getObject(index);
-            setParentRequestedRange((int) object.getNumber("firstIndex"),
-                    (int) object.getNumber("size"),
-                    object.getString("parentKey"));
+            recursiveSetParentRequestedRange((int) object.getNumber("firstIndex"), (int) object.getNumber("size"), object.getString("parentKey"));
         }
     }
 

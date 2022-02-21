@@ -394,13 +394,13 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             callback(cache[root][page]);
           } else {
             rootPageCallbacks[page] = callback;
-          }
 
-          rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(grid._hasData ? rootRequestDelay : 0),
-            () => {
-              grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
-            }
-          );
+            rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(grid._hasData ? rootRequestDelay : 0),
+              () => {
+                grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+              }
+            );
+          }
         }
       })
 
