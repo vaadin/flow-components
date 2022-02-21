@@ -45,7 +45,8 @@ public class TreeGridPreloadPage extends VerticalLayout
         implements HasUrlParameter<String> {
 
     private TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
-    private TextField requestCountField = new TextField("Child item fetching requests");
+    private TextField requestCountField = new TextField(
+            "Child item fetching requests");
 
     private VaadinRequest lastRequest;
     private int requestCount = 0;
@@ -57,14 +58,12 @@ public class TreeGridPreloadPage extends VerticalLayout
         Location location = event.getLocation();
         QueryParameters queryParameters = location.getQueryParameters();
 
-                
         List<String> nodesPerLevel = queryParameters.getParameters()
                 .get("nodesPerLevel");
-        List<String> depth = queryParameters.getParameters()
-                .get("depth");
+        List<String> depth = queryParameters.getParameters().get("depth");
 
-        int dpNodesPerLevel = nodesPerLevel == null ? 3 : Integer
-                .parseInt(nodesPerLevel.get(0));
+        int dpNodesPerLevel = nodesPerLevel == null ? 3
+                : Integer.parseInt(nodesPerLevel.get(0));
         int dpDepth = depth == null ? 4 : Integer.parseInt(depth.get(0));
         setDataProvider(dpNodesPerLevel, dpDepth);
 
@@ -96,20 +95,22 @@ public class TreeGridPreloadPage extends VerticalLayout
     }
 
     private void setDataProvider(int nodesPerLevel, int depth) {
-        grid.setDataProvider(new LazyHierarchicalDataProvider(nodesPerLevel, depth) {
-                @Override
-                protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
-                        HierarchicalQuery<HierarchicalTestBean, Void> query) {
-                    VaadinRequest currentRequest = VaadinService
-                            .getCurrentRequest();
-                    if (!currentRequest.equals(lastRequest)) {
-                        requestCount++;
+        grid.setDataProvider(
+                new LazyHierarchicalDataProvider(nodesPerLevel, depth) {
+                    @Override
+                    protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
+                            HierarchicalQuery<HierarchicalTestBean, Void> query) {
+                        VaadinRequest currentRequest = VaadinService
+                                .getCurrentRequest();
+                        if (!currentRequest.equals(lastRequest)) {
+                            requestCount++;
+                        }
+                        lastRequest = currentRequest;
+                        requestCountField
+                                .setValue(String.valueOf(requestCount));
+                        return super.fetchChildrenFromBackEnd(query);
                     }
-                    lastRequest = currentRequest;
-                    requestCountField.setValue(String.valueOf(requestCount));
-                    return super.fetchChildrenFromBackEnd(query);
-                }
-            });
+                });
     }
 
     public TreeGridPreloadPage() {

@@ -35,14 +35,14 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     private ButtonElement requestCountReset;
     private TextAreaElement receivedParents;
 
-
-    private void open(List<Integer> expandedRootIndexes, SortDirection sortDirection,
-             Integer nodesPerLevel, Integer depth) {
+    private void open(List<Integer> expandedRootIndexes,
+            SortDirection sortDirection, Integer nodesPerLevel, Integer depth) {
         String url = getRootURL() + getTestPath() + "/?foo=bar";
 
         if (expandedRootIndexes.size() > 0) {
-            String expandedRootIndexesString = expandedRootIndexes.stream().map(Object::toString)
-                    .reduce((a, b) -> a + "," + b).orElse("");
+            String expandedRootIndexesString = expandedRootIndexes.stream()
+                    .map(Object::toString).reduce((a, b) -> a + "," + b)
+                    .orElse("");
             url += "&expandedRootIndexes=" + expandedRootIndexesString;
         }
 
@@ -57,7 +57,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         if (depth != null) {
             url += "&depth=" + depth;
         }
-        
+
         getDriver().get(url);
         waitForDevServer();
 
