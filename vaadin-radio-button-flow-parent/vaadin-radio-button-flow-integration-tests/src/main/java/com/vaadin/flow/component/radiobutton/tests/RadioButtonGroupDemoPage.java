@@ -29,7 +29,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;

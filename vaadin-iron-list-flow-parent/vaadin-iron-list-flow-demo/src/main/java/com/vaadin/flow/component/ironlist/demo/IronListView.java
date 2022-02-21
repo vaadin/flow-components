@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.javafaker.Faker;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
@@ -42,7 +41,6 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 
 @Route("iron-list")
 public class IronListView extends DemoView {
