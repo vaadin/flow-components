@@ -690,6 +690,23 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+
+    @Override
+    protected void setRequestedRange(int start, int length) {
+        super.setRequestedRange(start, length);
+        
+        eagerFetchViewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+        getDataCommunicator()
+                    .fetchFromProvider(start, length)
+                    .filter(item -> isExpanded(item)).forEach(parentItem -> {
+                        if (eagerFetchViewportRemaining > 0) {
+                            recursiveSetParentRequestedRange(0, getPageSize(),
+                                    getDataCommunicator().getKeyMapper()
+                                            .key(parentItem));
+                        }
+                    });
+    }
+
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {

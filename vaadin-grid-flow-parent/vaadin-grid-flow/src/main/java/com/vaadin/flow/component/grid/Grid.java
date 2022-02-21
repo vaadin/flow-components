@@ -3161,7 +3161,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
+    protected void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
     }
 
