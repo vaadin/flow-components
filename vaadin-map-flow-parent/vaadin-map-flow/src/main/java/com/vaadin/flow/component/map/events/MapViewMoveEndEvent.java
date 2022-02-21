@@ -77,9 +77,11 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
     }
 
     /**
-     * Gets the {@link View}'s updated extent
+     * Gets the updated extent (or bounding box) of the {@link View}'s currently
+     * visible area. Can be used to check whether a specific coordinate is
+     * within the viewport.
      *
-     * @return updated view
+     * @return updated extent
      */
     public Extent getExtent() {
         return extent;
