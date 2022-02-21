@@ -711,8 +711,8 @@ public class TreeGrid<T> extends Grid<T>
                 // expanded. Call recursively to have the requested range
                 // set for the child also.
                 viewportRemaining = recursiveSetParentRequestedRange(0,
-                        getPageSize(), dc.getKeyMapper().key(child),
-                        viewportRemaining);
+                        EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
+                        dc.getKeyMapper().key(child), viewportRemaining);
             }
         }
 

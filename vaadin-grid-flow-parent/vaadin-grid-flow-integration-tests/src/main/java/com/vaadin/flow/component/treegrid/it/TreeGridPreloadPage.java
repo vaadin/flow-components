@@ -58,8 +58,17 @@ public class TreeGridPreloadPage extends VerticalLayout
         Location location = event.getLocation();
         QueryParameters queryParameters = location.getQueryParameters();
 
+        // query parameter: pageSize
+        List<String> pageSize = queryParameters.getParameters().get("pageSize");
+        if (pageSize != null) {
+            grid.setPageSize(Integer.parseInt(pageSize.get(0)));
+        }
+
+        // query parameter: nodesPerLevel
         List<String> nodesPerLevel = queryParameters.getParameters()
                 .get("nodesPerLevel");
+
+        // query parameter: depth
         List<String> depth = queryParameters.getParameters().get("depth");
 
         int dpNodesPerLevel = nodesPerLevel == null ? 3
@@ -67,6 +76,7 @@ public class TreeGridPreloadPage extends VerticalLayout
         int dpDepth = depth == null ? 4 : Integer.parseInt(depth.get(0));
         setDataProvider(dpNodesPerLevel, dpDepth);
 
+        // query parameter: expandedRootIndexes
         List<String> expandedRootIndexes = queryParameters.getParameters()
                 .get("expandedRootIndexes");
         if (expandedRootIndexes != null) {
@@ -79,6 +89,7 @@ public class TreeGridPreloadPage extends VerticalLayout
             grid.expandRecursively(expandedRootItems, Integer.MAX_VALUE);
         }
 
+        // query parameter: sortDirection
         List<String> sortDirection = queryParameters.getParameters()
                 .get("sortDirection");
         if (sortDirection != null) {
