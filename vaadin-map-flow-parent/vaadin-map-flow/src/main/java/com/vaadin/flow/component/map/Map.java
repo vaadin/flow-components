@@ -20,6 +20,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
+import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
@@ -125,4 +127,63 @@ public class Map extends MapBase {
         getConfiguration().removeLayer(layer);
     }
 
+    /**
+     * Gets center coordinates of the map's viewport
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     * 
+     * @return current center of the viewport
+     */
+    public Coordinate getCenter() {
+        return getView().getCenter();
+    }
+
+    /**
+     * Sets the center of the map's viewport in format specified by projection
+     * set on the view, which defaults to {@code EPSG:3857}
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @param center
+     *            new center of the viewport
+     */
+    public void setCenter(Coordinate center) {
+        getView().setCenter(center);
+    }
+
+    /**
+     * Gets zoom level of the map's viewport, defaults to {@code 0}
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @return current zoom level
+     */
+    public float getZoom() {
+        return getView().getZoom();
+    }
+
+    /**
+     * Sets the zoom level of the map's viewport. The zoom level is a decimal
+     * value that starts at {@code 0} as the most zoomed-out level, and then
+     * continually increases to zoom further in. By default, the maximum zoom
+     * level is currently restricted to {@code 28}. In practical terms, the
+     * level of detail of the map data that a map service provides determines
+     * how useful higher zoom levels are.
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @param zoom
+     *            new zoom level
+     */
+    public void setZoom(float zoom) {
+        getView().setZoom(zoom);
+    }
 }
