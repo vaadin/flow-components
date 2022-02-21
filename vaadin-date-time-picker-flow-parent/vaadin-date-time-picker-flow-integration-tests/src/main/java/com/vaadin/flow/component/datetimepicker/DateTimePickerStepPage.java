@@ -22,8 +22,6 @@ import com.vaadin.flow.router.Route;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 @Route("vaadin-date-time-picker/date-time-picker-step")
 public class DateTimePickerStepPage extends Div {

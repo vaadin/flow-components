@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.demo.ComboBoxView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

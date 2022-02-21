@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;

@@ -26,7 +26,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.annotations.RunLocally;
 
 @TestPath("vaadin-grid/column-resize-event")
 public class ColumnResizeIT extends AbstractComponentIT {

@@ -4,9 +4,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;

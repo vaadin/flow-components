@@ -2,7 +2,6 @@ package com.vaadin.flow.component.charts.demo.examples.column;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.events.DrilldownEvent;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -10,7 +9,6 @@ import com.vaadin.flow.component.charts.model.Cursor;
 import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
-import com.vaadin.flow.component.charts.model.DrilldownCallback;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.Tooltip;

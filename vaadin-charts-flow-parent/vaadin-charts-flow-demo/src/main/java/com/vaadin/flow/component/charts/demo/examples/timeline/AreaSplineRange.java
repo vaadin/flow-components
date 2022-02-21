@@ -7,7 +7,6 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
-import com.vaadin.flow.component.charts.model.RangeSelector;
 import com.vaadin.flow.component.charts.model.Tooltip;
 
 public class AreaSplineRange extends AbstractChartExample {
