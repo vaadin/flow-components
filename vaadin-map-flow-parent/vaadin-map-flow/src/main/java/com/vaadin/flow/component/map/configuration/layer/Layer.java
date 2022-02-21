@@ -45,7 +45,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      */
     public void setOpacity(float opacity) {
         this.opacity = opacity;
-        notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -63,7 +63,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      */
     public void setVisible(boolean visible) {
         this.visible = visible;
-        notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -84,7 +84,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      */
     public void setzIndex(Integer zIndex) {
         this.zIndex = zIndex;
-        notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -103,7 +103,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      */
     public void setMinZoom(Float minZoom) {
         this.minZoom = minZoom;
-        notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      */
     public void setMaxZoom(Float maxZoom) {
         this.maxZoom = maxZoom;
-        notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -143,6 +143,6 @@ public abstract class Layer extends AbstractConfigurationObject {
      */
     public void setBackground(String background) {
         this.background = background;
-        notifyChange();
+        markAsDirty();
     }
 }

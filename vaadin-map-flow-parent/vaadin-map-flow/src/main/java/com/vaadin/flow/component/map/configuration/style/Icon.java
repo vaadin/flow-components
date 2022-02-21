@@ -46,7 +46,7 @@ public class Icon extends ImageStyle {
      * range from {@code 0} to {@code 1}, where {@code 1} moves the image by its
      * full width or height from the anchor origin. Default value is {@code {x:
      * 0.5, y: 0.5}}, which centers the image.
-     * 
+     *
      * @return the current anchor
      */
     public Anchor getAnchor() {
@@ -55,13 +55,13 @@ public class Icon extends ImageStyle {
 
     /**
      * Sets the anchor position of the icon's image
-     * 
+     *
      * @param anchor
      *            the new anchor
      */
     public void setAnchor(Anchor anchor) {
         this.anchor = anchor;
-        notifyChange();
+        markAsDirty();
     }
 
     /**
@@ -70,7 +70,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
-     * 
+     *
      * @return the current anchor origin
      */
     public AnchorOrigin getAnchorOrigin() {
@@ -83,7 +83,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
-     * 
+     *
      * @return the current color tint
      */
     public String getColor() {
@@ -95,7 +95,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
-     * 
+     *
      * @return the cross-origin attribute value
      */
     public String getCrossOrigin() {
@@ -109,7 +109,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
-     * 
+     *
      * @return the source URL for the icon's image
      */
     public String getSrc() {
@@ -123,7 +123,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
-     * 
+     *
      * @return the stream resource containing the icon's image
      */
     public StreamResource getImg() {
@@ -135,7 +135,7 @@ public class Icon extends ImageStyle {
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
-     * 
+     *
      * @return the size of the image
      */
     public ImageSize getImgSize() {
