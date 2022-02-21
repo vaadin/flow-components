@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.map;
 
+import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
@@ -50,5 +51,39 @@ public class MapTest {
 
         Assert.assertThrows(NullPointerException.class,
                 () -> map.setBackgroundLayer(null));
+    }
+
+    @Test
+    public void getCenter_delegatesToInternalView() {
+        Map map = new Map();
+        map.getView().setCenter(new Coordinate(1, 2));
+
+        Assert.assertEquals(1, map.getCenter().getX(), 0);
+        Assert.assertEquals(2, map.getCenter().getY(), 0);
+    }
+
+    @Test
+    public void setCenter_delegatesToInternalView() {
+        Map map = new Map();
+        map.setCenter(new Coordinate(1, 2));
+
+        Assert.assertEquals(1, map.getView().getCenter().getX(), 0);
+        Assert.assertEquals(2, map.getView().getCenter().getY(), 0);
+    }
+
+    @Test
+    public void getZoom_delegatesToInternalView() {
+        Map map = new Map();
+        map.getView().setZoom(15);
+
+        Assert.assertEquals(15, map.getZoom(), 0);
+    }
+
+    @Test
+    public void setZoom_delegatesToInternalView() {
+        Map map = new Map();
+        map.setZoom(15);
+
+        Assert.assertEquals(15, map.getView().getZoom(), 0);
     }
 }
