@@ -139,8 +139,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/split-layout", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.0.0-beta4")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.0.0-beta4")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
