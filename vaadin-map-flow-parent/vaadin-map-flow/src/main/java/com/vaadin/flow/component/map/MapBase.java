@@ -21,6 +21,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Configuration;
@@ -41,8 +42,10 @@ import java.beans.PropertyChangeEvent;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public abstract class MapBase extends Component implements HasSize {
+public abstract class MapBase extends Component implements HasSize, HasTheme {
     private final Configuration configuration;
     private final MapSerializer serializer;
 
@@ -226,5 +229,29 @@ public abstract class MapBase extends Component implements HasSize {
     protected FeatureFlags getFeatureFlags() {
         return FeatureFlags
                 .get(UI.getCurrent().getSession().getService().getContext());
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(MapVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(MapVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(MapVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(MapVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }
