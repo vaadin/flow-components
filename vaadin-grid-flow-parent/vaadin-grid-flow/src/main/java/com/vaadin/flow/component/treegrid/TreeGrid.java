@@ -58,6 +58,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.function.SerializableTriConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
@@ -80,19 +81,14 @@ public class TreeGrid<T> extends Grid<T>
     private static final class TreeGridUpdateQueue extends UpdateQueue
             implements HierarchicalUpdate {
 
-        interface ArrayUpdateListener {
-            void onArrayUpdate(int start, List<JsonValue> items,
-                    String parentKey);
-        }
-
-        private ArrayUpdateListener arrayUpdateListener;
+        private SerializableTriConsumer<Integer, Integer, String> arrayUpdateListener;
 
         private TreeGridUpdateQueue(UpdateQueueData data, int size) {
             super(data, size);
         }
 
         public void setArrayUpdateListener(
-                ArrayUpdateListener arrayUpdateListener) {
+                SerializableTriConsumer<Integer, Integer, String> arrayUpdateListener) {
             this.arrayUpdateListener = arrayUpdateListener;
         }
 
@@ -101,7 +97,7 @@ public class TreeGrid<T> extends Grid<T>
             super.set(start, items);
 
             if (arrayUpdateListener != null) {
-                arrayUpdateListener.onArrayUpdate(start, items, null);
+                arrayUpdateListener.accept(start, items.size(), null);
             }
         }
 
@@ -111,7 +107,7 @@ public class TreeGrid<T> extends Grid<T>
                     items.stream().collect(JsonUtils.asArray()), parentKey);
 
             if (arrayUpdateListener != null) {
-                arrayUpdateListener.onArrayUpdate(start, items, parentKey);
+                arrayUpdateListener.accept(start, items.size(), parentKey);
             }
         }
 
@@ -153,10 +149,10 @@ public class TreeGrid<T> extends Grid<T>
             TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
                     .apply(data, sizeChange);
 
-            queue.setArrayUpdateListener((start, items, parentKey) -> {
+            queue.setArrayUpdateListener((start, length, parentKey) -> {
                 if (viewportRemaining > 0) {
                     viewportRemaining = recursiveSetParentRequestedRange(start,
-                            items.size(), parentKey, viewportRemaining);
+                            length, parentKey, viewportRemaining);
                 }
             });
 
