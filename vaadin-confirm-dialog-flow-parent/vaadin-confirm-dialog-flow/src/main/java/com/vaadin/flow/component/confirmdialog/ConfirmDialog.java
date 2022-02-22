@@ -568,6 +568,9 @@ public class ConfirmDialog extends Component
         if (opened) {
             ensureAttached();
         }
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, opened));
+        }
         getElement().setProperty("opened", opened);
     }
 
@@ -587,10 +590,11 @@ public class ConfirmDialog extends Component
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
                 updateWidth();
                 updateHeight();
+                ui.setChildComponentModal(this, true);
             }
         });
     }
