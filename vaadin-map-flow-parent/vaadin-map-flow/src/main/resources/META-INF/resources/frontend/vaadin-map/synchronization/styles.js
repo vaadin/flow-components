@@ -83,17 +83,17 @@ export function synchronizeStyle(target, source, context) {
 
   target.setImage(
     source.image
-      ? context.synchronize(target.getImage(), source.image, context)
+      ? context.lookup.get(source.image)
       : undefined
   );
   target.setFill(
     source.fill
-      ? context.synchronize(target.getFill(), source.fill, context)
+      ? context.lookup.get(source.fill)
       : undefined
   );
   target.setStroke(
     source.stroke
-      ? context.synchronize(target.getStroke(), source.stroke, context)
+      ? context.lookup.get(source.stroke)
       : undefined
   );
 

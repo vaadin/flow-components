@@ -35,7 +35,7 @@ public class Stroke extends AbstractConfigurationObject {
 
     public void setColor(String color) {
         this.color = color;
-        notifyChange();
+        markAsDirty();
     }
 
     public float getWidth() {
@@ -44,6 +44,6 @@ public class Stroke extends AbstractConfigurationObject {
 
     public void setWidth(float width) {
         this.width = width;
-        notifyChange();
+        markAsDirty();
     }
 }
