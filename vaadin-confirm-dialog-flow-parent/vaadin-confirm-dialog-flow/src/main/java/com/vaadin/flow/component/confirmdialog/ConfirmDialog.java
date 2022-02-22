@@ -133,6 +133,9 @@ public class ConfirmDialog extends Component
      */
     public ConfirmDialog() {
         getElement().addEventListener("opened-changed", event -> {
+            if (!isOpened()) {
+                setModality(false);
+            }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -568,10 +571,14 @@ public class ConfirmDialog extends Component
         if (opened) {
             ensureAttached();
         }
-        if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this, opened));
-        }
+        setModality(opened);
         getElement().setProperty("opened", opened);
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     private UI getCurrentUI() {
