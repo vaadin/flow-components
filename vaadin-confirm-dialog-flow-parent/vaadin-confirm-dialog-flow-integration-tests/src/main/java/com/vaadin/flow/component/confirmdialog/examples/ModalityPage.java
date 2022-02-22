@@ -9,20 +9,13 @@ import com.vaadin.flow.router.Route;
 @Route(value = "vaadin-confirm-dialog/modality")
 public class ModalityPage extends Div {
     public ModalityPage() {
-        // Dialog automatically adds itself to UI on open
-        ConfirmDialog autoAddedDialog = new ConfirmDialog();
-        autoAddedDialog.setId("auto-added-dialog");
-        Button openAutoAddedDialog = new Button("Open auto-added dialog",
-                e -> autoAddedDialog.open());
-        openAutoAddedDialog.setId("open-auto-added-dialog");
+        ConfirmDialog dialog = new ConfirmDialog();
 
-        // Dialog is manually added to the UI
-        ConfirmDialog manuallyAddedDialog = new ConfirmDialog();
-        manuallyAddedDialog.setId("manually-added-dialog");
-        Button openManuallyAddedDialog = new Button("Open auto-added dialog",
-                e -> manuallyAddedDialog.open());
-        openManuallyAddedDialog.setId("open-manually-added-dialog");
-        add(manuallyAddedDialog);
+        Button addDialog = new Button("Add dialog to UI", e -> add(dialog));
+        addDialog.setId("add-dialog");
+
+        Button openDialog = new Button("Open dialog", e -> dialog.open());
+        openDialog.setId("open-dialog");
 
         Span testClickResult = new Span();
         testClickResult.setId("test-click-result");
@@ -30,7 +23,7 @@ public class ModalityPage extends Div {
                 event -> testClickResult.setText("Click event received"));
         testClick.setId("test-click");
 
-        add(new Div(openAutoAddedDialog, openManuallyAddedDialog));
+        add(new Div(addDialog, openDialog));
         add(new Div(testClick, testClickResult));
     }
 }
