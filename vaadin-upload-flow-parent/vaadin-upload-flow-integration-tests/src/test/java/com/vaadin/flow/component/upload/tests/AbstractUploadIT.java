@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractUploadIT extends AbstractComponentIT {
