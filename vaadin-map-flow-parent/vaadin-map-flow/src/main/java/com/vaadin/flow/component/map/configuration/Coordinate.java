@@ -32,6 +32,16 @@ public class Coordinate {
         this(0, 0);
     }
 
+    /**
+     * Constructs a new coordinate instance from x and y coordinates. Unless the
+     * map's view uses a custom projection, it is assumed that the coordinates
+     * are in {@code EPSG:3857} / Web Mercator Sphere projection. To create
+     * coordinates from latitude and longitude, see
+     * {@link #fromLonLat(double, double)}.
+     *
+     * @param x
+     * @param y
+     */
     public Coordinate(double x, double y) {
         this.x = x;
         this.y = y;

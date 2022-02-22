@@ -1,8 +1,25 @@
 package com.vaadin.flow.component.map.configuration;
 
+/*
+ * #%L
+ * Vaadin Map
+ * %%
+ * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
+ *
+ * See the file license.html distributed with this software for more
+ * information about licensing.
+ *
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
+ */
+
 /**
- * Defines an area within a map using min/max coordinates, which are by default
- * in EPSG:3857 format
+ * Defines an area within a map using min/max coordinates. The coordinates are
+ * by default in {@code EPSG:3857} / Web Mercator Sphere projection, unless the
+ * map's {@link View} uses a custom projection.
  */
 public class Extent {
     private final double minX;

@@ -143,11 +143,12 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Gets the extent of the view's currently visible area, default value is
-     * {@code 0} for all coordinates.
+     * Gets the extent (or bounding box) of the view's currently visible area.
+     * Can be used to check whether a specific coordinate is within the
+     * viewport.
      * <p>
-     * The extent is calculated on the client-side and will only be available
-     * after the first view change event.
+     * <b>NOTE:</b> The extent is calculated on the client-side and will only be
+     * available after the first view change event.
      *
      * @return the coordinates of the view's extent
      */
