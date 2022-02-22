@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * Contains the configuration for the map, such as layers, sources, features.
+ */
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
     private View view;

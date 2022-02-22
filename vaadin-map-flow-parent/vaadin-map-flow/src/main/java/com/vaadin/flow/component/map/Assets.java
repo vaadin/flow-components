@@ -18,6 +18,9 @@ package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.server.StreamResource;
 
+/**
+ * Defines the default assets that the Map component provides
+ */
 public class Assets {
     public static final ImageAsset PIN = new ImageAsset("pin.png",
             "/META-INF/resources/frontend/vaadin-map/assets/pin.png", 80, 104);

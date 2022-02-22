@@ -26,9 +26,8 @@ import com.vaadin.flow.component.map.configuration.style.Style;
 import java.util.Objects;
 
 /**
- * A geographic feature to be displayed on a map. A feature can be anything that
- * should be displayed on top of a map, such as points of interest, vehicles or
- * people.
+ * A geographic feature to be displayed on a map. A feature represents a point
+ * of interest, such as an address, a building, a vehicle, or any other entity.
  */
 public abstract class Feature extends AbstractConfigurationObject {
 
