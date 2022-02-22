@@ -34,6 +34,7 @@ import com.vaadin.flow.component.timepicker.demo.TimePickerView;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.Keys;
 
 @TestPath("vaadin-time-picker/time-picker-localization")
 public class TimePickerLocalizationIT extends AbstractComponentIT {
@@ -140,6 +141,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         errors.add(verifyServerValue("16:0:0.0"));
 
         getTimePickerElement().selectByText("17:22:33.123");
+        getTimePickerElement().sendKeys(Keys.RETURN);
 
         errors.add(verifyFormatIncludingMilliseconds(pmString));
         errors.add(verifyValueProperty("17:22:33.123"));
