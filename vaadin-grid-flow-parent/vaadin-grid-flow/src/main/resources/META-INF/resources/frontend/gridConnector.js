@@ -844,27 +844,31 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       })
 
       grid.$connector.confirmParent = tryCatchWrapper(function(id, parentKey, levelSize) {
-        if(cache[parentKey]) {
-          cache[parentKey].size = levelSize;
+        if(!cache[parentKey]) {
+          cache[parentKey] = {};
         }
-        if(!treePageCallbacks[parentKey]) {
-          return;
+        cache[parentKey].size = levelSize;
+        if (levelSize === 0) {
+          cache[parentKey][0] = [];
         }
-        let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey]);
-        for(let i = 0; i < outstandingRequests.length; i++) {
-          let page = outstandingRequests[i];
+        
+        if (treePageCallbacks[parentKey]) {
+          let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey]);
+          for(let i = 0; i < outstandingRequests.length; i++) {
+            let page = outstandingRequests[i];
 
-          let lastRequestedRange = lastRequestedRanges[parentKey] || [0, 0];
+            let lastRequestedRange = lastRequestedRanges[parentKey] || [0, 0];
 
-          const callback = treePageCallbacks[parentKey][page];
-          if((cache[parentKey] && cache[parentKey][page]) || page < lastRequestedRange[0] || page > lastRequestedRange[1]) {
-            delete treePageCallbacks[parentKey][page];
-            let items = cache[parentKey][page] || new Array(levelSize);
-            callback(items, levelSize);
-          } else if (callback && levelSize === 0) {
-            // The parent item has 0 child items => resolve the callback with an empty array
-            delete treePageCallbacks[parentKey][page];
-            callback([], levelSize);
+            const callback = treePageCallbacks[parentKey][page];
+            if((cache[parentKey] && cache[parentKey][page]) || page < lastRequestedRange[0] || page > lastRequestedRange[1]) {
+              delete treePageCallbacks[parentKey][page];
+              let items = cache[parentKey][page] || new Array(levelSize);
+              callback(items, levelSize);
+            } else if (callback && levelSize === 0) {
+              // The parent item has 0 child items => resolve the callback with an empty array
+              delete treePageCallbacks[parentKey][page];
+              callback([], levelSize);
+            }
           }
         }
         // Let server know we're done
