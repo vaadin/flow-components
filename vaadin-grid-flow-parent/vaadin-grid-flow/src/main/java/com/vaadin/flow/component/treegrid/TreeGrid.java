@@ -166,11 +166,7 @@ public class TreeGrid<T> extends Grid<T>
 
             T parentItem = parentKey != null ? dc.getKeyMapper().get(parentKey)
                     : null;
-            if (parentItem != null) {
-                // Set requested range for the parent item
-                dc.setParentRequestedRange(start, length, parentItem);
-            }
-
+            
             // Make a query for the item children
             HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
                     start, getPageSize(), dc.getBackEndSorting(),
@@ -183,12 +179,15 @@ public class TreeGrid<T> extends Grid<T>
                 viewportRemaining -= 1;
 
                 if (viewportRemaining > 0 && isExpanded(child)) {
+                    int childLength =  Math.max(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE, getPageSize());
+
                     // There's still room left in the viewport and the child is
-                    // expanded. Call recursively to have the requested range
-                    // set for the child also.
+                    // expanded. Set parent requested range for the child.
+                    dc.setParentRequestedRange(0, childLength, child);
+
+                    // Run recursively with the child as the parent.
                     viewportRemaining = recursiveSetParentRequestedRange(0,
-                            Math.max(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
-                                    getPageSize()),
+                            childLength,
                             dc.getKeyMapper().key(child), viewportRemaining);
                 }
             }
