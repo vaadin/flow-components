@@ -41,9 +41,8 @@ import java.util.function.Consumer;
  * <li>implements the observable pattern using {@link PropertyChangeSupport}, in
  * order to notify the map component about changes to the configuration, see
  * {@link #notifyChange()}</li>
- * <li>keeps track of nested configuration objects in order to keep track and
- * notify about changes to nested objects, see
- * {@link #addChild(AbstractConfigurationObject)} and
+ * <li>keeps track of, and notifies about changes to nested configuration
+ * objects, see {@link #addChild(AbstractConfigurationObject)} and
  * {@link #removeChild(AbstractConfigurationObject)}</li>
  * </ul>
  * <p>
