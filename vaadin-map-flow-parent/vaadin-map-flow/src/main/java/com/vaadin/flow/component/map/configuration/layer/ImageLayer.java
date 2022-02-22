@@ -1,7 +1,12 @@
 package com.vaadin.flow.component.map.configuration.layer;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.source.ImageSource;
+
+import java.util.Objects;
 
 /**
  * Layer for server-rendered images that are available in arbitrary extents and
@@ -19,6 +24,8 @@ public class ImageLayer extends Layer {
     /**
      * @return source for this layer, null by default
      */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public ImageSource getSource() {
         return source;
     }
@@ -31,6 +38,9 @@ public class ImageLayer extends Layer {
      *            the new source for the layer, not null
      */
     public void setSource(ImageSource source) {
+        Objects.requireNonNull(source);
+        removeChild(this.source);
         this.source = source;
+        addChild(source);
     }
 }
