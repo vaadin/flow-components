@@ -80,14 +80,39 @@ public class TreeGrid<T> extends Grid<T>
     private static final class TreeGridUpdateQueue extends UpdateQueue
             implements HierarchicalUpdate {
 
+        interface ArrayUpdateListener {
+            void onArrayUpdate(int start, List<JsonValue> items,
+                    String parentKey);
+        }
+
+        private ArrayUpdateListener arrayUpdateListener;
+
         private TreeGridUpdateQueue(UpdateQueueData data, int size) {
             super(data, size);
+        }
+
+        public void setArrayUpdateListener(
+                ArrayUpdateListener arrayUpdateListener) {
+            this.arrayUpdateListener = arrayUpdateListener;
+        }
+
+        @Override
+        public void set(int start, List<JsonValue> items) {
+            super.set(start, items);
+
+            if (arrayUpdateListener != null) {
+                arrayUpdateListener.onArrayUpdate(start, items, null);
+            }
         }
 
         @Override
         public void set(int start, List<JsonValue> items, String parentKey) {
             enqueue("$connector.set", start,
                     items.stream().collect(JsonUtils.asArray()), parentKey);
+
+            if (arrayUpdateListener != null) {
+                arrayUpdateListener.onArrayUpdate(start, items, parentKey);
+            }
         }
 
         @Override
@@ -114,6 +139,10 @@ public class TreeGrid<T> extends Grid<T>
         private UpdateQueueData data;
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
 
+        // Approximated size of the viewport. Used for eager fetching.
+        private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
+        private int viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
             this.updateQueueFactory = updateQueueFactory;
@@ -121,8 +150,54 @@ public class TreeGrid<T> extends Grid<T>
 
         @Override
         public TreeGridUpdateQueue startUpdate(int sizeChange) {
-            return (TreeGridUpdateQueue) updateQueueFactory.apply(data,
-                    sizeChange);
+            TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
+                    .apply(data, sizeChange);
+
+            queue.setArrayUpdateListener((start, items, parentKey) -> {
+                if (viewportRemaining > 0) {
+                    viewportRemaining = recursiveSetParentRequestedRange(start,
+                            items.size(), parentKey, viewportRemaining);
+                }
+            });
+
+            return queue;
+        }
+
+        private int recursiveSetParentRequestedRange(int start, int length,
+                String parentKey, int viewportRemaining) {
+
+            HierarchicalDataCommunicator<T> dc = getDataCommunicator();
+
+            T parentItem = parentKey != null ? dc.getKeyMapper().get(parentKey)
+                    : null;
+            if (parentItem != null) {
+                // Set requested range for the parent item
+                dc.setParentRequestedRange(start, length, parentItem);
+            }
+
+            // Make a query for the item children
+            HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
+                    start, getPageSize(), dc.getBackEndSorting(),
+                    dc.getInMemorySorting(), null, parentItem);
+
+            List<T> children = getDataProvider().fetchChildren(query)
+                    .collect(Collectors.toList());
+
+            for (T child : children) {
+                viewportRemaining -= 1;
+
+                if (viewportRemaining > 0 && isExpanded(child)) {
+                    // There's still room left in the viewport and the child is
+                    // expanded. Call recursively to have the requested range
+                    // set for the child also.
+                    viewportRemaining = recursiveSetParentRequestedRange(0,
+                            Math.max(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
+                                    getPageSize()),
+                            dc.getKeyMapper().key(child), viewportRemaining);
+                }
+            }
+
+            return viewportRemaining;
         }
 
         @Override
@@ -130,9 +205,10 @@ public class TreeGrid<T> extends Grid<T>
             initConnector();
             updateSelectionModeOnClient();
             getDataCommunicator().setRequestedRange(0, getPageSize());
+        }
 
-            recursiveSetParentRequestedRange(0, getPageSize(), null,
-                    EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
+        public void resetViewportRemaining() {
+            viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
         }
 
         @Override
@@ -151,9 +227,6 @@ public class TreeGrid<T> extends Grid<T>
 
     private Registration dataProviderRegistration;
 
-    // Approximated size of the viewport. Used for eager fetching.
-    private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
-
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
      * on property names. Use an alternative constructor, such as
@@ -167,6 +240,9 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addSortListener(e -> ((TreeGridArrayUpdaterImpl) getArrayUpdater())
+                .resetViewportRemaining());
     }
 
     /**
@@ -186,6 +262,9 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addSortListener(e -> ((TreeGridArrayUpdaterImpl) getArrayUpdater())
+                .resetViewportRemaining());
     }
 
     @Override
@@ -683,60 +762,31 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private int recursiveSetParentRequestedRange(int start, int length,
-            String parentKey, int viewportRemaining) {
-
-        HierarchicalDataCommunicator<T> dc = getDataCommunicator();
-
-        T parentItem = parentKey != null ? dc.getKeyMapper().get(parentKey)
-                : null;
-        if (parentItem != null) {
-            // Set requested range for the parent item
-            dc.setParentRequestedRange(start, length, parentItem);
-        }
-
-        // Make a query for the item children
-        HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
-                start, getPageSize(), dc.getBackEndSorting(),
-                dc.getInMemorySorting(), null, parentItem);
-
-        List<T> children = getDataProvider().fetchChildren(query)
-                .collect(Collectors.toList());
-
-        for (T child : children) {
-            viewportRemaining -= 1;
-
-            if (viewportRemaining > 0 && isExpanded(child)) {
-                // There's still room left in the viewport and the child is
-                // expanded. Call recursively to have the requested range
-                // set for the child also.
-                viewportRemaining = recursiveSetParentRequestedRange(0,
-                        Math.max(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
-                                getPageSize()),
-                        dc.getKeyMapper().key(child), viewportRemaining);
-            }
-        }
-
-        return viewportRemaining;
-    }
-
     @Override
     protected void setRequestedRange(int start, int length) {
         super.setRequestedRange(start, length);
 
-        recursiveSetParentRequestedRange(start, length, null,
-                EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
+        ((TreeGridArrayUpdaterImpl) getArrayUpdater()).resetViewportRemaining();
+    }
+
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    private void setParentRequestedRange(int start, int length,
+            String parentKey) {
+        T item = getDataCommunicator().getKeyMapper().get(parentKey);
+        if (item != null) {
+            getDataCommunicator().setParentRequestedRange(start, length, item);
+        }
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRanges(JsonArray array) {
+        ((TreeGridArrayUpdaterImpl) getArrayUpdater()).resetViewportRemaining();
+
         for (int index = 0; index < array.length(); index++) {
             JsonObject object = array.getObject(index);
-            recursiveSetParentRequestedRange(
-                    (int) object.getNumber("firstIndex"),
+            setParentRequestedRange((int) object.getNumber("firstIndex"),
                     (int) object.getNumber("size"),
-                    object.getString("parentKey"),
-                    EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
+                    object.getString("parentKey"));
         }
     }
 
