@@ -4,17 +4,14 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "vaadin-confirm-dialog/basicuse")
-public class BasicUseView extends Div {
+@Route(value = "vaadin-confirm-dialog/modality")
+public class ModalityPage extends Div {
 
     private Log log = new Log();
 
-    boolean expanded = true;
-
-    public BasicUseView() {
+    public ModalityPage() {
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setHeader("My header");
         confirmDialog.setText("Here is my text");
@@ -22,11 +19,10 @@ public class BasicUseView extends Div {
                 e -> confirmDialog.open());
         showDialogButton.setId("open-dialog");
 
-        NativeButton logButton = new NativeButton("Log",
-                event -> log.log("Clicked"));
+        Button logButton = new Button("Log", event -> log.log("Clicked"));
         logButton.setId("log");
 
-        add(confirmDialog, showDialogButton, logButton, new Hr(), log);
+        add(showDialogButton, logButton, new Hr(), log);
     }
 
     public static class Log extends Div {
