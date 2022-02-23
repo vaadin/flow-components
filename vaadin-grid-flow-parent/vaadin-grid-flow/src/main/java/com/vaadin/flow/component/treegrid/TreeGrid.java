@@ -60,6 +60,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementData;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
