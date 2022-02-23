@@ -367,6 +367,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             // workaround: sometimes grid-element gives page index that overflows
             page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
+            // Ensure grid isn't in loading state when the callback executes
+            ensureSubCacheQueue = [];
             callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
             
             // Flush after the callback to have the grid rows up-to-date
