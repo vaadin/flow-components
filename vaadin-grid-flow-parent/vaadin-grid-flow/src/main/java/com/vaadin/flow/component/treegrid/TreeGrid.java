@@ -956,4 +956,24 @@ public class TreeGrid<T> extends Grid<T>
     public void scrollToIndex(int rowIndex) {
         super.scrollToIndex(rowIndex);
     }
+
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        if (getElement().getNode().hasFeature(ElementData.class)) {
+            getElement().setAttribute("disabled", !enabled);
+        }
+
+        if (getTreeData() != null) {
+            refreshChildItems(getTreeData().getRootItems());
+        } else {
+            getDataCommunicator().reset();
+        }
+    }
+
+    private void refreshChildItems(List<T> rootItems) {
+        for (T item : rootItems) {
+            getDataProvider().refreshItem(item, false);
+            refreshChildItems(getTreeData().getChildren(item));
+        }
+    }
 }
