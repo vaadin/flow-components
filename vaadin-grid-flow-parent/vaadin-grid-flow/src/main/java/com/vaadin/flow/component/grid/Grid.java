@@ -1170,7 +1170,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final DetailsManager detailsManager;
     private Element detailsTemplate;
-    private boolean detailsVisibleOnClick = true;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -3031,10 +3030,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #setItemDetailsRenderer(Renderer)
      */
     public void setDetailsVisibleOnClick(boolean detailsVisibleOnClick) {
-        if (this.detailsVisibleOnClick != detailsVisibleOnClick) {
-            this.detailsVisibleOnClick = detailsVisibleOnClick;
-            getElement().setProperty("__disallowDetailsOnClick", !detailsVisibleOnClick);
-        }
+        getElement().setProperty("__disallowDetailsOnClick", !detailsVisibleOnClick);
     }
 
     /**
@@ -3046,7 +3042,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #setItemDetailsRenderer(Renderer)
      */
     public boolean isDetailsVisibleOnClick() {
-        return detailsVisibleOnClick;
+        return !getElement().getProperty("__disallowDetailsOnClick", false);
     }
 
     /**
