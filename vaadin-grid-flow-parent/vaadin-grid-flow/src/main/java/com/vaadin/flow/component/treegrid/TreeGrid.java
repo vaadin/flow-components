@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
@@ -137,7 +138,7 @@ public class TreeGrid<T> extends Grid<T>
 
         // Approximated size of the viewport. Used for eager fetching.
         private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
-        private int viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+        private Integer viewportRemaining = null;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
@@ -148,6 +149,17 @@ public class TreeGrid<T> extends Grid<T>
         public TreeGridUpdateQueue startUpdate(int sizeChange) {
             TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
                     .apply(data, sizeChange);
+
+            if (viewportRemaining == null) {
+                // Reset the viewportRemaining once for a server roundtrip.
+                viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+
+                if (UI.getCurrent() != null) {
+                    UI.getCurrent().beforeClientResponse(TreeGrid.this,
+                            context -> viewportRemaining = null);
+                }
+
+            }
 
             queue.setArrayUpdateListener((start, length, parentKey) -> {
                 if (viewportRemaining > 0) {
@@ -205,10 +217,6 @@ public class TreeGrid<T> extends Grid<T>
             getDataCommunicator().setRequestedRange(0, getPageSize());
         }
 
-        public void resetViewportRemaining() {
-            viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
-        }
-
         @Override
         public void setUpdateQueueData(UpdateQueueData data) {
             this.data = data;
@@ -238,9 +246,6 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
-
-        addSortListener(e -> ((TreeGridArrayUpdaterImpl) getArrayUpdater())
-                .resetViewportRemaining());
     }
 
     /**
@@ -260,9 +265,6 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
-
-        addSortListener(e -> ((TreeGridArrayUpdaterImpl) getArrayUpdater())
-                .resetViewportRemaining());
     }
 
     @Override
@@ -760,13 +762,6 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    @Override
-    protected void setRequestedRange(int start, int length) {
-        super.setRequestedRange(start, length);
-
-        ((TreeGridArrayUpdaterImpl) getArrayUpdater()).resetViewportRemaining();
-    }
-
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {
@@ -778,8 +773,6 @@ public class TreeGrid<T> extends Grid<T>
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRanges(JsonArray array) {
-        ((TreeGridArrayUpdaterImpl) getArrayUpdater()).resetViewportRemaining();
-
         for (int index = 0; index < array.length(); index++) {
             JsonObject object = array.getObject(index);
             setParentRequestedRange((int) object.getNumber("firstIndex"),

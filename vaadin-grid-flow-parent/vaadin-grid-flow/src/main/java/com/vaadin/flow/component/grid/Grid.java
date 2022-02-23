@@ -3161,7 +3161,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    protected void setRequestedRange(int start, int length) {
+    private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
     }
 
@@ -3364,12 +3364,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected SerializableComparator<T> createSortingComparator() {
         BinaryOperator<SerializableComparator<T>> operator = (comparator1,
                 comparator2) -> {
-            /*
-             * thenComparing is defined to return a serializable comparator as
-             * long as both original comparators are also serializable
-             */
-            return comparator1.thenComparing(comparator2)::compare;
-        };
+                    /*
+                     * thenComparing is defined to return a serializable
+                     * comparator as long as both original comparators are also
+                     * serializable
+                     */
+                    return comparator1.thenComparing(comparator2)::compare;
+                };
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
@@ -4322,8 +4323,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateInMemoryFiltering(
             SerializablePredicate<T> componentInMemoryFilter) {
-        assert filterSlot != null
-                : "Filter Slot is supposed not to be empty when set the filter";
+        assert filterSlot != null : "Filter Slot is supposed not to be empty when set the filter";
         // As long as the Grid currently contains only in-memory filter
         // and only list data view has a filter setup API, we can safely cast
         // the filter slot type into in-memory filter (predicate).
