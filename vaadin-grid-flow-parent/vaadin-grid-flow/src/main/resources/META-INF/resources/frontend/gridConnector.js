@@ -111,8 +111,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       let selectedKeys = {};
       let selectionMode = 'SINGLE';
 
-      let detailsVisibleOnClick = true;
-
       let sorterDirectionsSetFromServer = false;
 
       grid.size = 0; // To avoid NaN here and there before we get proper data
@@ -222,7 +220,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       grid._createPropertyObserver('activeItem', '__activeItemChanged', true);
 
       grid.__activeItemChangedDetails = tryCatchWrapper(function(newVal, oldVal) {
-        if(!detailsVisibleOnClick) {
+        if (grid.__disallowDetailsOnClick) {
           return;
         }
         // when grid is attached, newVal is not set and oldVal is undefined
@@ -237,10 +235,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }
       })
       grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
-
-      grid.$connector.setDetailsVisibleOnClick = tryCatchWrapper(function(visibleOnClick) {
-        detailsVisibleOnClick = visibleOnClick;
-      });
 
       grid.$connector._getPageIfSameLevel = tryCatchWrapper(function(parentKey, index, defaultPage) {
         let cacheAndIndex = grid._cache.getCacheAndIndex(index);

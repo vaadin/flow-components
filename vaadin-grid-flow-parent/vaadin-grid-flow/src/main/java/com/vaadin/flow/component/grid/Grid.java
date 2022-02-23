@@ -3033,8 +3033,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDetailsVisibleOnClick(boolean detailsVisibleOnClick) {
         if (this.detailsVisibleOnClick != detailsVisibleOnClick) {
             this.detailsVisibleOnClick = detailsVisibleOnClick;
-            getElement().callJsFunction("$connector.setDetailsVisibleOnClick",
-                    detailsVisibleOnClick);
+            getElement().setProperty("__disallowDetailsOnClick", !detailsVisibleOnClick);
         }
     }
 
