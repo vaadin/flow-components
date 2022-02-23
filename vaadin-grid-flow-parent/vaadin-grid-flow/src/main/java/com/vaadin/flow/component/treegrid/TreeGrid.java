@@ -151,8 +151,13 @@ public class TreeGrid<T> extends Grid<T>
 
             queue.setArrayUpdateListener((start, length, parentKey) -> {
                 if (viewportRemaining > 0) {
+
+                    T parentItem = parentKey == null ? null
+                            : getDataCommunicator().getKeyMapper()
+                                    .get(parentKey);
+
                     viewportRemaining = recursiveSetParentRequestedRange(start,
-                            length, parentKey, viewportRemaining);
+                            length, parentItem, viewportRemaining);
                 }
             });
 
@@ -160,17 +165,14 @@ public class TreeGrid<T> extends Grid<T>
         }
 
         private int recursiveSetParentRequestedRange(int start, int length,
-                String parentKey, int viewportRemaining) {
+                T parentItem, int viewportRemaining) {
 
-            HierarchicalDataCommunicator<T> dc = getDataCommunicator();
-
-            T parentItem = parentKey != null ? dc.getKeyMapper().get(parentKey)
-                    : null;
-            
             // Make a query for the item children
             HierarchicalQuery<T, SerializablePredicate<T>> query = new HierarchicalQuery<>(
-                    start, getPageSize(), dc.getBackEndSorting(),
-                    dc.getInMemorySorting(), null, parentItem);
+                    start, getPageSize(),
+                    getDataCommunicator().getBackEndSorting(),
+                    getDataCommunicator().getInMemorySorting(), null,
+                    parentItem);
 
             List<T> children = getDataProvider().fetchChildren(query)
                     .collect(Collectors.toList());
@@ -179,16 +181,17 @@ public class TreeGrid<T> extends Grid<T>
                 viewportRemaining -= 1;
 
                 if (viewportRemaining > 0 && isExpanded(child)) {
-                    int childLength =  Math.max(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE, getPageSize());
+                    int childLength = Math.max(
+                            EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE, getPageSize());
 
                     // There's still room left in the viewport and the child is
                     // expanded. Set parent requested range for the child.
-                    dc.setParentRequestedRange(0, childLength, child);
+                    getDataCommunicator().setParentRequestedRange(0,
+                            childLength, child);
 
                     // Run recursively with the child as the parent.
                     viewportRemaining = recursiveSetParentRequestedRange(0,
-                            childLength,
-                            dc.getKeyMapper().key(child), viewportRemaining);
+                            childLength, child, viewportRemaining);
                 }
             }
 
