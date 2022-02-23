@@ -960,13 +960,25 @@ public class TreeGrid<T> extends Grid<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
+        // If the node has feature ElementData, then we know that the state
+        // provider accepts attributes
         if (getElement().getNode().hasFeature(ElementData.class)) {
             getElement().setAttribute("disabled", !enabled);
         }
 
         if (getTreeData() != null) {
+            /*
+             * DataCommunicator.reset() will cause collapse - expand cycle
+             * and thus flicker. In case of TreeData we can avoid this.
+             */
             refreshChildItems(getTreeData().getRootItems());
         } else {
+            /*
+             * The DataCommunicator needs to be reset so components rendered
+             * inside the cells can be updated to the new enabled state. The
+             * enabled state is passed as a property to the client via
+             * DataGenerators.
+             */
             getDataCommunicator().reset();
         }
     }
