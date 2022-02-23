@@ -209,7 +209,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }
         if (!newVal) {
           if (oldVal && selectedKeys[oldVal.key]) {
-            if (!grid.$connector.deselectAllowed) {
+            if (!grid.__deselectAllowed) {
               grid.activeItem = oldVal;
             } else {
               grid.$connector.doDeselection([oldVal], true);
