@@ -209,7 +209,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }
         if (!newVal) {
           if (oldVal && selectedKeys[oldVal.key]) {
-            if (!grid.$connector.deselectAllowed) {
+            if (grid.__deselectDisallowed) {
               grid.activeItem = oldVal;
             } else {
               grid.$connector.doDeselection([oldVal], true);
@@ -930,8 +930,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           throw 'Attempted to set an invalid selection mode';
         }
       });
-
-      grid.$connector.deselectAllowed = true;
 
       // TODO: should be removed once https://github.com/vaadin/vaadin-grid/issues/1471 gets implemented
       grid.$connector.setVerticalScrollingEnabled = tryCatchWrapper(function(enabled) {
