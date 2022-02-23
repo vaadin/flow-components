@@ -269,7 +269,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     @Override
                     public void setDeselectAllowed(boolean deselectAllowed) {
                         super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().setProperty("__deselectAllowed", deselectAllowed);
+                        grid.getElement().setProperty("__deselectDisallowed", !deselectAllowed);
                     }
                 };
             }
@@ -1376,8 +1376,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragEndListener(this::onDragEnd);
 
         getElement().setAttribute("suppress-template-warning", true);
-
-        getElement().setProperty("__deselectAllowed", true);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
