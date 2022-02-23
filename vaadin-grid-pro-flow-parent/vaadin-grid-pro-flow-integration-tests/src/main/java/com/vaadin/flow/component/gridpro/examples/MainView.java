@@ -177,7 +177,7 @@ public class MainView extends VerticalLayout {
             String stringRepresentation) {
         for (Department type : Department.values()) {
             if (type.getStringRepresentation()
-                    .equals(stringRepresentation.toLowerCase())) {
+                    .equals(stringRepresentation.toLowerCase(Locale.ENGLISH))) {
                 return type;
             }
         }

@@ -354,7 +354,7 @@ public class AppLayout extends Component implements RouterLayout {
         NAVBAR, DRAWER;
 
         public String toWebcomponentValue() {
-            return this.name().toLowerCase();
+            return this.name().toLoweCase(Locale.ENGLISH)();
         }
 
         public static Section fromWebcomponentValue(String webcomponentValue) {

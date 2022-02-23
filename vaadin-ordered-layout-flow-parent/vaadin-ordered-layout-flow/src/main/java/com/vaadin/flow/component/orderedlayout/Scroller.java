@@ -161,7 +161,7 @@ public class Scroller extends Component implements HasSize, HasStyle {
         VERTICAL, HORIZONTAL, BOTH, NONE;
 
         private String toWebComponentValue() {
-            return BOTH == this ? null : this.name().toLowerCase();
+            return BOTH == this ? null : this.name().toLowerCase(Locale.ENGLISH);
         }
 
         private static ScrollDirection fromWebComponentValue(

@@ -406,7 +406,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      */
     public void setOrientation(Orientation orientation) {
         getElement().setProperty("orientation",
-                orientation.name().toLowerCase());
+                orientation.name().toLowerCase(Locale.ENGLISH));
     }
 
     /**

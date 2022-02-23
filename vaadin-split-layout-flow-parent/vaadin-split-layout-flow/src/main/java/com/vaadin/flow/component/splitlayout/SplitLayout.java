@@ -193,7 +193,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public void setOrientation(Orientation orientation) {
         Objects.requireNonNull(orientation, "Orientation cannot be null");
-        this.setOrientation(orientation.toString().toLowerCase());
+        this.setOrientation(orientation.toString().toLowerCase(Locale.ENGLISH));
     }
 
     /**

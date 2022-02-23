@@ -20,6 +20,6 @@ public enum NodeLayout implements ChartEnum {
     NORMAL, HANGING;
 
     public String toString() {
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ENGLISH);
     }
 }

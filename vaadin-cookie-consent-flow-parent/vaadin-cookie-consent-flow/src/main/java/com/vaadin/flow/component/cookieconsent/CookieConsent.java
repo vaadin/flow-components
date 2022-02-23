@@ -116,7 +116,7 @@ public class CookieConsent extends Component {
      */
     public void setPosition(Position position) {
         getElement().setProperty("position",
-                position.name().toLowerCase().replace('_', '-'));
+                position.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
     }
 
     /**
