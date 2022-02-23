@@ -269,9 +269,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     @Override
                     public void setDeselectAllowed(boolean deselectAllowed) {
                         super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().executeJs(
-                                "this.$connector.deselectAllowed = $0",
-                                deselectAllowed);
+                        grid.updateDeselectAllowed(deselectAllowed);
                     }
                 };
             }
@@ -1173,6 +1171,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private final DetailsManager detailsManager;
     private Element detailsTemplate;
     private boolean detailsVisibleOnClick = true;
+
+    private boolean isDeselectAllowed = true;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -2599,6 +2599,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 selectionMode.name());
     }
 
+    protected void updateDeselectAllowed(boolean deselectAllowed) {
+        if (this.isDeselectAllowed != deselectAllowed) {
+            this.isDeselectAllowed = deselectAllowed;
+        }
+
+        getElement().executeJs("this.$connector.deselectAllowed = $0",
+                deselectAllowed);
+    }
+
     /**
      * Sets the grid's selection mode.
      * <p>
@@ -3229,6 +3238,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        updateDeselectAllowed(isDeselectAllowed);
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
