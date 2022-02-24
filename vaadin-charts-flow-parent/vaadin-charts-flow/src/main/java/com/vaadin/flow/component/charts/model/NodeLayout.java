@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.charts.model;
 
+import java.util.Locale;
+
 /*-
  * #%L
  * Vaadin Charts for Flow

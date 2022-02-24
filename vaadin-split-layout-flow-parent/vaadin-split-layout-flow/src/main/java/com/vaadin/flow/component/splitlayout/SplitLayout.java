@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;

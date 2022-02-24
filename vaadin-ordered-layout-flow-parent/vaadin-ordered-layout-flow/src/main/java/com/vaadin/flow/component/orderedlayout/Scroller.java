@@ -24,6 +24,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Locale;
+
 /**
  * Scroller is a component container which enables scrolling overflowing
  * content.

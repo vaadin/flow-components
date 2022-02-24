@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.cookieconsent;
 
+import java.util.Locale;
+
 /*
  * #%L
  * Cookie Consent for Vaadin Flow
