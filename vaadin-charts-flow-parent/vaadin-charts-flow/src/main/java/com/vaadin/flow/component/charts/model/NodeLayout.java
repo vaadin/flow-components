@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.charts.model;
 
+import java.util.Locale;
+
 /*-
  * #%L
  * Vaadin Charts for Flow
@@ -20,6 +22,6 @@ public enum NodeLayout implements ChartEnum {
     NORMAL, HANGING;
 
     public String toString() {
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ENGLISH);
     }
 }

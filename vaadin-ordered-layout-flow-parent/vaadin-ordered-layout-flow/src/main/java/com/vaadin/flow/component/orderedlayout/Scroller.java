@@ -24,6 +24,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Locale;
+
 /**
  * Scroller is a component container which enables scrolling overflowing
  * content.
@@ -161,7 +163,7 @@ public class Scroller extends Component implements HasSize, HasStyle {
         VERTICAL, HORIZONTAL, BOTH, NONE;
 
         private String toWebComponentValue() {
-            return BOTH == this ? null : this.name().toLowerCase();
+            return BOTH == this ? null : this.name().toLowerCase(Locale.ENGLISH);
         }
 
         private static ScrollDirection fromWebComponentValue(
