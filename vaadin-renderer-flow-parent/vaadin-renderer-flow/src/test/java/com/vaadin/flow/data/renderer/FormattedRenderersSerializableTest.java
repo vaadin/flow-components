@@ -14,7 +14,7 @@ public class FormattedRenderersSerializableTest {
     @Test
     public void numberRendererIsSerializable() throws IOException {
         final NumberRenderer renderer = new NumberRenderer(
-                value -> value.toString(), "");
+                value -> value.toString(), NumberFormat.getInstance());
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
@@ -31,8 +31,8 @@ public class FormattedRenderersSerializableTest {
     @Test
     public void localDateRendererIsSerializable() throws IOException {
         final LocalDateRenderer renderer = new LocalDateRenderer(
-                value -> value.toString(),
-                () -> DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+                value -> value.toString(), () -> DateTimeFormatter
+                        .ofLocalizedDateTime(FormatStyle.MEDIUM));
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
