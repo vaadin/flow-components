@@ -9,6 +9,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Tests for Upload using FileBuffer and MultiFileBuffer.
@@ -35,4 +36,28 @@ public class FileBufferIT extends AbstractUploadIT {
                 expectedContent, content);
     }
 
+    @Test
+    public void testUploadMultipleEventOrder() throws Exception {
+        if (getRunLocallyBrowser() == null) {
+            // Multiple file upload does not work with Remotewebdriver
+            // https://github.com/SeleniumHQ/selenium/issues/7408
+            throw new AssumptionViolatedException(
+                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
+        }
+        open();
+
+        final UploadElement upload = $(UploadElement.class).id("multi-upload");
+        waitUntil(driver -> upload.isDisplayed());
+
+        File tempFile = createTempFile();
+
+        upload.uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
+
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("multi-upload-event-output"));
+
+        Assert.assertEquals("Upload event order does not match expected",
+                "-succeeded-succeeded-succeeded-finished",
+                eventsOutput.getText());
+    }
 }
