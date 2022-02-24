@@ -481,10 +481,10 @@ public class TreeGrid<T> extends Grid<T>
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
         Column<T> column = addColumn(TemplateRenderer
                 .<T> of("<vaadin-grid-tree-toggle "
-                        + "leaf='[[item.leaf]]' expanded='{{expanded}}' level='[[level]]'>[[item.name]]"
+                        + "leaf='[[!item.children]]' expanded='{{expanded}}' level='[[level]]'>[[item.name]]"
                         + "</vaadin-grid-tree-toggle>")
-                .withProperty("leaf",
-                        item -> !getDataCommunicator().hasChildren(item))
+                .withProperty("children",
+                        item -> getDataCommunicator().hasChildren(item))
                 .withProperty("name",
                         value -> String.valueOf(valueProvider.apply(value))));
         final SerializableComparator<T> comparator = (a,
@@ -514,8 +514,8 @@ public class TreeGrid<T> extends Grid<T>
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
         return addColumn(new HierarchyColumnComponentRenderer<V, T>(
-                componentProvider).withProperty("leaf",
-                        item -> !getDataCommunicator().hasChildren(item)));
+                componentProvider).withProperty("children",
+                        item -> getDataCommunicator().hasChildren(item)));
     }
 
     /**

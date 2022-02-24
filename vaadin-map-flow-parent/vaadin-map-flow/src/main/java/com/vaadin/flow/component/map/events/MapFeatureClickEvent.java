@@ -1,5 +1,21 @@
 package com.vaadin.flow.component.map.events;
 
+/*
+ * #%L
+ * Vaadin Map
+ * %%
+ * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
+ *
+ * See the file license.html distributed with this software for more
+ * information about licensing.
+ *
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
+ */
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -7,9 +23,6 @@ import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
-
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Provides data for click events on geographic features
@@ -34,21 +47,12 @@ public class MapFeatureClickEvent extends ComponentEvent<Map> {
             @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
-        Optional<VectorLayer> maybeLayer = source.getRawConfiguration()
-                .getLayers().stream()
-                .filter(layer -> layer instanceof VectorLayer
-                        && Objects.equals(layer.getId(), layerId))
-                .findFirst().map(layer -> (VectorLayer) layer);
-        Optional<VectorSource> maybeVectorSource = maybeLayer
-                .map(layer -> (VectorSource) layer.getSource());
-        Optional<Feature> maybeFeature = maybeVectorSource.flatMap(
-                vectorSource -> vectorSource.getFeatures().stream().filter(
-                        feature -> Objects.equals(feature.getId(), featureId))
-                        .findFirst());
-
-        this.layer = maybeLayer.orElse(null);
-        this.vectorSource = maybeVectorSource.orElse(null);
-        this.feature = maybeFeature.orElse(null);
+        FeatureEventDetails featureEventDetails = MapEventUtil
+                .getFeatureEventDetails(source.getRawConfiguration(), layerId,
+                        featureId);
+        this.layer = featureEventDetails.getLayer();
+        this.vectorSource = featureEventDetails.getSource();
+        this.feature = featureEventDetails.getFeature();
 
         details = new MouseEventDetails();
         details.setAbsoluteX(pageX);

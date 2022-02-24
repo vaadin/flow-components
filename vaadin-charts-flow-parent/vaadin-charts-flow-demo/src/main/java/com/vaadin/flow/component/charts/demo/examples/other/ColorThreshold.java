@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.demo.examples.other;
 
 import com.vaadin.flow.component.charts.model.PlotOptionsArearange;
-import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.dependency.CssImport;
 

@@ -69,6 +69,21 @@ public class FeatureEventsIT extends AbstractComponentIT {
                 "click: feature=first-marker-feature | layer=first-feature-layer | source=first-source");
     }
 
+    @Test
+    public void overlappingFeatures_singleEventFromTopLevelFeature() {
+        addFirstLayerFeatureClickListener.click();
+
+        // Click on overlapping markers
+        map.clickAtCoordinates(4000000, 0);
+        // Click events are delayed by around 250ms, wait for event
+        waitSeconds(1);
+
+        // Should have only one event, from the marker that was last added
+        assertEventLogHasNumberOfEvents(1);
+        assertEventLogContainsEvent(
+                "click: feature=overlapping-marker-feature-3 | layer=first-feature-layer | source=first-source");
+    }
+
     private void assertEventLogHasNumberOfEvents(int expectedEvents) {
         String[] eventLines = eventLog.getText().split(System.lineSeparator());
         Assert.assertEquals(expectedEvents, eventLines.length);
