@@ -2,6 +2,7 @@ package com.vaadin.flow.component.gridpro.examples;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -177,7 +178,7 @@ public class MainView extends VerticalLayout {
             String stringRepresentation) {
         for (Department type : Department.values()) {
             if (type.getStringRepresentation()
-                    .equals(stringRepresentation.toLowerCase())) {
+                    .equals(stringRepresentation.toLowerCase(Locale.ENGLISH))) {
                 return type;
             }
         }

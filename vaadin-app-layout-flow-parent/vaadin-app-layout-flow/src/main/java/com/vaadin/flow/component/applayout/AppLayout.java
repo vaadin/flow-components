@@ -1,5 +1,9 @@
 package com.vaadin.flow.component.applayout;
 
+import java.io.Serializable;
+import java.util.Locale;
+import java.util.Objects;
+
 /*
  * #%L
  * Vaadin App Layout
@@ -33,9 +37,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.router.RouterLayout;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
@@ -354,7 +355,7 @@ public class AppLayout extends Component implements RouterLayout {
         NAVBAR, DRAWER;
 
         public String toWebcomponentValue() {
-            return this.name().toLowerCase();
+            return this.name().toLowerCase(Locale.ENGLISH);
         }
 
         public static Section fromWebcomponentValue(String webcomponentValue) {

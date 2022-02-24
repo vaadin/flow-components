@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -193,7 +194,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public void setOrientation(Orientation orientation) {
         Objects.requireNonNull(orientation, "Orientation cannot be null");
-        this.setOrientation(orientation.toString().toLowerCase());
+        this.setOrientation(orientation.toString().toLowerCase(Locale.ENGLISH));
     }
 
     /**
