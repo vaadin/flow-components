@@ -18,7 +18,6 @@ package com.vaadin.flow.data.renderer;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
@@ -34,7 +33,7 @@ import com.vaadin.flow.function.ValueProvider;
 public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
 
     private Locale locale;
-    private SerializableSupplier<NumberFormat> numberFormat;
+    private NumberFormat numberFormat;
     private String formatString;
     private String nullRepresentation;
 
@@ -94,7 +93,7 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         }
 
         locale = null;
-        this.numberFormat = () -> numberFormat;
+        this.numberFormat = numberFormat;
         formatString = null;
         this.nullRepresentation = nullRepresentation;
     }
@@ -205,7 +204,7 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         } else if (formatString != null && locale != null) {
             stringValue = String.format(locale, formatString, value);
         } else if (numberFormat != null) {
-            stringValue = numberFormat.get().format(value);
+            stringValue = numberFormat.format(value);
         } else {
             throw new IllegalStateException(String.format(
                     "Unable to format the given value: "
