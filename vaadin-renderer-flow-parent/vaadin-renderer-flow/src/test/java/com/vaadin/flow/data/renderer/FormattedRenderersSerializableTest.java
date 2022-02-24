@@ -22,8 +22,8 @@ public class FormattedRenderersSerializableTest {
     @Test
     public void localDateTimeRendererIsSerializable() throws IOException {
         final LocalDateTimeRenderer renderer = new LocalDateTimeRenderer(
-                value -> value.toString(),
-                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+                value -> value.toString(), () -> DateTimeFormatter
+                        .ofLocalizedDateTime(FormatStyle.MEDIUM));
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
