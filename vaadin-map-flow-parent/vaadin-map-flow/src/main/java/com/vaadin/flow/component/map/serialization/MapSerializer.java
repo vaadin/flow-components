@@ -1,5 +1,21 @@
 package com.vaadin.flow.component.map.serialization;
 
+/*
+ * #%L
+ * Vaadin Map
+ * %%
+ * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
+ *
+ * See the file license.html distributed with this software for more
+ * information about licensing.
+ *
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
+ */
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +35,10 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Custom JSON serializer for the map component using a Jackson
+ * {@link ObjectMapper}
+ */
 public class MapSerializer {
 
     private final ObjectWriter writer;
@@ -33,6 +53,17 @@ public class MapSerializer {
         writer = mapper.writer();
     }
 
+    /**
+     * Serializes a map configuration object to JSON using a Jackson
+     * {@link ObjectMapper}, and returns the value as a {@link JsonValue} to
+     * provide it in a type that is compatible with Flow.
+     * <p>
+     * Throws a runtime exception if the object can not be serialized to JSON.
+     *
+     * @param value
+     *            the map configuration object to be serialized into JSON
+     * @return a {@link JsonValue} representing the configuration object as JSON
+     */
     public JsonValue toJson(Object value) {
         String json;
         try {
@@ -45,6 +76,13 @@ public class MapSerializer {
         return new JreJsonFactory().parse(json);
     }
 
+    /**
+     * Custom Jackson serializer for {@link StreamResource}s. The serializer
+     * guarantees that all stream resources encountered during serialization of
+     * a configuration object are registered in a Flow session's stream resource
+     * registry, and are available under a dynamic URL. The serializer also
+     * returns the dynamic URL as serialized value.
+     */
     private static class StreamResourceSerializer
             extends StdSerializer<StreamResource> {
         private final Map<StreamResource, URI> streamResourceURICache = new HashMap<>();

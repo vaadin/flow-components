@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 

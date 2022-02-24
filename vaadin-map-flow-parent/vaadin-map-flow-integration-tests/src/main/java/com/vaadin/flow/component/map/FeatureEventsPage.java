@@ -41,6 +41,16 @@ public class FeatureEventsPage extends Div {
         secondMarkerFeature.setId("second-marker-feature");
         secondFeatureLayer.addFeature(secondMarkerFeature);
 
+        // Setup several overlapping markers to verify that we receive only one
+        // event when clicking that location
+        int numOverlappingMarkers = 3;
+        for (int i = 0; i < numOverlappingMarkers; i++) {
+            MarkerFeature overlappingMarker = new MarkerFeature(
+                    new Coordinate(4000000, 0));
+            overlappingMarker.setId("overlapping-marker-feature-" + (i + 1));
+            firstFeatureLayer.addFeature(overlappingMarker);
+        }
+
         Div eventLog = new Div();
         eventLog.setId("event-log");
         eventLog.getElement().getStyle().set("white-space", "pre");

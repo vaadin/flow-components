@@ -45,8 +45,8 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
         File file1 = createTempFile();
         File file2 = createTempFile();
         UploadElement upload = $(UploadElement.class).waitForFirst();
-        WebElement input = getInput(upload);
-        fillPathToUploadInput(input, file1.getPath(), file2.getPath());
+        upload.upload(file1);
+        upload.upload(file2);
         WebElement button = findButtonInVaadinUploadFile(upload, buttonType);
         button.click();
         TestBenchElement element = $("span").id("error-handler-message");

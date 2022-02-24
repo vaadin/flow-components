@@ -33,7 +33,7 @@ public class PointTest {
 
     @Test
     public void setCoordinates() {
-        Point point = new Point(new Coordinate());
+        TestPoint point = new TestPoint(new Coordinate());
 
         point.addPropertyChangeListener(propertyChangeListenerMock);
         Coordinate coordinate = new Coordinate(1233058.1696443919,
@@ -54,5 +54,17 @@ public class PointTest {
 
         Assert.assertThrows(NullPointerException.class,
                 () -> point.setCoordinates(null));
+    }
+
+    private static class TestPoint extends Point {
+        public TestPoint(Coordinate coordinates) {
+            super(coordinates);
+        }
+
+        // Expose method for testing
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            super.addPropertyChangeListener(listener);
+        }
     }
 }

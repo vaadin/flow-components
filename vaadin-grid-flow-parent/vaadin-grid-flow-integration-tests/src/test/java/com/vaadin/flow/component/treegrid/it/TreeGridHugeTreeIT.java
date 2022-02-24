@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.lang.management.ManagementFactory;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
