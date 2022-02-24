@@ -19,6 +19,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-grid/detach-reattach-page")
@@ -44,6 +46,23 @@ public class DetachReattachPage extends Div {
                 });
         btnDisallowDeselect.setId("disallow-deselect-button");
 
-        add(btnAttach, btnDetach, btnDisallowDeselect, grid);
+        NativeButton addItemDetailsButton = new NativeButton("Add item details",
+                e -> {
+                    grid.setSelectionMode(Grid.SelectionMode.NONE);
+                    grid.setItemDetailsRenderer(new ComponentRenderer<>(
+                            item -> new Span("Item details")));
+                });
+        addItemDetailsButton.setId("add-item-details-button");
+
+        NativeButton toggleDetailsVisibleOnClick = new NativeButton(
+                "Toggle details visible on click", e -> {
+                    grid.setDetailsVisibleOnClick(
+                            !grid.isDetailsVisibleOnClick());
+                });
+        toggleDetailsVisibleOnClick
+                .setId("toggle-details-visible-click-button");
+
+        add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
+                toggleDetailsVisibleOnClick, grid);
     }
 }
