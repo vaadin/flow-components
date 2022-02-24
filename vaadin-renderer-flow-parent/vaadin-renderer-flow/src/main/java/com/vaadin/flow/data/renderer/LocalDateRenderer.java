@@ -13,6 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Copyright 2000-2021 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.data.renderer;
 
 import java.time.LocalDate;
@@ -53,8 +68,8 @@ public class LocalDateRenderer<SOURCE>
      *      FormatStyle.LONG</a>
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider) {
-        this(valueProvider, DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG),
-                "");
+        this(valueProvider,
+                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG), "");
     }
 
     /**
@@ -156,8 +171,52 @@ public class LocalDateRenderer<SOURCE>
      *            the formatter to use, not <code>null</code>
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
-            DateTimeFormatter formatter) {
+            SerializableSupplier<DateTimeFormatter> formatter) {
         this(valueProvider, formatter, "");
+    }
+
+    /**
+     * Creates a new LocalDateRenderer.
+     * <p>
+     * The renderer is configured to render with the given formatter, with an
+     * empty string as its null representation.
+     *
+     * @param valueProvider
+     *            the callback to provide a {@link LocalDate} to the renderer,
+     *            not <code>null</code>
+     * @param formatter
+     *            the formatter to use, not <code>null</code>
+     * @deprecated Via this constructor renderer is not serializable, use
+     *             {@link LocalDateRenderer(ValueProvider, SerializableSupplier}
+     *             instead.
+     */
+    @Deprecated
+    public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
+            DateTimeFormatter formatter) {
+        this(valueProvider, () -> formatter, "");
+    }
+
+    /**
+     * Creates a new LocalDateRenderer.
+     * <p>
+     * The renderer is configured to render with the given formatter.
+     *
+     * @param valueProvider
+     *            the callback to provide a {@link LocalDate} to the renderer,
+     *            not <code>null</code>
+     * @param formatter
+     *            the formatter to use, not <code>null</code>
+     * @param nullRepresentation
+     *            the textual representation of the <code>null</code> value
+     * @deprecated Via this constructor renderer is not serializable, use
+     *             {@link LocalDateRenderer(ValueProvider, SerializableSupplier,
+     *             String} instead.
+     *
+     */
+    @Deprecated
+    public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
+            DateTimeFormatter formatter, String nullRepresentation) {
+        this(valueProvider, () -> formatter, nullRepresentation);
     }
 
     /**
@@ -175,14 +234,15 @@ public class LocalDateRenderer<SOURCE>
      *
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
-            DateTimeFormatter formatter, String nullRepresentation) {
+            SerializableSupplier<DateTimeFormatter> formatter,
+            String nullRepresentation) {
         super(valueProvider);
 
         if (formatter == null) {
             throw new IllegalArgumentException("formatter may not be null");
         }
 
-        this.formatter = () -> formatter;
+        this.formatter = formatter;
         this.nullRepresentation = nullRepresentation;
     }
 
