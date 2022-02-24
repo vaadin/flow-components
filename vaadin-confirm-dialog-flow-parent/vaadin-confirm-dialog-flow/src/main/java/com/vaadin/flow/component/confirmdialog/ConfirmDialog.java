@@ -38,10 +38,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.0-rc1")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -133,6 +133,9 @@ public class ConfirmDialog extends Component
      */
     public ConfirmDialog() {
         getElement().addEventListener("opened-changed", event -> {
+            if (!isOpened()) {
+                setModality(false);
+            }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -568,7 +571,14 @@ public class ConfirmDialog extends Component
         if (opened) {
             ensureAttached();
         }
+        setModality(opened);
         getElement().setProperty("opened", opened);
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     private UI getCurrentUI() {
@@ -587,10 +597,11 @@ public class ConfirmDialog extends Component
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
                 updateWidth();
                 updateHeight();
+                ui.setChildComponentModal(this, true);
             }
         });
     }

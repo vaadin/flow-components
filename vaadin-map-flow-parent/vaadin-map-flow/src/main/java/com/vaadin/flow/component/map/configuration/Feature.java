@@ -16,6 +16,9 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 import com.vaadin.flow.component.map.configuration.style.Style;
@@ -23,9 +26,8 @@ import com.vaadin.flow.component.map.configuration.style.Style;
 import java.util.Objects;
 
 /**
- * A geographic feature to be displayed on a map. A feature can be anything that
- * should be displayed on top of a map, such as points of interest, vehicles or
- * people.
+ * A geographic feature to be displayed on a map. A feature represents a point
+ * of interest, such as an address, a building, a vehicle, or any other entity.
  */
 public abstract class Feature extends AbstractConfigurationObject {
 
@@ -43,6 +45,8 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @return the current geometry
      */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public SimpleGeometry getGeometry() {
         return geometry;
     }
@@ -55,9 +59,9 @@ public abstract class Feature extends AbstractConfigurationObject {
      */
     public void setGeometry(SimpleGeometry geometry) {
         Objects.requireNonNull(geometry);
-        updateNestedPropertyObserver(this.geometry, geometry);
+        removeChild(this.geometry);
         this.geometry = geometry;
-        notifyChange();
+        addChild(geometry);
     }
 
     /**
@@ -65,6 +69,8 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @return the current style
      */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public Style getStyle() {
         return style;
     }
@@ -77,8 +83,8 @@ public abstract class Feature extends AbstractConfigurationObject {
      */
     public void setStyle(Style style) {
         Objects.requireNonNull(style);
-        updateNestedPropertyObserver(this.style, style);
+        removeChild(this.style);
         this.style = style;
-        notifyChange();
+        addChild(style);
     }
 }

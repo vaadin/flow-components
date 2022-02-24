@@ -16,7 +16,10 @@ package com.vaadin.flow.component.map.configuration.layer;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
@@ -43,6 +46,8 @@ public class FeatureLayer extends VectorLayer {
      * @return the source of the layer
      */
     @Override
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public VectorSource getSource() {
         return (VectorSource) super.getSource();
     }

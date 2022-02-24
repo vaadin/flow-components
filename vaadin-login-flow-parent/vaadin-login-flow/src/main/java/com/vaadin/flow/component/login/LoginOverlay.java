@@ -40,10 +40,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/login", version = "23.0.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "23.0.0-rc1")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin {
 
@@ -119,7 +119,7 @@ public class LoginOverlay extends AbstractLogin {
         if (getElement().getNode().getParent() == null) {
             UI ui = getCurrentUI();
             ui.beforeClientResponse(ui, context -> {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
             });
         }

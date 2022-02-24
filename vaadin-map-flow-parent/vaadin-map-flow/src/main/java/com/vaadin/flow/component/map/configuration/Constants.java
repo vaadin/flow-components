@@ -16,6 +16,11 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+/**
+ * Defines constants for OpenLayers types, which are uses by the client-side
+ * synchronization mechanism to identify which OL class to construct and
+ * synchronize into.
+ */
 public class Constants {
     // Layers
     public static final String OL_LAYER_IMAGE = "ol/layer/Image";
@@ -38,6 +43,4 @@ public class Constants {
     public static final String OL_MAP = "ol/Map";
     public static final String OL_VIEW = "ol/View";
     public static final String OL_FEATURE = "ol/Feature";
-
-    // Vaadin-specific abstractions
 }

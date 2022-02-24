@@ -10,12 +10,12 @@ import java.beans.PropertyChangeListener;
 
 public class FeatureLayerTest {
 
-    private FeatureLayer featureLayer;
+    private TestFeatureLayer featureLayer;
     private PropertyChangeListener propertyChangeListenerMock;
 
     @Before
     public void setup() {
-        featureLayer = new FeatureLayer();
+        featureLayer = new TestFeatureLayer();
         propertyChangeListenerMock = Mockito.mock(PropertyChangeListener.class);
     }
 
@@ -47,5 +47,13 @@ public class FeatureLayerTest {
         Assert.assertEquals(0, featureLayer.getFeatures().size());
         Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
                 .propertyChange(Mockito.any());
+    }
+
+    private static class TestFeatureLayer extends FeatureLayer {
+        // Expose method for testing
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            super.addPropertyChangeListener(listener);
+        }
     }
 }

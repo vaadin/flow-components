@@ -166,10 +166,10 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-field", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/text-field", version = "23.0.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.0.0-rc1")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

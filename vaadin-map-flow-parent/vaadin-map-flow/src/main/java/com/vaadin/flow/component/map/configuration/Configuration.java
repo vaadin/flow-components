@@ -16,15 +16,28 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
+/**
+ * Contains the configuration for the map, such as layers, sources, features.
+ */
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
+    private View view;
+
+    public Configuration() {
+        setView(new View());
+    }
 
     @Override
     public String getType() {
@@ -39,6 +52,8 @@ public class Configuration extends AbstractConfigurationObject {
      *
      * @return the list of layers managed by this map
      */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public List<Layer> getLayers() {
         return Collections.unmodifiableList(layers);
     }
@@ -55,10 +70,8 @@ public class Configuration extends AbstractConfigurationObject {
     public void addLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
-        layer.addPropertyChangeListener(this::notifyChange);
-
         layers.add(layer);
-        notifyChange();
+        addChild(layer);
     }
 
     /**
@@ -73,10 +86,8 @@ public class Configuration extends AbstractConfigurationObject {
     public void prependLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
-        layer.addPropertyChangeListener(this::notifyChange);
-
         layers.add(0, layer);
-        notifyChange();
+        addChild(layer);
     }
 
     /**
@@ -88,9 +99,67 @@ public class Configuration extends AbstractConfigurationObject {
     public void removeLayer(Layer layer) {
         Objects.requireNonNull(layer);
 
-        layer.removePropertyChangeListener(this::notifyChange);
-
         layers.remove(layer);
-        notifyChange();
+        removeChild(layer);
+    }
+
+    /**
+     * Gets the view of the map. The view gives access to properties like center
+     * and zoom level of the viewport.
+     *
+     * @return the map's view
+     */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    public View getView() {
+        return view;
+    }
+
+    /**
+     * Sets the view of the map. This is only necessary when dealing with map
+     * services that use custom coordinate projection, in which case a view with
+     * a matching projection needs to be created and used.
+     *
+     * @param view
+     *            the new view
+     */
+    public void setView(View view) {
+        removeChild(this.view);
+        this.view = view;
+        addChild(view);
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Exposes the method to allow the map component to mark the full
+     * configuration hierarchy as changed.
+     */
+    @Override
+    public void deepMarkAsDirty() {
+        super.deepMarkAsDirty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Exposes the method to allow the map component to listen for changes to
+     * the configuration.
+     */
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Exposes the method to allow the map component to collect changes from the
+     * configuration.
+     */
+    @Override
+    public void collectChanges(
+            Consumer<AbstractConfigurationObject> changeCollector) {
+        super.collectChanges(changeCollector);
     }
 }

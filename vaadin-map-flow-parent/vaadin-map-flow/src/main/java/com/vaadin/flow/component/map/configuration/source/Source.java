@@ -68,7 +68,7 @@ public abstract class Source extends AbstractConfigurationObject {
      */
     public void setAttributions(List<String> attributions) {
         this.attributions = attributions;
-        notifyChange();
+        markAsDirty();
     }
 
     /**

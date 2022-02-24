@@ -21,14 +21,16 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
-import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
@@ -37,23 +39,30 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 import java.beans.PropertyChangeEvent;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public abstract class MapBase extends Component implements HasSize {
+/**
+ * Base class for the map component. Contains all base functionality for the map
+ * component, but does not provide any defaults. This component should not be
+ * used directly, instead use {@link Map}, which also provides some
+ * out-of-the-box conveniences such as a pre-configured background layer, and a
+ * feature layer.
+ */
+public abstract class MapBase extends Component implements HasSize, HasTheme {
     private final Configuration configuration;
-    private final View view;
     private final MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
-    private StateTree.ExecutionRegistration pendingViewSync;
 
     protected MapBase() {
-        this.configuration = new Configuration();
-        this.view = new View();
         this.serializer = new MapSerializer();
+        this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
-        this.view.addPropertyChangeListener(this::viewPropertyChange);
         registerEventListeners();
     }
 
@@ -62,17 +71,25 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     /**
-     * Gets the view of the map. The view gives access to properties like center
-     * and zoom level of the viewport.
+     * Gets the {@link View} of the map. The view allows controlling properties
+     * of the map's viewport, such as center, zoom level and rotation.
      *
      * @return the map's view
      */
     public View getView() {
-        return view;
+        return configuration.getView();
     }
 
-    public void render() {
-        this.requestConfigurationSync();
+    /**
+     * Sets the view of the map. This is only necessary when dealing with map
+     * services that use custom coordinate projection, in which case a view with
+     * a matching projection needs to be created and used.
+     *
+     * @param view
+     *            the new view
+     */
+    public void setView(View view) {
+        configuration.setView(view);
     }
 
     @Override
@@ -80,10 +97,15 @@ public abstract class MapBase extends Component implements HasSize {
         super.onAttach(attachEvent);
         checkFeatureFlag();
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
+        // Ensure the full configuration is synced when (re-)attaching the
+        // component
+        configuration.deepMarkAsDirty();
         requestConfigurationSync();
-        requestViewSync();
     }
 
+    /**
+     * Schedules a configuration sync, if there isn't a scheduled sync already
+     */
     private void requestConfigurationSync() {
         if (pendingConfigurationSync != null) {
             return;
@@ -95,38 +117,25 @@ public abstract class MapBase extends Component implements HasSize {
                 }));
     }
 
-    private void requestViewSync() {
-        if (pendingViewSync != null) {
-            return;
-        }
-        getUI().ifPresent(ui -> pendingViewSync = ui.beforeClientResponse(this,
-                context -> {
-                    pendingViewSync = null;
-                    synchronizeView();
-                }));
-    }
-
+    /**
+     * Synchronize the map configuration to the client-side, into OpenLayers
+     * class instances
+     */
     private void synchronizeConfiguration() {
-        JsonValue jsonConfiguration = serializer.toJson(configuration);
+        // Use a linked hash set to prevent object duplicates, but guarantee
+        // that the changes are synchronized in the order that they were added
+        // to the set
+        Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
+        configuration.collectChanges(changedObjects::add);
+
+        JsonValue jsonChanges = serializer.toJson(changedObjects);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
-                jsonConfiguration);
-    }
-
-    private void synchronizeView() {
-        JsonValue jsonView = serializer.toJson(view);
-
-        this.getElement().executeJs(
-                "this.$connector.synchronize($0, this.configuration.getView())",
-                jsonView);
+                jsonChanges);
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {
         this.requestConfigurationSync();
-    }
-
-    private void viewPropertyChange(PropertyChangeEvent e) {
-        this.requestViewSync();
     }
 
     private void registerEventListeners() {
@@ -143,7 +152,10 @@ public abstract class MapBase extends Component implements HasSize {
     }
 
     /**
-     * Adds event listener for OpenLayers' "moveend" event.
+     * Adds an event listener for changes to the map's viewport. The event will
+     * only be triggered after the user has finished manipulating the viewport,
+     * for example after letting go of the mouse button after a mouse drag
+     * interaction.
      *
      * @param listener
      * @return a registration object for removing the added listener
@@ -234,5 +246,29 @@ public abstract class MapBase extends Component implements HasSize {
     protected FeatureFlags getFeatureFlags() {
         return FeatureFlags
                 .get(UI.getCurrent().getSession().getService().getContext());
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(MapVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(MapVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(MapVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(MapVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }

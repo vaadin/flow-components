@@ -68,6 +68,6 @@ public class Point extends SimpleGeometry {
     public void setCoordinates(Coordinate coordinates) {
         Objects.requireNonNull(coordinates);
         this.coordinates = coordinates;
-        notifyChange();
+        markAsDirty();
     }
 }
