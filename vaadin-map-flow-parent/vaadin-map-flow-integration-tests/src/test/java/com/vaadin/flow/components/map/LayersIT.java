@@ -15,6 +15,7 @@ public class LayersIT extends AbstractComponentIT {
     private TestBenchElement replaceBackgroundLayer;
     private TestBenchElement addCustomLayer;
     private TestBenchElement removeCustomLayer;
+    private TestBenchElement customizeLayerProperties;
 
     @Before
     public void init() {
@@ -24,6 +25,7 @@ public class LayersIT extends AbstractComponentIT {
         replaceBackgroundLayer = $("button").id("replace-background-layer");
         addCustomLayer = $("button").id("add-custom-layer");
         removeCustomLayer = $("button").id("remove-custom-layer");
+        customizeLayerProperties = $("button").id("customize-layer-properties");
     }
 
     @Test
@@ -39,6 +41,9 @@ public class LayersIT extends AbstractComponentIT {
                 .getSource();
 
         Assert.assertEquals("ol/layer/Tile", backgroundLayer.getTypeName());
+        Assert.assertTrue(backgroundLayer.isVisible());
+        Assert.assertEquals(1f, backgroundLayer.getOpacity(), 0.001);
+        Assert.assertNull(backgroundLayer.getZIndex());
         Assert.assertEquals("ol/source/OSM", backgroundSource.getTypeName());
 
         // Second layer should be a vector layer with a vector source
@@ -48,6 +53,9 @@ public class LayersIT extends AbstractComponentIT {
                 .getSource();
 
         Assert.assertEquals("ol/layer/Vector", featureLayer.getTypeName());
+        Assert.assertTrue(featureLayer.isVisible());
+        Assert.assertEquals(1f, featureLayer.getOpacity(), 0.001);
+        Assert.assertEquals(100, (long) featureLayer.getZIndex());
         Assert.assertEquals("ol/source/Vector",
                 featureLayerSource.getTypeName());
     }
@@ -115,5 +123,20 @@ public class LayersIT extends AbstractComponentIT {
         MapElement.LayerReference customLayer = mapReference.getLayers()
                 .getLayer("custom-layer");
         Assert.assertFalse("Custom layer still exists", customLayer.exists());
+    }
+
+    @Test
+    public void customizeProperties() {
+        addCustomLayer.click();
+        customizeLayerProperties.click();
+
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference customLayer = mapReference.getLayers()
+                .getLayer("custom-layer");
+        Assert.assertTrue("Custom layer does not exist", customLayer.exists());
+
+        Assert.assertFalse(customLayer.isVisible());
+        Assert.assertEquals(0.7f, customLayer.getOpacity(), 0.0001);
+        Assert.assertEquals(42, (long) customLayer.getZIndex());
     }
 }

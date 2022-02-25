@@ -15,11 +15,10 @@ public class FeatureLayerPage extends Div {
 
         map.getFeatureLayer().setId("feature-layer");
 
-        NativeButton addFeature = new NativeButton(
-                "Add feature", e -> {
-                    MarkerFeature feature = new MarkerFeature();
-                    map.getFeatureLayer().addFeature(feature);
-                });
+        NativeButton addFeature = new NativeButton("Add feature", e -> {
+            MarkerFeature feature = new MarkerFeature();
+            map.getFeatureLayer().addFeature(feature);
+        });
         addFeature.setId("add-feature");
 
         NativeButton removeFirstFeature = new NativeButton(

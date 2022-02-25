@@ -169,24 +169,24 @@ public class MapElement extends TestBenchElement {
             return (String) get(path, args);
         }
 
-        public int getInt(String path, Object... args) {
+        public Integer getInt(String path, Object... args) {
             Number number = (Number) get(path, args);
-            return number.intValue();
+            return number != null ? number.intValue() : null;
         }
 
-        public long getLong(String path, Object... args) {
+        public Long getLong(String path, Object... args) {
             Number number = (Number) get(path, args);
-            return number.longValue();
+            return number != null ? number.longValue() : null;
         }
 
-        public float getFloat(String path, Object... args) {
+        public Float getFloat(String path, Object... args) {
             Number number = (Number) get(path, args);
-            return number.floatValue();
+            return number != null ? number.floatValue() : null;
         }
 
-        public double getDouble(String path, Object... args) {
+        public Double getDouble(String path, Object... args) {
             Number number = (Number) get(path, args);
-            return number.doubleValue();
+            return number != null ? number.doubleValue() : null;
         }
 
         public String getTypeName() {
@@ -259,6 +259,18 @@ public class MapElement extends TestBenchElement {
 
         public SourceReference getSource() {
             return new SourceReference(executor, path("getSource()"));
+        }
+
+        public boolean isVisible() {
+            return getBoolean("getVisible()");
+        }
+
+        public float getOpacity() {
+            return getFloat("getOpacity()");
+        }
+
+        public Long getZIndex() {
+            return getLong("getZIndex()");
         }
     }
 
