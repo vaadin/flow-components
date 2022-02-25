@@ -11,37 +11,9 @@ import java.util.List;
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
     /**
-     * Evaluates a Javascript expression against a vaadin-map's internal
-     * OpenLayers map instance, and returns the result. The OpenLayers map
-     * instance will be provided as the {@code map} variable to the expression.
-     *
-     * @param expression
-     *            the Javascript expression to execute
-     * @return result of the Javascript evaluation
-     */
-    public Object evaluateOLExpression(String expression) {
-        return executeScript(
-                "const map = arguments[0].configuration; return " + expression,
-                getWrappedElement());
-    }
-
-    /**
-     * Helper for building a Javascript expression that returns the type name of
-     * an OpenLayers class instance
-     *
-     * @param jsExpression
-     *            a Javascript expression that returns an OpenLayers class
-     *            instance
-     * @return the Javascript expression that evaluates the type name
-     */
-    public String getOLTypeNameExpression(String jsExpression) {
-        return jsExpression + ".typeName";
-    }
-
-    /**
-     * Performs a native click at the specified map coordinates. The method will
-     * convert the coordinates into pixel values, and perform a click on the map
-     * at the calculated pixel offset.
+     * /** Performs a native click at the specified map coordinates. The method
+     * will convert the coordinates into pixel values, and perform a click on
+     * the map at the calculated pixel offset.
      *
      * @param x
      * @param y
@@ -66,31 +38,6 @@ public class MapElement extends TestBenchElement {
     public MapReference getMapReference() {
         ExpressionExecutor expressionExecutor = new ExpressionExecutor(this);
         return new MapReference(expressionExecutor, "map");
-    }
-
-    /**
-     * Returns a Javascript expression that returns the layer with the specified
-     * ID.
-     *
-     * @return a Javascript expression evaluating the layer
-     */
-    public String getLayerExpression(String layerId) {
-        return String.format(
-                "map.getLayers().getArray().find(layer => layer.id === '%s')",
-                layerId);
-    }
-
-    /**
-     * Returns a Javascript expression that evaluates the feature collection of
-     * the layer with the specified ID. Assumes that the layer is a vector layer
-     * that has a feature collection.
-     *
-     * @return a Javascript expression evaluating the feature collection of the
-     *         feature layer's source
-     */
-    public String getFeatureCollectionExpression(String layerId) {
-        return getLayerExpression(layerId)
-                + ".getSource().getFeaturesCollection()";
     }
 
     /**
@@ -222,12 +169,25 @@ public class MapElement extends TestBenchElement {
                     getDouble("getCenter()[1]"));
         }
 
+        public void setCenter(Coordinate coordinate) {
+            executor.executeScript(path("setCenter([%s, %s])",
+                    coordinate.getX(), coordinate.getY()));
+        }
+
         public float getZoom() {
             return getFloat("getZoom()");
         }
 
+        public void setZoom(float zoom) {
+            executor.executeScript(path("setZoom(%s)", zoom));
+        }
+
         public float getRotation() {
             return getFloat("getRotation()");
+        }
+
+        public void setRotation(float rotation) {
+            executor.executeScript(path("setRotation(%s)", rotation));
         }
     }
 
