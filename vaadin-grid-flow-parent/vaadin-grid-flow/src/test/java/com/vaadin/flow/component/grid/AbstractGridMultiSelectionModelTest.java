@@ -19,9 +19,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.selection.SelectionListener;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -116,6 +119,64 @@ public class AbstractGridMultiSelectionModelTest {
         grid.getSelectionModel().selectFromClient("foo");
 
         Assert.assertEquals(1, grid.getSelectedItems().size());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void select_usesDataProviderIdentify() {
+        Grid<TestEntity> grid = new Grid<>();
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider = new CallbackDataProvider<>(
+                query -> Stream.of(new TestEntity(1, "Name"),
+                        new TestEntity(2, "Name"), new TestEntity(3, "Name")),
+                query -> 3, TestEntity::getId);
+        grid.setItems(dataProviderWithIdentityProvider);
+
+        SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock = Mockito
+                .mock(SelectionListener.class);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        selectionModel.addSelectionListener(selectionListenerMock);
+
+        // Select initial item
+        selectionModel.select(new TestEntity(1, "joseph"));
+        // Select item with different equals value, but same identity in data
+        // provider
+        selectionModel.select(new TestEntity(1, "Joseph"));
+
+        // Second select should not result in a selection change
+        Mockito.verify(selectionListenerMock, Mockito.times(1))
+                .selectionChange(Mockito.any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void selectFromClient_usesDataProviderIdentify() {
+        Grid<TestEntity> grid = new Grid<>();
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider = new CallbackDataProvider<>(
+                query -> Stream.of(new TestEntity(1, "Name"),
+                        new TestEntity(2, "Name"), new TestEntity(3, "Name")),
+                query -> 3, TestEntity::getId);
+        grid.setItems(dataProviderWithIdentityProvider);
+
+        SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock = Mockito
+                .mock(SelectionListener.class);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        selectionModel.addSelectionListener(selectionListenerMock);
+
+        // Select initial item
+        selectionModel.selectFromClient(new TestEntity(1, "joseph"));
+        // Select item with different equals value, but same identity in data
+        // provider
+        selectionModel.selectFromClient(new TestEntity(1, "Joseph"));
+
+        // Second select should not result in a selection change
+        Mockito.verify(selectionListenerMock, Mockito.times(1))
+                .selectionChange(Mockito.any());
     }
 
     @Test
@@ -336,5 +397,42 @@ public class AbstractGridMultiSelectionModelTest {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
+    }
+
+    public static class TestEntity {
+        private final int id;
+        private final String name;
+
+        public TestEntity(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        // equals and hashCode are intentionally implemented differently from
+        // the identifier getter for the data provider. We want to make sure
+        // that the selection model uses the data provider identity, rather than
+        // the equals implementation
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            TestEntity that = (TestEntity) o;
+            return id == that.id && Objects.equals(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name);
+        }
     }
 }
