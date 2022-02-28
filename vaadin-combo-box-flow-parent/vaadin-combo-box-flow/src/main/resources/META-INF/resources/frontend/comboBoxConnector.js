@@ -152,6 +152,15 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
                 }
             }
 
+            comboBox.$connector.clear = tryCatchWrapper((start, length) => {
+                const firstPageToClear = Math.floor(start / comboBox.pageSize);
+                const numberOfPagesToClear = Math.ceil(length / comboBox.pageSize);
+                
+                for (let i = firstPageToClear; i < firstPageToClear + numberOfPagesToClear; i++) {
+                    delete cache[i];
+                }
+            });
+
             comboBox.$connector.filter = tryCatchWrapper(function (item, filter) {
                 filter = filter ? filter.toString().toLowerCase() : '';
                 return comboBox._getItemLabel(item).toString().toLowerCase().indexOf(filter) > -1;
