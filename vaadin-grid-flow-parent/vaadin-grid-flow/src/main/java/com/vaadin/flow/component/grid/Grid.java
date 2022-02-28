@@ -269,7 +269,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     @Override
                     public void setDeselectAllowed(boolean deselectAllowed) {
                         super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().setProperty("__deselectDisallowed", !deselectAllowed);
+                        grid.getElement().setProperty("__deselectDisallowed",
+                                !deselectAllowed);
                     }
                 };
             }
