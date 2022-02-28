@@ -11,9 +11,19 @@ import java.util.List;
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
     /**
-     * /** Performs a native click at the specified map coordinates. The method
-     * will convert the coordinates into pixel values, and perform a click on
-     * the map at the calculated pixel offset.
+     * Returns a {@link ConfigurationObjectReference} wrapper for the OpenLayers
+     * map instance. Used to access nested configuration objects in the browser
+     * and extract values from them to be used for assertions.
+     */
+    public MapReference getMapReference() {
+        ExpressionExecutor expressionExecutor = new ExpressionExecutor(this);
+        return new MapReference(expressionExecutor, "map");
+    }
+
+    /**
+     * Performs a native click at the specified map coordinates. The method will
+     * convert the coordinates into pixel values, and perform a click on the map
+     * at the calculated pixel offset.
      *
      * @param x
      * @param y
@@ -33,11 +43,6 @@ public class MapElement extends TestBenchElement {
         int clickY = startTop + pixelCoordinates.get(1).intValue();
         new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
                 .build().perform();
-    }
-
-    public MapReference getMapReference() {
-        ExpressionExecutor expressionExecutor = new ExpressionExecutor(this);
-        return new MapReference(expressionExecutor, "map");
     }
 
     /**
@@ -89,7 +94,16 @@ public class MapElement extends TestBenchElement {
         }
     }
 
-    public static class ConfigurationObjectReference {
+    /**
+     * Abstract class for wrapping an in-browser OpenLayers configuration class
+     * instance. The class holds a Javascript expression that defines the path
+     * to the wrapped object, and provides methods for accessing properties of
+     * the object (see {@link #get(String, Object...)} and related methods). All
+     * properties are evaluated lazily using an {@link ExpressionExecutor},
+     * which takes the path through the configuration hierarchy to that property
+     * as Javascript expression and executes it through the Selenium API.
+     */
+    public static abstract class ConfigurationObjectReference {
         ExpressionExecutor executor;
         String expression;
 
@@ -99,10 +113,32 @@ public class MapElement extends TestBenchElement {
             this.expression = expression;
         }
 
+        /**
+         * Creates a path to a nested object as Javascript expression, based on
+         * the current path
+         *
+         * @param path
+         *            the nested path
+         * @param args
+         *            variable arguments to be interpolated into the path, works
+         *            like {@link String#format(String, Object...)}
+         */
         public String path(String path, Object... args) {
             return this.expression + "." + String.format(path, args);
         }
 
+        /**
+         * Extracts a value from the wrapped object by executing a Selenium
+         * Javascript call and returning the result. The return type depends on
+         * how Selenium converts the Javascript values into Java types. See the
+         * more specific methods for returning values in specific types.
+         *
+         * @param path
+         *            the nested path to the value to extract
+         * @param args
+         *            variable arguments to be interpolated into the path, works
+         *            like {@link String#format(String, Object...)}
+         */
         public Object get(String path, Object... args) {
             String expression = path(path, args);
             return executor.executeExpression(expression);
