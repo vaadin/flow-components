@@ -1,77 +1,130 @@
 package com.vaadin.flow.component.grid;
 
-import java.util.stream.Stream;
-
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.selection.SelectionListener;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.data.provider.CallbackDataProvider;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class AbstractGridSingleSelectionModelTest {
-
-    private static final Person PERSON_C = new Person("c", 3);
-    private static final Person PERSON_B = new Person("b", 2);
-    private static final Person PERSON_A = new Person("a", 1);
-
-    private Grid<Person> grid;
-    private AbstractGridSingleSelectionModel<Person> selectionModel;
-    private CallbackDataProvider<Person, Void> spy;
+    private Grid<TestEntity> grid;
+    private CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider;
+    private SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock;
 
     @Before
-    public void init() {
+    @SuppressWarnings("unchecked")
+    public void setup() {
         grid = new Grid<>();
-        selectionModel = (AbstractGridSingleSelectionModel<Person>) grid
+        dataProviderWithIdentityProvider = new CallbackDataProvider<>(
+                query -> Stream.of(new TestEntity(1, "Name"),
+                        new TestEntity(2, "Name"), new TestEntity(3, "Name")),
+                query -> 3, TestEntity::getId);
+        selectionListenerMock = Mockito.mock(SelectionListener.class);
+        grid.getSelectionModel().addSelectionListener(selectionListenerMock);
+    }
+
+    @Test
+    public void select_usesDataProviderIdentify() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
                 .getSelectionModel();
-        final CallbackDataProvider<Person, Void> dataProvider = new CallbackDataProvider<>(
-                query -> Stream.of(PERSON_A, PERSON_B, PERSON_C), query -> 3,
-                Person::getName);
-        spy = Mockito.spy(dataProvider);
-        grid.setItems(spy);
+        // Select initial item
+        selectionModel.select(new TestEntity(1, "joseph"));
+        // Select item with different equals value, but same identity in data
+        // provider
+        selectionModel.select(new TestEntity(1, "Joseph"));
+
+        // Second select should not result in a selection change
+        Mockito.verify(selectionListenerMock, Mockito.times(1))
+                .selectionChange(Mockito.any());
     }
 
-    @Test // #2354
-    public void selectItem_dataProviderWithIdentifierProvider_identityUsedForEqualsComparison() {
-        grid.select(PERSON_A);
+    @Test
+    public void select_setNullClearsSelection() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        // Select initial item
+        selectionModel.select(new TestEntity(1, "joseph"));
+        // Select null
+        selectionModel.select(null);
 
-        // called 3 times - once by selection model and twice by KeyMapper
-        Mockito.verify(spy, Mockito.times(3)).getId(PERSON_A);
-        Mockito.verify(spy, Mockito.never()).getId(PERSON_B);
-
-        Mockito.reset(spy);
-        grid.select(PERSON_B);
-
-        // called 3 times - once by selection model and twice by KeyMapper
-        Mockito.verify(spy, Mockito.times(3)).getId(PERSON_B);
-        // called 2 times - once by selection model and once by KeyMapper
-        Mockito.verify(spy, Mockito.times(2)).getId(PERSON_A);
-
-        Mockito.reset(spy);
-        grid.select(null);
-
-        // called 2 times - once by selection model and once by KeyMapper
-        Mockito.verify(spy, Mockito.times(2)).getId(PERSON_B);
-        Mockito.verify(spy, Mockito.never()).getId(null);
+        // Second select should result in a selection change
+        Mockito.verify(selectionListenerMock, Mockito.times(2))
+                .selectionChange(Mockito.any());
+        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
     }
 
-    @Test // #2354
-    public void selectFromClient_dataProviderWithIdentifierProvider_identityUsedForEqualsComparison() {
-        selectionModel.selectFromClient(PERSON_A);
+    @Test
+    public void selectFromClient_usesDataProviderIdentify() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        // Select initial item
+        selectionModel.selectFromClient(new TestEntity(1, "joseph"));
+        // Select item with different equals value, but same identity in data
+        // provider
+        selectionModel.selectFromClient(new TestEntity(1, "Joseph"));
 
-        Mockito.verify(spy, Mockito.times(1)).getId(PERSON_A);
-        Mockito.verify(spy, Mockito.never()).getId(PERSON_B);
+        // Second select should not result in a selection change
+        Mockito.verify(selectionListenerMock, Mockito.times(1))
+                .selectionChange(Mockito.any());
+    }
 
-        Mockito.reset(spy);
-        selectionModel.selectFromClient(PERSON_B);
-
-        Mockito.verify(spy, Mockito.times(1)).getId(PERSON_B);
-        Mockito.verify(spy, Mockito.times(1)).getId(PERSON_A);
-
-        Mockito.reset(spy);
+    @Test
+    public void selectFromClient_setNullClearsSelection() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        // Select initial item
+        selectionModel.selectFromClient(new TestEntity(1, "joseph"));
+        // Select null
         selectionModel.selectFromClient(null);
 
-        // called 2 times - once by selection model and once by KeyMapper
-        Mockito.verify(spy, Mockito.times(1)).getId(PERSON_B);
-        Mockito.verify(spy, Mockito.never()).getId(null);
+        // Second select should result in a selection change
+        Mockito.verify(selectionListenerMock, Mockito.times(2))
+                .selectionChange(Mockito.any());
+        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+    }
+
+    public static class TestEntity {
+        private final int id;
+        private final String name;
+
+        public TestEntity(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        // equals and hashCode are intentionally implemented differently from
+        // the identifier getter for the data provider. We want to make sure
+        // that the selection model uses the data provider identity, rather than
+        // the equals implementation
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            TestEntity that = (TestEntity) o;
+            return id == that.id && Objects.equals(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name);
+        }
     }
 }
