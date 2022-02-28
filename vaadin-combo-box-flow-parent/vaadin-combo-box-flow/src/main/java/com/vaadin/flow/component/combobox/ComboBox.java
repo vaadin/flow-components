@@ -202,7 +202,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void clear(int start, int length) {
-            // NO-OP
+            enqueue("$connector.clear", start, length);
         }
 
         @Override
