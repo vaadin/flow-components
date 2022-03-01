@@ -100,4 +100,18 @@ public class DataProviderIT extends AbstractComponentIT {
                 "Item is not the same as in the refreshed data provider.",
                 "bar", items.get(0));
     }
+
+    @Test
+    public void loadData_toggleAttached_correctItemsDisplayed() {
+        // Detach and reattach the combobox
+        findElement(By.id("toggle-attached")).click();
+        findElement(By.id("toggle-attached")).click();
+
+        // Open the popup
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("combo-box-with-reduce-data-set");
+        comboBox.openPopup();
+
+        waitUntil(e -> "bar".equals(comboBox.getOptions().get(1)));
+    }
 }
