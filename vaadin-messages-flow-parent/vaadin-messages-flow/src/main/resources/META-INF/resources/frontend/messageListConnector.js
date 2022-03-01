@@ -16,7 +16,7 @@
 
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Message List', 'vaadin-messages');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Message List');
     };
 
     window.Vaadin.Flow.messageListConnector = {

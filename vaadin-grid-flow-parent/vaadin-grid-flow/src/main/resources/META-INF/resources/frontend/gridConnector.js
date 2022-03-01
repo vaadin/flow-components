@@ -6,7 +6,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid');
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid');
   };
 
   let isItemCacheInitialized = false;
