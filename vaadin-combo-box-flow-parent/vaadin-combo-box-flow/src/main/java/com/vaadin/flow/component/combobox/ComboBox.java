@@ -971,7 +971,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataProviderListener.remove();
             dataProviderListener = null;
         }
-        removeLazyOpenRegistration();
 
         if (clearFilterOnCloseRegistration != null) {
             clearFilterOnCloseRegistration.remove();
