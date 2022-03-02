@@ -15,8 +15,6 @@ import java.util.HashMap;
 public class SourcesPage extends Div {
     public SourcesPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         NativeButton setupTileWMSSource = new NativeButton(

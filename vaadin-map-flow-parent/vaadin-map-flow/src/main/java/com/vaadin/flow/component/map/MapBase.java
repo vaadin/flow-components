@@ -255,9 +255,8 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
      *            theme variants to add
      */
     public void addThemeVariants(MapVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(MapVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(Stream.of(variants)
+                .map(MapVariant::getVariantName).collect(Collectors.toList()));
     }
 
     /**
@@ -267,8 +266,7 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
      *            theme variants to remove
      */
     public void removeThemeVariants(MapVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(MapVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(MapVariant::getVariantName).collect(Collectors.toList()));
     }
 }
