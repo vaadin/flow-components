@@ -31,6 +31,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -48,7 +49,6 @@ public class LazyLoadingPage extends Div {
         message.setId("message");
         add(message);
 
-        addSeparator();
         createListDataProviderWithStringsAutoOpenDisabled();
         addSeparator();
         createListDataProviderWithStrings();
@@ -68,6 +68,7 @@ public class LazyLoadingPage extends Div {
         createComboBoxWithCustomPageSizeAndLazyLoading();
         addSeparator();
         createComboBoxWithDisabledLazyLoading();
+        addSeparator();
     }
 
     private void createListDataProviderWithStringsAutoOpenDisabled() {
@@ -302,6 +303,11 @@ public class LazyLoadingPage extends Div {
     }
 
     private void addSeparator() {
+        // Add a vertical spacer div after each test setup. This avoids issues with the tests being dependent on the screen size, regarding in which direction the combo boxes open, and how much space vertical space the combo box overlay gets.
+        Div spacer = new Div();
+        spacer.getStyle().set("height", "100px");
+        add(spacer);
+        // Add visual separator
         getElement().appendChild(new Element("hr"));
     }
 
