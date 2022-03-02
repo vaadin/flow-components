@@ -19,8 +19,6 @@ import java.util.HashMap;
 public class TileWMSDemo extends Div {
     public TileWMSDemo() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         // Add tile layer showing an overlay of the individual states of the US

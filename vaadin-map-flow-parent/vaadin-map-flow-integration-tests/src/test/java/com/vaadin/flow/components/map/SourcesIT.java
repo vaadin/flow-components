@@ -32,67 +32,44 @@ public class SourcesIT extends AbstractComponentIT {
     public void initializeTileWMSSource() {
         setupTileWMSSource.click();
 
-        String backgroundLayerEx = map.getLayerExpression("background-layer");
-        String sourceEx = backgroundLayerEx + ".getSource()";
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers().getLayer(0);
+        MapElement.TileWmsSourceReference source = layer.getSource()
+                .asTileWmsSource();
 
-        String sourceType = (String) map
-                .evaluateOLExpression(map.getOLTypeNameExpression(sourceEx));
-        String url = (String) map
-                .evaluateOLExpression(sourceEx + ".getUrls()[0]");
-        String layersParam = (String) map
-                .evaluateOLExpression(sourceEx + ".params_.LAYERS");
-        Boolean tiledParam = (Boolean) map
-                .evaluateOLExpression(sourceEx + ".params_.TILED");
-        String serverType = (String) map
-                .evaluateOLExpression(sourceEx + ".serverType_");
-
-        Assert.assertEquals("ol/source/TileWMS", sourceType);
-        Assert.assertEquals("https://example.com/wms", url);
-        Assert.assertEquals("layer1", layersParam);
-        Assert.assertEquals(true, tiledParam);
-        Assert.assertEquals("geoserver", serverType);
+        Assert.assertEquals("ol/source/TileWMS", source.getTypeName());
+        Assert.assertEquals("https://example.com/wms", source.getPrimaryUrl());
+        Assert.assertEquals("layer1", source.getParam("LAYERS"));
+        Assert.assertEquals(true, source.getParam("TILED"));
+        Assert.assertEquals("geoserver", source.getServerType());
     }
 
     @Test
     public void initializeXYZSource() {
         setupXYZSource.click();
 
-        String backgroundLayerEx = map.getLayerExpression("background-layer");
-        String sourceEx = backgroundLayerEx + ".getSource()";
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers().getLayer(0);
+        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
 
-        String sourceType = (String) map
-                .evaluateOLExpression(map.getOLTypeNameExpression(sourceEx));
-        String url = (String) map
-                .evaluateOLExpression(sourceEx + ".getUrls()[0]");
-
-        Assert.assertEquals("ol/source/XYZ", sourceType);
-        Assert.assertEquals("https://example.com/wms", url);
+        Assert.assertEquals("ol/source/XYZ", source.getTypeName());
+        Assert.assertEquals("https://example.com/wms", source.getPrimaryUrl());
     }
 
     @Test
     public void initializeImageWMSSource() {
         setupImageWMSSource.click();
 
-        String backgroundLayerEx = map.getLayerExpression("background-layer");
-        String sourceEx = backgroundLayerEx + ".getSource()";
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers().getLayer(0);
+        MapElement.ImageWmsSourceReference source = layer.getSource()
+                .asImageWmsSource();
 
-        String sourceType = (String) map
-                .evaluateOLExpression(map.getOLTypeNameExpression(sourceEx));
-        String url = (String) map.evaluateOLExpression(sourceEx + ".url_");
-        String layersParam = (String) map
-                .evaluateOLExpression(sourceEx + ".params_.LAYERS");
-        String serverType = (String) map
-                .evaluateOLExpression(sourceEx + ".serverType_");
-        String crossOrigin = (String) map
-                .evaluateOLExpression(sourceEx + ".crossOrigin_");
-        float ratio = ((Number) map.evaluateOLExpression(sourceEx + ".ratio_"))
-                .floatValue();
-
-        Assert.assertEquals("ol/source/ImageWMS", sourceType);
-        Assert.assertEquals("https://example.com/wms", url);
-        Assert.assertEquals("layer1", layersParam);
-        Assert.assertEquals("geoserver", serverType);
-        Assert.assertEquals("custom-cross-origin", crossOrigin);
-        Assert.assertEquals(2, ratio, 0.1);
+        Assert.assertEquals("ol/source/ImageWMS", source.getTypeName());
+        Assert.assertEquals("https://example.com/wms", source.getUrl());
+        Assert.assertEquals("layer1", source.getParam("LAYERS"));
+        Assert.assertEquals("geoserver", source.getServerType());
+        Assert.assertEquals("custom-cross-origin", source.getCrossOrigin());
+        Assert.assertEquals(2, source.getRatio(), 0.1);
     }
 }
