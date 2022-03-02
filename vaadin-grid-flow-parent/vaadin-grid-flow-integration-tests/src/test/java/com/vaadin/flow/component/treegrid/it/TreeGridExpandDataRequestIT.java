@@ -18,6 +18,13 @@ public class TreeGridExpandDataRequestIT extends AbstractTreeGridIT {
         setupTreeGrid();
         findElement(By.id("LoggingDataProvider")).click();
 
+        // Wait until root node requests are logged, then clear the log
+        // and continue with the tests.
+        waitUntil((w) -> {
+            String logValue = (String) executeScript(
+                    "return arguments[0].value", findElement(By.id("log")));
+            return logValue.contains("Range [0..50]");
+        });
         clickClearLog();
     }
 
