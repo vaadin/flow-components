@@ -303,7 +303,10 @@ public class LazyLoadingPage extends Div {
     }
 
     private void addSeparator() {
-        // Add a vertical spacer div after each test setup. This avoids issues with the tests being dependent on the screen size, regarding in which direction the combo boxes open, and how much space vertical space the combo box overlay gets.
+        // Add a vertical spacer div after each test setup. This avoids issues
+        // with the tests being dependent on the screen size, regarding in which
+        // direction the combo boxes open, and how much space vertical space the
+        // combo box overlay gets.
         Div spacer = new Div();
         spacer.getStyle().set("height", "100px");
         add(spacer);
