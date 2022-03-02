@@ -1021,7 +1021,7 @@
         const expectedSectionValues = ['header', 'body', 'footer'];
 
         if(expectedSectionValues.indexOf(eventContext.section) === -1) {
-          throw new Error('Unexpected value for section: ' + eventContext.section);
+          return;
         }
 
         grid.dispatchEvent(new CustomEvent('grid-cell-focus', {

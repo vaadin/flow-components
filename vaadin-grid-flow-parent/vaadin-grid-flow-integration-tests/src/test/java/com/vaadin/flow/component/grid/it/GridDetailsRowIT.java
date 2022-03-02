@@ -50,6 +50,14 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         assertElementHasButton(detailsElement.get(1), "Person 2");
     }
 
+    @Test
+    public void shouldNotThrowOnDetailsClick() {
+        open();
+        GridElement grid = $(GridElement.class).first();
+        grid.getRow(1).getDetails().click(0, 0);
+        checkLogsForErrors();
+    }
+
     /**
      * Click on an item, hide the other details
      */
