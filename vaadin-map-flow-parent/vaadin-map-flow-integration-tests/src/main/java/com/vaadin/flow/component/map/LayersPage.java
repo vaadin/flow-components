@@ -13,8 +13,6 @@ import com.vaadin.flow.router.Route;
 public class LayersPage extends Div {
     public LayersPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         NativeButton setCustomSource = new NativeButton("Set custom source",

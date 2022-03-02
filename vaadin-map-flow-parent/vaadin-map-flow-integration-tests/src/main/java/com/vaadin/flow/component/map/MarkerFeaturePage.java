@@ -3,7 +3,6 @@ package com.vaadin.flow.component.map;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.router.Route;
@@ -12,9 +11,6 @@ import com.vaadin.flow.router.Route;
 public class MarkerFeaturePage extends Div {
     public MarkerFeaturePage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
-
         map.getFeatureLayer().setId("feature-layer");
 
         NativeButton addDefaultMarkerFeature = new NativeButton(

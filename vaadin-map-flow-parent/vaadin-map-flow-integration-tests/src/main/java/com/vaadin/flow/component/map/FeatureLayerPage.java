@@ -10,8 +10,6 @@ import com.vaadin.flow.router.Route;
 public class FeatureLayerPage extends Div {
     public FeatureLayerPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
 
         map.getFeatureLayer().setId("feature-layer");
 
