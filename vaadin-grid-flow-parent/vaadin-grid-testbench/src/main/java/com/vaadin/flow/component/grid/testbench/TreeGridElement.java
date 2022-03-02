@@ -4,14 +4,14 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
- * the License. 
+ * the License.
  */
 package com.vaadin.flow.component.grid.testbench;
 
@@ -261,7 +261,7 @@ public class TreeGridElement extends GridElement {
      * Returns a number of expanded rows in the grid element. Notice that
      * returned number does not mean that grid has yet finished rendering all
      * visible expanded rows.
-     * 
+     *
      * @return the number of expanded rows
      */
     public long getNumberOfExpandedRows() {
@@ -272,7 +272,7 @@ public class TreeGridElement extends GridElement {
 
     /**
      * Returns {@code true} if details are open or the given row index.
-     * 
+     *
      * @param rowIndex
      *            the 0-based row index
      * @return {@code true} if details are shown in the target row
@@ -287,7 +287,7 @@ public class TreeGridElement extends GridElement {
 
     /**
      * Returns true if given index has tr element for the row
-     * 
+     *
      * @param row
      *            the row index
      * @return <code>true</code> if there is tr element for the row,
@@ -303,7 +303,7 @@ public class TreeGridElement extends GridElement {
 
     /**
      * Returns true if grid is loading expanded rows.
-     * 
+     *
      * @return <code>true</code> if grid is loading expanded rows,
      *         <code>false</code> otherwise
      */

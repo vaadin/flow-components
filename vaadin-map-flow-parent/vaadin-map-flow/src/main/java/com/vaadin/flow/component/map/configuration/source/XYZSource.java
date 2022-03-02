@@ -60,7 +60,7 @@ public class XYZSource extends TileImageSource {
 
     /**
      * Sets the URL template in XYZ format.
-     * 
+     *
      * @param url
      *            the new URL template
      */

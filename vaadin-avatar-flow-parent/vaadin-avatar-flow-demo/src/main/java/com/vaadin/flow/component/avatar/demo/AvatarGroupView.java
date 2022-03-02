@@ -25,7 +25,6 @@ import com.vaadin.flow.server.StreamResource;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * View for {@link AvatarGroup} demo.
  *

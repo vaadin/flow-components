@@ -31,7 +31,7 @@ public class Bullet extends AbstractChartExample {
 
     /**
      * Create a bullet chart with shared configuration
-     * 
+     *
      * @param plotBandY1
      *            "from" value for the first plotband
      * @param plotBandY2

@@ -28,7 +28,7 @@ import java.util.List;
  * The bottom-most layer contains {@code <vaadin-grid-column>} elements, the
  * second layer their parent {@code <vaadin-grid-column-group>} elements and so
  * on.
- * 
+ *
  * @author Vaadin Ltd.
  */
 class ColumnLayer implements Serializable {
@@ -42,7 +42,7 @@ class ColumnLayer implements Serializable {
     /**
      * Creates a ColumnLayer for tracking one hierarchy layer of column
      * components in a Grid.
-     * 
+     *
      * @param grid
      *            the grid that has the columns
      */
@@ -54,7 +54,7 @@ class ColumnLayer implements Serializable {
     /**
      * Creates a ColumnLayer for tracking one hierarchy layer of column
      * components in a Grid.
-     * 
+     *
      * @param grid
      *            the grid that has the columns
      * @param columns
@@ -67,7 +67,7 @@ class ColumnLayer implements Serializable {
 
     /**
      * Adds the given column to the end of this layer.
-     * 
+     *
      * @param column
      *            the column to add
      */
@@ -77,7 +77,7 @@ class ColumnLayer implements Serializable {
 
     /**
      * Inserts the given column to the provided index in this layer.
-     * 
+     *
      * @param index
      *            the index where to insert
      * @param column
@@ -96,7 +96,7 @@ class ColumnLayer implements Serializable {
     /**
      * Updates this layer and corresponding header and footer rows when the
      * given column is removed.
-     * 
+     *
      * @param column
      *            the component that is removed, must be on this layer
      */
@@ -115,7 +115,7 @@ class ColumnLayer implements Serializable {
      * <p>
      * If this layer has not been used as a HeaderRow before, the HeaderRow will
      * be instantiated by setting the header templates to the components.
-     * 
+     *
      * @return the HeaderRow representation of this layer
      */
     protected HeaderRow asHeaderRow() {
@@ -131,7 +131,7 @@ class ColumnLayer implements Serializable {
      * <p>
      * If this layer has not been used as a FooterRow before, the FooterRow will
      * be instantiated by setting the footer templates to the components.
-     * 
+     *
      * @return the FooterRow representation of this layer
      */
     protected FooterRow asFooterRow() {
@@ -144,7 +144,7 @@ class ColumnLayer implements Serializable {
 
     /**
      * Binds the given HeaderRow to the column components on this layer.
-     * 
+     *
      * @param headerRow
      *            the HeaderRow to update to use the columns on this layer
      */
@@ -157,7 +157,7 @@ class ColumnLayer implements Serializable {
 
     /**
      * Binds the given FooterRow to the column components on this layer.
-     * 
+     *
      * @param footerRow
      *            the FooterRow to update to use the columns on this layer
      */
@@ -171,7 +171,7 @@ class ColumnLayer implements Serializable {
     /**
      * Gets whether this layer has a HeaderRow representation instantiated
      * (whether the columns on this layer have header templates).
-     * 
+     *
      * @return whether the column components on this layer have headers or not
      */
     protected boolean isHeaderRow() {
@@ -181,7 +181,7 @@ class ColumnLayer implements Serializable {
     /**
      * Gets whether this layer has a FooterRow representation instantiated
      * (whether the columns on this layer have footer templates).
-     * 
+     *
      * @return whether the column components on this layer have footers or not
      */
     protected boolean isFooterRow() {
@@ -190,7 +190,7 @@ class ColumnLayer implements Serializable {
 
     /**
      * Gets the Grid that owns this layer of columns.
-     * 
+     *
      * @return the grid that owns this layer
      */
     protected Grid<?> getGrid() {
@@ -200,7 +200,7 @@ class ColumnLayer implements Serializable {
     /**
      * Bind this layer and the related HeaderRow and FooterRow representations
      * to the given column components.
-     * 
+     *
      * @param columns
      *            the column components to use for this layer
      */
@@ -216,7 +216,7 @@ class ColumnLayer implements Serializable {
 
     /**
      * Gets the column components that belong to this layer.
-     * 
+     *
      * @return the column components of this layer
      */
     protected List<AbstractColumn<?>> getColumns() {
@@ -226,7 +226,7 @@ class ColumnLayer implements Serializable {
     /**
      * Sets whether components on this layer should display the sorting
      * indicators if the underlying column is sortable.
-     * 
+     *
      * @param sortingIndicators
      *            {@code true} to make components on this layer to have the
      *            sorting indicators if the column is sortable, {@code false} to

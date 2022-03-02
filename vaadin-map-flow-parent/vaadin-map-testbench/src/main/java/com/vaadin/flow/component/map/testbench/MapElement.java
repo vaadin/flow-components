@@ -288,7 +288,8 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
-        private SourceReference(ExpressionExecutor executor, String expression) {
+        private SourceReference(ExpressionExecutor executor,
+                String expression) {
             super(executor, expression);
         }
 
