@@ -19,8 +19,6 @@ import java.util.HashMap;
 public class ImageWMSDemo extends Div {
     public ImageWMSDemo() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         // Add image layer showing an overlay of the individual states of the US

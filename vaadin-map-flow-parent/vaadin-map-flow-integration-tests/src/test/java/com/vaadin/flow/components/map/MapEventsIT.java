@@ -29,11 +29,13 @@ public class MapEventsIT extends AbstractComponentIT {
     @Test
     public void changeViewPort_viewStateUpdated() {
         addMoveEndListener.click();
-        // We are simulating user changing the view port of the map
-        map.evaluateOLExpression(
-                "map.getView().setCenter([4849385.650796606, 5487570.011434158]);");
-        map.evaluateOLExpression("map.getView().setRotation(5);");
-        map.evaluateOLExpression("map.getView().setZoom(6)");
+
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.ViewReference view = mapReference.getView();
+        // Simulate user changing the view port of the map
+        view.setCenter(new MapElement.Coordinate(4849385.650796606, 5487570.011434158));
+        view.setZoom(6);
+        view.setRotation(5);
 
         String[] parts = viewStateDiv.getText().split(";");
         double centerX = Double.parseDouble(parts[0]);
@@ -50,11 +52,13 @@ public class MapEventsIT extends AbstractComponentIT {
     @Test
     public void changeViewPort_correctEventDataReceived() {
         addMoveEndListener.click();
-        // We are simulating user changing the view port of the map
-        map.evaluateOLExpression(
-                "map.getView().setCenter([4849385.650796606, 5487570.011434158]);");
-        map.evaluateOLExpression("map.getView().setRotation(5);");
-        map.evaluateOLExpression("map.getView().setZoom(6)");
+
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.ViewReference view = mapReference.getView();
+        // Simulate user changing the view port of the map
+        view.setCenter(new MapElement.Coordinate(4849385.650796606, 5487570.011434158));
+        view.setZoom(6);
+        view.setRotation(5);
 
         String[] parts = eventDataDiv.getText().split(";");
         double centerX = Double.parseDouble(parts[0]);

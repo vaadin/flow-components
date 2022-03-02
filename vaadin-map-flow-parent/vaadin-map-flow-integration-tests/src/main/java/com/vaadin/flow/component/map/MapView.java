@@ -21,8 +21,6 @@ public class MapView extends Div {
 
     public MapView() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
 
         MarkerFeature nurembergMarker = new MarkerFeature(
                 new Coordinate(1233058.1696443919, 6351912.406929109));

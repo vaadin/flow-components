@@ -9,7 +9,8 @@ public class MapVariantTest {
         Map map = new Map();
         map.addThemeVariants(MapVariant.BORDERLESS);
 
-        Assert.assertEquals("borderless", map.getElement().getAttribute("theme"));
+        Assert.assertEquals("borderless",
+                map.getElement().getAttribute("theme"));
     }
 
     @Test

@@ -14,8 +14,6 @@ import com.vaadin.flow.router.Route;
 public class XYZSourceDemo extends Div {
     public XYZSourceDemo() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         // Use XYZ source displaying the OSM humanitarian map
