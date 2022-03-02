@@ -1,6 +1,5 @@
 package com.vaadin.flow.components.map;
 
-import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -27,7 +26,7 @@ public class ViewIT extends AbstractComponentIT {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.ViewReference view = mapReference.getView();
 
-        Coordinate center = view.getCenter();
+        MapElement.Coordinate center = view.getCenter();
         Assert.assertEquals(2482424.644689998, center.getX(), 0.0001);
         Assert.assertEquals(8500614.173537256, center.getY(), 0.0001);
 

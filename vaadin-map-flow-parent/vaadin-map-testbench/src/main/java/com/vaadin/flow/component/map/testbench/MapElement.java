@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.map.testbench;
 
-import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.Rectangle;
@@ -76,7 +75,7 @@ public class MapElement extends TestBenchElement {
     private static class ExpressionExecutor {
         private final MapElement mapElement;
 
-        public ExpressionExecutor(MapElement mapElement) {
+        private ExpressionExecutor(MapElement mapElement) {
             this.mapElement = mapElement;
         }
 
@@ -107,7 +106,7 @@ public class MapElement extends TestBenchElement {
         ExpressionExecutor executor;
         String expression;
 
-        public ConfigurationObjectReference(ExpressionExecutor executor,
+        private ConfigurationObjectReference(ExpressionExecutor executor,
                 String expression) {
             this.executor = executor;
             this.expression = expression;
@@ -181,8 +180,26 @@ public class MapElement extends TestBenchElement {
         }
     }
 
+    public static class Coordinate {
+        private final double x;
+        private final double y;
+
+        public Coordinate(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+    }
+
     public static class MapReference extends ConfigurationObjectReference {
-        public MapReference(ExpressionExecutor executor, String expression) {
+        private MapReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
         }
 
@@ -196,7 +213,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class ViewReference extends ConfigurationObjectReference {
-        public ViewReference(ExpressionExecutor executor, String expression) {
+        private ViewReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
         }
 
@@ -229,7 +246,7 @@ public class MapElement extends TestBenchElement {
 
     public static class LayerCollectionReference
             extends ConfigurationObjectReference {
-        public LayerCollectionReference(ExpressionExecutor executor,
+        private LayerCollectionReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -249,7 +266,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class LayerReference extends ConfigurationObjectReference {
-        public LayerReference(ExpressionExecutor executor, String expression) {
+        private LayerReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
         }
 
@@ -271,7 +288,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
-        public SourceReference(ExpressionExecutor executor, String expression) {
+        private SourceReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
         }
 
@@ -294,7 +311,7 @@ public class MapElement extends TestBenchElement {
 
     public static abstract class UrlTileSourceReference
             extends SourceReference {
-        public UrlTileSourceReference(ExpressionExecutor executor,
+        private UrlTileSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -305,14 +322,14 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class XyzSourceReference extends UrlTileSourceReference {
-        public XyzSourceReference(ExpressionExecutor executor,
+        private XyzSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
     }
 
     public static class TileWmsSourceReference extends UrlTileSourceReference {
-        public TileWmsSourceReference(ExpressionExecutor executor,
+        private TileWmsSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -327,7 +344,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class ImageWmsSourceReference extends SourceReference {
-        public ImageWmsSourceReference(ExpressionExecutor executor,
+        private ImageWmsSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -354,7 +371,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class VectorSourceReference extends SourceReference {
-        public VectorSourceReference(ExpressionExecutor executor,
+        private VectorSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -367,7 +384,7 @@ public class MapElement extends TestBenchElement {
 
     public static class FeatureCollectionReference
             extends ConfigurationObjectReference {
-        public FeatureCollectionReference(ExpressionExecutor executor,
+        private FeatureCollectionReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -382,7 +399,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class FeatureReference extends ConfigurationObjectReference {
-        public FeatureReference(ExpressionExecutor executor,
+        private FeatureReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -397,7 +414,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class StyleReference extends ConfigurationObjectReference {
-        public StyleReference(ExpressionExecutor executor, String expression) {
+        private StyleReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
         }
 
@@ -407,7 +424,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class GeometryReference extends ConfigurationObjectReference {
-        public GeometryReference(ExpressionExecutor executor,
+        private GeometryReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
         }
@@ -419,7 +436,7 @@ public class MapElement extends TestBenchElement {
     }
 
     public static class IconReference extends ConfigurationObjectReference {
-        public IconReference(ExpressionExecutor executor, String expression) {
+        private IconReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
         }
 

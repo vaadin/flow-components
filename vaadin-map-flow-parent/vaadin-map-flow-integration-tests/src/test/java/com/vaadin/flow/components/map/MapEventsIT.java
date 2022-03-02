@@ -1,6 +1,5 @@
 package com.vaadin.flow.components.map;
 
-import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -34,7 +33,7 @@ public class MapEventsIT extends AbstractComponentIT {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.ViewReference view = mapReference.getView();
         // Simulate user changing the view port of the map
-        view.setCenter(new Coordinate(4849385.650796606, 5487570.011434158));
+        view.setCenter(new MapElement.Coordinate(4849385.650796606, 5487570.011434158));
         view.setZoom(6);
         view.setRotation(5);
 
@@ -57,7 +56,7 @@ public class MapEventsIT extends AbstractComponentIT {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.ViewReference view = mapReference.getView();
         // Simulate user changing the view port of the map
-        view.setCenter(new Coordinate(4849385.650796606, 5487570.011434158));
+        view.setCenter(new MapElement.Coordinate(4849385.650796606, 5487570.011434158));
         view.setZoom(6);
         view.setRotation(5);
 
