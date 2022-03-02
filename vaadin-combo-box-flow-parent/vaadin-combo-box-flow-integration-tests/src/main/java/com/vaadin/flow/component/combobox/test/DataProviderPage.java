@@ -24,6 +24,7 @@ import com.vaadin.flow.component.combobox.bean.TestItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
@@ -90,6 +91,8 @@ public class DataProviderPage extends Div {
         ComboBox<String> cb = new ComboBox<>();
         cb.setId("combo-box-with-reduce-data-set");
 
+        Span cbWrapper = new Span(cb);
+
         List<String> items = new ArrayList<>();
         items.add("foo");
         items.add("bar");
@@ -106,6 +109,17 @@ public class DataProviderPage extends Div {
         refreshAllWithSmallerDataSetButton
                 .setId("refresh-all-with-smaller-data-set");
 
-        add(cb, refreshAllWithSmallerDataSetButton);
+        NativeButton toggleAttachedButton = new NativeButton("Toggle attached",
+                event -> {
+                    if (cb.isAttached()) {
+                        cbWrapper.remove(cb);
+                    } else {
+                        cbWrapper.add(cb);
+                    }
+                });
+        toggleAttachedButton.setId("toggle-attached");
+
+        add(cbWrapper, refreshAllWithSmallerDataSetButton,
+                toggleAttachedButton);
     }
 }

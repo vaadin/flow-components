@@ -1,6 +1,6 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Select', 'vaadin-select');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Select');
     };
 
     window.Vaadin.Flow.selectConnector = {
