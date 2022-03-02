@@ -12,8 +12,6 @@ import com.vaadin.flow.router.Route;
 public class PreserveOnRefreshPage extends Div {
     public PreserveOnRefreshPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         // Action for changing the configuration, so we can test that the

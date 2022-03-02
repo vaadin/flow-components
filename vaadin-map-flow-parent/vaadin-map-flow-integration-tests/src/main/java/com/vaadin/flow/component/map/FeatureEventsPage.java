@@ -14,8 +14,6 @@ import com.vaadin.flow.router.Route;
 public class FeatureEventsPage extends Div {
     public FeatureEventsPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         map.getView().setCenter(new Coordinate(0, 0));
         map.getView().setZoom(3);
 

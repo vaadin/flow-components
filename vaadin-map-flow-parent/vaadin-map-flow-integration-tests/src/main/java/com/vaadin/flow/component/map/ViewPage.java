@@ -9,8 +9,6 @@ import com.vaadin.flow.router.Route;
 public class ViewPage extends Div {
     public ViewPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         map.getView().setZoom(5);
 
         NativeButton setCenterButton = new NativeButton("Set Center", e -> {
