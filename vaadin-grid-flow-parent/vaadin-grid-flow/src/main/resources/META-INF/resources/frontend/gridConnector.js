@@ -160,10 +160,6 @@
           itemkey: grid.getItemId(targetCache.items[scaledIndex]),
           level: targetCache.getLevel()
         });
-        // sort by ascending scaledIndex and level
-        ensureSubCacheQueue.sort(function(a, b) {
-          return a.scaledIndex - b.scaledIndex || a.level - b.level;
-        });
 
         ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame,
           () => {
@@ -392,15 +388,26 @@
             // workaround: sometimes grid-element gives page index that overflows
             page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
+            // Ensure grid isn't in loading state when the callback executes
+            ensureSubCacheQueue = [];
             callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
+            
+            // Flush after the callback to have the grid rows up-to-date
+            updateAllGridRowsInDomBasedOnCache();
+            // Prevent sub-caches from being created (& data requests sent) for items
+            // that may no longer be visible
+            ensureSubCacheQueue = [];
+            // Eliminate flickering on eager fetch mode
+            grid.requestContentUpdate();
           } else {
             treePageCallbacks[parentUniqueKey][page] = callback;
+
+            grid.$connector.fetchPage(
+              (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
+              page,
+              parentUniqueKey
+            );
           }
-          grid.$connector.fetchPage(
-            (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
-            page,
-            parentUniqueKey
-          );
 
         } else {
           // workaround: sometimes grid-element gives page index that overflows
@@ -410,13 +417,13 @@
             callback(cache[root][page]);
           } else {
             rootPageCallbacks[page] = callback;
-          }
 
-          rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(grid._hasData ? rootRequestDelay : 0),
-            () => {
-              grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
-            }
-          );
+            rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(grid._hasData ? rootRequestDelay : 0),
+              () => {
+                grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+              }
+            );
+          }
         }
       })
 
@@ -849,13 +856,15 @@
       })
 
       grid.$connector.confirmParent = tryCatchWrapper(function(id, parentKey, levelSize) {
-        if(!treePageCallbacks[parentKey]) {
-          return;
+        if(!cache[parentKey]) {
+          cache[parentKey] = {};
         }
-        if(cache[parentKey]) {
-          cache[parentKey].size = levelSize;
+        cache[parentKey].size = levelSize;
+        if (levelSize === 0) {
+          cache[parentKey][0] = [];
         }
-        let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey]);
+        
+        let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey] || {});
         for(let i = 0; i < outstandingRequests.length; i++) {
           let page = outstandingRequests[i];
 
