@@ -21,7 +21,7 @@ public class FeaturesDiy extends Features {
                 new Span("Your next meeting starts in 5 minutes").getElement());
 
         // This button will get discarded by the new confirm button added below.
-        dialog.setConfirmButton(new Button("Discaded confirm button"));
+        dialog.setConfirmButton(new Button("Discarded confirm button"));
 
         Button confirmButton = new Button("Confirm");
         confirmButton.setId("confirmDiy");
