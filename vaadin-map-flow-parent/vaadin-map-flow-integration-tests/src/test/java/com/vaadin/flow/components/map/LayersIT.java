@@ -15,6 +15,7 @@ public class LayersIT extends AbstractComponentIT {
     private TestBenchElement replaceBackgroundLayer;
     private TestBenchElement addCustomLayer;
     private TestBenchElement removeCustomLayer;
+    private TestBenchElement customizeLayerProperties;
 
     @Before
     public void init() {
@@ -24,32 +25,39 @@ public class LayersIT extends AbstractComponentIT {
         replaceBackgroundLayer = $("button").id("replace-background-layer");
         addCustomLayer = $("button").id("add-custom-layer");
         removeCustomLayer = $("button").id("remove-custom-layer");
+        customizeLayerProperties = $("button").id("customize-layer-properties");
     }
 
     @Test
     public void defaultLayers() {
         // Initialized with two layers by default
-        long numLayers = (long) map
-                .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(2, numLayers);
+        MapElement.MapReference mapReference = map.getMapReference();
+        Assert.assertEquals(2, mapReference.getLayers().getLength());
 
-        // First layer should be a tile layer
-        String backgroundLayerEx = map.getLayerExpression("background-layer");
-        String backgroundLayerType = (String) map.evaluateOLExpression(
-                map.getOLTypeNameExpression(backgroundLayerEx));
-        Assert.assertEquals("ol/layer/Tile", backgroundLayerType);
+        // First layer should be a tile layer with an OpenStreetMap source
+        MapElement.LayerReference backgroundLayer = mapReference.getLayers()
+                .getLayer(0);
+        MapElement.SourceReference backgroundSource = backgroundLayer
+                .getSource();
 
-        // Layer's source should be an OpenStreetMap source
-        String backgroundLayerSourceEx = backgroundLayerEx + ".getSource()";
-        String sourceTypeName = (String) map.evaluateOLExpression(
-                map.getOLTypeNameExpression(backgroundLayerSourceEx));
-        Assert.assertEquals("ol/source/OSM", sourceTypeName);
+        Assert.assertEquals("ol/layer/Tile", backgroundLayer.getTypeName());
+        Assert.assertTrue(backgroundLayer.isVisible());
+        Assert.assertEquals(1f, backgroundLayer.getOpacity(), 0.001);
+        Assert.assertNull(backgroundLayer.getZIndex());
+        Assert.assertEquals("ol/source/OSM", backgroundSource.getTypeName());
 
-        // Second layer should be a vector layer
-        String featureLayerEx = map.getLayerExpression("feature-layer");
-        String featureLayerType = (String) map.evaluateOLExpression(
-                map.getOLTypeNameExpression(featureLayerEx));
-        Assert.assertEquals("ol/layer/Vector", featureLayerType);
+        // Second layer should be a vector layer with a vector source
+        MapElement.LayerReference featureLayer = mapReference.getLayers()
+                .getLayer(1);
+        MapElement.SourceReference featureLayerSource = featureLayer
+                .getSource();
+
+        Assert.assertEquals("ol/layer/Vector", featureLayer.getTypeName());
+        Assert.assertTrue(featureLayer.isVisible());
+        Assert.assertEquals(1f, featureLayer.getOpacity(), 0.001);
+        Assert.assertEquals(100, (long) featureLayer.getZIndex());
+        Assert.assertEquals("ol/source/Vector",
+                featureLayerSource.getTypeName());
     }
 
     @Test
@@ -57,16 +65,17 @@ public class LayersIT extends AbstractComponentIT {
         setCustomSource.click();
 
         // Background layer's source should now be an XYZ source
-        String backgroundLayerEx = map.getLayerExpression("background-layer");
-        String backgroundLayerSourceEx = backgroundLayerEx + ".getSource()";
-        String sourceTypeName = (String) map.evaluateOLExpression(
-                map.getOLTypeNameExpression(backgroundLayerSourceEx));
-        Assert.assertEquals("ol/source/XYZ", sourceTypeName);
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference backgroundLayer = mapReference.getLayers()
+                .getLayer(0);
+        MapElement.XyzSourceReference backgroundSource = backgroundLayer
+                .getSource().asXyzSource();
+
+        Assert.assertEquals("ol/source/XYZ", backgroundSource.getTypeName());
 
         // Layer's source should use custom URL
-        String sourceUrl = (String) map.evaluateOLExpression(
-                backgroundLayerSourceEx + ".getUrls()[0]");
-        Assert.assertEquals("https://example.com", sourceUrl);
+        Assert.assertEquals("https://example.com",
+                backgroundSource.getPrimaryUrl());
     }
 
     @Test
@@ -74,39 +83,31 @@ public class LayersIT extends AbstractComponentIT {
         replaceBackgroundLayer.click();
 
         // Should still have two layers
-        long numLayers = (long) map
-                .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(2, numLayers);
+        MapElement.MapReference mapReference = map.getMapReference();
+        Assert.assertEquals(2, mapReference.getLayers().getLength());
 
-        // Layer should be a vector layer
-        String newBackgroundLayerEx = map
-                .getLayerExpression("new-background-layer");
-        String layerTypeName = (String) map.evaluateOLExpression(
-                map.getOLTypeNameExpression(newBackgroundLayerEx));
-        Assert.assertEquals("ol/layer/Vector", layerTypeName);
+        // Layer should be a vector layer with a vector source
+        MapElement.LayerReference backgroundLayer = mapReference.getLayers()
+                .getLayer(0);
+        MapElement.SourceReference backgroundSource = backgroundLayer
+                .getSource();
 
-        // Layer's source should be a vector source
-        String newBackgroundLayerSourceEx = newBackgroundLayerEx
-                + ".getSource()";
-        String sourceTypeName = (String) map.evaluateOLExpression(
-                map.getOLTypeNameExpression(newBackgroundLayerSourceEx));
-        Assert.assertEquals("ol/source/Vector", sourceTypeName);
+        Assert.assertEquals("ol/layer/Vector", backgroundLayer.getTypeName());
+        Assert.assertEquals("ol/source/Vector", backgroundSource.getTypeName());
     }
 
     @Test
     public void addCustomLayer() {
         addCustomLayer.click();
 
-        // Should still have three layers
-        long numLayers = (long) map
-                .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(3, numLayers);
+        // Should now have three layers
+        MapElement.MapReference mapReference = map.getMapReference();
+        Assert.assertEquals(3, mapReference.getLayers().getLength());
 
-        String customLayerEx = map.getLayerExpression("custom-layer");
-        Boolean hasCustomLayer = (Boolean) map
-                .evaluateOLExpression(customLayerEx + " != null");
-
-        Assert.assertTrue("Custom layer does not exist", hasCustomLayer);
+        // Custom layer should exist
+        MapElement.LayerReference customLayer = mapReference.getLayers()
+                .getLayer("custom-layer");
+        Assert.assertTrue("Custom layer does not exist", customLayer.exists());
     }
 
     @Test
@@ -114,15 +115,28 @@ public class LayersIT extends AbstractComponentIT {
         addCustomLayer.click();
         removeCustomLayer.click();
 
-        // Should have two layers
-        long numLayers = (long) map
-                .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(2, numLayers);
+        // Should have the two default layers
+        MapElement.MapReference mapReference = map.getMapReference();
+        Assert.assertEquals(2, mapReference.getLayers().getLength());
 
-        String customLayerEx = map.getLayerExpression("custom-layer");
-        Boolean hasCustomLayer = (Boolean) map
-                .evaluateOLExpression(customLayerEx + " != null");
+        // Custom layer should not exist
+        MapElement.LayerReference customLayer = mapReference.getLayers()
+                .getLayer("custom-layer");
+        Assert.assertFalse("Custom layer still exists", customLayer.exists());
+    }
 
-        Assert.assertFalse("Custom layer still exists", hasCustomLayer);
+    @Test
+    public void customizeProperties() {
+        addCustomLayer.click();
+        customizeLayerProperties.click();
+
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference customLayer = mapReference.getLayers()
+                .getLayer("custom-layer");
+        Assert.assertTrue("Custom layer does not exist", customLayer.exists());
+
+        Assert.assertFalse(customLayer.isVisible());
+        Assert.assertEquals(0.7f, customLayer.getOpacity(), 0.0001);
+        Assert.assertEquals(42, (long) customLayer.getZIndex());
     }
 }

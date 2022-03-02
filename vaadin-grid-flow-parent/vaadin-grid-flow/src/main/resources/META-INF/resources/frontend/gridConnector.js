@@ -6,7 +6,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid', 'vaadin-grid');
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid');
   };
 
   let isItemCacheInitialized = false;
@@ -111,8 +111,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       let selectedKeys = {};
       let selectionMode = 'SINGLE';
 
-      let detailsVisibleOnClick = true;
-
       let sorterDirectionsSetFromServer = false;
 
       grid.size = 0; // To avoid NaN here and there before we get proper data
@@ -205,7 +203,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }
         if (!newVal) {
           if (oldVal && selectedKeys[oldVal.key]) {
-            if (!grid.$connector.deselectAllowed) {
+            if (grid.__deselectDisallowed) {
               grid.activeItem = oldVal;
             } else {
               grid.$connector.doDeselection([oldVal], true);
@@ -218,7 +216,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       grid._createPropertyObserver('activeItem', '__activeItemChanged', true);
 
       grid.__activeItemChangedDetails = tryCatchWrapper(function(newVal, oldVal) {
-        if(!detailsVisibleOnClick) {
+        if (grid.__disallowDetailsOnClick) {
           return;
         }
         // when grid is attached, newVal is not set and oldVal is undefined
@@ -233,10 +231,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }
       })
       grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
-
-      grid.$connector.setDetailsVisibleOnClick = tryCatchWrapper(function(visibleOnClick) {
-        detailsVisibleOnClick = visibleOnClick;
-      });
 
       grid.$connector._getPageIfSameLevel = tryCatchWrapper(function(parentKey, index, defaultPage) {
         let cacheAndIndex = grid._cache.getCacheAndIndex(index);
@@ -947,8 +941,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         }
       });
 
-      grid.$connector.deselectAllowed = true;
-
       /*
        * Manage aria-multiselectable attribute depending on the selection mode.
        * see more: https://github.com/vaadin/web-components/issues/1536
@@ -1054,7 +1046,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         const expectedSectionValues = ['header', 'body', 'footer'];
 
         if(expectedSectionValues.indexOf(eventContext.section) === -1) {
-          throw new Error('Unexpected value for section: ' + eventContext.section);
+          return;
         }
 
         grid.dispatchEvent(new CustomEvent('grid-cell-focus', {
