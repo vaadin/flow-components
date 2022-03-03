@@ -32,7 +32,7 @@ class SlotHelpers {
 
     /**
      * Gets all the child elements of the parent that are in the specified slot.
-     * 
+     *
      * @param parent
      *            the component to get children from, not {@code null}
      * @param slot
@@ -47,7 +47,7 @@ class SlotHelpers {
 
     /**
      * Removes every child element of the parent that are in the specified slot.
-     * 
+     *
      * @param parent
      *            the component whose slot to clear
      * @param slot
@@ -61,7 +61,7 @@ class SlotHelpers {
     /**
      * Gets the first child component of the parent that is in the specified
      * slot.
-     * 
+     *
      * @param parent
      *            the component to get child from, not {@code null}
      * @param slot

@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -20,7 +20,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * An array defining zones within a series. Zones can be applied to the X axis,
  * Y axis or Z axis for bubbles, according to the <code>zoneAxis</code> option.
  * </p>
- * 
+ *
  * <p>
  * In
  * <a href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

@@ -244,7 +244,7 @@ public class RadioButtonGroup<T>
      * in the radio button group for each item. By default,
      * {@link String#valueOf(Object)} is used.
      * <p>
-     * 
+     *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
      */

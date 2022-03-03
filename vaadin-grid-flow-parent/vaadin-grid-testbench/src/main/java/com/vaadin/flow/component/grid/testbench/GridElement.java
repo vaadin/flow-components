@@ -277,7 +277,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Finds the vaadin-grid-cell-content element for the given row and column
      * in header.
-     * 
+     *
      * @param rowIndex
      *            the index of the row in the header
      * @param columnIndex
@@ -300,7 +300,7 @@ public class GridElement extends TestBenchElement {
 
     /**
      * Find all {@link WebElement}s using the given {@link By} selector.
-     * 
+     *
      * @deprecated this method will not working for Chrome 96+, because of the
      *             breaking changes in ChromeDriver.
      * @param by

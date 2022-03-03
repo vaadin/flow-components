@@ -41,7 +41,7 @@ public class GridTRElement extends TestBenchElement {
 
     /**
      * Gets the row details for this row.
-     * 
+     *
      * @return the details cell
      */
     public GridTHTDElement getDetails() {

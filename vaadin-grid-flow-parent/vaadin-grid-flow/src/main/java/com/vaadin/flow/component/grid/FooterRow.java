@@ -24,14 +24,14 @@ import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 
 /**
  * One row of {@link FooterCell}s in a Grid.
- * 
+ *
  * @author Vaadin Ltd.
  */
 public class FooterRow extends AbstractRow<FooterCell> {
 
     /**
      * A footer cell in a Grid.
-     * 
+     *
      * @author Vaadin Ltd.
      */
     public static class FooterCell extends AbstractCell {
@@ -57,7 +57,7 @@ public class FooterRow extends AbstractRow<FooterCell> {
 
     /**
      * Creates a new footer row from the layer of column elements.
-     * 
+     *
      * @param layer
      */
     FooterRow(ColumnLayer layer) {

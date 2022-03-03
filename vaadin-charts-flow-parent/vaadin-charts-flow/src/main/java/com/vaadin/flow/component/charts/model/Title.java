@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -100,7 +100,7 @@ public class Title extends AbstractConfigurationObject {
      * CSS styles for the title. Use this for font styling, but use
      * <code>align</code>, <code>x</code> and <code>y</code> for text alignment.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

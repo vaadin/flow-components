@@ -42,7 +42,7 @@ public final class DataProviderListenersTest {
     /**
      * Checks the old data provider listeners of the component are removed after
      * component attach/detach and a new ones are added.
-     * 
+     *
      * @param component
      *            to be attached/detached
      * @param expectedListenersCountAfterDataProviderSetup

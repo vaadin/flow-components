@@ -134,7 +134,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      * applies to the bars unless a color is specified per point. The default
      * value is pulled from the <code>options.colors</code> array.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -233,7 +233,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      * <p>
      * Options for the series data labels, appearing next to each data point.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -350,7 +350,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -364,7 +364,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -438,7 +438,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      * column series, don't have markers, but have visual options on the series
      * level instead.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -653,7 +653,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      * the distance between two points is greater than five times that of the
      * two closest points, the graph will be broken.
      * </p>
-     * 
+     *
      * <p>
      * In practice, this option is most often used to visualize gaps in time
      * series. In a stock chart, intraday data is available for daytime hours,
@@ -714,7 +714,7 @@ public class PlotOptionsTimeline extends AbstractPlotOptions {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * These options are merged with options in
      * <a href="#navigator.series">navigator.series</a>, and will take
