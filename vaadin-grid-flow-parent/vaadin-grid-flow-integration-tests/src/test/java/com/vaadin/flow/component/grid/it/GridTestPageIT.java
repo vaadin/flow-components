@@ -419,6 +419,12 @@ public class GridTestPageIT extends AbstractComponentIT {
                 currentColumnOrdering.getText());
     }
 
+    @Test
+    public void gridWithNoConnector_noExceptions() {
+        executeScript("document.body.appendChild(document.createElement('vaadin-grid'));");
+        checkLogsForErrors();
+    }
+
     private void assertSelection(WebElement grid, String value) {
         Assert.assertTrue(value + " should be selected",
                 (Boolean) executeScript(
