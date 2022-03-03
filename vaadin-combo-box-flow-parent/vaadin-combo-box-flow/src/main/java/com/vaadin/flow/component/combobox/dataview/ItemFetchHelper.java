@@ -33,7 +33,7 @@ final class ItemFetchHelper implements Serializable {
     /**
      * Gets the items available in the ComboBox's service-side by requesting the
      * data provider directly, and not using the data communicator's cache.
-     * 
+     *
      * @param dataCommunicator
      *            data communicator of the ComboBox
      * @param <T>
@@ -50,7 +50,7 @@ final class ItemFetchHelper implements Serializable {
      * Gets the item at the given index from the data available in the
      * ComboBox's server-side by requesting the data provider directly, and not
      * using the data communicator's cache.
-     * 
+     *
      * @param dataCommunicator
      *            data communicator of the ComboBox
      * @param index
@@ -86,7 +86,7 @@ final class ItemFetchHelper implements Serializable {
      * Creates a query to be used by data provider for fetching a whole range of
      * items taking into account the filtering and sorting of a given data
      * communicator.
-     * 
+     *
      * @param dataCommunicator
      *            data communicator of the ComboBox
      * @param <T>
@@ -102,7 +102,7 @@ final class ItemFetchHelper implements Serializable {
      * Creates a query to be used by data provider for fetching a given range of
      * items taking into account the filtering and sorting of a given data
      * communicator.
-     * 
+     *
      * @param dataCommunicator
      *            data communicator of the ComboBox
      * @param offset

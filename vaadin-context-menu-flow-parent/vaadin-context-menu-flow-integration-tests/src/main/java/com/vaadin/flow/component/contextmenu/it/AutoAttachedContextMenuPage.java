@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
  * Needs to be in its own view to make sure that the frontend dependencies are
  * loaded for the target component even if there are no ContextMenu components
  * attached yet to the page.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @Route("vaadin-context-menu/auto-attached-context-menu")

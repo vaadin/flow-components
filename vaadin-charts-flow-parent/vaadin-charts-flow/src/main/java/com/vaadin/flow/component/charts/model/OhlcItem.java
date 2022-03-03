@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -20,10 +20,10 @@ import java.util.Date;
  * A DataSeriesItem implementation suitable for <a
  * https://en.wikipedia.org/wiki/Open-high-low-close_chart">OHLC charts</a>.
  * OHLC charts visualize well financial data.
- * 
+ *
  * @see PlotOptionsOhlc
  * @see PlotOptionsCandlestick
- * 
+ *
  */
 public class OhlcItem extends DataSeriesItem {
     // high/low already defined in DataSeriesItem

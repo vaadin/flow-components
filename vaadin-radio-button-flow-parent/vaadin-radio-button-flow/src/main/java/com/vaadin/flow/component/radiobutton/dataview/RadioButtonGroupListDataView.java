@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton.dataview;
 
-
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataProvider;

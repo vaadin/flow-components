@@ -58,7 +58,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * If {@code isInitialValueOptional} is {@code true} then the initial value
      * is used only if element has no {@code "value"} property value, otherwise
      * element {@code "value"} property is ignored and the initial value is set.
-     * 
+     *
      * @param isInitialValueOptional
      *            if {@code isInitialValueOptional} is {@code true} then the
      *            initial value is used only if element has no {@code "value"}

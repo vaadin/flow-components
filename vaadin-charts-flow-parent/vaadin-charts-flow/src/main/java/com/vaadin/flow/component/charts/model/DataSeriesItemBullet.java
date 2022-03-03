@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -33,7 +33,7 @@ public class DataSeriesItemBullet extends DataSeriesItem {
 
     /**
      * Constructs an item with Y and Target
-     * 
+     *
      * @param y
      * @param target
      */
@@ -45,7 +45,7 @@ public class DataSeriesItemBullet extends DataSeriesItem {
 
     /**
      * Constructs an item with X, Y and Target
-     * 
+     *
      * @param x
      * @param y
      * @param target
@@ -57,7 +57,7 @@ public class DataSeriesItemBullet extends DataSeriesItem {
 
     /**
      * Constructs an item with X, Y and Target
-     * 
+     *
      * @param x
      * @param y
      * @param target

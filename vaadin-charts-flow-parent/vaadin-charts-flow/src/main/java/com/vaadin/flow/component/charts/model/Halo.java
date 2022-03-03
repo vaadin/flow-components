@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -21,7 +21,7 @@ package com.vaadin.flow.component.charts.model;
  * can be disabled by setting the <code>halo</code> option to <code>false</code>
  * .
  * </p>
- * 
+ *
  * <p>
  * In
  * <a href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
