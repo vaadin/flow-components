@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.button.demo;
+package com.vaadin.flow.component.button.tests;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,8 +23,8 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.button.GeneratedVaadinButton;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
@@ -32,18 +32,16 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link Button} demo.
  */
 @Route("vaadin-button")
-public class ButtonView extends DemoView {
+public class ButtonView extends Div {
     private Div message;
 
-    @Override
-    public void initView() {
+    public ButtonView() {
         createDefaultButton();
         createButtonsWithIcons();
         createImageButtonWithAutofocus();
@@ -157,17 +155,16 @@ public class ButtonView extends DemoView {
     }
 
     private void addVariantsFeature() {
-        // begin-source-example
-        // source-example-heading: Theme variants usage
-        Button button = new Button();
+        Button button = new Button("Button");
+        button.setId("button-theme-variants");
         button.addThemeVariants(ButtonVariant.LUMO_SMALL,
                 ButtonVariant.LUMO_PRIMARY);
-        // end-source-example
-
-        addVariantsDemo(Button::new, GeneratedVaadinButton::addThemeVariants,
-                GeneratedVaadinButton::removeThemeVariants,
-                ButtonVariant::getVariantName, ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_PRIMARY);
+        
+        Button removeVariantButton = new Button("Remove theme variant", e -> {
+            button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
+        });
+        removeVariantButton.setId("remove-theme-variant-button");
+        addCard("Button theme variants", button, removeVariantButton);
     }
 
     private void createButtonsWithShortcuts() {
@@ -274,5 +271,13 @@ public class ButtonView extends DemoView {
         disableOnClickButton.setId("disable-on-click-button");
         temporarilyDisabledButton.setId("temporarily-disabled-button");
         enable.setId("enable-button");
+    }
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }
