@@ -404,6 +404,11 @@ public class ConfirmDialog extends Component
     }
 
     private void addToSlot(String slotName, Element element) {
+        // Remove existing elements with the same slot name
+        getElement().getChildren()
+                .filter(child -> slotName.equals(child.getAttribute("slot")))
+                .forEach(Element::removeFromParent);
+
         element.setAttribute("slot", slotName);
         getElement().appendChild(element);
     }
