@@ -41,6 +41,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement callbackBox;
     private ComboBoxElement templateBox;
     private ComboBoxElement emptyCallbackBox;
+    private ComboBoxElement disabledLazyLoadingBox;
 
     @Before
     public void init() {
@@ -57,6 +58,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         templateBox = $("combo-box-in-a-template").id("template")
                 .$(ComboBoxElement.class).first();
         emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
+        disabledLazyLoadingBox = $(ComboBoxElement.class)
+                .id("disabled-lazy-loading");
     }
 
     @Test
@@ -535,6 +538,25 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "return arguments[0].focusElement.value", beanBox);
         Assert.assertEquals("The ComboBox filter text got modified",
                 "Person 111", filterText);
+    }
+
+    @Test
+    public void disabledLazyLoading_reducePageSize_enablesLazyLoading() {
+        disabledLazyLoadingBox.openPopup();
+        assertLoadedItemsCount("Initially all 100 items should be loaded", 100,
+                disabledLazyLoadingBox);
+        disabledLazyLoadingBox.closePopup();
+
+        clickButton("enable-lazy-loading");
+        disabledLazyLoadingBox.openPopup();
+        assertLoadedItemsCount(
+                "After reducing page size, 50 items should be loaded", 50,
+                disabledLazyLoadingBox);
+
+        scrollToItem(disabledLazyLoadingBox, 100);
+        assertLoadedItemsCount("Scrolling down should load further pages", 100,
+                disabledLazyLoadingBox);
+        assertRendered("99");
     }
 
     private void assertMessage(String expectedMessage) {

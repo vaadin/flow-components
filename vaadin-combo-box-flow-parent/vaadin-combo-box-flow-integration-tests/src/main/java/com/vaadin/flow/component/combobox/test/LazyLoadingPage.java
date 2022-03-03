@@ -44,7 +44,6 @@ public class LazyLoadingPage extends Div {
         message.setId("message");
         add(message);
 
-        addSeparator();
         createListDataProviderWithStringsAutoOpenDisabled();
         addSeparator();
         createListDataProviderWithStrings();
@@ -60,6 +59,9 @@ public class LazyLoadingPage extends Div {
         createComboBoxInATemplate();
         addSeparator();
         createCallbackDataProviderWhichReturnsZeroItems();
+        addSeparator();
+        createComboBoxWithDisabledLazyLoading();
+        addSeparator();
     }
 
     private void createListDataProviderWithStringsAutoOpenDisabled() {
@@ -243,6 +245,24 @@ public class LazyLoadingPage extends Div {
         add(comboBox);
     }
 
+    private void createComboBoxWithDisabledLazyLoading() {
+        addTitle("ComboBox with disabled lazy loading");
+        ComboBox<Integer> comboBox = new ComboBox<>(100);
+        comboBox.setId("disabled-lazy-loading");
+        // Having a number of items less than or equal than the page size will
+        // disable lazy-loading
+        List<Integer> items = IntStream.range(0, 100).boxed()
+                .collect(Collectors.toList());
+        comboBox.setItems(items);
+
+        NativeButton enableLazyLoading = new NativeButton("Enable lazy loading",
+                // Reducing page size should enable lazy-loading
+                event -> comboBox.setPageSize(50));
+        enableLazyLoading.setId("enable-lazy-loading");
+
+        add(comboBox, enableLazyLoading);
+    }
+
     public static List<String> generateStrings(int count) {
         List<String> items = IntStream.range(0, count)
                 .mapToObj(i -> "Item " + i).collect(Collectors.toList());
@@ -250,6 +270,14 @@ public class LazyLoadingPage extends Div {
     }
 
     private void addSeparator() {
+        // Add a vertical spacer div after each test setup. This avoids issues
+        // with the tests being dependent on the screen size, regarding in which
+        // direction the combo boxes open, and how much space vertical space the
+        // combo box overlay gets.
+        Div spacer = new Div();
+        spacer.getStyle().set("height", "100px");
+        add(spacer);
+        // Add visual separator
         getElement().appendChild(new Element("hr"));
     }
 

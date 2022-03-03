@@ -603,8 +603,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void refreshAllData(boolean forceServerSideFiltering) {
-        setClientSideFilter(!forceServerSideFiltering && getDataProvider()
-                .size(new Query<>()) <= getPageSizeDouble());
+        if (getDataProvider() != null) {
+            setClientSideFilter(!forceServerSideFiltering && getDataProvider()
+                    .size(new Query<>()) <= getPageSizeDouble());
+        }
 
         reset();
     }
@@ -765,7 +767,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     "Page size should be greater than zero.");
         }
         super.setPageSize(pageSize);
-        reset();
+        refreshAllData(shouldForceServerSideFiltering);
     }
 
     /**
