@@ -61,13 +61,7 @@ public class Util {
      * @return an Instant value
      */
     public static Instant toServerInstant(double rawClientSideValue) {
-        Date date = new Date();
-        date.toInstant();
-        String doubleAsText = Double.toString(rawClientSideValue);
-        int milSecs = Integer.parseInt(doubleAsText.split(".")[0]);
-        int nanSecs = Integer.parseInt(doubleAsText.split(".")[1]);
-        Instant dateTime = Instant.ofEpochSecond(milSecs, nanSecs);
-        return dateTime;
+        return Instant.ofEpochMilli((long) rawClientSideValue);
     }
 
 }
