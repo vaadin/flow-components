@@ -2,9 +2,12 @@ package com.vaadin.flow.component.confirmdialog.test;
 
 import com.vaadin.flow.component.confirmdialog.examples.FeaturesDiy;
 import com.vaadin.flow.component.confirmdialog.test.helpers.Actionwords;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractParallelTest;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 public class FeaturesDiyIT extends AbstractParallelTest {
 
@@ -70,4 +73,14 @@ public class FeaturesDiyIT extends AbstractParallelTest {
         actionwords.cancelEventIsFired();
     }
 
+    @Test
+    public void testConfirmDialogButtonsCount() {
+        String sampleName = "SampleConfirmDialog";
+        actionwords.iHaveSampleDialog(sampleName);
+        actionwords.iOpenDialogDialog(sampleName);
+        TestBenchElement dialogOverlay = $("vaadin-dialog-overlay").first();
+        int confirmButtonCount = dialogOverlay.$("*")
+                .attribute("slot", "confirm-button").all().size();
+        Assert.assertEquals(1, confirmButtonCount);
+    }
 }
