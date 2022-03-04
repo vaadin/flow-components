@@ -140,7 +140,7 @@ public class TreeGrid<T> extends Grid<T>
         // Approximated size of the viewport. Used for eager fetching.
         private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
         private int viewportRemaining = 0;
-        private List<JsonValue> queuedParents = new ArrayList<>();
+        private final List<JsonValue> queuedParents = new ArrayList<>();
         private VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
