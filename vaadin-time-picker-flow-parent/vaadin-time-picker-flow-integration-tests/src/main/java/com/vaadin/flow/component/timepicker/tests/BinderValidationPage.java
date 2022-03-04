@@ -21,7 +21,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalTime;
 
 @Route("vaadin-time-picker/binder-validation")
@@ -58,7 +57,6 @@ public class BinderValidationPage extends Div {
 
     public static class AData {
 
-        @NotNull
         private LocalTime time;
 
         public LocalTime getTime() {
