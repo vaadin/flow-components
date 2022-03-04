@@ -18,7 +18,6 @@
     <modules>
         <module>vaadin-rich-text-editor-flow</module>
         <module>vaadin-rich-text-editor-testbench</module>
-        <module>vaadin-rich-text-editor-flow-demo</module>
     </modules>
     <profiles>
         <profile>
