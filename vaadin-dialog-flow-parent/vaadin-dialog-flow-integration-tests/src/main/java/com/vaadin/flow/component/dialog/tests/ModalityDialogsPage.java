@@ -37,22 +37,31 @@ public class ModalityDialogsPage extends Div {
 
         Dialog nonModalDialog = setupNonModalDialog();
 
-        NativeButton modalButton = new NativeButton("Open modal dialog",
+        NativeButton openModal = new NativeButton("Open modal dialog",
                 event -> modalDialog.open());
-        modalButton.setId("open-modal-dialog");
+        openModal.setId("open-modal-dialog");
 
-        NativeButton button = new NativeButton("Open non modal dialog",
+        NativeButton addModal = new NativeButton("Add modal dialog to UI",
+                event -> add(modalDialog));
+        addModal.setId("add-modal-dialog");
+
+        NativeButton enableCloseOnOutsideClick = new NativeButton("Enable close on outside click",
+                event -> modalDialog.setCloseOnOutsideClick(true));
+        enableCloseOnOutsideClick.setId("enable-close-on-outside-click");
+
+        NativeButton openNonModal = new NativeButton("Open non modal dialog",
                 event -> nonModalDialog.open());
-        button.setId("open-dialog");
+        openNonModal.setId("open-non-modal-dialog");
 
-        NativeButton logButton = new NativeButton("Log",
-                event -> log.log("Clicked"));
-        logButton.setId("log");
+        NativeButton log = new NativeButton("Log",
+                event -> this.log.log("Clicked"));
+        log.setId("log");
 
         final NativeButton showModal = new NativeButton("Show Hidden Modal",
                 e -> modalDialog.setVisible(true));
         showModal.setId("show");
-        add(modalButton, showModal, button, logButton, new Hr(), log);
+
+        add(openModal, addModal, enableCloseOnOutsideClick, showModal, openNonModal, log, new Hr(), this.log);
     }
 
     private Dialog setupNonModalDialog() {
