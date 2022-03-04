@@ -47,9 +47,11 @@ public class TreeGridPreloadPage extends VerticalLayout
     private TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
     private TextField requestCountField = new TextField(
             "Child item fetching requests");
+    private TextField fetchCountField = new TextField("Data provider fetches");
 
     private VaadinRequest lastRequest;
     private int requestCount = 0;
+    private int fetchCount = 0;
 
     @Override
     public void setParameter(BeforeEvent event,
@@ -119,6 +121,10 @@ public class TreeGridPreloadPage extends VerticalLayout
                         lastRequest = currentRequest;
                         requestCountField
                                 .setValue(String.valueOf(requestCount));
+
+                        fetchCount++;
+                        fetchCountField.setValue(String.valueOf(fetchCount));
+
                         return super.fetchChildrenFromBackEnd(query);
                     }
                 });
@@ -129,13 +135,20 @@ public class TreeGridPreloadPage extends VerticalLayout
         requestCountField.setValue("0");
         requestCountField.setReadOnly(true);
         requestCountField.setWidth("300px");
+
+        fetchCountField.setId("fetch-count");
+        fetchCountField.setValue("0");
+        fetchCountField.setReadOnly(true);
+
         Button requestCountResetButton = new Button("Reset", event -> {
             requestCount = 0;
             requestCountField.setValue("0");
+            fetchCount = 0;
+            fetchCountField.setValue("0");
         });
         requestCountResetButton.setId("request-count-reset");
         HorizontalLayout requestCountLayout = new HorizontalLayout(
-                requestCountField, requestCountResetButton);
+                requestCountField, fetchCountField, requestCountResetButton);
         requestCountLayout.setAlignItems(Alignment.END);
 
         TextArea receivedParentsField = new TextArea(

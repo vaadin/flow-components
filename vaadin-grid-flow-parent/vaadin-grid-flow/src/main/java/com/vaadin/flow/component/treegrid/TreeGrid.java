@@ -30,7 +30,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
@@ -56,6 +55,7 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.SerializableTriConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
@@ -133,7 +133,8 @@ public class TreeGrid<T> extends Grid<T>
 
         // Approximated size of the viewport. Used for eager fetching.
         private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
-        private Integer viewportRemaining = null;
+        private int viewportRemaining = 0;
+        private VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
@@ -145,15 +146,11 @@ public class TreeGrid<T> extends Grid<T>
             TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
                     .apply(data, sizeChange);
 
-            if (viewportRemaining == null) {
+            if (VaadinRequest.getCurrent() != null
+                    && !VaadinRequest.getCurrent().equals(previousRequest)) {
                 // Reset the viewportRemaining once for a server roundtrip.
                 viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
-
-                if (UI.getCurrent() != null) {
-                    UI.getCurrent().beforeClientResponse(TreeGrid.this,
-                            context -> viewportRemaining = null);
-                }
-
+                previousRequest = VaadinRequest.getCurrent();
             }
 
             queue.setArrayUpdateListener((start, length, parentKey) -> {
