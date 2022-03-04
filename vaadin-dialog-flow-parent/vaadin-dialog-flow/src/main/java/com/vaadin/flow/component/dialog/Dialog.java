@@ -87,6 +87,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setOpened(false);
 
         getElement().addEventListener("opened-changed", event -> {
+            if (!isOpened()) {
+                setModality(false);
+            }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -586,10 +589,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         if (opened) {
             ensureAttached();
         }
-        if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
-                    opened ? isModal() : false));
-        }
+        setModality(opened && isModal());
         super.setOpened(opened);
     }
 
@@ -600,6 +600,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public boolean isOpened() {
         return super.isOpenedBoolean();
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     @Override
