@@ -159,7 +159,7 @@ public class ButtonView extends Div {
         button.setId("button-theme-variants");
         button.addThemeVariants(ButtonVariant.LUMO_SMALL,
                 ButtonVariant.LUMO_PRIMARY);
-        
+
         Button removeVariantButton = new Button("Remove theme variant", e -> {
             button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
         });
@@ -236,6 +236,7 @@ public class ButtonView extends Div {
                         Thread.sleep(1500);
                         event.getSource().setEnabled(true);
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
                 });
         temporarilyDisabledButton.setDisableOnClick(true);
