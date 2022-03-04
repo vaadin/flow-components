@@ -171,7 +171,8 @@ public class TreeGrid<T> extends Grid<T>
                     T parentItem = getDataCommunicator().getKeyMapper()
                             .get(parent.getString("key"));
 
-                    if (isExpanded(parentItem)) {
+                    if (isExpanded(parentItem)
+                            && getDataCommunicator().hasChildren(parentItem)) {
                         int childLength = Math.max(
                                 EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
                                 getPageSize());
@@ -181,6 +182,10 @@ public class TreeGrid<T> extends Grid<T>
                         getDataCommunicator().setParentRequestedRange(0,
                                 childLength, parentItem);
 
+                        // Stop iterating the items on this level. The request
+                        // for child items above will end up back in this while
+                        // loop, and to processing any parent siblings that
+                        // might be left in the queue.
                         break;
                     }
 
