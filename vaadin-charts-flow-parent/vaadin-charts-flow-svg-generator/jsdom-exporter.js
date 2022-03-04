@@ -193,7 +193,7 @@ const inflateFunctions = (jsonConfiguration) => {
 const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
     return new Promise((resolve, reject) => {
 
-        // Disable all animation
+        // Disable all animation and default title
         Highcharts.setOptions({
             plotOptions: {
                 series: {
@@ -204,7 +204,8 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
                 }
             },
             credits: { enabled: false },
-            exporting: { enabled: false }
+            exporting: { enabled: false },
+            title:{ text : null }
         });
 
         let isTimeline = false;
