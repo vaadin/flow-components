@@ -205,7 +205,7 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
             },
             credits: { enabled: false },
             exporting: { enabled: false },
-            title:{ text : null }
+            title: { text : null }
         });
 
         let isTimeline = false;
