@@ -32,6 +32,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
     private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
     private TextFieldElement requestCount;
+    private TextFieldElement dataProviderFetchCount;
     private ButtonElement requestCountReset;
     private TextAreaElement receivedParents;
 
@@ -68,6 +69,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
         setupTreeGrid();
         requestCount = $(TextFieldElement.class).id("request-count");
+        dataProviderFetchCount = $(TextFieldElement.class).id("fetch-count");
         requestCountReset = $(ButtonElement.class).id("request-count-reset");
         receivedParents = $(TextAreaElement.class).id("received-parents");
     }
@@ -88,6 +90,12 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     public void firstExpanded_shouldPreLoadDataForExpandedChildren() {
         open(Arrays.asList(0), null, null, null, null);
         Assert.assertEquals("1", requestCount.getValue());
+    }
+
+    @Test
+    public void firstExpanded_shouldOptimizeDataProviderFetches() {
+        open(Arrays.asList(0), null, null, null, null);
+        Assert.assertEquals("70", dataProviderFetchCount.getValue());
     }
 
     @Test
