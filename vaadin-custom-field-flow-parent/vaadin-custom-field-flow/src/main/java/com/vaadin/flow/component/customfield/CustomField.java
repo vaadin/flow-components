@@ -21,6 +21,8 @@ package com.vaadin.flow.component.customfield;
  */
 
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -32,6 +34,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
@@ -58,7 +61,7 @@ import com.vaadin.flow.dom.Element;
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
-        HasLabel {
+        HasLabel, HasTheme {
 
     /**
      * Default constructor.
@@ -229,4 +232,27 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("label", label);
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(CustomFieldVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(CustomFieldVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(CustomFieldVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(CustomFieldVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 }
