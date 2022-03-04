@@ -46,7 +46,7 @@ public interface DrilldownCallback extends Serializable {
 
         /**
          * Construct a DrilldownDetails
-         * 
+         *
          * @param series
          *            {@link Series} in which the event was originated
          * @param item

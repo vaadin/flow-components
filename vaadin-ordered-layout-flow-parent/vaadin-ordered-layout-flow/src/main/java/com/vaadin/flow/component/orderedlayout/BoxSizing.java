@@ -17,8 +17,8 @@ package com.vaadin.flow.component.orderedlayout;
 
 /**
  * Enum for the values of the CSS property {@code box-sizing}.
- * 
- * 
+ *
+ *
  * @author Vaadin Ltd.
  * @see <a href=
  *      "https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing">MDN page

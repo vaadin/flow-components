@@ -4,7 +4,6 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * https://github.com/vaadin/vaadin-context-menu-flow/issues/119
  */

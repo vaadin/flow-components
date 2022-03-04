@@ -30,7 +30,7 @@ public enum NotificationVariant {
 
     /**
      * Gets the variant name.
-     * 
+     *
      * @return variant name
      */
     public String getVariantName() {

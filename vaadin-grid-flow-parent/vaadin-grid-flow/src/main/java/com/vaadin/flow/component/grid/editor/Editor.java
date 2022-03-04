@@ -141,7 +141,7 @@ public interface Editor<T> extends Serializable {
      * <p>
      * This is useful when the state of the item is changed while the editor is
      * open.
-     * 
+     *
      * @see #isOpen()
      */
     void refresh();
@@ -153,7 +153,7 @@ public interface Editor<T> extends Serializable {
      * closed. The item is not <code>null</code> during {@link #save()} and
      * {@link #cancel()} operations, but become <code>null</code> as soon as the
      * editor is closed.
-     * 
+     *
      * @return the item being edited, or <code>null</code> if none is being
      *         edited
      * @see #editItem(Object)
@@ -207,7 +207,7 @@ public interface Editor<T> extends Serializable {
      * are triggered: save and close listeners. Likewise, when a
      * {@link #cancel()} operation is performed, two listeners are triggered,
      * cancel and close listeners.
-     * 
+     *
      * @param listener
      *            close listener
      * @return a registration object for removing the listener

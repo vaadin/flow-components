@@ -26,7 +26,7 @@ import elemental.json.JsonArray;
 /**
  * DataCommunicator implementation which disables the paging and does not allow
  * the user to set up the page for IronList.
- * 
+ *
  * @param <T>
  *            item type
  */
