@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-time-picker-flow-demo</artifactId>
+            <artifactId>vaadin-renderer-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
