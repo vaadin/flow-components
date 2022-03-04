@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-upload-flow</module>
         <module>vaadin-upload-testbench</module>
-        <module>vaadin-upload-flow-demo</module>
     </modules>
     <profiles>
         <profile>
