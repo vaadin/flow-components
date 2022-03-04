@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
@@ -59,6 +60,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -79,7 +81,7 @@ import java.util.stream.Stream;
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel {
+        HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel, HasTheme {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -734,6 +736,30 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         // Also do not remove the list box but remove any slotted components
         // (see add())
         getChildren().forEach(this::remove);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(SelectVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(SelectVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(SelectVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(SelectVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     @Override
