@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-login-flow</module>
         <module>vaadin-login-testbench</module>
-        <module>vaadin-login-flow-demo</module>
     </modules>
     <profiles>
         <profile>
