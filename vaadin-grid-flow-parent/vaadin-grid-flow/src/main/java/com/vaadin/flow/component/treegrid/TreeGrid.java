@@ -171,8 +171,7 @@ public class TreeGrid<T> extends Grid<T>
                     T parentItem = getDataCommunicator().getKeyMapper()
                             .get(parent.getString("key"));
 
-                    if (isExpanded(parentItem)
-                            && getDataCommunicator().hasChildren(parentItem)) {
+                    if (isExpanded(parentItem)) {
                         int childLength = Math.max(
                                 EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
                                 getPageSize());
