@@ -17,14 +17,16 @@
 
 package com.vaadin.flow.component.listbox.test;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 import java.util.List;
@@ -37,21 +39,14 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Route("vaadin-list-box-demo")
-public class ListBoxViewDemoPage extends DemoView {
+public class ListBoxViewDemoPage extends Div {
 
-    @Override
-    public void initView() {
+    public ListBoxViewDemoPage() {
         addListboxWithSelection();
         addComponentsBetween();
         addItemRenderer();
         addDisabledListBox();
         addItemLabelGenerator();
-
-        addCard("Example object used in the demo");
-    }
-
-    @Override
-    public void populateSources() {
     }
 
     private void addListboxWithSelection() {
@@ -195,4 +190,20 @@ public class ListBoxViewDemoPage extends DemoView {
         }
     }
     // end-source-example
+
+    private Component addCard(String title, Component... components) {
+        return addCard(title, null, components);
+    }
+
+    private Component addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+        return layout;
+    }
 }

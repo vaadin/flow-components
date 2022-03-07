@@ -20,19 +20,23 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.listbox.testbench.ListBoxElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.tests.AbstractComponentIT;
 
 import static org.hamcrest.CoreMatchers.containsString;
 
 /**
  * Integration tests for the {@link ListBoxViewDemoPage}.
  */
-public class ListBoxIT extends ComponentDemoTest {
+@TestPath("vaadin-list-box-demo")
+public class ListBoxIT extends AbstractComponentIT {
 
     private static final String BREAD = "Bread";
     private static final String BUTTER = "Butter";
@@ -44,13 +48,13 @@ public class ListBoxIT extends ComponentDemoTest {
 
     private WebElement messageLabel;
 
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-list-box-demo";
+    @Before
+    public void init() {
+        open();
     }
-
+    
     private void init(String cardId) {
-        card = layout.findElement(By.id(cardId));
+        card = findElement(By.id(cardId));
         listBox = $(ListBoxElement.class).context(card).first();
         items = listBox.findElements(By.tagName("vaadin-item"));
     }
@@ -58,7 +62,7 @@ public class ListBoxIT extends ComponentDemoTest {
     @Test
     public void selection() {
         init("list-box-with-selection");
-        messageLabel = layout.findElement(By.tagName("label"));
+        messageLabel = findElement(By.tagName("label"));
 
         final List<String> texts = listBox.getOptions();
         Assert.assertEquals(Arrays.asList(BREAD, BUTTER, MILK), texts);
@@ -112,7 +116,7 @@ public class ListBoxIT extends ComponentDemoTest {
     @Test
     public void disabledListBox() {
         init("disabled-list-box");
-        messageLabel = layout.findElement(By.id("message-label"));
+        messageLabel = findElement(By.id("message-label"));
 
         Object[] texts = items.stream().map(WebElement::getText).toArray();
         Assert.assertArrayEquals(new Object[] { BREAD, BUTTER, MILK }, texts);
