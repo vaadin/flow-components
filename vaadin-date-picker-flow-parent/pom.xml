@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-date-picker-flow</module>
         <module>vaadin-date-picker-testbench</module>
-        <module>vaadin-date-picker-flow-demo</module>
     </modules>
     <profiles>
         <profile>

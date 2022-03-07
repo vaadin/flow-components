@@ -13,25 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.datepicker.demo;
+package com.vaadin.flow.component.datepicker;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Locale;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
-import com.vaadin.flow.component.datepicker.demo.entity.Appointment;
-import com.vaadin.flow.component.datepicker.demo.entity.Person;
+import com.vaadin.flow.component.datepicker.entity.Appointment;
+import com.vaadin.flow.component.datepicker.entity.Person;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -40,10 +40,9 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-date-picker")
-public class DatePickerView extends DemoView {
+public class DatePickerView extends Div {
 
-    @Override
-    public void initView() {
+    public DatePickerView() {
         basicDemo(); // Basic usage
         disabledAndReadonly();
         clearButton();
@@ -442,5 +441,20 @@ public class DatePickerView extends DemoView {
 
         addCard("Styling", "Styling references", firstHorizontalLayout,
                 secondHorizontalLayout);
+    }
+
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }
