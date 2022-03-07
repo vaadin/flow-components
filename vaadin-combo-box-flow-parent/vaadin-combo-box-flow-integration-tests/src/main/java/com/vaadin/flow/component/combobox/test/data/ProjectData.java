@@ -1,6 +1,6 @@
-package com.vaadin.flow.component.combobox.demo.data;
+package com.vaadin.flow.component.combobox.test.data;
 
-import com.vaadin.flow.component.combobox.demo.entity.Project;
+import com.vaadin.flow.component.combobox.test.entity.Project;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
-import com.vaadin.flow.component.combobox.demo.entity.Person;
+import com.vaadin.flow.component.combobox.test.entity.Person;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
