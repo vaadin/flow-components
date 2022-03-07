@@ -16,10 +16,12 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
@@ -32,14 +34,9 @@ import java.util.Locale;
  * @author Vaadin Ltd
  */
 @Route("vaadin-date-picker-test-demo")
-public class DatePickerViewDemoPage extends DemoView {
+public class DatePickerViewDemoPage extends Div {
 
-    @Override
-    public void populateSources() {
-    }
-
-    @Override
-    public void initView() {
+    public DatePickerViewDemoPage() {
         createSimpleDatePicker();
         createMinAndMaxDatePicker();
         createDisabledDatePicker();
@@ -278,4 +275,19 @@ public class DatePickerViewDemoPage extends DemoView {
         return message;
     }
     // end-source-example
+
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+    }
 }
