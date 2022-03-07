@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.datepicker.demo.entity;
+package com.vaadin.flow.component.datepicker.entity;
 
 import java.time.LocalDate;
 
