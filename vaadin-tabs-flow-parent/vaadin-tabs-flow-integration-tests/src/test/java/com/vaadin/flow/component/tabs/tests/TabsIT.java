@@ -16,24 +16,36 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
+import com.vaadin.flow.component.tabs.TabsVariant;
+import com.vaadin.tests.AbstractComponentIT;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.tabs.demo.TabsView;
-import com.vaadin.tests.ComponentDemoTest;
-
 import static org.hamcrest.CoreMatchers.is;
-
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchTestCase;
 
 /**
- * Integration tests for the {@link TabsView}.
+ * Integration tests for the {@link TabsPage}.
  *
  * @author Vaadin Ltd.
  */
-public class TabsIT extends ComponentDemoTest {
+@TestPath("vaadin-tabs/tabs")
+public class TabsIT extends AbstractComponentIT {
+
+    private TestBenchTestCase layout;
+
+    @Before
+    public void init() {
+        layout = this;
+        open();
+    }
 
     @Test
     public void pageGetsDisplayedWhenAssociatedTabIsSelected() {
@@ -51,11 +63,11 @@ public class TabsIT extends ComponentDemoTest {
 
     @Test
     public void assertThemeVariant() {
-        verifyThemeVariantsBeingToggled();
-    }
+        WebElement tabs = findElement(By.id("tabs-with-theme"));
+        scrollToElement(tabs);
+        Assert.assertEquals(TabsVariant.LUMO_SMALL.getVariantName(), tabs.getAttribute("theme"));
 
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-tabs";
+        findElement(By.id("remove-theme-variant-button")).click();
+        Assert.assertNull(tabs.getAttribute("theme"));
     }
 }
