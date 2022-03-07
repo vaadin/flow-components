@@ -24,7 +24,6 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchTestCase;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
@@ -33,13 +32,10 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-form-layout")
 public class FormLayoutIT extends AbstractComponentIT {
 
-    private TestBenchTestCase layout;
-
     @Before
     public void init() {
         open();
         Assert.assertTrue(isElementPresent(By.tagName("vaadin-form-layout")));
-        layout = this;
     }
 
     @Test
@@ -50,8 +46,7 @@ public class FormLayoutIT extends AbstractComponentIT {
      * you resize the browser window
      */
     public void custom_responsive_layouting() {
-        WebElement firstLayout = layout
-                .findElement(By.tagName("vaadin-form-layout"));
+        WebElement firstLayout = findElement(By.tagName("vaadin-form-layout"));
         List<WebElement> textFields = firstLayout
                 .findElements(By.tagName("vaadin-text-field"));
         Assert.assertEquals(3, textFields.size());
