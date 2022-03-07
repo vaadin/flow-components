@@ -16,8 +16,12 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.tests.AbstractComponentIT;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -25,8 +29,17 @@ import org.openqa.selenium.WebElement;
 /**
  * Integration tests for the {@link CheckboxDemoPage}.
  */
-public class CheckboxIT extends ComponentDemoTest {
+@TestPath("vaadin-checkbox-test-demo")
+public class CheckboxIT extends AbstractComponentIT {
+        private TestBenchTestCase layout;
 
+
+        @Before
+        public void init() {
+            open();
+            layout = this;
+        }
+        
     @Test
     public void defaultCheckbox() {
         WebElement checkbox = layout.findElement(By.id("default-checkbox"));
@@ -217,11 +230,6 @@ public class CheckboxIT extends ComponentDemoTest {
 
         Assert.assertEquals("Checkbox should be checked", true,
                 checkbox.isChecked());
-    }
-
-    @Override
-    protected String getTestPath() {
-        return ("/vaadin-checkbox-test-demo");
     }
 
     private void clickButton(String id) {

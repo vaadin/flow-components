@@ -1,9 +1,11 @@
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -12,11 +14,9 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-checkbox-test-demo")
-public class CheckboxDemoPage extends DemoView {
+public class CheckboxDemoPage extends Div {
 
-    @Override
-    public void initView() {
-
+    public CheckboxDemoPage() {
         addDefaultCheckbox();
         addDisabledCheckbox();
         addIndeterminateCheckbox();
@@ -24,15 +24,6 @@ public class CheckboxDemoPage extends DemoView {
         addAccessibleCheckbox();
         addCheckboxHtmlLabel();
         addCheckboxLazyHtmlLabel();
-    }
-
-    @Override
-    public void populateSources() {
-        // The body of this method is kept empty because no source population
-        // is needed for integration tests. CheckboxDemoPage is only used for
-        // testing.
-        // Old demos have been moved to integration tests and separated from
-        // demos.
     }
 
     private void addDefaultCheckbox() {
@@ -141,5 +132,13 @@ public class CheckboxDemoPage extends DemoView {
 
         addCard("Checkbox with the lazy label that contains HTML markup",
                 checkbox, button);
+    }
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }

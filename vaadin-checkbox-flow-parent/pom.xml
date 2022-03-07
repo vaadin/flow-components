@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-checkbox-flow</module>
         <module>vaadin-checkbox-testbench</module>
-        <module>vaadin-checkbox-flow-demo</module>
     </modules>
     <profiles>
         <profile>
