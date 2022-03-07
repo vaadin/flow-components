@@ -31,15 +31,14 @@ import org.openqa.selenium.WebElement;
  */
 @TestPath("vaadin-checkbox-test-demo")
 public class CheckboxIT extends AbstractComponentIT {
-        private TestBenchTestCase layout;
+    private TestBenchTestCase layout;
 
+    @Before
+    public void init() {
+        open();
+        layout = this;
+    }
 
-        @Before
-        public void init() {
-            open();
-            layout = this;
-        }
-        
     @Test
     public void defaultCheckbox() {
         WebElement checkbox = layout.findElement(By.id("default-checkbox"));
