@@ -120,7 +120,7 @@ async function main() {
   await run(`git pull origin ${branch}`);
 
   const json = JSON.parse(fs.readFileSync('./versions.json', 'utf-8'));
-  const byName = ['core', 'vaadin'].reduce((prev, k) => {
+  const byName = ['core', 'vaadin', 'bundles'].reduce((prev, k) => {
       Object.keys(json[k]).filter(pkg => (json[k][pkg].npmName || json[k][pkg].javaVersion) && pkg !== 'vaadin-core' ).map(pkg => {
       const version = json[k][pkg].javaVersion;
       const branch = version && version.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
@@ -139,7 +139,7 @@ async function main() {
     const msg = `chore: update versions.json in ${branch} with latest WC`;
     const prBranch = await commitChanges(branch, msg);
     const pr = createPR('vaadin/platform', msg, prBranch, branch);
-  }
+  } 
 }
 
 main();
