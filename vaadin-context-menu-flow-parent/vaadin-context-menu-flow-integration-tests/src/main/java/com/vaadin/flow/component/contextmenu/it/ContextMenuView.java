@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.contextmenu.demo;
+package com.vaadin.flow.component.contextmenu.it;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -26,7 +26,7 @@ import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -35,16 +35,14 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-context-menu")
-public class ContextMenuView extends DemoView {
+public class ContextMenuView extends Div {
 
-    @Override
-    public void initView() {
+    public ContextMenuView() {
         addBasicContextMenu();
         addContextMenuWithSubMenus();
         addCheckableMenuItems();
         addContextMenuWithComponents();
         addContextMenuWithComponentsInSubMenu();
-        addCard("Target component used in the demo");
     }
 
     private void addBasicContextMenu() {
@@ -215,5 +213,13 @@ public class ContextMenuView extends DemoView {
         return div;
     }
     // end-source-example
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+    }
 
 }

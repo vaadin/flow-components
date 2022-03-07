@@ -3,13 +3,15 @@ package com.vaadin.flow.component.checkbox.tests;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
-import com.vaadin.flow.component.checkbox.GeneratedVaadinCheckboxGroup;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -18,7 +20,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-checkbox-group-test-demo")
-public class CheckboxGroupDemoPage extends DemoView {
+public class CheckboxGroupDemoPage extends Div {
 
     public static class Person {
 
@@ -52,8 +54,7 @@ public class CheckboxGroupDemoPage extends DemoView {
         }
     }
 
-    @Override
-    protected void initView() {
+    public CheckboxGroupDemoPage() {
         addBasicFeatures();
         addComponentWithLabelAndErrorMessage();
         addItemLabelGenerator();
@@ -62,15 +63,6 @@ public class CheckboxGroupDemoPage extends DemoView {
         addReadOnlyGroup();
         addComponentWithThemeVariant();
         addHelperCheckboxGroup();
-    }
-
-    @Override
-    public void populateSources() {
-        // The body of this method is kept empty because no source population
-        // is needed for integration tests. CheckboxGroupDemoPage is only used
-        // for testing.
-        // Old demos have been moved to integration tests and separated from
-        // demos.
     }
 
     private void addBasicFeatures() {
@@ -184,18 +176,16 @@ public class CheckboxGroupDemoPage extends DemoView {
     }
 
     private void addComponentWithThemeVariant() {
-        // begin-source-example
-        // source-example-heading: Theme variants usage
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar", "baz");
+        group.setId("checkbox-group-theme-variants");
         group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        // end-source-example
 
-        addVariantsDemo(() -> group,
-                GeneratedVaadinCheckboxGroup::addThemeVariants,
-                GeneratedVaadinCheckboxGroup::removeThemeVariants,
-                CheckboxGroupVariant::getVariantName,
-                CheckboxGroupVariant.LUMO_VERTICAL);
+        Button removeVariantButton = new Button("Remove theme variant", e -> {
+            group.removeThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        });
+        removeVariantButton.setId("remove-theme-variant-button");
+        addCard("Button theme variants", group, removeVariantButton);
     }
 
     private void addHelperCheckboxGroup() {
@@ -240,6 +230,14 @@ public class CheckboxGroupDemoPage extends DemoView {
     private String getNames(Set<Person> persons) {
         return persons.stream().map(Person::getName).sorted()
                 .collect(Collectors.toList()).toString();
+    }
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 
 }
