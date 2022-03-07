@@ -54,6 +54,7 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -84,7 +85,6 @@ import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
@@ -94,7 +94,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-grid-it-demo")
 @JsModule("grid-demo-styles.js")
-public class GridView extends DemoView {
+public class GridView extends Div {
 
     static final List<Person> items;
     static final List<PersonWithLevel> rootItems;
@@ -201,8 +201,7 @@ public class GridView extends DemoView {
     }
     // end-source-example
 
-    @Override
-    protected void initView() {
+    public GridView() {
         createBasicUsage();
         createNoHeaderGrid();
         createCallBackDataProvider();
@@ -240,10 +239,6 @@ public class GridView extends DemoView {
                 new Label("These objects are used in the examples above"));
     }
 
-    @Override
-    public void populateSources() {
-    }
-
     private void addVariantFeature() {
         // begin-source-example
         // source-example-heading: Theme variants usage
@@ -255,11 +250,11 @@ public class GridView extends DemoView {
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         // end-source-example
 
-        addVariantsDemo(() -> {
-            return grid;
-        }, Grid::addThemeVariants, Grid::removeThemeVariants,
-                GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
-                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        // addVariantsDemo(() -> {
+        //     return grid;
+        // }, Grid::addThemeVariants, Grid::removeThemeVariants,
+        //         GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
+        //         GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
     }
 
     private void createBasicUsage() {
@@ -1896,4 +1891,21 @@ public class GridView extends DemoView {
         }
     }
     // end-source-example
+
+    
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    // TODO: In these demos, the title should create a separate view with a separate route.
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+    }
 }

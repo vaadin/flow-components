@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid.demo;
+package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
 import java.util.Random;
@@ -22,9 +22,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.grid.demo.GridDemo.Address;
-import com.vaadin.flow.component.grid.demo.GridDemo.Person;
-import com.vaadin.flow.component.treegrid.demo.TreeGridDemo.PersonWithLevel;
+import com.vaadin.flow.component.grid.it.GridDemo.Address;
+import com.vaadin.flow.component.grid.it.GridDemo.Person;
+import com.vaadin.flow.data.bean.PersonWithLevel;
 
 /**
  * Helper class used for generating stable random data for demo purposes.

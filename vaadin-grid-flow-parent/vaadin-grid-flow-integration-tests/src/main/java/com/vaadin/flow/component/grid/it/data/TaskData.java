@@ -1,6 +1,6 @@
-package com.vaadin.flow.component.grid.demo.data;
+package com.vaadin.flow.component.grid.it.data;
 
-import com.vaadin.flow.component.grid.demo.entity.Task;
+import com.vaadin.flow.component.grid.it.entity.Task;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

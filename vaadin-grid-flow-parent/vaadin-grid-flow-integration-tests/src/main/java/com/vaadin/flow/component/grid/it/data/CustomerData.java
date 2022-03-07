@@ -1,6 +1,6 @@
-package com.vaadin.flow.component.grid.demo.data;
+package com.vaadin.flow.component.grid.it.data;
 
-import com.vaadin.flow.component.grid.demo.entity.Customer;
+import com.vaadin.flow.component.grid.it.entity.Customer;
 
 import java.util.ArrayList;
 import java.util.List;

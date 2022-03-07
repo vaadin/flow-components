@@ -1,6 +1,6 @@
-package com.vaadin.flow.component.grid.demo;
+package com.vaadin.flow.component.grid.it;
 
-import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES;
+import static com.vaadin.flow.component.grid.it.data.CountryData.UNITED_STATES;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -47,12 +48,12 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.grid.demo.data.CountryData;
-import com.vaadin.flow.component.grid.demo.data.CustomerData;
-import com.vaadin.flow.component.grid.demo.data.StatesData;
-import com.vaadin.flow.component.grid.demo.data.TaskData;
-import com.vaadin.flow.component.grid.demo.entity.Customer;
-import com.vaadin.flow.component.grid.demo.entity.Task;
+import com.vaadin.flow.component.grid.it.data.CountryData;
+import com.vaadin.flow.component.grid.it.data.CustomerData;
+import com.vaadin.flow.component.grid.it.data.StatesData;
+import com.vaadin.flow.component.grid.it.data.TaskData;
+import com.vaadin.flow.component.grid.it.entity.Customer;
+import com.vaadin.flow.component.grid.it.entity.Task;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
@@ -60,6 +61,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
@@ -85,14 +87,13 @@ import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")
 @SuppressWarnings("squid:S1192")
-public class GridDemo extends DemoView {
+public class GridDemo extends Div {
 
     // begin-source-example
     // source-example-heading: Grid example model
@@ -611,8 +612,7 @@ public class GridDemo extends DemoView {
 
     }
 
-    @Override
-    protected void initView() {
+    protected GridDemo() {
         createBasicUsage();// Basic Grid
         addVariantFeature();
         createGridWithLazyLoading(); // Lazy Loading
@@ -712,10 +712,10 @@ public class GridDemo extends DemoView {
 
         // end-source-example
 
-        addVariantsDemo(() -> grid, Grid::addThemeVariants,
-                Grid::removeThemeVariants, GridVariant::getVariantName,
-                GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS,
-                GridVariant.LUMO_ROW_STRIPES);
+        // addVariantsDemo(() -> grid, Grid::addThemeVariants,
+        //         Grid::removeThemeVariants, GridVariant::getVariantName,
+        //         GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS,
+        //         GridVariant.LUMO_ROW_STRIPES);
     }
 
     // Lazy Loading Begin
@@ -2877,4 +2877,20 @@ public class GridDemo extends DemoView {
         }
     }
     // end-source-example
+
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    // TODO: In these demos, the title should create a separate view with a separate route.
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+    }
 }

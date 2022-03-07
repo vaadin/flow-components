@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.grid.demo;
+package com.vaadin.flow.component.grid.it;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

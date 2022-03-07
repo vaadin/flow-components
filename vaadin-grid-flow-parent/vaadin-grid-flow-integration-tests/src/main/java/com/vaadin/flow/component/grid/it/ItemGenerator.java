@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid.demo;
+package com.vaadin.flow.component.grid.it;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.demo.GridDemo.Item;
+import com.vaadin.flow.component.grid.it.GridDemo.Item;
 
 /**
  * Helper class used for generating stable random data for demo purposes.
