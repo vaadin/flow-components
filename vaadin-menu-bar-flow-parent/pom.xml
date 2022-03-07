@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-menu-bar-flow</module>
         <module>vaadin-menu-bar-testbench</module>
-        <module>vaadin-menu-bar-flow-demo</module>
     </modules>
     <profiles>
         <profile>
