@@ -28,7 +28,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.tests.TabbedComponentDemoTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonType;
@@ -42,7 +43,8 @@ import elemental.json.JsonValue;
  *
  * @author Vaadin Ltd.
  */
-public class IronListViewIT extends TabbedComponentDemoTest {
+@TestPath("iron-list")
+public class IronListViewIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -53,33 +55,24 @@ public class IronListViewIT extends TabbedComponentDemoTest {
                 && findElements(By.tagName("iron-list")).size() > 0);
     }
 
-    @Override
-    protected String getTestPath() {
-        return "/iron-list";
-    }
-
     @Test
     public void stringList() {
-        openTabAndCheckForErrors("");
         validateListSize(findElement(By.id("list-of-strings")), 3);
     }
 
     @Test
     public void stringListWithDataProvider() {
-        openTabAndCheckForErrors("");
         validateListSize(
                 findElement(By.id("list-of-strings-with-dataprovider")), 1000);
     }
 
     @Test
     public void chuckNorrisFacts() {
-        openTabAndCheckForErrors("using-templates");
         validateListSize(findElement(By.id("chuck-norris-facts")), 1000);
     }
 
     @Test
     public void peopleListWithDataProvider() {
-        openTabAndCheckForErrors("using-templates");
         WebElement list = findElement(
                 By.id("list-of-people-with-dataprovider"));
         validateListSize(list, 500);
@@ -88,7 +81,6 @@ public class IronListViewIT extends TabbedComponentDemoTest {
 
     @Test
     public void disabledListWithTemplates() throws InterruptedException {
-        openTabAndCheckForErrors("using-templates");
         WebElement list = findElement(By.id("disabled-list-with-templates"));
 
         WebElement removalInfo = findElement(By.id("disabled-removal-result"));
@@ -131,13 +123,11 @@ public class IronListViewIT extends TabbedComponentDemoTest {
 
     @Test
     public void rankedListWithEventHandling() {
-        openTabAndCheckForErrors("using-templates");
         validateListSize(findElement(By.id("using-events-with-templates")), 29);
     }
 
     @Test
     public void peopleListWithComponentRenderer() {
-        openTabAndCheckForErrors("using-components");
         WebElement list = findElement(By
                 .id("list-of-people-with-dataprovider-and-component-renderer"));
         validateListSize(list, 500);
@@ -146,8 +136,6 @@ public class IronListViewIT extends TabbedComponentDemoTest {
 
     @Test
     public void disabledPeopleListWithComponentRenderer() {
-        openTabAndCheckForErrors("using-components");
-
         new Actions(getDriver())
                 .moveToElement(findElement(By.id("switch-enabled-people-list")))
                 .click().perform();
