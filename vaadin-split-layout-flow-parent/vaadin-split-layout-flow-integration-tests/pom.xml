@@ -27,13 +27,29 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components-testbench</artifactId>
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-split-layout-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -50,11 +66,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
             <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-split-layout-flow-demo</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
