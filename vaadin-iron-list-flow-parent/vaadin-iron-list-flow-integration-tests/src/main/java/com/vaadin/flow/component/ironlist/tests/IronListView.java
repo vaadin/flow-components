@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ironlist.demo;
+package com.vaadin.flow.component.ironlist.tests;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,7 +27,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.javafaker.Faker;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -38,12 +40,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("iron-list")
-public class IronListView extends DemoView {
+public class IronListView extends Div {
 
     private static final List<String> LIST_OF_BOOKS;
     static {
@@ -141,8 +142,7 @@ public class IronListView extends DemoView {
     // end-source-example
     //@formatter:on
 
-    @Override
-    public void initView() {
+    public IronListView() {
         createStringList();
         createStringListWithDataProvider();
         createPeopleListWithDataProvider();
@@ -448,5 +448,20 @@ public class IronListView extends DemoView {
         }
 
         return people;
+    }
+
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }
