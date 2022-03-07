@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-iron-list-flow</module>
         <module>vaadin-iron-list-testbench</module>
-        <module>vaadin-iron-list-flow-demo</module>
     </modules>
     <profiles>
         <profile>
