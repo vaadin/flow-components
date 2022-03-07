@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.combobox.demo.entity;
+package com.vaadin.flow.component.combobox.test.entity;
 
 public class Element {
 

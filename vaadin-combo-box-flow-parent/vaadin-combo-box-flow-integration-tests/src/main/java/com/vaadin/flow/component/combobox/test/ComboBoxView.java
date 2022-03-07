@@ -13,30 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.combobox.demo;
+package com.vaadin.flow.component.combobox.test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
-import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
-import com.vaadin.flow.component.combobox.demo.data.ElementData;
-import com.vaadin.flow.component.combobox.demo.data.ProjectData;
-import com.vaadin.flow.component.combobox.demo.entity.Department;
-import com.vaadin.flow.component.combobox.demo.entity.Element;
-import com.vaadin.flow.component.combobox.demo.entity.Person;
-import com.vaadin.flow.component.combobox.demo.entity.Project;
-import com.vaadin.flow.component.combobox.demo.entity.Song;
-import com.vaadin.flow.component.combobox.demo.entity.Ticket;
-import com.vaadin.flow.component.combobox.demo.service.PersonService;
+import com.vaadin.flow.component.combobox.test.data.DepartmentData;
+import com.vaadin.flow.component.combobox.test.data.ElementData;
+import com.vaadin.flow.component.combobox.test.data.ProjectData;
+import com.vaadin.flow.component.combobox.test.entity.Department;
+import com.vaadin.flow.component.combobox.test.entity.Element;
+import com.vaadin.flow.component.combobox.test.entity.Person;
+import com.vaadin.flow.component.combobox.test.entity.Project;
+import com.vaadin.flow.component.combobox.test.entity.Song;
+import com.vaadin.flow.component.combobox.test.entity.Ticket;
+import com.vaadin.flow.component.combobox.test.service.PersonService;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -50,7 +52,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
 
@@ -60,13 +61,12 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-combo-box")
-public class ComboBoxView extends DemoView {
+public class ComboBoxView extends Div {
 
     private static final String WIDTH_STRING = "250px";
     private transient ProjectData projectData = new ProjectData();
 
-    @Override
-    public void initView() {
+    public ComboBoxView() {
         basicDemo(); // Basic usage
         disabledAndReadonly();
         entityList();
@@ -770,5 +770,20 @@ public class ComboBoxView extends DemoView {
         public String getImage() {
             return image;
         }
+    }
+
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }

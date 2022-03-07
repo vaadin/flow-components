@@ -1,7 +1,7 @@
-package com.vaadin.flow.component.combobox.demo.service;
+package com.vaadin.flow.component.combobox.test.service;
 
-import com.vaadin.flow.component.combobox.demo.data.PersonData;
-import com.vaadin.flow.component.combobox.demo.entity.Person;
+import com.vaadin.flow.component.combobox.test.data.PersonData;
+import com.vaadin.flow.component.combobox.test.entity.Person;
 
 import java.util.Collections;
 import java.util.List;
