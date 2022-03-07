@@ -321,7 +321,7 @@ public class ButtonIT extends AbstractComponentIT {
     public void assertVariants() {
         WebElement button = findElement(By.id("button-theme-variants"));
         Assert.assertEquals("small primary", button.getAttribute("theme"));
-        
+
         findElement(By.id("remove-theme-variant-button")).click();
         Assert.assertEquals("primary", button.getAttribute("theme"));
     }
