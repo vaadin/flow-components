@@ -37,11 +37,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-date-time-picker-flow-demo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
             <scope>compile</scope>
         </dependency>
