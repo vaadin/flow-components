@@ -52,6 +52,7 @@ public class ListBoxIT extends AbstractComponentIT {
     public void init() {
         open();
     }
+
     private void init(String cardId) {
         card = findElement(By.id(cardId));
         listBox = $(ListBoxElement.class).context(card).first();
