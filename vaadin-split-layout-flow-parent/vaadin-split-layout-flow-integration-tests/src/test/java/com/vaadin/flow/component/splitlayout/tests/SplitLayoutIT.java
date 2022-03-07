@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchTestCase;
@@ -125,7 +126,12 @@ public class SplitLayoutIT extends AbstractComponentIT {
 
     @Test
     public void assertVariants() {
-//        verifyThemeVariantsBeingToggled();
+        WebElement splitLayout = findElement(By.id("split-layout-theme-variant"));
+        scrollToElement(splitLayout);
+        Assert.assertEquals(SplitLayoutVariant.LUMO_SMALL.getVariantName(), splitLayout.getAttribute("theme"));
+
+        findElement(By.id("remove-variant-button")).click();
+        Assert.assertNull(splitLayout.getAttribute("theme"));
     }
 
     @Element("*")
