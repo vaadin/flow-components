@@ -195,7 +195,8 @@ public class ListBoxViewDemoPage extends Div {
         return addCard(title, null, components);
     }
 
-    private Component addCard(String title, String description, Component... components) {
+    private Component addCard(String title, String description,
+            Component... components) {
         if (description != null) {
             title = title + ": " + description;
         }
