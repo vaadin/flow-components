@@ -13,21 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.notification.demo;
+package com.vaadin.flow.component.notification.tests;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
@@ -36,12 +38,11 @@ import com.vaadin.flow.server.StreamResource;
  * View for {@link Notification} demo.
  */
 @Route("vaadin-notification")
-public class NotificationView extends DemoView {
+public class NotificationView extends Div {
 
     private static final String BUTTON_CAPTION = "Open notification";
 
-    @Override
-    public void initView() {
+    public NotificationView() {
         createDefaultNotificaiton();
         createNotificationWithPosition();
         createNotificationUsingStaticConvenienceMethod();
@@ -284,4 +285,18 @@ public class NotificationView extends DemoView {
         addCard("Theme Variants", "Error", openButton);
     }
 
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    private void addCard(String title, String description, Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+    }
 }
