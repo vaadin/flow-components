@@ -16,17 +16,20 @@
 
 package com.vaadin.flow.component.timepicker.tests;
 
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.flow.component.timepicker.demo.TimePickerView;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.Locale;
@@ -37,7 +40,7 @@ public class TimePickerLocalizationView extends Div
         implements HasUrlParameter<String> {
 
     private final TimePicker timePicker;
-    private final TimePickerView.LocalTimeTextBlock browserFormattedTime;
+    private final LocalTimeTextBlock browserFormattedTime;
 
     public TimePickerLocalizationView() {
         NativeSelect localesSelect = new NativeSelect();
@@ -57,7 +60,7 @@ public class TimePickerLocalizationView extends Div
         stepSelector.setValue(timePicker.getStep().toString().replace("PT", "")
                 .toLowerCase());
 
-        browserFormattedTime = new TimePickerView.LocalTimeTextBlock();
+        browserFormattedTime = new LocalTimeTextBlock();
         browserFormattedTime.setId("formatted-time");
         browserFormattedTime.setStep(timePicker.getStep());
 
@@ -108,6 +111,58 @@ public class TimePickerLocalizationView extends Div
             browserFormattedTime.setLocale(locale);
             timePicker.setValue(LocalTime.of(Integer.parseInt(split[2]),
                     Integer.parseInt(split[3])));
+        }
+    }
+
+    /**
+     * Component for showing browser formatted time string in the given locale.
+     */
+    public static class LocalTimeTextBlock extends Composite<Div> {
+
+        public final static String MILLISECONDS_SPLIT = "MS:";
+
+        private Locale locale;
+        private LocalTime localTime;
+        private Duration step;
+
+        public void setLocale(Locale locale) {
+            this.locale = locale;
+            updateValue();
+        }
+
+        public void setLocalTime(LocalTime localTime) {
+            this.localTime = localTime;
+            updateValue();
+        }
+
+        public void setStep(Duration step) {
+            this.step = step;
+        }
+
+        private void updateValue() {
+            if (locale == null || localTime == null) {
+                return;
+            }
+            String format = LocalDateTime.of(LocalDate.now(), localTime)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            StringBuilder tag = new StringBuilder(locale.getLanguage());
+            if (!locale.getCountry().isEmpty()) {
+                tag.append("-").append(locale.getCountry());
+            }
+            String expression = "$0['innerText'] = new Date('" + format
+                    + "').toLocaleTimeString('" + tag.toString()
+                    + "', {hour: 'numeric', minute: 'numeric'"
+                    + (step.getSeconds() < 60 ? ", second: 'numeric'" : "")
+                    + "})";
+            // no support for milliseconds in the toLocaleTimeString method
+            if (step.getSeconds() < 1) {
+                expression += "+' " + MILLISECONDS_SPLIT + "'+ $1;";
+                int milliSeconds = localTime.get(ChronoField.MILLI_OF_SECOND);
+                getElement().executeJs(expression, getElement(), milliSeconds);
+            } else {
+                expression += ";";
+                getElement().executeJs(expression, getElement());
+            }
         }
     }
 }
