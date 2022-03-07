@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -28,6 +29,7 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
@@ -45,7 +47,8 @@ import com.vaadin.flow.shared.Registration;
  */
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel {
+        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
+        HasTheme {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -328,6 +331,30 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
         return super.addInvalidChangeListener(listener);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(TimePickerVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(TimePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(TimePickerVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(TimePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     /**
