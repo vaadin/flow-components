@@ -139,7 +139,7 @@ async function main() {
     const msg = `chore: update versions.json in ${branch} with latest WC`;
     const prBranch = await commitChanges(branch, msg);
     const pr = createPR('vaadin/platform', msg, prBranch, branch);
-  } 
+  }
 }
 
 main();
