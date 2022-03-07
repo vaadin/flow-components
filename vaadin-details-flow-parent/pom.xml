@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-details-flow</module>
         <module>vaadin-details-testbench</module>
-        <module>vaadin-details-flow-demo</module>
     </modules>
     <profiles>
         <profile>

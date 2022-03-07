@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-split-layout-flow</module>
         <module>vaadin-split-layout-testbench</module>
-        <module>vaadin-split-layout-flow-demo</module>
     </modules>
     <profiles>
         <profile>

@@ -18,7 +18,6 @@
     <modules>
         <module>vaadin-confirm-dialog-flow</module>
         <module>vaadin-confirm-dialog-testbench</module>
-        <module>vaadin-confirm-dialog-flow-demo</module>
     </modules>
     <profiles>
         <profile>
