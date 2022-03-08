@@ -42,7 +42,7 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
- * Integration tests for the {@link GridView}.
+ * Integration tests for the {@link LegacyTestView}.
  */
 public class GridViewIT extends GridViewBase {
 
@@ -92,13 +92,13 @@ public class GridViewIT extends GridViewBase {
 
         clickElementWithJs(toggleButton);
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(0), false),
+                getSelectionMessage(null, LegacyTestView.items.get(0), false),
                 messageDiv.getText());
         Assert.assertTrue("Person 1 was not marked as selected",
                 isRowSelected(grid, 0));
         clickElementWithJs(toggleButton);
         Assert.assertEquals(
-                getSelectionMessage(GridView.items.get(0), null, false),
+                getSelectionMessage(LegacyTestView.items.get(0), null, false),
                 messageDiv.getText());
         Assert.assertFalse("Person 1 was marked as selected",
                 isRowSelected(grid, 0));
@@ -108,7 +108,7 @@ public class GridViewIT extends GridViewBase {
         Assert.assertTrue("Person 2 was not marked as selected",
                 isRowSelected(grid, 1));
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(1), true),
+                getSelectionMessage(null, LegacyTestView.items.get(1), true),
                 messageDiv.getText());
         clickElementWithJs(getCell(grid, "Person 2"));
         Assert.assertFalse("Person 2 was marked as selected",
@@ -120,8 +120,10 @@ public class GridViewIT extends GridViewBase {
                 isRowSelected(grid, 0));
         Assert.assertFalse("Person 2 was marked as selected",
                 isRowSelected(grid, 1));
-        Assert.assertEquals(getSelectionMessage(GridView.items.get(1),
-                GridView.items.get(0), false), messageDiv.getText());
+        Assert.assertEquals(
+                getSelectionMessage(LegacyTestView.items.get(1),
+                        LegacyTestView.items.get(0), false),
+                messageDiv.getText());
         clickElementWithJs(toggleButton);
         Assert.assertFalse("Person 1 was marked as selected",
                 isRowSelected(grid, 0));
@@ -132,7 +134,7 @@ public class GridViewIT extends GridViewBase {
         // select item that is not in cache
         clickElementWithJs(toggleButton);
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(0), false),
+                getSelectionMessage(null, LegacyTestView.items.get(0), false),
                 messageDiv.getText());
         // scroll back up
         scroll(grid, 0);
@@ -158,13 +160,13 @@ public class GridViewIT extends GridViewBase {
 
         toggleButton.click();
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(0), false),
+                getSelectionMessage(null, LegacyTestView.items.get(0), false),
                 messageDiv.getText());
         Assert.assertTrue("Person 1 was not marked as selected",
                 isRowSelected(grid, 0));
         toggleButton.click();
         Assert.assertEquals(
-                getSelectionMessage(GridView.items.get(0), null, false),
+                getSelectionMessage(LegacyTestView.items.get(0), null, false),
                 messageDiv.getText());
         Assert.assertFalse("Person 1 was marked as selected",
                 isRowSelected(grid, 0));
@@ -173,7 +175,7 @@ public class GridViewIT extends GridViewBase {
         Assert.assertTrue("Person 2 was not marked as selected",
                 isRowSelected(grid, 1));
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(1), true),
+                getSelectionMessage(null, LegacyTestView.items.get(1), true),
                 messageDiv.getText());
 
         // deselect non-selected row
@@ -181,7 +183,7 @@ public class GridViewIT extends GridViewBase {
         Assert.assertTrue("Person 2 was not marked as selected",
                 isRowSelected(grid, 1));
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(1), true),
+                getSelectionMessage(null, LegacyTestView.items.get(1), true),
                 messageDiv.getText());
 
         person2row.deselect();
@@ -194,8 +196,10 @@ public class GridViewIT extends GridViewBase {
                 isRowSelected(grid, 0));
         Assert.assertFalse("Person 2 was marked as selected",
                 isRowSelected(grid, 1));
-        Assert.assertEquals(getSelectionMessage(GridView.items.get(1),
-                GridView.items.get(0), false), messageDiv.getText());
+        Assert.assertEquals(
+                getSelectionMessage(LegacyTestView.items.get(1),
+                        LegacyTestView.items.get(0), false),
+                messageDiv.getText());
         toggleButton.click();
         Assert.assertFalse("Person 1 was marked as selected",
                 isRowSelected(grid, 0));
@@ -207,7 +211,7 @@ public class GridViewIT extends GridViewBase {
         // select item that is not in cache
         toggleButton.click();
         Assert.assertEquals(
-                getSelectionMessage(null, GridView.items.get(0), false),
+                getSelectionMessage(null, LegacyTestView.items.get(0), false),
                 messageDiv.getText());
 
         // scroll back up
@@ -230,8 +234,8 @@ public class GridViewIT extends GridViewBase {
 
         clickElementWithJs(selectBtn);
         Assert.assertEquals(
-                getSelectionMessage(GridView.items.subList(0, 2),
-                        GridView.items.subList(0, 5), false),
+                getSelectionMessage(LegacyTestView.items.subList(0, 2),
+                        LegacyTestView.items.subList(0, 5), false),
                 messageDiv.getText());
         assertRowsSelected(grid, 0, 5);
 
@@ -240,8 +244,8 @@ public class GridViewIT extends GridViewBase {
         checkbox = getCellContent(grid.getCell(1, 0));
         checkbox.click();
         Assert.assertEquals(
-                getSelectionMessage(GridView.items.subList(1, 5),
-                        GridView.items.subList(2, 5), true),
+                getSelectionMessage(LegacyTestView.items.subList(1, 5),
+                        LegacyTestView.items.subList(2, 5), true),
                 messageDiv.getText());
         assertRowsSelected(grid, 2, 5);
 
@@ -727,29 +731,27 @@ public class GridViewIT extends GridViewBase {
         scrollToElement(grid);
 
         GridTHTDElement headerCell = grid.getHeaderCell(0);
-        assertRendereredHeaderCell(headerCell, "<label>Name</label>", true,
-                true);
+        assertRendereredHeaderCell(headerCell, "<span>Name</span>", true, true);
 
         headerCell = grid.getHeaderCell(1);
-        assertRendereredHeaderCell(headerCell, "<label>Age</label>", true,
-                true);
+        assertRendereredHeaderCell(headerCell, "<span>Age</span>", true, true);
 
         headerCell = grid.getHeaderCell(2);
-        assertRendereredHeaderCell(headerCell, "<label>Street</label>", true,
+        assertRendereredHeaderCell(headerCell, "<span>Street</span>", true,
                 false);
 
         headerCell = grid.getHeaderCell(3);
-        assertRendereredHeaderCell(headerCell, "<label>Postal Code</label>",
-                true, false);
+        assertRendereredHeaderCell(headerCell, "<span>Postal Code</span>", true,
+                false);
 
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
                 hasComponentRendereredHeaderCell(grid,
-                        "<label>Basic Information</label>"));
+                        "<span>Basic Information</span>"));
 
         Assert.assertTrue("There should be a cell with the renderered footer",
                 hasComponentRendereredHeaderCell(grid,
-                        "<label>Total: 500 people</label>"));
+                        "<span>Total: 500 people</span>"));
     }
 
     @Test
@@ -1268,8 +1270,7 @@ public class GridViewIT extends GridViewBase {
         Assert.assertNotNull(layouts);
         Assert.assertEquals(2, layouts.size());
 
-        Pattern pattern = Pattern
-                .compile("<label>Name:\\s?([\\w\\s]*)</label>");
+        Pattern pattern = Pattern.compile("<span>Name:\\s?([\\w\\s]*)</span>");
         Matcher innerHTML = pattern
                 .matcher(layouts.get(0).getAttribute("innerHTML"));
         Assert.assertTrue(

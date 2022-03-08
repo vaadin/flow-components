@@ -175,4 +175,8 @@ public class Person implements Serializable, Cloneable {
                 Gender.FEMALE, new Address("Red street", 12, "Amsterdam",
                         Country.NETHERLANDS));
     }
+
+    public enum MaritalStatus {
+        MARRIED, SINGLE;
+    }
 }
