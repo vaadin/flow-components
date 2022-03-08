@@ -31,7 +31,6 @@ public class GridViewHeaderAndFooterRowsPage extends LegacyTestView {
         createHeaderAndFooterUsingComponents();
     }
 
-    
     private void createGridWithHeaderAndFooterRows() {
         // begin-source-example
         // source-example-heading: Adding header and footer rows

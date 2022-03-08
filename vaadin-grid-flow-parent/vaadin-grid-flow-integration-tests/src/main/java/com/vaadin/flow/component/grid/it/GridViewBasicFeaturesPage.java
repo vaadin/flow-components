@@ -125,7 +125,6 @@ public class GridViewBasicFeaturesPage extends LegacyTestView {
 
         filteringHeader.getCell(companyNameColumn).setComponent(filteringField);
 
-
         grid.setId("grid-basic-feature");
         addCard("Basic Features", "Grid Basic Features Demo", grid);
     }

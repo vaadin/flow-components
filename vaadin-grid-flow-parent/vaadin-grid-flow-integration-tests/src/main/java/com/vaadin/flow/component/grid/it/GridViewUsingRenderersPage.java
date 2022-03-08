@@ -64,8 +64,7 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
 
         // Icons
         grid.addColumn(new IconRenderer<>(
-                item -> item.getPrice() > 50 ? new Span("$$$")
-                        : new Span("$"),
+                item -> item.getPrice() > 50 ? new Span("$$$") : new Span("$"),
                 item -> ""));
 
         // NativeButtonRenderer for an easy clickable button,

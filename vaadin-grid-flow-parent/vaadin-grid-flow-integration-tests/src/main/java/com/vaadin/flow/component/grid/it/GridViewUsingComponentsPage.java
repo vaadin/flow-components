@@ -166,8 +166,7 @@ public class GridViewUsingComponentsPage extends LegacyTestView {
             layout1.add(new Span("Age: " + person.getAge()));
 
             VerticalLayout layout2 = new VerticalLayout();
-            layout2.add(
-                    new Span("Street: " + person.getAddress().getStreet()));
+            layout2.add(new Span("Street: " + person.getAddress().getStreet()));
             layout2.add(new Span(
                     "Address number: " + person.getAddress().getNumber()));
             layout2.add(new Span(

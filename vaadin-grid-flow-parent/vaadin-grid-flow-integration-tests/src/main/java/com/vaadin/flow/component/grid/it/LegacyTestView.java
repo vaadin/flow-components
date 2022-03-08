@@ -28,7 +28,8 @@ public class LegacyTestView extends Div {
         addCard(title, null, components);
     }
 
-    protected void addCard(String title, String description, Component... components) {
+    protected void addCard(String title, String description,
+            Component... components) {
         if (description != null) {
             title = title + ": " + description;
         }
@@ -38,7 +39,7 @@ public class LegacyTestView extends Div {
         layout.add(components);
         add(layout);
     }
-    
+
     protected List<Person> getItems() {
         return items.stream().map(Person::clone).collect(Collectors.toList());
     }

@@ -36,7 +36,6 @@ public class GridViewFilteringPage extends LegacyTestView {
         createGridWithFilters();
     }
 
-
     private void createGridWithFilters() {
         // begin-source-example
         // source-example-heading: Using text fields for filtering items

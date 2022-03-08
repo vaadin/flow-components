@@ -31,7 +31,7 @@ public class GridViewItemDetailsPage extends LegacyTestView {
         createItemDetails();
         createItemDetailsOpenedProgrammatically();
     }
-    
+
     private Grid<Person> createGridWithDetails() {
         // begin-source-example
         // source-example-heading: Grid with item details

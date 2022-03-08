@@ -120,8 +120,10 @@ public class GridViewIT extends GridViewBase {
                 isRowSelected(grid, 0));
         Assert.assertFalse("Person 2 was marked as selected",
                 isRowSelected(grid, 1));
-        Assert.assertEquals(getSelectionMessage(LegacyTestView.items.get(1),
-                LegacyTestView.items.get(0), false), messageDiv.getText());
+        Assert.assertEquals(
+                getSelectionMessage(LegacyTestView.items.get(1),
+                        LegacyTestView.items.get(0), false),
+                messageDiv.getText());
         clickElementWithJs(toggleButton);
         Assert.assertFalse("Person 1 was marked as selected",
                 isRowSelected(grid, 0));
@@ -194,8 +196,10 @@ public class GridViewIT extends GridViewBase {
                 isRowSelected(grid, 0));
         Assert.assertFalse("Person 2 was marked as selected",
                 isRowSelected(grid, 1));
-        Assert.assertEquals(getSelectionMessage(LegacyTestView.items.get(1),
-                LegacyTestView.items.get(0), false), messageDiv.getText());
+        Assert.assertEquals(
+                getSelectionMessage(LegacyTestView.items.get(1),
+                        LegacyTestView.items.get(0), false),
+                messageDiv.getText());
         toggleButton.click();
         Assert.assertFalse("Person 1 was marked as selected",
                 isRowSelected(grid, 0));
@@ -727,20 +731,18 @@ public class GridViewIT extends GridViewBase {
         scrollToElement(grid);
 
         GridTHTDElement headerCell = grid.getHeaderCell(0);
-        assertRendereredHeaderCell(headerCell, "<span>Name</span>", true,
-                true);
+        assertRendereredHeaderCell(headerCell, "<span>Name</span>", true, true);
 
         headerCell = grid.getHeaderCell(1);
-        assertRendereredHeaderCell(headerCell, "<span>Age</span>", true,
-                true);
+        assertRendereredHeaderCell(headerCell, "<span>Age</span>", true, true);
 
         headerCell = grid.getHeaderCell(2);
         assertRendereredHeaderCell(headerCell, "<span>Street</span>", true,
                 false);
 
         headerCell = grid.getHeaderCell(3);
-        assertRendereredHeaderCell(headerCell, "<span>Postal Code</span>",
-                true, false);
+        assertRendereredHeaderCell(headerCell, "<span>Postal Code</span>", true,
+                false);
 
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
@@ -1268,8 +1270,7 @@ public class GridViewIT extends GridViewBase {
         Assert.assertNotNull(layouts);
         Assert.assertEquals(2, layouts.size());
 
-        Pattern pattern = Pattern
-                .compile("<span>Name:\\s?([\\w\\s]*)</span>");
+        Pattern pattern = Pattern.compile("<span>Name:\\s?([\\w\\s]*)</span>");
         Matcher innerHTML = pattern
                 .matcher(layouts.get(0).getAttribute("innerHTML"));
         Assert.assertTrue(
