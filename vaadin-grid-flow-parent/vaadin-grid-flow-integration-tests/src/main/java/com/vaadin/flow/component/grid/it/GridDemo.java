@@ -76,6 +76,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.Address;
+import com.vaadin.flow.data.bean.Item;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.bean.Person.MaritalStatus;
 import com.vaadin.flow.data.binder.Binder;
@@ -195,63 +196,6 @@ public class GridDemo extends Div {
         }
     }
     // end-source-example
-
-    public static class Item {
-
-        private String name;
-        private double price;
-        private LocalDateTime purchaseDate;
-        private LocalDate EstimatedDeliveryDate;
-
-        public Item() {
-        }
-
-        public Item(String name, double price, LocalDateTime purchaseDate,
-                LocalDate estimatedDeliveryDate) {
-            this.name = name;
-            this.price = price;
-            this.purchaseDate = purchaseDate;
-            EstimatedDeliveryDate = estimatedDeliveryDate;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public double getPrice() {
-            return price;
-        }
-
-        public void setPrice(double price) {
-            this.price = price;
-        }
-
-        public LocalDateTime getPurchaseDate() {
-            return purchaseDate;
-        }
-
-        public void setPurchaseDate(LocalDateTime purchaseDate) {
-            this.purchaseDate = purchaseDate;
-        }
-
-        public LocalDate getEstimatedDeliveryDate() {
-            return EstimatedDeliveryDate;
-        }
-
-        public void setEstimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
-            EstimatedDeliveryDate = estimatedDeliveryDate;
-        }
-
-        @Override
-        public String toString() {
-            return getName();
-        }
-
-    }
 
     public static class Order {
 

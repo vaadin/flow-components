@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.it.GridDemo.Item;
+import com.vaadin.flow.data.bean.Item;
 
 /**
  * Helper class used for generating stable random data for demo purposes.
