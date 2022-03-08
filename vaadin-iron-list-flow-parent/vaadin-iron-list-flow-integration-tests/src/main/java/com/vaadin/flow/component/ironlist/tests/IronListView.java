@@ -48,9 +48,7 @@ public class IronListView extends Div {
 
     private static final List<String> LIST_OF_BOOKS;
     static {
-        SecureRandom random = new SecureRandom();
-        random.setSeed(42);
-        Faker faker = Faker.instance(random);
+        Faker faker = Faker.instance(new SecureRandom());
         LIST_OF_BOOKS = createListOfStrings(1000, () -> faker.book().title());
     }
 
@@ -406,9 +404,7 @@ public class IronListView extends Div {
     private List<String> getLordOfTheRingsCharacters() {
         Set<String> characters = new HashSet<>();
 
-        SecureRandom random = new SecureRandom();
-        random.setSeed(42);
-        Faker instance = Faker.instance(random);
+        Faker instance = Faker.instance(new SecureRandom());
         for (int i = 0; i < 100; i++) {
             characters.add(instance.lordOfTheRings().character());
         }
@@ -440,9 +436,7 @@ public class IronListView extends Div {
     private List<Person> createListOfPeople() {
         final int numberToGenerate = 500;
         List<Person> people = new ArrayList<>(numberToGenerate);
-        SecureRandom random = new SecureRandom();
-        random.setSeed(42);
-        Faker faker = Faker.instance(random);
+        Faker faker = Faker.instance(new SecureRandom());
         for (int i = 0; i < numberToGenerate; i++) {
             Person person = new Person();
             person.setFirstName(faker.name().firstName());
