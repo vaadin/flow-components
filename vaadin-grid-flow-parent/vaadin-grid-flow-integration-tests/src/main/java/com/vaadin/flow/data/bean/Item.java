@@ -9,17 +9,6 @@ public class Item {
     private LocalDateTime purchaseDate;
     private LocalDate estimatedDeliveryDate;
 
-    public Item() {
-    }
-
-    public Item(String name, double price, LocalDateTime purchaseDate,
-        LocalDate estimatedDeliveryDate) {
-        this.name = name;
-        this.price = price;
-        this.purchaseDate = purchaseDate;
-        this.estimatedDeliveryDate = estimatedDeliveryDate;
-    }
-
     public String getName() {
         return name;
     }

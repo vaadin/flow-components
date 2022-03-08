@@ -2,7 +2,6 @@ package com.vaadin.flow.data.bean;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Date;
 
 public class Person implements Serializable, Cloneable {
@@ -13,8 +12,6 @@ public class Person implements Serializable, Cloneable {
     private int age;
     private Gender gender;
     private Address address;
-    private String phoneNumber;
-    private MaritalStatus maritalStatus;
     private boolean deceased;
     private Date birthDate;
     private boolean isSubscriber;
@@ -26,31 +23,6 @@ public class Person implements Serializable, Cloneable {
 
     public Person() {
 
-    }
-
-    public Person(int id, String firstName, String lastName, int age,
-            Address address, String phoneNumber) {
-        super();
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Person(int id, String firstName, String lastName, int age,
-            Address address, String phoneNumber,
-            MaritalStatus maritalStatus, Date birthDate) {
-        super();
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.maritalStatus = maritalStatus;
-        this.birthDate = birthDate;
     }
 
     public int getId() {
@@ -181,27 +153,6 @@ public class Person implements Serializable, Cloneable {
 
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public MaritalStatus getMaritalStatus() {
-        return maritalStatus;
-    }
-
-    public void setMaritalStatus(MaritalStatus maritalStatus) {
-        this.maritalStatus = maritalStatus;
-    }
-
-    public String getImage() {
-        return "https://randomuser.me/api/portraits/men/" + getId()
-                + ".jpg";
     }
 
     @Override

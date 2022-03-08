@@ -792,7 +792,7 @@ public class GridViewIT extends GridViewBase {
         GridElement grid = $(GridElement.class).id("bean-grid");
         scrollToElement(grid);
 
-        Assert.assertEquals("Unexpected amount of columns", 16,
+        Assert.assertEquals("Unexpected amount of columns", 13,
                 grid.findElements(By.tagName("vaadin-grid-column")).size());
 
         Assert.assertEquals("Address", grid.getHeaderCell(0).getText());
@@ -802,12 +802,12 @@ public class GridViewIT extends GridViewBase {
         Assert.assertEquals("Email", grid.getHeaderCell(4).getText());
         Assert.assertEquals("First Name", grid.getHeaderCell(5).getText());
         Assert.assertEquals("Gender", grid.getHeaderCell(6).getText());
-        Assert.assertEquals("Last Name", grid.getHeaderCell(8).getText());
-        Assert.assertEquals("Rent", grid.getHeaderCell(11).getText());
-        Assert.assertEquals("Salary", grid.getHeaderCell(12).getText());
-        Assert.assertEquals("Salary Double", grid.getHeaderCell(13).getText());
-        Assert.assertEquals("Subscriber", grid.getHeaderCell(14).getText());
-        Assert.assertEquals("Postal Code", grid.getHeaderCell(15).getText());
+        Assert.assertEquals("Last Name", grid.getHeaderCell(7).getText());
+        Assert.assertEquals("Rent", grid.getHeaderCell(8).getText());
+        Assert.assertEquals("Salary", grid.getHeaderCell(9).getText());
+        Assert.assertEquals("Salary Double", grid.getHeaderCell(10).getText());
+        Assert.assertEquals("Subscriber", grid.getHeaderCell(11).getText());
+        Assert.assertEquals("Postal Code", grid.getHeaderCell(12).getText());
     }
 
     @Test
