@@ -1,8 +1,14 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import com.vaadin.flow.data.bean.Address;
+import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.bean.Person.MaritalStatus;
 
 public class PersonData {
 
@@ -86,21 +92,27 @@ public class PersonData {
     private static final String[] cities = new String[] { "New York",
             "Washington" };
 
-    private final List<GridDemo.Person> people = new ArrayList<>();
+    private final List<Person> people = new ArrayList<>();
 
-    public List<GridDemo.Person> getPersons() {
+    public List<Person> getPersons() {
         if (people.isEmpty()) {
             for (int i = 91; i <= 199; i++) {
+                
+
                 final int age = ages[i % ages.length];
-                people.add(new GridDemo.Person(i, names[i % names.length],
+                LocalDate birthLocalDate = LocalDate.now().minusYears(age).minusDays(i % LocalDate.now().getDayOfYear());
+                Date birthDate = Date.from(birthLocalDate.atStartOfDay()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant());
+
+                people.add(new Person(i, names[i % names.length],
                         surnames[i % surnames.length], age,
-                        new GridDemo.Address(numbers[i % numbers.length],
+                        new Address(numbers[i % numbers.length],
                                 cities[i % cities.length]),
                         phones[i % phones.length],
-                        GridDemo.MaritalStatus.values()[i
-                                % GridDemo.MaritalStatus.values().length],
-                        LocalDate.now().minusYears(age).minusDays(
-                                i % LocalDate.now().getDayOfYear())));
+                        MaritalStatus.values()[i
+                                % MaritalStatus.values().length],
+                                birthDate));
             }
         }
         return people;

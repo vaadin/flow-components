@@ -22,8 +22,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.grid.it.GridDemo.Address;
-import com.vaadin.flow.component.grid.it.GridDemo.Person;
+import com.vaadin.flow.data.bean.Address;
+import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.bean.PersonWithLevel;
 
 /**
@@ -85,7 +85,7 @@ public class PeopleGenerator extends BeanGenerator {
         Address address = new Address();
         address.setStreet(street);
         address.setNumber(addressNumber);
-        address.setPostalCode(postalCode);
+        address.setPostalCode(Integer.parseInt(postalCode));
 
         person.setAddress(address);
 

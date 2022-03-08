@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.grid.demo.entity;
+package com.vaadin.flow.component.grid.it.entity;
 
 public class Customer {
     private int id;

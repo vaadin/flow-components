@@ -15,6 +15,11 @@ public class Address implements Serializable {
 
     }
 
+    public Address(String postalCode, String city) {
+        this.postalCode = Integer.parseInt(postalCode);
+        this.city = city;
+    }
+
     public Address(String streetAddress, int postalCode, String city,
             Country country) {
         setStreet(streetAddress);
