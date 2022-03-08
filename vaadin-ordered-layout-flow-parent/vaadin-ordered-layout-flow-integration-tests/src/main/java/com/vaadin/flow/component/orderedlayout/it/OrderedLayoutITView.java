@@ -5,7 +5,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.orderedlayout.demo.AbstractLayout;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-ordered-layout/ordered-layout-tests")

@@ -13,9 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.orderedlayout.demo;
-
-import java.util.function.Consumer;
+package com.vaadin.flow.component.orderedlayout.it;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -24,13 +22,14 @@ import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.demo.DemoView;
+
+import java.util.function.Consumer;
 
 /**
  * Abstract layout class containing common code for horizontal and vertical
  * demos.
  */
-public abstract class AbstractLayout extends DemoView {
+public abstract class AbstractLayout extends Div {
 
     protected Div createComponent(int index, String color) {
         Div component = new Div();

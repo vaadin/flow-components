@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-ordered-layout-flow</module>
         <module>vaadin-ordered-layout-testbench</module>
-        <module>vaadin-ordered-layout-flow-demo</module>
     </modules>
     <profiles>
         <profile>
