@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-grid-flow</module>
         <module>vaadin-grid-testbench</module>
-        <module>vaadin-grid-flow-demo</module>
     </modules>
     <profiles>
         <profile>
