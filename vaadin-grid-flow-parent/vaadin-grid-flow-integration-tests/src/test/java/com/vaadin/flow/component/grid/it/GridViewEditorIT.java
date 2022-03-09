@@ -247,6 +247,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         TestBenchElement nameInput = nameField.$("input").first();
         assertElementHasFocus(nameInput);
 
+        nameInput.sendKeys(Keys.END);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -302,6 +303,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         TestBenchElement nameInput = nameField.$("input").first();
         assertElementHasFocus(nameInput);
 
+        nameInput.sendKeys(Keys.END);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -421,6 +423,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
         TestBenchElement nameInput = nameField.$("input").first();
         assertElementHasFocus(nameInput);
+        nameInput.sendKeys(Keys.END);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -448,14 +451,14 @@ public class GridViewEditorIT extends AbstractComponentIT {
         grid.getRow(1).click(10, 10);
 
         // New data should be shown in the grid cell
-        Assert.assertEquals("foo" + personName, nameCell.getText());
+        Assert.assertEquals(personName + "foo", nameCell.getText());
         Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
         Assert.assertEquals("bar@example.com",
                 row.getCell(grid.getAllColumns().get(2)).getText());
 
         // The edited person should have new data
         WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals("foo" + personName + ", true, bar@example.com",
+        Assert.assertEquals(personName + "foo, true, bar@example.com",
                 msg.getText());
     }
 
@@ -484,6 +487,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         TestBenchElement nameInput = nameField.$("input").first();
         assertElementHasFocus(nameInput);
 
+        nameInput.sendKeys(Keys.END);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
         nameInput.click();
@@ -499,14 +503,14 @@ public class GridViewEditorIT extends AbstractComponentIT {
         grid.getRow(1).click(10, 10);
 
         // New data should be shown in the grid cell
-        Assert.assertEquals("foo" + personName, nameCell.getText());
+        Assert.assertEquals(personName + "foo", nameCell.getText());
         Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
         Assert.assertEquals("mailss@example.org",
                 row.getCell(grid.getAllColumns().get(2)).getText());
 
         // The edited person should have new data
         WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals("foo" + personName + ", true, mailss@example.org",
+        Assert.assertEquals(personName + "foo, true, mailss@example.org",
                 msg.getText());
     }
 
