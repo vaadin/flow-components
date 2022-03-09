@@ -37,7 +37,6 @@
         <osgi.export.package>default</osgi.export.package>
     </properties>
     <modules>
-        <module>vaadin-component-demo-helpers</module>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>

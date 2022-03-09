@@ -18,7 +18,6 @@ package com.vaadin.flow.component.splitlayout.tests;
 import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchTestCase;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,7 +30,6 @@ import org.openqa.selenium.interactions.Actions;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 import com.vaadin.testbench.elementsbase.Element;
-import com.vaadin.tests.ComponentDemoTest;
 
 /**
  * Integration tests for {@link SplitLayoutView}.
