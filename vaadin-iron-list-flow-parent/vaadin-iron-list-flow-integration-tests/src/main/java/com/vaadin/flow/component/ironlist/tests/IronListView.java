@@ -16,12 +16,12 @@
 package com.vaadin.flow.component.ironlist.tests;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -48,7 +48,7 @@ public class IronListView extends Div {
 
     private static final List<String> LIST_OF_BOOKS;
     static {
-        Faker faker = Faker.instance(new Random(42));
+        Faker faker = Faker.instance(new SecureRandom());
         LIST_OF_BOOKS = createListOfStrings(1000, () -> faker.book().title());
     }
 
@@ -404,7 +404,7 @@ public class IronListView extends Div {
     private List<String> getLordOfTheRingsCharacters() {
         Set<String> characters = new HashSet<>();
 
-        Faker instance = Faker.instance(new Random(42));
+        Faker instance = Faker.instance(new SecureRandom());
         for (int i = 0; i < 100; i++) {
             characters.add(instance.lordOfTheRings().character());
         }
@@ -436,7 +436,7 @@ public class IronListView extends Div {
     private List<Person> createListOfPeople() {
         final int numberToGenerate = 500;
         List<Person> people = new ArrayList<>(numberToGenerate);
-        Faker faker = Faker.instance(new Random(42));
+        Faker faker = Faker.instance(new SecureRandom());
         for (int i = 0; i < numberToGenerate; i++) {
             Person person = new Person();
             person.setFirstName(faker.name().firstName());
