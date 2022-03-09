@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -27,20 +27,108 @@ import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-/**
- * Integration tests for the {@link GridView}.
- *
- * These test pass, but they slow down builds in TC and reduces stability.
- */
-@Ignore("Enabling this increases the build total build time in 10 minutes and causes: Out of memory - GC overhead limit exceeded")
-public class GridView2IT extends GridViewBase {
+@TestPath("vaadin-grid-it-demo/grid-editor")
+public class GridViewEditorIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+    }
+
+    @Test
+    public void notBufferedEditor() {
+        GridElement grid = $(GridElement.class).id("not-buffered-editor");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTHTDElement nameCell = row.getCell(nameColumn);
+        String personName = nameCell.getText();
+
+        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
+
+        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
+
+        row.doubleClick();
+
+        TestBenchElement subscriberCheckbox = subscriberCell
+                .$("vaadin-checkbox").first();
+        boolean isSubscriber = subscriberCheckbox
+                .getAttribute("checked") != null;
+
+        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
+
+        TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameInput);
+
+        nameInput.sendKeys(Keys.END);
+        nameInput.sendKeys("foo");
+        nameInput.sendKeys(Keys.ENTER);
+
+        subscriberCheckbox.click();
+
+        // click on another row
+        grid.getRow(1).click(10, 10);
+
+        // New data should be shown in the grid cell
+        Assert.assertEquals(personName + "foo", nameCell.getText());
+        Assert.assertEquals(String.valueOf(!isSubscriber),
+                subscriberCell.getText());
+
+        // The edited person should have new data
+        WebElement msg = findElement(By.id("not-buffered-editor-msg"));
+        Assert.assertEquals(personName + "foo, " + !isSubscriber,
+                msg.getText());
+    }
+
+    @Test
+    public void notBufferedEditor_closeEditorUsingKeyboard() {
+        assertCloseEditorUsingKeyBoard("not-buffered-editor");
+    }
+
+    @Test
+    public void dynamicNotBufferedEditor_closeEditorUsingKeyboard()
+            throws InterruptedException {
+        GridElement grid = assertCloseEditorUsingKeyBoard(
+                "not-buffered-dynamic-editor");
+
+        GridTRElement row = grid.getRow(0);
+
+        GridColumnElement emailColumn = grid.getColumn("E-mail");
+        GridTHTDElement emailCell = row.getCell(emailColumn);
+
+        row.doubleClick();
+
+        TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
+
+        TestBenchElement emailInput = emailField.$("input").first();
+        emailInput.click();
+        emailInput.sendKeys(Keys.TAB);
+        assertNotBufferedEditorClosed(grid);
+    }
+
+    @Test
+    public void dynamicEditor_bufferedMode_useKeyboardToSwitchEditorComponent() {
+
+        GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        // start to edit
+        GridColumnElement editColumn = grid.getAllColumns().get(3);
+        grid.getRow(0).getCell(editColumn).$("vaadin-button").first().click();
+
+        assertBufferedEditing(grid);
+    }
 
     @Test
     public void bufferedEditor_invalidName() {
-        openTabAndCheckForErrors("grid-editor");
-
         GridElement grid = $(GridElement.class).id("buffered-editor");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
@@ -59,7 +147,7 @@ public class GridView2IT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
         nameInput.clear();
         nameInput.sendKeys("foo");
@@ -87,7 +175,7 @@ public class GridView2IT extends GridViewBase {
 
     @Test
     public void bufferedEditor_cancelWithEscape() {
-        openTabAndCheckForErrors("grid-editor");
+        
 
         GridElement grid = $(GridElement.class).id("buffered-editor");
         scrollToElement(grid);
@@ -106,7 +194,7 @@ public class GridView2IT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
         nameInput.clear();
         nameInput.sendKeys("foo");
@@ -124,7 +212,7 @@ public class GridView2IT extends GridViewBase {
 
     @Test
     public void bufferedEditor_validName() {
-        openTabAndCheckForErrors("grid-editor");
+        
 
         GridElement grid = $(GridElement.class).id("buffered-editor");
         scrollToElement(grid);
@@ -159,7 +247,7 @@ public class GridView2IT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
@@ -189,7 +277,7 @@ public class GridView2IT extends GridViewBase {
 
     @Test
     public void dynamicEditor_bufferedMode() {
-        openTabAndCheckForErrors("grid-editor");
+        
 
         GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
         scrollToElement(grid);
@@ -215,7 +303,7 @@ public class GridView2IT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
@@ -276,8 +364,6 @@ public class GridView2IT extends GridViewBase {
 
     @Test
     public void dynamicEditor_bufferedMode_updateSubscriberValue_useKeyboardToSwitchEditorComponent() {
-        openTabAndCheckForErrors("grid-editor");
-
         GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
@@ -295,9 +381,10 @@ public class GridView2IT extends GridViewBase {
         GridTHTDElement nameCell = row.getCell(grid.getColumn("Name"));
 
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
+        nameField.focus();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
         nameInput.sendKeys(Keys.TAB);
 
         // skip checkbox and focus the email field
@@ -316,8 +403,6 @@ public class GridView2IT extends GridViewBase {
 
     @Test
     public void dynamicNotBufferedEditor() throws InterruptedException {
-        openTabAndCheckForErrors("grid-editor");
-
         GridElement grid = $(GridElement.class)
                 .id("not-buffered-dynamic-editor");
         scrollToElement(grid);
@@ -338,7 +423,7 @@ public class GridView2IT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -366,22 +451,20 @@ public class GridView2IT extends GridViewBase {
         grid.getRow(1).click(10, 10);
 
         // New data should be shown in the grid cell
-        Assert.assertEquals(personName + "foo", nameCell.getText());
+        Assert.assertEquals("foo"+ personName, nameCell.getText());
         Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
         Assert.assertEquals("bar@example.com",
                 row.getCell(grid.getAllColumns().get(2)).getText());
 
         // The edited person should have new data
         WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals(personName + "foo, true, bar@example.com",
+        Assert.assertEquals("foo" + personName + ", true, bar@example.com",
                 msg.getText());
     }
 
     @Test
     public void dynamicNotBufferedEditor_navigateUsingKeyboard()
             throws InterruptedException {
-        openTabAndCheckForErrors("grid-editor");
-
         GridElement grid = $(GridElement.class)
                 .id("not-buffered-dynamic-editor");
         scrollToElement(grid);
@@ -402,7 +485,7 @@ public class GridView2IT extends GridViewBase {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
-        assertElementHasFocus(nameField);
+        assertElementHasFocus(nameInput);
 
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
@@ -412,6 +495,7 @@ public class GridView2IT extends GridViewBase {
         new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
 
         new Actions(getDriver())
+                .sendKeys(Keys.ARROW_RIGHT)
                 .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
                 .sendKeys("org").build().perform();
 
@@ -419,36 +503,114 @@ public class GridView2IT extends GridViewBase {
         grid.getRow(1).click(10, 10);
 
         // New data should be shown in the grid cell
-        Assert.assertEquals(personName + "foo", nameCell.getText());
+        Assert.assertEquals("foo" + personName, nameCell.getText());
         Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
         Assert.assertEquals("mailss@example.org",
                 row.getCell(grid.getAllColumns().get(2)).getText());
 
         // The edited person should have new data
         WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals(personName + "foo, true, mailss@example.org",
+        Assert.assertEquals("foo" + personName + ", true, mailss@example.org",
                 msg.getText());
     }
 
-    @Test
-    public void dynamicNotBufferedEditor_closeEditorUsingKeyboard()
-            throws InterruptedException {
-        GridElement grid = assertCloseEditorUsingKeyBoard(
-                "not-buffered-dynamic-editor");
+
+    private void assertElementHasFocus(WebElement element) {
+        Assert.assertTrue("Element should have focus",
+                (Boolean) executeScript(
+                        "return document.activeElement === arguments[0]",
+                        element));
+    }
+
+    private GridElement assertCloseEditorUsingKeyBoard(String gridId) {
+        GridElement grid = $(GridElement.class).id(gridId);
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
 
         GridTRElement row = grid.getRow(0);
 
-        GridColumnElement emailColumn = grid.getColumn("E-mail");
-        GridTHTDElement emailCell = row.getCell(emailColumn);
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTHTDElement nameCell = row.getCell(nameColumn);
 
         row.doubleClick();
 
-        TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
+        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
-        TestBenchElement emailInput = emailField.$("input").first();
-        emailInput.click();
-        emailInput.sendKeys(Keys.TAB);
+        TestBenchElement nameInput = nameField.$("input").first();
+        nameInput.click();
+
+        nameInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
+
         assertNotBufferedEditorClosed(grid);
+
+        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
+        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
+
+        row.doubleClick();
+
+        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
+        checkbox.click();
+
+        checkbox.sendKeys(Keys.TAB);
+
+        assertNotBufferedEditorClosed(grid);
+
+        // restore the previous state
+        row.doubleClick();
+
+        checkbox = subscriberCell.$("vaadin-checkbox").first();
+        checkbox.click();
+
+        // close the editor
+        grid.getRow(1).click(5, 5);
+
+        return grid;
     }
 
+    private void assertNotBufferedEditorClosed(GridElement grid) {
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTRElement row = grid.getRow(0);
+        GridTHTDElement nameCell = row.getCell(nameColumn);
+        Assert.assertEquals(
+                "Unexpected shown text field in the name cell when the editor should be closed",
+                0, nameCell.$("vaadin-text-field").all().size());
+    }
+
+    private void assertBufferedEditing(GridElement grid) {
+        GridTRElement row = grid.getRow(0);
+
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTHTDElement nameCell = row.getCell(nameColumn);
+
+        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
+
+        TestBenchElement nameInput = nameField.$("input").first();
+        nameInput.click();
+
+        // Move caret to the end of the text
+        new Actions(getDriver()).sendKeys(Keys.END).build().perform();
+
+        nameInput.sendKeys("foo");
+
+        // skip checkbox and focus the email field
+        new Actions(getDriver()).sendKeys(Keys.TAB).sendKeys(Keys.TAB).build()
+                .perform();
+
+        // change the e-mail to .org
+        new Actions(getDriver()).sendKeys(Keys.END, Keys.BACK_SPACE,
+                Keys.BACK_SPACE, Keys.BACK_SPACE).sendKeys("org").build()
+                .perform();
+
+        // press enter on the save button
+        new Actions(getDriver()).sendKeys(Keys.TAB).sendKeys(Keys.ENTER).build()
+                .perform();
+
+        WebElement updatedItemMsg = findElement(
+                By.id("buffered-dynamic-editor-msg"));
+
+        waitUntil(driver -> !updatedItemMsg.getText().isEmpty());
+
+        Assert.assertEquals("Person 1foo, true, mailss@example.org",
+                updatedItemMsg.getText());
+    }
 }
