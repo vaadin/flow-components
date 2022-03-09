@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -299,7 +298,7 @@ public class RadioButtonGroupDataViewPage extends Div {
         selectedIdSpan
                 .setText(String.valueOf(radioButtonGroup.getValue().getId()));
 
-        Button updateAndSelectByIdOnlyButton = new Button(
+        NativeButton updateAndSelectByIdOnlyButton = new NativeButton(
                 "Update & Select by Id", click -> {
                     // Make the names of unselected items similar to the name of
                     // selected one to mess with the <equals> implementation in
@@ -320,7 +319,7 @@ public class RadioButtonGroupDataViewPage extends Div {
         updateAndSelectByIdOnlyButton
                 .setId(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON);
 
-        Button selectByIdAndNameButton = new Button("Select by Id and Name",
+        NativeButton selectByIdAndNameButton = new NativeButton("Select by Id and Name",
                 click -> {
                     // Select the item with the Id and a challenging wrong name
                     // to verify <equals> method is not in use:
