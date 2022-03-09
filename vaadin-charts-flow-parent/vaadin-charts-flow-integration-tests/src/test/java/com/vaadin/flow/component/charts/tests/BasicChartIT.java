@@ -17,8 +17,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.area.AreaChart;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.area.AreaChart;
 
 import static org.junit.Assert.assertTrue;
 
