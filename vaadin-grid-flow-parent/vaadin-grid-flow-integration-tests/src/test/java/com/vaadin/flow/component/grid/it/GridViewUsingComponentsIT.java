@@ -114,12 +114,11 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
         return grid.$("*").id("items").findElements(By.cssSelector("tr"))
                 .get(row);
     }
-    
+
     private boolean hasComponentRendereredCell(WebElement grid, String text) {
         return hasComponentRendereredCell(grid, text,
                 "flow-component-renderer");
     }
-
 
     private boolean hasComponentRendereredCell(WebElement grid, String text,
             String componentTag) {

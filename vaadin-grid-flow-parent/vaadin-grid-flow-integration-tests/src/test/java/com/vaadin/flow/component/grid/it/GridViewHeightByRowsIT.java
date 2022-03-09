@@ -31,7 +31,6 @@ public class GridViewHeightByRowsIT extends AbstractComponentIT {
         open();
     }
 
-
     @Test
     public void heightByRows_allRowsAreFetched() {
         GridElement grid = $(GridElement.class).id("grid-height-by-rows");

@@ -175,7 +175,6 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
     @Test
     public void bufferedEditor_cancelWithEscape() {
-        
 
         GridElement grid = $(GridElement.class).id("buffered-editor");
         scrollToElement(grid);
@@ -212,7 +211,6 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
     @Test
     public void bufferedEditor_validName() {
-        
 
         GridElement grid = $(GridElement.class).id("buffered-editor");
         scrollToElement(grid);
@@ -277,7 +275,6 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
     @Test
     public void dynamicEditor_bufferedMode() {
-        
 
         GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
         scrollToElement(grid);
@@ -451,7 +448,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         grid.getRow(1).click(10, 10);
 
         // New data should be shown in the grid cell
-        Assert.assertEquals("foo"+ personName, nameCell.getText());
+        Assert.assertEquals("foo" + personName, nameCell.getText());
         Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
         Assert.assertEquals("bar@example.com",
                 row.getCell(grid.getAllColumns().get(2)).getText());
@@ -494,8 +491,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
         new Actions(getDriver()).sendKeys(Keys.TAB).build().perform();
 
-        new Actions(getDriver())
-                .sendKeys(Keys.ARROW_RIGHT)
+        new Actions(getDriver()).sendKeys(Keys.ARROW_RIGHT)
                 .sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE)
                 .sendKeys("org").build().perform();
 
@@ -513,7 +509,6 @@ public class GridViewEditorIT extends AbstractComponentIT {
         Assert.assertEquals("foo" + personName + ", true, mailss@example.org",
                 msg.getText());
     }
-
 
     private void assertElementHasFocus(WebElement element) {
         Assert.assertTrue("Element should have focus",

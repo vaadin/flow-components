@@ -119,7 +119,6 @@ public class GridViewConfiguringColumnsIT extends AbstractComponentIT {
         Assert.assertEquals("Postal Code", grid.getHeaderCell(12).getText());
     }
 
-
     @Test
     public void beanGrid_valuesAreConvertedToStrings() {
         WebElement grid = findElement(By.id("bean-grid"));
