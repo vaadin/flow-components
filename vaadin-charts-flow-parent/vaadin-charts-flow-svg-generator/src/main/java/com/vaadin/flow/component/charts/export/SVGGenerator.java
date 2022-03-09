@@ -63,7 +63,7 @@ public class SVGGenerator implements AutoCloseable {
      * file which contents can be then read by this class.
      */
     private static final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
-            + "exporter({\n" + "chartConfiguration: %s,\n" + "outFile: '%s',\n"
+            + "exporter({\n" + "chartConfigFile: '%s',\n" + "outFile: '%s',\n"
             + "exportOptions: %s,\n" + "})";
 
     /**
@@ -161,12 +161,15 @@ public class SVGGenerator implements AutoCloseable {
                 "Chart configuration must not be null.");
         String jsonConfig = ChartSerialization.toJSON(config);
         String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
+        Path requestFilePath = Files.createTempFile(tempDirPath, "config", ".json");
+        String requestFileName = requestFilePath.toFile().getName();
+        Files.writeString(requestFilePath, jsonConfig, StandardCharsets.UTF_8);
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
         String script = String.format(
                 SCRIPT_TEMPLATE, bundleTempPath.toFile().getAbsolutePath()
                         .replaceAll("\\\\", "/"),
-                jsonConfig, chartFileName, jsonExportOptions);
+                requestFileName, chartFileName, jsonExportOptions);
         NodeRunner nodeRunner = new NodeRunner();
         nodeRunner.runJavascript(script);
         // when script completes, the chart svg file should exist
@@ -175,6 +178,7 @@ public class SVGGenerator implements AutoCloseable {
                     StandardCharsets.UTF_8);
         } finally {
             Files.delete(chartFilePath);
+            Files.delete(requestFilePath);
         }
     }
 

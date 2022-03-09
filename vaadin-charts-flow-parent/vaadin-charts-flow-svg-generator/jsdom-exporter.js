@@ -197,8 +197,12 @@ const inflateFunctions = (jsonConfiguration) => {
  *
  * @returns {Promise<SVGResult>} Object with the result of the export
  */
-const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
+const jsdomExporter = ({ chartConfigFile, chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
     return new Promise((resolve, reject) => {
+        if (chartConfigFile) {
+            let chartConfigurationString = fs.readFileSync(__dirname + '/' + chartConfigFile).toString();
+            chartConfiguration = JSON.parse(chartConfigurationString);
+        }
 
         // Disable all animation and default title
         Highcharts.setOptions({
