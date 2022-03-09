@@ -33,8 +33,6 @@ public class GridViewItemDetailsPage extends LegacyTestView {
     }
 
     private Grid<Person> createGridWithDetails() {
-        // begin-source-example
-        // source-example-heading: Grid with item details
         Grid<Person> grid = new Grid<>();
         List<Person> people = createItems();
         grid.setItems(people);
@@ -56,7 +54,6 @@ public class GridViewItemDetailsPage extends LegacyTestView {
                     person.setFirstName(person.getFirstName() + " Updated");
                     grid.getDataProvider().refreshItem(person);
                 }));
-        // end-source-example
         return grid;
     }
 
@@ -69,8 +66,6 @@ public class GridViewItemDetailsPage extends LegacyTestView {
     private void createItemDetailsOpenedProgrammatically() {
         Grid<Person> grid = createGridWithDetails();
 
-        // begin-source-example
-        // source-example-heading: Open details programmatically
         // Disable the default way of opening item details:
         grid.setDetailsVisibleOnClick(false);
 
@@ -78,7 +73,6 @@ public class GridViewItemDetailsPage extends LegacyTestView {
                 item -> grid.setDetailsVisible(item,
                         !grid.isDetailsVisible(item))));
 
-        // end-source-example
         grid.setId("grid-with-details-row-2");
         addCard("Item details", "Open details programmatically", grid);
     }

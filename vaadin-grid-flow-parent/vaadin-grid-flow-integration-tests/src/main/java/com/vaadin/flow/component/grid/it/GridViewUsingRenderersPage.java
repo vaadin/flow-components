@@ -40,8 +40,6 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
     }
 
     private void createBasicRenderers() {
-        // begin-source-example
-        // source-example-heading: Using basic renderers
         Grid<Item> grid = new Grid<>();
         grid.setItems(getShoppingCart());
 
@@ -75,8 +73,6 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         })).setWidth("100px").setFlexGrow(0);
-
-        // end-source-example
 
         grid.setId("grid-basic-renderers");
         addCard("Using renderers", "Using basic renderers", grid);

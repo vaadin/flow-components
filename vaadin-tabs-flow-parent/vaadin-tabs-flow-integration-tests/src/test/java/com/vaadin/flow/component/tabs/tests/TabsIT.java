@@ -65,7 +65,8 @@ public class TabsIT extends AbstractComponentIT {
     public void assertThemeVariant() {
         WebElement tabs = findElement(By.id("tabs-with-theme"));
         scrollToElement(tabs);
-        Assert.assertEquals(TabsVariant.LUMO_SMALL.getVariantName(), tabs.getAttribute("theme"));
+        Assert.assertEquals(TabsVariant.LUMO_SMALL.getVariantName(),
+                tabs.getAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
         Assert.assertNull(tabs.getAttribute("theme"));

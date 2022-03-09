@@ -53,12 +53,9 @@ public class NotificationView extends Div {
 
     private void createDefaultNotificaiton() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
-        // begin-source-example
-        // source-example-heading: Default Notification
         Notification notification = new Notification(
                 "This notification has text content", 3000);
         button.addClickListener(event -> notification.open());
-        // end-source-example
         button.setId("default-notification-button");
         notification.setId("default-notification");
         addCard("Default Notification", button);
@@ -66,24 +63,18 @@ public class NotificationView extends Div {
 
     private void createNotificationWithPosition() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
-        // begin-source-example
-        // source-example-heading: Notification with position
         Notification notification = new Notification(
                 "This notification is located on Top-Left", 3000,
                 Position.TOP_START);
         button.addClickListener(event -> notification.open());
-        // end-source-example
         button.setId("position-notification-button");
         notification.setId("position-notification");
         addCard("Notification with position", button);
     }
 
     private void createNotificationUsingStaticConvenienceMethod() {
-        // begin-source-example
-        // source-example-heading: Notification using static convenience method
         Notification notification = Notification.show(
                 "This is a notification created with static convenience method");
-        // end-source-example
         notification.setId("static-notification");
         addCard("Notification using static convenience method", notification);
     }
@@ -91,8 +82,6 @@ public class NotificationView extends Div {
     private void createNotificationWithComponents() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
         button.setId("component-notification-button");
-        // begin-source-example
-        // source-example-heading: Notification with components
         Span content = new Span("Hello, I am a notification with components!");
         NativeButton buttonInside = new NativeButton("Bye");
         Notification notification = new Notification(content, buttonInside);
@@ -100,7 +89,6 @@ public class NotificationView extends Div {
         buttonInside.addClickListener(event -> notification.close());
         notification.setPosition(Position.MIDDLE);
         button.addClickListener(event -> notification.open());
-        // end-source-example
         notification.setId("component-notification");
         content.setId("label-inside-notification");
         buttonInside.setId("button-inside-notification");
@@ -110,8 +98,6 @@ public class NotificationView extends Div {
     private void addStyledNotificationContent() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
 
-        // begin-source-example
-        // source-example-heading: Notification with styled content
         Div content = new Div();
         content.addClassName("my-style");
         content.setText("This component is styled using global styles");
@@ -119,11 +105,7 @@ public class NotificationView extends Div {
         Notification notification = new Notification(content);
         notification.setDuration(3000);
 
-        // @formatter:off
-        String styles = ".my-style { "
-                + "  color: red;"
-                + " }";
-        // @formatter:on
+        String styles = ".my-style { color: red; }";
 
         /*
          * The code below register the style file dynamically. Normally you
@@ -140,7 +122,6 @@ public class NotificationView extends Div {
                 "base://" + resource.getResourceUri().toString());
 
         button.addClickListener(event -> notification.open());
-        // end-source-example
 
         button.setId("styled-content-notification-button");
         addCard("Notification with styled content", button);
@@ -155,8 +136,6 @@ public class NotificationView extends Div {
     }
 
     private void createDefault() {
-        // begin-source-example
-        // source-example-heading: Default
         Notification notification = new Notification();
 
         Span label = new Span("Please update your password");
@@ -174,13 +153,10 @@ public class NotificationView extends Div {
 
         label.getStyle().set("margin-right", "0.5rem");
         notNowButton.getStyle().set("margin-right", "0.5rem");
-        // end-source-example
         addCard("Theme Variants", "Default", openButton);
     }
 
     private void createPrimary() {
-        // begin-source-example
-        // source-example-heading: Primary
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
 
@@ -200,13 +176,10 @@ public class NotificationView extends Div {
 
         label.getStyle().set("margin-right", "0.5rem");
         skipButton.getStyle().set("margin-right", "0.5rem");
-        // end-source-example
         addCard("Theme Variants", "Primary", openButton);
     }
 
     private void createContrast() {
-        // begin-source-example
-        // source-example-heading: Contrast
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
 
@@ -226,13 +199,10 @@ public class NotificationView extends Div {
 
         label.getStyle().set("margin-right", "0.5rem");
         dismissButton.getStyle().set("margin-right", "0.5rem");
-        // end-source-example
         addCard("Theme Variants", "Contrast", openButton);
     }
 
     private void createSuccess() {
-        // begin-source-example
-        // source-example-heading: Success
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
@@ -254,13 +224,10 @@ public class NotificationView extends Div {
 
         label.getStyle().set("margin-right", "0.5rem");
         viewLogButton.getStyle().set("margin-right", "0.5rem");
-        // end-source-example
         addCard("Theme Variants", "Success", openButton);
     }
 
     private void createError() {
-        // begin-source-example
-        // source-example-heading: Error
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
@@ -281,7 +248,6 @@ public class NotificationView extends Div {
 
         label.getStyle().set("margin-right", "0.5rem");
         thisIsFineButton.getStyle().set("margin-right", "0.5rem");
-        // end-source-example
         addCard("Theme Variants", "Error", openButton);
     }
 
@@ -289,7 +255,8 @@ public class NotificationView extends Div {
         addCard(title, null, components);
     }
 
-    private void addCard(String title, String description, Component... components) {
+    private void addCard(String title, String description,
+            Component... components) {
         if (description != null) {
             title = title + ": " + description;
         }

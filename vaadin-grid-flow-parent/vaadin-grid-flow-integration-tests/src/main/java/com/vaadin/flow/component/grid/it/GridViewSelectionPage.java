@@ -38,8 +38,6 @@ public class GridViewSelectionPage extends LegacyTestView {
 
     private void createSingleSelect() {
         Div messageDiv = new Div();
-        // begin-source-example
-        // source-example-heading: Grid Single Selection
         List<Person> people = getItems();
         Grid<Person> grid = new Grid<>();
         grid.setItems(people);
@@ -65,7 +63,6 @@ public class GridViewSelectionPage extends LegacyTestView {
                 selectionModel.select(firstPerson);
             }
         });
-        // end-source-example
         grid.setId("single-selection");
         toggleSelect.setId("single-selection-toggle");
         messageDiv.setId("single-selection-message");
@@ -75,8 +72,6 @@ public class GridViewSelectionPage extends LegacyTestView {
 
     private void createMultiSelect() {
         Div messageDiv = new Div();
-        // begin-source-example
-        // source-example-heading: Grid Multi Selection
         List<Person> people = getItems();
         Grid<Person> grid = new Grid<>();
         grid.setItems(people);
@@ -105,7 +100,6 @@ public class GridViewSelectionPage extends LegacyTestView {
         selectAllBtn.addClickListener(
                 event -> ((GridMultiSelectionModel<Person>) grid
                         .getSelectionModel()).selectAll());
-        // end-source-example
         grid.setId("multi-selection");
         selectBtn.setId("multi-selection-button");
         messageDiv.setId("multi-selection-message");
@@ -115,8 +109,6 @@ public class GridViewSelectionPage extends LegacyTestView {
     }
 
     private void createNoneSelect() {
-        // begin-source-example
-        // source-example-heading: Grid with No Selection Enabled
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
 
@@ -124,7 +116,6 @@ public class GridViewSelectionPage extends LegacyTestView {
         grid.addColumn(Person::getAge).setHeader("Age");
 
         grid.setSelectionMode(SelectionMode.NONE);
-        // end-source-example
         grid.setId("none-selection");
         addCard("Selection", "Grid with No Selection Enabled", grid);
     }

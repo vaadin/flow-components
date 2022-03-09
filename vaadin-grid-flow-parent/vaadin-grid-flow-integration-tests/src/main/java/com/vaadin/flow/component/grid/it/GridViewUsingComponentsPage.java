@@ -36,8 +36,6 @@ public class GridViewUsingComponentsPage extends LegacyTestView {
     }
 
     private void createColumnComponentRenderer() {
-        // begin-source-example
-        // source-example-heading: Grid with columns using component renderer
         Grid<Person> grid = new Grid<>();
         grid.setItems(createItems());
 
@@ -86,7 +84,6 @@ public class GridViewUsingComponentsPage extends LegacyTestView {
                 nameField, updateButton);
     }
 
-    // source-example-heading: Grid with columns using component renderer
     /**
      * Component used for the cell rendering.
      */

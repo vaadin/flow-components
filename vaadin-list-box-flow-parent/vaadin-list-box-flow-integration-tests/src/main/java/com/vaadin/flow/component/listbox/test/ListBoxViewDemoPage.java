@@ -51,8 +51,6 @@ public class ListBoxViewDemoPage extends Div {
 
     private void addListboxWithSelection() {
         Label message = new Label("-");
-        // begin-source-example
-        // source-example-heading: ListBox and selection
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems("Bread", "Butter", "Milk");
 
@@ -62,14 +60,11 @@ public class ListBoxViewDemoPage extends Div {
 
         NativeButton button = new NativeButton("Select Milk",
                 event -> listBox.setValue("Milk"));
-        // end-source-example
         addCard("ListBox and selection", listBox, button, message)
                 .setId("list-box-with-selection");
     }
 
     private void addComponentsBetween() {
-        // begin-source-example
-        // source-example-heading: Adding components between items
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems("Bread", "Butter", "Milk");
 
@@ -81,27 +76,21 @@ public class ListBoxViewDemoPage extends Div {
 
         // Adding components before a specific item:
         listBox.prependComponents("Bread", new H3("Before bread"));
-        // end-source-example
         addCard("Adding components between items", listBox)
                 .setId("list-box-with-components-between");
     }
 
     private void addItemLabelGenerator() {
-        // begin-source-example
-        // source-example-heading: Using item label generator
         ListBox<Item> listBox = new ListBox<>();
         listBox.setItems(getItems());
 
         listBox.setItemLabelGenerator(Item::getName);
 
-        // end-source-example
         addCard("Using item label generator", listBox)
                 .setId("list-box-with-item-label-generator");
     }
 
     private void addItemRenderer() {
-        // begin-source-example
-        // source-example-heading: Using item renderer and disabling items
         ListBox<Item> listBox = new ListBox<>();
         ListBoxListDataView<Item> listDataView = listBox.setItems(getItems());
 
@@ -127,7 +116,6 @@ public class ListBoxViewDemoPage extends Div {
 
         listBox.setItemEnabledProvider(item -> item.getStock() > 0);
 
-        // end-source-example
         addCard("Using item renderer and disabling items", listBox)
                 .setId("list-box-with-renderer");
     }
@@ -136,8 +124,6 @@ public class ListBoxViewDemoPage extends Div {
         Label message = new Label("-");
         message.setId("message-label");
 
-        // begin-source-example
-        // source-example-heading: Disabled ListBox and selection
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems("Bread", "Butter", "Milk");
         listBox.setEnabled(false);
@@ -147,7 +133,6 @@ public class ListBoxViewDemoPage extends Div {
 
         NativeButton button = new NativeButton("Select Milk",
                 event -> listBox.setValue("Milk"));
-        // end-source-example
 
         Label note = new Label(
                 "Note! Even though updating from the client doesn't work, "
@@ -166,8 +151,6 @@ public class ListBoxViewDemoPage extends Div {
         }).collect(Collectors.toList());
     }
 
-    // begin-source-example
-    // source-example-heading: Example object used in the demo
     public static class Item {
 
         private String name;
@@ -189,7 +172,6 @@ public class ListBoxViewDemoPage extends Div {
             this.stock = stock;
         }
     }
-    // end-source-example
 
     private Component addCard(String title, Component... components) {
         return addCard(title, null, components);
