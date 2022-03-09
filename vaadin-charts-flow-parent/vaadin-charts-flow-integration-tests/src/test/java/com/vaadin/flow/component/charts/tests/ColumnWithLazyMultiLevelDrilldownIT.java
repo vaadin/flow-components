@@ -4,8 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.column.ColumnWithLazyMultiLevelDrilldown;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.column.ColumnWithLazyMultiLevelDrilldown;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;

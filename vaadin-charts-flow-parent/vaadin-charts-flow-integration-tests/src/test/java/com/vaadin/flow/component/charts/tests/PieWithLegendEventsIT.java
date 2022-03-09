@@ -18,8 +18,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.pie.PieWithLegendEvents;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.pie.PieWithLegendEvents;
 import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
 import com.vaadin.tests.elements.SpanElement;
 
