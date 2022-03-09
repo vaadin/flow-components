@@ -85,9 +85,10 @@ public class TabsPage extends Div {
         tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
         tabs.setId("tabs-with-theme");
 
-        NativeButton removeVariantButton = new NativeButton("Remove theme variant", e -> {
-            tabs.removeThemeVariants(TabsVariant.LUMO_SMALL);
-        });
+        NativeButton removeVariantButton = new NativeButton(
+                "Remove theme variant", e -> {
+                    tabs.removeThemeVariants(TabsVariant.LUMO_SMALL);
+                });
         removeVariantButton.setId("remove-theme-variant-button");
         addCard("Tabs theme variant", tabs, removeVariantButton);
     }

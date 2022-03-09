@@ -39,38 +39,30 @@ public class GridViewBasicPage extends LegacyTestView {
     }
 
     private void createBasicUsage() {
-        // begin-source-example
-        // source-example-heading: Grid Basics
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
 
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        // end-source-example
         grid.setId("basic");
 
         addCard("Grid Basics", grid);
     }
 
     private void createNoHeaderGrid() {
-        // begin-source-example
-        // source-example-heading: Grid Basic with no header
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
 
         grid.addColumn(Person::getFirstName);
         grid.addColumn(Person::getAge);
 
-        // end-source-example
         grid.setId("noHeader");
 
         addCard("Grid Basic with no header", grid);
     }
 
     private void createCallBackDataProvider() {
-        // begin-source-example
-        // source-example-heading: Grid with lazy loading
         Grid<Person> grid = new Grid<>();
 
         /*
@@ -89,8 +81,6 @@ public class GridViewBasicPage extends LegacyTestView {
 
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
-
-        // end-source-example
 
         grid.setId("lazy-loading");
 

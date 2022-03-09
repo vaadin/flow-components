@@ -38,8 +38,6 @@ public class GridViewSortingPage extends LegacyTestView {
 
     private void createSorting() {
         Div messageDiv = new Div();
-        // begin-source-example
-        // source-example-heading: Grid with sortable columns
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
         grid.setSelectionMode(SelectionMode.NONE);
@@ -88,7 +86,6 @@ public class GridViewSortingPage extends LegacyTestView {
 
         NativeButton resetAllSortings = new NativeButton("Reset all sortings",
                 event -> grid.sort(null));
-        // end-source-example
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
         invertAllSortings.setId("grid-sortable-columns-invert-sortings");

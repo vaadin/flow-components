@@ -98,7 +98,6 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.add(component1, component2, component3);
 
-
         layout.setId("flex-layout-with-alignment-content");
 
         Consumer<FlexLayout.ContentAlignment> changeLayout = alignment -> layout
@@ -278,8 +277,7 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
         // the default is Alignment.BASELINE
-        layout.setDefaultVerticalComponentAlignment(
-                Alignment.CENTER);
+        layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
         Component component1 = createComponent(1, "#78909C");
         Component component2 = createComponent(2, "#546E7A");
@@ -315,20 +313,16 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
         Component component1 = createComponent(1, "#78909C");
-        layout.setVerticalComponentAlignment(Alignment.START,
-                component1);
+        layout.setVerticalComponentAlignment(Alignment.START, component1);
 
         Component component2 = createComponent(2, "#546E7A");
-        layout.setVerticalComponentAlignment(Alignment.CENTER,
-                component2);
+        layout.setVerticalComponentAlignment(Alignment.CENTER, component2);
 
         Component component3 = createComponent(3, "#37474F");
-        layout.setVerticalComponentAlignment(Alignment.END,
-                component3);
+        layout.setVerticalComponentAlignment(Alignment.END, component3);
 
         Component component4 = createComponent(4, "#263238");
-        layout.setVerticalComponentAlignment(Alignment.STRETCH,
-                component4);
+        layout.setVerticalComponentAlignment(Alignment.STRETCH, component4);
 
         layout.add(component1, component2, component3, component4);
 
@@ -575,12 +569,12 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setId("vertical-default-layout");
 
         Div themeSettings = new Div(
-                createToggleThemeCheckbox("vertical-padding", layout::setPadding,
-                        layout.isPadding()),
+                createToggleThemeCheckbox("vertical-padding",
+                        layout::setPadding, layout.isPadding()),
                 createToggleThemeCheckbox("vertical-margin", layout::setMargin,
                         layout.isMargin()),
-                createToggleThemeCheckbox("vertical-spacing", layout::setSpacing,
-                        layout.isSpacing()));
+                createToggleThemeCheckbox("vertical-spacing",
+                        layout::setSpacing, layout.isSpacing()));
 
         addCard("VerticalLayout", "Default vertical layout", layout,
                 themeSettings);
@@ -627,8 +621,7 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
         // the default is Alignment.START
-        layout.setDefaultHorizontalComponentAlignment(
-                Alignment.STRETCH);
+        layout.setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
 
         Component component1 = createComponent(1, "#78909C");
         Component component2 = createComponent(2, "#546E7A");
@@ -662,20 +655,16 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
         Component component1 = createComponent(1, "#78909C");
-        layout.setHorizontalComponentAlignment(Alignment.START,
-                component1);
+        layout.setHorizontalComponentAlignment(Alignment.START, component1);
 
         Component component2 = createComponent(2, "#546E7A");
-        layout.setHorizontalComponentAlignment(Alignment.CENTER,
-                component2);
+        layout.setHorizontalComponentAlignment(Alignment.CENTER, component2);
 
         Component component3 = createComponent(3, "#37474F");
-        layout.setHorizontalComponentAlignment(Alignment.END,
-                component3);
+        layout.setHorizontalComponentAlignment(Alignment.END, component3);
 
         Component component4 = createComponent(4, "#263238");
-        layout.setHorizontalComponentAlignment(Alignment.STRETCH,
-                component4);
+        layout.setHorizontalComponentAlignment(Alignment.STRETCH, component4);
 
         layout.add(component1, component2, component3, component4);
 
@@ -695,8 +684,7 @@ public class OrderedLayoutView extends AbstractLayout {
         VerticalLayout layout = new VerticalLayout();
         layout.setHeight("200px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
-        layout.setDefaultHorizontalComponentAlignment(
-                Alignment.STRETCH);
+        layout.setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
 
         Component component1 = createComponent(1, "#78909C");
         layout.expand(component1);
@@ -726,8 +714,7 @@ public class OrderedLayoutView extends AbstractLayout {
 
         Component component = createComponent(1, "#78909C");
         layout.add(component);
-        layout.setHorizontalComponentAlignment(Alignment.CENTER,
-                component);
+        layout.setHorizontalComponentAlignment(Alignment.CENTER, component);
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
         add(layout);
@@ -931,8 +918,8 @@ public class OrderedLayoutView extends AbstractLayout {
         addCard("Scroller", "Scroller with VerticalLayout content", scroller);
     }
 
-    private void addCard(String title, String description, Component... components) {
-
+    private void addCard(String title, String description,
+            Component... components) {
 
         VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);

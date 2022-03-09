@@ -29,7 +29,6 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-
 /**
  * Integration tests for the {@link ProgressBarView}.
  *
@@ -56,10 +55,12 @@ public class ProgressBarIT extends AbstractComponentIT {
 
     @Test
     public void assertVariants() {
-        WebElement progressBar = findElement(By.id("progress-bar-theme-variant"));
+        WebElement progressBar = findElement(
+                By.id("progress-bar-theme-variant"));
         scrollToElement(progressBar);
 
-        Assert.assertEquals(ProgressBarVariant.LUMO_ERROR.getVariantName(), progressBar.getAttribute("theme"));
+        Assert.assertEquals(ProgressBarVariant.LUMO_ERROR.getVariantName(),
+                progressBar.getAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
         Assert.assertNull(progressBar.getAttribute("theme"));

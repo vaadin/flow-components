@@ -47,7 +47,9 @@ public class ProgressBarView extends Div {
         progressBar.setValue(0.345);
         progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
 
-        NativeButton removeVariantButton = new NativeButton("Remove theme variant", e -> progressBar.removeThemeVariants(ProgressBarVariant.LUMO_ERROR));
+        NativeButton removeVariantButton = new NativeButton(
+                "Remove theme variant", e -> progressBar
+                        .removeThemeVariants(ProgressBarVariant.LUMO_ERROR));
         removeVariantButton.setId("remove-theme-variant-button");
 
         addCard("Progress Bar Theme Variant", progressBar, removeVariantButton);

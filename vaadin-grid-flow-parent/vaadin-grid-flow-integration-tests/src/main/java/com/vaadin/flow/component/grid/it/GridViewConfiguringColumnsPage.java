@@ -36,8 +36,6 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
     }
 
     private void createColumnApiExample() {
-        // begin-source-example
-        // source-example-heading: Column API example
         Grid<Person> grid = new Grid<>();
         GridSelectionModel<Person> selectionMode = grid
                 .setSelectionMode(SelectionMode.MULTI);
@@ -81,7 +79,6 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
         alignments.setValue(ColumnTextAlign.START);
         alignments.addValueChangeListener(event -> grid.getColumnByKey("age")
                 .setTextAlign(event.getValue()));
-        // end-source-example
 
         grid.setId("column-api-example");
         idColumnVisibility.setId("toggle-id-column-visibility");
@@ -95,8 +92,6 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
     }
 
     private void createBeanGrid() {
-        // begin-source-example
-        // source-example-heading: Automatically adding columns
         // Providing a bean-type generates columns for all of it's properties
         Grid<Person> grid = new Grid<>(Person.class);
         grid.setItems(getItems());
@@ -117,7 +112,6 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
                 "Show address information",
                 event -> grid.setColumns("address.street", "address.number",
                         "address.postalCode"));
-        // end-source-example
         grid.setId("bean-grid");
         showBasicInformation.setId("show-basic-information");
         showAddressInformation.setId("show-address-information");

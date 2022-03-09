@@ -95,8 +95,6 @@ public class ComboBoxView extends Div {
 
     private void basicDemo() {
         Div div = new Div();
-        // begin-source-example
-        // source-example-heading: Basic usage
         ComboBox<String> labelComboBox = new ComboBox<>();
         labelComboBox.setItems("Option one", "Option two");
         labelComboBox.setLabel("Label");
@@ -109,7 +107,6 @@ public class ComboBoxView extends Div {
         valueComboBox.setItems("Value", "Option one", "Option two");
         valueComboBox.setValue("Value");
 
-        // end-source-example
         labelComboBox.getStyle().set("margin-right", "5px");
         placeHolderComboBox.getStyle().set("margin-right", "5px");
         div.add(labelComboBox, placeHolderComboBox, valueComboBox);
@@ -118,8 +115,6 @@ public class ComboBoxView extends Div {
 
     private void disabledAndReadonly() {
         Div div = new Div();
-        // begin-source-example
-        // source-example-heading: Disabled and read-only
         ComboBox<String> disabledComboBox = new ComboBox<>();
         disabledComboBox.setItems("Value", "Option one", "Option two");
         disabledComboBox.setEnabled(false);
@@ -131,7 +126,6 @@ public class ComboBoxView extends Div {
         readOnlyComboBox.setReadOnly(true);
         readOnlyComboBox.setValue("Value");
         readOnlyComboBox.setLabel("Read-only");
-        // end-source-example
         disabledComboBox.getStyle().set("margin-right", "5px");
         div.add(disabledComboBox, readOnlyComboBox);
         addCard("Disabled and read-only", div);
@@ -149,8 +143,6 @@ public class ComboBoxView extends Div {
     }
 
     private void entityList() {
-        // begin-source-example
-        // source-example-heading: Entity list
         ComboBox<Department> comboBox = new ComboBox<>();
         comboBox.setLabel("Department");
         List<Department> departmentList = getDepartments();
@@ -158,17 +150,13 @@ public class ComboBoxView extends Div {
         // Choose which property from Department is the presentation value
         comboBox.setItemLabelGenerator(Department::getName);
         comboBox.setItems(departmentList);
-        // end-source-example
         addCard("Entity list", comboBox);
     }
 
     private void displayClearButton() {
-        // begin-source-example
-        // source-example-heading: Display the clear button
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("Option one", "Option two");
         comboBox.setClearButtonVisible(true);
-        // end-source-example
 
         addCard("Display the clear button", comboBox);
     }
@@ -176,19 +164,14 @@ public class ComboBoxView extends Div {
     private void autoOpenDisabled() {
         Span note = new Span(
                 "Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
-        // begin-source-example
-        // source-example-heading: Auto open disabled
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("Option one", "Option two");
         comboBox.setAutoOpen(false);
-        // end-source-example
 
         addCard("Auto open disabled", note, comboBox);
     }
 
     private void itemCountChangeNotification() {
-        // begin-source-example
-        // source-example-heading: Item Count Change Notification
         ComboBox<Ticket> comboBox = new ComboBox<>("Available tickets");
         comboBox.setPlaceholder("Select a ticket");
 
@@ -224,7 +207,6 @@ public class ComboBoxView extends Div {
                     }
                     comboBox.clear();
                 }));
-        // end-source-example
 
         HorizontalLayout layout = new HorizontalLayout(comboBox,
                 buyTicketButton);
@@ -233,8 +215,6 @@ public class ComboBoxView extends Div {
     }
 
     private void valueChangeEvent() {
-        // begin-source-example
-        // source-example-heading: Value change event
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setLabel("Label");
         comboBox.setItems("Option one", "Option two");
@@ -249,7 +229,6 @@ public class ComboBoxView extends Div {
                 value.setText("Selected: " + event.getValue());
             }
         });
-        // end-source-example
         VerticalLayout verticalLayout = new VerticalLayout(comboBox, value);
         verticalLayout.setAlignItems(FlexComponent.Alignment.START);
         addCard("Value change event", verticalLayout);
@@ -258,8 +237,6 @@ public class ComboBoxView extends Div {
     private void customValues() {
         Div message = createMessageDiv("custom-value-message");
 
-        // begin-source-example
-        // source-example-heading: Allow custom values
         ComboBox<String> comboBox = new ComboBox<>("Fruit");
         comboBox.setItems("Apple", "Orange", "Banana");
 
@@ -277,7 +254,6 @@ public class ComboBoxView extends Div {
                 message.setText("Selected value: " + event.getValue());
             }
         });
-        // end-source-example
 
         comboBox.setId("custom-value-box");
         addCard("Allow custom values", comboBox, message);
@@ -299,8 +275,6 @@ public class ComboBoxView extends Div {
 
     private void storingCustomValues() {
         Div message = createMessageDiv("custom-value-message");
-        // begin-source-example
-        // source-example-heading: Storing custom values
         ComboBox<Project> comboBox = new ComboBox<>("Project");
         comboBox.setItems(this::fetchProjects, this::countProjects);
         comboBox.setItemLabelGenerator(Project::getName);
@@ -318,19 +292,12 @@ public class ComboBoxView extends Div {
             Project project = projectData.addProject(event.getDetail());
             comboBox.setValue(project);
         });
-        // end-source-example
 
         addCard("Storing custom values", comboBox, message);
 
     }
 
     private void lazyLoading() {
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Lazy Loading with Callback
-        // PersonService can be found:
-        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
-
         ComboBox<Person> comboBox = new ComboBox<>();
         PersonService service = new PersonService(500);
         /*
@@ -339,58 +306,43 @@ public class ComboBoxView extends Div {
          * that is shown in its current view "window". The data is provided
          * based on string filter, offset and limit.
          *
-         * When the user scrolls to the end, combo box will automatically
-         * extend and fetch more items until the backend runs out of items.
+         * When the user scrolls to the end, combo box will automatically extend
+         * and fetch more items until the backend runs out of items.
          */
-        comboBox.setItems(
-                query -> service.fetch(query.getFilter().orElse(null),
-                        query.getOffset(), query.getLimit()));
-        // end-source-example
-        //@formatter:on
+        comboBox.setItems(query -> service.fetch(query.getFilter().orElse(null),
+                query.getOffset(), query.getLimit()));
+
         comboBox.setId("fetch-callback");
         addCard("Lazy Loading", "Lazy Loading with Callback", comboBox);
     }
 
     private void lazyLoadingWithExactItemCount() {
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Lazy Loading with Exact Items Count
-        // PersonService can be found:
-        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
-
         ComboBox<Person> comboBox = new ComboBox<>();
         PersonService service = new PersonService();
         /*
          * By using these callbacks the ComboBox doesn't load all the items to
          * the server memory right away. The ComboBox calls the first provided
          * callback to fetch items from the given range with the given filter.
-         * The second callback is optional and can be used to determine an
-         * exact count of items that match the query, if the exact count is
-         * desired.
+         * The second callback is optional and can be used to determine an exact
+         * count of items that match the query, if the exact count is desired.
          */
         comboBox.setItems(
                 query -> service.fetch(query.getFilter().orElse(null),
                         query.getOffset(), query.getLimit()),
                 query -> service.count(query.getFilter().orElse(null)));
-        // end-source-example
-        //@formatter:on
+
         comboBox.setId("with-exact-items-count");
         addCard("Lazy Loading", "Lazy Loading with Exact Items Count",
                 comboBox);
     }
 
     private void lazyLoadingWithCustomItemCountEstimate() {
-        // @formatter:off
-        // begin-source-example
-        // source-example-heading: Custom Item Count Estimate And Increase
-        // PersonService can be found:
-        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
         // The backend will have 12345 items
         PersonService service = new PersonService(12345);
         ComboBox<Person> comboBox = new ComboBox<>();
 
-        ComboBoxLazyDataView<Person> lazyDataView = comboBox.setItems(
-                query -> service.fetch(query.getFilter().orElse(null),
+        ComboBoxLazyDataView<Person> lazyDataView = comboBox
+                .setItems(query -> service.fetch(query.getFilter().orElse(null),
                         query.getOffset(), query.getLimit()));
 
         /*
@@ -400,8 +352,8 @@ public class ComboBoxView extends Div {
          *
          * Depending on the desired UX and the backend performance, the
          * scrolling experience and the number of items in the drop down can be
-         * customized accordingly by constraining the page size, estimated
-         * item count and its increase.
+         * customized accordingly by constraining the page size, estimated item
+         * count and its increase.
          */
         comboBox.setPageSize(10);
         lazyDataView.setItemCountEstimate(50);
@@ -414,13 +366,12 @@ public class ComboBoxView extends Div {
                 countText.setText(
                         "Person Count Estimate: " + event.getItemCount());
             } else {
-                countText.setText("Exact Person Count: " + event.getItemCount());
+                countText
+                        .setText("Exact Person Count: " + event.getItemCount());
             }
         });
 
         HorizontalLayout layout = new HorizontalLayout(comboBox, countText);
-        // end-source-example
-        //@formatter:on
 
         comboBox.setId("custom-item-count-estimate");
         addCard("Lazy Loading", "Custom Item Count Estimate And Increase",
@@ -428,32 +379,22 @@ public class ComboBoxView extends Div {
     }
 
     private void pagedRepository() {
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Lazy Loading from Paged Repository
-        // PersonService can be found:
-        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
-
         ComboBox<Person> comboBox = new ComboBox<>();
         PersonService service = new PersonService();
         /*
-         * For those backend repositories which use paged data fetching, it
-         * is possible to get the page number and page size from Query API.
+         * For those backend repositories which use paged data fetching, it is
+         * possible to get the page number and page size from Query API.
          */
         comboBox.setItems(
                 query -> service.fetchPage(query.getFilter().orElse(null),
                         query.getPage(), query.getPageSize()));
 
-        // end-source-example
-        //@formatter:on
         comboBox.setId("paged-box");
         addCard("Lazy Loading", "Lazy Loading from Paged Repository", comboBox);
     }
 
     private void helperText() {
         Div div = new Div();
-        // begin-source-example
-        // source-example-heading: Helper text and helper component
         ComboBox<String> helperTextCombobox = new ComboBox<>("Language");
         helperTextCombobox.setItems("Java", "Python", "C++", "Scala",
                 "JavaScript");
@@ -468,7 +409,6 @@ public class ComboBoxView extends Div {
 
         add(helperTextCombobox, helperComponentCombobox);
 
-        // end-source-example
         helperTextCombobox.getStyle().set("margin-right", "15px");
         div.add(helperTextCombobox, helperComponentCombobox);
 
@@ -476,8 +416,6 @@ public class ComboBoxView extends Div {
     }
 
     private void configurationForRequired() {
-        // begin-source-example
-        // source-example-heading: Required
         ComboBox<String> requiredComboBox = new ComboBox<>();
         requiredComboBox.setItems("Option one", "Option two", "Option three");
         requiredComboBox.setLabel("Required");
@@ -485,7 +423,6 @@ public class ComboBoxView extends Div {
 
         requiredComboBox.setRequired(true);
         requiredComboBox.setClearButtonVisible(true);
-        // end-source-example
         FlexLayout layout = new FlexLayout(requiredComboBox);
         layout.getStyle().set("flex-wrap", "wrap");
         addCard("Validation", "Required", layout);
@@ -494,8 +431,6 @@ public class ComboBoxView extends Div {
     private void customFiltering() {
         Div div = new Div();
         div.setText("Example uses case-sensitive starts-with filtering");
-        // begin-source-example
-        // source-example-heading: Custom filtering
         ComboBox<Element> filteringComboBox = new ComboBox<>();
         List<Element> elementsList = getElements();
 
@@ -509,14 +444,11 @@ public class ComboBoxView extends Div {
         filteringComboBox.setItems(filter, elementsList);
         filteringComboBox.setItemLabelGenerator(Element::getName);
         filteringComboBox.setClearButtonVisible(true);
-        // end-source-example
         addCard("Filtering", "Custom filtering", div, filteringComboBox);
 
     }
 
     private void filteringAndSortingWithDataView() {
-        // begin-source-example
-        // source-example-heading: Filtering and Sorting with Data View
         // PersonService can be found:
         // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
         ComboBox<Person> comboBox = new ComboBox<>("Persons");
@@ -544,7 +476,6 @@ public class ComboBoxView extends Div {
                 event -> dataView.setSortOrder(Person::toString,
                         SortDirection.ASCENDING));
 
-        // end-source-example
         personAgeFilter.setLabel("Filter Persons with age more than:");
         personAgeFilter.setWidth(WIDTH_STRING);
         addCard("Filtering", "Filtering and Sorting with Data View", comboBox,
@@ -552,8 +483,6 @@ public class ComboBoxView extends Div {
     }
 
     private void filteringWithTypesOtherThanString() {
-        // begin-source-example
-        // source-example-heading: Filtering with types other than String
         // PersonService can be found:
         // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
         PersonService personService = new PersonService(500);
@@ -571,7 +500,6 @@ public class ComboBoxView extends Div {
                         query.getLimit()),
                 ageStr -> ageStr.trim().isEmpty() ? null
                         : Integer.parseInt(ageStr));
-        // end-source-example
         comboBox.setItemLabelGenerator(person -> person.getFirstName() + " "
                 + person.getLastName() + " - " + person.getAge());
         comboBox.setClearButtonVisible(true);
@@ -581,8 +509,6 @@ public class ComboBoxView extends Div {
     }
 
     private void customOptionsDemo() {
-        // begin-source-example
-        // source-example-heading: Customizing drop down items with
         // ComponentRenderer
         ComboBox<Information> comboBox = new ComboBox<>();
         comboBox.setLabel("User");
@@ -612,39 +538,34 @@ public class ComboBoxView extends Div {
         }));
 
         comboBox.setItemLabelGenerator(Information::getText);
-        // end-source-example
 
         addCard("Presentation",
                 "Customizing drop down items with ComponentRenderer", comboBox);
     }
 
     private void usingTemplateRenderer() {
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Customizing drop down items with TemplateRenderer
+
         ComboBox<Song> comboBox = new ComboBox<>();
         comboBox.setLabel("Song");
         List<Song> listOfSongs = createListOfSongs();
 
         /*
-         * Providing a custom item filter allows filtering based on all of
-         * the rendered properties:
+         * Providing a custom item filter allows filtering based on all of the
+         * rendered properties:
          */
-        ItemFilter<Song> filter = (song, filterString) ->
-                song.getName().toLowerCase()
+        ItemFilter<Song> filter = (song,
+                filterString) -> song.getName().toLowerCase()
                         .contains(filterString.toLowerCase())
                         || song.getArtist().toLowerCase()
-                        .contains(filterString.toLowerCase());
+                                .contains(filterString.toLowerCase());
 
         comboBox.setItems(filter, listOfSongs);
         comboBox.setClearButtonVisible(true);
         comboBox.setItemLabelGenerator(Song::getName);
-        comboBox.setRenderer(TemplateRenderer.<Song>of(
+        comboBox.setRenderer(TemplateRenderer.<Song> of(
                 "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
                 .withProperty("song", Song::getName)
                 .withProperty("artist", Song::getArtist));
-        // end-source-example
-        //@formatter:on
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
@@ -654,8 +575,6 @@ public class ComboBoxView extends Div {
 
     private void themeVariantsTextAlign() {
         Div div = new Div();
-        // begin-source-example
-        // source-example-heading: Text align
         ComboBox<String> leftComboBox = new ComboBox<>();
         leftComboBox.setItems("Left", "Center", "Right");
         leftComboBox.setValue("Left");
@@ -670,7 +589,6 @@ public class ComboBoxView extends Div {
         rightComboBox.setItems("Left", "Center", "Right");
         rightComboBox.setValue("Right");
         rightComboBox.getElement().setAttribute("theme", "align-right");
-        // end-source-example
         div.add(leftComboBox, centerComboBox, rightComboBox);
         leftComboBox.getStyle().set("margin-right", "5px");
         centerComboBox.getStyle().set("margin-right", "5px");
@@ -679,19 +597,14 @@ public class ComboBoxView extends Div {
     }
 
     private void themeVariantsSmallSize() {
-        // begin-source-example
-        // source-example-heading: Small size
         ComboBox<String> comboBox = new ComboBox<>("Label");
         comboBox.setItems("Option one", "Option two");
         comboBox.setPlaceholder("Placeholder");
         comboBox.getElement().setAttribute("theme", "small");
-        // end-source-example
         addCard("Theme Variants", "Small size", comboBox);
     }
 
     private void helperTextAbove() {
-        // begin-source-example
-        // source-example-heading: Helper text above the component
 
         ComboBox<String> helperTextAbove = new ComboBox<>();
         helperTextAbove.setLabel("Label");
@@ -702,7 +615,6 @@ public class ComboBoxView extends Div {
                 true);
 
         add(helperTextAbove);
-        // end-source-example
 
         addCard("Theme Variants", "Helper text above the component",
                 helperTextAbove);
@@ -720,10 +632,7 @@ public class ComboBoxView extends Div {
         p2.add(new Anchor("https://vaadin.com/components/"
                 + "vaadin-combo-box/html-examples/combo-box-styling-demos",
                 "HTML Styling Demos"));
-        // begin-source-example
-        // source-example-heading: Styling references
 
-        // end-source-example
         addCard("Styling", "Styling references", p1, p2);
     }
 
@@ -776,7 +685,8 @@ public class ComboBoxView extends Div {
         addCard(title, null, components);
     }
 
-    private void addCard(String title, String description, Component... components) {
+    private void addCard(String title, String description,
+            Component... components) {
         if (description != null) {
             title = title + ": " + description;
         }

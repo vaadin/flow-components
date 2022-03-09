@@ -68,14 +68,11 @@ public class CheckboxGroupDemoPage extends Div {
     private void addBasicFeatures() {
         Div message = new Div();
 
-        // begin-source-example
-        // source-example-heading: Basic checkbox group
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar", "baz");
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Checkbox group value changed from '%s' to '%s'",
                 toString(event.getOldValue()), toString(event.getValue()))));
-        // end-source-example
 
         group.setId("checkbox-group-with-value-change-listener");
         message.setId("checkbox-group-value");
@@ -84,8 +81,6 @@ public class CheckboxGroupDemoPage extends Div {
     }
 
     private void addComponentWithLabelAndErrorMessage() {
-        // begin-source-example
-        // source-example-heading: Group with label and error message
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar", "baz");
         group.setLabel("Group label");
@@ -93,7 +88,6 @@ public class CheckboxGroupDemoPage extends Div {
         NativeButton button = new NativeButton("Switch validity state",
                 event -> group.setInvalid(!group.isInvalid()));
 
-        // end-source-example
         group.setId("group-with-label-and-error-message");
         button.setId("group-with-label-button");
         addCard("Group with label and error message", group, button);
@@ -102,8 +96,6 @@ public class CheckboxGroupDemoPage extends Div {
     private void addItemLabelGenerator() {
         Div message = new Div();
 
-        // begin-source-example
-        // source-example-heading: Checkbox group with label generator
         CheckboxGroup<Person> group = new CheckboxGroup<>();
         group.setItems(new Person("Joe"), new Person("John"),
                 new Person("Bill"));
@@ -111,7 +103,6 @@ public class CheckboxGroupDemoPage extends Div {
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Checkbox group value changed from '%s' to '%s'",
                 getNames(event.getOldValue()), getNames(event.getValue()))));
-        // end-source-example
 
         group.setId("checkbox-group-with-item-generator");
         message.setId("checkbox-group-gen-value");
@@ -121,12 +112,9 @@ public class CheckboxGroupDemoPage extends Div {
 
     private void addDisabled() {
 
-        // begin-source-example
-        // source-example-heading: Disabled checkbox group
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar", "baz");
         group.setEnabled(false);
-        // end-source-example
 
         group.setId("checkbox-group-disabled");
 
@@ -136,13 +124,10 @@ public class CheckboxGroupDemoPage extends Div {
     private void addDisabledItems() {
 
         Div valueInfo = new Div();
-        // begin-source-example
-        // source-example-heading: Checkbox group with item enabled
         // provider
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar", "baz");
         group.setItemEnabledProvider(item -> !"bar".equals(item));
-        // end-source-example
 
         group.addValueChangeListener(
                 event -> valueInfo.setText(toString(group.getValue())));
@@ -154,8 +139,6 @@ public class CheckboxGroupDemoPage extends Div {
     }
 
     private void addReadOnlyGroup() {
-        // begin-source-example
-        // source-example-heading: Read-only checkbox group
         Div valueInfo = new Div();
 
         CheckboxGroup<String> group = new CheckboxGroup<>();
@@ -166,7 +149,6 @@ public class CheckboxGroupDemoPage extends Div {
                 event -> group.setReadOnly(!group.isReadOnly()));
         group.addValueChangeListener(
                 event -> valueInfo.setText(toString(group.getValue())));
-        // end-source-example
 
         group.setId("checkbox-group-read-only");
         valueInfo.setId("selected-value-info");
@@ -189,8 +171,6 @@ public class CheckboxGroupDemoPage extends Div {
     }
 
     private void addHelperCheckboxGroup() {
-        // begin-source-example
-        // source-example-heading: CheckboxGroup with helper text and helper
         // component
         CheckboxGroup<String> groupHelperText = new CheckboxGroup<>();
         groupHelperText.setItems("foo", "bar", "baz");
@@ -211,7 +191,6 @@ public class CheckboxGroupDemoPage extends Div {
                     groupHelperComponent.setHelperComponent(null);
                 });
 
-        // end-source-example
         groupHelperText.setId("checkbox-helper-text");
         groupHelperComponent.setId("checkbox-helper-component");
         span.setId("component-helper");
