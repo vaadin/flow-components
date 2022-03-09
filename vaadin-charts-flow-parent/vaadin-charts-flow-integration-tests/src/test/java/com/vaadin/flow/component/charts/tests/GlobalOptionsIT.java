@@ -23,8 +23,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.other.GlobalOptions;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.other.GlobalOptions;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 public class GlobalOptionsIT extends AbstractTBTest {

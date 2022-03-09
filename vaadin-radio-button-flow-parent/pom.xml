@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-radio-button-flow</module>
         <module>vaadin-radio-button-testbench</module>
-        <module>vaadin-radio-button-flow-demo</module>
     </modules>
     <profiles>
         <profile>

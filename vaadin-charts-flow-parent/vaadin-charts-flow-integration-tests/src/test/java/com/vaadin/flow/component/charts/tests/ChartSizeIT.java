@@ -16,8 +16,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.pie.PieWithSize;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.pie.PieWithSize;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 public class ChartSizeIT extends AbstractTBTest {
