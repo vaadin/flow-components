@@ -197,7 +197,7 @@ public class IronListView extends Div {
 
     private void createPeopleListWithDataProvider() {
         //@formatter:off
-                        IronList<Person> list = new IronList<>();
+        IronList<Person> list = new IronList<>();
         list.setHeight("400px");
         list.getStyle().set("border", "1px solid lightgray");
 

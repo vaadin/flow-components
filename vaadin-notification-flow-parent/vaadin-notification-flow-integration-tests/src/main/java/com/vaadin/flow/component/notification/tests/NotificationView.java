@@ -105,11 +105,7 @@ public class NotificationView extends Div {
         Notification notification = new Notification(content);
         notification.setDuration(3000);
 
-        // @formatter:off
-        String styles = ".my-style { "
-                + "  color: red;"
-                + " }";
-        // @formatter:on
+        String styles = ".my-style { color: red; }";
 
         /*
          * The code below register the style file dynamically. Normally you

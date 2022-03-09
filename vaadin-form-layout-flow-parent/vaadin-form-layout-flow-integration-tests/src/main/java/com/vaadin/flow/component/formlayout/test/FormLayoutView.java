@@ -155,8 +155,7 @@ public class FormLayoutView extends Div {
     }
 
     private void createResponsiveLayout() {
-        // @formatter:off
-                        FormLayout nameLayout = new FormLayout();
+        FormLayout nameLayout = new FormLayout();
 
         TextField titleField = new TextField();
         titleField.setLabel("Title");
@@ -175,11 +174,8 @@ public class FormLayoutView extends Div {
         // breakpoints at “40em” “32em” and “25em”. Now by changing the size of
         // the browser horizontally, you can notice that the number of the
         // columns in the FormLayout changes.
-        nameLayout.setResponsiveSteps(
-                new ResponsiveStep("1px", 1),
-                new ResponsiveStep("600px", 2),
-                new ResponsiveStep("700px", 3));
-                // @formatter:on
+        nameLayout.setResponsiveSteps(new ResponsiveStep("1px", 1),
+                new ResponsiveStep("600px", 2), new ResponsiveStep("700px", 3));
 
         addCard("A form layout with custom responsive layouting", nameLayout);
     }
