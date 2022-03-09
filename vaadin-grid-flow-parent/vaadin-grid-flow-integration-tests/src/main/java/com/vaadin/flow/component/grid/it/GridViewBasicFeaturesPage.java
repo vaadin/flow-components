@@ -47,8 +47,6 @@ public class GridViewBasicFeaturesPage extends LegacyTestView {
         final int baseYear = 2015;
         final int numberOfYears = 5;
 
-        // begin-source-example
-        // source-example-heading: Grid Basic Features Demo
         DecimalFormat dollarFormat = new DecimalFormat("$#,##0.00");
         Grid<CompanyBudgetHistory> grid = new Grid<>();
 

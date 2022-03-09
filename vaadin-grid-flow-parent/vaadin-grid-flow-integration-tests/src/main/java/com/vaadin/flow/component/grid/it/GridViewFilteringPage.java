@@ -37,8 +37,6 @@ public class GridViewFilteringPage extends LegacyTestView {
     }
 
     private void createGridWithFilters() {
-        // begin-source-example
-        // source-example-heading: Using text fields for filtering items
         Grid<Person> grid = new Grid<>();
         ListDataProvider<Person> dataProvider = new ListDataProvider<>(
                 createItems());
@@ -78,7 +76,6 @@ public class GridViewFilteringPage extends LegacyTestView {
             field.setSizeFull();
             field.setPlaceholder("Filter");
         });
-        // end-source-example
         grid.setId("grid-with-filters");
         addCard("Filtering", "Using text fields for filtering items", grid);
     }

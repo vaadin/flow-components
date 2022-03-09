@@ -319,8 +319,8 @@ public class RadioButtonGroupDataViewPage extends Div {
         updateAndSelectByIdOnlyButton
                 .setId(RADIO_GROUP_SELECTION_BY_ID_UPDATE_BUTTON);
 
-        NativeButton selectByIdAndNameButton = new NativeButton("Select by Id and Name",
-                click -> {
+        NativeButton selectByIdAndNameButton = new NativeButton(
+                "Select by Id and Name", click -> {
                     // Select the item with the Id and a challenging wrong name
                     // to verify <equals> method is not in use:
                     radioButtonGroup.setValue(new CustomItem(3L, "Second"));

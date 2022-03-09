@@ -27,11 +27,8 @@ public class CheckboxDemoPage extends Div {
     }
 
     private void addDefaultCheckbox() {
-        // begin-source-example
-        // source-example-heading: Default Checkbox
         Checkbox checkbox = new Checkbox();
         checkbox.setLabel("Default Checkbox");
-        // end-source-example
         checkbox.setId("default-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {
@@ -45,12 +42,9 @@ public class CheckboxDemoPage extends Div {
     private void addDisabledCheckbox() {
         Div message = new Div();
         message.setId("disabled-checkbox-message");
-        // begin-source-example
-        // source-example-heading: Disabled Checkbox
         Checkbox disabledCheckbox = new Checkbox("Disabled Checkbox");
         disabledCheckbox.setValue(true);
         disabledCheckbox.setEnabled(false);
-        // end-source-example
         disabledCheckbox.addClickListener(evt -> message.setText("Checkbox "
                 + evt.getSource().getLabel()
                 + " was clicked, but the component is disabled and this shouldn't happen!"));
@@ -59,11 +53,8 @@ public class CheckboxDemoPage extends Div {
     }
 
     private void addIndeterminateCheckbox() {
-        // begin-source-example
-        // source-example-heading: Indeterminate Checkbox
         Checkbox indeterminateCheckbox = new Checkbox("Indeterminate Checkbox");
         indeterminateCheckbox.setIndeterminate(true);
-        // end-source-example
 
         NativeButton button = new NativeButton("Reset", event -> {
             indeterminateCheckbox.setValue(false);
@@ -76,15 +67,12 @@ public class CheckboxDemoPage extends Div {
     }
 
     private void addValueChangeCheckbox() {
-        // begin-source-example
-        // source-example-heading: Checkbox with a ValueChangeListener
         Checkbox valueChangeCheckbox = new Checkbox(
                 "Checkbox with a ValueChangeListener");
         Div message = new Div();
         valueChangeCheckbox.addValueChangeListener(event -> message.setText(
                 String.format("Checkbox value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));
-        // end-source-example
         addCard("Checkbox with a ValueChangeListener", valueChangeCheckbox,
                 message);
         valueChangeCheckbox.setId("value-change-checkbox");
@@ -92,22 +80,16 @@ public class CheckboxDemoPage extends Div {
     }
 
     private void addAccessibleCheckbox() {
-        // begin-source-example
-        // source-example-heading: Checkbox with Custom Accessible Label
         Checkbox accessibleCheckbox = new Checkbox("Accessible Checkbox");
         accessibleCheckbox.setAriaLabel("Click me");
-        // end-source-example
         addCard("Checkbox with Custom Accessible Label", accessibleCheckbox);
         accessibleCheckbox.setId("accessible-checkbox");
     }
 
     private void addCheckboxHtmlLabel() {
-        // begin-source-example
-        // source-example-heading: Checkbox with the HTML-content based label
         Checkbox checkbox = new Checkbox();
         checkbox.setLabelAsHtml(
                 "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
-        // end-source-example
         checkbox.setId("html-label-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {

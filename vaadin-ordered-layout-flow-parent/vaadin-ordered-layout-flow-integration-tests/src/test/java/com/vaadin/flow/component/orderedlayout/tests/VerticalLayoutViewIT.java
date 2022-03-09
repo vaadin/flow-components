@@ -66,7 +66,8 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void layoutWithJustifyContent() {
-        WebElement vlayout = findElement(By.id("vertical-layout-with-justify-content"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-justify-content"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
@@ -101,7 +102,8 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void layoutWithAlignment() {
-        WebElement vlayout = findElement(By.id("vertical-layout-with-alignment"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-alignment"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
@@ -127,7 +129,8 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void layoutWithIndividualAlignments() {
-        WebElement vlayout = findElement(By.id("vertical-layout-with-individual-alignments"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-individual-alignments"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
@@ -148,7 +151,8 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void layoutWithExpandRatios() {
-        WebElement vlayout = findElement(By.id("vertical-layout-with-expand-ratios"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-expand-ratios"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         WebElement child = vlayout.findElement(By.id("ratio-1"));
@@ -173,7 +177,8 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void boxSizing() {
-        WebElement vlayout = findElement(By.id("vertical-layout-with-box-sizing"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-box-sizing"));
         Assert.assertEquals("border-box", vlayout.getCssValue("box-sizing"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)

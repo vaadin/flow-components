@@ -95,9 +95,6 @@ public class IronListView extends Div {
         }
     }
 
-    //@formatter:off
-    // begin-source-example
-    // source-example-heading: List of people with DataProvider and ComponentRenderer
     /**
      * Component to render a person card, with picture, name and email.
      */
@@ -134,13 +131,12 @@ public class IronListView extends Div {
                 name.setText(person.getFirstName());
             } else {
                 picture.setSrc(person.getPicture());
-                name.setText(person.getFirstName() + " " + person.getLastName());
+                name.setText(
+                        person.getFirstName() + " " + person.getLastName());
                 email.setText(person.getEmail());
             }
         }
     }
-    // end-source-example
-    //@formatter:on
 
     public IronListView() {
         createStringList();
@@ -153,23 +149,18 @@ public class IronListView extends Div {
     }
 
     private void createStringList() {
-        // begin-source-example
-        // source-example-heading: List of strings
         IronList<String> list = new IronList<>();
         list.setHeight("100px");
         list.getStyle().set("border", "1px solid lightgray");
 
         List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
         list.setItems(items);
-        // end-source-example
 
         list.setId("list-of-strings");
         addCard("List of strings", list);
     }
 
     private void createStringListWithDataProvider() {
-        // begin-source-example
-        // source-example-heading: List of strings with DataProvider
         IronList<String> list = new IronList<>();
         list.setHeight("200px");
         list.getStyle().set("border", "1px solid lightgray");
@@ -179,7 +170,6 @@ public class IronListView extends Div {
                 query -> countStringsFromDatabase(query));
 
         list.setDataProvider(dataProvider);
-        // end-source-example
 
         list.setId("list-of-strings-with-dataprovider");
         addCard("List of strings with DataProvider",
@@ -187,8 +177,6 @@ public class IronListView extends Div {
     }
 
     private void createChuckNorrisFacts() {
-        // begin-source-example
-        // source-example-heading: List of random Chuck Norris facts
         IronList<String> list = new IronList<>();
         list.setHeight("400px");
 
@@ -202,7 +190,6 @@ public class IronListView extends Div {
                         + "border:1px solid lightgray; border-radius:5px;'>"
                         + "#[[index]]. [[item.fact]]</div>")
                 .withProperty("fact", ValueProvider.identity()));
-        // end-source-example
 
         list.setId("chuck-norris-facts");
         addCard("Using templates", "List of random Chuck Norris facts", list);
@@ -210,9 +197,7 @@ public class IronListView extends Div {
 
     private void createPeopleListWithDataProvider() {
         //@formatter:off
-        // begin-source-example
-        // source-example-heading: List of people with DataProvider
-        IronList<Person> list = new IronList<>();
+                        IronList<Person> list = new IronList<>();
         list.setHeight("400px");
         list.getStyle().set("border", "1px solid lightgray");
 
@@ -241,7 +226,6 @@ public class IronListView extends Div {
         placeholder.setFirstName("-----");
         placeholder.setPicture("//:0");
         list.setPlaceholderItem(placeholder);
-        // end-source-example
         //@formatter:on
 
         list.setId("list-of-people-with-dataprovider");
@@ -250,8 +234,6 @@ public class IronListView extends Div {
     }
 
     private void createRankedListWithEventHandling() {
-        // begin-source-example
-        // source-example-heading: Using events with templates
         IronList<String> list = new IronList<>();
         list.setHeight("400px");
         list.getStyle().set("border", "1px solid lightgray");
@@ -295,7 +277,6 @@ public class IronListView extends Div {
                     items.remove(item);
                     list.getDataCommunicator().reset();
                 }));
-        // end-source-example
 
         list.setId("using-events-with-templates");
         addCard("Using templates", "Using events with templates", new Label(
@@ -308,8 +289,6 @@ public class IronListView extends Div {
     }
 
     private void createDisabledStringsList() {
-        // begin-source-example
-        // source-example-heading: Disabled list with events from template
         IronList<String> list = new IronList<>();
         list.setHeight("400px");
         list.getStyle().set("border", "1px solid lightgray");
@@ -342,7 +321,6 @@ public class IronListView extends Div {
                 }));
         NativeButton switchEnabled = new NativeButton("Switch enabled state",
                 event -> list.setEnabled(!list.isEnabled()));
-        // end-source-example
 
         list.setId("disabled-list-with-templates");
         switchEnabled.setId("switch-enabled-state-string-list");
@@ -353,9 +331,7 @@ public class IronListView extends Div {
     }
 
     private void createPeopleListWithDataProviderAndComponentRenderer() {
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: List of people with DataProvider and ComponentRenderer
+
         /* IronList that uses the component above */
         IronList<Person> list = new IronList<>();
         list.setHeight("400px");
@@ -376,9 +352,7 @@ public class IronListView extends Div {
         list.setPlaceholderItem(placeholder);
 
         NativeButton switchEnabled = new NativeButton("Switch enabled state",
-                event-> list.setEnabled(!list.isEnabled()));
-        // end-source-example
-        //@formatter:on
+                event -> list.setEnabled(!list.isEnabled()));
 
         list.setId("list-of-people-with-dataprovider-and-component-renderer");
         switchEnabled.setId("switch-enabled-people-list");
@@ -454,7 +428,8 @@ public class IronListView extends Div {
         addCard(title, null, components);
     }
 
-    private void addCard(String title, String description, Component... components) {
+    private void addCard(String title, String description,
+            Component... components) {
         if (description != null) {
             title = title + ": " + description;
         }

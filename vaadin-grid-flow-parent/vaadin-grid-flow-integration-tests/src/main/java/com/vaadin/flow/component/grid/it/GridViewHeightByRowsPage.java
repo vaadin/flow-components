@@ -30,8 +30,6 @@ public class GridViewHeightByRowsPage extends LegacyTestView {
     }
 
     private void createHeightByRows() {
-        // begin-source-example
-        // source-example-heading: Using height by rows
         Grid<Person> grid = new Grid<>();
 
         // When using allRowsVisible, all items are fetched and
@@ -45,7 +43,6 @@ public class GridViewHeightByRowsPage extends LegacyTestView {
         grid.addColumn(Person::getAge).setHeader("Age");
 
         grid.setSelectionMode(SelectionMode.NONE);
-        // end-source-example
 
         grid.setId("grid-height-by-rows");
         addCard("Height by Rows", "Using height by rows", grid);

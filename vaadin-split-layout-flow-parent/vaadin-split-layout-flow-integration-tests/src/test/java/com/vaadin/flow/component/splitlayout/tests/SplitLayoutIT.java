@@ -126,9 +126,11 @@ public class SplitLayoutIT extends AbstractComponentIT {
 
     @Test
     public void assertVariants() {
-        WebElement splitLayout = findElement(By.id("split-layout-theme-variant"));
+        WebElement splitLayout = findElement(
+                By.id("split-layout-theme-variant"));
         scrollToElement(splitLayout);
-        Assert.assertEquals(SplitLayoutVariant.LUMO_SMALL.getVariantName(), splitLayout.getAttribute("theme"));
+        Assert.assertEquals(SplitLayoutVariant.LUMO_SMALL.getVariantName(),
+                splitLayout.getAttribute("theme"));
 
         findElement(By.id("remove-variant-button")).click();
         Assert.assertNull(splitLayout.getAttribute("theme"));

@@ -58,20 +58,15 @@ public class ButtonView extends Div {
     }
 
     private void createDefaultButton() {
-        // begin-source-example
-        // source-example-heading: Default button
         Button button = new Button("Vaadin button");
 
         button.addClickListener(this::showButtonClickedMessage);
-        // end-source-example
 
         addCard("Default button", button);
         button.setId("default-button");
     }
 
     private void createButtonsWithIcons() {
-        // begin-source-example
-        // source-example-heading: Buttons with icons
         Button leftButton = new Button("Left", new Icon(VaadinIcon.ARROW_LEFT));
 
         Button rightButton = new Button("Right",
@@ -79,7 +74,6 @@ public class ButtonView extends Div {
         rightButton.setIconAfterText(true);
 
         Button thumbsUpButton = new Button(new Icon(VaadinIcon.THUMBS_UP));
-        // end-source-example
 
         leftButton.addClickListener(this::showButtonClickedMessage);
         rightButton.addClickListener(this::showButtonClickedMessage);
@@ -92,35 +86,27 @@ public class ButtonView extends Div {
     }
 
     private void createImageButtonWithAutofocus() {
-        // begin-source-example
-        // source-example-heading: Button with image and autofocus
         Button button = new Button(
                 new Image("img/vaadin-logo.svg", "Vaadin logo"));
         button.setAutofocus(true);
 
         button.addClickListener(this::showButtonClickedMessage);
-        // end-source-example
 
         addCard("Button with image and autofocus", button);
         button.setId("image-button");
     }
 
     private void createImageButtonWithAccessibleLabel() {
-        // begin-source-example
-        // source-example-heading: Button with ARIA label
         Button button = new Button("Accessible");
         button.getElement().setAttribute("aria-label", "Click me");
 
         button.addClickListener(this::showButtonClickedMessage);
-        // end-source-example
 
         addCard("Button with ARIA label", button);
         button.setId("accessible-button");
     }
 
     private void createButtonsWithTabIndex() {
-        // begin-source-example
-        // source-example-heading: Buttons with custom tabindex
         Button button1 = new Button("1");
         button1.setTabIndex(1);
         button1.addClickListener(this::showButtonClickedMessage);
@@ -132,7 +118,6 @@ public class ButtonView extends Div {
         Button button3 = new Button("3");
         button3.setTabIndex(3);
         button3.addClickListener(this::showButtonClickedMessage);
-        // end-source-example
 
         addCard("Buttons with custom tabindex", button3, button2, button1);
         button1.setId("button-tabindex-1");
@@ -141,11 +126,8 @@ public class ButtonView extends Div {
     }
 
     private void createDisabledButton() {
-        // begin-source-example
-        // source-example-heading: Disabled button
         Button button = new Button("Disabled");
         button.setEnabled(false);
-        // end-source-example
 
         addCard("Disabled button", button);
         button.addClickListener(evt -> message.setText("Button "
@@ -168,8 +150,6 @@ public class ButtonView extends Div {
     }
 
     private void createButtonsWithShortcuts() {
-        // begin-source-example
-        // source-example-heading: Button shortcuts
         Button button = new Button("Has global Enter-shortcut",
                 this::showButtonClickedMessage);
         button.addClickShortcut(Key.ENTER);
@@ -186,7 +166,6 @@ public class ButtonView extends Div {
                 clearButton);
         clearButton.addClickShortcut(Key.KEY_L, KeyModifier.ALT)
                 .listenOn(container);
-        // end-source-example
         Paragraph paragraph = new Paragraph("Button \"Clean fields\"'s "
                 + "shortcut ALT+L works only within the text fields.");
         container.add(paragraph);
@@ -220,8 +199,6 @@ public class ButtonView extends Div {
     }
 
     private void createButtonWithDisableOnClick() {
-        // begin-source-example
-        // source-example-heading: Button disabled on click
         Button disableOnClickButton = new Button("Disabled on click", event -> {
             // Triggering an action that can be started only once
         });
@@ -240,7 +217,6 @@ public class ButtonView extends Div {
                     }
                 });
         temporarilyDisabledButton.setDisableOnClick(true);
-        // end-source-example
 
         final Div disabledMessage = new Div();
         disabledMessage.setId("disabled-message");

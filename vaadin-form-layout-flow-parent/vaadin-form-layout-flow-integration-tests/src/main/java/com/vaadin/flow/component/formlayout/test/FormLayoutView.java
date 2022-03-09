@@ -142,8 +142,6 @@ public class FormLayoutView extends Div {
         }
     }
 
-    // begin-source-example
-    // source-example-heading: Using form layout inside a composite
     // You can create a custom layout that internally uses FormLayout
     public class MyCustomLayout extends Composite<FormLayout> {
 
@@ -155,13 +153,10 @@ public class FormLayoutView extends Div {
             getContent().addFormItem(itemWrapper, label);
         }
     }
-    // end-source-example
 
     private void createResponsiveLayout() {
         // @formatter:off
-        // begin-source-example
-        // source-example-heading: A form layout with custom responsive layouting
-        FormLayout nameLayout = new FormLayout();
+                        FormLayout nameLayout = new FormLayout();
 
         TextField titleField = new TextField();
         titleField.setLabel("Title");
@@ -184,15 +179,12 @@ public class FormLayoutView extends Div {
                 new ResponsiveStep("1px", 1),
                 new ResponsiveStep("600px", 2),
                 new ResponsiveStep("700px", 3));
-        // end-source-example
-        // @formatter:on
+                // @formatter:on
 
         addCard("A form layout with custom responsive layouting", nameLayout);
     }
 
     private void createFormLayoutWithItems() {
-        // begin-source-example
-        // source-example-heading: A form layout with fields wrapped in items
         FormLayout layoutWithFormItems = new FormLayout();
 
         TextField firstName = new TextField();
@@ -202,15 +194,12 @@ public class FormLayoutView extends Div {
         TextField lastName = new TextField();
         lastName.setPlaceholder("Doe");
         layoutWithFormItems.addFormItem(lastName, "Last name");
-        // end-source-example
 
         addCard("A form layout with fields wrapped in items",
                 layoutWithFormItems);
     }
 
     private void createLayoutHandleColspans() {
-        // begin-source-example
-        // source-example-heading: Handling columns and colspans in a layout
         FormLayout columnLayout = new FormLayout();
         // Setting the desired responsive steps for the columns in the layout
         columnLayout.setResponsiveSteps(new ResponsiveStep("25em", 1),
@@ -232,7 +221,6 @@ public class FormLayoutView extends Div {
         columnLayout.setColspan(website, 2);
         // Or just set it as you add them.
         columnLayout.add(description, 3);
-        // end-source-example
 
         firstName.setId("colspan-first-name");
         lastName.setId("colspan-last-name");
@@ -245,8 +233,6 @@ public class FormLayoutView extends Div {
     }
 
     private void createFormLayoutWithBinder() {
-        // begin-source-example
-        // source-example-heading: A form layout with fields using Binder
         FormLayout layoutWithBinder = new FormLayout();
         Binder<Contact> binder = new Binder<>();
 
@@ -337,7 +323,6 @@ public class FormLayoutView extends Div {
             infoLabel.setText("");
             doNotCall.setValue(false);
         });
-        // end-source-example
 
         infoLabel.setId("binder-info");
         firstName.setId("binder-first-name");
@@ -355,8 +340,6 @@ public class FormLayoutView extends Div {
     }
 
     private void createCompositeLayout() {
-        // begin-source-example
-        // source-example-heading: Using form layout inside a composite
         // And then just use it like a regular component
         MyCustomLayout layout = new MyCustomLayout();
         TextField name = new TextField();
@@ -367,7 +350,6 @@ public class FormLayoutView extends Div {
         // Both the email field and the emailUpdates checkbox are wrapped inside
         // the same form item
         layout.addItemWithLabel("E-mail", email, emailUpdates);
-        // end-source-example
 
         addCard("Using form layout inside a composite", layout);
     }

@@ -37,8 +37,6 @@ public class GridViewContextMenuPage extends LegacyTestView {
     }
 
     private void createContextMenu() {
-        // begin-source-example
-        // source-example-heading: Using ContextMenu With Grid
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
         grid.addColumn(Person::getFirstName).setHeader("Name");
@@ -60,15 +58,12 @@ public class GridViewContextMenuPage extends LegacyTestView {
                 dataProvider.refreshAll();
             });
         });
-        // end-source-example
         grid.setId("context-menu-grid");
         addCard("Context Menu", "Using ContextMenu With Grid", grid,
                 contextMenu);
     }
 
     private void createContextSubMenu() {
-        // begin-source-example
-        // source-example-heading: Using Context Sub Menu With Grid
         Grid<Person> grid = new Grid<>();
 
         ListDataProvider<Person> dataProvider = DataProvider
@@ -104,7 +99,6 @@ public class GridViewContextMenuPage extends LegacyTestView {
                     new PeopleGenerator().createPerson(items.size() + 1));
             dataProvider.refreshAll();
         });
-        // end-source-example
         grid.setId("context-submenu-grid");
         addCard("Context Menu", "Using Context Sub Menu With Grid", grid,
                 contextMenu);

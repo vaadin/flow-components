@@ -32,8 +32,6 @@ public class GridViewHeaderAndFooterRowsPage extends LegacyTestView {
     }
 
     private void createGridWithHeaderAndFooterRows() {
-        // begin-source-example
-        // source-example-heading: Adding header and footer rows
         Grid<Person> grid = new Grid<>();
         grid.setItems(createItems());
 
@@ -59,15 +57,12 @@ public class GridViewHeaderAndFooterRowsPage extends LegacyTestView {
 
         grid.appendFooterRow().getCell(nameColumn)
                 .setText("Total: " + getItems().size() + " people");
-        // end-source-example
         grid.setId("grid-with-header-and-footer-rows");
         addCard("Header and footer rows", "Adding header and footer rows",
                 grid);
     }
 
     private void createHeaderAndFooterUsingComponents() {
-        // begin-source-example
-        // source-example-heading: Header and footer using components
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
 
@@ -93,7 +88,6 @@ public class GridViewHeaderAndFooterRowsPage extends LegacyTestView {
 
         grid.appendFooterRow().getCell(nameColumn).setComponent(
                 new Span("Total: " + getItems().size() + " people"));
-        // end-source-example
         grid.setId("grid-header-with-components");
         addCard("Header and footer rows", "Header and footer using components",
                 grid);

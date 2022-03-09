@@ -36,8 +36,6 @@ public class GridViewUsingTemplatesPage extends LegacyTestView {
         List<Person> people = new ArrayList<>();
         people.addAll(createItems());
 
-        // begin-source-example
-        // source-example-heading: Grid with columns using template renderer
         Grid<Person> grid = new Grid<>();
         grid.setItems(people);
 
@@ -77,7 +75,6 @@ public class GridViewUsingTemplatesPage extends LegacyTestView {
                 })).setHeader("Actions");
 
         grid.setSelectionMode(SelectionMode.NONE);
-        // end-source-example
         grid.setId("template-renderer");
         addCard("Using templates", "Grid with columns using template renderer",
                 grid);
