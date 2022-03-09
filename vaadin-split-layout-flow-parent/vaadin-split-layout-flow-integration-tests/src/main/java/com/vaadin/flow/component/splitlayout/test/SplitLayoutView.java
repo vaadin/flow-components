@@ -52,7 +52,9 @@ public class SplitLayoutView extends Div {
         layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
         layout.setId("split-layout-theme-variant");
 
-        NativeButton removeVariantButton = new NativeButton("Remove theme variant", e -> layout.removeThemeVariants(SplitLayoutVariant.LUMO_SMALL));
+        NativeButton removeVariantButton = new NativeButton(
+                "Remove theme variant",
+                e -> layout.removeThemeVariants(SplitLayoutVariant.LUMO_SMALL));
         removeVariantButton.setId("remove-variant-button");
 
         addCard("Split Layout theme variant", layout, removeVariantButton);

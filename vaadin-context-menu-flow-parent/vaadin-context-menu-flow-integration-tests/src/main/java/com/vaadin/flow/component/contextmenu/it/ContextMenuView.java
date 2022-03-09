@@ -46,8 +46,6 @@ public class ContextMenuView extends Div {
     }
 
     private void addBasicContextMenu() {
-        // begin-source-example
-        // source-example-heading: Basic ContextMenu
         ContextMenu contextMenu = new ContextMenu();
 
         Component target = createTargetComponent();
@@ -66,16 +64,12 @@ public class ContextMenuView extends Div {
                 e -> message.setText("This cannot happen"));
         item.setEnabled(false);
 
-        // end-source-example
-
         addCard("Basic ContextMenu", target, message);
         target.setId("basic-context-menu-target");
         contextMenu.setId("basic-context-menu");
     }
 
     private void addContextMenuWithSubMenus() {
-        // begin-source-example
-        // source-example-heading: Hierarchical Menu
         ContextMenu contextMenu = new ContextMenu();
 
         Component target = createTargetComponent();
@@ -96,16 +90,12 @@ public class ContextMenuView extends Div {
         subMenu.addItem("Third menu item",
                 event -> message.setText("Clicked on the third item"));
 
-        // end-source-example
-
         addCard("Hierarchical Menu", target, message);
         target.setId("hierarchical-menu-target");
         message.setId("hierarchical-menu-message");
     }
 
     private void addCheckableMenuItems() {
-        // begin-source-example
-        // source-example-heading: Checkable Menu Items
         ContextMenu contextMenu = new ContextMenu();
 
         Component target = createTargetComponent();
@@ -132,16 +122,12 @@ public class ContextMenuView extends Div {
         item2.setCheckable(true);
         item2.setChecked(true);
 
-        // end-source-example
-
         addCard("Checkable Menu Items", target, message);
         target.setId("checkable-menu-items-target");
         message.setId("checkable-menu-items-message");
     }
 
     private void addContextMenuWithComponents() {
-        // begin-source-example
-        // source-example-heading: ContextMenu With Components
         Component target = createTargetComponent();
         ContextMenu contextMenu = new ContextMenu(target);
 
@@ -160,8 +146,6 @@ public class ContextMenuView extends Div {
         Component separator = new Hr();
         contextMenu.add(separator, new Label("This is not a menu item"));
 
-        // end-source-example
-
         addCard("ContextMenu With Components", target, message);
         target.setId("context-menu-with-components-target");
         contextMenu.setId("context-menu-with-components");
@@ -169,8 +153,6 @@ public class ContextMenuView extends Div {
     }
 
     private void addContextMenuWithComponentsInSubMenu() {
-        // begin-source-example
-        // source-example-heading: ContextMenu With Components in Sub Menu
         Component target = createTargetComponent();
         ContextMenu contextMenu = new ContextMenu(target);
 
@@ -194,16 +176,12 @@ public class ContextMenuView extends Div {
         subMenu.addComponentAtIndex(1, new Hr());
         subMenu.add(new Label("This is not a menu item"));
 
-        // end-source-example
-
         addCard("ContextMenu With Components in Sub Menu", target, message);
         target.setId("context-menu-with-submenu-components-target");
         contextMenu.setId("context-menu-with-submenu-components");
         message.setId("context-menu-with-submenu-components-message");
     }
 
-    // begin-source-example
-    // source-example-heading: Target component used in the demo
     private Component createTargetComponent() {
         H2 header = new H2("Right click this component");
         Paragraph paragraph = new Paragraph("(or long touch on mobile)");
@@ -212,7 +190,6 @@ public class ContextMenuView extends Div {
                 "center");
         return div;
     }
-    // end-source-example
 
     private void addCard(String title, Component... components) {
         VerticalLayout layout = new VerticalLayout();

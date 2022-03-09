@@ -127,7 +127,9 @@ public class RadioButtonGroupDemoPage extends Div {
         group.setItems("foo", "bar", "baz");
         group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        NativeButton button = new NativeButton("Remove theme variant", e -> group.removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL));
+        NativeButton button = new NativeButton("Remove theme variant",
+                e -> group
+                        .removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL));
         button.setId("remove-theme-variant-button");
 
         addCard("Radio Button Theme Variant", group, button);

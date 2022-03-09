@@ -134,7 +134,8 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void layoutWithIndividualAlignments() {
-        WebElement vlayout = findElement(By.id("layout-with-individual-alignments"));
+        WebElement vlayout = findElement(
+                By.id("layout-with-individual-alignments"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
@@ -180,7 +181,8 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
     @Test
     public void boxSizing() {
-        WebElement hlayout = findElement(By.id("horizontal-layout-with-box-sizing"));
+        WebElement hlayout = findElement(
+                By.id("horizontal-layout-with-box-sizing"));
         Assert.assertEquals("border-box", hlayout.getCssValue("box-sizing"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
@@ -195,8 +197,7 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
     private void checkThemeChanges(WebElement layoutToCheck, String themeName,
             boolean shouldPresent) {
-        findElement(By.id(String.format("toggle-%s", themeName)))
-                .click();
+        findElement(By.id(String.format("toggle-%s", themeName))).click();
         if (shouldPresent) {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
                     && layoutToCheck.getAttribute("theme").contains(themeName));

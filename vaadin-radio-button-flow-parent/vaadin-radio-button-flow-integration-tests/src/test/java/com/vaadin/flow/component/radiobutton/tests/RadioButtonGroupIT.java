@@ -43,7 +43,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
     @Test
     public void valueChange() {
         WebElement valueDiv = findElement(By.id("button-group-value"));
-        WebElement group = findElement(By.id("button-group-with-value-change-listener"));
+        WebElement group = findElement(
+                By.id("button-group-with-value-change-listener"));
 
         executeScript("arguments[0].value=2;", group);
 
@@ -61,7 +62,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
     @Test
     public void itemGenerator() {
         WebElement valueDiv = findElement(By.id("button-group-gen-value"));
-        WebElement group = findElement(By.id("button-group-with-item-generator"));
+        WebElement group = findElement(
+                By.id("button-group-with-item-generator"));
 
         executeScript("arguments[0].value=2;", group);
 
@@ -129,7 +131,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         buttons.get(0).click();
 
-        WebElement infoLabel = findElement(By.id("button-group-disabled-items-info"));
+        WebElement infoLabel = findElement(
+                By.id("button-group-disabled-items-info"));
 
         Assert.assertEquals("'foo' should be selected", "foo",
                 infoLabel.getText());
@@ -226,7 +229,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
     @Test
     public void addedComponentsAfterItems() {
-        WebElement group = findElement(By.id("button-group-with-appended-text"));
+        WebElement group = findElement(
+                By.id("button-group-with-appended-text"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -245,7 +249,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
     @Test
     public void insertedComponentsBetweenItems() {
-        WebElement group = findElement(By.id("button-group-with-inserted-component"));
+        WebElement group = findElement(
+                By.id("button-group-with-inserted-component"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -262,7 +267,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
     @Test
     public void componentsPrependedBeforeItems() {
-        WebElement group = findElement(By.id("button-group-with-prepended-component"));
+        WebElement group = findElement(
+                By.id("button-group-with-prepended-component"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -293,7 +299,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
     @Test
     public void dynamicComponentForAfterItem() {
-        WebElement group = findElement(By.id("button-group-with-dynamic-component"));
+        WebElement group = findElement(
+                By.id("button-group-with-dynamic-component"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -329,7 +336,8 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
     public void assertThemeVariant() {
         WebElement group = findElement(By.id("button-group-theme-variant"));
         scrollToElement(group);
-        Assert.assertEquals(RadioGroupVariant.LUMO_VERTICAL.getVariantName(), group.getAttribute("theme"));
+        Assert.assertEquals(RadioGroupVariant.LUMO_VERTICAL.getVariantName(),
+                group.getAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
         Assert.assertNull(group.getAttribute("theme"));
