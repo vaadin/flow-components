@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8
                 </project.reporting.outputEncoding>
-        <jetty.version>9.4.45.v20220203</jetty.version>
+        <jetty.version>11.0.8</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
