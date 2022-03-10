@@ -301,15 +301,15 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void toggleItemVisible_buttonRemovedAndAdded() {
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1");
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1", "<p>item 2</p>");
     }
 
     @Test
     public void hiddenItemOverflows_overflowButtonNotRendered() {
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         click("set-width");
         waitForResizeObserver();
         Assert.assertNull(menuBar.getOverflowButton());
@@ -320,14 +320,14 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("add-root-item");
         click("set-width");
         waitForResizeObserver();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
 
         menuBar.getOverflowButton().click();
         assertOverlayContents("added item");
 
         clickBody();
         verifyClosed();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
 
         menuBar.getOverflowButton().click();
         assertOverlayContents("<p>item 2</p>", "added item");
@@ -336,15 +336,15 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void hideParentButton_noClientError() {
         click("add-sub-item");
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         checkLogsForErrors();
     }
 
     @Test
     public void hideParentButton_setVisible_subMenuRendered() {
         click("add-sub-item");
-        click("toggle-visible");
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
+        click("toggle-item-2-visibility");
         menuBar.getButtons().get(1).click();
         verifyNumOfOverlays(1);
         assertOverlayContents("added sub item");
@@ -359,7 +359,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         // Verify client-code with setVisible functionality:
         menuBar = $(MenuBarElement.class).first();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1");
     }
 
@@ -371,7 +371,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         // Verify client-code with setVisible functionality:
         menuBar = $(MenuBarElement.class).first();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1");
     }
 
@@ -435,13 +435,22 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void toggleMenuItemTheme_themeIsToggled() {
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
-        click("toggle-item-theme");
+        click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("theme"),
                 MenuBarTestPage.MENU_ITEM_THEME);
-        click("toggle-item-theme");
+        click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
+    }
+
+    @Test
+    public void setMenuItemTheme_toggleMenuItemVisibility_themeIsPreserved() {
+        click("toggle-item-1-theme");
+        click("toggle-item-1-visibility");
+        click("toggle-item-1-visibility");
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("theme"), MenuBarTestPage.MENU_ITEM_THEME);
     }
 
     @Test
@@ -466,7 +475,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void toggleMenuBarTheme_toggleMenuItemTheme_themeIsOverridden() {
         click("toggle-theme");
-        click("toggle-item-theme");
+        click("toggle-item-1-theme");
 
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
