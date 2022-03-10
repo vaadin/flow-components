@@ -454,7 +454,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setMenuItemTheme_hide_resetTheme_show_themeIsNotSet() {
+    public void setMenuItemTheme_hide_resetTheme_show_themeIsUnset() {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
         click("toggle-item-1-theme");
