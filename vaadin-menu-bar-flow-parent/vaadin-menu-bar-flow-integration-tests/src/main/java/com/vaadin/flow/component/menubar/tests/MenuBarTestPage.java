@@ -74,13 +74,11 @@ public class MenuBarTestPage extends Div {
 
         NativeButton setWidthButton = new NativeButton("set width 140px", e -> {
             setWidth("140px");
-            menuBar.getElement().callFunction("notifyResize");
         });
         setWidthButton.setId("set-width");
 
         NativeButton resetWidthButton = new NativeButton("reset width", e -> {
             setWidth("auto");
-            menuBar.getElement().callFunction("notifyResize");
         });
         resetWidthButton.setId("reset-width");
 

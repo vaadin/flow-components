@@ -156,6 +156,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void buttonsOverflow_itemsMovedToOverflowSubMenu() {
         click("set-width");
+        waitForResizeObserver();
         click("add-root-item");
         TestBenchElement overflowButton = menuBar.getOverflowButton();
         Assert.assertNotNull("Expected the overflow button to be rendered",
@@ -198,6 +199,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void buttonWithClickListenerOverflows_clickListenerWorksInSubMenu() {
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         getOverlayMenuItems().get(0).click();
         assertMessage("clicked item 2");
@@ -206,10 +208,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void overflow_openAndClose_unOverflow_clickButton_listenerCalledOnce() {
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
+        waitForResizeObserver();
         menuBar.getButtons().get(1).click();
         assertMessage("clicked item 2");
     }
@@ -217,10 +221,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void overflow_openAndClose_unOverflow_clickItem_listenerCalledOnce() {
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
+        waitForResizeObserver();
         menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
                 .click();
         assertMessage("clicked item 2");
@@ -259,6 +265,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void disableItem_overflow_itemDisabled() {
         click("toggle-disable");
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         assertDisabled(getOverlayMenuItems().get(0), true);
@@ -267,6 +274,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void overflow_disableItem_itemDisabled() {
         click("set-width");
+        waitForResizeObserver();
         click("toggle-disable");
         menuBar.getOverflowButton().click();
         verifyOpened();
@@ -282,10 +290,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void disable_overflow_openAndClose_unOverflow_buttonDisabled() {
         click("toggle-disable");
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
+        waitForResizeObserver();
         assertButtonDisabled(1, true);
     }
 
@@ -301,6 +311,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void hiddenItemOverflows_overflowButtonNotRendered() {
         click("toggle-visible");
         click("set-width");
+        waitForResizeObserver();
         Assert.assertNull(menuBar.getOverflowButton());
     }
 
@@ -308,6 +319,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void itemsOverflow_toggleItemVisible_visibleStateCorrectInOverlay() {
         click("add-root-item");
         click("set-width");
+        waitForResizeObserver();
         click("toggle-visible");
 
         menuBar.getOverflowButton().click();
@@ -366,6 +378,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void setI18n_i18nIsUpdated() {
         click("set-width");
+        waitForResizeObserver();
         click("add-root-item");
         TestBenchElement overflowButton = menuBar.getOverflowButton();
 
@@ -381,6 +394,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void setI18n_detach_attach_i18nIsPersisted() {
         click("set-width");
+        waitForResizeObserver();
         click("add-root-item");
         click("set-i18n");
         TestBenchElement overflowButton = menuBar.getOverflowButton();
@@ -553,5 +567,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
                 hoverTarget);
+    }
+
+    private void waitForResizeObserver() {
+        getCommandExecutor().getDriver().executeAsyncScript(
+            "var callback = arguments[arguments.length - 1];" +
+                "requestAnimationFrame(callback)");
+
     }
 }
