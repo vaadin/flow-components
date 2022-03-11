@@ -571,8 +571,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     private void waitForResizeObserver() {
         getCommandExecutor().getDriver().executeAsyncScript(
-            "var callback = arguments[arguments.length - 1];" +
-                "requestAnimationFrame(callback)");
+                "var callback = arguments[arguments.length - 1];"
+                        + "requestAnimationFrame(callback)");
 
     }
 }
