@@ -82,14 +82,18 @@ public class MenuBarTestPage extends Div {
         });
         resetWidthButton.setId("reset-width");
 
-        NativeButton disableButton = new NativeButton("toggle disable items",
+        NativeButton disableItemButton = new NativeButton("toggle disable items",
                 e -> menuBar.getItems()
                         .forEach(item -> item.setEnabled(!item.isEnabled())));
-        disableButton.setId("toggle-disable");
+        disableItemButton.setId("toggle-disable");
 
-        NativeButton visibleButton = new NativeButton("toggle visible item 2",
+        NativeButton toggleItem1VisibilityButton = new NativeButton("toggle item 1 visibility",
+                e -> item1.setVisible(!item1.isVisible()));
+        toggleItem1VisibilityButton.setId("toggle-item-1-visibility");
+
+        NativeButton toggleItem2VisibilityButton = new NativeButton("toggle item 2 visibility",
                 e -> item2.setVisible(!item2.isVisible()));
-        visibleButton.setId("toggle-visible");
+        toggleItem2VisibilityButton.setId("toggle-item-2-visibility");
 
         NativeButton checkedButton = new NativeButton("toggle checked",
                 e -> checkable.setChecked(!checkable.isChecked()));
@@ -120,7 +124,7 @@ public class MenuBarTestPage extends Div {
                 });
         toggleMenuBarThemeButton.setId("toggle-theme");
 
-        NativeButton toggleMenuItemThemeButton = new NativeButton(
+        NativeButton toggleItem1ThemeButton = new NativeButton(
                 "toggle item theme", e -> {
                     if (item1.hasThemeName(MENU_ITEM_THEME)) {
                         item1.removeThemeNames(MENU_ITEM_THEME);
@@ -128,7 +132,7 @@ public class MenuBarTestPage extends Div {
                         item1.addThemeNames(MENU_ITEM_THEME);
                     }
                 });
-        toggleMenuItemThemeButton.setId("toggle-item-theme");
+        toggleItem1ThemeButton.setId("toggle-item-1-theme");
 
         NativeButton toggleSubItemThemeButton = new NativeButton(
                 "toggle sub theme", e -> {
@@ -142,9 +146,9 @@ public class MenuBarTestPage extends Div {
 
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
-                disableButton, visibleButton, checkedButton,
+                disableItemButton, toggleItem1VisibilityButton, toggleItem2VisibilityButton, checkedButton,
                 toggleAttachedButton, setI18nButton, toggleAttachedButton,
-                toggleMenuBarThemeButton, toggleMenuItemThemeButton,
+                toggleMenuBarThemeButton, toggleItem1ThemeButton,
                 toggleSubItemThemeButton);
     }
 }
