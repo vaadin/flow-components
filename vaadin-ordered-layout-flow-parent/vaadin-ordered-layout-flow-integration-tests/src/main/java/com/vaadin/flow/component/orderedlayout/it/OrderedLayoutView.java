@@ -406,7 +406,8 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setId("horizontal-layout-with-box-sizing");
 
         addCard("HorizontalLayout", "HorizontalLayout with box-sizing settings",
-                layout, createBoxSizingButtons(layout, layout.getId().orElse(null)));
+                layout,
+                createBoxSizingButtons(layout, layout.getId().orElse(null)));
     }
 
     private void createHorizontalLayoutWithExpandingContent() {
@@ -749,7 +750,8 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setId("vertical-layout-with-box-sizing");
 
         addCard("VerticalLayout", "VerticalLayout with box-sizing settings",
-                layout, createBoxSizingButtons(layout, layout.getId().orElse(null)));
+                layout,
+                createBoxSizingButtons(layout, layout.getId().orElse(null)));
     }
 
     private void createVerticalLayoutWithExpandingContent() {

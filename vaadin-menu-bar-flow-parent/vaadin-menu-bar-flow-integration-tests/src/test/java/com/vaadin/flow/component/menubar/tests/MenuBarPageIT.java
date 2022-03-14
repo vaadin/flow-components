@@ -450,7 +450,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item-1-visibility");
         click("toggle-item-1-visibility");
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertEquals(menuButton1.getAttribute("theme"), MenuBarTestPage.MENU_ITEM_THEME);
+        Assert.assertEquals(menuButton1.getAttribute("theme"),
+                MenuBarTestPage.MENU_ITEM_THEME);
     }
 
     @Test

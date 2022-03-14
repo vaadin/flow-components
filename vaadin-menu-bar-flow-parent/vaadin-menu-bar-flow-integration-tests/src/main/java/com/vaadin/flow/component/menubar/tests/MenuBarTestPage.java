@@ -82,16 +82,18 @@ public class MenuBarTestPage extends Div {
         });
         resetWidthButton.setId("reset-width");
 
-        NativeButton disableItemButton = new NativeButton("toggle disable items",
-                e -> menuBar.getItems()
+        NativeButton disableItemButton = new NativeButton(
+                "toggle disable items", e -> menuBar.getItems()
                         .forEach(item -> item.setEnabled(!item.isEnabled())));
         disableItemButton.setId("toggle-disable");
 
-        NativeButton toggleItem1VisibilityButton = new NativeButton("toggle item 1 visibility",
+        NativeButton toggleItem1VisibilityButton = new NativeButton(
+                "toggle item 1 visibility",
                 e -> item1.setVisible(!item1.isVisible()));
         toggleItem1VisibilityButton.setId("toggle-item-1-visibility");
 
-        NativeButton toggleItem2VisibilityButton = new NativeButton("toggle item 2 visibility",
+        NativeButton toggleItem2VisibilityButton = new NativeButton(
+                "toggle item 2 visibility",
                 e -> item2.setVisible(!item2.isVisible()));
         toggleItem2VisibilityButton.setId("toggle-item-2-visibility");
 
@@ -146,7 +148,8 @@ public class MenuBarTestPage extends Div {
 
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
-                disableItemButton, toggleItem1VisibilityButton, toggleItem2VisibilityButton, checkedButton,
+                disableItemButton, toggleItem1VisibilityButton,
+                toggleItem2VisibilityButton, checkedButton,
                 toggleAttachedButton, setI18nButton, toggleAttachedButton,
                 toggleMenuBarThemeButton, toggleItem1ThemeButton,
                 toggleSubItemThemeButton);

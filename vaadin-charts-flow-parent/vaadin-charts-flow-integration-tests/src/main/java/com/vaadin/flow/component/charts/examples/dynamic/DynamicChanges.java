@@ -34,9 +34,10 @@ public class DynamicChanges extends AbstractChartExample {
         addPointButton.setId("addPointButton");
         ComponentUtil.addListener(addPointButton, ClickEvent.class,
                 (ComponentEventListener) e -> {
-                    series.add(new DataSeriesItem(
-                            "Random browser " + Math.floor(Math.random() * 20),
-                            Math.random() * 20));
+                    String randomName = "Random browser "
+                            + Math.floor(Math.random() * 20); // NOSONAR
+                    double randomValue = Math.random() * 20; // NOSONAR
+                    series.add(new DataSeriesItem(randomName, randomValue));
                 });
 
         Input removePointButton = new Input();
@@ -58,7 +59,7 @@ public class DynamicChanges extends AbstractChartExample {
                 (ComponentEventListener) e -> {
                     if (!series.getData().isEmpty()) {
                         DataSeriesItem item = series.getData().get(0);
-                        item.setY(Math.random() * 20);
+                        item.setY(Math.random() * 20); // NOSONAR
                         series.update(item);
                     }
                 });
@@ -71,7 +72,7 @@ public class DynamicChanges extends AbstractChartExample {
                 (ComponentEventListener) e -> {
                     if (!series.getData().isEmpty()) {
                         DataSeriesItem item = series.getData().get(0);
-                        item.setX(Math.random() * 20);
+                        item.setX(Math.random() * 20); // NOSONAR
                         series.setItemSliced(0, !item.getSliced());
                     }
                 });
