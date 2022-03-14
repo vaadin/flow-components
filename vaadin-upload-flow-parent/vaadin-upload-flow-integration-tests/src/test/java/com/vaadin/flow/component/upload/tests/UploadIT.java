@@ -21,7 +21,6 @@ import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
