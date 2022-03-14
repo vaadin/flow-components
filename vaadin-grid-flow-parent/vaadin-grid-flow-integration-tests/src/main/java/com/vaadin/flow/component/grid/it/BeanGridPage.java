@@ -15,9 +15,17 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.Map;
+import java.util.stream.IntStream;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
@@ -26,12 +34,65 @@ public class BeanGridPage extends Div {
 
     public BeanGridPage() {
         Grid<Person> grid = new Grid<>(Person.class);
-        grid.setItems(new Person("Jorma", 2018), new Person("Jarvi", 33));
-        grid.setItemDetailsRenderer(TemplateRenderer
-                .<Person> of("<div>[[item.name]] [[item.age]]</div>")
-                .withProperty("name", Person::getFirstName)
-                .withProperty("age", Person::getAge));
+        
+        grid.setItems(IntStream.range(0, 100).mapToObj(i -> new Person("Name " + i, 100)));
+
+        grid.setColumns("firstName", "age");
+
+        grid.addColumn(new RecyclingComponentRenderer<Person, TextField>(){
+            @Override
+            TextField createComponent() {
+                return new TextField();
+            }
+
+            @Override
+            void updateComponent(TextField component, Person item) {
+                component.setValue(item.getFirstName());
+            }
+        }.create());
+
         add(grid);
     }
 
+    public abstract class RecyclingComponentRenderer<SOURCE, COMPONENT extends Component> {
+
+        private Map<String, COMPONENT> components = new java.util.HashMap<>();
+
+        private final String APP_ID = UI.getCurrent().getInternals().getAppId();
+        
+        public Renderer<SOURCE> create() {
+
+            String template =  "<flow-component-renderer appid='" + APP_ID + "' " +
+                    ".update=${(() => { " +
+                    "   if (root.rendererId === undefined) { " +
+                    // TODO: Unique id
+                    "     root.rendererId = itemKey; " +
+                    "     window.renderers = window.renderers || {}; " +
+                    "     window.renderers[root.rendererId] = root " +
+                    "   } " +
+                    // TODO: debounce
+                    "   update(root.rendererId, item); " +
+                    " })() " +
+                    "} " +
+                    "></flow-component-renderer>";
+                
+            return LitRenderer.<SOURCE>of(template).withFunction("update", (item, params) -> {
+                String rendererId = params.getString(0);
+                if (!components.containsKey(rendererId)) {
+                    COMPONENT component = createComponent();
+                    components.put(rendererId, component);
+                    
+                    // TODO: The instances must be cleaned up
+                    UI.getCurrent().getElement().appendVirtualChild(component.getElement());
+                    UI.getCurrent().getElement().executeJs("window.renderers[$0].firstElementChild.nodeid = $1", rendererId, component.getElement().getNode().getId());
+                }
+                updateComponent(components.get(rendererId), item);
+            });
+        }
+
+        abstract COMPONENT createComponent();
+
+        abstract void updateComponent(COMPONENT component, SOURCE item);
+            
+    }
 }
