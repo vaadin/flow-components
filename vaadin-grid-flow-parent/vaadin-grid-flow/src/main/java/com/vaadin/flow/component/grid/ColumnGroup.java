@@ -33,7 +33,7 @@ import com.vaadin.flow.dom.Element;
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-column-group.js")
 @Tag("vaadin-grid-column-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class ColumnGroup extends AbstractColumn<ColumnGroup> {
 
