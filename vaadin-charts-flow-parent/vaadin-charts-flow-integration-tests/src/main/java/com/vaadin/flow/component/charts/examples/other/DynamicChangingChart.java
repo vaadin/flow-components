@@ -30,7 +30,7 @@ import java.util.Random;
 
 @SkipFromDemo
 public class DynamicChangingChart extends AbstractChartExample {
-    final Random random = new Random(0);
+    final Random random = new Random(0); // NOSONAR
 
     @Override
     public void initDemo() {

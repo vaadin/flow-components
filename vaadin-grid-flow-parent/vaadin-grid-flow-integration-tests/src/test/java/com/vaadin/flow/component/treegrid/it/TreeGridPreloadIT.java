@@ -95,7 +95,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void firstExpanded_shouldOptimizeDataProviderFetches() {
         open(Arrays.asList(0), null, null, null, null);
-        Assert.assertEquals("70", dataProviderFetchCount.getValue());
+        Assert.assertEquals("55", dataProviderFetchCount.getValue());
     }
 
     @Test
