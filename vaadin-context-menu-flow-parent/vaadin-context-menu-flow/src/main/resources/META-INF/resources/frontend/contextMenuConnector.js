@@ -92,7 +92,7 @@ import * as Gestures from "@vaadin/component-base/src/gestures.js";
               const item = {
                   component: child,
                   checked: child._checked,
-                  theme: child._theme
+                  theme: child.__theme
               };
               if (
                 child.tagName == "VAADIN-CONTEXT-MENU-ITEM" &&

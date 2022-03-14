@@ -47,7 +47,7 @@ public abstract class AbstractChartExample extends Div {
         try {
             return mapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // NOSONAR
             return "";
         }
     }

@@ -71,7 +71,7 @@ public class ScatterAndPolygon extends AbstractChartExample {
     }
 
     private void fillScatter(DataSeries series) {
-        Random random = new Random(13);
+        Random random = new Random(13); // NOSONAR
         for (int i = 0; i < 100; i++) {
             double x = random.nextDouble() * 30 + 150;
             double y = 60;

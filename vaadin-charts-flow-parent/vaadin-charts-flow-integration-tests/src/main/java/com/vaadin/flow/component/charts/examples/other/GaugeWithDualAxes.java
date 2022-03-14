@@ -20,7 +20,7 @@ public class GaugeWithDualAxes extends AbstractChartExample {
 
     @Override
     public void initDemo() {
-        final Random random = new Random(0);
+        final Random random = new Random(0); // NOSONAR
         final Chart chart = new Chart();
 
         final Configuration configuration = chart.getConfiguration();

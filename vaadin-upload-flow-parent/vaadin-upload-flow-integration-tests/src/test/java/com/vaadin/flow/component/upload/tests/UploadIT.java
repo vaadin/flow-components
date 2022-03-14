@@ -21,7 +21,6 @@ import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -83,21 +82,13 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadMultipleEventOrder() throws Exception {
-        if (getRunLocallyBrowser() == null) {
-            // Multiple file upload does not work with Remotewebdriver
-            // https://github.com/SeleniumHQ/selenium/issues/7408
-            throw new AssumptionViolatedException(
-                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
-        }
         open();
 
         waitUntil(driver -> getUpload().isDisplayed());
 
         File tempFile = createTempFile();
 
-        getUpload().upload(tempFile);
-        getUpload().upload(tempFile);
-        getUpload().upload(tempFile);
+        getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("test-events-output"));
