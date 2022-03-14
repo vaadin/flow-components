@@ -38,12 +38,6 @@ public class FileBufferIT extends AbstractUploadIT {
 
     @Test
     public void testUploadMultipleEventOrder() throws Exception {
-        if (getRunLocallyBrowser() == null) {
-            // Multiple file upload does not work with Remotewebdriver
-            // https://github.com/SeleniumHQ/selenium/issues/7408
-            throw new AssumptionViolatedException(
-                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
-        }
         open();
 
         final UploadElement upload = $(UploadElement.class).id("multi-upload");
