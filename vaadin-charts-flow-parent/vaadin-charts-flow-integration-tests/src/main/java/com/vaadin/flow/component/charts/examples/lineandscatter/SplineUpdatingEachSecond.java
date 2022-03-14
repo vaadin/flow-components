@@ -18,7 +18,7 @@ public class SplineUpdatingEachSecond extends AbstractChartExample {
 
     @Override
     public void initDemo() {
-        final Random random = new Random();
+        final Random random = new Random(); // NOSONAR
 
         final Chart chart = new Chart();
 

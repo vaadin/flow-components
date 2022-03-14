@@ -3,12 +3,12 @@ package com.vaadin.flow.component.upload.tests;
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Tests for Upload using FileBuffer and MultiFileBuffer.
@@ -37,12 +37,6 @@ public class FileBufferIT extends AbstractUploadIT {
 
     @Test
     public void testUploadMultipleEventOrder() throws Exception {
-        if (getRunLocallyBrowser() == null) {
-            // Multiple file upload does not work with Remotewebdriver
-            // https://github.com/SeleniumHQ/selenium/issues/7408
-            throw new AssumptionViolatedException(
-                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
-        }
         open();
 
         final UploadElement upload = $(UploadElement.class).id("multi-upload");
@@ -50,9 +44,7 @@ public class FileBufferIT extends AbstractUploadIT {
 
         File tempFile = createTempFile();
 
-        upload.upload(tempFile);
-        upload.upload(tempFile);
-        upload.upload(tempFile);
+        upload.uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("multi-upload-event-output"));

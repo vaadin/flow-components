@@ -215,8 +215,8 @@ public class GridViewBasicFeaturesPage extends LegacyTestView {
         }
 
         public static BigDecimal getRandomBigDecimal() {
-            return new BigDecimal(
-                    100 + Math.random() * 100 + Math.random() * 10000);
+            return BigDecimal
+                    .valueOf(100 + Math.random() * 100 + Math.random() * 10000); // NOSONAR
         }
     }
 

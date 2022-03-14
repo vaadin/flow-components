@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 
-    private static final String PRIVATE_THEME_ATTRIBUTE = "_theme";
+    private static final String PRIVATE_THEME_ATTRIBUTE = "__theme";
 
     private final C contextMenu;
     private S subMenu;
