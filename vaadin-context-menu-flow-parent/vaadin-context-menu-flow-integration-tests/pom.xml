@@ -37,7 +37,12 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-context-menu-flow-demo</artifactId>
+            <artifactId>vaadin-checkbox-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

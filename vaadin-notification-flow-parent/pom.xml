@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-notification-flow</module>
         <module>vaadin-notification-testbench</module>
-        <module>vaadin-notification-flow-demo</module>
     </modules>
     <profiles>
         <profile>

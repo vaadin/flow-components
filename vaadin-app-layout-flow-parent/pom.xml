@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-app-layout-flow</module>
         <module>vaadin-app-layout-testbench</module>
-        <module>vaadin-app-layout-flow-demo</module>
     </modules>
     <profiles>
         <profile>

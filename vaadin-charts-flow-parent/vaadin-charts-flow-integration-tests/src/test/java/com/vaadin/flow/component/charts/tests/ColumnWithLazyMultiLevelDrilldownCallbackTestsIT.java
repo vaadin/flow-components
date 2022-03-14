@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.charts.tests;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.column.ColumnWithLazyMultiLevelDrilldownCallbackTests;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.column.ColumnWithLazyMultiLevelDrilldownCallbackTests;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import org.junit.Test;
 import org.openqa.selenium.By;
