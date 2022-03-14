@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -139,8 +140,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/split-layout", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.0.1")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.0.1")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -193,7 +194,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public void setOrientation(Orientation orientation) {
         Objects.requireNonNull(orientation, "Orientation cannot be null");
-        this.setOrientation(orientation.toString().toLowerCase());
+        this.setOrientation(orientation.toString().toLowerCase(Locale.ENGLISH));
     }
 
     /**

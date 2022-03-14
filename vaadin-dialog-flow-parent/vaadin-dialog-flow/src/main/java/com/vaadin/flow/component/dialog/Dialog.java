@@ -87,6 +87,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setOpened(false);
 
         getElement().addEventListener("opened-changed", event -> {
+            if (!isOpened()) {
+                setModality(false);
+            }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -438,6 +441,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public void setModal(boolean modal) {
         getElement().setProperty("modeless", !modal);
+        getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
     }
 
     /**
@@ -501,6 +505,24 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return getElement().getProperty("resizable", false);
     }
 
+    /**
+     * Set the visibility of the dialog.
+     * <p>
+     * For a modal dialog the server-side modality will be removed when dialog
+     * is not visible so that interactions can be made in the application.
+     *
+     * @see Component#setVisible(boolean)
+     * @param visible
+     *            dialog visibility
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+
+        getUI().ifPresent(
+                ui -> ui.setChildComponentModal(this, visible && isModal()));
+    }
+
     private UI getCurrentUI() {
         UI ui = UI.getCurrent();
         if (ui == null) {
@@ -517,7 +539,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
+                ui.setChildComponentModal(this, isModal());
                 autoAddedToTheUi = true;
             }
         });
@@ -566,6 +589,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         if (opened) {
             ensureAttached();
         }
+        setModality(opened && isModal());
         super.setOpened(opened);
     }
 
@@ -576,6 +600,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public boolean isOpened() {
         return super.isOpenedBoolean();
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     @Override

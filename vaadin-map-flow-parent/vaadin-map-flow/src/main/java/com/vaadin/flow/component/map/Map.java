@@ -20,15 +20,49 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
+import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.View;
+import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
+import com.vaadin.flow.component.map.configuration.layer.ImageLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
+import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
+import com.vaadin.flow.component.map.configuration.source.Source;
+import com.vaadin.flow.component.map.configuration.source.VectorSource;
+import com.vaadin.flow.component.map.configuration.source.XYZSource;
 
 import java.util.Objects;
 
+/**
+ * Map is a component for displaying geographic maps from various sources. It
+ * supports multiple layers, tiled and full image sources, adding markers, and
+ * interaction through events.
+ * <p>
+ * Each map consists of one or more {@link Layer}s that display geographical
+ * data. Each layer has a {@link Source} that provides that data. The Map
+ * component provides several types of layers (for example {@link TileLayer},
+ * {@link VectorLayer}, {@link ImageLayer}), as well as several types of sources
+ * that can be used with each type of layer (for example {@link OSMSource},
+ * {@link XYZSource}, {@link VectorSource}).
+ * <p>
+ * The map component comes pre-configured with a background layer, which by
+ * default is a {@link TileLayer} using an {@link OSMSource}, which means that
+ * it displays tiled image data from the OpenStreeMap service. The background
+ * layer of the map can be replaced using {@link #setBackgroundLayer(Layer)}.
+ * The component is also pre-configured with a {@link FeatureLayer}, accessible
+ * with {@link #getFeatureLayer()}, that allows to quickly display geographical
+ * features, such as markers (see {@link MarkerFeature}), on top of a map.
+ * Custom layers can be added or removed using {@link #addLayer(Layer)} and
+ * {@link #removeLayer(Layer)}.
+ * <p>
+ * The viewport of the map is controlled through a {@link View}, which allows
+ * setting the center, zoom level and rotation. The map's view can be accessed
+ * through {@link Map#getView()}.
+ */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/map", version = "23.0.1")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
@@ -125,4 +159,63 @@ public class Map extends MapBase {
         getConfiguration().removeLayer(layer);
     }
 
+    /**
+     * Gets center coordinates of the map's viewport
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @return current center of the viewport
+     */
+    public Coordinate getCenter() {
+        return getView().getCenter();
+    }
+
+    /**
+     * Sets the center of the map's viewport in format specified by projection
+     * set on the view, which defaults to {@code EPSG:3857}
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @param center
+     *            new center of the viewport
+     */
+    public void setCenter(Coordinate center) {
+        getView().setCenter(center);
+    }
+
+    /**
+     * Gets zoom level of the map's viewport, defaults to {@code 0}
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @return current zoom level
+     */
+    public float getZoom() {
+        return getView().getZoom();
+    }
+
+    /**
+     * Sets the zoom level of the map's viewport. The zoom level is a decimal
+     * value that starts at {@code 0} as the most zoomed-out level, and then
+     * continually increases to zoom further in. By default, the maximum zoom
+     * level is currently restricted to {@code 28}. In practical terms, the
+     * level of detail of the map data that a map service provides determines
+     * how useful higher zoom levels are.
+     * <p>
+     * This is a convenience method that delegates to the map's internal
+     * {@link View}. See {@link #getView()} for accessing other properties of
+     * the view.
+     *
+     * @param zoom
+     *            new zoom level
+     */
+    public void setZoom(float zoom) {
+        getView().setZoom(zoom);
+    }
 }

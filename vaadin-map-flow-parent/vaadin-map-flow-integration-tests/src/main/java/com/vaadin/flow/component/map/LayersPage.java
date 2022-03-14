@@ -5,7 +5,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
-import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.router.Route;
@@ -14,13 +13,7 @@ import com.vaadin.flow.router.Route;
 public class LayersPage extends Div {
     public LayersPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
-
-        // Set IDs on default layers for easier retrieval in ITs
-        map.getBackgroundLayer().setId("background-layer");
-        map.getFeatureLayer().setId("feature-layer");
 
         NativeButton setCustomSource = new NativeButton("Set custom source",
                 e -> {
@@ -52,7 +45,17 @@ public class LayersPage extends Div {
                 e -> map.removeLayer(customLayer));
         removeCustomLayer.setId("remove-custom-layer");
 
+        NativeButton customizeLayerProperties = new NativeButton(
+                "Customize layer properties", e -> {
+                    // Test sync of some common layer props, combination does
+                    // not need to make sense
+                    customLayer.setVisible(false);
+                    customLayer.setOpacity(0.7f);
+                    customLayer.setzIndex(42);
+                });
+        customizeLayerProperties.setId("customize-layer-properties");
+
         add(new Div(setCustomSource, replaceBackgroundLayer, addCustomLayer,
-                removeCustomLayer));
+                removeCustomLayer, customizeLayerProperties));
     }
 }

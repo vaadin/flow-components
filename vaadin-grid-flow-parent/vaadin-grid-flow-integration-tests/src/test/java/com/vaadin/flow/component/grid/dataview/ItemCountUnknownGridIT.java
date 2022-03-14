@@ -37,7 +37,7 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
         doScroll(45, getDefaultInitialItemCount(), 1, 50, 150);
 
         // trigger next page fetch and size buffer increase
-        doScroll(110, 400, 2, 150, 200);
+        doScroll(125, 400, 2, 150, 200);
 
         // jump over a page, trigger fetch
         doScroll(270, 400, 3, 250, 350);

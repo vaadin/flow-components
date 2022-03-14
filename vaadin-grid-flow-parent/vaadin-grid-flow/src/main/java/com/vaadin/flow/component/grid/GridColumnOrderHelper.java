@@ -231,7 +231,7 @@ class GridColumnOrderHelper<T> {
 
         /**
          * Peeks at the first ID in the internal queue but doesn't remove it.
-         * 
+         *
          * @return the head ID, never {@code null}.
          * @throws IllegalArgumentException
          *             if the queue is empty.
@@ -249,7 +249,7 @@ class GridColumnOrderHelper<T> {
          * Makes sure the {@link Grid.Column#getInternalId()} matches the
          * {@link #element() head} of the ID queue. If it does, removes the head
          * of the queue.
-         * 
+         *
          * @param column
          *            the column to match, not {@code null}
          * @throws IllegalArgumentException
@@ -303,7 +303,7 @@ class GridColumnOrderHelper<T> {
         /**
          * Finds first column from given list of columns which contains a leaf
          * with given ID.
-         * 
+         *
          * @param columnID
          *            the desired {@link Grid.Column#getInternalId()}, not null.
          * @param columns

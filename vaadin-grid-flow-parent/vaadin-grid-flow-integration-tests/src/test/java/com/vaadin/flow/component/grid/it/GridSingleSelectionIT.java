@@ -24,8 +24,6 @@ import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import javax.validation.constraints.AssertTrue;
-
 @TestPath("vaadin-grid/grid-single-selection")
 public class GridSingleSelectionIT extends AbstractComponentIT {
 

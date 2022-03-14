@@ -16,8 +16,8 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.pie.PieWithoutAccessibility;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.pie.PieWithoutAccessibility;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 public class PieWithoutAccessibilityIT extends AbstractTBTest {

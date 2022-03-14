@@ -16,6 +16,9 @@ package com.vaadin.flow.component.map.configuration.source;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 
@@ -40,6 +43,8 @@ public class VectorSource extends Source {
         return Constants.OL_SOURCE_VECTOR;
     }
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     public List<Feature> getFeatures() {
         return Collections.unmodifiableList(features);
     }
@@ -47,19 +52,15 @@ public class VectorSource extends Source {
     public void addFeature(Feature feature) {
         Objects.requireNonNull(feature);
 
-        feature.addPropertyChangeListener(this::notifyChange);
-
         features.add(feature);
-        notifyChange();
+        addChild(feature);
     }
 
     public void removeFeature(Feature feature) {
         Objects.requireNonNull(feature);
 
-        feature.removePropertyChangeListener(this::notifyChange);
-
         features.remove(feature);
-        notifyChange();
+        removeChild(feature);
     }
 
     protected static class BaseOptions<T extends BaseOptions<T>>

@@ -15,15 +15,10 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid.Column;
-
-import elemental.json.JsonObject;
 
 /**
  * Event fired when a Grid column is resized by the user.
@@ -63,7 +58,7 @@ public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Returns the column that was the target of user's resize action
-     * 
+     *
      * @return resize action target column
      */
     public Column<T> getResizedColumn() {

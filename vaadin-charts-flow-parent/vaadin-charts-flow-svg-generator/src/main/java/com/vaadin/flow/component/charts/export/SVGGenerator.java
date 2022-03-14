@@ -122,7 +122,7 @@ public class SVGGenerator implements AutoCloseable {
      *             virtually render the chart.
      * @throws InterruptedException
      *             if the rendering process gets interrupted.
-     * 
+     *
      * @see SVGGenerator#generate(Configuration, ExportOptions)
      */
     public String generate(Configuration chartConfiguration)

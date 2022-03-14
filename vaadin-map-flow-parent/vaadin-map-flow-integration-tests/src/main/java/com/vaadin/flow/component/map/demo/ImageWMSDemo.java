@@ -4,9 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.layer.ImageLayer;
-import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.ImageWMSSource;
-import com.vaadin.flow.component.map.configuration.source.TileWMSSource;
 import com.vaadin.flow.router.Route;
 
 import java.util.HashMap;
@@ -21,8 +19,6 @@ import java.util.HashMap;
 public class ImageWMSDemo extends Div {
     public ImageWMSDemo() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
 
         // Add image layer showing an overlay of the individual states of the US

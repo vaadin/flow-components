@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-time-picker-flow-parent</artifactId>
-        <version>23.0-SNAPSHOT</version>
+        <version>23.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-time-picker-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-time-picker-flow-demo</artifactId>
+            <artifactId>vaadin-renderer-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

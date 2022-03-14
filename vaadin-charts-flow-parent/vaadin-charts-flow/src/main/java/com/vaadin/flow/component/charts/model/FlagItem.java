@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -93,7 +93,7 @@ public class FlagItem extends DataSeriesItem {
 
     /**
      * Sets the title of the flag
-     * 
+     *
      * @param title
      */
     public void setTitle(String title) {

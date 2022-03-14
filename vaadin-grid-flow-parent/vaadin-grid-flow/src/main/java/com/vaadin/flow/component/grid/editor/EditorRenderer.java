@@ -38,12 +38,12 @@ import elemental.json.JsonObject;
  * <p>
  * Components are created during the {@link #generateData(Object, JsonObject)}
  * calls, and the proper data is sent to the client-side to be rendered.
- * 
+ *
  * @author Vaadin Ltd.
  *
  * @param <T>
  *            the type of the object being processed
- * 
+ *
  * @see Column#setEditorComponent(Component)
  * @see Column#setEditorComponent(SerializableFunction)
  */
@@ -63,7 +63,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     /**
      * Creates a new renderer for a specific column.
-     * 
+     *
      * @param editor
      *            the Grid's editor
      * @param columnInternalId
@@ -78,7 +78,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
      * Sets the function that creates components to be used as editors for the
      * column. When set to <code>null</code>, an empty component is used
      * instead.
-     * 
+     *
      * @param componentFunction
      *            the function that generates editor components
      */

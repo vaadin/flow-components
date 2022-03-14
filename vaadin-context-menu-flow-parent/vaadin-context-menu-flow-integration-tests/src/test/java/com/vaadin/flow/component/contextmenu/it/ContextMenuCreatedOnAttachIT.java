@@ -1,12 +1,8 @@
 package com.vaadin.flow.component.contextmenu.it;
 
-import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.testutil.TestPath;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
 
 /**
  * https://github.com/vaadin/vaadin-context-menu-flow/issues/119

@@ -24,6 +24,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Locale;
+
 /**
  * Scroller is a component container which enables scrolling overflowing
  * content.
@@ -32,10 +34,10 @@ import static java.util.Objects.requireNonNull;
  * {@link #setScrollDirection(ScrollDirection)}
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/scroller", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/scroller", version = "23.0.1")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.0.1")
 @JsModule("@vaadin/scroller/vaadin-scroller.js")
 public class Scroller extends Component implements HasSize, HasStyle {
 
@@ -161,7 +163,8 @@ public class Scroller extends Component implements HasSize, HasStyle {
         VERTICAL, HORIZONTAL, BOTH, NONE;
 
         private String toWebComponentValue() {
-            return BOTH == this ? null : this.name().toLowerCase();
+            return BOTH == this ? null
+                    : this.name().toLowerCase(Locale.ENGLISH);
         }
 
         private static ScrollDirection fromWebComponentValue(

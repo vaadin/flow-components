@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.lang.management.ManagementFactory;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
@@ -105,7 +104,6 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         // assuming buffer to match visible row count
         int assumedCachedSize = (grid.getLastVisibleRowIndex()
                 - grid.getFirstVisibleRowIndex()) * 3;
-        waitUntil(b -> grid.getRowCount() >= assumedCachedSize);
         waitUntil(test -> !grid.isLoadingExpandedRows(), 20);
         String[] cellTexts = new String[assumedCachedSize];
         for (int i = 0; i < assumedCachedSize; i++) {

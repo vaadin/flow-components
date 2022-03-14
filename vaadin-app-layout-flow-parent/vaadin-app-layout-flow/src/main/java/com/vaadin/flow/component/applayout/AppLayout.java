@@ -1,5 +1,9 @@
 package com.vaadin.flow.component.applayout;
 
+import java.io.Serializable;
+import java.util.Locale;
+import java.util.Objects;
+
 /*
  * #%L
  * Vaadin App Layout
@@ -34,9 +38,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.router.RouterLayout;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
@@ -45,10 +46,10 @@ import elemental.json.JsonType;
  * quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.0-beta3")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.0.1")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.1")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -354,7 +355,7 @@ public class AppLayout extends Component implements RouterLayout {
         NAVBAR, DRAWER;
 
         public String toWebcomponentValue() {
-            return this.name().toLowerCase();
+            return this.name().toLowerCase(Locale.ENGLISH);
         }
 
         public static Section fromWebcomponentValue(String webcomponentValue) {

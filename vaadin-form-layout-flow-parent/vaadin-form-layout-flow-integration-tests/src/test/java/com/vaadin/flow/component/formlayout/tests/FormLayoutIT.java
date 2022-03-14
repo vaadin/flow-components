@@ -23,16 +23,18 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.formlayout.demo.FormLayoutView;
-import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link FormLayoutView}.
  */
-public class FormLayoutIT extends ComponentDemoTest {
+@TestPath("vaadin-form-layout")
+public class FormLayoutIT extends AbstractComponentIT {
 
     @Before
     public void init() {
+        open();
         Assert.assertTrue(isElementPresent(By.tagName("vaadin-form-layout")));
     }
 
@@ -44,8 +46,7 @@ public class FormLayoutIT extends ComponentDemoTest {
      * you resize the browser window
      */
     public void custom_responsive_layouting() {
-        WebElement firstLayout = layout
-                .findElement(By.tagName("vaadin-form-layout"));
+        WebElement firstLayout = findElement(By.tagName("vaadin-form-layout"));
         List<WebElement> textFields = firstLayout
                 .findElements(By.tagName("vaadin-text-field"));
         Assert.assertEquals(3, textFields.size());
@@ -154,17 +155,7 @@ public class FormLayoutIT extends ComponentDemoTest {
                 executeScript("return arguments[0].checked;", element)));
     }
 
-    private void clearInput(String id) {
-        WebElement element = findElement(By.id(id));
-        executeScript("arguments[0].value = '';", element);
-    }
-
     private void forceClick(WebElement element) {
         executeScript("arguments[0].click();", element);
-    }
-
-    @Override
-    protected String getTestPath() {
-        return ("/vaadin-form-layout");
     }
 }

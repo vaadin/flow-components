@@ -12,16 +12,10 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.util.List;
-
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.charts.ui.MainView;
 import com.vaadin.tests.AbstractParallelTest;

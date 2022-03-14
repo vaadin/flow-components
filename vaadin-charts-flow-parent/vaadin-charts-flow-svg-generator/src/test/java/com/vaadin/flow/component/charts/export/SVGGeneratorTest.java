@@ -105,6 +105,17 @@ public class SVGGeneratorTest {
     }
 
     @Test
+    public void generateSVGFromChartWithoutTitle()
+            throws IOException, InterruptedException {
+        Configuration conf = createColumnWithoutTitle();
+        String svg = svgGenerator.generate(conf);
+        Path pieChartPath = Paths.get("src", "test", "resources",
+                "column-without-title.svg");
+        String expectedSVG = readUtf8File(pieChartPath);
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+    }
+
+    @Test
     public void exportWithCustomWidth()
             throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
@@ -224,6 +235,32 @@ public class SVGGeneratorTest {
         series.add(new DataSeriesItem("Others", 2.61));
         conf.setSeries(series);
         return conf;
+    }
+
+    private Configuration createColumnWithoutTitle() {
+        Configuration configuration = new Configuration();
+        configuration.getChart().setType(ChartType.COLUMN);
+
+        configuration.addSeries(new ListSeries("Tokyo", 49.9, 71.5, 106.4,
+                129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4));
+        configuration.addSeries(new ListSeries("New York", 83.6, 78.8, 98.5,
+                93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3));
+        configuration.addSeries(new ListSeries("London", 48.9, 38.8, 39.3, 41.4,
+                47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2));
+        configuration.addSeries(new ListSeries("Berlin", 42.4, 33.2, 34.5, 39.7,
+                52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1));
+
+        XAxis x = new XAxis();
+        x.setCategories("January is a long month", "February is rather boring",
+                "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+                "Dec");
+        configuration.addxAxis(x);
+
+        YAxis y = new YAxis();
+        y.setTitle("Rainfall (mm)");
+        configuration.addyAxis(y);
+
+        return configuration;
     }
 
     private Configuration createAreaChartConfiguration() {
