@@ -172,4 +172,22 @@ public class CrudElement extends TestBenchElement {
         }
         return this;
     }
+
+	/**
+	 * Gets the confirm cancel dialog
+	 *
+	 * @return the confirm cancel dialog
+	 */
+	public ConfirmDialogElement getConfirmCancel() {
+		return this.$(ConfirmDialogElement.class).id("confirmCancel");
+	}
+
+	/**
+	 * Gets the confirm delete dialog
+	 *
+	 * @return the confirm delete dialog
+	 */
+	public ConfirmDialogElement getConfirmDelete() {
+		return this.$(ConfirmDialogElement.class).id("confirmDelete");
+	}
 }
