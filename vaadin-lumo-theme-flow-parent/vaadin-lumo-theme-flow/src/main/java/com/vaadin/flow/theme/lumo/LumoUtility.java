@@ -2,13 +2,23 @@
 package com.vaadin.flow.theme.lumo;
 
 public class LumoUtility {
+
+    private LumoUtility() {
+    }
+
     public static class Accessibility {
+
+        private Accessibility() {
+        }
 
         public static final String SCREEN_READER_ONLY = "sr-only";
 
     }
 
     public static class AlignContent {
+
+        private AlignContent() {
+        }
 
         public static final String AROUND = "content-around";
         public static final String BETWEEN = "content-between";
@@ -22,6 +32,9 @@ public class LumoUtility {
 
     public static class AlignItems {
 
+        private AlignItems() {
+        }
+
         public static final String BASELINE = "items-baseline";
         public static final String CENTER = "items-center";
         public static final String END = "items-end";
@@ -31,6 +44,9 @@ public class LumoUtility {
     }
 
     public static class AlignSelf {
+
+        private AlignSelf() {
+        }
 
         public static final String AUTO = "self-auto";
         public static final String BASELINE = "self-baseline";
@@ -42,6 +58,9 @@ public class LumoUtility {
     }
 
     public static class Background {
+
+        private Background() {
+        }
 
         public static final String BASE = "bg-base";
         public static final String TRANSPARENT = "bg-transparent";
@@ -74,6 +93,9 @@ public class LumoUtility {
 
     public static class Border {
 
+        private Border() {
+        }
+
         public static final String NONE = "border-0";
 
         public static final String ALL = "border";
@@ -85,6 +107,9 @@ public class LumoUtility {
     }
 
     public static class BorderColor {
+
+        private BorderColor() {
+        }
 
         public static final String CONTRAST = "border-contrast";
         public static final String CONTRAST_90 = "border-contrast-90";
@@ -114,6 +139,9 @@ public class LumoUtility {
 
     public static class BorderRadius {
 
+        private BorderRadius() {
+        }
+
         public static final String NONE = "rounded-none";
         public static final String SMALL = "rounded-s";
         public static final String MEDIUM = "rounded-m";
@@ -122,6 +150,9 @@ public class LumoUtility {
     }
 
     public static class BoxShadow {
+
+        private BoxShadow() {
+        }
 
         public static final String XSMALL = "shadow-xs";
         public static final String SMALL = "shadow-s";
@@ -133,12 +164,18 @@ public class LumoUtility {
 
     public static class BoxSizing {
 
+        private BoxSizing() {
+        }
+
         public static final String BORDER = "box-border";
         public static final String CONTENT = "box-content";
 
     }
 
     public static class Display {
+
+        private Display() {
+        }
 
         public static final String BLOCK = "block";
         public static final String FLEX = "flex";
@@ -151,27 +188,50 @@ public class LumoUtility {
 
         public static class Breakpoint {
 
+            private Breakpoint() {
+            }
+
             public static class Small {
+
+                private Small() {
+                }
+
                 public static final String FLEX = "sm:flex";
                 public static final String HIDDEN = "sm:hidden";
             }
 
             public static class Medium {
+
+                private Medium() {
+                }
+
                 public static final String FLEX = "md:flex";
                 public static final String HIDDEN = "md:hidden";
             }
 
             public static class Large {
+
+                private Large() {
+                }
+
                 public static final String FLEX = "lg:flex";
                 public static final String HIDDEN = "lg:hidden";
             }
 
             public static class XLarge {
+
+                private XLarge() {
+                }
+
                 public static final String FLEX = "xl:flex";
                 public static final String HIDDEN = "xl:hidden";
             }
 
             public static class XXLarge {
+
+                private XXLarge() {
+                }
+
                 public static final String FLEX = "2xl:flex";
                 public static final String HIDDEN = "2xl:hidden";
             }
@@ -179,6 +239,9 @@ public class LumoUtility {
     }
 
     public static class Flex {
+
+        private Flex() {
+        }
 
         public static final String AUTO = "flex-auto";
         public static final String NONE = "flex-none";
@@ -193,6 +256,9 @@ public class LumoUtility {
 
     public static class FlexDirection {
 
+        private FlexDirection() {
+        }
+
         public static final String COLUMN = "flex-col";
         public static final String COLUMN_REVERSE = "flex-col-reverse";
         public static final String ROW = "flex-row";
@@ -200,27 +266,50 @@ public class LumoUtility {
 
         public static class Breakpoint {
 
+            private Breakpoint() {
+            }
+
             public static class Small {
+
+                private Small() {
+                }
+
                 public static final String COLUMN = "sm:flex-col";
                 public static final String ROW = "sm:flex-row";
             }
 
             public static class Medium {
+
+                private Medium() {
+                }
+
                 public static final String COLUMN = "md:flex-col";
                 public static final String ROW = "md:flex-row";
             }
 
             public static class Large {
+
+                private Large() {
+                }
+
                 public static final String COLUMN = "lg:flex-col";
                 public static final String ROW = "lg:flex-row";
             }
 
             public static class XLarge {
+
+                private XLarge() {
+                }
+
                 public static final String COLUMN = "xl:flex-col";
                 public static final String ROW = "xl:flex-row";
             }
 
             public static class XXLarge {
+
+                private XXLarge() {
+                }
+
                 public static final String COLUMN = "2xl:flex-col";
                 public static final String ROW = "2xl:flex-row";
             }
@@ -231,6 +320,9 @@ public class LumoUtility {
 
     public static class FlexWrap {
 
+        private FlexWrap() {
+        }
+
         public static final String NOWRAP = "flex-nowrap";
         public static final String WRAP = "flex-wrap";
         public static final String WRAP_REVERSE = "flex-wrap-reverse";
@@ -238,6 +330,9 @@ public class LumoUtility {
     }
 
     public static class FontSize {
+
+        private FontSize() {
+        }
 
         public static final String XXSMALL = "text-2xs";
         public static final String XSMALL = "text-xs";
@@ -250,7 +345,14 @@ public class LumoUtility {
 
         public static class Breakpoint {
 
+            private Breakpoint() {
+            }
+
             public static class Small {
+
+                private Small() {
+                }
+
                 public static final String XXSMALL = "sm:text-2xs";
                 public static final String XSMALL = "sm:text-xs";
                 public static final String SMALL = "sm:text-s";
@@ -262,6 +364,10 @@ public class LumoUtility {
             }
 
             public static class Medium {
+
+                private Medium() {
+                }
+
                 public static final String XXSMALL = "md:text-2xs";
                 public static final String XSMALL = "md:text-xs";
                 public static final String SMALL = "md:text-s";
@@ -273,6 +379,10 @@ public class LumoUtility {
             }
 
             public static class Large {
+
+                private Large() {
+                }
+
                 public static final String XXSMALL = "lg:text-2xs";
                 public static final String XSMALL = "lg:text-xs";
                 public static final String SMALL = "lg:text-s";
@@ -284,6 +394,10 @@ public class LumoUtility {
             }
 
             public static class XLarge {
+
+                private XLarge() {
+                }
+
                 public static final String XXSMALL = "xl:text-2xs";
                 public static final String XSMALL = "xl:text-xs";
                 public static final String SMALL = "xl:text-s";
@@ -295,6 +409,10 @@ public class LumoUtility {
             }
 
             public static class XXLarge {
+
+                private XXLarge() {
+                }
+
                 public static final String XXSMALL = "2xl:text-2xs";
                 public static final String XSMALL = "2xl:text-xs";
                 public static final String SMALL = "2xl:text-s";
@@ -309,6 +427,9 @@ public class LumoUtility {
 
     public static class FontWeight {
 
+        private FontWeight() {
+        }
+
         public static final String THIN = "font-thin";
         public static final String EXTRALIGHT = "font-extralight";
         public static final String LIGHT = "font-light";
@@ -322,6 +443,9 @@ public class LumoUtility {
 
     public static class Gap {
 
+        private Gap() {
+        }
+
         public static final String XSMALL = "gap-xs";
         public static final String SMALL = "gap-s";
         public static final String MEDIUM = "gap-m";
@@ -329,6 +453,10 @@ public class LumoUtility {
         public static final String XLARGE = "gap-xl";
 
         public static class Column {
+
+            private Column() {
+            }
+
             public static final String XSMALL = "gap-x-xs";
             public static final String SMALL = "gap-x-s";
             public static final String MEDIUM = "gap-x-m";
@@ -337,6 +465,10 @@ public class LumoUtility {
         }
 
         public static class Row {
+
+            private Row() {
+            }
+
             public static final String XSMALL = "gap-y-xs";
             public static final String SMALL = "gap-y-s";
             public static final String MEDIUM = "gap-y-m";
@@ -347,10 +479,16 @@ public class LumoUtility {
 
     public static class Grid {
 
+        private Grid() {
+        }
+
         public static final String FLOW_COLUMN = "grid-flow-col";
         public static final String FLOW_ROW = "grid-flow-row";
 
         public static class Column {
+
+            private Column() {
+            }
 
             public static final String COLUMNS_1 = "grid-cols-1";
             public static final String COLUMNS_2 = "grid-cols-2";
@@ -382,6 +520,9 @@ public class LumoUtility {
 
         public static class Row {
 
+            private Row() {
+            }
+
             public static final String ROWS_1 = "grid-rows-1";
             public static final String ROWS_2 = "grid-rows-2";
             public static final String ROWS_3 = "grid-rows-3";
@@ -400,7 +541,14 @@ public class LumoUtility {
 
         public static class Breakpoint {
 
+            private Breakpoint() {
+            }
+
             public static class Small {
+
+                private Small() {
+                }
+
                 public static final String COLUMNS_1 = "sm:grid-cols-1";
                 public static final String COLUMNS_2 = "sm:grid-cols-2";
                 public static final String COLUMNS_3 = "sm:grid-cols-3";
@@ -416,6 +564,10 @@ public class LumoUtility {
             }
 
             public static class Medium {
+
+                private Medium() {
+                }
+
                 public static final String COLUMNS_1 = "md:grid-cols-1";
                 public static final String COLUMNS_2 = "md:grid-cols-2";
                 public static final String COLUMNS_3 = "md:grid-cols-3";
@@ -431,6 +583,10 @@ public class LumoUtility {
             }
 
             public static class Large {
+
+                private Large() {
+                }
+
                 public static final String COLUMNS_1 = "lg:grid-cols-1";
                 public static final String COLUMNS_2 = "lg:grid-cols-2";
                 public static final String COLUMNS_3 = "lg:grid-cols-3";
@@ -446,6 +602,10 @@ public class LumoUtility {
             }
 
             public static class XLarge {
+
+                private XLarge() {
+                }
+
                 public static final String COLUMNS_1 = "xl:grid-cols-1";
                 public static final String COLUMNS_2 = "xl:grid-cols-2";
                 public static final String COLUMNS_3 = "xl:grid-cols-3";
@@ -461,6 +621,10 @@ public class LumoUtility {
             }
 
             public static class XXLarge {
+
+                private XXLarge() {
+                }
+
                 public static final String COLUMNS_1 = "2xl:grid-cols-1";
                 public static final String COLUMNS_2 = "2xl:grid-cols-2";
                 public static final String COLUMNS_3 = "2xl:grid-cols-3";
@@ -481,6 +645,9 @@ public class LumoUtility {
 
     public static class Height {
 
+        private Height() {
+        }
+
         public static final String AUTO = "h-auto";
         public static final String FULL = "h-full";
         public static final String NONE = "h-0";
@@ -496,6 +663,9 @@ public class LumoUtility {
 
     public static class IconSize {
 
+        private IconSize() {
+        }
+
         public static final String SMALL = "icon-s";
         public static final String MEDIUM = "icon-m";
         public static final String LARGE = "icon-l";
@@ -503,6 +673,9 @@ public class LumoUtility {
     }
 
     public static class JustifyContent {
+
+        private JustifyContent() {
+        }
 
         public static final String AROUND = "justify-around";
         public static final String BETWEEN = "justify-between";
@@ -515,6 +688,9 @@ public class LumoUtility {
 
     public static class LineHeight {
 
+        private LineHeight() {
+        }
+
         public static final String NONE = "leading-none";
         public static final String XSMALL = "leading-xs";
         public static final String SMALL = "leading-s";
@@ -524,11 +700,17 @@ public class LumoUtility {
 
     public static class ListStyleType {
 
+        private ListStyleType() {
+        }
+
         public static final String NONE = "list-none";
 
     }
 
     public static class Margin {
+
+        private Margin() {
+        }
 
         public static final String AUTO = "m-auto";
         public static final String NONE = "m-0";
@@ -539,6 +721,10 @@ public class LumoUtility {
         public static final String XLARGE = "m-xl";
 
         public static class Bottom {
+
+            private Bottom() {
+            }
+
             public static final String AUTO = "mb-auto";
             public static final String NONE = "mb-0";
             public static final String XSMALL = "mb-xs";
@@ -549,6 +735,10 @@ public class LumoUtility {
         }
 
         public static class End {
+
+            private End() {
+            }
+
             public static final String AUTO = "me-auto";
             public static final String NONE = "me-0";
             public static final String XSMALL = "me-xs";
@@ -559,6 +749,10 @@ public class LumoUtility {
         }
 
         public static class Horizontal {
+
+            private Horizontal() {
+            }
+
             public static final String AUTO = "mx-auto";
             public static final String NONE = "mx-0";
             public static final String XSMALL = "mx-xs";
@@ -569,6 +763,10 @@ public class LumoUtility {
         }
 
         public static class Left {
+
+            private Left() {
+            }
+
             public static final String AUTO = "ml-auto";
             public static final String NONE = "ml-0";
             public static final String XSMALL = "ml-xs";
@@ -579,6 +777,10 @@ public class LumoUtility {
         }
 
         public static class Right {
+
+            private Right() {
+            }
+
             public static final String AUTO = "mr-auto";
             public static final String NONE = "mr-0";
             public static final String XSMALL = "mr-xs";
@@ -589,6 +791,10 @@ public class LumoUtility {
         }
 
         public static class Start {
+
+            private Start() {
+            }
+
             public static final String AUTO = "ms-auto";
             public static final String NONE = "ms-0";
             public static final String XSMALL = "ms-xs";
@@ -599,6 +805,10 @@ public class LumoUtility {
         }
 
         public static class Top {
+
+            private Top() {
+            }
+
             public static final String AUTO = "mt-auto";
             public static final String NONE = "mt-0";
             public static final String XSMALL = "mt-xs";
@@ -609,6 +819,10 @@ public class LumoUtility {
         }
 
         public static class Vertical {
+
+            private Vertical() {
+            }
+
             public static final String AUTO = "my-auto";
             public static final String NONE = "my-0";
             public static final String XSMALL = "my-xs";
@@ -622,12 +836,18 @@ public class LumoUtility {
 
     public static class MaxHeight {
 
+        private MaxHeight() {
+        }
+
         public static final String FULL = "max-h-full";
         public static final String SCREEN = "max-h-screen";
 
     }
 
     public static class MaxWidth {
+
+        private MaxWidth() {
+        }
 
         public static final String FULL = "max-w-full";
         public static final String SCREEN_SMALL = "max-w-screen-sm";
@@ -640,6 +860,9 @@ public class LumoUtility {
 
     public static class MinHeight {
 
+        private MinHeight() {
+        }
+
         public static final String FULL = "min-h-full";
         public static final String NONE = "min-h-0";
         public static final String SCREEN = "min-h-screen";
@@ -648,12 +871,18 @@ public class LumoUtility {
 
     public static class MinWidth {
 
+        private MinWidth() {
+        }
+
         public static final String FULL = "min-w-full";
         public static final String NONE = "min-w-0";
 
     }
 
     public static class Overflow {
+
+        private Overflow() {
+        }
 
         public static final String AUTO = "overflow-auto";
         public static final String HIDDEN = "overflow-hidden";
@@ -663,6 +892,9 @@ public class LumoUtility {
 
     public static class Padding {
 
+        private Padding() {
+        }
+
         public static final String NONE = "p-0";
         public static final String XSMALL = "p-xs";
         public static final String SMALL = "p-s";
@@ -671,6 +903,10 @@ public class LumoUtility {
         public static final String XLARGE = "p-xl";
 
         public static class Bottom {
+
+            private Bottom() {
+            }
+
             public static final String NONE = "pb-0";
             public static final String XSMALL = "pb-xs";
             public static final String SMALL = "pb-s";
@@ -680,6 +916,10 @@ public class LumoUtility {
         }
 
         public static class End {
+
+            private End() {
+            }
+
             public static final String NONE = "pe-0";
             public static final String XSMALL = "pe-xs";
             public static final String SMALL = "pe-s";
@@ -689,6 +929,10 @@ public class LumoUtility {
         }
 
         public static class Horizontal {
+
+            private Horizontal() {
+            }
+
             public static final String NONE = "px-0";
             public static final String XSMALL = "px-xs";
             public static final String SMALL = "px-s";
@@ -698,6 +942,10 @@ public class LumoUtility {
         }
 
         public static class Left {
+
+            private Left() {
+            }
+
             public static final String NONE = "pl-0";
             public static final String XSMALL = "pl-xs";
             public static final String SMALL = "pl-s";
@@ -707,6 +955,10 @@ public class LumoUtility {
         }
 
         public static class Right {
+
+            private Right() {
+            }
+
             public static final String NONE = "pr-0";
             public static final String XSMALL = "pr-xs";
             public static final String SMALL = "pr-s";
@@ -716,6 +968,10 @@ public class LumoUtility {
         }
 
         public static class Start {
+
+            private Start() {
+            }
+
             public static final String NONE = "ps-0";
             public static final String XSMALL = "ps-xs";
             public static final String SMALL = "ps-s";
@@ -725,6 +981,10 @@ public class LumoUtility {
         }
 
         public static class Top {
+
+            private Top() {
+            }
+
             public static final String NONE = "pt-0";
             public static final String XSMALL = "pt-xs";
             public static final String SMALL = "pt-s";
@@ -734,6 +994,10 @@ public class LumoUtility {
         }
 
         public static class Vertical {
+
+            private Vertical() {
+            }
+
             public static final String NONE = "py-0";
             public static final String XSMALL = "py-xs";
             public static final String SMALL = "py-s";
@@ -746,6 +1010,9 @@ public class LumoUtility {
 
     public static class Position {
 
+        private Position() {
+        }
+
         public static final String ABSOLUTE = "absolute";
         public static final String FIXED = "fixed";
         public static final String RELATIVE = "relative";
@@ -756,6 +1023,9 @@ public class LumoUtility {
 
     public static class TextAlignment {
 
+        private TextAlignment() {
+        }
+
         public static final String LEFT = "text-left";
         public static final String CENTER = "text-center";
         public static final String RIGHT = "text-right";
@@ -764,6 +1034,9 @@ public class LumoUtility {
     }
 
     public static class TextColor {
+
+        private TextColor() {
+        }
 
         public static final String HEADER = "text-header";
         public static final String BODY = "text-body";
@@ -784,12 +1057,18 @@ public class LumoUtility {
 
     public static class TextOverflow {
 
+        private TextOverflow() {
+        }
+
         public static final String CLIP = "overflow-cip";
         public static final String ELLIPSIS = "overflow-ellipsis";
 
     }
 
     public static class TextTransform {
+
+        private TextTransform() {
+        }
 
         public static final String CAPITALIZE = "capitalize";
         public static final String LOWERCASE = "lowercase";
@@ -798,6 +1077,9 @@ public class LumoUtility {
     }
 
     public static class Whitespace {
+
+        private Whitespace() {
+        }
 
         public static final String NORMAL = "whitespace-normal";
         public static final String NOWRAP = "whitespace-nowrap";
@@ -808,6 +1090,9 @@ public class LumoUtility {
     }
 
     public static class Width {
+
+        private Width() {
+        }
 
         public static final String AUTO = "w-auto";
         public static final String FULL = "w-full";
