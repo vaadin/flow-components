@@ -26,9 +26,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <junit.version>4.11</junit.version>
-        <mockito.version>1.10.19</mockito.version>
-        <jetty.version>9.3.7.v20160115</jetty.version>
+        <jetty.version>9.3.9.v20160517</jetty.version>
+        <jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
 
         <flow.version>6.0.9</flow.version>
         <vaadin.version>19.0.8</vaadin.version>
@@ -41,7 +40,12 @@
         <gwt.style>pretty</gwt.style>
         <gwt.draft.compile>false</gwt.draft.compile>
 
-
+        <junit.version>4.11</junit.version>
+        <mockito.version>1.10.19</mockito.version>
+        <testbench.version>5.1.0</testbench.version>
+        <testbench.api.version>${vaadin.version}</testbench.api.version>
+        <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+        <hamcrest.version>1.3</hamcrest.version>
     </properties>
 
     <modules>
@@ -99,7 +103,6 @@
                 <version>${poi.ooxml.schemas.version}</version>
             </dependency>
 
-
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-client</artifactId>
@@ -144,6 +147,11 @@
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-library</artifactId>
+                <version>${hamcrest.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -167,10 +175,32 @@
                         <modules>
                             <module>${gwt.module></module>
                         </modules>
+                        <hostedWebapp>${gwt.hostedWebapp}</hostedWebapp>
                         <generateJsInteropExports>true</generateJsInteropExports>
                         <style>${gwt.style}</style>
                         <extraJvmArgs>-Xmx1g -Xms1g</extraJvmArgs>
                         <draftCompile>${gwt.draft.compile}</draftCompile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>${jetty.version}</version>
+                    <configuration>
+                        <httpConnector>
+                            <port>9998</port>
+                        </httpConnector>
+                        <useTestClasspath>true</useTestClasspath>
+                        <stopKey>STOP</stopKey>
+                        <stopPort>8005</stopPort>
+                        <webAppConfig>
+                            <webInfIncludeJarPattern>.*vaadin.*</webInfIncludeJarPattern>
+                            <contextPath>/</contextPath>
+                            <resourceBases>
+                                <resourceBase>${gwt.hostedWebapp}</resourceBase>
+                                <resourceBase>${project.build.outputDirectory}</resourceBase>
+                            </resourceBases>
+                        </webAppConfig>
                     </configuration>
                 </plugin>
             </plugins>
