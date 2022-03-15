@@ -29,6 +29,9 @@ public class ComboBoxNavigationIT extends AbstractComponentIT {
 
     @Test
     public void comboBoxNavigationTest() {
+        open();
+        waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
+                .size() > 0);
         ComboBoxElement combo = $(ComboBoxElement.class).first();
         combo.selectByText("Four");
         findElement(By.id("dummy-view"));
