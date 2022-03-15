@@ -24,12 +24,13 @@ public class HasStyleTest {
     @Test
     public void customField() {
         CustomField<String> c = new CustomField<String>() {
-            @Override protected String generateModelValue() {
+            @Override
+            protected String generateModelValue() {
                 return null;
             }
 
-            @Override protected void setPresentationValue(
-                    String newPresentationValue) {
+            @Override
+            protected void setPresentationValue(String newPresentationValue) {
 
             }
         };
