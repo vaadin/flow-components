@@ -8,8 +8,9 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>2.0.2</version>
+        <version>2.0.5</version>
     </parent>
+    <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>23.0-SNAPSHOT</flow.version>
         <testbench.version>8.0.0</testbench.version>
@@ -37,7 +38,6 @@
         <osgi.export.package>default</osgi.export.package>
     </properties>
     <modules>
-        <module>vaadin-component-demo-helpers</module>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
@@ -542,7 +542,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.3.1</version>
+                <version>4.4.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

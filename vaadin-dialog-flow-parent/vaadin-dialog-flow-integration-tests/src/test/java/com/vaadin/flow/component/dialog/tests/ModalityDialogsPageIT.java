@@ -94,7 +94,8 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
     @Test
     public void openModalDialog_outsideClickToCloseDialog_logButtonClickable() {
         $(NativeButtonElement.class).id("add-modal-dialog").click();
-        $(NativeButtonElement.class).id("enable-close-on-outside-click").click();
+        $(NativeButtonElement.class).id("enable-close-on-outside-click")
+                .click();
         $(NativeButtonElement.class).id("open-modal-dialog").click();
 
         // Click anything to close dialog

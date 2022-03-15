@@ -18,29 +18,33 @@ package com.vaadin.flow.component.radiobutton.tests;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.ComponentDemoTest;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonElement;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.testbench.TestBenchElement;
 
-public class RadioButtonGroupIT extends ComponentDemoTest {
+@TestPath("vaadin-radio-button-group-test-demo")
+public class RadioButtonGroupIT extends AbstractComponentIT {
 
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-radio-button-group-test-demo";
+    @Before
+    public void init() {
+        open();
     }
 
     @Test
     public void valueChange() {
-        WebElement valueDiv = layout.findElement(By.id("button-group-value"));
-        WebElement group = layout
-                .findElement(By.id("button-group-with-value-change-listener"));
+        WebElement valueDiv = findElement(By.id("button-group-value"));
+        WebElement group = findElement(
+                By.id("button-group-with-value-change-listener"));
 
         executeScript("arguments[0].value=2;", group);
 
@@ -57,10 +61,9 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void itemGenerator() {
-        WebElement valueDiv = layout
-                .findElement(By.id("button-group-gen-value"));
-        WebElement group = layout
-                .findElement(By.id("button-group-with-item-generator"));
+        WebElement valueDiv = findElement(By.id("button-group-gen-value"));
+        WebElement group = findElement(
+                By.id("button-group-with-item-generator"));
 
         executeScript("arguments[0].value=2;", group);
 
@@ -71,7 +74,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void disabledGroup() {
-        WebElement group = layout.findElement(By.id("button-group-disabled"));
+        WebElement group = findElement(By.id("button-group-disabled"));
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 group.getAttribute("disabled"));
@@ -79,9 +82,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void itemRenderer() {
-        WebElement valueDiv = layout
-                .findElement(By.id("button-group-renderer-value"));
-        WebElement group = layout.findElement(By.id("button-group-renderer"));
+        WebElement valueDiv = findElement(By.id("button-group-renderer-value"));
+        WebElement group = findElement(By.id("button-group-renderer"));
 
         List<WebElement> buttons = group
                 .findElements(By.tagName("vaadin-radio-button"));
@@ -101,8 +103,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void iconGenerator() {
-        WebElement group = layout
-                .findElement(By.id("button-group-icon-generator"));
+        WebElement group = findElement(By.id("button-group-icon-generator"));
 
         List<WebElement> buttons = group
                 .findElements(By.tagName("vaadin-radio-button"));
@@ -117,8 +118,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void disabledGroupItems() {
-        WebElement group = layout
-                .findElement(By.id("button-group-disabled-items"));
+        WebElement group = findElement(By.id("button-group-disabled-items"));
 
         List<WebElement> buttons = group
                 .findElements(By.tagName("vaadin-radio-button"));
@@ -131,8 +131,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         buttons.get(0).click();
 
-        WebElement infoLabel = layout
-                .findElement(By.id("button-group-disabled-items-info"));
+        WebElement infoLabel = findElement(
+                By.id("button-group-disabled-items-info"));
 
         Assert.assertEquals("'foo' should be selected", "foo",
                 infoLabel.getText());
@@ -160,7 +160,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void readOnlyGroup() {
-        WebElement group = layout.findElement(By.id("button-group-read-only"));
+        WebElement group = findElement(By.id("button-group-read-only"));
 
         List<WebElement> buttons = group
                 .findElements(By.tagName("vaadin-radio-button"));
@@ -175,7 +175,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         buttons.get(1).click();
 
-        WebElement valueInfo = layout.findElement(By.id("selected-value-info"));
+        WebElement valueInfo = findElement(By.id("selected-value-info"));
         Assert.assertEquals("", valueInfo.getText());
 
         // make the group not read-only
@@ -229,8 +229,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void addedComponentsAfterItems() {
-        WebElement group = layout
-                .findElement(By.id("button-group-with-appended-text"));
+        WebElement group = findElement(
+                By.id("button-group-with-appended-text"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -249,8 +249,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void insertedComponentsBetweenItems() {
-        WebElement group = layout
-                .findElement(By.id("button-group-with-inserted-component"));
+        WebElement group = findElement(
+                By.id("button-group-with-inserted-component"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -267,8 +267,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void componentsPrependedBeforeItems() {
-        WebElement group = layout
-                .findElement(By.id("button-group-with-prepended-component"));
+        WebElement group = findElement(
+                By.id("button-group-with-prepended-component"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -299,8 +299,8 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void dynamicComponentForAfterItem() {
-        WebElement group = layout
-                .findElement(By.id("button-group-with-dynamic-component"));
+        WebElement group = findElement(
+                By.id("button-group-with-dynamic-component"));
 
         List<WebElement> elements = group.findElements(By.xpath("./*"));
 
@@ -334,7 +334,13 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Test
     public void assertThemeVariant() {
-        verifyThemeVariantsBeingToggled();
+        WebElement group = findElement(By.id("button-group-theme-variant"));
+        scrollToElement(group);
+        Assert.assertEquals(RadioGroupVariant.LUMO_VERTICAL.getVariantName(),
+                group.getAttribute("theme"));
+
+        findElement(By.id("remove-theme-variant-button")).click();
+        Assert.assertNull(group.getAttribute("theme"));
     }
 
     @Test

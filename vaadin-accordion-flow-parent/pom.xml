@@ -11,8 +11,7 @@
     <name>Vaadin Accordion Parent</name>
     <modules>
         <module>vaadin-accordion-flow</module>
-        <module>vaadin-accordion-testbench</module>
-        <module>vaadin-accordion-flow-demo</module>
+        <module>vaadin-accordion-testbench</module>        
     </modules>
     <profiles>
         <profile>

@@ -18,7 +18,6 @@
     <modules>
         <module>vaadin-charts-flow</module>
         <module>vaadin-charts-testbench</module>
-        <module>vaadin-charts-flow-demo</module>
         <module>vaadin-charts-flow-svg-generator</module>
     </modules>
     <profiles>

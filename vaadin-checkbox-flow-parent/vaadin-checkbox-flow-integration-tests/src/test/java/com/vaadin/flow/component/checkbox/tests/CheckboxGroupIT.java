@@ -17,9 +17,13 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.List;
 
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.TestBenchTestCase;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
@@ -27,13 +31,17 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import com.vaadin.tests.ComponentDemoTest;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class CheckboxGroupIT extends ComponentDemoTest {
+@TestPath("vaadin-checkbox-group-test-demo")
+public class CheckboxGroupIT extends AbstractComponentIT {
 
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-checkbox-group-test-demo";
+    private TestBenchTestCase layout;
+
+    @Before
+    public void init() {
+        open();
+        layout = this;
     }
 
     @Test
@@ -155,7 +163,12 @@ public class CheckboxGroupIT extends ComponentDemoTest {
 
     @Test
     public void assertThemeVariant() {
-        verifyThemeVariantsBeingToggled();
+        WebElement group = findElement(By.id("checkbox-group-theme-variants"));
+        scrollToElement(group);
+        Assert.assertEquals("vertical", group.getAttribute("theme"));
+
+        findElement(By.id("remove-theme-variant-button")).click();
+        Assert.assertNull(group.getAttribute("theme"));
     }
 
     @Test

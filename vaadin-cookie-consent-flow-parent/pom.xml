@@ -18,7 +18,6 @@
     <modules>
         <module>vaadin-cookie-consent-flow</module>
         <module>vaadin-cookie-consent-testbench</module>
-        <module>vaadin-cookie-consent-flow-demo</module>
     </modules>
     <profiles>
         <profile>

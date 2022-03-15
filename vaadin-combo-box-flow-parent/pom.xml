@@ -12,7 +12,6 @@
     <modules>
         <module>vaadin-combo-box-flow</module>
         <module>vaadin-combo-box-testbench</module>
-        <module>vaadin-combo-box-flow-demo</module>
     </modules>
     <profiles>
         <profile>

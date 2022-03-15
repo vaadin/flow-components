@@ -17,55 +17,57 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.ComponentDemoTest;
-
 /**
  * Tests for the VerticalLayout.
  */
-public class VerticalLayoutViewIT extends ComponentDemoTest {
+@TestPath("vaadin-ordered-layout")
+public class VerticalLayoutViewIT extends AbstractComponentIT {
 
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-ordered-layout/verticallayout";
+    @Before
+    public void init() {
+        open();
     }
 
     @Test
     public void defaultLayout() {
-        WebElement vLayout = layout.findElement(By.id("default-layout"));
-        assertBasicFlexPropertiesAreSet(vLayout);
+        WebElement vlayout = findElement(By.id("vertical-default-layout"));
+        assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertTrue(
                 "By default layout should contain spacing theme in 'theme' attribute",
-                vLayout.getAttribute("theme").contains("spacing"));
+                vlayout.getAttribute("theme").contains("spacing"));
         Assert.assertTrue(
                 "By default layout should contain margin theme in 'theme' attribute",
-                vLayout.getAttribute("theme").contains("margin"));
+                vlayout.getAttribute("theme").contains("margin"));
 
-        checkThemeChanges(vLayout, "spacing", false);
-        checkThemeChanges(vLayout, "margin", false);
+        checkThemeChanges(vlayout, "spacing", false);
+        checkThemeChanges(vlayout, "margin", false);
 
         Assert.assertNull(
                 "After turning off spacing and padding, layout should not contain 'theme' attribute",
-                vLayout.getAttribute("theme"));
+                vlayout.getAttribute("theme"));
 
-        checkThemeChanges(vLayout, "margin", true);
+        checkThemeChanges(vlayout, "margin", true);
 
-        checkThemeChanges(vLayout, "margin", false);
+        checkThemeChanges(vlayout, "margin", false);
 
         Assert.assertNull(
                 "After turning off everything, layout should not contain 'theme' attribute",
-                vLayout.getAttribute("theme"));
+                vlayout.getAttribute("theme"));
     }
 
     @Test
     public void layoutWithJustifyContent() {
-        WebElement vlayout = layout
-                .findElement(By.id("layout-with-justify-content"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-justify-content"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
@@ -100,7 +102,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithAlignment() {
-        WebElement vlayout = layout.findElement(By.id("layout-with-alignment"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-alignment"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
@@ -126,8 +129,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithIndividualAlignments() {
-        WebElement vlayout = layout
-                .findElement(By.id("layout-with-individual-alignments"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-individual-alignments"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
@@ -148,8 +151,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithExpandRatios() {
-        WebElement vlayout = layout
-                .findElement(By.id("layout-with-expand-ratios"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-expand-ratios"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         WebElement child = vlayout.findElement(By.id("ratio-1"));
@@ -164,18 +167,18 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void centerComponent() {
-        WebElement vlayout = layout.findElement(By.id("layout-with-center"));
+        WebElement vlayout = findElement(By.id("vertical-layout-with-center"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("center", vlayout.getCssValue("justify-content"));
-        WebElement component = layout.findElement(By.id("center"));
+        WebElement component = vlayout.findElement(By.id("center"));
         Assert.assertEquals("center", component.getCssValue("align-self"));
     }
 
     @Test
     public void boxSizing() {
-        WebElement vlayout = layout
-                .findElement(By.id("vertical-layout-with-box-sizing"));
+        WebElement vlayout = findElement(
+                By.id("vertical-layout-with-box-sizing"));
         Assert.assertEquals("border-box", vlayout.getCssValue("box-sizing"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
@@ -190,7 +193,7 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     private void checkThemeChanges(WebElement layoutToCheck, String themeName,
             boolean shouldPresent) {
-        layout.findElement(By.id(String.format("toggle-%s", themeName)))
+        findElement(By.id(String.format("toggle-vertical-%s", themeName)))
                 .click();
         if (shouldPresent) {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") != null

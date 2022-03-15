@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.virtuallist.tests;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class VirtualListViewPage extends Div {
 
     private static final List<String> LIST_OF_BOOKS;
     static {
-        Faker faker = Faker.instance(new Random(42));
+        Faker faker = Faker.instance(new SecureRandom());
         LIST_OF_BOOKS = createListOfStrings(1000, () -> faker.book().title());
     }
 
@@ -93,9 +94,6 @@ public class VirtualListViewPage extends Div {
         }
     }
 
-    //@formatter:off
-    // begin-source-example
-    // source-example-heading: List of people with DataProvider and ComponentRenderer
     /**
      * Component to render a person card, with picture, name and email.
      */
@@ -121,7 +119,6 @@ public class VirtualListViewPage extends Div {
             Div email = new Div();
             email.getStyle().set("fontSize", "13px");
 
-
             VerticalLayout nameContainer = new VerticalLayout(name, email);
 
             add(pictureContainer, nameContainer);
@@ -133,7 +130,8 @@ public class VirtualListViewPage extends Div {
                 name.setText(person.getFirstName());
             } else {
                 picture.setSrc(person.getPicture());
-                name.setText(person.getFirstName() + " " + person.getLastName());
+                name.setText(
+                        person.getFirstName() + " " + person.getLastName());
                 email.setText(person.getEmail());
             }
         }
@@ -173,7 +171,8 @@ public class VirtualListViewPage extends Div {
         list.setDataProvider(dataProvider);
 
         list.setId("list-of-strings-with-dataprovider");
-        add(new Div(new Text("List of books lazy loaded from the database")), list);
+        add(new Div(new Text("List of books lazy loaded from the database")),
+                list);
     }
 
     private void createChuckNorrisFacts() {
@@ -182,9 +181,9 @@ public class VirtualListViewPage extends Div {
         int totalCount = 1000;
         List<String> facts = createFacts(totalCount);
 
-        DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
-                query -> facts.stream().skip(query.getOffset()).limit(query.getLimit()),
-                query -> totalCount);
+        DataProvider<String, ?> dataProvider = DataProvider
+                .fromCallbacks(query -> facts.stream().skip(query.getOffset())
+                        .limit(query.getLimit()), query -> totalCount);
 
         list.setDataProvider(dataProvider);
         list.setRenderer(TemplateRenderer.<String> of(
@@ -206,15 +205,13 @@ public class VirtualListViewPage extends Div {
                 .ofCollection(createListOfPeople());
 
         list.setDataProvider(dataProvider);
-        list.setRenderer(TemplateRenderer
-                .<Person> of("<div style='padding:10px; display:flex; min-width:250px'>"
-                                + "<div style='margin-right:10px; width:40px; height:40px'>"
-                                    + "<img src='[[item.picture]]' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>"
-                                + "</div>"
-                                + "<div>"
-                                    + "[[item.firstName]] [[item.lastName]]"
-                                    + "<br><small>[[item.email]]</small>"
-                                + "</div>"
+        list.setRenderer(TemplateRenderer.<Person> of(
+                "<div style='padding:10px; display:flex; min-width:250px'>"
+                        + "<div style='margin-right:10px; width:40px; height:40px'>"
+                        + "<img src='[[item.picture]]' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>"
+                        + "</div>" + "<div>"
+                        + "[[item.firstName]] [[item.lastName]]"
+                        + "<br><small>[[item.email]]</small>" + "</div>"
                         + "</div>")
                 .withProperty("firstName", Person::getFirstName)
                 .withProperty("lastName", Person::getLastName)
@@ -322,9 +319,8 @@ public class VirtualListViewPage extends Div {
 
         list.setId("disabled-list-with-templates");
         switchEnabled.setId("switch-enabled-state-string-list");
-        add(
-                new Div(new Text(
-                        "Rank up/down your favorite Lord of the Rings characters")),
+        add(new Div(new Text(
+                "Rank up/down your favorite Lord of the Rings characters")),
                 list, removalResult, switchEnabled);
     }
 
@@ -348,12 +344,11 @@ public class VirtualListViewPage extends Div {
         list.setPlaceholderItem(placeholder);
 
         NativeButton switchEnabled = new NativeButton("Switch enabled state",
-                event-> list.setEnabled(!list.isEnabled()));
+                event -> list.setEnabled(!list.isEnabled()));
 
         list.setId("list-of-people-with-dataprovider-and-component-renderer");
         switchEnabled.setId("switch-enabled-people-list");
-        add(
-                new Div(new Text("List of people with grid layout")), list,
+        add(new Div(new Text("List of people with grid layout")), list,
                 switchEnabled);
     }
 
@@ -373,7 +368,7 @@ public class VirtualListViewPage extends Div {
     private List<String> getLordOfTheRingsCharacters() {
         Set<String> characters = new HashSet<>();
 
-        Faker instance = Faker.instance(new Random(42));
+        Faker instance = Faker.instance(new SecureRandom());
         for (int i = 0; i < 100; i++) {
             characters.add(instance.lordOfTheRings().character());
         }
@@ -405,7 +400,7 @@ public class VirtualListViewPage extends Div {
     private List<Person> createListOfPeople() {
         final int numberToGenerate = 500;
         List<Person> people = new ArrayList<>(numberToGenerate);
-        Faker faker = Faker.instance(new Random(42));
+        Faker faker = Faker.instance(new SecureRandom());
         for (int i = 0; i < numberToGenerate; i++) {
             Person person = new Person();
             person.setFirstName(faker.name().firstName());
