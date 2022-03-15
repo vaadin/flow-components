@@ -23,8 +23,15 @@ public final class LumoUtility {
     private LumoUtility() {
     }
 
+    /**
+     * Accessibility related classes.
+     */
     public static final class Accessibility {
 
+        /**
+         * Hides content visually while remaining it available to screen
+         * readers.
+         */
         public static final String SCREEN_READER_ONLY = "sr-only";
 
         private Accessibility() {
@@ -32,6 +39,10 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for distributing space around and between items along a flexbox’s
+     * cross axis or a grid’s block axis. Applies to flexbox and grid layouts.
+     */
     public static final class AlignContent {
 
         public static final String AROUND = "content-around";
@@ -47,6 +58,10 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for aligning items along a flexbox’s cross axis or a grid’s block
+     * axis. Applies to flexbox and grid layouts.
+     */
     public static final class AlignItems {
 
         public static final String BASELINE = "items-baseline";
@@ -60,6 +75,10 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for overriding individual items align-item property. Applies to
+     * flexbox and grid items.
+     */
     public static final class AlignSelf {
 
         public static final String AUTO = "self-auto";
@@ -74,6 +93,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for applying a background color.
+     */
     public static final class Background {
 
         public static final String BASE = "bg-base";
@@ -108,6 +130,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Border related classes.
+     */
     public static final class Border {
 
         public static final String NONE = "border-0";
@@ -123,6 +148,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the border color of an element.
+     */
     public static final class BorderColor {
 
         public static final String CONTRAST = "border-contrast";
@@ -154,6 +182,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the border radius of an element.
+     */
     public static final class BorderRadius {
 
         public static final String NONE = "rounded-none";
@@ -166,6 +197,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for applying a box shadow.
+     */
     public static final class BoxShadow {
 
         public static final String XSMALL = "shadow-xs";
@@ -179,6 +213,11 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the box sizing property of an element. Box sizing
+     * determines whether an element’s border and padding is considered a part
+     * of its size.
+     */
     public static final class BoxSizing {
 
         public static final String BORDER = "box-border";
@@ -189,6 +228,11 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the display property of an element. Determines
+     * whether the element is a block or inline element and how its items are
+     * laid out.
+     */
     public static final class Display {
 
         public static final String BLOCK = "block";
@@ -255,6 +299,10 @@ public final class LumoUtility {
         }
     }
 
+    /**
+     * Classes for setting how items grow and shrink in a flexbox layout.
+     * Applies to flexbox items.
+     */
     public static final class Flex {
 
         public static final String AUTO = "flex-auto";
@@ -271,6 +319,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the flex direction of a flexbox layout.
+     */
     public static final class FlexDirection {
 
         public static final String COLUMN = "flex-col";
@@ -335,6 +386,10 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting how items wrap in a flexbox layout. Applies to
+     * flexbox layouts.
+     */
     public static final class FlexWrap {
 
         public static final String NOWRAP = "flex-nowrap";
@@ -346,6 +401,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the font size of an element.
+     */
     public static final class FontSize {
 
         public static final String XXSMALL = "text-2xs";
@@ -442,6 +500,9 @@ public final class LumoUtility {
         }
     }
 
+    /**
+     * Classes for setting the font weight of an element.
+     */
     public static final class FontWeight {
 
         public static final String THIN = "font-thin";
@@ -458,6 +519,10 @@ public final class LumoUtility {
         }
     }
 
+    /**
+     * Classes for defining the space between items in a flexbox or grid layout.
+     * Applies to flexbox and grid layouts.
+     */
     public static final class Gap {
 
         public static final String XSMALL = "gap-xs";
@@ -469,6 +534,10 @@ public final class LumoUtility {
         private Gap() {
         }
 
+        /**
+         * Classes for defining the horizontal space between items in a flexbox
+         * or grid layout. Applies to flexbox and grid layouts.
+         */
         public static final class Column {
 
             public static final String XSMALL = "gap-x-xs";
@@ -481,6 +550,10 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for defining the vertical space between items in a flexbox or
+         * grid layout. Applies to flexbox and grid layouts.
+         */
         public static final class Row {
 
             public static final String XSMALL = "gap-y-xs";
@@ -494,14 +567,28 @@ public final class LumoUtility {
         }
     }
 
+    /**
+     * Set of classes to define the content flow on a grid layout.
+     */
     public static final class Grid {
 
+        /**
+         * Items are placed by filling each column in turn, adding new columns
+         * as necessary.
+         */
         public static final String FLOW_COLUMN = "grid-flow-col";
+        /**
+         * Items are placed by filling each row in turn, adding new rows as
+         * necessary.
+         */
         public static final String FLOW_ROW = "grid-flow-row";
 
         private Grid() {
         }
 
+        /**
+         * Classes for setting the number of columns in a grid layout.
+         */
         public static final class Column {
 
             public static final String COLUMNS_1 = "grid-cols-1";
@@ -535,6 +622,9 @@ public final class LumoUtility {
 
         }
 
+        /**
+         * Classes for setting the number of rows in a grid layout.
+         */
         public static final class Row {
 
             public static final String ROWS_1 = "grid-rows-1";
@@ -660,6 +750,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for defining the height of an element.
+     */
     public static final class Height {
 
         public static final String AUTO = "h-auto";
@@ -678,6 +771,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for defining the size of elements working as icons.
+     */
     public static final class IconSize {
 
         public static final String SMALL = "icon-s";
@@ -689,6 +785,10 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for aligning items along a flexbox’s main axis or a grid’s inline
+     * axis. Applies to flexbox and grid layouts.
+     */
     public static final class JustifyContent {
 
         public static final String AROUND = "justify-around";
@@ -703,6 +803,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the line height of an element.
+     */
     public static final class LineHeight {
 
         public static final String NONE = "leading-none";
@@ -715,6 +818,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Class for removing the default look of a list.
+     */
     public static final class ListStyleType {
 
         public static final String NONE = "list-none";
@@ -724,6 +830,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the margin of an element.
+     */
     public static final class Margin {
 
         public static final String AUTO = "m-auto";
@@ -737,6 +846,9 @@ public final class LumoUtility {
         private Margin() {
         }
 
+        /**
+         * Classes for setting the bottom margin of an element.
+         */
         public static final class Bottom {
 
             public static final String AUTO = "mb-auto";
@@ -751,6 +863,11 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the logical inline end margin of an element. The
+         * actual physical edge where the styles are applied depends on the text
+         * flow of the element.
+         */
         public static final class End {
 
             public static final String AUTO = "me-auto";
@@ -765,6 +882,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting both the left and the right margins an element.
+         */
         public static final class Horizontal {
 
             public static final String AUTO = "mx-auto";
@@ -779,6 +899,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the left margin of an element.
+         */
         public static final class Left {
 
             public static final String AUTO = "ml-auto";
@@ -793,6 +916,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the right margin of an element.
+         */
         public static final class Right {
 
             public static final String AUTO = "mr-auto";
@@ -807,6 +933,11 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the logical inline start margin of an element.
+         * The actual physical edge where the styles are applied depends on the
+         * text flow of the element.
+         */
         public static final class Start {
 
             public static final String AUTO = "ms-auto";
@@ -821,6 +952,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the top margin of an element.
+         */
         public static final class Top {
 
             public static final String AUTO = "mt-auto";
@@ -835,6 +969,10 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting both the top and the bottom margins of an
+         * element.
+         */
         public static final class Vertical {
 
             public static final String AUTO = "my-auto";
@@ -851,6 +989,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for defining the maximum height of an element.
+     */
     public static final class MaxHeight {
 
         public static final String FULL = "max-h-full";
@@ -861,6 +1002,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for defining the maximum width of an element.
+     */
     public static final class MaxWidth {
 
         public static final String FULL = "max-w-full";
@@ -875,6 +1019,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for defining the minimum height of an element.
+     */
     public static final class MinHeight {
 
         public static final String FULL = "min-h-full";
@@ -886,6 +1033,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for defining the minimum width of an element.
+     */
     public static final class MinWidth {
 
         public static final String FULL = "min-w-full";
@@ -896,6 +1046,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the overflow behaviour of an element.
+     */
     public static final class Overflow {
 
         public static final String AUTO = "overflow-auto";
@@ -907,6 +1060,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the padding of an element.
+     */
     public static final class Padding {
 
         public static final String NONE = "p-0";
@@ -919,6 +1075,9 @@ public final class LumoUtility {
         private Padding() {
         }
 
+        /**
+         * Classes for setting the bottom padding of an element.
+         */
         public static final class Bottom {
 
             public static final String NONE = "pb-0";
@@ -932,6 +1091,11 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the logical inline end padding of an element. The
+         * actual physical edge where the styles are applied depends on the text
+         * flow of the element.
+         */
         public static final class End {
 
             public static final String NONE = "pe-0";
@@ -945,6 +1109,10 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting both the right and the left paddings of an
+         * element.
+         */
         public static final class Horizontal {
 
             public static final String NONE = "px-0";
@@ -958,6 +1126,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the left padding of an element.
+         */
         public static final class Left {
 
             public static final String NONE = "pl-0";
@@ -971,6 +1142,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the right padding of an element.
+         */
         public static final class Right {
 
             public static final String NONE = "pr-0";
@@ -984,6 +1158,11 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for setting the logical inline start padding of an element.
+         * The actual physical edge where the styles are applied depends on the
+         * text flow of the element.
+         */
         public static final class Start {
 
             public static final String NONE = "ps-0";
@@ -997,6 +1176,9 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for defining the top padding of an element.
+         */
         public static final class Top {
 
             public static final String NONE = "pt-0";
@@ -1010,6 +1192,10 @@ public final class LumoUtility {
             }
         }
 
+        /**
+         * Classes for defining both the vertical and the horizontal paddings of
+         * an element.
+         */
         public static final class Vertical {
 
             public static final String NONE = "py-0";
@@ -1025,6 +1211,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the position of an element.
+     */
     public static final class Position {
 
         public static final String ABSOLUTE = "absolute";
@@ -1038,6 +1227,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting an element’s text alignment.
+     */
     public static final class TextAlignment {
 
         public static final String LEFT = "text-left";
@@ -1050,6 +1242,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting an element’s text color.
+     */
     public static final class TextColor {
 
         public static final String HEADER = "text-header";
@@ -1072,6 +1267,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the text overflow.
+     */
     public static final class TextOverflow {
 
         public static final String CLIP = "overflow-cip";
@@ -1082,6 +1280,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for transforming the text.
+     */
     public static final class TextTransform {
 
         public static final String CAPITALIZE = "capitalize";
@@ -1093,6 +1294,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting how the white space inside an element is handled.
+     */
     public static final class Whitespace {
 
         public static final String NORMAL = "whitespace-normal";
@@ -1106,6 +1310,9 @@ public final class LumoUtility {
 
     }
 
+    /**
+     * Classes for setting the width of an element.
+     */
     public static final class Width {
 
         public static final String AUTO = "w-auto";
