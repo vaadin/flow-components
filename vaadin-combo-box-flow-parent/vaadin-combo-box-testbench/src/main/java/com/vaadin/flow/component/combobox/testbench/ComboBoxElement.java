@@ -76,7 +76,11 @@ public class ComboBoxElement extends TestBenchElement
                 + "  var value = combobox._getItemValue(matches[0]);"
                 + "  combobox.value = value;" + "  return true;" //
                 + "}", this, text);
-        closePopup();
+        try {
+            closePopup();
+        } catch (StaleElementReferenceException e) {
+            // This can happen in navigation
+        }
         if (!success) {
             throw new IllegalArgumentException(
                     "Value '" + text + "' not found in the combobox");
