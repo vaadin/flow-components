@@ -40,6 +40,8 @@
         <gwt.version>2.8.2</gwt.version>
         <gwt.style>pretty</gwt.style>
         <gwt.draft.compile>false</gwt.draft.compile>
+
+
     </properties>
 
     <modules>
@@ -147,6 +149,30 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <version>${gwt.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                                <!-- <goal>test</goal> -->
+                                <!-- <goal>generateAsync</goal> -->
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <runTarget>${gwt.target}</runTarget>
+                        <modules>
+                            <module>${gwt.module></module>
+                        </modules>
+                        <generateJsInteropExports>true</generateJsInteropExports>
+                        <style>${gwt.style}</style>
+                        <extraJvmArgs>-Xmx1g -Xms1g</extraJvmArgs>
+                        <draftCompile>${gwt.draft.compile}</draftCompile>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>

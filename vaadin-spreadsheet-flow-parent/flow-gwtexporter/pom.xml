@@ -12,6 +12,12 @@
   <artifactId>flow-gwtexporter</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <gwt.target>GwtAddonExporter.html</gwt.target>
+    <gwt.module>com.vaadin.spreadsheet.flowport.gwtexporter.GwtExporter</gwt.module>
+    <gwt.hostedWebapp>${project.build.directory}/${project.build.finalName}</gwt.hostedWebapp>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -81,32 +87,9 @@
     </resources>
     <plugins>
 
-      <!-- Mojo's Maven Plugin for GWT -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>test</goal>
-              <goal>generateAsync</goal>
-            </goals>
-          </execution>
-        </executions>
-        <!-- Plugin configuration. There are many available options, see
-          gwt-maven-plugin documentation at codehaus.org -->
-        <configuration>
-          <runTarget>GwtAddonExporter.html</runTarget>
-          <modules>
-            <module>com.vaadin.spreadsheet.flowport.gwtexporter.GwtExporter</module>
-          </modules>
-          <generateJsInteropExports>true</generateJsInteropExports>
-          <style>${gwt.style}</style>
-          <extraJvmArgs>-Xmx1g -Xms1g</extraJvmArgs>
-          <draftCompile>${gwt.draft.compile}</draftCompile>
-        </configuration>
       </plugin>
 
       <plugin>
