@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.testbench;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
