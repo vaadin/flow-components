@@ -6,7 +6,6 @@
     <version>3.0-SNAPSHOT</version>
     <artifactId>vaadin-spreadsheet-directorypackage</artifactId>
     <packaging>pom</packaging>
-    <name>Vaadin Spreadsheet</name>
     <inceptionYear>2013</inceptionYear>
 
     <parent>
@@ -53,7 +52,7 @@
     <modules>
         <module>vaadin-spreadsheet</module>
         <module>vaadin-spreadsheet-testbench-api</module>
-        <module>vaadin-spreadsheet-charts</module>
+        <!-- <module>vaadin-spreadsheet-charts</module> -->
         <module>flow-gwtexporter</module>
         <module>flow-component</module>
         <module>flow-demo</module>
