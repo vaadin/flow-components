@@ -29,7 +29,7 @@
 
         <flow.version>23.0.1</flow.version>
         <vaadin.version>${flow.version}</vaadin.version>
-        <framework.version>8.12.2</framework.version>
+        <framework.version>8.14.3</framework.version>
 
         <poi.version>4.0.1</poi.version>
         <poi.ooxml.schemas.version>1.4</poi.ooxml.schemas.version>
