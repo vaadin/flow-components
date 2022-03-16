@@ -17,9 +17,9 @@ package com.vaadin.flow.component.grid;
 
 /**
  * Constants for the text alignment of columns.
- * 
+ *
  * @author Vaadin Ltd.
- * 
+ *
  * @see ColumnBase#setTextAlign(ColumnTextAlign)
  *
  */
@@ -37,7 +37,7 @@ public enum ColumnTextAlign {
      * Converts the property name in String form to the corresponding enum
      * value. Values that cannot be mapped to a direct constant (including
      * <code>null</code>) are mapped to {@link ColumnTextAlign#START}.
-     * 
+     *
      * @param propertyValue
      *            the value for the textAlign property
      * @return the enum value corresponding to the property value, not
@@ -59,7 +59,7 @@ public enum ColumnTextAlign {
 
     /**
      * Gets the client-side property for the textAlign property.
-     * 
+     *
      * @return the property value
      */
     public String getPropertyValue() {

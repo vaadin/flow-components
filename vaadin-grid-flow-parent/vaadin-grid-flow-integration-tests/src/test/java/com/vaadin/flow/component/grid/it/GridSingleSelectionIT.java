@@ -24,7 +24,6 @@ import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-
 @TestPath("vaadin-grid/grid-single-selection")
 public class GridSingleSelectionIT extends AbstractComponentIT {
 

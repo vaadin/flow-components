@@ -24,11 +24,11 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 - `mvn clean install -DskipTests -Drelease -T C2`
 
-## Running one component demo
+## Serving the IT pages of a component
 
-- `mvn -am -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-demo -Pwar package jetty:run`
+- `mvn -am -pl vaadin-checkbox-flow-parent/vaadin-checkbox-flow-integration-tests -DskipTests package jetty:run`
 
-Then navigate to `http://localhost:8080/vaadin-checkbox` to see the demo.
+Then navigate to `http://localhost:8080/vaadin-checkbox/checkbox-test` to see the IT page.
 
 ## Running ITs of one component
 

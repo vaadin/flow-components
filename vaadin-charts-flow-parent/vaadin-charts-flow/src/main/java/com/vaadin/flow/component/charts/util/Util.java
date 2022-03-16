@@ -8,7 +8,7 @@ package com.vaadin.flow.component.charts.util;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -61,13 +61,7 @@ public class Util {
      * @return an Instant value
      */
     public static Instant toServerInstant(double rawClientSideValue) {
-        Date date = new Date();
-        date.toInstant();
-        String doubleAsText = Double.toString(rawClientSideValue);
-        int milSecs = Integer.parseInt(doubleAsText.split(".")[0]);
-        int nanSecs = Integer.parseInt(doubleAsText.split(".")[1]);
-        Instant dateTime = Instant.ofEpochSecond(milSecs, nanSecs);
-        return dateTime;
+        return Instant.ofEpochMilli((long) rawClientSideValue);
     }
 
 }

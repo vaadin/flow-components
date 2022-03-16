@@ -18,8 +18,6 @@ public class AttributionsPage extends Div {
 
     public AttributionsPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
 
         NativeButton setupOSMSource = new NativeButton("Setup OSM source",
                 e -> {

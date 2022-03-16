@@ -15,30 +15,36 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
+import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.splitlayout.demo.SplitLayoutView;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 import com.vaadin.testbench.elementsbase.Element;
-import com.vaadin.tests.ComponentDemoTest;
 
 /**
  * Integration tests for {@link SplitLayoutView}.
  */
-public class SplitLayoutIT extends ComponentDemoTest {
+@TestPath("vaadin-split-layout/split-layout")
+public class SplitLayoutIT extends AbstractComponentIT {
 
-    private static String SPLIT_LAYOUT_TAG = "vaadin-split-layout";
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void combined_layouts() {
-        WebElement splitLayout = layout
-                .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(2);
+        WebElement splitLayout = findElement(By.id("split-layout-combination"));
         WebElement firstComponent = splitLayout
                 .findElement(By.id("first-component"));
         WebElement nestedLayout = splitLayout
@@ -60,9 +66,8 @@ public class SplitLayoutIT extends ComponentDemoTest {
     @Test
     @Ignore // Due to drag and drop issues with selenium.
     public void resize_events_fired() {
-        WebElement splitLayout = layout
-                .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(3);
-        WebElement resizeMessage = layout.findElement(By.id("resize-message"));
+        WebElement splitLayout = findElement(By.id("split-layout-resize"));
+        WebElement resizeMessage = findElement(By.id("resize-message"));
 
         WebElement splitter = new TestBenchWrapper(splitLayout,
                 getCommandExecutor()).$("*").id("splitter")
@@ -97,8 +102,7 @@ public class SplitLayoutIT extends ComponentDemoTest {
     @Test
     @Ignore // Due to drag and drop issues with selenium.
     public void min_and_max_width_splitter() {
-        WebElement splitLayout = layout
-                .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(5);
+        WebElement splitLayout = findElement(By.id("split-layout-min-max"));
         WebElement splitter = new TestBenchWrapper(splitLayout,
                 getCommandExecutor()).$("*").id("splitter")
                         .findElement(By.tagName("div"));
@@ -120,12 +124,14 @@ public class SplitLayoutIT extends ComponentDemoTest {
 
     @Test
     public void assertVariants() {
-        verifyThemeVariantsBeingToggled();
-    }
+        WebElement splitLayout = findElement(
+                By.id("split-layout-theme-variant"));
+        scrollToElement(splitLayout);
+        Assert.assertEquals(SplitLayoutVariant.LUMO_SMALL.getVariantName(),
+                splitLayout.getAttribute("theme"));
 
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-split-layout";
+        findElement(By.id("remove-variant-button")).click();
+        Assert.assertNull(splitLayout.getAttribute("theme"));
     }
 
     @Element("*")

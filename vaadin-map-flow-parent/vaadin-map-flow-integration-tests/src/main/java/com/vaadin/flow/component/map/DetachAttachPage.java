@@ -9,8 +9,6 @@ import com.vaadin.flow.router.Route;
 public class DetachAttachPage extends Div {
     public DetachAttachPage() {
         Map map = new Map();
-        map.setWidthFull();
-        map.setHeight("400px");
         add(map);
         // Modify viewport, so we can test some non-default values
         map.getView().setCenter(

@@ -58,7 +58,7 @@ public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
      * Returns the column that was the target of user's resize action
-     * 
+     *
      * @return resize action target column
      */
     public Column<T> getResizedColumn() {

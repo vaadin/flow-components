@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-
 @TestPath("vaadin-map/preserve-on-refresh")
 public class PreserveOnRefreshIT extends AbstractComponentIT {
     private TestBenchElement customizeMap;
@@ -28,23 +26,19 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
         getDriver().navigate().refresh();
 
         MapElement map = $(MapElement.class).waitForFirst();
-        assertCustomizedConfiguration(map);
+        assertMapStateIsPreserved(map);
     }
 
-    private void assertCustomizedConfiguration(MapElement map) {
-        // We should have 3 layers in total
-        long numLayers = (long) map
-                .evaluateOLExpression("map.getLayers().getLength()");
-        Assert.assertEquals(3, numLayers);
-        // And a custom viewport
-        List<Number> center = (List<Number>) map
-                .evaluateOLExpression("map.getView().getCenter()");
-        Number zoomLevel = (Number) map
-                .evaluateOLExpression("map.getView().getZoom()");
-        Assert.assertEquals(center.get(0).doubleValue(), 2482424.644689998,
-                0.0001);
-        Assert.assertEquals(center.get(1).doubleValue(), 8500614.173537256,
-                0.0001);
-        Assert.assertEquals(zoomLevel.doubleValue(), 14, 0.1);
+    private void assertMapStateIsPreserved(MapElement map) {
+        // This doesn't need to be an exhaustive test, more of a smoke test. We
+        // just want to verify that the synchronization ran at all and reflected
+        // the server-side state to the client
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.ViewReference view = mapReference.getView();
+
+        Assert.assertEquals(3, mapReference.getLayers().getLength());
+        Assert.assertEquals(2482424.644689998, view.getCenter().getX(), 0.0001);
+        Assert.assertEquals(8500614.173537256, view.getCenter().getY(), 0.0001);
+        Assert.assertEquals(14, view.getZoom(), 0.1);
     }
 }

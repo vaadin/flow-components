@@ -38,10 +38,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.0")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.0")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.1")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.1")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -404,6 +404,11 @@ public class ConfirmDialog extends Component
     }
 
     private void addToSlot(String slotName, Element element) {
+        // Remove existing elements with the same slot name
+        getElement().getChildren()
+                .filter(child -> slotName.equals(child.getAttribute("slot")))
+                .forEach(Element::removeFromParent);
+
         element.setAttribute("slot", slotName);
         getElement().appendChild(element);
     }

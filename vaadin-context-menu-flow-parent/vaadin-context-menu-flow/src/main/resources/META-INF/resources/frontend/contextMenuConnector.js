@@ -1,11 +1,7 @@
 import * as Gestures from "@vaadin/component-base/src/gestures.js";
 (function() {
   const tryCatchWrapper = function(callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(
-      callback,
-      "Vaadin Context Menu",
-      "vaadin-context-menu-flow"
-    );
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu');
   };
 
   window.Vaadin.Flow.contextMenuConnector = {
@@ -96,7 +92,7 @@ import * as Gestures from "@vaadin/component-base/src/gestures.js";
               const item = {
                   component: child,
                   checked: child._checked,
-                  theme: child._theme
+                  theme: child.__theme
               };
               if (
                 child.tagName == "VAADIN-CONTEXT-MENU-ITEM" &&

@@ -40,7 +40,7 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
     @Test
     public void openNonModalDialog_logButtonClickable() {
-        $(NativeButtonElement.class).id("open-dialog").click();
+        $(NativeButtonElement.class).id("open-non-modal-dialog").click();
 
         Assert.assertTrue("No dialog opened", $(DialogElement.class).exists());
         Assert.assertEquals("Only one dialog expected", 1,
@@ -87,6 +87,24 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         $(NativeButtonElement.class).id("log").click();
 
+        Assert.assertEquals("Click should have resulted in a log message", 1,
+                $(DivElement.class).id(LOG_ID).$("div").all().size());
+    }
+
+    @Test
+    public void openModalDialog_outsideClickToCloseDialog_logButtonClickable() {
+        $(NativeButtonElement.class).id("add-modal-dialog").click();
+        $(NativeButtonElement.class).id("enable-close-on-outside-click")
+                .click();
+        $(NativeButtonElement.class).id("open-modal-dialog").click();
+
+        // Click anything to close dialog
+        $("body").first().click();
+        Assert.assertFalse("Dialog should be hidden",
+                $(DialogElement.class).first().isDisplayed());
+
+        // Now that dialog is closed, verify that click events work
+        $(NativeButtonElement.class).id("log").click();
         Assert.assertEquals("Click should have resulted in a log message", 1,
                 $(DivElement.class).id(LOG_ID).$("div").all().size());
     }

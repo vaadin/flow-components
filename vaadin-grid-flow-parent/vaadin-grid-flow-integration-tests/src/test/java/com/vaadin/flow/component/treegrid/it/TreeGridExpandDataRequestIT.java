@@ -17,7 +17,6 @@ public class TreeGridExpandDataRequestIT extends AbstractTreeGridIT {
 
         setupTreeGrid();
         findElement(By.id("LoggingDataProvider")).click();
-
         clickClearLog();
     }
 

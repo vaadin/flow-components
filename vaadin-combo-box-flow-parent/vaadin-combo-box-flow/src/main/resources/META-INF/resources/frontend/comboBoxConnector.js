@@ -4,7 +4,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box');
     };
 
     window.Vaadin.Flow.comboBoxConnector = {
@@ -155,7 +155,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             comboBox.$connector.clear = tryCatchWrapper((start, length) => {
                 const firstPageToClear = Math.floor(start / comboBox.pageSize);
                 const numberOfPagesToClear = Math.ceil(length / comboBox.pageSize);
-                
+
                 for (let i = firstPageToClear; i < firstPageToClear + numberOfPagesToClear; i++) {
                     delete cache[i];
                 }

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload.testbench;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver.Timeouts;
@@ -95,6 +96,39 @@ public class UploadElement extends TestBenchElement {
     }
 
     /**
+     * Uploads the given local files and waits for the given number of seconds
+     * for the upload to finish.
+     * <p>
+     * Note that Safari webdriver does not support file uploads.
+     * <p>
+     * Technically this temporarily disables the auto-upload feature, schedules
+     * all files for upload, and then starts the upload manually. This is
+     * necessary, because when running tests locally, uploads can finish even
+     * before we can schedule the command through the Selenium API.
+     *
+     * @param files
+     *            the local files to upload, can reference the same file
+     *            multiple times
+     * @param maxSeconds
+     *            the number of seconds to wait for the upload to finish or
+     *            <code>0</code> not to wait
+     */
+    public void uploadMultiple(List<File> files, int maxSeconds) {
+        // Disable auto-upload
+        boolean originalNoAuto = getPropertyBoolean("noAuto");
+        setProperty("noAuto", true);
+        // Schedule individual files
+        files.forEach(file -> upload(file, 0));
+        // Manually start upload, wait for all files to finish
+        startUpload();
+        if (maxSeconds > 0) {
+            waitForUploads(maxSeconds);
+        }
+        // Reset auto-upload to original value
+        setProperty("noAuto", originalNoAuto);
+    }
+
+    /**
      * Wait for the given number of seconds for all uploads to finish.
      *
      * @param maxSeconds
@@ -118,6 +152,10 @@ public class UploadElement extends TestBenchElement {
         executeScript(
                 "arguments[0]._removeFile(arguments[0].files[arguments[1]])",
                 this, i);
+    }
+
+    private void startUpload() {
+        executeScript("arguments[0].uploadFiles()", this);
     }
 
     /**

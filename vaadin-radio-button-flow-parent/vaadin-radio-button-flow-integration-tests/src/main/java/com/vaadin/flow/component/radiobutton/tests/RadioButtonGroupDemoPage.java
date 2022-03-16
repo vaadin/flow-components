@@ -17,19 +17,20 @@
 
 package com.vaadin.flow.component.radiobutton.tests;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.radiobutton.GeneratedVaadinRadioGroup;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -38,7 +39,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-radio-button-group-test-demo")
-public class RadioButtonGroupDemoPage extends DemoView {
+public class RadioButtonGroupDemoPage extends Div {
 
     public static class Person {
 
@@ -64,13 +65,7 @@ public class RadioButtonGroupDemoPage extends DemoView {
 
     }
 
-    @Override
-    public void populateSources() {
-
-    }
-
-    @Override
-    protected void initView() {
+    public RadioButtonGroupDemoPage() {
         addBasicFeatures();
         addHelperText();
         addComponentWithLabelAndErrorMessage();
@@ -88,8 +83,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void addComponentWithLabelAndErrorMessage() {
-        // begin-source-example
-        // source-example-heading: Group with label and error message
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
         group.setLabel("Group label");
@@ -97,15 +90,12 @@ public class RadioButtonGroupDemoPage extends DemoView {
         NativeButton button = new NativeButton("Switch validity state",
                 event -> group.setInvalid(!group.isInvalid()));
 
-        // end-source-example
         group.setId("group-with-label-and-error-message");
         button.setId("group-with-label-button");
         addCard("Group with label and error message", group, button);
     }
 
     private void addHelperText() {
-        // begin-source-example
-        // source-example-heading: Helper text
         RadioButtonGroup<String> groupWitHelperText = new RadioButtonGroup<>();
         groupWitHelperText.setId("group-with-helper-text");
         groupWitHelperText.setItems("foo", "bar", "baz");
@@ -117,7 +107,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
         Span helperComponent = new Span("helperComponent");
         helperComponent.setId("helper-component");
         groupWitHelperComponent.setHelperComponent(helperComponent);
-        // end-source-example
 
         NativeButton clearHelperText = new NativeButton("clear helper text",
                 e -> groupWitHelperText.setHelperText(null));
@@ -133,31 +122,27 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void addComponentWithThemeVariant() {
-        // begin-source-example
-        // source-example-heading: Theme variants usage
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setId("button-group-theme-variant");
         group.setItems("foo", "bar", "baz");
         group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        // end-source-example
 
-        addVariantsDemo(() -> group,
-                GeneratedVaadinRadioGroup::addThemeVariants,
-                GeneratedVaadinRadioGroup::removeThemeVariants,
-                RadioGroupVariant::getVariantName,
-                RadioGroupVariant.LUMO_VERTICAL);
+        NativeButton button = new NativeButton("Remove theme variant",
+                e -> group
+                        .removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL));
+        button.setId("remove-theme-variant-button");
+
+        addCard("Radio Button Theme Variant", group, button);
     }
 
     private void addBasicFeatures() {
         Div message = new Div();
 
-        // begin-source-example
-        // source-example-heading: Basic radio button group
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 event.getOldValue(), event.getValue())));
-        // end-source-example
 
         group.setId("button-group-with-value-change-listener");
         message.setId("button-group-value");
@@ -168,8 +153,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     private void addItemRenderer() {
         Div message = new Div();
 
-        // begin-source-example
-        // source-example-heading: Radio button group with renderer
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
@@ -178,7 +161,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));
-        // end-source-example
 
         group.setId("button-group-renderer");
         message.setId("button-group-renderer-value");
@@ -189,8 +171,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     private void addItemLabelGenerator() {
         Div message = new Div();
 
-        // begin-source-example
-        // source-example-heading: Radio button group with label generator
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person("Joe"), new Person("John"),
                 new Person("Bill"));
@@ -198,7 +178,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));
-        // end-source-example
 
         group.setId("button-group-with-item-generator");
         message.setId("button-group-gen-value");
@@ -207,8 +186,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void addItemIconGenerator() {
-        // begin-source-example
-        // source-example-heading: Radio button group with icon generator
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
@@ -221,7 +198,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
             image.getStyle().set("marginTop", "2px");
             return image;
         }, Person::getName));
-        // end-source-example
 
         group.setId("button-group-icon-generator");
 
@@ -230,12 +206,9 @@ public class RadioButtonGroupDemoPage extends DemoView {
 
     private void addDisabled() {
 
-        // begin-source-example
-        // source-example-heading: Disabled radio button group
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
         group.setEnabled(false);
-        // end-source-example
 
         group.setId("button-group-disabled");
 
@@ -243,8 +216,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void addReadOnlyGroup() {
-        // begin-source-example
-        // source-example-heading: Read-only radio button group
         Div valueInfo = new Div();
 
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
@@ -255,7 +226,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
                 event -> group.setReadOnly(!group.isReadOnly()));
         group.addValueChangeListener(
                 event -> valueInfo.setText(group.getValue()));
-        // end-source-example
 
         group.setId("button-group-read-only");
         valueInfo.setId("selected-value-info");
@@ -267,12 +237,9 @@ public class RadioButtonGroupDemoPage extends DemoView {
     private void addDisabledItems() {
 
         Div valueInfo = new Div();
-        // begin-source-example
-        // source-example-heading: Radio button group with item enabled provider
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
         group.setItemEnabledProvider(item -> !"bar".equals(item));
-        // end-source-example
 
         group.addValueChangeListener(
                 event -> valueInfo.setText(group.getValue()));
@@ -292,15 +259,12 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void addComponentAfterItems() {
-        // begin-source-example
-        // source-example-heading: Add component to group
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
         group.add(new Label("My Custom text"));
 
         group.getElement().getStyle().set("display", "flex");
         group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
 
         group.setId("button-group-with-appended-text");
 
@@ -308,8 +272,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void insertComponentsBetweenItems() {
-        // begin-source-example
-        // source-example-heading: Insert component after item in group
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 
         // Note that setting items clear any components
@@ -321,7 +283,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
 
         group.getElement().getStyle().set("display", "flex");
         group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
 
         group.setId("button-group-with-inserted-component");
 
@@ -329,8 +290,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     }
 
     private void prependAndInsertComponents() {
-        // begin-source-example
-        // source-example-heading: Insert components before item in group
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 
         group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
@@ -341,7 +300,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
 
         group.getElement().getStyle().set("display", "flex");
         group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
 
         group.setId("button-group-with-prepended-component");
 
@@ -351,8 +309,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
     private Label below;
 
     private void dynamicComponents() {
-        // begin-source-example
-        // source-example-heading: Move component in group on selection
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 
         group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
@@ -368,7 +324,6 @@ public class RadioButtonGroupDemoPage extends DemoView {
 
         group.getElement().getStyle().set("display", "flex");
         group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
 
         group.setId("button-group-with-dynamic-component");
 
@@ -379,6 +334,15 @@ public class RadioButtonGroupDemoPage extends DemoView {
         Hr hr = new Hr();
         hr.setSizeFull();
         return hr;
+    }
+
+    private Component addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+        return layout;
     }
 
 }

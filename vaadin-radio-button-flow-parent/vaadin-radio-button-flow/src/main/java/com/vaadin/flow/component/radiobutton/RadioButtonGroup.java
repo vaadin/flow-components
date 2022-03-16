@@ -70,8 +70,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.0.0")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.0")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.0.1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.1")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -244,7 +244,7 @@ public class RadioButtonGroup<T>
      * in the radio button group for each item. By default,
      * {@link String#valueOf(Object)} is used.
      * <p>
-     * 
+     *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
      */

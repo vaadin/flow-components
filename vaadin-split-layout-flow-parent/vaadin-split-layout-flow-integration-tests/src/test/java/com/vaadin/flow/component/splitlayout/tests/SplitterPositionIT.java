@@ -16,13 +16,13 @@
 package com.vaadin.flow.component.splitlayout.tests;
 
 import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.html.testbench.SpanElement;
-import com.vaadin.flow.component.splitlayout.demo.SplitLayoutView;
 import com.vaadin.flow.component.splitlayout.test.SplitterPositionView;
 import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
 import com.vaadin.tests.AbstractComponentIT;

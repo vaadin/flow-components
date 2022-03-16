@@ -4,7 +4,7 @@ import dateFnsIsValid from 'date-fns/isValid';
 
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker');
     };
 
     /* helper class for parsing regex from formatted date string */

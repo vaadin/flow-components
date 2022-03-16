@@ -80,6 +80,10 @@ public class LazyHierarchicalDataProvider extends
             list.add(new HierarchicalTestBean(parentKey.orElse(null), depth,
                     i + query.getOffset()));
         }
+
+        query.getSortingComparator().ifPresent(sorting -> {
+            list.sort(sorting);
+        });
         return list.stream();
     }
 
