@@ -184,8 +184,7 @@ public class AppLayoutTest {
 
     @Test
     public void hasStyle() {
-        AppLayout appLayout = new AppLayout();
-        Assert.assertTrue(appLayout instanceof HasStyle);
+        Assert.assertTrue(systemUnderTest instanceof HasStyle);
     }
 
     private void testDrawerOpened(boolean expectedDrawerOpened) {
