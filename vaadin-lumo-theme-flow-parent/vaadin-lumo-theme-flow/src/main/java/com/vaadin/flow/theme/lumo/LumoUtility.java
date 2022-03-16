@@ -247,11 +247,18 @@ public final class LumoUtility {
         private Display() {
         }
 
+        /**
+         * Set of classes with styles to be used for certain viewport sizes
+         */
         public static final class Breakpoint {
 
             private Breakpoint() {
             }
 
+            /**
+             * Classes for defining the display property of an element that will
+             * be applied when the viewport has a minimum width of 640px
+             */
             public static final class Small {
 
                 public static final String FLEX = "sm:flex";
@@ -261,6 +268,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes for defining the display property of an element that will
+             * be applied when the viewport has a minimum width of 768px
+             */
             public static final class Medium {
 
                 public static final String FLEX = "md:flex";
@@ -270,6 +281,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes for defining the display property of an element that will
+             * be applied when the viewport has a minimum width of 1024px
+             */
             public static final class Large {
 
                 public static final String FLEX = "lg:flex";
@@ -279,6 +294,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes for defining the display property of an element that will
+             * be applied when the viewport has a minimum width of 1280px
+             */
             public static final class XLarge {
 
                 public static final String FLEX = "xl:flex";
@@ -288,6 +307,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes for defining the display property of an element that will
+             * be applied when the viewport has a minimum width of 1536px
+             */
             public static final class XXLarge {
 
                 public static final String FLEX = "2xl:flex";
@@ -332,11 +355,19 @@ public final class LumoUtility {
         private FlexDirection() {
         }
 
+        /**
+         * Set of classes defining the flex direction of an element that will be
+         * applied only for certain viewport sizes.
+         */
         public static final class Breakpoint {
 
             private Breakpoint() {
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 640px.
+             */
             public static final class Small {
 
                 public static final String COLUMN = "sm:flex-col";
@@ -346,6 +377,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 768px.
+             */
             public static final class Medium {
 
                 public static final String COLUMN = "md:flex-col";
@@ -355,6 +390,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1024px.
+             */
             public static final class Large {
 
                 public static final String COLUMN = "lg:flex-col";
@@ -364,6 +403,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1280px.
+             */
             public static final class XLarge {
 
                 public static final String COLUMN = "xl:flex-col";
@@ -373,6 +416,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1536px.
+             */
             public static final class XXLarge {
 
                 public static final String COLUMN = "2xl:flex-col";
@@ -418,11 +465,19 @@ public final class LumoUtility {
         private FontSize() {
         }
 
+        /**
+         * Set of classes defining the font size of an element that will be
+         * applied only for certain viewport sizes.
+         */
         public static final class Breakpoint {
 
             private Breakpoint() {
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 640px.
+             */
             public static final class Small {
 
                 public static final String XXSMALL = "sm:text-2xs";
@@ -438,6 +493,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 768px.
+             */
             public static final class Medium {
 
                 public static final String XXSMALL = "md:text-2xs";
@@ -453,6 +512,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1024px.
+             */
             public static final class Large {
 
                 public static final String XXSMALL = "lg:text-2xs";
@@ -468,6 +531,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1280px.
+             */
             public static final class XLarge {
 
                 public static final String XXSMALL = "xl:text-2xs";
@@ -483,6 +550,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1536px.
+             */
             public static final class XXLarge {
 
                 public static final String XXSMALL = "2xl:text-2xs";
@@ -646,11 +717,19 @@ public final class LumoUtility {
 
         }
 
+        /**
+         * Set of classes defining the number of columns in a grid layout that
+         * will be applied only for certain viewport sizes.
+         */
         public static final class Breakpoint {
 
             private Breakpoint() {
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 640px.
+             */
             public static final class Small {
 
                 public static final String COLUMNS_1 = "sm:grid-cols-1";
@@ -670,6 +749,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 768px.
+             */
             public static final class Medium {
 
                 public static final String COLUMNS_1 = "md:grid-cols-1";
@@ -689,6 +772,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1024px.
+             */
             public static final class Large {
 
                 public static final String COLUMNS_1 = "lg:grid-cols-1";
@@ -708,6 +795,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1280px.
+             */
             public static final class XLarge {
 
                 public static final String COLUMNS_1 = "xl:grid-cols-1";
@@ -727,6 +818,10 @@ public final class LumoUtility {
                 }
             }
 
+            /**
+             * Classes that will be applied when the viewport has a minimum
+             * width of 1536px.
+             */
             public static final class XXLarge {
 
                 public static final String COLUMNS_1 = "2xl:grid-cols-1";
