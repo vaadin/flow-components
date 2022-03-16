@@ -43,7 +43,7 @@
 
         <plugins>
             <!-- TODO re-add license, bundle, javadoc, assembly, jar, surefire, failsafe plugins -->
-            <plugin>
+            <!-- <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
             </plugin>
@@ -54,7 +54,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-            </plugin>
+            </plugin> -->
         </plugins>
     </build>
 
