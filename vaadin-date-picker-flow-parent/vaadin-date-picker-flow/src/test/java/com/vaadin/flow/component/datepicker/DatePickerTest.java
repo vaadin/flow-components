@@ -54,7 +54,7 @@ public class DatePickerTest {
         DatePicker picker = new DatePicker();
 
         Assert.assertNull(picker.getValue());
-        Assert.assertFalse(picker.getElement().hasProperty("value"));
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
 
         picker.setValue(LocalDate.of(2018, 4, 25));
         Assert.assertEquals("2018-04-25",
@@ -73,7 +73,7 @@ public class DatePickerTest {
     public void defaultCtor_does_not_update_values() {
         DatePicker picker = new DatePicker();
         Assert.assertNull(picker.getValue());
-        Assert.assertNull(picker.getElement().getProperty("value"));
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
