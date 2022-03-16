@@ -96,8 +96,7 @@ public class CrudTest {
 
     @Test
     public void crudHasStyle() {
-        Crud<String> c = new Crud<>();
-        Assert.assertTrue(c instanceof HasStyle);
+        Assert.assertTrue(systemUnderTest instanceof HasStyle);
     }
 
     private Grid<Thing> createFakeGrid() {
