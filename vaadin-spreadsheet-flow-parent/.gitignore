@@ -1,4 +1,5 @@
 *.iml
+.vscode/
 .idea/
 */target/
 */bin/
