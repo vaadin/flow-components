@@ -83,10 +83,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public DatePicker() {
         this((LocalDate) null, true);
-        // Trigger model-to-presentation conversion in constructor, so that
-        // the client side component has a correct initial value of an empty
-        // string
-        this.setPresentationValue(null);
     }
 
     /**

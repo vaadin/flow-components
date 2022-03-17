@@ -50,11 +50,22 @@ public class DatePickerTest {
     }
 
     @Test
-    public void datePicker_basicCases() {
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         DatePicker picker = new DatePicker();
-
         Assert.assertNull(picker.getValue());
         Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        DatePicker picker = new DatePicker((LocalDate) null);
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void datePicker_basicCases() {
+        DatePicker picker = new DatePicker();
 
         picker.setValue(LocalDate.of(2018, 4, 25));
         Assert.assertEquals("2018-04-25",
@@ -67,13 +78,6 @@ public class DatePickerTest {
         // https://github.com/vaadin/flow/issues/3994
         picker.getElement().setProperty("value", null);
         Assert.assertNull(picker.getValue());
-    }
-
-    @Test
-    public void defaultCtor_does_not_update_values() {
-        DatePicker picker = new DatePicker();
-        Assert.assertNull(picker.getValue());
-        Assert.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
