@@ -143,6 +143,11 @@ public class DateTimePicker
             initialDateTime = sanitizeValue(initialDateTime);
             setPresentationValue(initialDateTime);
             synchronizeChildComponentValues(initialDateTime);
+        } else if (this.getElement().getProperty("value") == null) {
+            // Only apply initial value if the element does not already have a value,
+            // which can be the case when binding to an existing element from a Lit
+            // template.
+            setPresentationValue(null);
         }
 
         addToSlot(datePicker, "date-picker");
