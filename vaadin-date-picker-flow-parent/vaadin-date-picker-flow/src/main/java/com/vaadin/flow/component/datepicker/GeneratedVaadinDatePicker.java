@@ -1198,7 +1198,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) || initialValue == null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
