@@ -22,9 +22,12 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.datepicker.DatePickerVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.timepicker.StepsUtil;
@@ -743,5 +746,29 @@ public class DateTimePicker
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
 
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(DateTimePickerVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(DateTimePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(DateTimePickerVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(DateTimePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }
