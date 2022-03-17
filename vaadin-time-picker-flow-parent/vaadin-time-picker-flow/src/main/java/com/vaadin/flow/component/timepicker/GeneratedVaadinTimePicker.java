@@ -868,8 +868,13 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
             boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
+        // Only apply initial value if the element does not already have a value
+        // (this can be the case when binding to an existing element from a Lit
+        // template), or if isInitialValueOptional enforces setting the initial
+        // value, which is the case when calling a DatePicker constructor with a
+        // custom initial value.
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
@@ -913,9 +918,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
     public GeneratedVaadinTimePicker(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setPresentationValue(initialValue);
-        }
+        setPresentationValue(initialValue);
     }
 
     /**
@@ -943,9 +946,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
             SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setPresentationValue(initialValue);
-        }
+        setPresentationValue(initialValue);
     }
 
     /**
