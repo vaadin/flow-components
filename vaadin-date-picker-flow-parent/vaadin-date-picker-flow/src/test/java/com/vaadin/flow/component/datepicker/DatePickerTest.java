@@ -38,17 +38,6 @@ public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
 
-    private static final LocalDate TEST_VALUE = LocalDate.now();
-
-    private static class TestDatePicker
-            extends GeneratedVaadinDatePicker<TestDatePicker, LocalDate> {
-
-        TestDatePicker() {
-            super(TEST_VALUE, null, String.class, value -> null, value -> null,
-                    true);
-        }
-    }
-
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         DatePicker picker = new DatePicker();
@@ -146,12 +135,12 @@ public class DatePickerTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(instantiator.createComponent(TestDatePicker.class))
-                .thenAnswer(invocation -> new TestDatePicker());
+        Mockito.when(instantiator.createComponent(DatePicker.class))
+                .thenAnswer(invocation -> new DatePicker());
 
-        TestDatePicker field = Component.from(element, TestDatePicker.class);
+        DatePicker field = Component.from(element, DatePicker.class);
         Assert.assertEquals("2007-12-03",
-                field.getElement().getPropertyRaw("value"));
+                field.getElement().getProperty("value"));
     }
 
     public void assertClearButtonPropertyValueEquals(DatePicker picker,
