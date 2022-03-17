@@ -871,7 +871,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
         // Only apply initial value if the element does not already have a value
         // (this can be the case when binding to an existing element from a Lit
         // template), or if isInitialValueOptional enforces setting the initial
-        // value, which is the case when calling a DatePicker constructor with a
+        // value, which is the case when calling a TimePicker constructor with a
         // custom initial value.
         if ((getElement().getProperty("value") == null
                 || !isInitialValueOptional)) {
