@@ -144,7 +144,10 @@ public class DateTimePicker
             setPresentationValue(initialDateTime);
             synchronizeChildComponentValues(initialDateTime);
         } else if (this.getElement().getProperty("value") == null) {
-            // Only apply initial value if the element does not already have a value,
+            // Apply `null` as a value to force the client side `value` property to be initialized with an empty string.
+            // Having an empty string will prevent `ValueChangeEvent` which otherwise can be triggered
+            // as a result of Polymer converting `null` to an empty string by itself.
+            // Only apply `null` if the element does not already have a value,
             // which can be the case when binding to an existing element from a Lit
             // template.
             setPresentationValue(null);
