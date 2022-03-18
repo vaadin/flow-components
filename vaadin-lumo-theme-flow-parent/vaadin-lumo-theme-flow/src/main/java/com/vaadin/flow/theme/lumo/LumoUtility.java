@@ -29,7 +29,7 @@ public final class LumoUtility {
     public static final class Accessibility {
 
         /**
-         * Hides content visually while remaining it available to screen
+         * Hides content visually while keeping it available to screen
          * readers.
          */
         public static final String SCREEN_READER_ONLY = "sr-only";
@@ -76,7 +76,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for overriding individual items align-item property. Applies to
+     * Classes for overriding individual items' align-item property. Applies to
      * flexbox and grid items.
      */
     public static final class AlignSelf {
@@ -131,7 +131,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Border related classes.
+     * Border-related classes.
      */
     public static final class Border {
 
@@ -867,7 +867,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for defining the size of elements working as icons.
+     * Classes for defining the size of elements used as icons.
      */
     public static final class IconSize {
 
@@ -1142,7 +1142,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for setting the overflow behaviour of an element.
+     * Classes for setting the overflow behavior of an element.
      */
     public static final class Overflow {
 
@@ -1205,7 +1205,7 @@ public final class LumoUtility {
         }
 
         /**
-         * Classes for setting both the right and the left paddings of an
+         * Classes for setting both the right and left paddings of an
          * element.
          */
         public static final class Horizontal {
@@ -1288,7 +1288,7 @@ public final class LumoUtility {
         }
 
         /**
-         * Classes for defining both the vertical and the horizontal paddings of
+         * Classes for defining both the vertical and horizontal paddings of
          * an element.
          */
         public static final class Vertical {
@@ -1367,7 +1367,7 @@ public final class LumoUtility {
      */
     public static final class TextOverflow {
 
-        public static final String CLIP = "overflow-cip";
+        public static final String CLIP = "overflow-clip";
         public static final String ELLIPSIS = "overflow-ellipsis";
 
         private TextOverflow() {
