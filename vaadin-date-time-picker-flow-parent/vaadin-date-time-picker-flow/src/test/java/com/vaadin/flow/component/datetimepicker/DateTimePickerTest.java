@@ -71,9 +71,12 @@ public class DateTimePickerTest {
 
     @Test
     public void initialValueIsDateTime_valuePropertyHasInitialValue() {
-        DateTimePicker picker = new DateTimePicker(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
-        Assert.assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10), picker.getValue());
-        Assert.assertEquals("2018-04-25T13:45:10", picker.getElement().getProperty("value"));
+        DateTimePicker picker = new DateTimePicker(
+                LocalDateTime.of(2018, 4, 25, 13, 45, 10));
+        Assert.assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
+                picker.getValue());
+        Assert.assertEquals("2018-04-25T13:45:10",
+                picker.getElement().getProperty("value"));
     }
 
     @Test
