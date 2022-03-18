@@ -69,8 +69,7 @@ public class ProtectedBackendIT extends AbstractParallelTest {
         crud.openRowForEditing(1);
         // A click in another row when editor is dirty opens confirmCancel
         // dialog
-        ConfirmDialogElement confirmCancel = crud.$(ConfirmDialogElement.class)
-                .id("confirmCancel");
+        ConfirmDialogElement confirmCancel = crud.getConfirmCancelDialog();
         Assert.assertEquals("Discard changes", confirmCancel.getHeaderText());
 
         confirmCancel.getConfirmButton().click();
