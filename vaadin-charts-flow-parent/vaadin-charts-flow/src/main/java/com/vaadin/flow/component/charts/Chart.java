@@ -617,6 +617,9 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Adds theme variants to the component.
      *
+     * @apiNote To use theme variants CSS styling mode needs to be enabled
+     *          ({@link #getConfiguration().getChart().setStyleMode(true)})
+     *
      * @param variants
      *            theme variants to add
      */
