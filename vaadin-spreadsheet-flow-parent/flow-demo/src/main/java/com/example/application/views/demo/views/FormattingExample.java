@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.juchar.colorpicker.ColorPickerField;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -14,7 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -26,8 +24,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 public class FormattingExample extends Div implements Spreadsheet.SelectionChangeListener {
 
     private final Spreadsheet spreadsheet;
-    private ColorPickerField backgroundColor;
-    private ColorPickerField fontColor;
 
     public FormattingExample() {
         setSizeFull();
@@ -44,15 +40,8 @@ public class FormattingExample extends Div implements Spreadsheet.SelectionChang
         //stylingToolbar.setSpacing(false);
         Button boldButton = new Button(new Icon(VaadinIcon.BOLD));
         boldButton.addClickListener(event -> updateSelectedCellsBold());
-        backgroundColor = new ColorPickerField("Background Color");
-        backgroundColor.addValueChangeListener(e->
-                updateSelectedCellsBackgroundColor(e.getValue())
-        );
-        fontColor = new ColorPickerField("Font Color");
-        fontColor.addValueChangeListener(event->{
-            updateSelectedCellsFontColor(event.getValue());
-        });
-        stylingToolbar.add(boldButton, backgroundColor, fontColor);
+
+        stylingToolbar.add(boldButton);
         stylingToolbar.setVerticalComponentAlignment(FlexComponent.Alignment.END, boldButton);
         return stylingToolbar;
     }
