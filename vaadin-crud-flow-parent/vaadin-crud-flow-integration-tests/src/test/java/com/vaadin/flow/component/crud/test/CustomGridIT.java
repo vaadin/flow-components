@@ -63,8 +63,7 @@ public class CustomGridIT extends AbstractParallelTest {
             return;
         }
 
-        ConfirmDialogElement confirmCancel = crud.$(ConfirmDialogElement.class)
-                .id("confirmCancel");
+        ConfirmDialogElement confirmCancel = crud.getConfirmCancelDialog();
         Assert.assertEquals("Discard changes", confirmCancel.getHeaderText());
         confirmCancel.getConfirmButton().click();
         Assert.assertEquals("Sayo",
