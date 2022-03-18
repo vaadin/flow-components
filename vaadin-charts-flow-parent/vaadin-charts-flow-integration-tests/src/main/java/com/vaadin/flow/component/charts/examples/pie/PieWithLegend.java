@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.charts.examples.pie;
 
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.ChartVariant;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -19,6 +20,8 @@ public class PieWithLegend extends AbstractChartExample {
     @Override
     public void initDemo() {
         chart = new Chart(ChartType.PIE);
+        chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.getConfiguration().getChart().setStyledMode(true);
 
         Configuration conf = chart.getConfiguration();
 
