@@ -31,7 +31,7 @@ import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -46,7 +46,7 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -66,10 +66,10 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.0.1")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.0.2")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -143,6 +143,16 @@ public class DateTimePicker
             initialDateTime = sanitizeValue(initialDateTime);
             setPresentationValue(initialDateTime);
             synchronizeChildComponentValues(initialDateTime);
+        } else if (this.getElement().getProperty("value") == null) {
+            // Apply `null` as a value to force the client side `value` property
+            // to be initialized with an empty string. Having an empty string
+            // will prevent `ValueChangeEvent` which otherwise can be triggered
+            // in response to Polymer converting `null` to an empty string by
+            // itself.
+            // Only apply `null` if the element does not already have a value,
+            // which can be the case when binding to an existing element from a
+            // Lit template.
+            setPresentationValue(null);
         }
 
         addToSlot(datePicker, "date-picker");

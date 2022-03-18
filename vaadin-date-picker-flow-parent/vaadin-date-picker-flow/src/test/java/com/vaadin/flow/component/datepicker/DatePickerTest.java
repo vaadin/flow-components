@@ -38,23 +38,23 @@ public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
 
-    private static final LocalDate TEST_VALUE = LocalDate.now();
+    @Test
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
 
-    private static class TestDatePicker
-            extends GeneratedVaadinDatePicker<TestDatePicker, LocalDate> {
-
-        TestDatePicker() {
-            super(TEST_VALUE, null, String.class, value -> null, value -> null,
-                    true);
-        }
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        DatePicker picker = new DatePicker((LocalDate) null);
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
     public void datePicker_basicCases() {
         DatePicker picker = new DatePicker();
-
-        Assert.assertNull(picker.getValue());
-        Assert.assertFalse(picker.getElement().hasProperty("value"));
 
         picker.setValue(LocalDate.of(2018, 4, 25));
         Assert.assertEquals("2018-04-25",
@@ -67,13 +67,6 @@ public class DatePickerTest {
         // https://github.com/vaadin/flow/issues/3994
         picker.getElement().setProperty("value", null);
         Assert.assertNull(picker.getValue());
-    }
-
-    @Test
-    public void defaultCtor_does_not_update_values() {
-        DatePicker picker = new DatePicker();
-        Assert.assertNull(picker.getValue());
-        Assert.assertNull(picker.getElement().getProperty("value"));
     }
 
     @Test
@@ -142,12 +135,12 @@ public class DatePickerTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(instantiator.createComponent(TestDatePicker.class))
-                .thenAnswer(invocation -> new TestDatePicker());
+        Mockito.when(instantiator.createComponent(DatePicker.class))
+                .thenAnswer(invocation -> new DatePicker());
 
-        TestDatePicker field = Component.from(element, TestDatePicker.class);
+        DatePicker field = Component.from(element, DatePicker.class);
         Assert.assertEquals("2007-12-03",
-                field.getElement().getPropertyRaw("value"));
+                field.getElement().getProperty("value"));
     }
 
     public void assertClearButtonPropertyValueEquals(DatePicker picker,

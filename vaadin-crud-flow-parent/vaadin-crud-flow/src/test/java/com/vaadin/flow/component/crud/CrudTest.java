@@ -2,6 +2,7 @@ package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -91,6 +92,11 @@ public class CrudTest {
     public void getToolbarVisible_setVisibleToFalse_returnsFalse() {
         systemUnderTest.setToolbarVisible(false);
         Assert.assertEquals(false, systemUnderTest.getToolbarVisible());
+    }
+
+    @Test
+    public void crudHasStyle() {
+        Assert.assertTrue(systemUnderTest instanceof HasStyle);
     }
 
     private Grid<Thing> createFakeGrid() {

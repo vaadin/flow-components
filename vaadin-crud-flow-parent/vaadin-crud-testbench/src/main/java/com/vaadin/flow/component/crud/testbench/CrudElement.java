@@ -17,6 +17,7 @@ package com.vaadin.flow.component.crud.testbench;
  */
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
@@ -171,5 +172,23 @@ public class CrudElement extends TestBenchElement {
                     .attribute("opened", "").first();
         }
         return this;
+    }
+
+    /**
+     * Gets the confirm cancel dialog
+     *
+     * @return the confirm cancel dialog
+     */
+    public ConfirmDialogElement getConfirmCancelDialog() {
+        return this.$(ConfirmDialogElement.class).id("confirmCancel");
+    }
+
+    /**
+     * Gets the confirm delete dialog
+     *
+     * @return the confirm delete dialog
+     */
+    public ConfirmDialogElement getConfirmDeleteDialog() {
+        return this.$(ConfirmDialogElement.class).id("confirmDelete");
     }
 }

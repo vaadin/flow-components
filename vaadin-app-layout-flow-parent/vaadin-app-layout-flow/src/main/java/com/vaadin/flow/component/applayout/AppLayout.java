@@ -27,6 +27,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
@@ -46,12 +47,12 @@ import elemental.json.JsonType;
  * quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.1")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.2")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
-public class AppLayout extends Component implements RouterLayout {
+public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
             .propertyWithDefault("primarySection",
                     Section.NAVBAR.toWebcomponentValue());
