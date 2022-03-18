@@ -27,6 +27,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
@@ -51,7 +52,7 @@ import elemental.json.JsonType;
 @NpmPackage(value = "@vaadin/app-layout", version = "23.0.1")
 @NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.1")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
-public class AppLayout extends Component implements RouterLayout {
+public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
             .propertyWithDefault("primarySection",
                     Section.NAVBAR.toWebcomponentValue());
