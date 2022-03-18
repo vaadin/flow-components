@@ -93,7 +93,7 @@ public class ChartVariantTest {
 
     private void assertThemeAttributeContains(String expected) {
         String actual = chart.getThemeName();
-        assertTrue("Theme attribute not present ib chart",
+        assertTrue("Theme attribute not present on chart",
                 actual.contains(expected));
     }
 }
