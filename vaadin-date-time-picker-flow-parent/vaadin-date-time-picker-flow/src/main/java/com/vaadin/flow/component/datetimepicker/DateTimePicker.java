@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
-import com.vaadin.flow.component.datepicker.DatePickerVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.timepicker.StepsUtil;
