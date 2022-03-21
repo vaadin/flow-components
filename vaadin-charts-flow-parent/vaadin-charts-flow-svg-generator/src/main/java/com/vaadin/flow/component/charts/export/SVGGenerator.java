@@ -165,7 +165,7 @@ public class SVGGenerator implements AutoCloseable {
         // Pass the configuration json via a temp file instead of passing it
         // directly via a CLI argument. It allows to avoid the potential
         // "Argument list too long" exception which can be otherwise thrown when
-        // length of the configuration json exceeds the `ARG_MAX` limit.
+        // length of the configuration json exceeds the `ARG_MAX` OS limit.
         // The `ARG_MAX` limit can be different depending on the platform:
         // https://www.in-ulm.de/~mascheck/various/argmax/
         Path chartConfigFilePath = Files.createTempFile(tempDirPath, "config",
