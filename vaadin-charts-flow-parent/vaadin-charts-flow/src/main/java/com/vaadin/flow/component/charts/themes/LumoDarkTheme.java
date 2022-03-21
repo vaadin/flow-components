@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.themes;
  * #%L
  * Vaadin Charts Addon
  * %%
- * Copyright (C) 2012 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
