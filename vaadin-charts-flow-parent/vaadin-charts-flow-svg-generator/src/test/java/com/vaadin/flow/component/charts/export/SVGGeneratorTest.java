@@ -205,6 +205,21 @@ public class SVGGeneratorTest {
         assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
     }
 
+    @Test
+    public void exportLargeChart() throws IOException, InterruptedException {
+        Configuration configuration = new Configuration();
+
+        for (Integer i = 0; i < 500; i++) {
+          ListSeries series = new ListSeries();
+          for (Integer j = 0; j < 500; j++) {
+            series.addData(j);
+          }
+          configuration.addSeries(series);
+        }
+
+        svgGenerator.generate(configuration);
+    }
+
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();
         conf.setTitle("Browser market shares in January, 2018");
