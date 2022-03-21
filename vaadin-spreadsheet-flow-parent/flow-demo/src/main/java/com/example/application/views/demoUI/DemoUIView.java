@@ -192,9 +192,10 @@ public class DemoUIView extends VerticalLayout implements Receiver {
         Button freezePanesButton = new Button("Freeze Pane",
                 e->addWindow(new FreezePaneWindow()));
 
-        hideTop = new Checkbox("toggle top bar visibility");
-        hideBottom = new Checkbox("toggle bottom bar visibility");
+        hideTop = new Checkbox("hide top bar visibility");
+        hideBottom = new Checkbox("hide bottom bar visibility");
         hideBoth = new Checkbox("report mode");
+        disableCheckboxes();
 
         hideTop.addValueChangeListener(event -> {
             spreadsheet.setFunctionBarVisible(!hideTop.getValue());
@@ -220,6 +221,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                     spreadsheetContainer.remove(spreadsheet);
                     spreadsheet = null;
                     SpreadsheetFactory.logMemoryUsage();
+                    disableCheckboxes();
                 }
         });
 
@@ -319,6 +321,13 @@ public class DemoUIView extends VerticalLayout implements Receiver {
         add(layout);
         layout.add(spreadsheetContainer);
     }
+    
+    private void disableCheckboxes() {
+    	for (Checkbox b : Arrays.asList(hideTop, hideBottom, hideBoth)) {
+    		b.setValue(false);
+    		b.setEnabled(false);
+    	}
+    }
 
     private void addWindow(FreezePaneWindow freezePaneWindow) {
         new Dialog(freezePaneWindow).open();
@@ -399,6 +408,9 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                         gridlines.setValue(spreadsheet.isGridlinesVisible());
                         rowColHeadings.setValue(spreadsheet
                                 .isRowColHeadingsVisible());
+                        hideTop.setEnabled(true);
+                        hideBottom.setEnabled(true);
+                        hideBoth.setEnabled(true);
                 });
     }
 

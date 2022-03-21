@@ -1,9 +1,14 @@
 package com.example.application.views.demo;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import com.example.application.views.demo.views.BasicFunctionalityExample;
 import com.example.application.views.demo.views.CollaborativeExample;
@@ -16,11 +21,8 @@ import com.example.application.views.demo.views.InlineComponentsExample;
 import com.example.application.views.demo.views.ReportModeExample;
 import com.example.application.views.demo.views.SimpleInvoiceExample;
 import com.example.application.views.main.MainView;
-import org.apache.commons.io.IOUtils;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
@@ -32,7 +34,6 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 
 @Route(value = "demo/:demoID", layout = MainView.class)
 @NpmPackage(value = "code-prettify", version = "0.1.0")
@@ -105,9 +106,20 @@ public class DemoView extends VerticalLayout implements BeforeEnterObserver, Has
 
     private String getSource(Class clazz) throws IOException {
         InputStream resourceAsStream = clazz.getResourceAsStream(clazz.getSimpleName() + ".java");
-        String code = IOUtils.toString(resourceAsStream);
-        code = code.replace("&", "&amp;").replace("<", "&lt;")
-                .replace(">", "&gt;");
+        
+        String code = "";
+        if (resourceAsStream != null) {
+            code = IOUtils.toString(resourceAsStream);
+        }  else {
+        	File file = new File("./src/main/java/", clazz.getName().replace('.', '/') + ".java");
+        	if (file.canRead()) {
+            	code = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        	}
+        } 
+        if (code != null) {
+            code = code.replace("&", "&amp;").replace("<", "&lt;")
+                    .replace(">", "&gt;");
+        }
         return code;
     }
 
