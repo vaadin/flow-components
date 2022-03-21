@@ -18,8 +18,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -206,17 +210,14 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportLargeChart() throws IOException, InterruptedException {
+    public void exportChartWithLargeSeries() throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
-
-        for (Integer i = 0; i < 500; i++) {
-          ListSeries series = new ListSeries();
-          for (Integer j = 0; j < 500; j++) {
-            series.addData(j);
-          }
-          configuration.addSeries(series);
-        }
-
+        List<Number> data = IntStream
+                .range(0, 100000)
+                .boxed()
+                .collect(Collectors.toList());
+        ListSeries series = new ListSeries(data);
+        configuration.addSeries(series);
         svgGenerator.generate(configuration);
     }
 
