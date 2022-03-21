@@ -209,11 +209,10 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithLargeSeries() throws IOException, InterruptedException {
+    public void exportWithLargeSeries()
+            throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
-        List<Number> data = IntStream
-                .range(0, 100000)
-                .boxed()
+        List<Number> data = IntStream.range(0, 100000).boxed()
                 .collect(Collectors.toList());
         ListSeries series = new ListSeries(data);
         configuration.addSeries(series);
