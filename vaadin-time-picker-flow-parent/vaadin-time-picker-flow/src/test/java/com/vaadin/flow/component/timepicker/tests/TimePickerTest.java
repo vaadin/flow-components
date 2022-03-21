@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.timepicker.GeneratedVaadinTimePicker;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -39,23 +38,30 @@ import com.vaadin.flow.server.VaadinSession;
 public class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
-    private static LocalTime TEST_VALUE = LocalTime.now();
+    @Test
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+        TimePicker picker = new TimePicker();
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
 
-    private static class TestTimePicker
-            extends GeneratedVaadinTimePicker<TestTimePicker, LocalTime> {
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        TimePicker picker = new TimePicker((LocalTime) null);
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
 
-        TestTimePicker() {
-            super(TEST_VALUE, null, String.class, value -> null, value -> null,
-                    true);
-        }
+    @Test
+    public void initialValueIsTime_valuePropertyHasInitialValue() {
+        TimePicker picker = new TimePicker(LocalTime.of(9, 32));
+        assertEquals(LocalTime.of(9, 32), picker.getValue());
+        assertEquals("09:32", picker.getElement().getProperty("value"));
     }
 
     @Test
     public void timePicker_basicCases() {
         TimePicker picker = new TimePicker();
-
-        assertEquals(null, picker.getValue());
-        assertFalse(picker.getElement().hasProperty("value"));
 
         picker.setValue(LocalTime.of(5, 30));
         assertEquals("05:30", picker.getElement().getProperty("value"));
@@ -69,13 +75,6 @@ public class TimePickerTest {
         TimePicker timePicker = new TimePicker();
         timePicker.setValue(null);
         assertEquals(null, timePicker.getValue());
-    }
-
-    @Test
-    public void setInitialValue() {
-        TimePicker picker = new TimePicker(LocalTime.of(9, 32));
-        assertEquals(LocalTime.of(9, 32), picker.getValue());
-        assertEquals("09:32", picker.getElement().getProperty("value"));
     }
 
     @Test
@@ -242,7 +241,7 @@ public class TimePickerTest {
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-time-picker");
 
-        String value = TEST_VALUE.plus(31l, ChronoUnit.MINUTES).toString();
+        String value = LocalTime.now().plus(31l, ChronoUnit.MINUTES).toString();
         element.setProperty("value", value);
         UI ui = new UI();
         UI.setCurrent(ui);
@@ -255,10 +254,10 @@ public class TimePickerTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(instantiator.createComponent(TestTimePicker.class))
-                .thenAnswer(invocation -> new TestTimePicker());
+        Mockito.when(instantiator.createComponent(TimePicker.class))
+                .thenAnswer(invocation -> new TimePicker());
 
-        TestTimePicker field = Component.from(element, TestTimePicker.class);
+        TimePicker field = Component.from(element, TimePicker.class);
         Assert.assertEquals(value, field.getElement().getPropertyRaw("value"));
     }
 
