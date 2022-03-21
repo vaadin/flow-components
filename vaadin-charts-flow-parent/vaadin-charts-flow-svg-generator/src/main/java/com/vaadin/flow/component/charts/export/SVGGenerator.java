@@ -63,7 +63,7 @@ public class SVGGenerator implements AutoCloseable {
      * file which contents can be then read by this class.
      */
     private static final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
-            + "exporter({\n" + "chartConfigFile: '%s',\n" + "outFile: '%s',\n"
+            + "exporter({\n" + "chartConfigurationFile: '%s',\n" + "outFile: '%s',\n"
             + "exportOptions: %s,\n" + "})";
 
     /**
