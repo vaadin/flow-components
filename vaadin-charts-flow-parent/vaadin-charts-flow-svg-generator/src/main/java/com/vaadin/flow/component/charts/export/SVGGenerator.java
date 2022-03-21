@@ -163,9 +163,9 @@ public class SVGGenerator implements AutoCloseable {
         String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
 
         // Pass the configuration json via a temp file instead of passing a raw json directly via a CLI argument.
-        // It is to avoid the potential "Argument list too long" error which can be thrown
-        // when length of the configuration json exceeds the `ARG_MAX` limit.
-        // Note, the `ARG_MAX` limit is different on different platforms, see more:
+        // It allows to potentially avoid the "Argument list too long" exception which can be thrown
+        // if length of the configuration json exceeds the `ARG_MAX` limit.
+        // The `ARG_MAX` limit can be different depending on the platform:
         // https://www.in-ulm.de/~mascheck/various/argmax/
         Path chartConfigFilePath = Files.createTempFile(tempDirPath, "config", ".json");
         String chartConfigFileName = chartConfigFilePath.toFile().getName();
