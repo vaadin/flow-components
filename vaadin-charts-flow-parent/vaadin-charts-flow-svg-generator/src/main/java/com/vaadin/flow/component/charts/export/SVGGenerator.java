@@ -161,15 +161,23 @@ public class SVGGenerator implements AutoCloseable {
                 "Chart configuration must not be null.");
         String jsonConfig = ChartSerialization.toJSON(config);
         String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
-        Path requestFilePath = Files.createTempFile(tempDirPath, "config", ".json");
-        String requestFileName = requestFilePath.toFile().getName();
-        Files.writeString(requestFilePath, jsonConfig, StandardCharsets.UTF_8);
+
+        // Pass the configuration json via a temp file instead of passing a raw json directly via a CLI argument.
+        // It is to avoid the potential "Argument list too long" error which can be thrown
+        // when length of the configuration json exceeds the `ARG_MAX` limit.
+        // Note, the `ARG_MAX` limit is different on different platforms, see more:
+        // https://www.in-ulm.de/~mascheck/various/argmax/
+        Path chartConfigFilePath = Files.createTempFile(tempDirPath, "config", ".json");
+        String chartConfigFileName = chartConfigFilePath.toFile().getName();
+        Files.writeString(chartConfigFilePath, jsonConfig, StandardCharsets.UTF_8);
+
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
+
         String script = String.format(
                 SCRIPT_TEMPLATE, bundleTempPath.toFile().getAbsolutePath()
                         .replaceAll("\\\\", "/"),
-                requestFileName, chartFileName, jsonExportOptions);
+                chartConfigFileName, chartFileName, jsonExportOptions);
         NodeRunner nodeRunner = new NodeRunner();
         nodeRunner.runJavascript(script);
         // when script completes, the chart svg file should exist
@@ -178,7 +186,7 @@ public class SVGGenerator implements AutoCloseable {
                     StandardCharsets.UTF_8);
         } finally {
             Files.delete(chartFilePath);
-            Files.delete(requestFilePath);
+            Files.delete(chartConfigFilePath);
         }
     }
 
