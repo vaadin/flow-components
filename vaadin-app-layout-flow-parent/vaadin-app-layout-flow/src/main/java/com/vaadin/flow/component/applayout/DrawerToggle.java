@@ -4,7 +4,7 @@ package com.vaadin.flow.component.applayout;
  * #%L
  * Vaadin App Layout
  * %%
- * Copyright (C) 2018 - 2019 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
