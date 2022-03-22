@@ -2504,8 +2504,8 @@ public class SheetWidget extends Panel {
     /*-{
         var cssRules = stylesheet.sheet.cssRules? stylesheet.sheet.cssRules : stylesheet.sheet.rules;
         var rules = [];
-    	for (i=0; i<cssRules.length; i++){
-    		rules.push(cssRules[i].cssText);
+        for (var i=0; i<cssRules.length; i++){
+             rules.push(cssRules[i].cssText);
     	}
     	return rules.join(' ');
     }-*/;
