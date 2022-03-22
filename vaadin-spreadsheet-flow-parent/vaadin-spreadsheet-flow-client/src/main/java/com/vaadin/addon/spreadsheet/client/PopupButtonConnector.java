@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -28,16 +28,12 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
-import com.vaadin.shared.ui.Connect;
-import com.vaadin.shared.ui.Connect.LoadStyle;
 
 @SuppressWarnings("serial")
-@Connect(value = PopupButton.class, loadStyle = LoadStyle.DEFERRED)
 public class PopupButtonConnector extends AbstractHasComponentsConnector
         implements ClickHandler, CloseHandler<PopupPanel> {
 

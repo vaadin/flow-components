@@ -49,19 +49,6 @@
                 <module>vaadin-spreadsheet-flow-client</module>
             </modules>
         </profile>
-
-        <!-- TODO: remove this when addon classes moved to vaadin-spreadsheet-flow-client -->
-        <profile>
-            <id>addon</id>
-            <activation>
-                <property>
-                    <name>!skipAddon</name>
-                </property>
-            </activation>
-            <modules>
-                <module>legacy/vaadin-spreadsheet</module>
-            </modules>
-        </profile>
     </profiles>
 
     <!-- Everything from here should be in vaadin-flow-components parent when moved to the monorepo  -->
@@ -86,8 +73,6 @@
         <poi.ooxml.schemas.version>1.4</poi.ooxml.schemas.version>
 
         <gwt.version>2.9.0</gwt.version>
-        <gwt.style>pretty</gwt.style>
-        <gwt.draft.compile>false</gwt.draft.compile>
 
         <junit.version>4.13.2</junit.version>
         <mockito.version>1.10.19</mockito.version>
@@ -223,31 +208,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <version>${gwt.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>compile</goal>
-                                <!-- <goal>test</goal> -->
-                                <!-- <goal>generateAsync</goal> -->
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <runTarget>${gwt.target}</runTarget>
-                        <modules>
-                            <module>${gwt.module></module>
-                        </modules>
-                        <hostedWebapp>${gwt.hostedWebapp}</hostedWebapp>
-                        <generateJsInteropExports>true</generateJsInteropExports>
-                        <style>${gwt.style}</style>
-                        <extraJvmArgs>-Xmx1g -Xms1g</extraJvmArgs>
-                        <draftCompile>${gwt.draft.compile}</draftCompile>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
