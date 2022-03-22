@@ -171,7 +171,8 @@ public class SVGGenerator implements AutoCloseable {
         Path chartConfigFilePath = Files.createTempFile(tempDirPath, "config",
                 ".json");
         String chartConfigFileName = chartConfigFilePath.toFile().getName();
-        Files.write(chartConfigFilePath, jsonConfig.getBytes(StandardCharsets.UTF_8));
+        Files.write(chartConfigFilePath,
+                jsonConfig.getBytes(StandardCharsets.UTF_8));
 
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
