@@ -84,7 +84,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
@@ -115,9 +114,7 @@ import com.vaadin.flow.server.StreamResource;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-spreadsheet")
-@NpmPackage(value = "spreadsheet-lit-element", version = "^0.0.122")
-//@JsModule("my-element/my-element.js")
-@JsModule("spreadsheet-lit-element/vaadin-spreadsheet.js")
+@JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
 public class Spreadsheet extends Component implements HasComponents, HasSize, HasStyle,
         Action.Container, Focusable {

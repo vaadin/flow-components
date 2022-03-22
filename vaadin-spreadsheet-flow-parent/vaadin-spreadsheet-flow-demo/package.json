@@ -118,8 +118,7 @@
     "code-prettify": "0.1.0",
     "construct-style-sheets-polyfill": "3.0.4",
     "date-fns": "2.23.0",
-    "lit": "2.1.4",
-    "spreadsheet-lit-element": "^0.0.122"
+    "lit": "2.1.4"
   },
   "devDependencies": {
     "@vaadin/application-theme-plugin": "./target/plugins/application-theme-plugin",
@@ -264,8 +263,7 @@
       "code-prettify": "0.1.0",
       "construct-style-sheets-polyfill": "3.0.4",
       "date-fns": "2.23.0",
-      "lit": "2.1.4",
-      "spreadsheet-lit-element": "^0.0.122"
+      "lit": "2.1.4"
     },
     "devDependencies": {
       "chokidar": "^3.5.0",
@@ -289,7 +287,7 @@
       "workbox-precaching": "6.5.0",
       "workbox-webpack-plugin": "6.5.0"
     },
-    "hash": "c1acef740edd29b73d9ff1940dac4f64890e7054c06aa06e629a6640497c8698"
+    "hash": "893349ed11629e1997f29ea810562e4992d2a98d8c372378ca1f75fad3e528c4"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -408,7 +406,6 @@
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "date-fns": "$date-fns",
     "lit": "$lit",
-    "spreadsheet-lit-element": "$spreadsheet-lit-element",
     "chokidar": "$chokidar"
   }
 }
