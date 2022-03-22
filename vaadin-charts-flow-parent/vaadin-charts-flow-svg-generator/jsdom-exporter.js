@@ -68,6 +68,9 @@ doc.createElementNS = (ns, tagName) => {
      * each glyph. It could easily be improved to take font-weight into account.
      * For a more exact result we could to create a map over glyph widths for
      * several fonts and sizes, but it may not be necessary for the purpose.
+     * If the width for the element is zero, then the height is also
+     * set to zero, in order to not reserve any vertical space for elements
+     * without content.
      * @returns {Object} The bounding box
      */
     elem.getBBox = () => {
@@ -123,11 +126,15 @@ doc.createElementNS = (ns, tagName) => {
             }
             );
 
+        // If the width of the text box is 0, always return a 0 height (since the element indeed consumes no space)
+        // Returning a non-zero height causes Highcharts to allocate vertical space in the chart for text that doesn't
+        // exist
+        let retHeight = width == 0 ? 0 : height;
         return {
             x: 0,
             y: 0,
             width: width,
-            height: height
+            height: retHeight
         };
     };
     return elem;

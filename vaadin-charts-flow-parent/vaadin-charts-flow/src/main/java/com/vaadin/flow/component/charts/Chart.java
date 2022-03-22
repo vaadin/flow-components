@@ -18,12 +18,15 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.events.ChartAddSeriesEvent;
@@ -79,7 +82,7 @@ import elemental.json.impl.JreJsonFactory;
 @NpmPackage(value = "@vaadin/charts", version = "23.0.2")
 @NpmPackage(value = "@vaadin/vaadin-charts", version = "23.0.2")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
-public class Chart extends Component implements HasStyle, HasSize {
+public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private Configuration configuration;
 
@@ -609,6 +612,33 @@ public class Chart extends Component implements HasStyle, HasSize {
     public Registration addYAxesExtremesSetListener(
             ComponentEventListener<YAxesExtremesSetEvent> listener) {
         return addListener(YAxesExtremesSetEvent.class, listener);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @apiNote To use theme variants CSS styling mode needs to be enabled
+     *          ({@link #getConfiguration().getChart().setStyleMode(true)})
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(ChartVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(ChartVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(ChartVariant... variants) {
+        getThemeNames()
+                .removeAll(Stream.of(variants).map(ChartVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     /*
