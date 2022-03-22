@@ -39,9 +39,8 @@ public class StylingIT extends AbstractComponentIT {
 
     @Test
     public void addClassBeforeOpen() {
-        addDialog.click();
-
         addFoo.click();
+
         openDialog.click();
 
         String value = getOverlayClassName();

@@ -29,6 +29,9 @@
             });
 
             observer.observe(dialog, { attributes: true, attributeFilter: ['class'] });
+
+            // Copy initial class
+            copyClassName(dialog);
         }
     };
 })();
