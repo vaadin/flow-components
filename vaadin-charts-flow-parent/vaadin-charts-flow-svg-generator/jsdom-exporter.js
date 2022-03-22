@@ -208,7 +208,7 @@ const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = '
     return new Promise((resolve, reject) => {
         if (chartConfigurationFile) {
             chartConfiguration = JSON.parse(
-                fs.readFileSync(path.join(__dirname, chartConfigurationFile)).toString()
+                fs.readFileSync(path.join(__dirname, chartConfigurationFile), 'utf8').toString()
             );
         }
 
