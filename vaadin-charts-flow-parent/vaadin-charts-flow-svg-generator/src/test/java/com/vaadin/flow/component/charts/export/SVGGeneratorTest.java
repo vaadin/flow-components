@@ -18,8 +18,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -203,6 +206,17 @@ public class SVGGeneratorTest {
                 "enabled-functions.svg");
         String expectedSVG = readUtf8File(expectedResultPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
+    }
+
+    @Test
+    public void exportWithLargeSeries()
+            throws IOException, InterruptedException {
+        Configuration configuration = new Configuration();
+        List<Number> data = IntStream.range(0, 100000).boxed()
+                .collect(Collectors.toList());
+        ListSeries series = new ListSeries(data);
+        configuration.addSeries(series);
+        svgGenerator.generate(configuration);
     }
 
     private Configuration createPieChartConfiguration() {
