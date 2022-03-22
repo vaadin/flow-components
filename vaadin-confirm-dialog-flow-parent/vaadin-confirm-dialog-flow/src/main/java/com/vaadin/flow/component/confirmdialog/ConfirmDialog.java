@@ -16,6 +16,7 @@ package com.vaadin.flow.component.confirmdialog;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -43,6 +44,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.2")
 @NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.2")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
+@JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 
@@ -124,6 +126,17 @@ public class ConfirmDialog extends Component
 
     public void updateHeight() {
         this.getElement().executeJs("this._setHeight($0)", this.height);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.confirmDialogConnector.initLazy(this)");
     }
 
     private boolean autoAddedToTheUi;
