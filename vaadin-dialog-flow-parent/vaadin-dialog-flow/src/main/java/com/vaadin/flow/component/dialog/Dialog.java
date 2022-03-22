@@ -37,6 +37,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -44,9 +46,10 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize, HasTheme {
+        implements HasComponents, HasSize, HasTheme, HasStyle {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
@@ -94,12 +97,19 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
             }
+            if (getClassName() != null) {
+                getElement().executeJs(OVERLAY_LOCATOR_JS
+                        + ".$.overlay.className = this.className");
+            }
         });
 
         addListener(DialogResizeEvent.class, event -> {
             width = event.getWidth();
             height = event.getHeight();
         });
+
+        getElement()
+                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     /**
@@ -708,4 +718,14 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             Adding styles to dialog overlay are not supported
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException();
+    }
+
 }
