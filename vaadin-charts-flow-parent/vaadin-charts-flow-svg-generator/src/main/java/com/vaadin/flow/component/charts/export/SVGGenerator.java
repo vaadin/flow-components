@@ -122,7 +122,7 @@ public class SVGGenerator implements AutoCloseable {
      *             virtually render the chart.
      * @throws InterruptedException
      *             if the rendering process gets interrupted.
-     * 
+     *
      * @see SVGGenerator#generate(Configuration, ExportOptions)
      */
     public String generate(Configuration chartConfiguration)
@@ -171,8 +171,7 @@ public class SVGGenerator implements AutoCloseable {
         Path chartConfigFilePath = Files.createTempFile(tempDirPath, "config",
                 ".json");
         String chartConfigFileName = chartConfigFilePath.toFile().getName();
-        Files.writeString(chartConfigFilePath, jsonConfig,
-                StandardCharsets.UTF_8);
+        Files.write(chartConfigFilePath, jsonConfig.getBytes(StandardCharsets.UTF_8));
 
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
