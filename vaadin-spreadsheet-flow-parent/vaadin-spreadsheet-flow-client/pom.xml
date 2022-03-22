@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <groupId>com.vaadin</groupId>
+  <artifactId>vaadin-spreadsheet-flow-client</artifactId>
+  <packaging>jar</packaging>
+
+  <properties>
+    <gwt.target>GwtAddonExporter.html</gwt.target>
+    <gwt.module>com.vaadin.spreadsheet.flowport.gwtexporter.GwtExporter</gwt.module>
+    <gwt.hostedWebapp>${project.build.directory}/${project.build.finalName}</gwt.hostedWebapp>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt</artifactId>
+        <version>${gwt.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+    </dependency>
+
+    <!-- TODO Remove this by copying original spreadsheet classes and dependencies -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-spreadsheet</artifactId>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
+
+    <!-- TODO We should depend only on flow-client and gwt -->
+    <!-- Used in ApplicationConfiguration & ApplicationConnection & ConnectorBundleLoaderFactory -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client</artifactId>
+    </dependency>
+    <!-- ConnectorBundleLoaderFactory uses ConnectorBundle -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client-compiler</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
+    <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+    <!-- Add source and resource files to artifact -->
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/java</directory>
+      </resource>
+      <resource>
+        <directory>${basedir}/src/main/resources</directory>
+      </resource>
+    </resources>
+    <plugins>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${jetty.version}</version>
+        <configuration>
+          <scanIntervalSeconds>-1</scanIntervalSeconds>
+          <stopPort>8081</stopPort>
+          <stopWait>5</stopWait>
+          <stopKey>foo</stopKey>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>
