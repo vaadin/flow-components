@@ -15,28 +15,99 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-dialog/dialog-class-names-test") public class DialogWithClassNamesIT
-        extends AbstractComponentIT {
+import static com.vaadin.flow.component.dialog.tests.DialogTestPageIT.DIALOG_OVERLAY_TAG;
+
+@TestPath("vaadin-dialog/dialog-class-names-test")
+public class DialogWithClassNamesIT extends AbstractComponentIT {
 
     @Before public void init() {
         open();
     }
 
-    @Test public void openDialog_clickThreeTimes_containerIsUpdated() {
+    @Test
+    public void openDialog_overlayHasSameClassNames() {
         $(NativeButtonElement.class).id("open").click();
 
-        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
         DialogElement dialog = $(DialogElement.class).first();
 
-        //TODO
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+
+        String overlayClassNames = overlay.getAttribute("class");
+        String dialogClassNames = dialog.getAttribute("class");
+
+        Assert.assertEquals(dialogClassNames, "custom");
+        Assert.assertEquals(overlayClassNames, dialogClassNames);
+    }
+
+    @Test
+    public void openDialog_overlayChangeClassName() {
+        $(NativeButtonElement.class).id("open").click();
+
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+
+        $(NativeButtonElement.class).id("add").click();
+
+        DialogElement dialog = $(DialogElement.class).first();
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+
+        String overlayClassNames = overlay.getAttribute("class");
+        String dialogClassNames = dialog.getAttribute("class");
+
+        Assert.assertEquals(dialogClassNames, "custom added");
+        Assert.assertEquals(overlayClassNames, dialogClassNames);
+    }
+
+    @Test
+    public void openDialog_overlayNoClassNameAfterClearClassName() {
+        $(NativeButtonElement.class).id("open").click();
+
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+
+        $(NativeButtonElement.class).id("clear").click();
+
+        DialogElement dialog = $(DialogElement.class).first();
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+
+        String overlayClassNames = overlay.getAttribute("class");
+        String dialogClassNames = dialog.getAttribute("class");
+
+        Assert.assertEquals(dialogClassNames, "");
+        Assert.assertEquals(overlayClassNames, dialogClassNames);
+    }
+
+    @Test
+    public void openDialog_overlayChagedClassNameAfterSecondOpening() {
+        $(NativeButtonElement.class).id("open").click();
+
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+
+        $(NativeButtonElement.class).id("clear").click();
+        $(NativeButtonElement.class).id("add").click();
+
+        $(DIALOG_OVERLAY_TAG).first().click();
+
+        $(NativeButtonElement.class).id("open").click();
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+
+        DialogElement dialog = $(DialogElement.class).first();
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+
+        String overlayClassNames = overlay.getAttribute("class");
+        String dialogClassNames = dialog.getAttribute("class");
+
+        Assert.assertEquals(dialogClassNames, "added");
+        Assert.assertEquals(overlayClassNames, dialogClassNames);
     }
 }

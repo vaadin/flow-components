@@ -1,10 +1,15 @@
 (function () {
+    function copyClassName(dialog) {
+        const overlay = dialog.$.overlay.$.overlay;
+        if (overlay) {
+            overlay.className = dialog.className;
+        }
+    }
+
     const observer = new MutationObserver((records) => {
         records.forEach((mutation) => {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const dialog = mutation.target;
-                const overlay = dialog.$.overlay.$.overlay;
-                overlay.className = dialog.className;
+                copyClassName(mutation.target);
             }
         });
     });
@@ -15,6 +20,14 @@
                 return;
             }
             dialog.$connector = {};
+
+            // copyClassName(dialog);
+
+            dialog.addEventListener('opened-changed', (e) => {
+                if (e.detail.value) {
+                    copyClassName(dialog);
+                }
+            });
 
             observer.observe(dialog, { attributes: true, attributeFilter: ['class'] });
         }

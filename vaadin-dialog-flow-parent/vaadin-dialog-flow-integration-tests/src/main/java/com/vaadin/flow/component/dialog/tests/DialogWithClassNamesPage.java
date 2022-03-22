@@ -29,17 +29,16 @@ public class DialogWithClassNamesPage extends Div {
         dialog = new Dialog();
         dialog.addClassName("custom");
 
-        NativeButton addClass = new NativeButton("Add class");
-        addClass.addClickListener(event -> dialog.addClassName("changed"));
+        NativeButton addClass = new NativeButton("Add class", event -> dialog.addClassName("changed"));
+        addClass.setId("add");
         dialog.add(addClass);
 
-        NativeButton clearAllClass = new NativeButton("Clear all class");
-        clearAllClass.addClickListener(event -> dialog.getClassNames().clear());
+        NativeButton clearAllClass = new NativeButton("Clear all class", event -> dialog.getClassNames().clear());
+        clearAllClass.setId("clear");
         dialog.add(clearAllClass);
 
-        NativeButton open = new NativeButton("Open dialog");
+        NativeButton open = new NativeButton("Open dialog", event -> dialog.open());
         open.setId("open");
-        open.addClickListener(event -> dialog.open());
         add(open);
     }
 

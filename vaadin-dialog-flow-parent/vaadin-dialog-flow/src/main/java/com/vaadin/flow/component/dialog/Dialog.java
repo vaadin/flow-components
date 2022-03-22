@@ -97,19 +97,16 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
             }
-            if (getClassName() != null) {
-                getElement().executeJs(OVERLAY_LOCATOR_JS
-                        + ".$.overlay.className = this.className");
-            }
+//            if (getClassName() != null) {
+//                getElement().executeJs(OVERLAY_LOCATOR_JS
+//                        + ".$.overlay.className = this.className");
+//            }
         });
 
         addListener(DialogResizeEvent.class, event -> {
             width = event.getWidth();
             height = event.getHeight();
         });
-
-        getElement()
-                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     /**
@@ -696,6 +693,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement()
+                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     private void setDimension(String dimension, String value) {
