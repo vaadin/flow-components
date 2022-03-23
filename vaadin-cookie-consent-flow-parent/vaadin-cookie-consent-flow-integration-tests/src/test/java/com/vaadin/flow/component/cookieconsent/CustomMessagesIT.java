@@ -2,7 +2,7 @@ package com.vaadin.flow.component.cookieconsent;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.confirmdialog.examples.CustomMessages;
+import com.vaadin.flow.component.cookieconsent.examples.CustomMessages;
 
 public class CustomMessagesIT extends AbstractParallelTest {
 

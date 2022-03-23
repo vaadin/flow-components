@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.confirmdialog.examples;
+package com.vaadin.flow.component.cookieconsent.examples;
 
 import com.vaadin.flow.component.cookieconsent.CookieConsent;
 import com.vaadin.flow.component.html.Div;

@@ -7,6 +7,7 @@
 /* eslint no-console: 0 */
 const jsdom = require('jsdom');
 const fs = require('fs');
+const path = require('path');
 
 const { JSDOM } = jsdom;
 
@@ -175,7 +176,8 @@ const inflateFunctions = (jsonConfiguration) => {
  *
  * @typedef ExportConfiguration
  *
- * @property {object} chartConfiguration
+ * @property {string} chartConfigurationFile A relative path to a file containing the configuration in JSON.
+ * @property {object} chartConfiguration An object with the configuration. Only has effect when `chartConfigurationFile` is not provided.
  * @property {string} outFile
  * @property {ExportOptions} exportOptions
  */
@@ -191,14 +193,24 @@ const inflateFunctions = (jsonConfiguration) => {
 
 /**
  * Function to export SVG a string containing a chart based
- * on the configuration provided
+ * on the configuration provided.
+ *
+ * - The `chartConfiguration` property can be used to provide a configuration when the exporter is being called from another JS script.
+ * - The `chartConfigurationFile` property can be used when the exporter is being called via CLI to get around the max argument length limit.
+ *
+ * The `chartConfigurationFile` property takes priority over `chartConfiguration`.
  *
  * @param {ExportConfiguration} configuration
  *
  * @returns {Promise<SVGResult>} Object with the result of the export
  */
-const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
+const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = 'chart.svg', exportOptions }) => {
     return new Promise((resolve, reject) => {
+        if (chartConfigurationFile) {
+            chartConfiguration = JSON.parse(
+                fs.readFileSync(path.join(__dirname, chartConfigurationFile), 'utf8').toString()
+            );
+        }
 
         // Disable all animation and default title
         Highcharts.setOptions({
@@ -256,7 +268,7 @@ const jsdomExporter = ({ chartConfiguration, outFile = 'chart.svg', exportOption
         let svg = chart.sanitizeSVG(
             chart.container.innerHTML
         );
-        fs.writeFile(__dirname + '/' + outFile, svg, function (err) {
+        fs.writeFile(path.join(__dirname, outFile), svg, function (err) {
             if (err) {
                 reject(err);
             }
