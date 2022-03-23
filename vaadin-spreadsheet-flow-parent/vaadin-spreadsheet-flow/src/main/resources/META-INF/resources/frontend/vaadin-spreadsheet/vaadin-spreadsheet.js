@@ -13,8 +13,8 @@
  */
 
 import {LitElement, html, css, unsafeCSS} from 'lit-element';
-import { Spreadsheet } from 'spreadsheet-export.js';
-import { css_gwt, css_valo } from 'spreadsheet-styles.js';
+import { Spreadsheet } from './spreadsheet-export.js';
+import { css_gwt, css_valo } from './spreadsheet-styles.js';
 
 
 /**

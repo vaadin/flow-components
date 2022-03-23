@@ -400,12 +400,12 @@
     "@vaadin/vaadin-crud": "$@vaadin/vaadin-crud",
     "@vaadin/vaadin-grid-pro": "$@vaadin/vaadin-grid-pro",
     "@vaadin/vaadin-rich-text-editor": "$@vaadin/vaadin-rich-text-editor",
-    "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
-    "code-prettify": "$code-prettify",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
-    "date-fns": "$date-fns",
     "lit": "$lit",
-    "chokidar": "$chokidar"
+    "@polymer/polymer": "$@polymer/polymer",
+    "chokidar": "$chokidar",
+    "code-prettify": "$code-prettify",
+    "date-fns": "$date-fns"
   }
 }
