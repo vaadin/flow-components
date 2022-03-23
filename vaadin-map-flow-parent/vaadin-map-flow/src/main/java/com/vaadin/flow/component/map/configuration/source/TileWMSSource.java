@@ -97,7 +97,7 @@ public class TileWMSSource extends TileImageSource {
         return serverType;
     }
 
-    public static class Options extends TileImageSource.BaseOptions<Options> {
+    public static class Options extends TileImageSource.Options {
         private int gutter = 0;
         private Map<String, Object> params;
         private String serverType;
@@ -105,25 +105,22 @@ public class TileWMSSource extends TileImageSource {
         /**
          * @see TileWMSSource#getGutter()
          */
-        public Options setGutter(int gutter) {
+        public void setGutter(int gutter) {
             this.gutter = gutter;
-            return getThis();
         }
 
         /**
          * @see TileWMSSource#getParams()
          */
-        public Options setParams(Map<String, Object> params) {
+        public void setParams(Map<String, Object> params) {
             this.params = params;
-            return getThis();
         }
 
         /**
          * @see TileWMSSource#getServerType()
          */
-        public Options setServerType(String serverType) {
+        public void setServerType(String serverType) {
             this.serverType = serverType;
-            return getThis();
         }
     }
 }

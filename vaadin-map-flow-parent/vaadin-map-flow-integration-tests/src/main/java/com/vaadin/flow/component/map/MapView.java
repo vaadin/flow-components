@@ -40,8 +40,10 @@ public class MapView extends Div {
 
         NativeButton useOpenCycleMap = new NativeButton("Use OpenCycleMap",
                 e -> {
-                    OSMSource source = new OSMSource(new OSMSource.Options()
-                            .setUrl("https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499"));
+                    OSMSource.Options options = new OSMSource.Options();
+                    options.setUrl(
+                            "https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499");
+                    OSMSource source = new OSMSource(options);
                     TileLayer layer = new TileLayer();
                     layer.setSource(source);
                     map.setBackgroundLayer(layer);
@@ -56,9 +58,10 @@ public class MapView extends Div {
 
         NativeButton addSeaMapLayer = new NativeButton("Add OpenSeaMap layer",
                 e -> {
-                    OSMSource seaMapSource = new OSMSource(
-                            new OSMSource.Options().setUrl(
-                                    "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png"));
+                    OSMSource.Options options = new OSMSource.Options();
+                    options.setUrl(
+                            "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png");
+                    OSMSource seaMapSource = new OSMSource(options);
                     TileLayer seaMapLayer = new TileLayer();
                     seaMapLayer.setSource(seaMapSource);
                     map.addLayer(seaMapLayer);

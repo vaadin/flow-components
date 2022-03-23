@@ -52,19 +52,25 @@ public class MarkerFeature extends PointBasedFeature {
     static {
         Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
                 Assets.PIN.getHeight());
-        PIN_ICON = new Icon(new Icon.Options().setImg(Assets.PIN.getResource())
-                .setImgSize(pinImageSize).setScale(0.5f)
-                .setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT)
-                // Move image slightly downwards to compensate for whitespace at
-                // the bottom of the image
-                .setAnchor(new Icon.Anchor(0.5f, 0.12f)));
+        Icon.Options pinIconOptions = new Icon.Options();
+        pinIconOptions.setImg(Assets.PIN.getResource());
+        pinIconOptions.setImgSize(pinImageSize);
+        pinIconOptions.setScale(0.5f);
+        pinIconOptions.setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT);
+        // Move image slightly downwards to compensate for whitespace at
+        // the bottom of the image
+        pinIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.12f));
+        PIN_ICON = new Icon(pinIconOptions);
 
         Icon.ImageSize pointImageSize = new Icon.ImageSize(
                 Assets.POINT.getWidth(), Assets.POINT.getHeight());
-        POINT_ICON = new Icon(new Icon.Options()
-                .setImg(Assets.POINT.getResource()).setImgSize(pointImageSize)
-                .setScale(0.25f).setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT)
-                .setAnchor(new Icon.Anchor(0.5f, 0.5f)));
+        Icon.Options pointIconOptions = new Icon.Options();
+        pointIconOptions.setImg(Assets.POINT.getResource());
+        pointIconOptions.setImgSize(pointImageSize);
+        pointIconOptions.setScale(0.25f);
+        pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
+        pointIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
+        POINT_ICON = new Icon(pointIconOptions);
     }
 
     /**

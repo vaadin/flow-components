@@ -44,7 +44,10 @@ public class ImageWMSSourceTest {
     private ImageWMSSource.Options createValidOptions() {
         Map<String, Object> params = createValidParams();
 
-        return new ImageWMSSource.Options().setUrl("https://example.com")
-                .setParams(params);
+        ImageWMSSource.Options options = new ImageWMSSource.Options();
+        options.setUrl("https://example.com");
+        options.setParams(params);
+
+        return options;
     }
 }

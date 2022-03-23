@@ -57,8 +57,9 @@ public class MarkerFeatureTest {
     public void initializeWithCustomIcon() {
         Coordinate coordinate = new Coordinate(1233058.1696443919,
                 6351912.406929109);
-        Icon icon = new Icon(
-                new Icon.Options().setSrc("assets/custom-marker.png"));
+        Icon.Options options = new Icon.Options();
+        options.setSrc("assets/custom-marker.png");
+        Icon icon = new Icon(options);
         MarkerFeature markerFeature = new MarkerFeature(coordinate, icon);
 
         Assert.assertNotNull(markerFeature.getIcon());
@@ -78,8 +79,9 @@ public class MarkerFeatureTest {
         TestMarkerFeature markerFeature = new TestMarkerFeature();
         markerFeature.addPropertyChangeListener(propertyChangeListenerMock);
 
-        Icon icon = new Icon(
-                new Icon.Options().setSrc("assets/custom-marker.png"));
+        Icon.Options options = new Icon.Options();
+        options.setSrc("assets/custom-marker.png");
+        Icon icon = new Icon(options);
         markerFeature.setIcon(icon);
 
         Assert.assertEquals(icon, markerFeature.getIcon());

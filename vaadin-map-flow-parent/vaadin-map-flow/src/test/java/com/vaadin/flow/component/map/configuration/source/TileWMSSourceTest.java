@@ -44,7 +44,9 @@ public class TileWMSSourceTest {
     private TileWMSSource.Options createValidOptions() {
         Map<String, Object> params = createValidParams();
 
-        return new TileWMSSource.Options().setUrl("https://example.com")
-                .setParams(params);
+        TileWMSSource.Options options = new TileWMSSource.Options();
+        options.setUrl("https://example.com");
+        options.setParams(params);
+        return options;
     }
 }

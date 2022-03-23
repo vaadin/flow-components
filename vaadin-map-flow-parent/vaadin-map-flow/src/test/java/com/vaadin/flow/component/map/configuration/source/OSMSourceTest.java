@@ -7,7 +7,8 @@ public class OSMSourceTest {
     @Test
     public void setAttributionsCollapsible_mayNotBeEnabled() {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            new OSMSource.Options().setAttributionsCollapsible(true);
+            OSMSource.Options options = new OSMSource.Options();
+            options.setAttributionsCollapsible(true);
         });
     }
 }

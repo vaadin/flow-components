@@ -23,7 +23,7 @@ public abstract class TileImageSource extends UrlTileSource {
 
     private final String crossOrigin;
 
-    protected TileImageSource(BaseOptions<?> options) {
+    protected TileImageSource(Options options) {
         super(options);
         this.crossOrigin = options.crossOrigin;
     }
@@ -40,16 +40,14 @@ public abstract class TileImageSource extends UrlTileSource {
         return crossOrigin;
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>>
-            extends UrlTileSource.BaseOptions<T> {
+    protected static class Options extends UrlTileSource.Options {
         private String crossOrigin;
 
         /**
          * @see TileImageSource#getCrossOrigin()
          */
-        public T setCrossOrigin(String crossOrigin) {
+        public void setCrossOrigin(String crossOrigin) {
             this.crossOrigin = crossOrigin;
-            return getThis();
         }
     }
 }

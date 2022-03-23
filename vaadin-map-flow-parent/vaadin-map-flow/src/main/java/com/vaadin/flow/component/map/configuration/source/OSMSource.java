@@ -50,20 +50,19 @@ public class OSMSource extends XYZSource {
         return super.isAttributionsCollapsible();
     }
 
-    public static class Options extends XYZSource.BaseOptions<Options> {
+    public static class Options extends XYZSource.Options {
         public Options() {
             setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
             setAttributionsCollapsible(false);
         }
 
         @Override
-        public Options setAttributionsCollapsible(
+        public void setAttributionsCollapsible(
                 boolean attributionsCollapsible) {
             if (attributionsCollapsible) {
                 throw new IllegalArgumentException(
                         "OSMSource does not allow to collapse attributions");
             }
-            return getThis();
         }
     }
 }
