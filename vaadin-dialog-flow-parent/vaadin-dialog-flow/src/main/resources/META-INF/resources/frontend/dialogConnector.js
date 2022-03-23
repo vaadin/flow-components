@@ -1,6 +1,6 @@
 (function () {
     function copyClassName(dialog) {
-        const overlay = dialog.$.overlay.$.overlay;
+        const overlay = dialog.$.overlay;
         if (overlay) {
             overlay.className = dialog.className;
         }

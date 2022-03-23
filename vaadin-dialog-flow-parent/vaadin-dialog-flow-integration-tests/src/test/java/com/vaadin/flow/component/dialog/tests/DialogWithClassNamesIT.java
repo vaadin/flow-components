@@ -43,7 +43,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
         DialogElement dialog = $(DialogElement.class).first();
 
-        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
@@ -61,7 +61,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("add").click();
 
         DialogElement dialog = $(DialogElement.class).first();
-        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
@@ -79,7 +79,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("clear").click();
 
         DialogElement dialog = $(DialogElement.class).first();
-        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
@@ -103,7 +103,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
 
         DialogElement dialog = $(DialogElement.class).first();
-        WebElement overlay = $(DIALOG_OVERLAY_TAG).first().$("*").id("overlay");
+        WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
