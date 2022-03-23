@@ -31,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -126,6 +127,16 @@ public class ConfirmDialog extends Component
 
     public void updateHeight() {
         this.getElement().executeJs("this._setHeight($0)", this.height);
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     *            ConfirmDialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "ConfirmDialog does not support adding styles to overlay");
     }
 
     @Override
