@@ -37,6 +37,7 @@ import com.google.gwt.core.linker.SingleScriptLinker;
 import com.google.gwt.dev.About;
 import com.google.gwt.dev.util.DefaultTextOutput;
 import com.google.gwt.util.tools.Utility;
+import com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetJsApi;
 
 /**
  * Customized version of {@link SingleScriptLinker} which uses a modified
@@ -199,6 +200,9 @@ public class ClientEngineLinker extends SingleScriptLinker {
         out.newlineOpt();
         out.print("})();");
         out.newlineOpt();
+
+        // Export in JS the java class with the exported spreadsheet API
+        out.print("\n\nlet Spreadsheet = " + SpreadsheetJsApi.class.getName() + ";\n\nexport { Spreadsheet };\n");
 
         return emitString(logger, out.toString(),
                 getJsFilename(context, result));

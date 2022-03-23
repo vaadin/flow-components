@@ -15,9 +15,10 @@
   <properties>
     <!-- TODO enable OBF when com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetJsApi is exported to window -->
     <gwt.style>pretty</gwt.style>
-    <gwt.draft.compile>false</gwt.draft.compile>    
+    <gwt.draft.compile>false</gwt.draft.compile>
 
-    <gwt.target>GwtAddonExporter.html</gwt.target>
+    <gwt.name>GwtAddonExporter</gwt.name>
+    <gwt.target>${gwt.name}.html</gwt.target>
     <gwt.module>com.vaadin.spreadsheet.flowport.gwtexporter.GwtExporter</gwt.module>
     <gwt.hostedWebapp>${project.build.directory}/${project.build.finalName}</gwt.hostedWebapp>
 
@@ -149,8 +150,8 @@
           <modulePathPrefix>${modulePathPrefix}</modulePathPrefix>
           <gen>${project.build.directory}/gen</gen>
           <workDir>target</workDir>
-        </configuration>        
-    </plugin> 
+        </configuration>
+    </plugin>
 
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
@@ -162,7 +163,27 @@
           <stopWait>5</stopWait>
           <stopKey>foo</stopKey>
         </configuration>
-      </plugin>
+        </plugin>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.8</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <configuration>
+                <target>
+                    <copy
+                      file="${project.build.directory}/${project.build.finalName}/${gwt.name}/${gwt.name}.cache.js"
+                      tofile="${basedir}/../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/spreadsheet-export.js">
+                    </copy>
+                </target>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
 
     </plugins>
   </build>
