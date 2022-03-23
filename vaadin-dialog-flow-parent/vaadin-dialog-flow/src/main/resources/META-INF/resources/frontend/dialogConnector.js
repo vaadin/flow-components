@@ -21,8 +21,6 @@
             }
             dialog.$connector = {};
 
-            // copyClassName(dialog);
-
             dialog.addEventListener('opened-changed', (e) => {
                 if (e.detail.value) {
                     copyClassName(dialog);
@@ -30,6 +28,8 @@
             });
 
             observer.observe(dialog, { attributes: true, attributeFilter: ['class'] });
+
+            copyClassName(dialog);
         }
     };
 })();

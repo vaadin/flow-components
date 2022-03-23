@@ -31,7 +31,8 @@ import static com.vaadin.flow.component.dialog.tests.DialogTestPageIT.DIALOG_OVE
 @TestPath("vaadin-dialog/dialog-class-names-test")
 public class DialogWithClassNamesIT extends AbstractComponentIT {
 
-    @Before public void init() {
+    @Before
+    public void init() {
         open();
     }
 

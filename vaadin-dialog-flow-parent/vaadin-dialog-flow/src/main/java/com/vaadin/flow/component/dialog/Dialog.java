@@ -97,10 +97,6 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
             }
-//            if (getClassName() != null) {
-//                getElement().executeJs(OVERLAY_LOCATOR_JS
-//                        + ".$.overlay.className = this.className");
-//            }
         });
 
         addListener(DialogResizeEvent.class, event -> {
