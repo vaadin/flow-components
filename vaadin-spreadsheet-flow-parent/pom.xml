@@ -22,7 +22,7 @@
 
     <modules>
         <module>vaadin-spreadsheet-flow</module>
-        <module>vaadin-spreadsheet-flow-testbench</module>
+        <module>vaadin-spreadsheet-testbench</module>
         <module>vaadin-spreadsheet-flow-demo</module>
     </modules>
 
