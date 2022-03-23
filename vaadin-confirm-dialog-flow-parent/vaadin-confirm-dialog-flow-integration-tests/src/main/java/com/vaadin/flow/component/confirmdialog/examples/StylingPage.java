@@ -3,7 +3,6 @@ package com.vaadin.flow.component.confirmdialog.examples;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-confirm-dialog/styling")
