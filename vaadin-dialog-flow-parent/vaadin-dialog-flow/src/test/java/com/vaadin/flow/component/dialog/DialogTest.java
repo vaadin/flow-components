@@ -121,7 +121,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
 
         dialog.addDialogCloseActionListener(event -> {
         });
@@ -154,7 +154,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
     }
 
     @Test
@@ -202,7 +202,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -220,7 +220,7 @@ public class DialogTest {
 
         registration.remove();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
