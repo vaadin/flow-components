@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
@@ -375,5 +376,11 @@ public class DialogTest {
         List<PendingJavaScriptInvocation> invocations = flushInvocations();
 
         Assert.assertEquals(expectedInvocations, invocations.size());
+    }
+
+    @Test
+    public void dialogHasStyle() {
+        Dialog dialog = new Dialog();
+        Assert.assertTrue(dialog instanceof HasStyle);
     }
 }

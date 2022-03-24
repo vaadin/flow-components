@@ -48,8 +48,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
 
-        Assert.assertEquals(dialogClassNames, "custom");
-        Assert.assertEquals(overlayClassNames, dialogClassNames);
+        Assert.assertEquals("custom", dialogClassNames);
+        Assert.assertEquals("custom", overlayClassNames);
     }
 
     @Test
@@ -66,8 +66,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
 
-        Assert.assertEquals(dialogClassNames, "custom added");
-        Assert.assertEquals(overlayClassNames, dialogClassNames);
+        Assert.assertEquals("custom added", dialogClassNames);
+        Assert.assertEquals("custom added", overlayClassNames);
     }
 
     @Test
@@ -84,8 +84,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
 
-        Assert.assertEquals(dialogClassNames, "");
-        Assert.assertEquals(overlayClassNames, dialogClassNames);
+        Assert.assertEquals("", dialogClassNames);
+        Assert.assertEquals("", overlayClassNames);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         String overlayClassNames = overlay.getAttribute("class");
         String dialogClassNames = dialog.getAttribute("class");
 
-        Assert.assertEquals(dialogClassNames, "added");
-        Assert.assertEquals(overlayClassNames, dialogClassNames);
+        Assert.assertEquals("added", dialogClassNames);
+        Assert.assertEquals("added", overlayClassNames);
     }
 }

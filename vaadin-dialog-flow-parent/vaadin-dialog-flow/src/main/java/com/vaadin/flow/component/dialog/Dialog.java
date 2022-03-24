@@ -38,7 +38,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -720,11 +719,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * @throws UnsupportedOperationException
-     *             Adding styles to dialog overlay are not supported
+     *             Dialog does not support adding styles to overlay
      */
     @Override
     public Style getStyle() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(
+                "Dialog does not support adding styles to overlay");
     }
 
 }
