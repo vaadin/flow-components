@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.confirmdialog.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.confirmdialog.examples.Dimensions;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.flow.testutil.TestPath;
