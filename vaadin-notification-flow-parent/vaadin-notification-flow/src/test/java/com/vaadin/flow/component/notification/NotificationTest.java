@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -224,5 +225,11 @@ public class NotificationTest {
 
         Div div = new Div();
         notification.addComponentAtIndex(index, div);
+    }
+
+    @Test
+    public void hasStyle() {
+        Notification notification = new Notification();
+        Assert.assertTrue(notification instanceof HasStyle);
     }
 }
