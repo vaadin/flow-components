@@ -37,6 +37,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -44,9 +45,10 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize, HasTheme {
+        implements HasComponents, HasSize, HasTheme, HasStyle {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
@@ -686,6 +688,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement()
+                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     private void setDimension(String dimension, String value) {
@@ -708,4 +716,15 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             Dialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "Dialog does not support adding styles to overlay");
+    }
+
 }
