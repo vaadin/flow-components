@@ -4,7 +4,7 @@ package com.vaadin.flow.component.login;
  * #%L
  * Login for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.0.1")
+@NpmPackage(value = "@vaadin/login", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "23.0.2")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin {
 

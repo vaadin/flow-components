@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -62,7 +62,7 @@ import java.util.Objects;
  * through {@link Map#getView()}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "23.0.1")
+@NpmPackage(value = "@vaadin/map", version = "23.0.2")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {

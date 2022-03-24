@@ -8,7 +8,7 @@ import java.util.Objects;
  * #%L
  * Vaadin App Layout
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,10 @@ import elemental.json.JsonType;
  * quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.1")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.2")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors

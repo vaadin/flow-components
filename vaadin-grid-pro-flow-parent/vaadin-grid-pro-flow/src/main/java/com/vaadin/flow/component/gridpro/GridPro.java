@@ -4,7 +4,7 @@ package com.vaadin.flow.component.gridpro;
  * #%L
  * Vaadin GridPro
  * %%
- * Copyright (C) 2018 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -48,10 +48,10 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.0.1")
+@NpmPackage(value = "@vaadin/grid-pro", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.0.2")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -148,7 +148,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 

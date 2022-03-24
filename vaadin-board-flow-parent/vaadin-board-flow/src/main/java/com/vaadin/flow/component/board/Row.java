@@ -4,7 +4,7 @@ package com.vaadin.flow.component.board;
  * #%L
  * Vaadin Board for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -52,10 +52,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </pre>
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "23.0.1")
+@NpmPackage(value = "@vaadin/board", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "23.0.2")
 @JsModule("@vaadin/board/vaadin-board-row.js")
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {

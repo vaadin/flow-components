@@ -6,7 +6,7 @@ import java.util.Locale;
  * #%L
  * Cookie Consent for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -32,10 +32,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/cookie-consent", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "23.0.1")
+@NpmPackage(value = "@vaadin/cookie-consent", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "23.0.2")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
 public class CookieConsent extends Component {
 

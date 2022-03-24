@@ -4,7 +4,7 @@ package com.vaadin.flow.component.customfield;
  * #%L
  * Vaadin CustomField for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.0.1")
+@NpmPackage(value = "@vaadin/custom-field", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.0.2")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,

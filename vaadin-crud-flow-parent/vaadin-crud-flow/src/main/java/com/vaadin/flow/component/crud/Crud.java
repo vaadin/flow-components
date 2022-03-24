@@ -4,7 +4,7 @@ package com.vaadin.flow.component.crud;
  * #%L
  * Vaadin Crud for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -68,10 +68,10 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.0.1")
+@NpmPackage(value = "@vaadin/crud", version = "23.0.2")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.0.2")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
