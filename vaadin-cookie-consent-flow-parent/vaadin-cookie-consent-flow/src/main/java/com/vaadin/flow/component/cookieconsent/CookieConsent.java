@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.cookieconsent;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 /*
@@ -18,10 +19,14 @@ import java.util.Locale;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Style;
 
 /**
  * Server-side component for the <code>vaadin-cookie-consent</code> element,
@@ -37,7 +42,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/cookie-consent", version = "23.0.2")
 @NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "23.0.2")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
-public class CookieConsent extends Component {
+@JsModule("./cookieConsentConnector.js")
+public class CookieConsent extends Component implements HasStyle {
 
     /**
      * Creates a banner with default values.
@@ -142,4 +148,36 @@ public class CookieConsent extends Component {
         TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             CookieConsent does not support adding styles
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "CookieConsent does not support adding styles");
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Store the CSS class names defined in the JS library used by the web
+        // component. Exclude "cc-invisible" class set during the initial 20ms
+        // animation. Preserving this class would incorrectly hide the banner.
+        getElement().executeJs(
+                "return this._getPopup().className.replace('cc-invisible', '').trim();")
+                .then((result) -> {
+                    String classValue = result.asString();
+                    String[] parts = classValue.split("\\s+");
+                    getClassNames().addAll(Arrays.asList(parts));
+
+                    initConnector();
+                });
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.cookieConsentConnector.initLazy(this)");
+    }
 }
