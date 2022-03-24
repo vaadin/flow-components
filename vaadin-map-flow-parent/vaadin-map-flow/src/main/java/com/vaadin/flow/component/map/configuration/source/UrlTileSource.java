@@ -46,7 +46,7 @@ public abstract class UrlTileSource extends TileSource {
         markAsDirty();
     }
 
-    protected static class Options extends TileSource.Options {
+    protected static abstract class Options extends TileSource.Options {
         private String url;
 
         /**

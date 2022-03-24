@@ -112,7 +112,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
         scale = options.scale;
     }
 
-    protected static class Options {
+    protected static abstract class Options {
         private float opacity = 1;
         private boolean rotateWithView = false;
         private float rotation = 0;

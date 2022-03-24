@@ -24,6 +24,6 @@ public abstract class ImageSource extends Source {
         super(options);
     }
 
-    public static class Options extends Source.Options {
+    protected static abstract class Options extends Source.Options {
     }
 }

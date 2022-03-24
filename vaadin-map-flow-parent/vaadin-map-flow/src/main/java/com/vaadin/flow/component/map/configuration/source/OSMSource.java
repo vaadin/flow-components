@@ -63,6 +63,7 @@ public class OSMSource extends XYZSource {
                 throw new IllegalArgumentException(
                         "OSMSource does not allow to collapse attributions");
             }
+            super.setAttributionsCollapsible(false);
         }
     }
 }

@@ -63,6 +63,6 @@ public class VectorSource extends Source {
         removeChild(feature);
     }
 
-    protected static class Options extends Source.Options {
+    public static class Options extends Source.Options {
     }
 }

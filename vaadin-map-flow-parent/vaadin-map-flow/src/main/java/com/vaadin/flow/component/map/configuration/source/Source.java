@@ -100,7 +100,7 @@ public abstract class Source extends AbstractConfigurationObject {
         return projection;
     }
 
-    protected static class Options {
+    protected static abstract class Options {
         private List<String> attributions;
         private boolean attributionsCollapsible = true;
         private String projection;

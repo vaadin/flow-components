@@ -42,7 +42,7 @@ public abstract class TileSource extends Source {
         return opaque;
     }
 
-    protected static class Options extends Source.Options {
+    protected static abstract class Options extends Source.Options {
         private boolean opaque = false;
 
         /**

@@ -40,7 +40,7 @@ public abstract class TileImageSource extends UrlTileSource {
         return crossOrigin;
     }
 
-    protected static class Options extends UrlTileSource.Options {
+    protected static abstract class Options extends UrlTileSource.Options {
         private String crossOrigin;
 
         /**
