@@ -26,14 +26,17 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinSession;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -43,7 +46,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class NotificationTest {
 
-    private UI ui = new UI();
+    private final UI ui = new UI();
 
     @Before
     public void setUp() {
@@ -182,7 +185,10 @@ public class NotificationTest {
 
         notification.open();
 
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        UIInternals internals = ui.getInternals();
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        internals.setSession(session);
+        internals.getStateTree().runExecutionsBeforeClientResponse();
 
         Element templateElement = notification.getElement().getChildren()
                 .findFirst().get();
@@ -200,7 +206,10 @@ public class NotificationTest {
 
         notification.open();
 
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        UIInternals internals = ui.getInternals();
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        internals.setSession(session);
+        internals.getStateTree().runExecutionsBeforeClientResponse();
 
         Element templateElement = notification.getElement().getChildren()
                 .findFirst().get();
