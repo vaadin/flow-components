@@ -50,7 +50,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Server-side component for the <code>vaadin-avatar-group</code> element.
+ * Avatar Group is used to group multiple Avatars together. It can be used, for
+ * example, to show that there are multiple users viewing the same page or for
+ * listing members of a project.<br>
+ * <br>
+ *
+ * You can specify the max number of items an Avatar Group should display. Items
+ * that overflow are grouped into a single Avatar that displays the overflow
+ * count. The name of each hidden item is shown on hover in a tooltip. Clicking
+ * the overflow item displays the overflowing avatars and names in a list.
  *
  * @author Vaadin Ltd
  */

@@ -35,7 +35,24 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code <vaadin-confirm-dialog>} element.
+ * Confirm Dialog is a modal Dialog used to confirm user actions.<br>
+ * <br>
+ *
+ * Confirm Dialog consists of:<br>
+ * <ul>
+ * <li>Title</li>
+ * <li>Message</li>
+ * <li>Footer</li>
+ * <ul>
+ * <li>“Cancel” button</li>
+ * <li>“Reject” button</li>
+ * <li>“Confirm” button</li>
+ * </ul>
+ * </ul>
+ *
+ * Each Confirm Dialog should have a title and/or message. The “Confirm” button
+ * is shown by default, while the two other buttons are not (they must be
+ * explicitly enabled to be displayed).
  *
  * @author Vaadin Ltd
  */

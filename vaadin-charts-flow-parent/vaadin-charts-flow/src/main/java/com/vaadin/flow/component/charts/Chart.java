@@ -76,6 +76,21 @@ import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
 
+/**
+ * Vaadin Charts is a feature-rich interactive charting library for Vaadin. It
+ * provides multiple different chart types for visualizing one- or
+ * two-dimensional tabular data, or scatter data with free X and Y values. You
+ * can configure all the chart elements with a powerful API as well as the
+ * visual style using CSS. The built-in functionalities allow the user to
+ * interact with the chart elements in various ways, and you can define custom
+ * interaction with events.<br>
+ * <br>
+ *
+ * The Chart is a regular Vaadin component, which you can add to any Vaadin
+ * layout.
+ *
+ * @author Vaadin Ltd
+ */
 @Tag("vaadin-chart")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
