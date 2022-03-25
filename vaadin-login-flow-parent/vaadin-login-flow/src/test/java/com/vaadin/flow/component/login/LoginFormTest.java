@@ -1,10 +1,12 @@
 package com.vaadin.flow.component.login;
 
-import com.vaadin.flow.component.ComponentUtil;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasStyle;
 
 public class LoginFormTest {
 
@@ -39,5 +41,11 @@ public class LoginFormTest {
 
         Assert.assertEquals(1, count.get());
         Assert.assertFalse(loginFormComponent.isEnabled());
+    }
+
+    @Test
+    public void loginFormHasStyle() {
+        LoginForm loginForm = new LoginForm();
+        Assert.assertTrue(loginForm instanceof HasStyle);
     }
 }
