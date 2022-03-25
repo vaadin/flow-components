@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -25,11 +28,18 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.provider.DataGenerator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 
+@PreserveOnRefresh
 @Route(value = "vaadin-grid/beangridpage")
 public class BeanGridPage extends Div {
 
@@ -39,6 +49,12 @@ public class BeanGridPage extends Div {
         grid.setItems(IntStream.range(0, 100).mapToObj(i -> new Person("Name " + i, 100)));
 
         grid.setColumns("firstName", "age");
+
+        // grid.addComponentColumn(item -> {
+        //     TextField tf = new TextField();
+        //     tf.setValue(item.getFirstName());
+        //     return tf;
+        // });
 
         grid.addColumn(new RecyclingComponentRenderer<Person, TextField>(){
             @Override
@@ -50,7 +66,7 @@ public class BeanGridPage extends Div {
             void updateComponent(TextField component, Person item) {
                 component.setValue(item.getFirstName());
             }
-        }.create());
+        });
 
         add(grid);
     }
@@ -58,41 +74,74 @@ public class BeanGridPage extends Div {
     public abstract class RecyclingComponentRenderer<SOURCE, COMPONENT extends Component> extends LitRenderer<SOURCE>{
 
         private final String RENDERER_ID = UUID.randomUUID().toString();
-        private final String APP_ID = UI.getCurrent().getInternals().getAppId();
         private final Map<String, COMPONENT> components = new java.util.HashMap<>();
+        private Element container;
 
         public RecyclingComponentRenderer() {
-            super();
-        }
-        
-        public Renderer<SOURCE> create() {
+            super("<flow-component-renderer appid='" + UI.getCurrent().getInternals().getAppId() + "' " +
+            ".update=${(() => { " +
+            "   if (root.rendererInstanceId === undefined) { " +
+            // TODO: Unique id (scope under element by renderer namespace)
+            "     root.rendererInstanceId = itemKey; " +
+            "     rendererOwner.rendererInstances = rendererOwner.rendererInstances || {}; " +
+            "     rendererOwner.rendererInstances[root.rendererInstanceId] = root; " +
+            "   } " +
+            // TODO: Don't hide if the item hasn't changed
+            "   root.firstElementChild && (root.firstElementChild.style.opacity = 0); " +
+            // TODO: debounce
+            "   rendererItemUpdated(root.rendererInstanceId, item); " +
+            " })() " +
+            "} " +
+            "></flow-component-renderer>");
 
-            String template =  "<flow-component-renderer appid='" + APP_ID + "' " +
-                    ".update=${(() => { " +
-                    "   if (root.rendererId === undefined) { " +
-                    // TODO: Unique id
-                    "     root.rendererId = itemKey; " +
-                    "     window.renderers = window.renderers || {}; " +
-                    "     window.renderers[root.rendererId] = root; " +
-                    "   } " +
-                    // TODO: debounce
-                    "   rendererItemUpdated(root.rendererId, item); " +
-                    " })() " +
-                    "} " +
-                    "></flow-component-renderer>";
-                
-            return LitRenderer.<SOURCE>of(template).withFunction("rendererItemUpdated", (item, params) -> {
-                String rendererId = params.getString(0);
-                if (!components.containsKey(rendererId)) {
+            withFunction("rendererItemUpdated", (item, params) -> {
+                String rendererInstanceId = params.getString(0);
+                if (!components.containsKey(rendererInstanceId)) {
                     COMPONENT component = createComponent();
-                    components.put(rendererId, component);
+                    components.put(rendererInstanceId, component);
                     
-                    // TODO: The instances must be cleaned up
-                    UI.getCurrent().getElement().appendVirtualChild(component.getElement());
-                    UI.getCurrent().getElement().executeJs("window.renderers[$0].firstElementChild.nodeid = $1; delete window.renderers[$0];", rendererId, component.getElement().getNode().getId());
+                    container.appendVirtualChild(component.getElement());
+                    container.executeJs("this.rendererInstances[$0].firstElementChild.nodeid = $1;", rendererInstanceId, component.getElement().getNode().getId());
                 }
-                updateComponent(components.get(rendererId), item);
+                updateComponent(components.get(rendererInstanceId), item);
+                // TODO: Doesn't work reliably yet (not debounced / element so it may unhide prematurely)
+                container.executeJs("this.rendererInstances[$0].firstElementChild.style.opacity = 1;", rendererInstanceId);
             });
+        }
+
+        @Override
+        public Rendering<SOURCE> render(Element container, DataKeyMapper<SOURCE> keyMapper, String rendererName) {
+            this.container = container;
+            
+            Registration detachListenerRegistration = container.addDetachListener(e -> clearComponents());
+
+            Rendering<SOURCE> rendering = super.render(container, keyMapper, rendererName);
+            
+            return new Rendering<SOURCE>() {
+                @Override
+                public Optional<DataGenerator<SOURCE>> getDataGenerator() {
+                    return rendering.getDataGenerator();
+                }
+    
+                @Override
+                public Element getTemplateElement() {
+                    return null;
+                }
+    
+                @Override
+                public Registration getRegistration() {
+                    List<Registration> registrations = new ArrayList<>();
+                    registrations.add(rendering.getRegistration());
+                    registrations.add(detachListenerRegistration);
+                    registrations.add(() -> clearComponents());
+                    return () -> registrations.forEach(Registration::remove);
+                }
+            };
+        }
+
+        private void clearComponents() {
+            components.values().forEach((component) -> container.removeVirtualChild(component.getElement()));
+            components.clear();
         }
 
         abstract COMPONENT createComponent();
