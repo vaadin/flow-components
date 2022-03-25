@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
@@ -54,11 +55,15 @@ public class BeanGridPage extends Div {
         add(grid);
     }
 
-    public abstract class RecyclingComponentRenderer<SOURCE, COMPONENT extends Component> {
+    public abstract class RecyclingComponentRenderer<SOURCE, COMPONENT extends Component> extends LitRenderer<SOURCE>{
 
-        private Map<String, COMPONENT> components = new java.util.HashMap<>();
-
+        private final String RENDERER_ID = UUID.randomUUID().toString();
         private final String APP_ID = UI.getCurrent().getInternals().getAppId();
+        private final Map<String, COMPONENT> components = new java.util.HashMap<>();
+
+        public RecyclingComponentRenderer() {
+            super();
+        }
         
         public Renderer<SOURCE> create() {
 
@@ -68,15 +73,15 @@ public class BeanGridPage extends Div {
                     // TODO: Unique id
                     "     root.rendererId = itemKey; " +
                     "     window.renderers = window.renderers || {}; " +
-                    "     window.renderers[root.rendererId] = root " +
+                    "     window.renderers[root.rendererId] = root; " +
                     "   } " +
                     // TODO: debounce
-                    "   update(root.rendererId, item); " +
+                    "   rendererItemUpdated(root.rendererId, item); " +
                     " })() " +
                     "} " +
                     "></flow-component-renderer>";
                 
-            return LitRenderer.<SOURCE>of(template).withFunction("update", (item, params) -> {
+            return LitRenderer.<SOURCE>of(template).withFunction("rendererItemUpdated", (item, params) -> {
                 String rendererId = params.getString(0);
                 if (!components.containsKey(rendererId)) {
                     COMPONENT component = createComponent();
@@ -84,7 +89,7 @@ public class BeanGridPage extends Div {
                     
                     // TODO: The instances must be cleaned up
                     UI.getCurrent().getElement().appendVirtualChild(component.getElement());
-                    UI.getCurrent().getElement().executeJs("window.renderers[$0].firstElementChild.nodeid = $1", rendererId, component.getElement().getNode().getId());
+                    UI.getCurrent().getElement().executeJs("window.renderers[$0].firstElementChild.nodeid = $1; delete window.renderers[$0];", rendererId, component.getElement().getNode().getId());
                 }
                 updateComponent(components.get(rendererId), item);
             });
