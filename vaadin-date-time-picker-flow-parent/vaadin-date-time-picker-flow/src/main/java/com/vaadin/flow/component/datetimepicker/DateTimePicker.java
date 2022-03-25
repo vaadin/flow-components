@@ -63,9 +63,13 @@ class DateTimePickerTimePicker
 }
 
 /**
- * Server-side component that encapsulates the functionality of the
- * {@code vaadin-date-time-picker} web component.
+ * Date Time Picker is an input field for selecting both a date and a time. The
+ * date and time can be entered directly using a keyboard in the format of the
+ * current locale or through the Date Time Picker’s two overlays. The overlays
+ * open when their respective fields are clicked or any input is entered when
+ * the fields are focused.
  *
+ * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.3")
