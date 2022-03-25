@@ -405,7 +405,7 @@
     "lit": "$lit",
     "@polymer/polymer": "$@polymer/polymer",
     "chokidar": "$chokidar",
-    "code-prettify": "$code-prettify",
-    "date-fns": "$date-fns"
+    "date-fns": "$date-fns",
+    "code-prettify": "$code-prettify"
   }
 }

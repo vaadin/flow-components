@@ -96,20 +96,24 @@
   <build>
     <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
     <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
-    <!-- Add source and resource files to artifact -->
-    <resources>
-      <resource>
-        <directory>${basedir}/src/main/java</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-      </resource>
-    </resources>
     <plugins>
-
+      <!-- exclude everything in this artifact -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>META-INF/**</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <!-- Do not deploy to maven repos -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+            <skip>true</skip>
+        </configuration>
       </plugin>
 
       <plugin>
