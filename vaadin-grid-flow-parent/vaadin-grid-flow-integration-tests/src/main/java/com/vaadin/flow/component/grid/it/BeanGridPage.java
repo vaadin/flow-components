@@ -31,9 +31,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
@@ -50,11 +48,11 @@ public class BeanGridPage extends Div {
 
         grid.setColumns("firstName", "age");
 
-        // grid.addComponentColumn(item -> {
-        //     TextField tf = new TextField();
-        //     tf.setValue(item.getFirstName());
-        //     return tf;
-        // });
+        grid.addComponentColumn(item -> {
+            TextField tf = new TextField();
+            tf.setValue(item.getFirstName());
+            return tf;
+        });
 
         grid.addColumn(new RecyclingComponentRenderer<Person, TextField>(){
             @Override
@@ -73,12 +71,12 @@ public class BeanGridPage extends Div {
 
     public abstract class RecyclingComponentRenderer<SOURCE, COMPONENT extends Component> extends LitRenderer<SOURCE>{
 
-        private final String RENDERER_ID = UUID.randomUUID().toString();
         private final Map<String, COMPONENT> components = new java.util.HashMap<>();
         private Element container;
+        private DataKeyMapper<SOURCE> keyMapper;
 
         public RecyclingComponentRenderer() {
-            super("<flow-component-renderer appid='" + UI.getCurrent().getInternals().getAppId() + "' " +
+            super("<flow-component-renderer .requestedItemKey=${itemKey} appid='" + UI.getCurrent().getInternals().getAppId() + "' " +
             ".update=${(() => { " +
             "   if (root.rendererInstanceId === undefined) { " +
             // TODO: Unique id (scope under element by renderer namespace)
@@ -86,9 +84,9 @@ public class BeanGridPage extends Div {
             "     rendererOwner.rendererInstances = rendererOwner.rendererInstances || {}; " +
             "     rendererOwner.rendererInstances[root.rendererInstanceId] = root; " +
             "   } " +
-            // TODO: Don't hide if the item hasn't changed
-            "   root.firstElementChild && (root.firstElementChild.style.opacity = 0); " +
-            // TODO: debounce
+            "   if (root.firstElementChild && root.firstElementChild.requestedItemKey !== root.firstElementChild.updatedItemKey) { " + 
+            "       root.firstElementChild.style.opacity = 0; " +
+            "   } " +
             "   rendererItemUpdated(root.rendererInstanceId, item); " +
             " })() " +
             "} " +
@@ -104,14 +102,15 @@ public class BeanGridPage extends Div {
                     container.executeJs("this.rendererInstances[$0].firstElementChild.nodeid = $1;", rendererInstanceId, component.getElement().getNode().getId());
                 }
                 updateComponent(components.get(rendererInstanceId), item);
-                // TODO: Doesn't work reliably yet (not debounced / element so it may unhide prematurely)
-                container.executeJs("this.rendererInstances[$0].firstElementChild.style.opacity = 1;", rendererInstanceId);
+               
+                container.executeJs("const fcr = this.rendererInstances[$0].firstElementChild; if (fcr.requestedItemKey === $1) fcr.style.opacity = 1;", rendererInstanceId, keyMapper.key(item));
             });
         }
 
         @Override
         public Rendering<SOURCE> render(Element container, DataKeyMapper<SOURCE> keyMapper, String rendererName) {
             this.container = container;
+            this.keyMapper = keyMapper;
             
             Registration detachListenerRegistration = container.addDetachListener(e -> clearComponents());
 
