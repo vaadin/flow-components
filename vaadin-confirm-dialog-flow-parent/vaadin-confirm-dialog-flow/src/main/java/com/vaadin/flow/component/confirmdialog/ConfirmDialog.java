@@ -16,6 +16,7 @@ package com.vaadin.flow.component.confirmdialog;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -38,11 +40,12 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.2")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.2")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.3")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.3")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
+@JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 
@@ -124,6 +127,27 @@ public class ConfirmDialog extends Component
 
     public void updateHeight() {
         this.getElement().executeJs("this._setHeight($0)", this.height);
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     *            ConfirmDialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "ConfirmDialog does not support adding styles to overlay");
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.confirmDialogConnector.initLazy(this)");
     }
 
     private boolean autoAddedToTheUi;
