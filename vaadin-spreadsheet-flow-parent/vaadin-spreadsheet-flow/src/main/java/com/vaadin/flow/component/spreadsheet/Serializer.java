@@ -1,10 +1,8 @@
 package com.vaadin.flow.component.spreadsheet;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -15,49 +13,66 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 
 public class Serializer {
+
+    public static String serialize(HashMap<?, ?> map) {
+        if (map == null || map.size() == 0) {
+            return "";
+        }
+        boolean escapeKey = map.keySet().iterator().next() instanceof String;
+        boolean escapeVal = map.values().iterator().next() instanceof String;
+        return map.entrySet().stream()
+                .map(e -> (escapeKey ? escapeQuotes(e.getKey()) : e.getKey())
+                        + "@"
+                        + (escapeVal ? escapeQuotes(e.getValue())
+                                : e.getValue()))
+                .collect(Collectors.joining(","));
+    }
+
     public static String serialize(Object value) {
         StringBuffer rs = new StringBuffer();
-        if (value != null) {
+        if (value == null) {
+            rs.append("null");
+        } else {
             if (Collection.class.isAssignableFrom(value.getClass())) {
-                rs.append(((Collection)value).stream().map(v -> {
+                rs.append(((Collection<?>)value).stream().map(v -> {
                     if (v == null) {
                         return "null";
                     } else if (v instanceof String) {
                         String s = (String) v;
-                        return "\"" + s.replaceAll("\"", "\\\"") + "\"";
+                        return escapeQuotes(s);
                     } else if (v instanceof MergedRegion) {
                         MergedRegion o = (MergedRegion) v;
-                        return "" + o.id
+                        return o.id
                                 + "#" + o.col1
                                 + "#" + o.col2
                                 + "#" + o.row1
                                 + "#" + o.row2;
                     } else if (v instanceof GroupingData) {
                         GroupingData o = (GroupingData) v;
-                        return "" + o.startIndex
+                        return o.startIndex
                                 + "#" + o.endIndex
                                 + "#" + o.level
                                 + "#" + o.uniqueIndex
                                 + "#" + o.collapsed;
                     } else if (v instanceof CellData) {
                         CellData o = (CellData) v;
-                        return "" + o.row
+                        return  o.row
                                 + "#" + o.col
-                                + "#" + escape(o.value)
-                                + "#" + escape(o.formulaValue)
-                                + "#" + escape(o.originalValue)
-                                + "#" + escape(o.cellStyle)
+                                + "#" + escapeSymbols(o.value)
+                                + "#" + escapeSymbols(o.formulaValue)
+                                + "#" + escapeSymbols(o.originalValue)
+                                + "#" + escapeSymbols(o.cellStyle)
                                 + "#" + o.locked
                                 + "#" + o.needsMeasure
                                 + "#" + o.isPercentage;
                     } else if (v instanceof SpreadsheetActionDetails) {
                         SpreadsheetActionDetails o = (SpreadsheetActionDetails) v;
-                        return "" + escape(o.caption)
-                                + "#" + escape(o.key)
+                        return escapeSymbols(o.caption)
+                                + "#" + escapeSymbols(o.key)
                                 + "#" + o.type;
                     } else if (v instanceof PopupButton) {
                         PopupButton b = (PopupButton) v;
-                        return "" + b.getId().orElse("xxxxxxxxxx")
+                        return b.getId().orElse("xxxxxxxxxx")
                                 + "#" + b.getState().active
                                 + "#" + b.getState().col
                                 + "#" + b.getState().row
@@ -66,7 +81,9 @@ public class Serializer {
                                 + "#" + b.getState().popupWidth
                                 + "#" + b.getState().popupHeight
                                 ;
-                    } else return v.toString();
+                    } else {
+                        return v.toString();
+                    }
                 }).collect(Collectors.joining(",")));
             } else if (value instanceof float[]) {
                 StringBuffer s = new StringBuffer();
@@ -78,13 +95,18 @@ public class Serializer {
                 }
                 rs.append(s);
             } else if (value instanceof int[]) {
-                rs.append(Arrays.stream((int[]) value).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+                rs.append(Arrays.stream((int[]) value).mapToObj(String::valueOf)
+                        .collect(Collectors.joining(",")));
             } else if (value instanceof String[]) {
-                rs.append(Arrays.stream((String[]) value).map(s -> "\"" + s.replaceAll("\"", "\\\"") + "\"").collect(Collectors.joining(",")));
+                rs.append(Arrays.stream((String[]) value)
+                        .map(s -> escapeQuotes(s))
+                        .collect(Collectors.joining(",")));
             } else if (Map.class.isAssignableFrom(value.getClass())) {
-                ((Map)value).forEach((k, v) -> {
-                    if (!"".equals(rs.toString())) rs.append(",");
-                    rs.append(k instanceof String?"\"" + ((String)k).replaceAll("\"", "\\\"") + "\"":k);
+                ((Map<?,?>)value).forEach((k, v) -> {
+                    if (!"".equals(rs.toString())) {
+                        rs.append(",");
+                    }
+                    rs.append(k instanceof String ? escapeQuotes(k) : k);
                     rs.append("@");
                     if (v instanceof OverlayInfo) {
                         OverlayInfo i = (OverlayInfo) v;
@@ -96,16 +118,23 @@ public class Serializer {
                                 + "#" + i.dy
                                 + "#" + i.dx;
                         rs.append(s);
-                    } else rs.append(v instanceof String?"\"" + ((String)v).replaceAll("\"", "\\\"") + "\"":v);
+                    } else {
+                        rs.append(v instanceof String? escapeQuotes(v): v);
+                    }
                 });
             }
-        } else rs.append("null");
+        }
         return rs.toString();
     }
 
-    private static String escape(String value) {
+    private static String escapeSymbols(String value) {
         if (value == null) return null;
         else return value.replaceAll("#", "\\\\#").replaceAll(",", "\\\\,");
+    }
+
+    private static String escapeQuotes(Object o) {
+        String s = o.toString();
+        return "\"" + (s.contains("\"") ? s.replaceAll("\"", "\\\"") : s)+ "\"";
     }
 
 }
