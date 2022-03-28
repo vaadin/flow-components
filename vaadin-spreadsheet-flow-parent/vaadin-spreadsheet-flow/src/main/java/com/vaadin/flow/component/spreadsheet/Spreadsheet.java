@@ -1130,7 +1130,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     /** The last visible column in the scroll area **/
     private int lastColumn;
 
-    private boolean chartsEnabled = true;
+    /** Spreadsheet Flow does not support charts yet **/
+    private boolean chartsEnabled = false;
+
     /**
      * This is used for making sure the cells are sent to client side in when
      * the next cell data request comes. This is triggered when the client side
