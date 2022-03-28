@@ -58,18 +58,6 @@
       <artifactId>gwt-dev</artifactId>
     </dependency>
 
-    <!-- TODO get rid of framework dependencies -->
-    <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-server</artifactId>
-        <version>${framework.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-themes</artifactId>
-        <version>${framework.version}</version>
-    </dependency>
-
     <!-- TODO We should depend only on flow-client and gwt -->
     <!-- Used in ApplicationConfiguration & ApplicationConnection & ConnectorBundleLoaderFactory -->
     <dependency>
