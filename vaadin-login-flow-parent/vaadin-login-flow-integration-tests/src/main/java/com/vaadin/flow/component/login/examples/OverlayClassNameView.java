@@ -4,7 +4,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.Route;
 
-
 @Route(value = "vaadin-login/overlay-class-name")
 public class OverlayClassNameView extends AbstractView {
 

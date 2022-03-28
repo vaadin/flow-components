@@ -1,135 +1,114 @@
+/*
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.vaadin.flow.component.login.test;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
-import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class OverlayClassNameIT extends BasicIT {
+@TestPath("vaadin-login/overlay-class-name")
+public class OverlayClassNameIT extends AbstractComponentIT {
 
-    @Override
-    protected String getBaseURL() {
-        return super.getBaseURL() + "/overlay";
-    }
+    private static final String LOGIN_OVERLAY_WRAPPER_TAG = "vaadin-login-overlay-wrapper";
 
-    @Override
-    public LoginFormElement getLoginForm() {
-        openOverlay();
-        return $(LoginOverlayElement.class).waitForFirst().getLoginForm();
-    }
-
-    private void openOverlay() {
-        $("button").waitForFirst().click();
+    @Before
+    public void init() {
+        open();
     }
 
     @Test
-    public void login() {
-        openOverlay();
-        LoginOverlayElement overlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-        checkSuccessfulLogin(overlay.getUsernameField(),
-                overlay.getPasswordField(), () -> overlay.submit());
-    }
+    public void openDialog_overlayHasSameClassNames() {
+        findElement(By.id("open")).click();
 
-    @Override
-    public void testDefaults() {
-        super.testDefaults();
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-        Assert.assertEquals("App name", loginOverlay.getTitle());
-        Assert.assertEquals("Application description",
-                loginOverlay.getDescription());
-        checkLoginForm(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(),
-                loginOverlay.getSubmitButton());
+        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
+        LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
+
+        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
+
+        String overlayClassNames = overlay.getAttribute("class");
+        String wrapperClassNames = overlayWrapper.getAttribute("class");
+
+        Assert.assertEquals("custom", overlayClassNames);
+        Assert.assertEquals("custom", wrapperClassNames);
     }
 
     @Test
-    public void testOverlaySelfAttached() {
-        getDriver()
-                .get(super.getBaseURL() + "/vaadin-login/overlayselfattached");
+    public void openDialog_overlayChangeClassName() {
+        findElement(By.id("open")).click();
 
-        Assert.assertFalse($(LoginOverlayElement.class).exists());
-        openOverlay();
+        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-        Assert.assertTrue(loginOverlay.isOpened());
+        findElement(By.id("add")).click();
 
-        loginOverlay.getUsernameField().setValue("value");
-        loginOverlay.getPasswordField().setValue("value");
-        loginOverlay.submit();
+        LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
+        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
 
-        Assert.assertFalse($(LoginOverlayElement.class).exists());
+        String overlayClassNames = overlay.getAttribute("class");
+        String wrapperClassNames = overlayWrapper.getAttribute("class");
+
+        Assert.assertEquals("custom added", overlayClassNames);
+        Assert.assertEquals("custom added", wrapperClassNames);
     }
 
     @Test
-    public void testTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
-        getDriver().get(url);
-        openOverlay();
+    public void openDialog_overlayNoClassNameAfterClearClassName() {
+        findElement(By.id("open")).click();
 
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-        TestBenchElement title = loginOverlay.getTitleComponent();
+        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
-        Assert.assertEquals("Component title", title.getText());
+        findElement(By.id("clear")).click();
 
-        checkSuccessfulLogin(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(), () -> loginOverlay.submit());
+        LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
+        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
 
-        Assert.assertFalse(loginOverlay.isOpened());
-        openOverlay();
-        Assert.assertTrue(loginOverlay.isOpened());
+        String overlayClassNames = overlay.getAttribute("class");
+        String wrapperClassNames = overlayWrapper.getAttribute("class");
 
-        title = loginOverlay.getTitleComponent();
-        Assert.assertEquals("vaadin:vaadin-h",
-                title.$("vaadin-icon").first().getAttribute("icon"));
-
-        Assert.assertEquals("Component title", title.$("h3").first().getText());
-
-        checkSuccessfulLogin(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(), () -> loginOverlay.submit());
-        Assert.assertFalse(loginOverlay.isOpened());
-
-        checkTitleComponentWasReset();
+        Assert.assertEquals("", overlayClassNames);
+        Assert.assertEquals("", wrapperClassNames);
     }
 
     @Test
-    public void testResetTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
-        getDriver().get(url);
-        checkTitleComponentWasReset();
+    public void openDialog_overlayChagedClassNameAfterSecondOpening() {
+        findElement(By.id("open")).click();
+
+        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
+
+        findElement(By.id("clear")).click();
+        findElement(By.id("add")).click();
+
+        $(LOGIN_OVERLAY_WRAPPER_TAG).first().click();
+
+        findElement(By.id("open")).click();
+        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
+
+        LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
+        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
+
+        String overlayClassNames = overlay.getAttribute("class");
+        String wrapperClassNames = overlayWrapper.getAttribute("class");
+
+        Assert.assertEquals("added", overlayClassNames);
+        Assert.assertEquals("added", wrapperClassNames);
     }
-
-    private void checkTitleComponentWasReset() {
-        // Setting title as String should detach the title component
-        $("button").id("removeCustomTitle").click();
-        openOverlay();
-
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-
-        Assert.assertFalse(loginOverlay.hasTitleComponent());
-        Assert.assertEquals("Make title string again", loginOverlay.getTitle());
-    }
-
-    public void testTitleAndDescriptionStrings() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login")
-                + "/property-title-description";
-        getDriver().get(url);
-        openOverlay();
-
-        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
-                .waitForFirst();
-        Assert.assertEquals("Property title", loginOverlay.getTitle());
-        Assert.assertEquals("Property description",
-                loginOverlay.getDescription());
-    }
-
 }
