@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -71,7 +70,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
      */
     public AbstractGridMultiSelectionModel(Grid<T> grid) {
         super(grid);
-        selected = new HashMap<>();
+        selected = new LinkedHashMap<>();
         selectionColumn = new GridSelectionColumn(this::clientSelectAll,
                 this::clientDeselectAll);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
