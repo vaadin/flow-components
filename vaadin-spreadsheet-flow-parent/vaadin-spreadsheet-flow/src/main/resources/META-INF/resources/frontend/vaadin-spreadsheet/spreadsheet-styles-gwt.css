@@ -1,0 +1,204 @@
+/**
+ * The file contains styles for GWT widgets in the standard theme.
+ */
+
+ /** Widget used in spreadsheet
+   3 import com.google.gwt.user.client.ui.FlowPanel;
+   1 import com.google.gwt.user.client.ui.Image;
+   1 import com.google.gwt.user.client.ui.ListBox;
+   1 import com.google.gwt.user.client.ui.MenuBar;
+   1 import com.google.gwt.user.client.ui.Panel;
+   3 import com.google.gwt.user.client.ui.PopupPanel;
+   1 import com.google.gwt.user.client.ui.SimplePanel;
+   1 import com.google.gwt.user.client.ui.TextArea;
+   4 import com.google.gwt.user.client.ui.TextBox;
+   1 import com.google.gwt.user.client.ui.VerticalPanel;
+  */
+
+body, table td, select {
+  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-size: small;
+}
+
+.gwt-MenuBar {
+  cursor: default;
+}
+.gwt-MenuBar .gwt-MenuItem {
+  cursor: default;
+}
+.gwt-MenuBar .gwt-MenuItem-selected {
+  background: #E0EDFE;
+}
+.gwt-MenuBar .gwt-MenuItem-disabled {
+  color: #c0c0c0;
+}
+.gwt-MenuBar-horizontal {
+  background: #e3e8f3 url(images/hborder.png) repeat-x 0px -2003px;
+  border: 1px solid #BBBBBB;
+}
+.gwt-MenuBar-horizontal .gwt-MenuItem {
+  padding: 0px 10px;
+  vertical-align: bottom;
+  color: #666666;
+  font-weight: bold;
+}
+.gwt-MenuBar-horizontal .gwt-MenuItemSeparator {
+  width: 1px;
+  padding: 0px;
+  margin: 0px;
+  border: 0px;
+  border-left: 1px solid #888888;
+  background: white;
+}
+.gwt-MenuBar-horizontal .gwt-MenuItemSeparator .menuSeparatorInner {
+  width: 1px;
+  height: 1px;
+  background: white;
+}
+.gwt-MenuBar-vertical {
+  margin-top: 0px;
+  margin-left: 0px;
+  background: white;
+}
+.gwt-MenuBar-vertical table {
+  border-collapse: collapse;
+}
+.gwt-MenuBar-vertical .gwt-MenuItem {
+  padding: 4px 14px 4px 1px;
+}
+.gwt-MenuBar-vertical .gwt-MenuItemSeparator {
+  padding: 2px 0px;
+}
+.gwt-MenuBar-vertical .gwt-MenuItemSeparator .menuSeparatorInner {
+  height: 1px;
+  padding: 0px;
+  border: 0px;
+  border-top: 1px solid #777777;
+  background: #ddddee;
+  overflow: hidden;
+}
+.gwt-MenuBar-vertical .subMenuIcon {
+  padding-right: 4px;
+}
+.gwt-MenuBar-vertical .subMenuIcon-selected {
+  background: #E0EDFE;
+}
+.gwt-MenuBarPopup .menuPopupTopCenter {
+  background: url(images/hborder.png) 0px -12px repeat-x;
+}
+.gwt-MenuBarPopup .menuPopupBottomCenter {
+  background: url(images/hborder.png) 0px -13px repeat-x;
+}
+.gwt-MenuBarPopup .menuPopupMiddleLeft {
+  background: url(images/vborder.png) -12px 0px repeat-y;
+}
+.gwt-MenuBarPopup .menuPopupMiddleRight {
+  background: url(images/vborder.png) -13px 0px repeat-y;
+}
+.gwt-MenuBarPopup .menuPopupTopLeftInner {
+  width: 5px;
+  height: 5px;
+  zoom: 1;
+}
+.gwt-MenuBarPopup .menuPopupTopRightInner {
+  width: 8px;
+  height: 5px;
+  zoom: 1;
+}
+.gwt-MenuBarPopup .menuPopupBottomLeftInner {
+  width: 5px;
+  height: 8px;
+  zoom: 1;
+}
+.gwt-MenuBarPopup .menuPopupBottomRightInner {
+  width: 8px;
+  height: 8px;
+  zoom: 1;
+}
+.gwt-MenuBarPopup .menuPopupTopLeft {
+  background: url(images/corner.png) no-repeat 0px -36px;
+}
+.gwt-MenuBarPopup .menuPopupTopRight {
+  background: url(images/corner.png) no-repeat -5px -36px;
+}
+.gwt-MenuBarPopup .menuPopupBottomLeft {
+  background: url(images/corner.png) no-repeat 0px -41px;
+}
+.gwt-MenuBarPopup .menuPopupBottomRight {
+  background: url(images/corner.png) no-repeat -5px -41px;
+}
+
+.gwt-PopupPanel {
+  border: 3px solid #C3D9FF;
+  padding: 3px;
+  background: white;
+}
+
+.gwt-DecoratedPopupPanel .popupContent {
+}
+.gwt-DecoratedPopupPanel .popupMiddleCenter {
+  padding: 3px;
+  background: #d0e4f6;
+}
+.gwt-DecoratedPopupPanel .popupTopCenter {
+  background: url(images/hborder.png) repeat-x;
+}
+.gwt-DecoratedPopupPanel .popupBottomCenter {
+  background: url(images/hborder.png) repeat-x 0px -4px;
+}
+.gwt-DecoratedPopupPanel .popupMiddleLeft {
+  background: url(images/vborder.png) repeat-y;
+}
+.gwt-DecoratedPopupPanel .popupMiddleRight {
+  background: url(images/vborder.png) repeat-y -4px 0px;
+}
+.gwt-DecoratedPopupPanel .popupTopLeftInner {
+  width: 5px;
+  height: 5px;
+  zoom: 1;
+}
+.gwt-DecoratedPopupPanel .popupTopRightInner {
+  width: 8px;
+  height: 5px;
+  zoom: 1;
+}
+.gwt-DecoratedPopupPanel .popupBottomLeftInner {
+  width: 5px;
+  height: 8px;
+  zoom: 1;
+}
+.gwt-DecoratedPopupPanel .popupBottomRightInner {
+  width: 8px;
+  height: 8px;
+  zoom: 1;
+}
+.gwt-DecoratedPopupPanel .popupTopLeft {
+  background: url(images/corner.png) no-repeat 0px -10px;
+}
+.gwt-DecoratedPopupPanel .popupTopRight {
+  background: url(images/corner.png) no-repeat -5px -10px;
+}
+.gwt-DecoratedPopupPanel .popupBottomLeft {
+  background: url(images/corner.png) no-repeat 0px -15px;
+}
+.gwt-DecoratedPopupPanel .popupBottomRight {
+  background: url(images/corner.png) no-repeat -5px -15px;
+}
+.gwt-PopupPanelGlass {
+  background-color: #000;
+  opacity: 0.3;
+  filter: alpha(opacity=30);
+}
+.gwt-TextArea {
+  padding: 2px;
+}
+.gwt-TextArea-readonly {
+  color: #888;
+}
+
+.gwt-TextBox {
+  padding: 2px;
+}
+.gwt-TextBox-readonly {
+  color: #888;
+}

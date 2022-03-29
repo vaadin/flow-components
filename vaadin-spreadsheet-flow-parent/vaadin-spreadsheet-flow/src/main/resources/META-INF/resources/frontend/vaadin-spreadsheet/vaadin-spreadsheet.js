@@ -14,8 +14,8 @@
 
 import {LitElement, html, css, unsafeCSS} from 'lit-element';
 import { Spreadsheet } from './spreadsheet-export.js';
-import { css_gwt, css_valo } from './spreadsheet-styles.js';
-
+import css_gwt from './spreadsheet-styles-gwt.css';
+import css_valo from './spreadsheet-styles-valo.css';
 
 /**
  * An example element.
@@ -24,25 +24,6 @@ import { css_gwt, css_valo } from './spreadsheet-styles.js';
  * @csspart button - The button
  */
 export class VaadinSpreadsheet extends LitElement {
-
-
-  static get styles() {
-    return css`    
-    
-      #mislot {
-        border: 1px solid green;
-        height: 200px;
-      }
-      
-      slot {
-        border: 1px solid green;
-      }
-    
-      ${unsafeCSS(css_gwt)}
-
-      ${unsafeCSS(css_valo)}
-    `;
-  }
 
   static get properties() {
     return {
@@ -222,23 +203,13 @@ export class VaadinSpreadsheet extends LitElement {
     console.log('disconnected')
   }
 
-  addStyle(styleString) {
-    const style = document.createElement('style');
-    style.textContent = styleString;
-    document.head.append(style);
-    }
-
-
   updated(_changedProperties) {
     super.updated(_changedProperties);
-    //console.log('vaadin-spreadsheet', '_changedProperties', _changedProperties)
-    //console.log(this.shadowRoot.querySelector('#mislot'));
-    //console.log(this.querySelector('#mislot'));
     let initial = false;
     if (!this.api) {
-      this.addStyle(css_gwt);
-      this.addStyle(css_valo);
-      this.addFontAwesome();
+      this.injectStyle('css_gwt', css_gwt);
+      this.injectStyle('css_valo', css_valo);
+      this.injectStyleLink('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
       const div = document.createElement('div');
       div.setAttribute('class', 'spreadsheetport');
@@ -674,12 +645,22 @@ SERVER RPC METHOD CALLBACKS
     });
   }
 
-  addFontAwesome() {
-    const style = document.createElement('link');
-    style.setAttribute('href', 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
-    style.setAttribute('rel', 'stylesheet')
-    document.head.append(style);
+  injectStyle(id, style) {
+    let elm = document.getElementById(id);
+    if (!elm) {
+      elm = document.createElement('style');
+      elm.id = id;
+      document.head.append(elm);
     }
+    elm.textContent = style;
+  }
+
+  injectStyleLink(link) {
+    const elm = document.createElement('link');
+    elm.setAttribute('href', link);
+    elm.setAttribute('rel', 'stylesheet');
+    document.head.append(elm);
+  }
 }
 
 window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);
