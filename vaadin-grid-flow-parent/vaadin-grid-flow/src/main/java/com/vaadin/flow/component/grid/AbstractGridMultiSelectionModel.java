@@ -435,7 +435,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
 
-        // Map<Object, T> selectedMap = mapItemsById(selected);
         if (selected.keySet().containsAll(addedItems.keySet()) && Collections
                 .disjoint(selected.keySet(), removedItems.keySet())) {
             return;
@@ -444,8 +443,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 .collect(Collectors.toSet());
         removedItems.keySet().forEach(selected::remove);
         selected.putAll(addedItems);
-        // selected.clear();
-        // selected.addAll(selectedMap.values());
 
         sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
                 getGrid()::doClientSideSelection);
