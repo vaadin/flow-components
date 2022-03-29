@@ -128,7 +128,7 @@ public class ImageWMSSource extends ImageSource {
         return ratio;
     }
 
-    public static class Options extends ImageSource.BaseOptions<Options> {
+    public static class Options extends ImageSource.Options {
         private String url;
         private Map<String, Object> params;
         private String serverType;
@@ -138,41 +138,36 @@ public class ImageWMSSource extends ImageSource {
         /**
          * @see ImageWMSSource#getUrl()
          */
-        public Options setUrl(String url) {
+        public void setUrl(String url) {
             this.url = url;
-            return getThis();
         }
 
         /**
          * @see ImageWMSSource#getParams()
          */
-        public Options setParams(Map<String, Object> params) {
+        public void setParams(Map<String, Object> params) {
             this.params = params;
-            return getThis();
         }
 
         /**
          * @see ImageWMSSource#getServerType()
          */
-        public Options setServerType(String serverType) {
+        public void setServerType(String serverType) {
             this.serverType = serverType;
-            return getThis();
         }
 
         /**
          * @see ImageWMSSource#getCrossOrigin()
          */
-        public Options setCrossOrigin(String crossOrigin) {
+        public void setCrossOrigin(String crossOrigin) {
             this.crossOrigin = crossOrigin;
-            return getThis();
         }
 
         /**
          * @see ImageWMSSource#getRatio()
          */
-        public Options setRatio(float ratio) {
+        public void setRatio(float ratio) {
             this.ratio = ratio;
-            return getThis();
         }
     }
 }

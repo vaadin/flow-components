@@ -25,10 +25,11 @@ public class TileWMSDemo extends Div {
         HashMap<String, Object> params = new HashMap<>();
         params.put("LAYERS", "topp:states");
         params.put("TILED", true);
-        TileWMSSource tileWMSSource = new TileWMSSource(
-                new TileWMSSource.Options()
-                        .setUrl("https://ahocevar.com/geoserver/wms")
-                        .setParams(params).setServerType("geoserver"));
+        TileWMSSource.Options options = new TileWMSSource.Options();
+        options.setUrl("https://ahocevar.com/geoserver/wms");
+        options.setParams(params);
+        options.setServerType("geoserver");
+        TileWMSSource tileWMSSource = new TileWMSSource(options);
 
         TileLayer tileLayer = new TileLayer();
         tileLayer.setSource(tileWMSSource);
