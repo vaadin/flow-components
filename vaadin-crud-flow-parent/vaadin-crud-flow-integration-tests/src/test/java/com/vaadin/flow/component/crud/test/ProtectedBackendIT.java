@@ -34,8 +34,7 @@ public class ProtectedBackendIT extends AbstractParallelTest {
         Assert.assertTrue(crud.isEditorOpen());
 
         crud.getEditorDeleteButton().click();
-        crud.getConfirmDeleteDialog()
-                .getConfirmButton().click();
+        crud.getConfirmDeleteDialog().getConfirmButton().click();
 
         Assert.assertTrue("Editor should stay opened if exception happened",
                 crud.isEditorOpen());
