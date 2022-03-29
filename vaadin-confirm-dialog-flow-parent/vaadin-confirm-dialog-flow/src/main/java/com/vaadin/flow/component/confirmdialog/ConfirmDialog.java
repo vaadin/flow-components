@@ -131,7 +131,7 @@ public class ConfirmDialog extends Component
 
     /**
      * @throws UnsupportedOperationException
-     *            ConfirmDialog does not support adding styles to overlay
+     *             ConfirmDialog does not support adding styles to overlay
      */
     @Override
     public Style getStyle() {

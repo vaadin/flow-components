@@ -29,8 +29,7 @@ public final class LumoUtility {
     public static final class Accessibility {
 
         /**
-         * Hides content visually while keeping it available to screen
-         * readers.
+         * Hides content visually while keeping it available to screen readers.
          */
         public static final String SCREEN_READER_ONLY = "sr-only";
 
@@ -1205,8 +1204,7 @@ public final class LumoUtility {
         }
 
         /**
-         * Classes for setting both the right and left paddings of an
-         * element.
+         * Classes for setting both the right and left paddings of an element.
          */
         public static final class Horizontal {
 
@@ -1288,8 +1286,8 @@ public final class LumoUtility {
         }
 
         /**
-         * Classes for defining both the vertical and horizontal paddings of
-         * an element.
+         * Classes for defining both the vertical and horizontal paddings of an
+         * element.
          */
         public static final class Vertical {
 
