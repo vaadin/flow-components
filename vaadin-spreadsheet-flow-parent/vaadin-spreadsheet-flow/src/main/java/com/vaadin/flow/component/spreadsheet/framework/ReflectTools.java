@@ -1,17 +1,14 @@
 /*
- * Copyright 2000-2021 Vaadin Ltd.
+ * #%L
+ * Vaadin Spreadsheet
+ * %%
+ * Copyright (C) 2013 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
  */
 package com.vaadin.flow.component.spreadsheet.framework;
 
@@ -45,15 +42,17 @@ public class ReflectTools implements Serializable {
      * locating the method as this is mainly called from static blocks.
      *
      * @param cls
-     *            Class that contains the method
+     *                       Class that contains the method
      * @param methodName
-     *            The name of the method
+     *                       The name of the method
      * @param parameterTypes
-     *            The parameter types for the method.
+     *                       The parameter types for the method.
      * @return A reference to the method
      * @throws ExceptionInInitializerError
-     *             Wraps any exception in an {@link ExceptionInInitializerError}
-     *             so this method can be called from a static initializer.
+     *                                     Wraps any exception in an
+     *                                     {@link ExceptionInInitializerError}
+     *                                     so this method can be called from a
+     *                                     static initializer.
      */
     public static Method findMethod(Class<?> cls, String methodName,
             Class<?>... parameterTypes) throws ExceptionInInitializerError {
@@ -71,16 +70,16 @@ public class ReflectTools implements Serializable {
      * directly.
      *
      * @param object
-     *            The object containing the field
+     *               The object containing the field
      * @param field
-     *            The field we want to get the value for
+     *               The field we want to get the value for
      * @return The value of the field in the object
      * @throws InvocationTargetException
-     *             If the value could not be retrieved
+     *                                   If the value could not be retrieved
      * @throws IllegalAccessException
-     *             If the value could not be retrieved
+     *                                   If the value could not be retrieved
      * @throws IllegalArgumentException
-     *             If the value could not be retrieved
+     *                                   If the value could not be retrieved
      */
     public static Object getJavaFieldValue(Object object, Field field)
             throws IllegalArgumentException, IllegalAccessException,
@@ -113,18 +112,18 @@ public class ReflectTools implements Serializable {
      * assignable to the property type throws an IllegalArgumentException.
      *
      * @param object
-     *            The object containing the field
+     *                     The object containing the field
      * @param field
-     *            The field we want to get the value for
+     *                     The field we want to get the value for
      * @param propertyType
-     *            The type the field must be assignable to
+     *                     The type the field must be assignable to
      * @return The value of the field in the object
      * @throws InvocationTargetException
-     *             If the value could not be retrieved
+     *                                   If the value could not be retrieved
      * @throws IllegalAccessException
-     *             If the value could not be retrieved
+     *                                   If the value could not be retrieved
      * @throws IllegalArgumentException
-     *             If the value could not be retrieved
+     *                                   If the value could not be retrieved
      */
     public static Object getJavaFieldValue(Object object, Field field,
             Class<?> propertyType) throws IllegalArgumentException,
@@ -160,17 +159,20 @@ public class ReflectTools implements Serializable {
      * directly.
      *
      * @param object
-     *            The object containing the field
+     *               The object containing the field
      * @param field
-     *            The field we want to set the value for
+     *               The field we want to set the value for
      * @param value
-     *            The value to set
+     *               The value to set
      * @throws IllegalAccessException
-     *             If the value could not be assigned to the field
+     *                                   If the value could not be assigned to the
+     *                                   field
      * @throws IllegalArgumentException
-     *             If the value could not be assigned to the field
+     *                                   If the value could not be assigned to the
+     *                                   field
      * @throws InvocationTargetException
-     *             If the value could not be assigned to the field
+     *                                   If the value could not be assigned to the
+     *                                   field
      */
     public static void setJavaFieldValue(Object object, Field field,
             Object value) throws IllegalAccessException,
@@ -229,9 +231,9 @@ public class ReflectTools implements Serializable {
      * Finds the most specific class that both provided classes extend from.
      *
      * @param a
-     *            one class to get the base type for, not <code>null</code>
+     *          one class to get the base type for, not <code>null</code>
      * @param b
-     *            another class to get the base type for, not <code>null</code>
+     *          another class to get the base type for, not <code>null</code>
      * @return the most specific base class, not <code>null</code>
      *
      * @since 8.0
@@ -328,11 +330,13 @@ public class ReflectTools implements Serializable {
      * instrumented.
      *
      * @param listenerClass
-     *            The {@link Class} of the listener, which has a single method
-     *            in the source code
+     *                      The {@link Class} of the listener, which has a single
+     *                      method
+     *                      in the source code
      * @return the first non-synthetic method
      * @throws IllegalStateException
-     *             if the specified class does not have found method
+     *                               if the specified class does not have found
+     *                               method
      * @since 8.2
      */
     public static Method getMethod(Class<?> listenerClass) {

@@ -1,17 +1,14 @@
 /*
- * Copyright 2000-2021 Vaadin Ltd.
+ * #%L
+ * Vaadin Spreadsheet
+ * %%
+ * Copyright (C) 2013 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
  */
 package com.vaadin.spreadsheet.flowport.gwtexporter;
 
@@ -294,7 +291,7 @@ public class ConnectorBundleLoaderFactory extends Generator {
             boolean isEager = name
                     .equals(ConnectorBundleLoader.EAGER_BUNDLE_NAME);
 
-            //spreadsheet: we need to avoid fragments if we want to use the sso linker
+            // spreadsheet: we need to avoid fragments if we want to use the sso linker
             isEager = true;
 
             w.print("addAsyncBlockLoader(new AsyncBundleLoader(\"");
@@ -1181,13 +1178,13 @@ public class ConnectorBundleLoaderFactory extends Generator {
      * class.
      *
      * @param logger
-     *            the logger to which information can be logged
+     *                   the logger to which information can be logged
      * @param typeOracle
-     *            the type oracle that can be used for finding types
+     *                   the type oracle that can be used for finding types
      * @return a collection of all the connector types that should be included
      *         in the widgetset
      * @throws UnableToCompleteException
-     *             if the operation fails
+     *                                   if the operation fails
      */
     protected Collection<JClassType> getConnectorsForWidgetset(
             TreeLogger logger, TypeOracle typeOracle)
@@ -1275,7 +1272,7 @@ public class ConnectorBundleLoaderFactory extends Generator {
 
     private Collection<TypeVisitor> getVisitors(TypeOracle oracle)
             throws NotFoundException {
-        List<TypeVisitor> visitors = Arrays.<TypeVisitor> asList(
+        List<TypeVisitor> visitors = Arrays.<TypeVisitor>asList(
                 new ConnectorInitVisitor(), new StateInitVisitor(),
                 new WidgetInitVisitor(), new RendererVisitor(),
                 new ClientRpcVisitor(), new ServerRpcVisitor(),

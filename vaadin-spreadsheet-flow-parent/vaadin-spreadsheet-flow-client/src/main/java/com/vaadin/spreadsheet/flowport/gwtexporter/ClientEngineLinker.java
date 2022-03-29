@@ -1,18 +1,16 @@
 /*
- * Copyright 2000-2020 Vaadin Ltd.
+ * #%L
+ * Vaadin Spreadsheet
+ * %%
+ * Copyright (C) 2013 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
  */
+
 package com.vaadin.spreadsheet.flowport.gwtexporter;
 
 import java.io.IOException;
@@ -159,7 +157,7 @@ public class ClientEngineLinker extends SingleScriptLinker {
     @Override
     protected EmittedArtifact emitSelectionScript(TreeLogger logger,
             LinkerContext context, ArtifactSet artifacts)
-                    throws UnableToCompleteException {
+            throws UnableToCompleteException {
 
         // Find the single Script result
         Script result = getScript(logger, artifacts);
@@ -254,7 +252,7 @@ public class ClientEngineLinker extends SingleScriptLinker {
     }
 
     private String getJsFilename(LinkerContext context, Script result) {
-        //spreadsheet: we want a simple file name, hash free
+        // spreadsheet: we want a simple file name, hash free
         return context.getModuleName() // + "-" + result.getStrongName()
                 + ".cache.js";
     }
@@ -303,7 +301,7 @@ public class ClientEngineLinker extends SingleScriptLinker {
     @Override
     public ArtifactSet link(TreeLogger logger, LinkerContext context,
             ArtifactSet artifacts, boolean onePermutation)
-                    throws UnableToCompleteException {
+            throws UnableToCompleteException {
         ArtifactSet result = super.link(logger, context, artifacts,
                 onePermutation);
         if (!onePermutation) {
@@ -317,7 +315,7 @@ public class ClientEngineLinker extends SingleScriptLinker {
      */
     private Artifact<?> emitStrongNamePropertyFile(TreeLogger logger,
             LinkerContext context, ArtifactSet artifacts)
-                    throws UnableToCompleteException {
+            throws UnableToCompleteException {
         Script result = getScript(logger, artifacts);
 
         String contents = "jsFile=" + getJsFilename(context, result);
