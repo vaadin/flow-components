@@ -109,7 +109,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return;
         }
         Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean added = selected.add(item);
+        boolean added = !selected.stream()
+                .anyMatch(i -> getGrid().getDataProvider().getId(item)
+                        .equals(getGrid().getDataProvider().getId(i)));
+        selected.add(item);
         if (added) {
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
