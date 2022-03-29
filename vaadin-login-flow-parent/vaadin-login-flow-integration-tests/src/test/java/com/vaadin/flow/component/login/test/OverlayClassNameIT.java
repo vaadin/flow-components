@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -31,84 +32,76 @@ public class OverlayClassNameIT extends AbstractComponentIT {
 
     private static final String LOGIN_OVERLAY_WRAPPER_TAG = "vaadin-login-overlay-wrapper";
 
+    private NativeButtonElement openOverlay;
+    private NativeButtonElement closeOverlay;
+    private NativeButtonElement addClassName;
+    private NativeButtonElement clearClassNames;
+
     @Before
     public void init() {
         open();
+        openOverlay = $(NativeButtonElement.class).id("open-overlay-btn");
+        closeOverlay = $(NativeButtonElement.class).id("close-overlay-btn");
+        addClassName = $(NativeButtonElement.class).id("add-class-btn");
+        clearClassNames = $(NativeButtonElement.class).id("clear-classes-btn");
     }
 
     @Test
-    public void openDialog_overlayHasSameClassNames() {
-        findElement(By.id("open")).click();
-
+    public void openLoginOverlay_overlayWrapperHasSameClassNames() {
+        openOverlay.click();
         waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
+
         LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
-
-        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
-
-        String overlayClassNames = overlay.getAttribute("class");
-        String wrapperClassNames = overlayWrapper.getAttribute("class");
-
-        Assert.assertEquals("custom", overlayClassNames);
-        Assert.assertEquals("custom", wrapperClassNames);
+        assertClassAttribute(overlay, "custom");
     }
 
     @Test
-    public void openDialog_overlayChangeClassName() {
-        findElement(By.id("open")).click();
-
+    public void openLoginOverlay_overlayWrapperChangeClassName() {
+        openOverlay.click();
         waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
-        findElement(By.id("add")).click();
+        addClassName.click();
 
         LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
-        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
-
-        String overlayClassNames = overlay.getAttribute("class");
-        String wrapperClassNames = overlayWrapper.getAttribute("class");
-
-        Assert.assertEquals("custom added", overlayClassNames);
-        Assert.assertEquals("custom added", wrapperClassNames);
+        assertClassAttribute(overlay, "custom added");
     }
 
     @Test
-    public void openDialog_overlayNoClassNameAfterClearClassName() {
-        findElement(By.id("open")).click();
-
+    public void openLoginOverlay_overlayWrapperNoClassNameAfterClearClassName() {
+        openOverlay.click();
         waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
-        findElement(By.id("clear")).click();
+        clearClassNames.click();
 
         LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
-        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
-
-        String overlayClassNames = overlay.getAttribute("class");
-        String wrapperClassNames = overlayWrapper.getAttribute("class");
-
-        Assert.assertEquals("", overlayClassNames);
-        Assert.assertEquals("", wrapperClassNames);
+        assertClassAttribute(overlay, "");
     }
 
     @Test
-    public void openDialog_overlayChagedClassNameAfterSecondOpening() {
-        findElement(By.id("open")).click();
-
+    public void openLoginOverlay_overlayWrapperChangedClassNameAfterSecondOpening() {
+        openOverlay.click();
         waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
-        findElement(By.id("clear")).click();
-        findElement(By.id("add")).click();
+        clearClassNames.click();
+        addClassName.click();
 
-        $(LOGIN_OVERLAY_WRAPPER_TAG).first().click();
+        closeOverlay.click();
+        waitForElementNotPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
-        findElement(By.id("open")).click();
+        openOverlay.click();
         waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
-        WebElement overlayWrapper = $(LOGIN_OVERLAY_WRAPPER_TAG).first();
+        assertClassAttribute(overlay, "added");
+    }
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String wrapperClassNames = overlayWrapper.getAttribute("class");
+    private void assertClassAttribute(LoginOverlayElement overlay,
+            String expected) {
+        String className = overlay.getAttribute("class");
+        Assert.assertEquals(expected, className);
 
-        Assert.assertEquals("added", overlayClassNames);
-        Assert.assertEquals("added", wrapperClassNames);
+        WebElement wrappedElement = overlay.getLoginOverlayWrapper();
+        String cardClassName = wrappedElement.getAttribute("class");
+        Assert.assertEquals(expected, cardClassName);
     }
 }

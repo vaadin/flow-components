@@ -14,22 +14,22 @@ public class OverlayClassNameView extends AbstractView {
         login.addClassName("custom");
         login.addLoginListener(e -> login.close());
 
-        NativeButton button = new NativeButton("Open");
-        button.setId("open");
-        button.addClickListener(e -> login.setOpened(true));
+        NativeButton open = new NativeButton("Open Login");
+        open.setId("open-overlay-btn");
+        open.addClickListener(e -> login.setOpened(true));
 
-        NativeButton close = new NativeButton("Close");
-        close.setId("close");
+        NativeButton close = new NativeButton("Close Login");
+        close.setId("close-overlay-btn");
         close.addClickListener(e -> login.setOpened(false));
 
         NativeButton addClass = new NativeButton("Add a class",
                 event -> login.addClassName("added"));
-        addClass.setId("add");
+        addClass.setId("add-class-btn");
 
         NativeButton clearAllClass = new NativeButton("Clear all classes",
                 event -> login.getClassNames().clear());
-        clearAllClass.setId("clear");
+        clearAllClass.setId("clear-classes-btn");
 
-        add(button, close, addClass, clearAllClass);
+        add(open, close, addClass, clearAllClass);
     }
 }
