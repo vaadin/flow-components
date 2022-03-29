@@ -21,8 +21,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-notification/notification-class-names-test")
@@ -30,116 +32,101 @@ public class NotificationWithClassNamesIT extends AbstractComponentIT {
 
     public static final String NOTIFICATION_CARD = "vaadin-notification-card";
 
+    private ButtonElement openNotification;
+    private ButtonElement closeNotification;
+    private ButtonElement openOtherNotification;
+    private ButtonElement addClassName;
+    private ButtonElement clearClassNames;
+
     @Before
     public void init() {
         open();
+        openNotification = $(ButtonElement.class).id("open-notification-btn");
+        closeNotification = $(ButtonElement.class).id("close-notification-btn");
+        openOtherNotification = $(ButtonElement.class)
+                .id("open-other-notification-btn");
+        addClassName = $(ButtonElement.class).id("add-class-btn");
+        clearClassNames = $(ButtonElement.class).id("clear-classes-btn");
     }
 
     @Test
     public void openNotification_cardHasSameClassNames() {
-        findElement(By.id("open-notification-btn")).click();
-
+        openNotification.click();
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
+
         NotificationElement notification = $(NotificationElement.class).first();
-
-        WebElement card = $(NOTIFICATION_CARD).first();
-
-        String cardClassNames = card.getAttribute("class");
-        String notificationClassNames = notification.getAttribute("class");
-
-        Assert.assertEquals("custom", notificationClassNames);
-        Assert.assertEquals("custom", cardClassNames);
+        assertClassAttribute(notification, "custom");
     }
 
     @Test
     public void openNotification_cardChangeClassName() {
-        findElement(By.id("open-notification-btn")).click();
-
+        openNotification.click();
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
-        findElement(By.id("add-notification-btn")).click();
+        addClassName.click();
 
-        WebElement card = $(NOTIFICATION_CARD).first();
         NotificationElement notification = $(NotificationElement.class).first();
-
-        String cardClassNames = card.getAttribute("class");
-        String notificationClassNames = notification.getAttribute("class");
-
-        Assert.assertEquals("custom added", notificationClassNames);
-        Assert.assertEquals("custom added", cardClassNames);
+        assertClassAttribute(notification, "custom added");
     }
 
     @Test
     public void openNotification_cardNoClassNameAfterClearClassName() {
-        findElement(By.id("open-notification-btn")).click();
 
+        openNotification.click();
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
-        findElement(By.id("clear-notification-btn")).click();
+        clearClassNames.click();
 
-        WebElement card = $(NOTIFICATION_CARD).first();
         NotificationElement notification = $(NotificationElement.class).first();
-
-        String cardClassNames = card.getAttribute("class");
-        String notificationClassNames = notification.getAttribute("class");
-
-        Assert.assertEquals("", notificationClassNames);
-        Assert.assertEquals("", cardClassNames);
+        assertClassAttribute(notification, "");
     }
 
     @Test
     public void openNotification_cardChagedClassNameAfterSecondOpening() {
-        findElement(By.id("open-notification-btn")).click();
-
+        openNotification.click();
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
-        findElement(By.id("clear-notification-btn")).click();
-        findElement(By.id("add-notification-btn")).click();
+        clearClassNames.click();
+        addClassName.click();
 
-        findElement(By.id("close-notification-btn")).click();
+        closeNotification.click();
         waitForElementNotPresent(By.tagName(NOTIFICATION_CARD));
 
-        findElement(By.id("open-notification-btn")).click();
+        openNotification.click();
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
-        WebElement card = $(NOTIFICATION_CARD).first();
         NotificationElement notification = $(NotificationElement.class).first();
-
-        String cardClassNames = card.getAttribute("class");
-        String notificationClassNames = notification.getAttribute("class");
-
-        Assert.assertEquals("added", notificationClassNames);
-        Assert.assertEquals("added", cardClassNames);
+        assertClassAttribute(notification, "added");
     }
 
     @Test
     public void openTwoNotification_CorrectClassNamesApplied() {
-        findElement(By.id("open-notification-btn")).click();
-        findElement(By.id("open-other-notification-btn")).click();
+        openNotification.click();
+        waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
-        waitForElementPresent(By.className("custom"));
-        waitForElementPresent(By.className("other"));
+        openOtherNotification.click();
 
-        findElement(By.id("add-notification-btn")).click();
+        waitForElementPresent(
+                By.cssSelector("vaadin-notification-card.custom"));
+        waitForElementPresent(By.cssSelector("vaadin-notification-card.other"));
+
+        addClassName.click();
 
         NotificationElement notification = $(NotificationElement.class).first();
-        WebElement card = $(NOTIFICATION_CARD).first();
+        assertClassAttribute(notification, "custom added");
 
         NotificationElement otherNotification = $(NotificationElement.class)
                 .get(1);
-        WebElement otherCard = $(NOTIFICATION_CARD).get(1);
+        assertClassAttribute(otherNotification, "other");
+    }
 
-        String cardClassNames = card.getAttribute("class");
-        String notificationClassNames = notification.getAttribute("class");
+    private void assertClassAttribute(TestBenchElement notification,
+            String expected) {
+        String className = notification.getAttribute("class");
+        Assert.assertEquals(expected, className);
 
-        Assert.assertEquals("custom added", notificationClassNames);
-        Assert.assertEquals("custom added", cardClassNames);
-
-        String otherCardClassNames = otherCard.getAttribute("class");
-        String otherNotificationClassNames = otherNotification
-                .getAttribute("class");
-
-        Assert.assertEquals("other", otherCardClassNames);
-        Assert.assertEquals("other", otherNotificationClassNames);
+        TestBenchElement card = (TestBenchElement) notification.getContext();
+        String cardClassName = card.getAttribute("class");
+        Assert.assertEquals(expected, cardClassName);
     }
 }

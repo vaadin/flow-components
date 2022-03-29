@@ -24,18 +24,16 @@ import com.vaadin.flow.router.Route;
 public class NotificationWithClassNamesPage extends Div {
 
     public NotificationWithClassNamesPage() {
-        final Notification notification = new Notification();
+        final Notification notification = new Notification("Notification");
         notification.addClassName("custom");
 
         Button addClass = new Button("Add a class",
                 event -> notification.addClassName("added"));
-        addClass.setId("add-notification-btn");
-        notification.add(addClass);
+        addClass.setId("add-class-btn");
 
         Button clearAllClass = new Button("Clear all classes",
                 event -> notification.getClassNames().clear());
-        clearAllClass.setId("clear-notification-btn");
-        notification.add(clearAllClass);
+        clearAllClass.setId("clear-classes-btn");
 
         Button close = new Button("Close notification",
                 event -> notification.close());
@@ -44,19 +42,19 @@ public class NotificationWithClassNamesPage extends Div {
         Button open = new Button("Open notification",
                 event -> notification.open());
         open.setId("open-notification-btn");
-        add(open, close);
+        add(addClass, clearAllClass, open, close);
 
-        createDefaultNotification();
+        createOtherNotification();
     }
 
-    private void createDefaultNotification() {
+    private void createOtherNotification() {
         Button button = new Button("Open other notification");
         Notification notification = new Notification(
                 "This notification has text content", 3000);
         notification.addClassName("other");
         button.addClickListener(event -> notification.open());
         button.setId("open-other-notification-btn");
-        notification.setId("default-notification");
+        notification.setId("other-notification");
         add(button);
     }
 }
