@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -57,7 +58,7 @@ import elemental.json.JsonObject;
 public abstract class AbstractGridMultiSelectionModel<T>
         extends AbstractGridExtension<T> implements GridMultiSelectionModel<T> {
 
-    private final Set<T> selected;
+    private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
 
@@ -70,7 +71,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
      */
     public AbstractGridMultiSelectionModel(Grid<T> grid) {
         super(grid);
-        selected = new LinkedHashSet<>();
+        selected = new HashMap<>();
         selectionColumn = new GridSelectionColumn(this::clientSelectAll,
                 this::clientDeselectAll);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
@@ -108,11 +109,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item)) {
             return;
         }
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean added = !selected.stream()
-                .anyMatch(i -> getGrid().getDataProvider().getId(item)
-                        .equals(getGrid().getDataProvider().getId(i)));
-        selected.add(item);
+        Set<T> oldSelection = selected.values().stream()
+                .collect(Collectors.toSet());
+        boolean added = selected.get(getItemId(item)) == null;
+        selected.put(getItemId(item), item);
         if (added) {
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
@@ -137,8 +137,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelected(item)) {
             return;
         }
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean removed = selected.remove(item);
+        Set<T> oldSelection = selected.values().stream()
+                .collect(Collectors.toSet());
+        boolean removed = selected.containsKey(getItemId(item));
+        selected.remove(getItemId(item));
         if (removed) {
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
@@ -158,12 +160,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
          * ConcurrentModificationExceptions when changing the selection during
          * an iteration
          */
-        return Collections.unmodifiableSet(new LinkedHashSet<>(selected));
+        return Collections.unmodifiableSet(
+                selected.values().stream().collect(Collectors.toSet()));
     }
 
     @Override
     public Optional<T> getFirstSelectedItem() {
-        return selected.stream().findFirst();
+        return selected.values().stream().findFirst();
     }
 
     @Override
@@ -432,16 +435,17 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
 
-        Map<Object, T> selectedMap = mapItemsById(selected);
-        if (selectedMap.keySet().containsAll(addedItems.keySet()) && Collections
-                .disjoint(selectedMap.keySet(), removedItems.keySet())) {
+        // Map<Object, T> selectedMap = mapItemsById(selected);
+        if (selected.keySet().containsAll(addedItems.keySet()) && Collections
+                .disjoint(selected.keySet(), removedItems.keySet())) {
             return;
         }
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        removedItems.keySet().forEach(selectedMap::remove);
-        selectedMap.putAll(addedItems);
-        selected.clear();
-        selected.addAll(selectedMap.values());
+        Set<T> oldSelection = selected.values().stream()
+                .collect(Collectors.toSet());
+        removedItems.keySet().forEach(selected::remove);
+        selected.putAll(addedItems);
+        // selected.clear();
+        // selected.addAll(selectedMap.values());
 
         sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
                 getGrid()::doClientSideSelection);
