@@ -114,17 +114,17 @@ public abstract class AbstractGridMultiSelectionModel<T>
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
 
-            long size = 0;
-
             if (!isSelectAllCheckboxVisible()) {
                 // Skip changing the state of Select All checkbox if it was
                 // meant to be hidden
                 return;
             }
 
-            size = getDataProviderSize();
-
+            long size = getDataProviderSize();
             selectionColumn.setSelectAllCheckboxState(size == selected.size());
+            selectionColumn.setSelectAllCheckboxIndeterminateState(
+                    isHierarchicalDataProvider() ? selected.size() > 0
+                            : selected.size() > 0 && selected.size() < size);
         }
     }
 
@@ -138,8 +138,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (removed) {
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
+
+            long size = getDataProviderSize();
+            selectionColumn.setSelectAllCheckboxState(false);
+            selectionColumn.setSelectAllCheckboxIndeterminateState(
+                    isHierarchicalDataProvider() ? selected.size() > 0
+                            : selected.size() > 0 && selected.size() < size);
         }
-        selectionColumn.setSelectAllCheckboxState(false);
     }
 
     @Override
@@ -189,12 +194,14 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         .fetch(new Query<>()).collect(Collectors.toSet()),
                 Collections.emptySet());
         selectionColumn.setSelectAllCheckboxState(true);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     @Override
     public void deselectAll() {
         updateSelection(Collections.emptySet(), getSelectedItems());
         selectionColumn.setSelectAllCheckboxState(false);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     @Override
@@ -338,7 +345,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
 
-    private void clientSelectAll() {
+    void clientSelectAll() {
         if (!isSelectAllCheckboxVisible()) {
             // ignore event if the checkBox was meant to be hidden
             return;
@@ -355,6 +362,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
                 Collections.emptySet(), true);
         selectionColumn.setSelectAllCheckboxState(true);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     /**
@@ -395,13 +403,14 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         fetchAllDescendants(child, dataProvider)));
     }
 
-    private void clientDeselectAll() {
+    void clientDeselectAll() {
         if (!isSelectAllCheckboxVisible()) {
             // ignore event if the checkBox was meant to be hidden
             return;
         }
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
         selectionColumn.setSelectAllCheckboxState(false);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
@@ -437,12 +446,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
-        if (!removedItems.isEmpty()) {
-            selectionColumn.setSelectAllCheckboxState(false);
-        } else {
-            long size = getDataProviderSize();
-            selectionColumn.setSelectAllCheckboxState(size == selected.size());
-        }
+
+        long size = getDataProviderSize();
+        selectionColumn.setSelectAllCheckboxState(
+                !isHierarchicalDataProvider() && size == selected.size());
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     private Map<Object, T> mapItemsById(Set<T> items) {
@@ -488,5 +498,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
             }
         }
         return size;
+    }
+
+    private boolean isHierarchicalDataProvider() {
+        return getGrid().getDataCommunicator()
+                .getDataProvider() instanceof HierarchicalDataProvider;
     }
 }

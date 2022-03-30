@@ -52,6 +52,8 @@ public class GridSelectionColumn extends Component {
             SerializableRunnable deselectAllCallback) {
         this.selectAllCallback = selectAllCallback;
         this.deselectAllCallback = deselectAllCallback;
+        setSelectAllCheckboxState(false);
+        setSelectAllCheckboxIndeterminateState(false);
     }
 
     /**
@@ -62,6 +64,16 @@ public class GridSelectionColumn extends Component {
      */
     public void setSelectAllCheckboxState(boolean selectAll) {
         getElement().setProperty("selectAll", selectAll);
+    }
+
+    /**
+     * Sets the indeterminate state of the select all checkbox on the client.
+     *
+     * @param indeterminate
+     *            the new indeterminate state of the select all checkbox
+     */
+    public void setSelectAllCheckboxIndeterminateState(boolean indeterminate) {
+        getElement().setProperty("indeterminate", indeterminate);
     }
 
     /**
