@@ -52,9 +52,8 @@ import java.util.stream.Stream;
 /**
  * Avatar Group is used to group multiple Avatars together. It can be used, for
  * example, to show that there are multiple users viewing the same page or for
- * listing members of a project.<br>
- * <br>
- *
+ * listing members of a project.
+ * <p>
  * You can specify the max number of items an Avatar Group should display. Items
  * that overflow are grouped into a single Avatar that displays the overflow
  * count. The name of each hidden item is shown on hover in a tooltip. Clicking

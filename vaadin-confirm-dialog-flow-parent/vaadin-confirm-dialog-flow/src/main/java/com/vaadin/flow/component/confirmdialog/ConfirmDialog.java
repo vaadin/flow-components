@@ -35,9 +35,8 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Confirm Dialog is a modal Dialog used to confirm user actions.<br>
- * <br>
- *
+ * Confirm Dialog is a modal Dialog used to confirm user actions.
+ * <p>
  * Confirm Dialog consists of:<br>
  * <ul>
  * <li>Title</li>

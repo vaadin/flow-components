@@ -43,16 +43,14 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Details is an expandable panel for showing and hiding content from the user
  * to make the UI less crowded. Details consists of a summary and a content
- * area.<br>
- * <br>
- *
+ * area.
+ * <p>
  * The Summary is the part that is always visible, and typically describes the
  * contents, for example, with a title. Clicking on the summary toggles the
  * content area’s visibility. The summary supports rich content and can contain
  * any component. This can be utilized for example to indicate the status of the
- * corresponding content.<br>
- * <br>
- *
+ * corresponding content.
+ * <p>
  * The content area is the collapsible part of Details. It can contain any
  * component. When the content area is collapsed, the content is invisible and
  * inaccessible by keyboard or screen reader.

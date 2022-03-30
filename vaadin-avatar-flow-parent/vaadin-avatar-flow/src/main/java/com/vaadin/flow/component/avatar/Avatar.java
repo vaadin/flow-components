@@ -34,25 +34,20 @@ import java.util.stream.Stream;
 
 /**
  * Avatar is a graphical representation of an object or entity, for example a
- * person or an organisation.<br>
- * <br>
- *
- * Avatar has three properties: name, abbreviation and image.<br>
- * <br>
- *
+ * person or an organisation.
+ * <p>
+ * Avatar has three properties: name, abbreviation and image.
+ * <p>
  * The name is shown on hover in a tooltip. When a name is set, Avatar will
  * auto-generate and display an abbreviation of the specified name. For example,
- * “Allison Torres” becomes “AT”, “John Smith” becomes “JS”, etc.<br>
- * <br>
- *
+ * “Allison Torres” becomes “AT”, “John Smith” becomes “JS”, etc.
+ * <p>
  * The abbreviation can also be set manually. Abbreviations should be kept to a
- * maximum of 2–3 characters.<br>
- * <br>
- *
+ * maximum of 2–3 characters.
+ * <p>
  * Avatar can be used to display images, such as user profile pictures or
- * company logos. Abbreviations are not shown when images are used.<br>
- * <br>
- *
+ * company logos. Abbreviations are not shown when images are used.
+ * <p>
  * Note that this component is optimized for use with Collaboration Engine — a
  * simple way to build real-time collaboration into your app — but can also be
  * used standalone as a regular component.

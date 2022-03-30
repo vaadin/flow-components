@@ -83,9 +83,8 @@ import elemental.json.impl.JreJsonFactory;
  * can configure all the chart elements with a powerful API as well as the
  * visual style using CSS. The built-in functionalities allow the user to
  * interact with the chart elements in various ways, and you can define custom
- * interaction with events.<br>
- * <br>
- *
+ * interaction with events.
+ * <p>
  * The Chart is a regular Vaadin component, which you can add to any Vaadin
  * layout.
  *

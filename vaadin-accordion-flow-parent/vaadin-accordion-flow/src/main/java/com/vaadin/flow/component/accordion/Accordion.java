@@ -40,14 +40,12 @@ import com.vaadin.flow.shared.Registration;
  * content at a time.
  * <p>
  * Accordion consists of stacked panels, each composed of two parts: a summary
- * and a content area. Only one panel can be expanded at a time.<br>
- * <br>
- *
+ * and a content area. Only one panel can be expanded at a time.
+ * <p>
  * The summary is the part that is always visible, and typically describes the
  * contents, for example, with a title. Clicking on the summary toggles the
- * content area’s visibility.<br>
- * <br>
- *
+ * content area’s visibility.
+ * <p>
  * The content area is the collapsible part of a panel. It can contain any
  * component. When the content area is collapsed, the content is invisible and
  * inaccessible by keyboard or screen reader.

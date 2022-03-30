@@ -50,9 +50,8 @@ import elemental.json.JsonType;
  * <p>
  * It allows setting and getting {@link LocalDate} objects, setting minimum and
  * maximum date ranges and has internationalization support by using the
- * {@link DatePickerI18n} object.<br>
- * <br>
- *
+ * {@link DatePickerI18n} object.
+ * <p>
  * This component allows the date to be entered directly using the keyboard in
  * the format of the current locale or through the date picker overlay. The
  * overlay opens when the field is clicked and/or any input is entered when the

@@ -42,26 +42,22 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * A Dialog is a small window that can be used to present information and user
- * interface elements in an overlay.<br>
- * <br>
- *
+ * interface elements in an overlay.
+ * <p>
  * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
  * interacting with the rest of the user interface while the Dialog is open, as
- * opposed to a non-modal Dialog, which does not block interaction.<br>
- * <br>
- *
+ * opposed to a non-modal Dialog, which does not block interaction.
+ * <p>
  * Dialogs can be made draggable and resizable. When draggable, the user is able
  * to move them around using a pointing device. It is recommended to make
  * non-modal Dialogs draggable so that the user can interact with content that
  * might otherwise be obscured by the Dialog. A resizable Dialog allows the user
  * to resize the Dialog by dragging from the edges of the Dialog with a pointing
- * device. Dialogs are not resizable by default.<br>
- * <br>
- *
+ * device. Dialogs are not resizable by default.
+ * <p>
  * Dialogs automatically become scrollable when their content overflows. Custom
- * scrollable areas can be created using the Scroller component.<br>
- * <br>
- *
+ * scrollable areas can be created using the Scroller component.
+ * <p>
  * Best Practices:<br>
  * Dialogs are disruptive by nature and should be used sparingly. Do not use
  * them to communicate nonessential information, such as success messages like

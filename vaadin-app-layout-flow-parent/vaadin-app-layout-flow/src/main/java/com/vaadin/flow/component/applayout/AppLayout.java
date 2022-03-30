@@ -43,15 +43,13 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * App Layout is a component for building common application layouts.<br>
- * <br>
- *
+ * App Layout is a component for building common application layouts.
+ * <p>
  * The layout consists of three sections: a horizontal navigation bar (navbar),
  * a collapsible navigation drawer (drawer) and a content area. An application’s
  * main navigation blocks should be positioned in the navbar and/or drawer while
- * views are rendered in the content area.<br>
- * <br>
- *
+ * views are rendered in the content area.
+ * <p>
  * App Layout is responsive and adjusts automatically to fit desktop, tablet,
  * and mobile screen sizes.
  *

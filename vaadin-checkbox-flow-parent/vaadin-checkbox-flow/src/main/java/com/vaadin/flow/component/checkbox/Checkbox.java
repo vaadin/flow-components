@@ -28,9 +28,8 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * value is unchecked.
  * <p>
  * Checkbox also has a indeterminate mode, see {@link #isIndeterminate()} for
- * more info.<br>
- * <br>
- *
+ * more info.
+ * <p>
  * Use {@link com.vaadin.flow.component.checkbox CheckboxGroup} to group related
  * items. Individual checkboxes should be used for options that are not related
  * to each other in any way.
