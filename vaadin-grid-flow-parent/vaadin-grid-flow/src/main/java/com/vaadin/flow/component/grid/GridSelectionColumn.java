@@ -52,8 +52,6 @@ public class GridSelectionColumn extends Component {
             SerializableRunnable deselectAllCallback) {
         this.selectAllCallback = selectAllCallback;
         this.deselectAllCallback = deselectAllCallback;
-        setSelectAllCheckboxState(false);
-        setSelectAllCheckboxIndeterminateState(false);
     }
 
     /**
