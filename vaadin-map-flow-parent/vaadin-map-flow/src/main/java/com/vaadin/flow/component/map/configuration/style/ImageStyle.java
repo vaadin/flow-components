@@ -105,53 +105,45 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
         markAsDirty();
     }
 
-    public ImageStyle(BaseOptions<?> options) {
+    public ImageStyle(Options options) {
         opacity = options.opacity;
         rotateWithView = options.rotateWithView;
         rotation = options.rotation;
         scale = options.scale;
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>> {
+    protected static abstract class Options {
         private float opacity = 1;
         private boolean rotateWithView = false;
         private float rotation = 0;
         private float scale = 1;
 
-        protected T getThis() {
-            return (T) this;
-        }
-
         /**
          * @see ImageStyle#getOpacity()
          */
-        public T setOpacity(float opacity) {
+        public void setOpacity(float opacity) {
             this.opacity = opacity;
-            return getThis();
         }
 
         /**
          * @see ImageStyle#isRotateWithView()
          */
-        public T setRotateWithView(boolean rotateWithView) {
+        public void setRotateWithView(boolean rotateWithView) {
             this.rotateWithView = rotateWithView;
-            return getThis();
         }
 
         /**
          * @see ImageStyle#getRotation()
          */
-        public T setRotation(float rotation) {
+        public void setRotation(float rotation) {
             this.rotation = rotation;
-            return getThis();
         }
 
         /**
          * @see ImageStyle#getScale()
          */
-        public T setScale(float scale) {
+        public void setScale(float scale) {
             this.scale = scale;
-            return getThis();
         }
     }
 }

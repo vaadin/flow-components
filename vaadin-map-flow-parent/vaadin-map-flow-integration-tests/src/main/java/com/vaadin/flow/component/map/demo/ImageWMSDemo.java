@@ -24,11 +24,12 @@ public class ImageWMSDemo extends Div {
         // Add image layer showing an overlay of the individual states of the US
         HashMap<String, Object> params = new HashMap<>();
         params.put("LAYERS", "topp:states");
-        ImageWMSSource imageWMSSource = new ImageWMSSource(
-                new ImageWMSSource.Options()
-                        .setUrl("https://ahocevar.com/geoserver/wms")
-                        .setParams(params).setServerType("geoserver")
-                        .setRatio(1));
+        ImageWMSSource.Options options = new ImageWMSSource.Options();
+        options.setUrl("https://ahocevar.com/geoserver/wms");
+        options.setParams(params);
+        options.setServerType("geoserver");
+        options.setRatio(1);
+        ImageWMSSource imageWMSSource = new ImageWMSSource(options);
 
         ImageLayer imageLayer = new ImageLayer();
         imageLayer.setSource(imageWMSSource);

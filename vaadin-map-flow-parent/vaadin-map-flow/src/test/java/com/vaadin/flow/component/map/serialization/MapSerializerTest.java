@@ -46,10 +46,12 @@ public class MapSerializerTest {
     public void serializationSmokeTest() {
         MapSerializer mapSerializer = new MapSerializer();
 
-        JsonValue jsonValue = mapSerializer.toJson(new OSMSource(
-                new OSMSource.Options().setUrl("https://example.com")
-                        .setOpaque(false).setCrossOrigin("custom-cors")
-                        .setAttributions(List.of("Custom map service"))));
+        OSMSource.Options options = new OSMSource.Options();
+        options.setUrl("https://example.com");
+        options.setOpaque(false);
+        options.setCrossOrigin("custom-cors");
+        options.setAttributions(List.of("Custom map service"));
+        JsonValue jsonValue = mapSerializer.toJson(new OSMSource(options));
 
         Assert.assertTrue("Result should be JSON object",
                 jsonValue instanceof JsonObject);
@@ -66,8 +68,10 @@ public class MapSerializerTest {
     public void serializeStreamResource_shouldRegisterResourceExactlyOnce() {
         UI.setCurrent(ui);
         MapSerializer mapSerializer = new MapSerializer();
-        Icon icon = new Icon(
-                new Icon.Options().setImg(Assets.PIN.getResource()));
+
+        Icon.Options options = new Icon.Options();
+        options.setImg(Assets.PIN.getResource());
+        Icon icon = new Icon(options);
 
         mapSerializer.toJson(icon);
         mapSerializer.toJson(icon);

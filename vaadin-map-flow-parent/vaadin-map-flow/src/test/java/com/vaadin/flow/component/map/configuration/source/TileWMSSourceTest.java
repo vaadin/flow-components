@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TileWMSSourceTest {
@@ -11,7 +12,15 @@ public class TileWMSSourceTest {
     public void initialize_validOptions() {
         TileWMSSource.Options options = createValidOptions();
 
-        new TileWMSSource(options);
+        TileWMSSource source = new TileWMSSource(options);
+        Assert.assertEquals("https://example.com", source.getUrl());
+        Assert.assertEquals("layer1", source.getParams().get("LAYERS"));
+        Assert.assertEquals("testServerType", source.getServerType());
+        Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
+        Assert.assertEquals("testProjection", source.getProjection());
+        Assert.assertEquals("testAttributions", source.getAttributions().get(0));
+        Assert.assertFalse(source.isAttributionsCollapsible());
+        Assert.assertTrue(source.isOpaque());
     }
 
     @Test
@@ -44,7 +53,16 @@ public class TileWMSSourceTest {
     private TileWMSSource.Options createValidOptions() {
         Map<String, Object> params = createValidParams();
 
-        return new TileWMSSource.Options().setUrl("https://example.com")
-                .setParams(params);
+        TileWMSSource.Options options = new TileWMSSource.Options();
+        options.setUrl("https://example.com");
+        options.setParams(params);
+        options.setServerType("testServerType");
+        options.setCrossOrigin("testCrossOrigin");
+        options.setProjection("testProjection");
+        options.setAttributions(List.of("testAttributions"));
+        options.setAttributionsCollapsible(false);
+        options.setOpaque(true);
+
+        return options;
     }
 }
