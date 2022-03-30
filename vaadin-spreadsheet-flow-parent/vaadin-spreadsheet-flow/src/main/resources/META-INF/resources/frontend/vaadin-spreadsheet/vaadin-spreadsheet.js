@@ -211,12 +211,18 @@ export class VaadinSpreadsheet extends LitElement {
       this.injectStyle('css_valo', css_valo);
       this.injectStyleLink('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
-      const div = document.createElement('div');
-      div.setAttribute('class', 'spreadsheetport');
-      div.setAttribute('style', 'min-height: 300px; min-width: 300px;width: 100%; height: 100%;');
-      this.append(div);
+      const container = document.createElement('div');
+      container.id = 'spreadsheet-container';
+      container.classList.add('spreadsheetport');
+      container.setAttribute('style', 'min-height: 300px; min-width: 300px;width: 100%; height: 100%;');
+      this.append(container);
 
-      this.api = new Spreadsheet(div);
+      const overlays = document.createElement('div');
+      overlays.id = 'spreadsheet-overlays';
+      overlays.classList.add('spreadsheetport');
+      document.body.appendChild(overlays);
+
+      this.api = new Spreadsheet(container);
       console.log('updated')
       this.createCallbacks();
       console.log('callbacks created')

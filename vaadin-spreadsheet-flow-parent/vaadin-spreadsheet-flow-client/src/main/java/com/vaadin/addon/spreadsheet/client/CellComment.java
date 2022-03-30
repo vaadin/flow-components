@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -24,9 +24,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.vaadin.client.ui.VLabel;
-import com.vaadin.client.ui.VOverlay;
 
-public class CellComment extends VOverlay {
+public class CellComment extends SpreadsheetOverlay {
 
     protected static final String COMMENT_OVERLAY_LINE_CLASSNAME = "comment-overlay-line";
     private static final String COMMENT_OVERLAY_CLASSNAME = "v-spreadsheet-comment-overlay";

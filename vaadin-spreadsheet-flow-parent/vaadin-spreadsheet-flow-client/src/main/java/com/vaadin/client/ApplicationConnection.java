@@ -36,11 +36,11 @@ import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.spreadsheet.client.SpreadsheetOverlay;
 import com.vaadin.client.ApplicationConfiguration.ErrorMessage;
 import com.vaadin.client.communication.ConnectionStateHandler;
 import com.vaadin.client.communication.Heartbeat;
@@ -1160,10 +1160,8 @@ public class ApplicationConnection implements HasHandlers {
      */
     public VContextMenu getContextMenu() {
         if (contextMenu == null) {
-            contextMenu = new VContextMenu();
+            contextMenu = new SpreadsheetOverlay.SpreadsheetContextMenu();
             contextMenu.setOwner(uIConnector.getWidget());
-            DOM.setElementProperty(contextMenu.getElement(), "id",
-                    "PID_VAADIN_CM");
         }
         return contextMenu;
     }

@@ -546,13 +546,13 @@ public class SheetWidget extends Panel {
         overflownMergedCells = new HashMap<MergedRegion, Cell>();
         hyperlinkTooltipLabel = new VLabel();
         hyperlinkTooltipLabel.setStyleName(HYPERLINK_TOOLTIP_LABEL_CLASSNAME);
-        hyperlinkTooltip = new VOverlay();
+        hyperlinkTooltip = new SpreadsheetOverlay() ;
         hyperlinkTooltip.setStyleName("v-tooltip");
         hyperlinkTooltip.setOwner(this);
         hyperlinkTooltip.add(hyperlinkTooltipLabel);
         resizeTooltipLabel = new VLabel();
         resizeTooltipLabel.setStyleName(RESIZE_TOOLTIP_LABEL_CLASSNAME);
-        resizeTooltip = new VOverlay();
+        resizeTooltip = new SpreadsheetOverlay();
         resizeTooltip.setStyleName("v-tooltip");
         resizeTooltip.setOwner(this);
         resizeTooltip.add(resizeTooltipLabel);

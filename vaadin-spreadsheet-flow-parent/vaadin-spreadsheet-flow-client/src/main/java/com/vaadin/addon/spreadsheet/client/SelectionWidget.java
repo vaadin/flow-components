@@ -852,7 +852,7 @@ public class SelectionWidget extends Composite {
                 touchActions.hide();
             }
 
-            touchActions = new VOverlay(true);
+            touchActions = new SpreadsheetOverlay(true);
             touchActions.setOwner((Widget) sheetWidget.actionHandler);
             touchActions.addStyleName("v-contextmenu");
 
