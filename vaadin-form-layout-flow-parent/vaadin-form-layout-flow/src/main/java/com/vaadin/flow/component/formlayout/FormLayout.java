@@ -37,7 +37,30 @@ import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
- * Server-side component for the {@code <vaadin-form-layout>} element.
+ * Form Layout allows you to build responsive forms with multiple columns and to
+ * position input labels on top or to the side of the input. Form Layout has two
+ * columns by default meaning it displays two input fields per line. When the
+ * layout width is smaller it adjusts to a single column layout.
+ * <p>
+ * You can define how many columns Form Layout should use based on the screen
+ * width. A single column layout is preferable to a multi column one. A multi
+ * column layout is more prone to cause confusion and to be misinterpreted by
+ * the user. However, closely related fields can be placed in line without
+ * issue. For example, first and last name, address fields such as postal code
+ * and city, as well as ranged input for dates, time, currency, etc.
+ * <p>
+ * Best Practices:<br>
+ * Longer forms should be split into smaller, more manageable and user-friendly
+ * sections using subheadings, Tabs, Details or separate views when possible.
+ * Each section should consist of related content and/or fields.
+ * <p>
+ * Also, use the following guidelines for Button placement in forms:<br>
+ * <ul>
+ * <li>Buttons should be placed below the form they’re associated with.</li>
+ * <li>Buttons should be aligned left.</li>
+ * <li>Primary action first, followed by other actions, in order of
+ * importance.</li>
+ * </ul>
  *
  * @author Vaadin Ltd
  */
