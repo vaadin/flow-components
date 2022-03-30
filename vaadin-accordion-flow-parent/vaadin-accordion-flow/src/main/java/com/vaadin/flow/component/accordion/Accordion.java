@@ -37,9 +37,8 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Accordion is a vertically stacked set of expandable panels. It reduces
  * clutter and helps maintain the user’s focus by showing only the relevant
- * content at a time.<br>
- * <br>
- *
+ * content at a time.
+ * <p>
  * Accordion consists of stacked panels, each composed of two parts: a summary
  * and a content area. Only one panel can be expanded at a time.<br>
  * <br>
