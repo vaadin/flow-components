@@ -13,7 +13,8 @@ public class VectorSourceTest {
         VectorSource source = new VectorSource(options);
 
         Assert.assertEquals("testProjection", source.getProjection());
-        Assert.assertEquals("testAttributions", source.getAttributions().get(0));
+        Assert.assertEquals("testAttributions",
+                source.getAttributions().get(0));
         Assert.assertFalse(source.isAttributionsCollapsible());
     }
 

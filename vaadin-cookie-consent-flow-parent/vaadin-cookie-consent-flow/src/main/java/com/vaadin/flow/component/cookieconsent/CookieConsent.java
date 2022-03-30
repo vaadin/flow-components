@@ -29,8 +29,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Style;
 
 /**
- * Cookie Consent is a component for showing a cookie consent banner the first time a user visits the
- * application, until the banner is dismissed.
+ * Cookie Consent is a component for showing a cookie consent banner the first
+ * time a user visits the application, until the banner is dismissed.
  * <p>
  * By default, the banner is shown at the top of the screen with a predefined
  * text, a link to cookiesandyou.com which explains what cookies are, and a

@@ -18,7 +18,8 @@ public class TileWMSSourceTest {
         Assert.assertEquals("testServerType", source.getServerType());
         Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
         Assert.assertEquals("testProjection", source.getProjection());
-        Assert.assertEquals("testAttributions", source.getAttributions().get(0));
+        Assert.assertEquals("testAttributions",
+                source.getAttributions().get(0));
         Assert.assertFalse(source.isAttributionsCollapsible());
         Assert.assertTrue(source.isOpaque());
     }

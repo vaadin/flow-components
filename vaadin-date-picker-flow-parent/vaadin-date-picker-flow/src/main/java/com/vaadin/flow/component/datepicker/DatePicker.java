@@ -45,7 +45,8 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Date Picker is an input field that allows the user to enter a date by typing or by selecting from a calendar overlay.
+ * Date Picker is an input field that allows the user to enter a date by typing
+ * or by selecting from a calendar overlay.
  * <p>
  * DatePicker allows setting and getting {@link LocalDate} objects, setting
  * minimum and maximum date ranges and has internationalization support by using
