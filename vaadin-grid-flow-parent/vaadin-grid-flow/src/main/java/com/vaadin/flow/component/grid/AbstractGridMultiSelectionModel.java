@@ -121,7 +121,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             }
 
             long size = getDataProviderSize();
-            selectionColumn.setSelectAllCheckboxState(size == selected.size());
+            selectionColumn.setSelectAllCheckboxState(
+                    !isHierarchicalDataProvider() && size == selected.size());
             selectionColumn.setSelectAllCheckboxIndeterminateState(
                     isHierarchicalDataProvider() ? selected.size() > 0
                             : selected.size() > 0 && selected.size() < size);
