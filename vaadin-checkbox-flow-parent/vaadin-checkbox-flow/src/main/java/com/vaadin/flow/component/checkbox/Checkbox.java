@@ -22,12 +22,9 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
- * Server-side component for the {@code vaadin-checkbox} element.
+ * Checkbox is an input field representing a binary choice.
  * <p>
- * Checkbox is a value component that can be checked or unchecked. The default
- * value is unchecked.
- * <p>
- * Checkbox also has a indeterminate mode, see {@link #isIndeterminate()} for
+ * Checkbox also has an indeterminate mode, see {@link #isIndeterminate()} for
  * more info.
  * <p>
  * Use {@link com.vaadin.flow.component.checkbox CheckboxGroup} to group related
