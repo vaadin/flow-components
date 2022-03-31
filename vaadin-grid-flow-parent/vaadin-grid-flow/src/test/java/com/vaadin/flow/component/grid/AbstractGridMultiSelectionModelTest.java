@@ -15,9 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -447,19 +445,22 @@ public class AbstractGridMultiSelectionModelTest {
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         // Select all
-        grid.asMultiSelect().updateSelection(Set.of("foo", "bar"), Set.of());
+        grid.asMultiSelect().updateSelection(
+                new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>());
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
 
         // Deselect single
-        grid.asMultiSelect().updateSelection(Set.of(), Set.of("foo"));
+        grid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("foo")));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
 
         // Deselect all
-        grid.asMultiSelect().updateSelection(Set.of(), Set.of("bar"));
+        grid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("bar")));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
