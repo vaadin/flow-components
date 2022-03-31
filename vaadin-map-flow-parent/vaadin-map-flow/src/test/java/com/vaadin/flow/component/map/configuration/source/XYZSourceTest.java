@@ -5,12 +5,12 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class OSMSourceTest {
+public class XYZSourceTest {
 
     @Test
     public void initializeWithOptions() {
-        OSMSource.Options options = createOptions();
-        OSMSource source = new OSMSource(options);
+        XYZSource.Options options = createOptions();
+        XYZSource source = new XYZSource(options);
 
         Assert.assertEquals("https://example.com", source.getUrl());
         Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
@@ -21,23 +21,8 @@ public class OSMSourceTest {
         Assert.assertTrue(source.isOpaque());
     }
 
-    @Test
-    public void setAttributionsCollapsible_disabledByDefault() {
-        OSMSource source = new OSMSource();
-
-        Assert.assertFalse(source.isAttributionsCollapsible());
-    }
-
-    @Test
-    public void setAttributionsCollapsible_mayNotBeEnabled() {
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            OSMSource.Options options = new OSMSource.Options();
-            options.setAttributionsCollapsible(true);
-        });
-    }
-
-    private OSMSource.Options createOptions() {
-        OSMSource.Options options = new OSMSource.Options();
+    private XYZSource.Options createOptions() {
+        XYZSource.Options options = new XYZSource.Options();
         options.setUrl("https://example.com");
         options.setCrossOrigin("testCrossOrigin");
         options.setProjection("testProjection");

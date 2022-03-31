@@ -18,8 +18,9 @@ public class XYZSourceDemo extends Div {
 
         // Use XYZ source displaying the OSM humanitarian map
         String url = "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png";
-        XYZSource xyzSource = new XYZSource(
-                new XYZSource.Options().setUrl(url));
+        XYZSource.Options options = new XYZSource.Options();
+        options.setUrl(url);
+        XYZSource xyzSource = new XYZSource(options);
 
         TileLayer tileLayer = new TileLayer();
         tileLayer.setSource(xyzSource);

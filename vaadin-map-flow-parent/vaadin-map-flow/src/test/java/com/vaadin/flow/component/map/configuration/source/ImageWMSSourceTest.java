@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ImageWMSSourceTest {
@@ -11,7 +12,16 @@ public class ImageWMSSourceTest {
     public void initialize_validOptions() {
         ImageWMSSource.Options options = createValidOptions();
 
-        new ImageWMSSource(options);
+        ImageWMSSource source = new ImageWMSSource(options);
+        Assert.assertEquals("https://example.com", source.getUrl());
+        Assert.assertEquals("layer1", source.getParams().get("LAYERS"));
+        Assert.assertEquals(5f, source.getRatio(), 0.1);
+        Assert.assertEquals("testServerType", source.getServerType());
+        Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
+        Assert.assertEquals("testProjection", source.getProjection());
+        Assert.assertEquals("testAttributions",
+                source.getAttributions().get(0));
+        Assert.assertFalse(source.isAttributionsCollapsible());
     }
 
     @Test
@@ -44,7 +54,16 @@ public class ImageWMSSourceTest {
     private ImageWMSSource.Options createValidOptions() {
         Map<String, Object> params = createValidParams();
 
-        return new ImageWMSSource.Options().setUrl("https://example.com")
-                .setParams(params);
+        ImageWMSSource.Options options = new ImageWMSSource.Options();
+        options.setUrl("https://example.com");
+        options.setParams(params);
+        options.setRatio(5f);
+        options.setServerType("testServerType");
+        options.setCrossOrigin("testCrossOrigin");
+        options.setProjection("testProjection");
+        options.setAttributions(List.of("testAttributions"));
+        options.setAttributionsCollapsible(false);
+
+        return options;
     }
 }

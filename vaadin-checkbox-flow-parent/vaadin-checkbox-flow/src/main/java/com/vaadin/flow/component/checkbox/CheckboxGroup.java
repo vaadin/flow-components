@@ -62,10 +62,11 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 
 /**
- * Server-side component for the {@code vaadin-checkbox-group} element.
- * <p>
- * CheckBoxGroup is a multiselection component where items are displayed as
+ * CheckBoxGroup is a multi-selection component where items are displayed as
  * check boxes.
+ * <p>
+ * Use CheckBoxGroup to group related items. Individual checkboxes should be
+ * used for options that are not related to each other in any way.
  *
  * @author Vaadin Ltd
  */
