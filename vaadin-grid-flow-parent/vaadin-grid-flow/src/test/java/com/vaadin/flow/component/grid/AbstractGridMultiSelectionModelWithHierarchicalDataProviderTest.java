@@ -167,19 +167,22 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         // Select all
         // with hierarchical data provider we can not detect whether all are
         // selected, so should still be indeterminate
-        treeGrid.asMultiSelect().updateSelection(new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>());
+        treeGrid.asMultiSelect().updateSelection(
+                new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>());
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
 
         // Deselect single
-        treeGrid.asMultiSelect().updateSelection(new HashSet<>(), new HashSet<>(Collections.singletonList("foo")));
+        treeGrid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("foo")));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
 
         // Deselect all
-        treeGrid.asMultiSelect().updateSelection(new HashSet<>(), new HashSet<>(Collections.singletonList("bar")));
+        treeGrid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("bar")));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));

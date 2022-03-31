@@ -50,8 +50,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     @Test
     public void selectAllCheckbox_state() {
         open();
-        WebElement grid = findElement(
-                By.id("in-memory-grid"));
+        WebElement grid = findElement(By.id("in-memory-grid"));
         WebElement selectAllCheckbox = grid
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
         WebElement selectCheckbox = grid

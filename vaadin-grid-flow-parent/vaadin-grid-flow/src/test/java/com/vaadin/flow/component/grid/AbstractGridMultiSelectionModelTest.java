@@ -97,7 +97,6 @@ public class AbstractGridMultiSelectionModelTest {
         Assert.assertEquals(0, deselected.size());
     }
 
-
     @Test
     public void select_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
@@ -260,19 +259,22 @@ public class AbstractGridMultiSelectionModelTest {
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         // Select all
-        grid.asMultiSelect().updateSelection(new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>());
+        grid.asMultiSelect().updateSelection(
+                new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>());
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
 
         // Deselect single
-        grid.asMultiSelect().updateSelection(new HashSet<>(), new HashSet<>(Collections.singletonList("foo")));
+        grid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("foo")));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
 
         // Deselect all
-        grid.asMultiSelect().updateSelection(new HashSet<>(), new HashSet<>(Collections.singletonList("bar")));
+        grid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("bar")));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
