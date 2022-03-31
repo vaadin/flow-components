@@ -106,64 +106,6 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void select_usesDataProviderIdentify() {
-        Grid<TestEntity> grid = new Grid<>();
-        grid.setSelectionMode(SelectionMode.MULTI);
-
-        CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider = new CallbackDataProvider<>(
-                query -> Stream.of(new TestEntity(1, "Name"),
-                        new TestEntity(2, "Name"), new TestEntity(3, "Name")),
-                query -> 3, TestEntity::getId);
-        grid.setItems(dataProviderWithIdentityProvider);
-
-        SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock = Mockito
-                .mock(SelectionListener.class);
-        GridSelectionModel<TestEntity> selectionModel = grid
-                .getSelectionModel();
-        selectionModel.addSelectionListener(selectionListenerMock);
-
-        // Select initial item
-        selectionModel.select(new TestEntity(1, "joseph"));
-        // Select item with different equals value, but same identity in data
-        // provider
-        selectionModel.select(new TestEntity(1, "Joseph"));
-
-        // Second select should not result in a selection change
-        Mockito.verify(selectionListenerMock, Mockito.times(1))
-                .selectionChange(Mockito.any());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void selectFromClient_usesDataProviderIdentify() {
-        Grid<TestEntity> grid = new Grid<>();
-        grid.setSelectionMode(SelectionMode.MULTI);
-
-        CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider = new CallbackDataProvider<>(
-                query -> Stream.of(new TestEntity(1, "Name"),
-                        new TestEntity(2, "Name"), new TestEntity(3, "Name")),
-                query -> 3, TestEntity::getId);
-        grid.setItems(dataProviderWithIdentityProvider);
-
-        SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock = Mockito
-                .mock(SelectionListener.class);
-        GridSelectionModel<TestEntity> selectionModel = grid
-                .getSelectionModel();
-        selectionModel.addSelectionListener(selectionListenerMock);
-
-        // Select initial item
-        selectionModel.selectFromClient(new TestEntity(1, "joseph"));
-        // Select item with different equals value, but same identity in data
-        // provider
-        selectionModel.selectFromClient(new TestEntity(1, "Joseph"));
-
-        // Second select should not result in a selection change
-        Mockito.verify(selectionListenerMock, Mockito.times(1))
-                .selectionChange(Mockito.any());
-    }
-
-    @Test
     public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndDefaultVisibilityMode_visible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
@@ -571,42 +513,5 @@ public class AbstractGridMultiSelectionModelTest {
                     "First Grid child is not a GridSelectionColumn");
         }
         return (GridSelectionColumn) child;
-    }
-
-    public static class TestEntity {
-        private final int id;
-        private final String name;
-
-        public TestEntity(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        // equals and hashCode are intentionally implemented differently from
-        // the identifier getter for the data provider. We want to make sure
-        // that the selection model uses the data provider identity, rather than
-        // the equals implementation
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-            TestEntity that = (TestEntity) o;
-            return id == that.id && Objects.equals(name, that.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, name);
-        }
     }
 }
