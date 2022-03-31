@@ -29,7 +29,14 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-email-field} element.
+ * Email Field is an extension of Text Field that only accepts email addresses
+ * as input. If the given address is invalid, the field is highlighted in red
+ * and an error message appears underneath the input. The validity of the email
+ * addresses is checked according to the RFC 5322 standard, which includes the
+ * format for email addresses. The component also supports supplying additional
+ * validation criteria using a regular expression (see
+ * {@link #setPattern(String)}). These extra validation criteria can be used,
+ * for example, to require a specific email domain.
  *
  * @author Vaadin Ltd.
  */

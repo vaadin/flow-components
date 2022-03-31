@@ -37,16 +37,39 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code <vaadin-dialog>} element.
+ * A Dialog is a small window that can be used to present information and user
+ * interface elements in an overlay.
+ * <p>
+ * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
+ * interacting with the rest of the user interface while the Dialog is open, as
+ * opposed to a non-modal Dialog, which does not block interaction.
+ * <p>
+ * Dialogs can be made draggable and resizable. When draggable, the user is able
+ * to move them around using a pointing device. It is recommended to make
+ * non-modal Dialogs draggable so that the user can interact with content that
+ * might otherwise be obscured by the Dialog. A resizable Dialog allows the user
+ * to resize the Dialog by dragging from the edges of the Dialog with a pointing
+ * device. Dialogs are not resizable by default.
+ * <p>
+ * Dialogs automatically become scrollable when their content overflows. Custom
+ * scrollable areas can be created using the Scroller component.
+ * <p>
+ * Best Practices:<br>
+ * Dialogs are disruptive by nature and should be used sparingly. Do not use
+ * them to communicate nonessential information, such as success messages like
+ * “Logged in”, “Copied”, and so on. Instead, use Notifications when
+ * appropriate.
  *
  * @author Vaadin Ltd
  */
+@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize, HasTheme {
+        implements HasComponents, HasSize, HasTheme, HasStyle {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
@@ -686,6 +709,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement()
+                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     private void setDimension(String dimension, String value) {
@@ -708,4 +737,15 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             Dialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "Dialog does not support adding styles to overlay");
+    }
+
 }

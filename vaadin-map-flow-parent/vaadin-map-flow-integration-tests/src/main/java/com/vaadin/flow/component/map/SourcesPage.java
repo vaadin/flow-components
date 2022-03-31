@@ -24,10 +24,11 @@ public class SourcesPage extends Div {
                     HashMap<String, Object> params = new HashMap<>();
                     params.put("LAYERS", "layer1");
                     params.put("TILED", true);
-                    TileWMSSource source = new TileWMSSource(
-                            new TileWMSSource.Options().setUrl(url)
-                                    .setServerType(serverType)
-                                    .setParams(params));
+                    TileWMSSource.Options options = new TileWMSSource.Options();
+                    options.setUrl(url);
+                    options.setServerType(serverType);
+                    options.setParams(params);
+                    TileWMSSource source = new TileWMSSource(options);
                     TileLayer layer = new TileLayer();
                     layer.setId("background-layer");
                     layer.setSource(source);
@@ -38,8 +39,9 @@ public class SourcesPage extends Div {
         NativeButton setupXYZSource = new NativeButton("Setup XYZ source",
                 e -> {
                     String url = "https://example.com/wms";
-                    XYZSource source = new XYZSource(
-                            new XYZSource.Options().setUrl(url));
+                    XYZSource.Options options = new XYZSource.Options();
+                    options.setUrl(url);
+                    XYZSource source = new XYZSource(options);
                     TileLayer layer = new TileLayer();
                     layer.setId("background-layer");
                     layer.setSource(source);
@@ -53,11 +55,13 @@ public class SourcesPage extends Div {
                     String serverType = "geoserver";
                     HashMap<String, Object> params = new HashMap<>();
                     params.put("LAYERS", "layer1");
-                    ImageWMSSource source = new ImageWMSSource(
-                            new ImageWMSSource.Options().setUrl(url)
-                                    .setServerType(serverType).setParams(params)
-                                    .setCrossOrigin("custom-cross-origin")
-                                    .setRatio(2));
+                    ImageWMSSource.Options options = new ImageWMSSource.Options();
+                    options.setUrl(url);
+                    options.setServerType(serverType);
+                    options.setParams(params);
+                    options.setCrossOrigin("custom-cross-origin");
+                    options.setRatio(2);
+                    ImageWMSSource source = new ImageWMSSource(options);
                     ImageLayer layer = new ImageLayer();
                     layer.setId("background-layer");
                     layer.setSource(source);

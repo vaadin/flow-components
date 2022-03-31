@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
@@ -121,7 +122,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -130,7 +131,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
 
         dialog.addDialogCloseActionListener(event -> {
         });
@@ -154,7 +155,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
     }
 
     @Test
@@ -169,7 +170,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
     }
 
     @Test
@@ -202,7 +203,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -220,7 +221,7 @@ public class DialogTest {
 
         registration.remove();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -375,5 +376,11 @@ public class DialogTest {
         List<PendingJavaScriptInvocation> invocations = flushInvocations();
 
         Assert.assertEquals(expectedInvocations, invocations.size());
+    }
+
+    @Test
+    public void dialogHasStyle() {
+        Dialog dialog = new Dialog();
+        Assert.assertTrue(dialog instanceof HasStyle);
     }
 }

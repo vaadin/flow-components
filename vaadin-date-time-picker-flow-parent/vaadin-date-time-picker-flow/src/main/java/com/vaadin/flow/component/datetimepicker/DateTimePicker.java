@@ -22,6 +22,8 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
@@ -31,7 +33,7 @@ import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -46,7 +48,7 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -61,15 +63,19 @@ class DateTimePickerTimePicker
 }
 
 /**
- * Server-side component that encapsulates the functionality of the
- * {@code vaadin-date-time-picker} web component.
+ * Date Time Picker is an input field for selecting both a date and a time. The
+ * date and time can be entered directly using a keyboard in the format of the
+ * current locale or through the Date Time Picker’s two overlays. The overlays
+ * open when their respective fields are clicked or any input is entered when
+ * the fields are focused.
  *
+ * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "23.0.2")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.0.2")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "23.0.3")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.0.3")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -753,5 +759,29 @@ public class DateTimePicker
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
 
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(DateTimePickerVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(DateTimePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(DateTimePickerVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(DateTimePickerVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }

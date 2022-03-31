@@ -34,7 +34,7 @@ public class VectorSource extends Source {
         this(new Options());
     }
 
-    public VectorSource(BaseOptions options) {
+    public VectorSource(Options options) {
         super(options);
     }
 
@@ -63,10 +63,6 @@ public class VectorSource extends Source {
         removeChild(feature);
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>>
-            extends Source.BaseOptions<T> {
-    }
-
-    public static class Options extends BaseOptions<Options> {
+    public static class Options extends Source.Options {
     }
 }
