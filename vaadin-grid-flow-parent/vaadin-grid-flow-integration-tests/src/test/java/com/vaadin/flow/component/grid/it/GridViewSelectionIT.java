@@ -15,14 +15,17 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.data.bean.Person;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -314,6 +317,20 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         return String.format(
                 "Selection changed from %s to %s, selection is from client: %s",
                 oldSelection, newSelection, isFromClient);
+    }
+
+    private static String getSelectionMessage(List<Person> previousSelection,
+            List<Person> newSelection, boolean isFromClient) {
+        List<Person> previousSelectionSorted = previousSelection.stream()
+                .sorted(Comparator.comparingLong(Person::getId))
+                .collect(Collectors.toList());
+        List<Person> newSelectionSorted = newSelection.stream()
+                .sorted(Comparator.comparingLong(Person::getId))
+                .collect(Collectors.toList());
+
+        return String.format(
+                "Selection changed from %s to %s, selection is from client: %s",
+                previousSelectionSorted, newSelectionSorted, isFromClient);
     }
 
     private void scroll(GridElement grid, int index) {
