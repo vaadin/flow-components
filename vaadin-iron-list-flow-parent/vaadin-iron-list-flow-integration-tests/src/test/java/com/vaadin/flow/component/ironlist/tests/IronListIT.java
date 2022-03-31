@@ -212,7 +212,6 @@ public class IronListIT extends AbstractComponentIT {
         Assert.assertThat(list.getAttribute("innerText"), CoreMatchers
                 .not(CoreMatchers.containsString("the-placeholder")));
 
-        getCommandExecutor().disableWaitForVaadin();
         // Scroll to bottom and set an attribute when a placeholder becomes
         // visible.
         executeScript(
