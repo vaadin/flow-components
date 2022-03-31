@@ -1,25 +1,11 @@
 package com.vaadin.addon.spreadsheet.elements;
 
-/*
- * #%L
- * Vaadin Spreadsheet Testbench API
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 import java.util.List;
 
+import com.vaadin.testbench.TestBenchElement;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.testbench.By;
-import com.vaadin.testbench.elementsbase.AbstractElement;
 
 /**
  * This class represents one cell within the currently active sheet of a
@@ -27,7 +13,7 @@ import com.vaadin.testbench.elementsbase.AbstractElement;
  * 
  * @author Vaadin Ltd.
  */
-public class SheetCellElement extends AbstractElement {
+public class SheetCellElement extends TestBenchElement {
 
     private SpreadsheetElement parent;
 

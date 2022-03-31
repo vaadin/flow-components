@@ -1,20 +1,8 @@
 package com.vaadin.addon.spreadsheet.elements;
 
-/*
- * #%L
- * Vaadin Spreadsheet Testbench API
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 import java.util.List;
 
+import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
@@ -25,8 +13,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.AbstractElement;
-import com.vaadin.testbench.elementsbase.ServerClass;
 
 /**
  * This is the base element class for accessing a Vaadin Spreadsheet component
@@ -34,8 +20,8 @@ import com.vaadin.testbench.elementsbase.ServerClass;
  * 
  * @author Vaadin Ltd.
  */
-@ServerClass("com.vaadin.addon.spreadsheet.Spreadsheet")
-public class SpreadsheetElement extends AbstractElement {
+@Element("vaadin-spreadsheet")
+public class SpreadsheetElement extends TestBenchElement {
 
     /**
      * Gets the cell element at the given coordinates for the currently active
@@ -251,7 +237,7 @@ public class SpreadsheetElement extends AbstractElement {
         }
     }
 
-    public static class ContextMenuElement extends AbstractElement {
+    public static class ContextMenuElement extends TestBenchElement {
 
         public WebElement getItem(String text) {
             return findElement(By.xpath(".//table//tr[*]//td//div[contains(text(), \""+text+"\")]"));

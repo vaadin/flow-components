@@ -23,7 +23,6 @@
     <modules>
         <module>vaadin-spreadsheet-flow</module>
         <module>vaadin-spreadsheet-testbench</module>
-        <module>vaadin-spreadsheet-flow-demo</module>
     </modules>
 
     <profiles>
@@ -63,7 +62,9 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
-        <jetty.version>9.3.9.v20160517</jetty.version>
+        <jetty.version>9.4.45.v20220203</jetty.version>
+        <jetty.http.port>8080</jetty.http.port>
+        <jetty.stop.port>9999</jetty.stop.port>
 
         <vaadin.version>23.0.1</vaadin.version>
         <flow.version>${vaadin.version}</flow.version>
@@ -74,9 +75,15 @@
 
         <gwt.version>2.9.0</gwt.version>
 
+        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
+        <failsafe.forkCount>4</failsafe.forkCount>
+        <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
+        <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
+
         <junit.version>4.13.2</junit.version>
         <mockito.version>1.10.19</mockito.version>
-        <testbench.version>5.1.0</testbench.version>
+        <testbench.version>8.0.0</testbench.version>
         <testbench.api.version>${framework.version}</testbench.api.version>
         <vaadin.plugin.version>${framework.version}</vaadin.plugin.version>
         <hamcrest.version>1.3</hamcrest.version>
@@ -214,11 +221,11 @@
                     <version>${jetty.version}</version>
                     <configuration>
                         <httpConnector>
-                            <port>9998</port>
+                            <port>${jetty.http.port}</port>
                         </httpConnector>
                         <useTestClasspath>true</useTestClasspath>
                         <stopKey>STOP</stopKey>
-                        <stopPort>8005</stopPort>
+                        <stopPort>${jetty.stop.port}</stopPort>
                         <webAppConfig>
                             <webInfIncludeJarPattern>.*vaadin.*</webInfIncludeJarPattern>
                             <contextPath>/</contextPath>

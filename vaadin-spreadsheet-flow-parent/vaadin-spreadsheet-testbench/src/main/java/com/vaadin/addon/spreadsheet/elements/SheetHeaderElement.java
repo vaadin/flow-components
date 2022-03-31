@@ -1,22 +1,7 @@
 package com.vaadin.addon.spreadsheet.elements;
 
-/*
- * #%L
- * Vaadin Spreadsheet Testbench API
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
-import org.openqa.selenium.By;
-
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.AbstractElement;
+import org.openqa.selenium.By;
 
 /**
  * This class represents a header (either row- or column) within the currently
@@ -24,7 +9,7 @@ import com.vaadin.testbench.elementsbase.AbstractElement;
  * 
  * @author Vaadin Ltd.
  */
-public class SheetHeaderElement extends AbstractElement {
+public class SheetHeaderElement extends TestBenchElement {
 
     public TestBenchElement getResizeHandle() {
         return wrapElement(
