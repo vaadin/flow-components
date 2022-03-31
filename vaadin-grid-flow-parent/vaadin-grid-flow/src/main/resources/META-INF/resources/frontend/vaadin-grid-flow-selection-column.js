@@ -43,6 +43,16 @@ import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
           notify: true
         },
 
+        /**
+         * Whether to display the select all checkbox in indeterminate state,
+         * which means some, but not all, items are selected
+         */
+        indeterminate: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+
         selectAllHidden: Boolean
       };
     }
@@ -55,7 +65,7 @@ import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 
     static get observers() {
       return [
-        '_onHeaderRendererOrBindingChanged(_headerRenderer, _headerCell, path, header, selectAll, selectAllHidden)'
+        '_onHeaderRendererOrBindingChanged(_headerRenderer, _headerCell, path, header, selectAll, indeterminate, selectAllHidden)'
       ];
     }
 
@@ -96,6 +106,7 @@ import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
       const checked = this.selectAll;
       checkbox.hidden = this.selectAllHidden;
       checkbox.checked = checked;
+      checkbox.indeterminate = this.indeterminate;
     }
 
     /**
