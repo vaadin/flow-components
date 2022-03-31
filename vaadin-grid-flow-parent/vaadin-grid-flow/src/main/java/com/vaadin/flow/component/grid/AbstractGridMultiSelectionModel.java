@@ -108,27 +108,25 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item)) {
             return;
         }
-        Set<T> oldSelection = selected.values().stream()
-                .collect(Collectors.toSet());
-        boolean added = selected.get(getItemId(item)) == null;
+
+        Set<T> oldSelection = getSelectedItems();
         selected.put(getItemId(item), item);
-        if (added) {
-            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                    getGrid().asMultiSelect(), oldSelection, true));
 
-            if (!isSelectAllCheckboxVisible()) {
-                // Skip changing the state of Select All checkbox if it was
-                // meant to be hidden
-                return;
-            }
+        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                getGrid().asMultiSelect(), oldSelection, true));
 
-            long size = getDataProviderSize();
-            selectionColumn.setSelectAllCheckboxState(
-                    !isHierarchicalDataProvider() && size == selected.size());
-            selectionColumn.setSelectAllCheckboxIndeterminateState(
-                    isHierarchicalDataProvider() ? selected.size() > 0
-                            : selected.size() > 0 && selected.size() < size);
+        if (!isSelectAllCheckboxVisible()) {
+            // Skip changing the state of Select All checkbox if it was
+            // meant to be hidden
+            return;
         }
+
+        long size = getDataProviderSize();
+        selectionColumn.setSelectAllCheckboxState(
+                !isHierarchicalDataProvider() && size == selected.size());
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -136,20 +134,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelected(item)) {
             return;
         }
-        Set<T> oldSelection = selected.values().stream()
-                .collect(Collectors.toSet());
-        boolean removed = selected.containsKey(getItemId(item));
-        selected.remove(getItemId(item));
-        if (removed) {
-            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                    getGrid().asMultiSelect(), oldSelection, true));
 
-            long size = getDataProviderSize();
-            selectionColumn.setSelectAllCheckboxState(false);
-            selectionColumn.setSelectAllCheckboxIndeterminateState(
-                    isHierarchicalDataProvider() ? selected.size() > 0
-                            : selected.size() > 0 && selected.size() < size);
-        }
+        Set<T> oldSelection = getSelectedItems();
+        selected.remove(getItemId(item));
+
+        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                getGrid().asMultiSelect(), oldSelection, true));
+
+        long size = getDataProviderSize();
+        selectionColumn.setSelectAllCheckboxState(false);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -159,8 +155,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
          * ConcurrentModificationExceptions when changing the selection during
          * an iteration
          */
-        return Collections.unmodifiableSet(
-                selected.values().stream().collect(Collectors.toSet()));
+        return Collections
+                .unmodifiableSet(new LinkedHashSet<>(selected.values()));
     }
 
     @Override
@@ -438,8 +434,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 .disjoint(selected.keySet(), removedItems.keySet())) {
             return;
         }
-        Set<T> oldSelection = selected.values().stream()
-                .collect(Collectors.toSet());
+        Set<T> oldSelection = getSelectedItems();
         removedItems.keySet().forEach(selected::remove);
         selected.putAll(addedItems);
 
