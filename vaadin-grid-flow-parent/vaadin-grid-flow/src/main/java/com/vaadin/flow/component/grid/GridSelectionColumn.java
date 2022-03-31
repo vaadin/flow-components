@@ -64,6 +64,16 @@ public class GridSelectionColumn extends Component {
     }
 
     /**
+     * Sets the indeterminate state of the select all checkbox on the client.
+     *
+     * @param indeterminate
+     *            the new indeterminate state of the select all checkbox
+     */
+    public void setSelectAllCheckboxIndeterminateState(boolean indeterminate) {
+        getElement().setProperty("indeterminate", indeterminate);
+    }
+
+    /**
      * Sets the visibility of the select all checkbox on the client.
      *
      * @param visible

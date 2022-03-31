@@ -3,12 +3,19 @@
 <dom-module id="vaadin-grid-flow-selection-column">
   <template>
     <template class="header" id="defaultHeaderTemplate">
+      <style>
+          /* Fix a grid web-component style that sets the font-size to small for all header contents */
+          #selectAllCheckbox {
+              font-size: var(--lumo-font-size-m);
+          }
+      </style>
       <vaadin-checkbox
         id="selectAllCheckbox"
         aria-label="Select All"
         hidden$="[[selectAllHidden]]"
         on-click="_onSelectAllClick"
-        checked="[[selectAll]]">
+        checked="[[selectAll]]"
+        indeterminate="[[indeterminate]]">
       </vaadin-checkbox>
     </template>
     <template id="defaultBodyTemplate">
@@ -61,6 +68,15 @@
             type: Boolean,
             value: false,
             notify: true
+          },
+
+          /**
+           * Whether to display the select all checkbox in indeterminate state,
+           * which means some, but not all, items are selected
+           */
+          indeterminate: {
+            type: Boolean,
+            value: false
           },
 
           selectAllHidden: Boolean

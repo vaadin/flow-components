@@ -31,7 +31,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     private static final String SELECT_ALL_CHECKBOX_ID = "selectAllCheckbox";
 
     @Test
-    public void selectAllCheckbox() {
+    public void selectAllCheckbox_visibility() {
         open();
         WebElement lazyGrid = findElement(By.id("lazy-grid"));
         Assert.assertEquals(
@@ -45,29 +45,73 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertNull(
                 "in-memory grid selectAllCheckbox should be visible by default",
                 selectAllCheckbox.getAttribute("hidden"));
+    }
 
-        selectAllCheckbox.click();
+    @Test
+    public void selectAllCheckbox_state() {
+        open();
+        WebElement grid = findElement(
+                By.id("in-memory-grid"));
+        WebElement selectAllCheckbox = grid
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
+        WebElement selectCheckbox = grid
+                .findElements(By.tagName("vaadin-checkbox")).get(5);
         WebElement message = findElement(By.id("selected-item-count"));
+
+        // Initial
+        Assert.assertNull("Select all checkbox should not be checked initially",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertNull(
+                "Select all checkbox should not be in indeterminate state initially",
+                selectAllCheckbox.getAttribute("indeterminate"));
+
+        // Select single
+        selectCheckbox.click();
+        Assert.assertEquals("Selected item count: 1", message.getText());
+        Assert.assertNull(
+                "Select all checkbox is checked even though not all items selected",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not in indeterminate state even though an item is selected",
+                "true", selectAllCheckbox.getAttribute("indeterminate"));
+
+        // Select all
+        selectAllCheckbox.click();
         Assert.assertEquals(
                 "Selected item count: "
                         + GridMultiSelectionColumnPage.ITEM_COUNT,
                 message.getText());
-        Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not checked even though all items selected",
+                "true", selectAllCheckbox.getAttribute("checked"));
+        Assert.assertNull(
+                "Select all checkbox is in indeterminate state even though all items are selected",
+                selectAllCheckbox.getAttribute("indeterminate"));
 
-        WebElement selectCheckbox = grid
-                .findElements(By.tagName("vaadin-checkbox")).get(5);
-        Assert.assertEquals("true", selectCheckbox.getAttribute("checked"));
+        // Deselect single
         selectCheckbox.click();
-        Assert.assertNull("Item 5 selected even though it shouldn't be",
-                selectCheckbox.getAttribute("checked"));
-        Assert.assertNull("Select all check even though not all items selected",
-                selectAllCheckbox.getAttribute("checked"));
-
-        // On deselected item
         Assert.assertEquals(
                 "Selected item count: "
                         + (GridMultiSelectionColumnPage.ITEM_COUNT - 1),
                 message.getText());
+        Assert.assertNull(
+                "Select all checkbox is checked even though not all items selected",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not in indeterminate state even though not all items selected",
+                "true", selectAllCheckbox.getAttribute("indeterminate"));
+
+        // Deselect all, needs to toggle the checkbox twice, first to select all
+        // again, then to deselect all
+        selectAllCheckbox.click();
+        selectAllCheckbox.click();
+        Assert.assertEquals("Selected item count: 0", message.getText());
+        Assert.assertNull(
+                "Select all checkbox is checked even though no items selected",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertNull(
+                "Select all checkbox is in indeterminate state even though no items are selected",
+                selectAllCheckbox.getAttribute("indeterminate"));
     }
 
     @Test
