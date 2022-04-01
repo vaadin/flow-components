@@ -22,6 +22,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -371,11 +372,19 @@ public class GridView extends DemoView {
 
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.asMultiSelect()
-                .addSelectionListener(event -> messageDiv.setText(String.format(
-                        "Selection changed from %s to %s, selection is from client: %s",
-                        event.getOldValue(), event.getValue(),
-                        event.isFromClient())));
+        grid.asMultiSelect().addSelectionListener(event -> {
+            List<Person> previousSelectionSorted = event.getOldValue().stream()
+                    .sorted(Comparator.comparingLong(Person::getId))
+                    .collect(Collectors.toList());
+            List<Person> newSelectionSorted = event.getValue().stream()
+                    .sorted(Comparator.comparingLong(Person::getId))
+                    .collect(Collectors.toList());
+
+            messageDiv.setText(String.format(
+                    "Selection changed from %s to %s, selection is from client: %s",
+                    previousSelectionSorted, newSelectionSorted,
+                    event.isFromClient()));
+        });
 
         // You can pre-select items
         grid.asMultiSelect().select(people.get(0), people.get(1));
