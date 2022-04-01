@@ -57,7 +57,7 @@ import elemental.json.JsonObject;
 public abstract class AbstractGridMultiSelectionModel<T>
         extends AbstractGridExtension<T> implements GridMultiSelectionModel<T> {
 
-    private final Set<T> selected;
+    private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
 
@@ -70,7 +70,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
      */
     public AbstractGridMultiSelectionModel(Grid<T> grid) {
         super(grid);
-        selected = new LinkedHashSet<>();
+        selected = new LinkedHashMap<>();
         selectionColumn = new GridSelectionColumn(this::clientSelectAll,
                 this::clientDeselectAll);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
@@ -108,25 +108,25 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item)) {
             return;
         }
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean added = selected.add(item);
-        if (added) {
-            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                    getGrid().asMultiSelect(), oldSelection, true));
 
-            if (!isSelectAllCheckboxVisible()) {
-                // Skip changing the state of Select All checkbox if it was
-                // meant to be hidden
-                return;
-            }
+        Set<T> oldSelection = getSelectedItems();
+        selected.put(getItemId(item), item);
 
-            long size = getDataProviderSize();
-            selectionColumn.setSelectAllCheckboxState(
-                    !isHierarchicalDataProvider() && size == selected.size());
-            selectionColumn.setSelectAllCheckboxIndeterminateState(
-                    isHierarchicalDataProvider() ? selected.size() > 0
-                            : selected.size() > 0 && selected.size() < size);
+        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                getGrid().asMultiSelect(), oldSelection, true));
+
+        if (!isSelectAllCheckboxVisible()) {
+            // Skip changing the state of Select All checkbox if it was
+            // meant to be hidden
+            return;
         }
+
+        long size = getDataProviderSize();
+        selectionColumn.setSelectAllCheckboxState(
+                !isHierarchicalDataProvider() && size == selected.size());
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -134,18 +134,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelected(item)) {
             return;
         }
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean removed = selected.remove(item);
-        if (removed) {
-            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                    getGrid().asMultiSelect(), oldSelection, true));
 
-            long size = getDataProviderSize();
-            selectionColumn.setSelectAllCheckboxState(false);
-            selectionColumn.setSelectAllCheckboxIndeterminateState(
-                    isHierarchicalDataProvider() ? selected.size() > 0
-                            : selected.size() > 0 && selected.size() < size);
-        }
+        Set<T> oldSelection = getSelectedItems();
+        selected.remove(getItemId(item));
+
+        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                getGrid().asMultiSelect(), oldSelection, true));
+
+        long size = getDataProviderSize();
+        selectionColumn.setSelectAllCheckboxState(false);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -155,12 +155,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
          * ConcurrentModificationExceptions when changing the selection during
          * an iteration
          */
-        return Collections.unmodifiableSet(new LinkedHashSet<>(selected));
+        return Collections
+                .unmodifiableSet(new LinkedHashSet<>(selected.values()));
     }
 
     @Override
     public Optional<T> getFirstSelectedItem() {
-        return selected.stream().findFirst();
+        return selected.values().stream().findFirst();
     }
 
     @Override
@@ -429,16 +430,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
 
-        Map<Object, T> selectedMap = mapItemsById(selected);
-        if (selectedMap.keySet().containsAll(addedItems.keySet()) && Collections
-                .disjoint(selectedMap.keySet(), removedItems.keySet())) {
+        if (selected.keySet().containsAll(addedItems.keySet()) && Collections
+                .disjoint(selected.keySet(), removedItems.keySet())) {
             return;
         }
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        removedItems.keySet().forEach(selectedMap::remove);
-        selectedMap.putAll(addedItems);
-        selected.clear();
-        selected.addAll(selectedMap.values());
+        Set<T> oldSelection = getSelectedItems();
+        removedItems.keySet().forEach(selected::remove);
+        selected.putAll(addedItems);
 
         sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
                 getGrid()::doClientSideSelection);
