@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.gridpro;
 
 /**
- * Set of theme variants applicable for {@code vaadin-grid} component.
+ * Set of theme variants applicable for {@code vaadin-grid-pro} component.
  */
 public enum GridProVariant {
     //@formatter:off
