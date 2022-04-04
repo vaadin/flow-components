@@ -76,7 +76,7 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
 
         NativeButton freezeAgeColumnToEnd = new NativeButton(
                 "Toggle frozen to end state of Age column");
-        freezeIdColumn.addClickListener(
+        freezeAgeColumnToEnd.addClickListener(
                 event -> ageColumn.setFrozenToEnd(!ageColumn.isFrozenToEnd()));
 
         RadioButtonGroup<ColumnTextAlign> alignments = new RadioButtonGroup<>();
