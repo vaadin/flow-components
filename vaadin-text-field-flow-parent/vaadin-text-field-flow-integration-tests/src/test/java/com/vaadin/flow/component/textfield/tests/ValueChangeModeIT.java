@@ -38,6 +38,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.vaadin.flow.testutil.TestPath;
 
+import java.time.Duration;
+
 /**
  * Integration tests for changing the ValueChangeMode of TextField, TextArea and
  * PasswordField.
@@ -211,12 +213,14 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     private void waitUntilMessageUpdated() {
-        waitUntilMessageUpdated(2000,
-                "It took more than 2000ms to change the message, probably CI performance problems");
+        waitUntilMessageUpdated(2,
+                "It took more than 2s to change the message, probably CI performance problems");
     }
 
-    private void waitUntilMessageUpdated(long timeout, String failMessage) {
-        new WebDriverWait(getDriver(), timeout).withMessage(failMessage)
+    private void waitUntilMessageUpdated(long timeoutInSeconds,
+            String failMessage) {
+        new WebDriverWait(getDriver(), Duration.ofSeconds(timeoutInSeconds))
+                .withMessage(failMessage)
                 .until(webDriver -> isMessageUpdated());
     }
 }
