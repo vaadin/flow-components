@@ -83,7 +83,7 @@ public class GridViewConfiguringColumnsIT extends AbstractComponentIT {
                 "vaadin-grid-flow-selection-column", 0);
 
         String frozenToEndStatusScript = "return arguments[0].frozenToEnd";
-        assertFrozenColumn(grid, frozenStatusScript,
+        assertFrozenColumn(grid, frozenToEndStatusScript,
                 "toggle-age-column-frozen-to-end", "vaadin-grid-column", 2);
 
         WebElement alignments = findElement(By.id("toggle-text-align"));
