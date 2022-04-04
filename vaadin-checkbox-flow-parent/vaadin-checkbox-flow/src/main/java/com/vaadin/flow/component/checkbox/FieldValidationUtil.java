@@ -33,8 +33,7 @@ class FieldValidationUtil {
         // Wait until the response is being written as the validation state
         // should not change after that
         component.getUI().ifPresent(ui -> ui.beforeClientResponse(component,
-                        executionContext -> overrideClientValidation(
-                                component)));
+                executionContext -> overrideClientValidation(component)));
     }
 
     private static <T> void overrideClientValidation(

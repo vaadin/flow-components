@@ -31,9 +31,11 @@ public class ValidationPage extends Div {
 
         Span logOutput = new Span();
         logOutput.setId("log-output");
-        NativeButton logInvalidState = new NativeButton("Log Invalid State", e -> {
-            logOutput.setText(String.valueOf(checkboxGroup.isInvalid()));
-        });
+        NativeButton logInvalidState = new NativeButton("Log Invalid State",
+                e -> {
+                    logOutput
+                            .setText(String.valueOf(checkboxGroup.isInvalid()));
+                });
         logInvalidState.setId("log-invalid-state");
 
         add(checkboxGroup);
