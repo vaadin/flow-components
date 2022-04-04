@@ -64,14 +64,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A customizable drop-down select component similar to a native browser select.
- * <p>
- * This is a server side Java integration for {@code <vaadin-select>} web
- * component.
- * <p>
- * For usage examples, see
- * <a href="https://vaadin.com/components/vaadin-select/java-examples">the demo
- * in vaadin.com</a>.
+ * Select allows users to choose a single value from a list of options presented
+ * in an overlay. The dropdown can be opened with a click, up/down arrow keys,
+ * or by typing the initial character for one of the options.
  *
  * @param <T>
  *            the type of the items for the select

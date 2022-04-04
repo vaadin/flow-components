@@ -21,7 +21,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasLabel;
 
 /**
- * Server-side component for the {@code vaadin-tab} element.
+ * This component provides an accessible and customizable tab to be used inside
+ * {@link Tabs} component.
  *
  * @author Vaadin Ltd.
  */

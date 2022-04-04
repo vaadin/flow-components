@@ -23,9 +23,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * HorizontalLayout is a component container, which shows the subcomponents in
- * the order of their addition (horizontally). A horizontal layout is doesn't
- * have a predefined size - its size is defined by the components inside it.
+ * Horizontal Layout places components side-by-side in a row. By default, it has
+ * undefined width and height, meaning its size is determined by the components
+ * it contains.
  */
 @Tag("vaadin-horizontal-layout")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha1")
