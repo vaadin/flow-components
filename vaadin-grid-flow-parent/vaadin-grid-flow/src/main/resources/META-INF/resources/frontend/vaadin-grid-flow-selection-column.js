@@ -6,7 +6,13 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
     static get template() {
       return html`
     <template class="header" id="defaultHeaderTemplate">
-      <vaadin-checkbox id="selectAllCheckbox" aria-label="Select All" hidden\$="[[selectAllHidden]]" on-click="_onSelectAllClick" checked="[[selectAll]]">
+      <style>
+        /* Fix a grid web-component style that sets the font-size to small for all header contents */
+        #selectAllCheckbox {
+          font-size: var(--lumo-font-size-m);
+        }
+      </style>
+      <vaadin-checkbox id="selectAllCheckbox" aria-label="Select All" hidden\$="[[selectAllHidden]]" on-click="_onSelectAllClick" checked="[[selectAll]]" indeterminate="[[indeterminate]]">
       </vaadin-checkbox>
     </template>
     <template id="defaultBodyTemplate">
@@ -54,6 +60,15 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
           type: Boolean,
           value: false,
           notify: true
+        },
+
+        /**
+         * Whether to display the select all checkbox in indeterminate state,
+         * which means some, but not all, items are selected
+         */
+        indeterminate: {
+          type: Boolean,
+          value: false
         },
 
         selectAllHidden: Boolean

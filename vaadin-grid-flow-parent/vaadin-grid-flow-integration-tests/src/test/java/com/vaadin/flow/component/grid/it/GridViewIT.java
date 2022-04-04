@@ -285,17 +285,25 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertFalse(isRowSelected(grid, 6));
 
         // test the select all button
-        grid.findElement(By.id("selectAllCheckbox")).click();
+        TestBenchElement selectAllCheckbox = grid
+                .findElement(By.id("selectAllCheckbox"));
+        selectAllCheckbox.click();
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been deselected", "false",
-                grid.findElement(By.id("selectAllCheckbox"))
-                        .getAttribute("aria-checked"));
+        Assert.assertEquals("Select all should be in indeterminate state",
+                "mixed", selectAllCheckbox.getAttribute("aria-checked"));
+        Assert.assertEquals("Select all should be in indeterminate state",
+                "true", selectAllCheckbox.getAttribute("indeterminate"));
+        Assert.assertNull("Select all should not be checked",
+                selectAllCheckbox.getAttribute("checked"));
 
         getCellContent(grid.getCell(0, 0)).click();
         Assert.assertEquals("Select all should have been reselected", "true",
-                grid.findElement(By.id("selectAllCheckbox"))
-                        .getAttribute("aria-checked"));
+                selectAllCheckbox.getAttribute("aria-checked"));
+        Assert.assertEquals("Select all should have been reselected", "true",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertNull("Select all should not be in indeterminate state",
+                selectAllCheckbox.getAttribute("indeterminate"));
 
     }
 

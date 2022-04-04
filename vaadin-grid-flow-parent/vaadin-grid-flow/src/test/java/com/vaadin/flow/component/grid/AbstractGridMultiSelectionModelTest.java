@@ -15,24 +15,24 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.component.treegrid.TreeGrid;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AbstractGridMultiSelectionModelTest {
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
+    private MockUI ui;
 
     @Before
     public void init() {
@@ -55,6 +55,8 @@ public class AbstractGridMultiSelectionModelTest {
                 return true;
             }
         };
+        ui = new MockUI();
+        ui.add(grid);
     }
 
     @Test
@@ -96,17 +98,195 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void treegrid_select_singleItemSignature_selectFromClient() {
-        TreeGrid<String> grid = new TreeGrid<>();
-
+    public void select_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
-        List<String> roots = Arrays.asList("foo", "bar");
-        grid.setItems(roots,
-                root -> roots.contains(root) ? Arrays.asList(root + 1, root + 2)
-                        : Collections.emptyList());
-        // Asserting that selectFromClient does not throw any exception
-        grid.getSelectionModel().selectFromClient("foo");
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
 
-        Assert.assertEquals(1, grid.getSelectedItems().size());
+        // select first
+        grid.getSelectionModel().select("foo");
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertTrue(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // select second, which equals all selected
+        grid.getSelectionModel().select("bar");
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void selectFromClient_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // select first
+        grid.getSelectionModel().selectFromClient("foo");
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertTrue(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // select second, which equals all selected
+        grid.getSelectionModel().selectFromClient("bar");
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void deselect_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // start with all selected
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // deselect first
+        grid.getSelectionModel().deselect("foo");
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertTrue(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // deselect second, which equals none selected
+        grid.getSelectionModel().deselect("bar");
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void deselectFromClient_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // start with all selected
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // deselect first
+        grid.getSelectionModel().deselectFromClient("foo");
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertTrue(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // deselect second, which equals none selected
+        grid.getSelectionModel().deselectFromClient("bar");
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void selectAll_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void clientSelectAll_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
+                .clientSelectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void deselectAll_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // start with all selected
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        grid.getSelectionModel().deselectAll();
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void clientDeselectAll_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // start with all selected
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
+                .clientDeselectAll();
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void updateSelection_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // Select all
+        grid.asMultiSelect().updateSelection(
+                new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>());
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // Deselect single
+        grid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("foo")));
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertTrue(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+
+        // Deselect all
+        grid.asMultiSelect().updateSelection(new HashSet<>(),
+                new HashSet<>(Collections.singletonList("bar")));
+        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    private <T> GridSelectionColumn getGridSelectionColumn(Grid<T> grid) {
+        Component child = grid.getChildren().findFirst().orElseThrow(
+                () -> new IllegalStateException("Grid does not have a child"));
+        if (!(child instanceof GridSelectionColumn)) {
+            throw new IllegalStateException(
+                    "First Grid child is not a GridSelectionColumn");
+        }
+        return (GridSelectionColumn) child;
     }
 }
