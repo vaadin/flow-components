@@ -158,52 +158,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration combine.self="override">
-                    <httpConnector>
-                        <port>${jetty.http.port}</port>
-                    </httpConnector>
-                    <scanIntervalSeconds>-1</scanIntervalSeconds>
-                    <stopPort>${jetty.stop.port}</stopPort>
-                    <stopWait>5</stopWait>
-                    <stopKey>foo</stopKey>
-                    <systemProperties>
-                        <force>true</force>
-                        <systemProperty>
-                            <name>project.basedir</name>
-                            <value>${project.basedir}</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>vaadin.productionMode</name>
-                            <value>true</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>vaadin.reuseDevServer</name>
-                            <value>true</value>
-                        </systemProperty>
-                    </systemProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-jetty</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>deploy-war</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-jetty</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
     <profiles>
@@ -247,6 +201,47 @@
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration combine.self="override">
+                            <httpConnector>
+                                <port>${jetty.http.port}</port>
+                            </httpConnector>
+                            <scanIntervalSeconds>-1</scanIntervalSeconds>
+                            <stopPort>${jetty.stop.port}</stopPort>
+                            <stopWait>5</stopWait>
+                            <stopKey>foo</stopKey>
+                            <systemProperties>
+                                <force>true</force>
+                                <systemProperty>
+                                    <name>project.basedir</name>
+                                    <value>${project.basedir}</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>vaadin.productionMode</name>
+                                    <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>vaadin.reuseDevServer</name>
+                                    <value>true</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-jetty</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>deploy-war</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-jetty</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
