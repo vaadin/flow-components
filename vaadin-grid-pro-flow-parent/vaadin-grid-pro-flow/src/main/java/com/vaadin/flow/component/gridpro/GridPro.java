@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentEvent;
@@ -669,6 +671,29 @@ public class GridPro<E> extends Grid<E> {
                 }
             };
         }
+    }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(GridProVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(GridProVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(GridProVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(GridProVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }
