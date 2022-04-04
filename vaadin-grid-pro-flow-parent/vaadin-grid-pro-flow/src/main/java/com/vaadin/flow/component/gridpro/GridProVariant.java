@@ -27,8 +27,8 @@ public enum GridProVariant {
     LUMO_COMPACT("compact"),
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
     MATERIAL_COLUMN_DIVIDERS("column-dividers"),
-    LUMO_HIGHLIGH_EDITABLE_CELLS("highlight-editable-cells"),
-    LUMO_HIGHLIGH_READ_ONLY_CELLS("highlight-read-only-cells");
+    LUMO_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
+    LUMO_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells");
 
     //@formatter:on
 
