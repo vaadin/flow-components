@@ -313,20 +313,17 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         // in case the component client side is just created, but server side
         // has been existing (like when component has been invisible
         consoleLog("reload = " + state.reload);
-        if (!state.reload && stateChangeEvent.isInitialStateChange()) {
+        if (state.reload || stateChangeEvent.isInitialStateChange()) {
+            state.reload = false;
             loadInitialStateDataToWidget(stateChangeEvent);
             // this is deferred because the first layout of the spreadsheet is
             // done as deferred
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
                 @Override
                 public void execute() {
                     loadStateChangeDataToWidget(stateChangeEvent);
                 }
             });
-        } else if (state.reload) {
-            loadInitialStateDataToWidget(stateChangeEvent);
-            state.reload = false;
         } else {
             if (stateChangeEvent.hasPropertyChanged("sheetNames")
                     || stateChangeEvent.hasPropertyChanged("sheetIndex")) {
