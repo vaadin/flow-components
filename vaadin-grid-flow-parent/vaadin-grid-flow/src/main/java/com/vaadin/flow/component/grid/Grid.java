@@ -190,7 +190,9 @@ import org.slf4j.LoggerFactory;
  * Grid can be configured to allow inline editing. Editing can be either
  * buffered and non-buffered. Buffered means changes must be explicitly
  * committed, while non-buffered automatically commit changes on blur (when a
- * field loses focus). Styling Rows and Columns:<br>
+ * field loses focus). 
+ * <p>
+ * Styling Rows and Columns:<br>
  * You can style individual cells based on the data, for example, to highlight
  * changes or important information.
  * <p>
