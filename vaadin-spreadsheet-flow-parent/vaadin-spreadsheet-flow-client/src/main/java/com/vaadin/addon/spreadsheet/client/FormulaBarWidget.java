@@ -672,14 +672,11 @@ public class FormulaBarWidget extends Composite {
         int caretPos = currentEditor.getCursorPos();
         // scan backward
         int numQuotes = 0;
-        while (caretPos >= 0) {
-            caretPos--;
-
-            char c = val.charAt(caretPos);
-            char d = val.charAt(caretPos - 1);
-
-            if (c == '"' && d != '\\') {
-                numQuotes++;
+        while (--caretPos > 0) {
+            if (val.charAt(caretPos) == '"') {
+                if (caretPos == 0 || val.charAt(caretPos - 1) != '\\') {
+                    numQuotes++;
+                }
             }
         }
 
@@ -695,25 +692,21 @@ public class FormulaBarWidget extends Composite {
 
         caretPos = currentEditor.getCursorPos();
         // scan back
-        boolean run = true;
-        while (run || caretPos <= 0) {
-            caretPos--;
-            char c = val.charAt(caretPos);
+        while (caretPos > 0) {
+            char c = val.charAt(caretPos - 1);
             if (String.valueOf(c).matches("[^A-z0-9:!]")) {
-                start = caretPos + 1;
-                run = false;
+                start = caretPos;
                 break;
             }
+            caretPos--;
         }
 
         caretPos = currentEditor.getCursorPos();
         // scan forward
-        run = true;
-        while (run || caretPos > val.length()) {
+        while (caretPos < val.length()) {
             char c = val.charAt(caretPos);
             if (String.valueOf(c).matches("[^A-z0-9:!]")) {
                 end = caretPos;
-                run = false;
                 break;
             }
             caretPos++;
