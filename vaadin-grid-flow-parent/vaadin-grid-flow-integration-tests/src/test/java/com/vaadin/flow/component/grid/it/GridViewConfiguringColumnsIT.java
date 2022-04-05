@@ -77,10 +77,14 @@ public class GridViewConfiguringColumnsIT extends AbstractComponentIT {
 
         String frozenStatusScript = "return arguments[0].frozen";
         assertFrozenColumn(grid, frozenStatusScript, "toggle-id-column-frozen",
-                "vaadin-grid-column");
+                "vaadin-grid-column", 0);
         assertFrozenColumn(grid, frozenStatusScript,
                 "toggle-selection-column-frozen",
-                "vaadin-grid-flow-selection-column");
+                "vaadin-grid-flow-selection-column", 0);
+
+        String frozenToEndStatusScript = "return arguments[0].frozenToEnd";
+        assertFrozenColumn(grid, frozenToEndStatusScript,
+                "toggle-age-column-frozen-to-end", "vaadin-grid-column", 2);
 
         WebElement alignments = findElement(By.id("toggle-text-align"));
 
@@ -170,9 +174,9 @@ public class GridViewConfiguringColumnsIT extends AbstractComponentIT {
     }
 
     private void assertFrozenColumn(WebElement grid, String frozenStatusScript,
-            String buttonId, String columnTag) {
+            String buttonId, String columnTag, Integer idx) {
         WebElement toggleIdColumnFrozen = findElement(By.id(buttonId));
-        WebElement idColumn = grid.findElements(By.tagName(columnTag)).get(0);
+        WebElement idColumn = grid.findElements(By.tagName(columnTag)).get(idx);
         Assert.assertEquals(false, getCommandExecutor()
                 .executeScript(frozenStatusScript, idColumn));
         clickElementWithJs(toggleIdColumnFrozen);
