@@ -12,7 +12,6 @@
 
     <artifactId>vaadin-spreadsheet-flow-integration-tests</artifactId>
     <packaging>war</packaging>
-    <name>Vaadin Spreadsheet Integration Tests</name>
 
     <dependencies>
         <!-- Replace with individual dependencies -->
