@@ -82,6 +82,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private String height;
     private String minHeight;
     private String maxHeight;
+    private DialogHeader dialogHeader;
+    private DialogFooter dialogFooter;
 
     /**
      * Creates an empty dialog.
@@ -531,7 +533,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Sets the title to be rendered on the dialog header.
      *
-     * @param title title to be rendered
+     * @param title
+     *            title to be rendered
      */
     public void setHeaderTitle(String title) {
         getElement().setProperty("headerTitle", title);
@@ -544,6 +547,115 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public String getHeaderTitle() {
         return getElement().getProperty("headerTitle", "");
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * dialog header area. The header is displayed only if there's a
+     * {@link #getHeaderTitle()} or at least one component added with
+     * {@link DialogHeaderFooter#add(Component)}.
+     *
+     * @return the header object
+     */
+    public DialogHeader getHeader() {
+        if (this.dialogHeader == null) {
+            this.dialogHeader = new DialogHeader(this);
+        }
+        return this.dialogHeader;
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * dialog footer area. The footer is displayed only if there's at least one
+     * component added with {@link DialogHeaderFooter#add(Component)}.
+     *
+     * @return the header object
+     */
+    public DialogFooter getFooter() {
+        if (this.dialogFooter == null) {
+            this.dialogFooter = new DialogFooter(this);
+        }
+        return this.dialogFooter;
+    }
+
+    public static class DialogHeader extends DialogHeaderFooter {
+        private DialogHeader(Dialog dialog) {
+            super("headerRenderer", dialog);
+        }
+    }
+
+    public static class DialogFooter extends DialogHeaderFooter {
+        private DialogFooter(Dialog dialog) {
+            super("footerRenderer", dialog);
+            root.getStyle().set("flex", "1");
+            root.getStyle().set("justify-content", "flex-end");
+        }
+    }
+
+    static abstract class DialogHeaderFooter {
+        protected final Element root;
+        private final String rendererFunction;
+        private final Component dialog;
+        boolean rendererCreated = false;
+
+        protected DialogHeaderFooter(String rendererFunction,
+                Component dialog) {
+            this.rendererFunction = rendererFunction;
+            this.dialog = dialog;
+            root = new Element("div");
+            root.getStyle().set("display", "flex");
+        }
+
+        /**
+         * Adds the component to the container.
+         *
+         * @param component
+         *            the component to be added.
+         */
+        public void add(Component component) {
+            root.appendChild(component.getElement());
+            if (!isRendererCreated()) {
+                initRenderer();
+            }
+        }
+
+        /**
+         * Removes the component from the container.
+         *
+         * <p>
+         * Note that the component needs to be removed from this method in order
+         * to guarantee the correct state of the component.
+         *
+         * @param component
+         *            the component to be removed.
+         */
+        public void remove(Component component) {
+            root.removeChild(component.getElement());
+            if (root.getChildCount() == 0) {
+                dialog.getElement()
+                        .executeJs("this." + rendererFunction + " = null;");
+                setRendererCreated(false);
+            }
+        }
+
+        void initRenderer() {
+            if (root.getChildCount() == 0) {
+                return;
+            }
+            dialog.getElement().appendChild(root);
+            dialog.getElement().executeJs("this." + rendererFunction
+                    + " = (root) => {" + "if (root.firstElement) { "
+                    + "   return;" + "}" + "root.appendChild($0);" + "}", root);
+            setRendererCreated(true);
+        }
+
+        boolean isRendererCreated() {
+            return rendererCreated;
+        }
+
+        void setRendererCreated(boolean rendererCreated) {
+            this.rendererCreated = rendererCreated;
+        }
     }
 
     /**
@@ -728,11 +840,23 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initConnector();
+        initHeaderFooterRenderer();
     }
 
     private void initConnector() {
         getElement()
                 .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
+    }
+
+    private void initHeaderFooterRenderer() {
+        if (dialogHeader != null) {
+            dialogHeader.setRendererCreated(false);
+            dialogHeader.initRenderer();
+        }
+        if (dialogFooter != null) {
+            dialogFooter.setRendererCreated(false);
+            dialogFooter.initRenderer();
+        }
     }
 
     private void setDimension(String dimension, String value) {
