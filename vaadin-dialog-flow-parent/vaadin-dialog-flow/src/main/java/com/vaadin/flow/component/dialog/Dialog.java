@@ -529,6 +529,24 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     /**
+     * Sets the title to be rendered on the dialog header.
+     *
+     * @param title title to be rendered
+     */
+    public void setHeaderTitle(String title) {
+        getElement().setProperty("headerTitle", title);
+    }
+
+    /**
+     * Gets the title set for the dialog header.
+     *
+     * @return the title or an empty string, if a header title is not defined.
+     */
+    public String getHeaderTitle() {
+        return getElement().getProperty("headerTitle", "");
+    }
+
+    /**
      * Set the visibility of the dialog.
      * <p>
      * For a modal dialog the server-side modality will be removed when dialog
