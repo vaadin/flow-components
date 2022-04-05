@@ -59,8 +59,7 @@ import elemental.json.JsonObject;
 @JsModule("./gridProConnector.js")
 /**
  * Grid Pro is an extension of the Grid component that provides inline editing
- * with full keyboard navigation. Grid Pro supports editing on double- or
- * single-click or
+ * with full keyboard navigation.
  *
  * @author Vaadin Ltd
  *
