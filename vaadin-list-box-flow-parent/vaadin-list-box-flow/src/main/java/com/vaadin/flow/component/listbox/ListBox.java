@@ -38,9 +38,8 @@ import com.vaadin.flow.data.selection.SingleSelect;
  * <p>
  * Best Practices:<br>
  * List Box is not designed to be used as an input field in forms, and lacks
- * features like label, helper, and validation errors. See related components
- * below for better options for use in forms. List Box is best suited to be used
- * as a lightweight, scrollable, single-column list for single or
+ * features like label, helper, and validation errors. List Box is best suited
+ * to be used as a lightweight, scrollable, single-column list for single or
  * multi-selection of items.
  *
  * @author Vaadin Ltd
