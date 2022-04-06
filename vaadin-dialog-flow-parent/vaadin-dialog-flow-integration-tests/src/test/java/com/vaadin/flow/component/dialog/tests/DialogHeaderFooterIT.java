@@ -181,12 +181,14 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
 
     private void assertDialogContains(String text) {
         var overlay = getOverlayElement();
-        Assert.assertTrue("Dialog should contains text " + text, overlay.getText().contains(text));
+        Assert.assertTrue("Dialog should contains text " + text,
+                overlay.getText().contains(text));
     }
 
     private void assertDialogNotContains(String text) {
         var overlay = getOverlayElement();
-        Assert.assertFalse("Dialog should not contain text " + text, overlay.getText().contains(text));
+        Assert.assertFalse("Dialog should not contain text " + text,
+                overlay.getText().contains(text));
     }
 
     private WebElement getOverlayElement() {

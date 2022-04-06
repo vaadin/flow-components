@@ -579,13 +579,19 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return this.dialogFooter;
     }
 
-    public static class DialogHeader extends DialogHeaderFooter {
+    /**
+     * Class for adding and removing components to the header part of a dialog.
+     */
+    final public static class DialogHeader extends DialogHeaderFooter {
         private DialogHeader(Dialog dialog) {
             super("headerRenderer", dialog);
         }
     }
 
-    public static class DialogFooter extends DialogHeaderFooter {
+    /**
+     * Class for adding and removing components to the header part of a dialog.
+     */
+    final public static class DialogFooter extends DialogHeaderFooter {
         private DialogFooter(Dialog dialog) {
             super("footerRenderer", dialog);
             root.getStyle().set("flex", "1");
@@ -593,7 +599,13 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         }
     }
 
-    static abstract class DialogHeaderFooter implements Serializable {
+    /**
+     * This class defines the common behavior for adding/removing components to
+     * the header and footer parts. It also creates the root element where the
+     * components will be attached to as well as the renderer function used by
+     * the dialog.
+     */
+    abstract static class DialogHeaderFooter implements Serializable {
         protected final Element root;
         private final String rendererFunction;
         private final Component dialog;
@@ -639,6 +651,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
             }
         }
 
+        /**
+         * Method called to create the renderer function using
+         * {@link #rendererFunction} as the property name.
+         */
         void initRenderer() {
             if (root.getChildCount() == 0) {
                 return;
@@ -650,10 +666,25 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
             setRendererCreated(true);
         }
 
+        /**
+         * Gets whether the renderer function exists or not
+         *
+         * @return the renderer function state
+         */
         boolean isRendererCreated() {
             return rendererCreated;
         }
 
+        /**
+         * Sets the renderer function creation state. To avoid making a
+         * JavaScript execution to get the information from the client, this is
+         * done on the server by setting it to <code>true</code> on
+         * {@link #initRenderer()} and to <code>false</code> when the last child is removed
+         * in {@link #remove(Component)} or when an auto attached dialog is
+         * closed.
+         *
+         * @param rendererCreated
+         */
         void setRendererCreated(boolean rendererCreated) {
             this.rendererCreated = rendererCreated;
         }
