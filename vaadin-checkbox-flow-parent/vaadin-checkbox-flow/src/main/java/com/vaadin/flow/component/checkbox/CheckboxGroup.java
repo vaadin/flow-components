@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
@@ -104,6 +105,13 @@ public class CheckboxGroup<T>
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
         registerValidation();
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     @Override
