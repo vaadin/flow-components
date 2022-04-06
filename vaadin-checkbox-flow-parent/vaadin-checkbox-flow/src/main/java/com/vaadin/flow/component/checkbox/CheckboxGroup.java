@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -23,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -99,6 +99,13 @@ public class CheckboxGroup<T>
     }
 
     @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        FieldValidationUtil.disableClientValidation(this);
+    }
+
+    @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider = dataProvider;
         reset();
@@ -137,7 +144,7 @@ public class CheckboxGroup<T>
      * The component doesn't accept {@code null} values. The value of a checkbox
      * group without any selected items is an empty set. You can use the
      * {@link #clear()} method to set the empty value.
-     * 
+     *
      * @param value
      *            the new value to set, not {@code null}
      * @throws NullPointerException

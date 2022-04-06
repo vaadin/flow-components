@@ -175,9 +175,6 @@ public class CheckboxGroupIT extends ComponentDemoTest {
                 "Correct error message should be shown after the button clicks",
                 "Field has been set to invalid from server side",
                 errorMessage.getText());
-
-        executeScript("arguments[0].value=['2'];", group);
-        verifyGroupValid(group, errorMessage);
     }
 
     @Test

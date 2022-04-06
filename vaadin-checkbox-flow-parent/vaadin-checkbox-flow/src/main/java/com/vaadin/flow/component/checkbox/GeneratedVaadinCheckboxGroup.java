@@ -287,14 +287,9 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * </p>
      * <p>
      * This property is set to true when the control value is invalid.
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'invalid-changed' event happens.
-     * </p>
      *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
