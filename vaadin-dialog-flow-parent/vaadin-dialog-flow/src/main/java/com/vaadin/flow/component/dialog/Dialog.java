@@ -645,7 +645,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
             }
             dialog.getElement().appendChild(root);
             dialog.getElement().executeJs("this." + rendererFunction
-                    + " = (root) => {" + "if (root.firstElement) { "
+                    + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);
             setRendererCreated(true);
         }
