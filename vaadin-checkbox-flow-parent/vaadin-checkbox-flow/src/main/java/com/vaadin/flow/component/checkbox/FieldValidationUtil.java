@@ -39,7 +39,7 @@ class FieldValidationUtil {
     private static <T> void overrideClientValidation(
             CheckboxGroup<T> component) {
         StringBuilder expression = new StringBuilder(
-                "this.validate = function () {return this.checkValidity();};");
+                "this.validate = function () {return !(this.required && this.value.length === 0);};");
 
         if (component.isInvalid()) {
             /*
