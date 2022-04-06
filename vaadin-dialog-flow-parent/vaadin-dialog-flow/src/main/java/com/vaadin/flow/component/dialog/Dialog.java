@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -592,7 +593,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         }
     }
 
-    static abstract class DialogHeaderFooter {
+    static abstract class DialogHeaderFooter implements Serializable {
         protected final Element root;
         private final String rendererFunction;
         private final Component dialog;
