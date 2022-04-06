@@ -68,6 +68,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -1790,6 +1791,16 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
+        if (!FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext())
+                .isEnabled(FeatureFlags.SPREADSHEET_COMPONENT)) {
+            throw new RuntimeException("\n\n--------------\n\n"
+                    + "The spreadsheet component is currently an experimental feature and needs to be explicitly enabled. "
+                    + "The component can be enabled by using the Vaadin dev-mode Gizmo, in the experimental features tab, "
+                    + "or by adding a `src/main/resources/vaadin-featureflags.properties` file with the following content: "
+                    + "`com.vaadin.experimental.spreadsheetComponent=true`"
+                    + "\n\n--------------\n\n");
+        }
     }
 
     /**

@@ -15,6 +15,15 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
+## Experimental
+
+The spreadsheet component is currently an experimental feature and needs to be explicitly enabled.
+
+The component can be enabled by either:
+ - by using the Vaadin dev-mode Gizmo, in the experimental features tab
+ - or by adding a `src/main/resources/vaadin-featureflags.properties` file with the following content:
+`com.vaadin.experimental.spreadsheetComponent=true`
+
 ## License
 
 This add-on is distributed under [Commercial Vaadin Developer License 4.0](https://vaadin.com/license/cvdl-4.0) (CVDLv4).
