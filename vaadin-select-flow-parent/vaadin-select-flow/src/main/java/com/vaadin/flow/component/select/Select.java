@@ -144,9 +144,55 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @param items
      *            the items for the select
      */
+    @SafeVarargs
     public Select(T... items) {
         this();
 
+        setItems(items);
+    }
+
+    /**
+     * Creates an empty select with the defined label.
+     *
+     * @param label
+     *            the label describing the select
+     */
+    public Select(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items
+     * in the collection.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setItems(Collection)
+     */
+    public Select(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+
+    /**
+     * Creates a select with the defined label and populated with the items
+     * in the array.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public Select(String label, T... items) {
+        this();
+        setLabel(label);
         setItems(items);
     }
 
