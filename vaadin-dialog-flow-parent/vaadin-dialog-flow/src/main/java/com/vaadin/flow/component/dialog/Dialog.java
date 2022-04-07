@@ -643,7 +643,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          *            the component to be removed.
          */
         public void remove(Component component) {
-            root.removeChild(component.getElement());
+            if (root.equals(component.getElement().getParent())) {
+                root.removeChild(component.getElement());
+            }
             if (root.getChildCount() == 0) {
                 dialog.getElement()
                         .executeJs("this." + rendererFunction + " = null;");
