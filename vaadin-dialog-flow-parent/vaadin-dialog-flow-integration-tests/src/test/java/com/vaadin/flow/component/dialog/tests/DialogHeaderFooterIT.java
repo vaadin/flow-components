@@ -58,7 +58,7 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     }
 
     @Test
-    public void closedDialog_headerRendererIsSet_contentIsRenderer() {
+    public void closedDialog_headerRendererIsSet_contentIsRendered() {
         clickButton(ADD_HEADER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
 
@@ -117,7 +117,7 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     }
 
     @Test
-    public void closedDialog_footerRendererIsSet_contentIsRenderer() {
+    public void closedDialog_footerRendererIsSet_contentIsRendered() {
         clickButton(ADD_FOOTER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
 
