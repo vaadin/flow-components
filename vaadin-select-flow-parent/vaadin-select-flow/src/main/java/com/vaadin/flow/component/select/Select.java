@@ -163,8 +163,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     }
 
     /**
-     * Creates a select with the defined label and populated with the items
-     * in the collection.
+     * Creates a select with the defined label and populated with the items in
+     * the collection.
      *
      * @param label
      *            the label describing the select
@@ -178,10 +178,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         setItems(items);
     }
 
-
     /**
-     * Creates a select with the defined label and populated with the items
-     * in the array.
+     * Creates a select with the defined label and populated with the items in
+     * the array.
      *
      * @param label
      *            the label describing the select
