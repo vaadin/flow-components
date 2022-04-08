@@ -170,7 +170,7 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Constructs a checkbox with the initial value change listener.
+     * Constructs a radio button group with the initial value change listener.
      *
      * @param listener
      *            the value change listener to add
@@ -183,8 +183,8 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Constructs a checkbox with the initial label text and value change
-     * listener.
+     * Constructs a radio button group with the initial label text and value
+     * change listener.
      *
      * @param label
      *            the label describing the radio button group
@@ -201,8 +201,8 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Constructs a checkbox with the initial label text and value change
-     * listener.
+     * Constructs a radio button group with the initial label text and value
+     * change listener.
      *
      * @param label
      *            the label describing the radio button group
