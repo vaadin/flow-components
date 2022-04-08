@@ -134,8 +134,8 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Creates a radio button group with the defined label and populated with the items
-     * in the array.
+     * Creates a radio button group with the defined label and populated with
+     * the items in the array.
      *
      * @param label
      *            the label describing the radio button group
@@ -146,6 +146,58 @@ public class RadioButtonGroup<T>
     @SafeVarargs
     public RadioButtonGroup(String label, T... items) {
         this(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a checkbox with the initial value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public RadioButtonGroup(
+            ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a checkbox with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public RadioButtonGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
+
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a checkbox with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the radio button group
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    @SafeVarargs
+    public RadioButtonGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener,
+            T... items) {
+        this(label, listener);
         setItems(items);
     }
 
