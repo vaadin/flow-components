@@ -117,6 +117,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
 
 
         layout.addClassName("layout");
+        layout.setSizeFull();
 
         options = new HorizontalLayout();
         options.addClassName("options");

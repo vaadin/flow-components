@@ -1,4 +1,4 @@
-package com.vaadin.addon.spreadsheet.elements;
+package com.vaadin.flow.component.spreadsheet.testbench;
 
 import java.util.List;
 
@@ -224,7 +224,7 @@ public class SpreadsheetElement extends TestBenchElement {
     /**
      * Fetches the context menu for the spreadsheet
      *
-     * @return {@link com.vaadin.addon.spreadsheet.elements.SpreadsheetElement.ContextMenuElement}
+     * @return {@link SpreadsheetElement.ContextMenuElement}
      * @throws java.util.NoSuchElementException if the menu isn't open
      */
     public ContextMenuElement getContextMenu() {
