@@ -137,7 +137,7 @@ public class SelectTest {
         Assert.assertEquals("Invalid number of items", 0,
                 getListBox().getChildren().count());
 
-        select = new Select<>("foo", "bar", "baz");
+        select = new Select<>("label", "foo", "bar", "baz");
 
         Assert.assertEquals("Invalid number of items", 3,
                 getListBox().getChildren().count());
@@ -715,7 +715,7 @@ public class SelectTest {
         select.setValue(new CustomItem(1L));
 
         Assert.assertNotNull(select.getValue());
-        Assert.assertEquals(select.getValue().getName(), "First");
+        Assert.assertEquals("First", select.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
