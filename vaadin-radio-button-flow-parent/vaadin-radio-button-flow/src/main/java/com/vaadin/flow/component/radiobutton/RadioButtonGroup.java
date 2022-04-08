@@ -23,32 +23,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
-import com.vaadin.flow.data.provider.DataChangeEvent;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.DataProviderWrapper;
-import com.vaadin.flow.data.provider.DataViewUtils;
-import com.vaadin.flow.data.provider.HasDataView;
-import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.data.provider.IdentifierProvider;
-import com.vaadin.flow.data.provider.InMemoryDataProvider;
-import com.vaadin.flow.data.provider.ItemCountChangeEvent;
-import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
@@ -117,11 +97,58 @@ public class RadioButtonGroup<T>
         return radioButtonGroup.keyMapper.key(model);
     }
 
+    /**
+     * Default constructor. Creates an empty radio button group.
+     */
     public RadioButtonGroup() {
         super(null, null, String.class, RadioButtonGroup::presentationToModel,
                 RadioButtonGroup::modelToPresentation, true);
 
         registerValidation();
+    }
+
+    /**
+     * Creates an empty radio button group with the defined label.
+     *
+     * @param label
+     *            the label describing the radio button group
+     */
+    public RadioButtonGroup(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a radio button group with the defined label and populated with
+     * the items in the collection.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param items
+     *            the items to be shown in the list of the radio button group
+     * @see #setItems(Collection)
+     */
+    public RadioButtonGroup(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a radio button group with the defined label and populated with the items
+     * in the array.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param items
+     *            the items to be shown in the list of the radio button group
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public RadioButtonGroup(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
     }
 
     @Override
