@@ -18,14 +18,7 @@
 package com.vaadin.flow.component.radiobutton.tests;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
@@ -138,11 +131,11 @@ public class RadioButtonGroupDemoPage extends Div {
     private void addBasicFeatures() {
         Div message = new Div();
 
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Radio button group value changed from '%s' to '%s'",
-                event.getOldValue(), event.getValue())));
+        RadioButtonGroup<String> group = new RadioButtonGroup<>("label",
+                event -> message.setText(String.format(
+                        "Radio button group value changed from '%s' to '%s'",
+                        event.getOldValue(), event.getValue())),
+                "foo", "bar", "baz");
 
         group.setId("button-group-with-value-change-listener");
         message.setId("button-group-value");
