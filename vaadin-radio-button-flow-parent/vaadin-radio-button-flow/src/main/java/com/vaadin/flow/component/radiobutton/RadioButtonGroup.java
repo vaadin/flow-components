@@ -129,8 +129,7 @@ public class RadioButtonGroup<T>
      * @see #setItems(Collection)
      */
     public RadioButtonGroup(String label, Collection<T> items) {
-        this();
-        setLabel(label);
+        this(label);
         setItems(items);
     }
 
@@ -146,8 +145,7 @@ public class RadioButtonGroup<T>
      */
     @SafeVarargs
     public RadioButtonGroup(String label, T... items) {
-        this();
-        setLabel(label);
+        this(label);
         setItems(items);
     }
 
