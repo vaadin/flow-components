@@ -364,6 +364,58 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(items);
     }
 
+    /**
+     * Constructs a combo box with the initial value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public ComboBox(
+            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a combo box with the initial label text and value
+     * change listener.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public ComboBox(String label,
+                            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a combo box with the initial label text and value
+     * change listener.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    @SafeVarargs
+    public ComboBox(String label,
+                            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener,
+                            T... items) {
+        this(label, listener);
+        setItems(items);
+    }
+
     private static <T> T presentationToModel(ComboBox<T> comboBox,
             String presentation) {
         if (presentation == null || comboBox.dataCommunicator == null) {
