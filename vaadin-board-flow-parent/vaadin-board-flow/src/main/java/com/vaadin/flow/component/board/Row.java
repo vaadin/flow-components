@@ -52,10 +52,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </pre>
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "22.0.11")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "22.0.11")
+@NpmPackage(value = "@vaadin/board", version = "22.0.12")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "22.0.12")
 @JsModule("@vaadin/board/vaadin-board-row.js")
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {
