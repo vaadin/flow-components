@@ -26,15 +26,15 @@ public class ConditionalFormattingBasedOnFormulaIT
 
     @Test
     public void loadSpreadsheetWithConditionalFormattingInA2_MakeConditionFalse_CellA2FilledWhite() {
-        getSpreadsheet().getCellAt("A1").setValue(VALUE);
-        getSpreadsheet().getCellAt("A2").setValue("Not"+VALUE);
+        setCellValue("A1", VALUE);
+        setCellValue("A2", "Not"+VALUE);
         assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
     }
 
     @Test
     public void loadSpreadsheetWithConditionalFormattingInA2_MakeConditionTrue_CellA2FilledRed() {
-        getSpreadsheet().getCellAt("A1").setValue(VALUE);
-        getSpreadsheet().getCellAt("A2").setValue(VALUE);
+        setCellValue("A1", VALUE);
+        setCellValue("A2", VALUE);
         assertEquals(TRUE_CONDITION_COLOR, getCellColor("A2"));
     }
     

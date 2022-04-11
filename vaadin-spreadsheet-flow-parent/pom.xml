@@ -80,6 +80,7 @@
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
+        <failIfNoTests>false</failIfNoTests>
 
         <junit.version>4.13.2</junit.version>
         <mockito.version>1.10.19</mockito.version>
@@ -282,6 +283,43 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>${exclude.tests}</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven.failsafe.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <forkCount>${failsafe.forkCount}</forkCount>
+                    <argLine>-Xmx2048m</argLine>
+                    <reuseForks>false</reuseForks>
+                    <trimStackTrace>false</trimStackTrace>
+                    <systemPropertyVariables>
+                        <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+                        <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
+                        <com.vaadin.testbench.Parameters.testsInParallel>${com.vaadin.testbench.Parameters.testsInParallel}</com.vaadin.testbench.Parameters.testsInParallel>
+                    </systemPropertyVariables>
+                    <excludes>
+                        <exclude>${exclude.tests}</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

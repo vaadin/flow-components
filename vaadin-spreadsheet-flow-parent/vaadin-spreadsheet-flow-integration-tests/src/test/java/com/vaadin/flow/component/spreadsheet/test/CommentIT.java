@@ -142,20 +142,4 @@ public class CommentIT extends AbstractSpreadsheetIT {
         });
     }
 
-    // Context menu helpers
-
-    private void clickItem(String caption) {
-        try {
-            new Actions(getDriver())
-                    .click(getDriver().findElement(By.xpath("//div[@class='popupContent']//*[text()='"+caption+"']")))
-                    .perform();
-        } catch (NoSuchElementException ex) {
-            throw new RuntimeException("Menu item '"+caption+"' not found", ex);
-        }
-    }
-
-    public boolean hasOption (String caption) {
-        return getDriver().findElements(By.xpath("//div[@class='popupContent']//*[text()='"+caption+"']")).size()!=0;
-    }
-
 }

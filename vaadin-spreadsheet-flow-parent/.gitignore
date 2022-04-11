@@ -23,6 +23,7 @@ node_modules
 .driver
 package*json
 pnpm*
+.pnpm*
 error-screenshots
 
 **/frontend/generated
