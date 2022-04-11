@@ -234,7 +234,6 @@ export class VaadinSpreadsheet extends LitElement {
       //console.log(`${name} changed from oldValue: ${oldValue} to:`, this[name]);
       //this.setAttribute(propName, oldValue, this[propName]);
       let newVal = this[name];
-
       if ('dirty' == name) {
         dirty = true;
       } else if ('rowBufferSize' == name) {
@@ -354,63 +353,6 @@ export class VaadinSpreadsheet extends LitElement {
       }
       propNames.push(name);
     });
-    if (dirty) {
-      propNames = [
-        'rowBufferSize'
-        , 'columnBufferSize'
-          , 'rows'
-          ,'cols'
-          ,'colGroupingData'
-          ,'rowGroupingData'
-          ,'colGroupingMax'
-          ,'rowGroupingMax'
-          ,'colGroupingInversed'
-          ,'rowGroupingInversed'
-          ,'defRowH'
-          ,'defColW'
-          ,'rowH'
-          ,'colW'
-          ,'reload'
-          ,'sheetIndex'
-          ,'sheetNames'
-          ,'cellStyleToCSSStyle'
-          ,'rowIndexToStyleIndex'
-          ,'columnIndexToStyleIndex'
-          ,'lockedColumnIndexes'
-          ,'lockedRowIndexes'
-          ,'shiftedCellBorderStyles'
-          ,'conditionalFormattingStyles'
-          ,'hiddenColumnIndexes'
-          ,'hiddenRowIndexes'
-          ,'verticalScrollPositions'
-          ,'horizontalScrollPositions'
-          ,'sheetProtected'
-          ,'workbookProtected'
-          ,'cellKeysToEditorIdMap'
-          ,'componentIDtoCellKeysMap'
-          ,'hyperlinksTooltips'
-          ,'cellComments'
-          ,'cellCommentAuthors'
-          ,'visibleCellComments'
-          ,'invalidFormulaCells'
-          ,'hasActions'
-          ,'overlays'
-          ,'mergedRegions'
-          ,'displayGridlines'
-          ,'displayRowColHeadings'
-          ,'verticalSplitPosition'
-          ,'horizontalSplitPosition'
-          ,'infoLabelValue'
-          ,'workbookChangeToggle'
-          ,'invalidFormulaErrorMessage'
-          ,'lockFormatColumns'
-          ,'lockFormatRows'
-          ,'namedRanges'
-          ,'width'
-          ,'height'
-          ,'reload'
-      ]
-    }
     this.api.notifyStateChanges(propNames, initial);
     if (initial) {
       this.api.relayout();
