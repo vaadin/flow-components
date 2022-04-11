@@ -143,6 +143,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @param items
      *            the items for the select
+     * @see #setItems(Object...)
      */
     @SafeVarargs
     public Select(T... items) {
@@ -156,6 +157,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @param label
      *            the label describing the select
+     * @see #setLabel(String)
      */
     public Select(String label) {
         this();
@@ -170,6 +172,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *            the label describing the select
      * @param items
      *            the items to be shown in the list of the select
+     * @see #setLabel(String)
      * @see #setItems(Collection)
      */
     public Select(String label, Collection<T> items) {
@@ -186,12 +189,66 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *            the label describing the select
      * @param items
      *            the items to be shown in the list of the select
+     * @see #setLabel(String)
      * @see #setItems(Object...)
      */
     @SafeVarargs
     public Select(String label, T... items) {
         this();
         setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a select with the initial value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Select(
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a select with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the select
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Select(String label,
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
+
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a select with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the select
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    @SafeVarargs
+    public Select(String label,
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener,
+            T... items) {
+        this(label, listener);
         setItems(items);
     }
 
