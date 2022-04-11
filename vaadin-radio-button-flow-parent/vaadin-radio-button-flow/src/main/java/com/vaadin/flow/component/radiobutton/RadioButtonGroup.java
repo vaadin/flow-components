@@ -173,7 +173,7 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Constructs a radio button group with the initial value change listener.
+     * Constructs a radio button group with a value change listener.
      *
      * @param listener
      *            the value change listener to add
@@ -186,8 +186,8 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Constructs a radio button group with the initial label text and value
-     * change listener.
+     * Constructs a radio button group with the defined label and a value change
+     * listener.
      *
      * @param label
      *            the label describing the radio button group
@@ -198,14 +198,13 @@ public class RadioButtonGroup<T>
      */
     public RadioButtonGroup(String label,
             ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
-
         this(label);
         addValueChangeListener(listener);
     }
 
     /**
-     * Constructs a radio button group with the initial label text and value
-     * change listener.
+     * Constructs a radio button group with the defined label, a value change
+     * listener and populated with the items in the array.
      *
      * @param label
      *            the label describing the radio button group
