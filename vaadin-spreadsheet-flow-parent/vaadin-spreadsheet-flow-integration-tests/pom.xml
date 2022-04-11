@@ -18,13 +18,17 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin</artifactId>
-            <version>${vaadin.version}</version>
             <exclusions>
                 <!-- Fusion is only supported in Spring Boot currently, exclude obsolete dependencies -->
                 <exclusion>
                     <groupId>com.vaadin</groupId>
                     <artifactId>fusion-endpoint</artifactId>
                 </exclusion>
+                <!-- We do not use this, and it brings artefact with repeated elemental dependencies -->
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>                
             </exclusions>
         </dependency>
         <dependency>
