@@ -40,7 +40,6 @@ public class OverlayInfo implements Serializable {
 
     @Override
     public String toString() {
-        return "OverlayInfo: col=" + col + ", row=" + row + ", width=" + width
-                + ", height=" + height + ", dx=" + dx + ", dy=" + dy;
+        return type.name() + "#" + col + "#" + row + "#" + width + "#" + height + "#" + dx + "#" + dy;
     }
 }
