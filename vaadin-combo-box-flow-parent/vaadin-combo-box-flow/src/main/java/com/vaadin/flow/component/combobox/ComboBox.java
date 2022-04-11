@@ -325,6 +325,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @param label
      *            the label describing the combo box
+     * @see #setLabel(String)
      */
     public ComboBox(String label) {
         this();
@@ -339,6 +340,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the label describing the combo box
      * @param items
      *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
      * @see #setItems(Collection)
      */
     public ComboBox(String label, Collection<T> items) {
@@ -355,6 +357,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the label describing the combo box
      * @param items
      *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
      * @see #setItems(Object...)
      */
     @SafeVarargs
@@ -378,8 +381,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Constructs a combo box with the initial label text and value
-     * change listener.
+     * Constructs a combo box with the initial label text and value change
+     * listener.
      *
      * @param label
      *            the label describing the combo box
@@ -389,15 +392,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @see #addValueChangeListener(ValueChangeListener)
      */
     public ComboBox(String label,
-                            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 
         this(label);
         addValueChangeListener(listener);
     }
 
     /**
-     * Constructs a combo box with the initial label text and value
-     * change listener.
+     * Constructs a combo box with the initial label text and value change
+     * listener.
      *
      * @param label
      *            the label describing the combo box
@@ -407,11 +410,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the items to be shown in the list of the combo box
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Collection)
      */
     @SafeVarargs
     public ComboBox(String label,
-                            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener,
-                            T... items) {
+            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener,
+            T... items) {
         this(label, listener);
         setItems(items);
     }
