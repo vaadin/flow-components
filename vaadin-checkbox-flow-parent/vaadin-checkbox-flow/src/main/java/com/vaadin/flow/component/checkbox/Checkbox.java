@@ -116,6 +116,42 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     }
 
     /**
+     * Constructs a checkbox with the initial value and value change listener.
+     *
+     * @param initialValue
+     *            the initial value
+     * @param listener
+     *            the value change listener to add
+     * @see AbstractField#setValue(Object)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Checkbox(boolean initialValue,
+            ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
+        this(initialValue);
+        addValueChangeListener(listener);
+    }
+
+    /** 
+     * Constructs a checkbox with the initial value, label text and value change
+     * listener.
+     *
+     * @param labelText
+     *            the label text to set
+     * @param initialValue
+     *            the initial value
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see AbstractField#setValue(Object)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Checkbox(String labelText, boolean initialValue,
+            ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
+        this(labelText, initialValue);
+        addValueChangeListener(listener);
+    }
+
+    /**
      * Get the current label text.
      *
      * @return the current label text
