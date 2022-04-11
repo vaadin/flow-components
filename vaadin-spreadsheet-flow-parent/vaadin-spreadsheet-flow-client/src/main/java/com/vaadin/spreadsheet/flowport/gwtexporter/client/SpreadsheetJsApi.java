@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
+import com.vaadin.addon.spreadsheet.client.SheetWidget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetHandler;
@@ -616,7 +617,12 @@ public class SpreadsheetJsApi {
     }
 
     public void editCellComment(int col, int row) {
-        getClientRpcInstance().editCellComment(col, row);
+        // On a new comment, server creates the comment setting the author but
+        // properties are updated after actions, thus, executing this
+        // asynchronously fixes it (#790)
+        Scheduler.get().scheduleDeferred(() -> {
+            getClientRpcInstance().editCellComment(col, row);
+        });
     }
 
     /*
