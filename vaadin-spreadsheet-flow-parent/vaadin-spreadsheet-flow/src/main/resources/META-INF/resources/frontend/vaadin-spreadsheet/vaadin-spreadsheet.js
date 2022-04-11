@@ -180,6 +180,16 @@ export class VaadinSpreadsheet extends LitElement {
     super();
   }
 
+  static get styles() {
+    return css`
+      :host {
+        display: block;
+        height: 100%;
+        min-height: 400px;
+      }
+    `
+  };
+
   /*
     createRenderRoot() {
       // Do not use a shadow root
@@ -211,18 +221,17 @@ export class VaadinSpreadsheet extends LitElement {
       this.injectStyle('css_valo', css_valo);
       this.injectStyleLink('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
-      const container = document.createElement('div');
-      container.id = 'spreadsheet-container';
-      container.classList.add('spreadsheetport');
-      container.setAttribute('style', 'min-height: 300px; min-width: 300px;width: 100%; height: 100%;');
-      this.append(container);
+      this.classList.add('spreadsheetport');
 
-      const overlays = document.createElement('div');
-      overlays.id = 'spreadsheet-overlays';
-      overlays.classList.add('spreadsheetport');
-      document.body.appendChild(overlays);
+      let overlays = document.getElementById('spreadsheet-overlays');
+      if (!overlays) {
+        overlays = document.createElement('div');
+        overlays.id = 'spreadsheet-overlays';
+        overlays.classList.add('spreadsheetport');
+        document.body.appendChild(overlays);
+      }
 
-      this.api = new Spreadsheet(container);
+      this.api = new Spreadsheet(this);
       console.log('updated')
       this.createCallbacks();
       console.log('callbacks created')
