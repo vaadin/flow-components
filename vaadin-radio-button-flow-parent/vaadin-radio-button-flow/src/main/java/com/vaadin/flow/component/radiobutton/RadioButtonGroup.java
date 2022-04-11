@@ -132,6 +132,7 @@ public class RadioButtonGroup<T>
      *
      * @param label
      *            the label describing the radio button group
+     * @see #setLabel(String)
      */
     public RadioButtonGroup(String label) {
         this();
@@ -146,6 +147,7 @@ public class RadioButtonGroup<T>
      *            the label describing the radio button group
      * @param items
      *            the items to be shown in the list of the radio button group
+     * @see #setLabel(String)
      * @see #setItems(Collection)
      */
     public RadioButtonGroup(String label, Collection<T> items) {
@@ -161,6 +163,7 @@ public class RadioButtonGroup<T>
      *            the label describing the radio button group
      * @param items
      *            the items to be shown in the list of the radio button group
+     * @see #setLabel(String)
      * @see #setItems(Object...)
      */
     @SafeVarargs
@@ -212,6 +215,7 @@ public class RadioButtonGroup<T>
      *            the items to be shown in the list of the radio button group
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Object...)
      */
     @SafeVarargs
     public RadioButtonGroup(String label,
