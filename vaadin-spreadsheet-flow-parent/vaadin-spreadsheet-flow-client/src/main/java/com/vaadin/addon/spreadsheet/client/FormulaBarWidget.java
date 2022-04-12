@@ -380,7 +380,7 @@ public class FormulaBarWidget extends Composite {
 
                 String value = currentEditor.getValue();
                 int cursorPos = currentEditor.getCursorPos();
-                char c = value.charAt(cursorPos - 1);
+                char c = cursorPos > 0 ? value.charAt(cursorPos - 1) : 0;
 
                 enableKeyboardNavigation = false;
 
@@ -881,12 +881,19 @@ public class FormulaBarWidget extends Composite {
      * @return
      */
     private static CellCoord parseSingleCell(String cellRef) {
-        String c = cellRef.split("[0-9]")[0].toUpperCase();
+        String c = "", r = "";
+        if (cellRef != null) {
+            String[] split1 = cellRef.toUpperCase().split("[0-9]");
+            String[] split = cellRef.split("[A-z]");
+            if (split1.length > 0) {
+                c = split1[0];
+            }
+            if (split.length > 0) {
+                r = split[split.length - 1];
+            }
+        }
 
-        String[] split = cellRef.split("[A-z]");
-        String r = split[split.length - 1];
-
-        int row = Integer.valueOf(r);
+        int row = r.length() > 0 ? Integer.valueOf(r) : 0;
         int col = 0;
         for (int i = 0; i < c.length(); i++) {
             char current = c.charAt(i);

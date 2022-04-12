@@ -371,7 +371,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
     }
 
     private ComboBox<File> createTestSheetCombobox(List<File> files) {
-        ComboBox<File> cb = new ComboBox<>(null);
+        ComboBox<File> cb = new ComboBox<>();
 
         cb.setItems(files);
         cb.setItemLabelGenerator(File::getName);
