@@ -63,7 +63,7 @@ public class GridSingleSelectionDeselectAllowedPage extends VerticalLayout {
     @SuppressWarnings("rawtypes")
     private Grid<String> buildGrid(boolean deselectAllowed, String id) {
         Grid<String> grid = new Grid<>();
-        grid.addColumn(string -> String.valueOf(Math.random()))
+        grid.addColumn(string -> String.valueOf(Math.random())) // NOSONAR
                 .setHeader("column 1");
         grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf));
         grid.setAllRowsVisible(true);
@@ -77,7 +77,7 @@ public class GridSingleSelectionDeselectAllowedPage extends VerticalLayout {
 
     @SuppressWarnings("rawtypes")
     private Grid<String> setItemsGrid(Grid grid, String id) {
-        grid.addColumn(string -> String.valueOf(Math.random()))
+        grid.addColumn(string -> String.valueOf(Math.random())) // NOSONAR
                 .setHeader("column 1");
         grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf));
         grid.setAllRowsVisible(true);
