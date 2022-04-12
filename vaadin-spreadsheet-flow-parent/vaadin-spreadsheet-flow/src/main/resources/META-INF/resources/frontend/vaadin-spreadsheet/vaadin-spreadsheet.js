@@ -219,7 +219,6 @@ export class VaadinSpreadsheet extends LitElement {
     if (!this.api) {
       this.injectStyle('css_gwt', css_gwt);
       this.injectStyle('css_valo', css_valo);
-      this.injectStyleLink('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
       this.classList.add('spreadsheetport');
 
@@ -612,12 +611,6 @@ SERVER RPC METHOD CALLBACKS
     elm.textContent = style;
   }
 
-  injectStyleLink(link) {
-    const elm = document.createElement('link');
-    elm.setAttribute('href', link);
-    elm.setAttribute('rel', 'stylesheet');
-    document.head.append(elm);
-  }
 }
 
 window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);

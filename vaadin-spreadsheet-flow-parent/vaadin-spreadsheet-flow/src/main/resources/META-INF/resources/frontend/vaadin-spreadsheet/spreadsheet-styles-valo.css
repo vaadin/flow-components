@@ -580,7 +580,7 @@ v-window-closebox
     padding-right: 4px;
     border-radius: 0 4px 0 4px; }
     .spreadsheetport .v-window-closebox:before {
-      content: "\00d7"; }
+      content: "×"; }
   .spreadsheetport .v-panel {
     background: white;
     color: #474747;
@@ -1132,17 +1132,17 @@ v-window-closebox
           text-align: center;
           z-index: inherit;
           color: #464646;
-          font-family: FontAwesome; }
+          }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-beginning::before {
-            content: "\f053\f053"; }
+            content: "≪"; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-end::before {
-            content: "\f054\f054"; }
+            content: "≫"; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-left::before {
-            content: "\f053"; }
+            content: "﹤"; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-right::before {
-            content: "\f054"; }
+            content: "﹥"; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.add-new-tab::before {
-            content: "\f067"; }
+            content: "+"; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
             color: #197de1; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
@@ -1234,89 +1234,28 @@ v-window-closebox
       -ms-user-select: none;
       user-select: none; }
     .spreadsheetport .v-spreadsheet .sheet div div.popupbutton {
-      height: 37px;
       padding: 0;
       color: #191919;
       font-weight: 400;
-      border-radius: 4px;
-      border: 1px solid #c5c5c5;
-      border-top-color: #c6c6c6;
-      border-bottom-color: #bdbdbd;
-      background-color: #fafafa;
-      background-image: -webkit-linear-gradient(top, #fafafa 2%, #f0f0f0 98%);
-      background-image: linear-gradient(to bottom,#fafafa 2%, #f0f0f0 98%);
-      -webkit-box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e8e8e8, 0 2px 3px rgba(0, 0, 0, 0.05);
-      box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e8e8e8, 0 2px 3px rgba(0, 0, 0, 0.05);
-      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
-      position: relative;
-      text-align: center;
       white-space: nowrap;
       outline: none;
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-      -webkit-touch-callout: none;
-      cursor: pointer;
       position: absolute;
-      bottom: 1px;
+      bottom: 0px;
       right: 1px;
       cursor: pointer;
-      height: 14px;
-      width: 14px;
-      outline: none;
-      background: url(triangle-inactive.png);
-      background-size: 100% 100%;
-      box-shadow: none;
-      border: none; }
+      height: 11px;
+      width: 11px;
+      border: solid 1px lightgrey;
+      text-align: center;
+      background: white;
+      border-radius: 2px;}
       .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:after {
-        border: inherit;
-        top: -1px;
-        right: -1px;
-        bottom: -1px;
-        left: -1px; }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:hover:after {
-        background-color: rgba(186, 186, 186, 0.1); }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:focus:after {
-        border-color: #197de1;
-        -webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-        box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5); }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:active:after {
-        background-color: rgba(125, 125, 125, 0.2); }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:before {
-        content: "";
-        display: inline-block;
-        width: 0;
-        height: 100%;
-        vertical-align: middle; }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton > div {
-        vertical-align: middle; }
-      .v-sa .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:before {
-        height: 110%; }
-      .v-ff .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:before {
-        height: 107%; }
-      .v-ie .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:before {
-        margin-top: 4px; }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        border-radius: inherit;
-        -webkit-transition: box-shadow 180ms, border 180ms;
-        -moz-transition: box-shadow 180ms, border 180ms;
-        transition: box-shadow 180ms, border 180ms; }
-      .spreadsheetport .v-spreadsheet .sheet div div.popupbutton:focus:after {
-        -webkit-transition: none;
-        -moz-transition: none;
-        transition: none; }
+        content: "▼";
+        color: grey;
+        font-size: 11px;
+        vertical-align: top;}
       .spreadsheetport .v-spreadsheet .sheet div div.popupbutton.v-disabled {
-        opacity: 0.5;
-        filter: alpha(opacity=50) ; }
-        .spreadsheetport .v-spreadsheet .sheet div div.popupbutton.v-disabled:after {
-          display: none; }
-    .spreadsheetport .v-spreadsheet .sheet div div.popupbutton.active {
-      background: url(triangle-active.png);
-      background-size: 100% 100%; }
+        opacity: 0.5;}
     .spreadsheetport .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square {
       position: relative;
       width: 30px;
