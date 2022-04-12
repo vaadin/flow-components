@@ -33,3 +33,5 @@ error-screenshots
 vaadin-spreadsheet/errors
 */styles.css
 *styles.css
+
+spreadsheet-export.js
