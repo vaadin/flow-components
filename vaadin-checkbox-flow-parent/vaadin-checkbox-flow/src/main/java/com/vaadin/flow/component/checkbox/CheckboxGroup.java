@@ -37,7 +37,6 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -190,8 +189,6 @@ public class CheckboxGroup<T>
 
         private final T item;
 
-        private final Label labelElement = appendLabelElement();
-
         private CheckBoxItem(String id, T item) {
             this.item = item;
             getElement().setProperty(VALUE, id);
@@ -200,24 +197,6 @@ public class CheckboxGroup<T>
         @Override
         public T getItem() {
             return item;
-        }
-
-        /**
-         * Replaces the label content with the given label component.
-         *
-         * @param component
-         *            the component to be added to the label.
-         */
-        public void setLabelComponent(Component component) {
-            labelElement.removeAll();
-            labelElement.add(component);
-        }
-
-        private Label appendLabelElement() {
-            Label label = new Label();
-            label.getElement().setAttribute("slot", "label");
-            getElement().appendChild(label.getElement());
-            return label;
         }
     }
 

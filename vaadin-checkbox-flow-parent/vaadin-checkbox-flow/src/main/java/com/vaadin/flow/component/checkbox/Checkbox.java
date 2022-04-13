@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Label;
@@ -259,5 +260,17 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     public boolean isIndeterminate() {
         return isIndeterminateBoolean();
+    }
+
+    /**
+     * Replaces the label content with the given label component.
+     *
+     * @param component
+     *            the component to be added to the label.
+     */
+    public void setLabelComponent(Component component) {
+        getElement().appendChild(labelElement.getElement());
+        labelElement.removeAll();
+        labelElement.add(component);
     }
 }
