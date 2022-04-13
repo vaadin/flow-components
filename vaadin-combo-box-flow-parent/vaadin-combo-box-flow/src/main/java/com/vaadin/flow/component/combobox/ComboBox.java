@@ -325,6 +325,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @param label
      *            the label describing the combo box
+     * @see #setLabel(String)
      */
     public ComboBox(String label) {
         this();
@@ -339,6 +340,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the label describing the combo box
      * @param items
      *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
      * @see #setItems(Collection)
      */
     public ComboBox(String label, Collection<T> items) {
@@ -355,12 +357,65 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the label describing the combo box
      * @param items
      *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
      * @see #setItems(Object...)
      */
     @SafeVarargs
     public ComboBox(String label, T... items) {
         this();
         setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a combo box with a value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public ComboBox(
+            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a combo box with the defined label and a value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public ComboBox(String label,
+            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a combo box with the defined label, a value change listener
+     * and populated with the items in the array.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public ComboBox(String label,
+            ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener,
+            T... items) {
+        this(label, listener);
         setItems(items);
     }
 
