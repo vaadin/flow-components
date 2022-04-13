@@ -24,17 +24,16 @@ import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-
-@TestPath("vaadin-grid/grid-single-selection")
-public class GridSingleSelectionIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/grid-single-selection-deselect-allowed")
+public class GridSingleSelectionDeselectAllowedIT extends AbstractComponentIT {
 
     @Test
     public void checkDeselectionAllowedByDefault() {
         open();
 
         // Ensure that de-selection is allowed by default
-        GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.DESELECT_ALLOWED_GRID_ID);
+        GridElement grid = $(GridElement.class).id(
+                GridSingleSelectionDeselectAllowedPage.DESELECT_ALLOWED_GRID_ID);
 
         grid.getRow(1).select();
         Assert.assertTrue("Row 1 was not selected after selecting it.",
@@ -45,7 +44,8 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
                 !grid.getRow(1).isSelected());
 
         // Disable de-selection on the fly and test again
-        $("button").id(GridSingleSelectionPage.DESELECT_ALLOWED_TOGGLE_ID)
+        $("button").id(
+                GridSingleSelectionDeselectAllowedPage.DESELECT_ALLOWED_TOGGLE_ID)
                 .click();
 
         grid.getRow(1).select();
@@ -64,8 +64,8 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
 
         // Ensure that de-selection is not possible when it has been disallowed
         // initially
-        GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.DESELECT_DISALLOWED_GRID_ID);
+        GridElement grid = $(GridElement.class).id(
+                GridSingleSelectionDeselectAllowedPage.DESELECT_DISALLOWED_GRID_ID);
 
         grid.getRow(1).select();
         Assert.assertTrue("Row 1 was not selected after selecting it.",
@@ -77,7 +77,8 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
                 grid.getRow(1).isSelected());
 
         // Enable de-selection on the fly and test again
-        $("button").id(GridSingleSelectionPage.DESELECT_DISALLOWED_TOGGLE_ID)
+        $("button").id(
+                GridSingleSelectionDeselectAllowedPage.DESELECT_DISALLOWED_TOGGLE_ID)
                 .click();
 
         grid.getRow(1).select();
@@ -96,14 +97,16 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
         // De-selection is not allowed(deselectAllowed is false) and then
         // setting items for grid
         GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.ITEMS_GRID);
+                .id(GridSingleSelectionDeselectAllowedPage.ITEMS_GRID);
 
         grid.getRow(1).select();
         Assert.assertTrue("Row 1 was selected after selecting it.",
                 grid.getRow(1).isSelected());
         // Set Items again by clicking the button
-        $("button").id(GridSingleSelectionPage.SET_ITEMS).click();
-        $("button").id(GridSingleSelectionPage.SET_ITEMS).click();
+        $("button").id(GridSingleSelectionDeselectAllowedPage.SET_ITEMS)
+                .click();
+        $("button").id(GridSingleSelectionDeselectAllowedPage.SET_ITEMS)
+                .click();
     }
 
     @Test
@@ -113,7 +116,7 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
         // De-selection is not allowed(deselectAllowed is false) and then
         // setting items for grid
         GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.ITEMS_GRID);
+                .id(GridSingleSelectionDeselectAllowedPage.ITEMS_GRID);
 
         grid.getRow(0).select();
 
