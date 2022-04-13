@@ -138,11 +138,11 @@ public class RadioButtonGroupDemoPage extends Div {
     private void addBasicFeatures() {
         Div message = new Div();
 
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Radio button group value changed from '%s' to '%s'",
-                event.getOldValue(), event.getValue())));
+        RadioButtonGroup<String> group = new RadioButtonGroup<>("label",
+                event -> message.setText(String.format(
+                        "Radio button group value changed from '%s' to '%s'",
+                        event.getOldValue(), event.getValue())),
+                "foo", "bar", "baz");
 
         group.setId("button-group-with-value-change-listener");
         message.setId("button-group-value");
