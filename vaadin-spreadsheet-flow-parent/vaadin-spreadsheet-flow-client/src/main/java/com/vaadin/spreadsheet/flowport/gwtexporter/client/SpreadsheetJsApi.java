@@ -240,13 +240,16 @@ public class SpreadsheetJsApi {
         spreadsheetConnector.postLayout();
     }
 
+    public void resize() {
+        spreadsheetWidget.widgetSizeChanged();
+    }
+
     public void relayout() {
         Scheduler.get().scheduleDeferred(() -> {
             //spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
             spreadsheetWidget.relayoutSheet();
         });
     }
-
 
     private void initState(SpreadsheetState state) {
         state.rows = 50;

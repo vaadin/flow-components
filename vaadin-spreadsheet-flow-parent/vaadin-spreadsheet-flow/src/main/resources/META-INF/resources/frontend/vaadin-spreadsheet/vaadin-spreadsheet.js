@@ -33,7 +33,6 @@ export class VaadinSpreadsheet extends LitElement {
       /*
       SHARED STATE
        */
-
       dirty: {type: Number},
 
       width: {type: String},
@@ -205,11 +204,13 @@ export class VaadinSpreadsheet extends LitElement {
 
   connectedCallback() {
     super.connectedCallback()
+    this.observer && this.observer.observe(this);
     console.log('connected')
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.observer && this.observer.unobserve(this);
     console.log('disconnected')
   }
 
@@ -234,6 +235,8 @@ export class VaadinSpreadsheet extends LitElement {
       console.log('updated')
       this.createCallbacks();
       console.log('callbacks created')
+
+      this.observer = new ResizeObserver(e => this.api.resize());
       initial = true;
     }
     let propNames = [];
