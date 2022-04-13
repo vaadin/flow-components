@@ -594,8 +594,6 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     final public static class DialogFooter extends DialogHeaderFooter {
         private DialogFooter(Dialog dialog) {
             super("footerRenderer", dialog);
-            root.getStyle().set("flex", "1");
-            root.getStyle().set("justify-content", "flex-end");
         }
     }
 
@@ -616,7 +614,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
             this.rendererFunction = rendererFunction;
             this.dialog = dialog;
             root = new Element("div");
-            root.getStyle().set("display", "flex");
+            root.getStyle().set("display", "contents");
         }
 
         /**
