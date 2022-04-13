@@ -52,7 +52,6 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -94,8 +93,7 @@ public class CheckboxGroup<T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>(
-            itemLabelGenerator);
+    private ComponentRenderer<? extends Component, T> itemRenderer;
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
@@ -585,8 +583,14 @@ public class CheckboxGroup<T>
     }
 
     private void updateCheckbox(CheckBoxItem<T> checkbox) {
-        checkbox.setLabelComponent(
-                getItemRenderer().createComponent(checkbox.item));
+        if (itemRenderer == null) {
+            checkbox.setLabel(
+                    getItemLabelGenerator().apply(checkbox.getItem()));
+        } else {
+            checkbox.setLabelComponent(
+                    getItemRenderer().createComponent(checkbox.item));
+        }
+
         checkbox.setValue(getValue().stream().anyMatch(
                 selectedItem -> Objects.equals(getItemId(selectedItem),
                         getItemId(checkbox.getItem()))));
