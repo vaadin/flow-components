@@ -34,27 +34,27 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dev-server</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server-production-mode</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -75,12 +75,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-lit-template</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-polymer-template</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spreadsheet-testbench</artifactId>
-            <version>23.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

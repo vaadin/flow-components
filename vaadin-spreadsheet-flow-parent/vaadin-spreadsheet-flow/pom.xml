@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

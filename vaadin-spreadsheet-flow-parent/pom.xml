@@ -66,8 +66,11 @@
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
 
+        <!-- for vaadin-flow-components -->
         <vaadin.version>${project.version}</vaadin.version>
-        <flow.version>${vaadin.version}</flow.version>
+        <!-- for flow deps and maven plugin -->
+        <flow.version>${project.version}</flow.version>
+        <!-- for gwt widget compilation -->
         <framework.version>8.14.3</framework.version>
 
         <poi.version>4.0.1</poi.version>
