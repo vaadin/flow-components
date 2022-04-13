@@ -131,7 +131,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         addValueChangeListener(listener);
     }
 
-    /** 
+    /**
      * Constructs a checkbox with the initial value, label text and value change
      * listener.
      *

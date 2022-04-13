@@ -37,6 +37,7 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -50,6 +51,8 @@ import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -90,6 +93,9 @@ public class CheckboxGroup<T>
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>(
+            itemLabelGenerator);
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
@@ -186,6 +192,8 @@ public class CheckboxGroup<T>
 
         private final T item;
 
+        private final Label labelElement = appendLabelElement();
+
         private CheckBoxItem(String id, T item) {
             this.item = item;
             getElement().setProperty(VALUE, id);
@@ -196,6 +204,23 @@ public class CheckboxGroup<T>
             return item;
         }
 
+        /**
+         * Replaces the label content with the given label component.
+         *
+         * @param component
+         *            the component to be added to the label.
+         */
+        public void setLabelComponent(Component component) {
+            labelElement.removeAll();
+            labelElement.add(component);
+        }
+
+        private Label appendLabelElement() {
+            Label label = new Label();
+            label.getElement().setAttribute("slot", "label");
+            getElement().appendChild(label.getElement());
+            return label;
+        }
     }
 
     /**
@@ -470,6 +495,33 @@ public class CheckboxGroup<T>
                         .contains(item.getItem()));
     }
 
+    /**
+     * Returns the item component renderer.
+     *
+     * @return the item renderer
+     * @see #setRenderer(ComponentRenderer)
+     */
+    public ComponentRenderer<? extends Component, T> getItemRenderer() {
+        return itemRenderer;
+    }
+
+    /**
+     * Sets the item renderer for this checkbox group. The renderer is applied
+     * to each item to create a component which represents the item.
+     * <p>
+     * Note: Component acts as a label to the checkbox and clicks on it trigger
+     * the checkbox. Hence interactive components like DatePicker or ComboBox
+     * cannot be used.
+     *
+     * @param renderer
+     *            the item renderer, not {@code null}
+     */
+    public void setRenderer(
+            ComponentRenderer<? extends Component, T> renderer) {
+        this.itemRenderer = Objects.requireNonNull(renderer);
+        refreshCheckboxItems();
+    }
+
     @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
@@ -528,8 +580,13 @@ public class CheckboxGroup<T>
         return checkbox;
     }
 
+    private void refreshCheckboxItems() {
+        getCheckboxItems().forEach(this::updateCheckbox);
+    }
+
     private void updateCheckbox(CheckBoxItem<T> checkbox) {
-        checkbox.setLabel(getItemLabelGenerator().apply(checkbox.getItem()));
+        checkbox.setLabelComponent(
+                getItemRenderer().createComponent(checkbox.item));
         checkbox.setValue(getValue().stream().anyMatch(
                 selectedItem -> Objects.equals(getItemId(selectedItem),
                         getItemId(checkbox.getItem()))));
