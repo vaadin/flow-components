@@ -194,6 +194,21 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     }
 
     /**
+     * Replaces the label content with the given label component.
+     *
+     * @param component
+     *            the component to be added to the label.
+     *
+     * @since 23.1
+     */
+    public void setLabelComponent(Component component) {
+        setLabel("");
+        getElement().appendChild(labelElement.getElement());
+        labelElement.removeAll();
+        labelElement.add(component);
+    }
+
+    /**
      * Set the accessibility label of this checkbox.
      *
      * @param ariaLabel
@@ -260,17 +275,5 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     public boolean isIndeterminate() {
         return isIndeterminateBoolean();
-    }
-
-    /**
-     * Replaces the label content with the given label component.
-     *
-     * @param component
-     *            the component to be added to the label.
-     */
-    public void setLabelComponent(Component component) {
-        getElement().appendChild(labelElement.getElement());
-        labelElement.removeAll();
-        labelElement.add(component);
     }
 }

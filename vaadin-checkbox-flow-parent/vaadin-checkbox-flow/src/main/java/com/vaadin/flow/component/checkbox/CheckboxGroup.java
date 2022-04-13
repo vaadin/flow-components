@@ -477,6 +477,8 @@ public class CheckboxGroup<T>
      *
      * @return the item renderer
      * @see #setRenderer(ComponentRenderer)
+     *
+     * @since 23.1
      */
     public ComponentRenderer<? extends Component, T> getItemRenderer() {
         return itemRenderer;
@@ -492,6 +494,8 @@ public class CheckboxGroup<T>
      *
      * @param renderer
      *            the item renderer, not {@code null}
+     *
+     * @since 23.1
      */
     public void setRenderer(
             ComponentRenderer<? extends Component, T> renderer) {
