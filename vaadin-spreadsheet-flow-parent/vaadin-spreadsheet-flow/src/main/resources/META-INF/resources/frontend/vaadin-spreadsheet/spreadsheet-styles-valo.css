@@ -1123,7 +1123,7 @@ v-window-closebox
         left: 0;
         top: 0; }
         .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
-          line-height: 29px;
+          line-height: 26px;
           width: 26px;
           cursor: pointer;
           display: inline-block;
@@ -1133,16 +1133,28 @@ v-window-closebox
           z-index: inherit;
           color: #464646;
           }
-          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-beginning::before {
-            content: "≪"; }
-          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-end::before {
-            content: "≫"; }
-          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-left::before {
-            content: "﹤"; }
-          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-right::before {
-            content: "﹥"; }
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-beginning::before,
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-end::before,
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-left::before,
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-right::before,
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.add-new-tab::before {
-            content: "+"; }
+            content: "";
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            background: currentColor;
+            -webkit-mask-image: var(--mask-image);
+            mask-image: var(--mask-image);
+            --mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>'); }
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-end::before {
+            --mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>'); }
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-left::before {
+            --mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>'); }
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-right::before {
+            --mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>'); }
+          .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.add-new-tab::before {
+            --mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>'); }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
             color: #197de1; }
           .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
@@ -1582,4 +1594,3 @@ v-window-closebox
         box-shadow: none; }
       .spreadsheetport .sheet-image > .v-csslayout .v-button-minimize-button .v-button-caption {
         display: none; }
-
