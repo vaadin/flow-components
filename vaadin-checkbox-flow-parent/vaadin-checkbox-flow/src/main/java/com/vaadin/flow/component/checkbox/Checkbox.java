@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Label;
@@ -131,7 +132,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         addValueChangeListener(listener);
     }
 
-    /** 
+    /**
      * Constructs a checkbox with the initial value, label text and value change
      * listener.
      *
@@ -190,6 +191,21 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         setLabel("");
         labelElement.getElement().setProperty("innerHTML", htmlContent);
         getElement().appendChild(labelElement.getElement());
+    }
+
+    /**
+     * Replaces the label content with the given label component.
+     *
+     * @param component
+     *            the component to be added to the label.
+     *
+     * @since 23.1
+     */
+    public void setLabelComponent(Component component) {
+        setLabel("");
+        getElement().appendChild(labelElement.getElement());
+        labelElement.removeAll();
+        labelElement.add(component);
     }
 
     /**
