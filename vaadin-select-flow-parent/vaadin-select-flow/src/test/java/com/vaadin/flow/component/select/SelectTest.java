@@ -137,7 +137,7 @@ public class SelectTest {
         Assert.assertEquals("Invalid number of items", 0,
                 getListBox().getChildren().count());
 
-        select = new Select<>("label", "foo", "bar", "baz");
+        select = new Select<>("foo", "bar", "baz");
 
         Assert.assertEquals("Invalid number of items", 3,
                 getListBox().getChildren().count());

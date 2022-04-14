@@ -47,7 +47,7 @@ public class OverrideClientValidationPage extends Div {
     }
 
     private void createBasicSetup() {
-        basicSelect = new Select<>("label", "a", "b", "c");
+        basicSelect = new Select<>("a", "b", "c");
         basicSelect.setId(ID_BASIC_SELECT);
 
         basicSelectResultSpan = new Span();
