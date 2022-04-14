@@ -51,10 +51,16 @@
 
           let items = [...menubar.__cachedItems];
 
+          // Watch for the properties change.
           items.forEach((item) => {
             observer.observe(item.component, {
               attributeFilter: ['hidden', 'disabled']
             });
+          });
+
+          // Propagate disabled state from items to parent buttons.
+          items.forEach((item) => {
+            item.disabled = item.component.disabled;
           });
 
           // Remove hidden items entirely from the array. Just hiding them
@@ -65,16 +71,10 @@
           // to update the disabled state and re-render buttons.
           items = items.filter((item) => !item.component.hidden);
 
-          // Propagate disabled state from items to parent buttons
-          items.forEach((item) => {
-            item.disabled = item.component.disabled;
-          });
-
           // Assign the items to the menu-bar that will cause it to re-render.
           menubar.items = items;
 
-          // Setup click listeners for the menu's buttons
-          // to propagate click events from them to the context-menu-item components.
+          // Propagate click events from the menu buttons to the item components
           menubar._buttons.forEach(button => {
             if (button.item && button.item.component) {
               button.addEventListener('click', e => {
