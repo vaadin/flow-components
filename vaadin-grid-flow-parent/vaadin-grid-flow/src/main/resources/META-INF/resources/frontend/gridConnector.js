@@ -159,7 +159,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           selectedKeys = {};
         }
 
-        grid.selectedItems = grid.selectedItems.concat(items);
+        // For single selection mode, "deselect all" selects a single item `null`,
+        // which should not end up in the selected items
+        const sanitizedItems = items.filter(item => item !== null);
+        grid.selectedItems = grid.selectedItems.concat(sanitizedItems);
+
         items.forEach(item => {
           if (item) {
             selectedKeys[item.key] = item;
@@ -369,7 +373,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             // Ensure grid isn't in loading state when the callback executes
             ensureSubCacheQueue = [];
             callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
-            
+
             // Flush after the callback to have the grid rows up-to-date
             updateAllGridRowsInDomBasedOnCache();
             // Prevent sub-caches from being created (& data requests sent) for items
@@ -852,7 +856,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         if (levelSize === 0) {
           cache[parentKey][0] = [];
         }
-        
+
         let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey] || {});
         for(let i = 0; i < outstandingRequests.length; i++) {
           let page = outstandingRequests[i];
