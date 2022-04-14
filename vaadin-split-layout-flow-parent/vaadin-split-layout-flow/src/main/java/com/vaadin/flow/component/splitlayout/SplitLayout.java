@@ -189,8 +189,9 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *            the orientation set to the layout
      */
     public SplitLayout(Orientation orientation) {
-        this();
         setOrientation(orientation);
+        addAttachListener(
+                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
     }
 
     /**
