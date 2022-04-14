@@ -334,10 +334,9 @@ public class MenuBar extends Component
 
     void resetContent() {
         menuItemsArrayGenerator.generate();
-        resetItemsOnClientSide();
     }
 
-    void resetItemsOnClientSide() {
+    void updateButtons() {
         if (updateScheduled) {
             return;
         }

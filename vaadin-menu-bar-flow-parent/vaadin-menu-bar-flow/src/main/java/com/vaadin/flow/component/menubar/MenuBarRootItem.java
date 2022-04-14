@@ -48,7 +48,7 @@ class MenuBarRootItem extends MenuItem {
     @Override
     public void addThemeNames(String... themeNames) {
         super.addThemeNames(themeNames);
-        menuBar.resetItemsOnClientSide();
+        menuBar.updateButtons();
     }
 
     /**
@@ -61,6 +61,6 @@ class MenuBarRootItem extends MenuItem {
     @Override
     public void removeThemeNames(String... themeNames) {
         super.removeThemeNames(themeNames);
-        menuBar.resetItemsOnClientSide();
+        menuBar.updateButtons();
     }
 }
