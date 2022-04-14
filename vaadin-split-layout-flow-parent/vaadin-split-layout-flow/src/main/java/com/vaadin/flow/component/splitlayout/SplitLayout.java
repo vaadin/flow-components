@@ -205,8 +205,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @param orientation
      *            the orientation set to the layout
      */
-    public SplitLayout(Component primaryComponent,
-                       Component secondaryComponent, Orientation orientation) {
+    public SplitLayout(Component primaryComponent, Component secondaryComponent,
+            Orientation orientation) {
         this(primaryComponent, secondaryComponent);
         setOrientation(orientation);
     }
