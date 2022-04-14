@@ -48,6 +48,7 @@ import elemental.json.JsonObject;
 @SuppressWarnings("serial")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
+@JsModule("./contextMenuTargetConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends GeneratedVaadinContextMenu<C> implements HasComponents {
 
@@ -101,7 +102,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
             getTarget().getElement()
-                    .callJsFunction("$contextMenuConnector.removeConnector");
+                    .callJsFunction("$contextMenuTargetConnector.removeConnector");
             if (isTargetJsPending()) {
                 targetJsRegistration.cancelExecution();
                 targetJsRegistration = null;
@@ -385,8 +386,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
                 targetJsRegistration.cancelExecution();
             }
             targetJsRegistration = target.getElement().executeJs(
-                    "window.Vaadin.Flow.contextMenuConnector.init(this);"
-                            + "this.$contextMenuConnector.updateOpenOn($0);",
+                    "window.Vaadin.Flow.contextMenuTargetConnector.init(this);"
+                            + "this.$contextMenuTargetConnector.updateOpenOn($0);",
                     openOnEventName);
         }
     }
@@ -403,7 +404,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         if (shouldOpenMenu) {
             addContextMenuToUi();
-            target.getElement().callJsFunction("$contextMenuConnector.openMenu",
+            target.getElement().callJsFunction("$contextMenuTargetConnector.openMenu",
                     getElement());
         }
     }

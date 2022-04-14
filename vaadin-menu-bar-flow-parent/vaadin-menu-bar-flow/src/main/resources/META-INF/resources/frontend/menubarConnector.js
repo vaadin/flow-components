@@ -19,22 +19,39 @@
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Menu Bar');
   };
 
+  // const observer = new MutationObserver((records) => {
+  //   records.forEach((mutation) => {
+  //     if (mutation.type === 'attributes' && mutation.attributeName === 'disabled') {
+
+  //     }
+  //   });
+  // });
+
   window.Vaadin.Flow.menubarConnector = {
     initLazy: function (menubar) {
       if (menubar.$connector) {
         return;
       }
-      menubar.$connector = {
 
-        updateButtons: tryCatchWrapper(function () {
+      menubar.$connector = {
+        /**
+         * @param {string | undefined} appId
+         * @param {number | undefined} nodeId
+         */
+        renderItems: tryCatchWrapper((appId, nodeId) => {
           if (!menubar.shadowRoot) {
             // workaround for https://github.com/vaadin/flow/issues/5722
-            setTimeout(() => menubar.$connector.updateButtons());
+            setTimeout(() => menubar.$connector.renderItems(appId, nodeId));
             return;
           }
 
-          // Propagate disabled state from items to parent buttons
-          menubar.items.forEach(item => item.disabled = item.component.disabled);
+          menubar._appId = appId || menubar._appId;
+          menubar._nodeId = nodeId || menubar._nodeId;
+
+          const items = window.Vaadin.Flow.contextMenuConnector.constructItemsTree(
+            menubar._appId,
+            menubar._nodeId
+          );
 
           // Remove hidden items entirely from the array. Just hiding them
           // could cause the overflow button to be rendered without items.
@@ -42,9 +59,18 @@
           //
           // The items-prop needs to be set even when all items are visible
           // to update the disabled state and re-render buttons.
-          menubar.items = menubar.items.filter(item => !item.component.hidden);
+          items = items.filter((item) => !item.component.hidden);
 
-          // Propagate click events from the menu buttons to the item components
+          // Propagate disabled state from items to parent buttons
+          items.forEach((item) => {
+            item.disabled = item.component.disabled;
+          });
+
+          // Assign the items to the menu-bar that will cause it to re-render.
+          menubar.items = items;
+
+          // Setup click listeners for the menu's buttons
+          // to propagate click events from them to the context-menu-item components.
           menubar._buttons.forEach(button => {
             if (button.item && button.item.component) {
               button.addEventListener('click', e => {
@@ -55,8 +81,12 @@
               });
             }
           });
+
+          menubar._buttons.forEach(() => {
+            // Implement the Mutation Observer logic.
+          });
         })
-      };
+      }
     }
   };
 })();
