@@ -19,40 +19,43 @@
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Menu Bar');
   };
 
-  // const observer = new MutationObserver((records) => {
-  //   records.forEach((mutation) => {
-  //     if (mutation.type === 'attributes' && mutation.attributeName === 'disabled') {
-
-  //     }
-  //   });
-  // });
-
   window.Vaadin.Flow.menubarConnector = {
-    initLazy: function (menubar) {
+    initLazy: function (menubar, appId) {
       if (menubar.$connector) {
         return;
       }
 
+      const observer = new MutationObserver((records) => {
+        records.forEach(() => {
+          menubar.$connector.assignItems();
+        });
+      });
+
       menubar.$connector = {
         /**
-         * @param {string | undefined} appId
          * @param {number | undefined} nodeId
          */
-        assignItems: tryCatchWrapper((appId, nodeId) => {
+        assignItems: tryCatchWrapper((nodeId) => {
           if (!menubar.shadowRoot) {
             // workaround for https://github.com/vaadin/flow/issues/5722
-            setTimeout(() => menubar.$connector.assignItems(appId, nodeId));
+            setTimeout(() => menubar.$connector.assignItems(nodeId));
             return;
           }
 
-          if (appId && nodeId) {
+          if (nodeId) {
             menubar.__cachedItems = window.Vaadin.Flow.contextMenuConnector.constructItemsTree(
               appId,
               nodeId
             );
           }
 
-          let items = menubar.__cachedItems;
+          let items = [...menubar.__cachedItems];
+
+          items.forEach((item) => {
+            observer.observe(item.component, {
+              attributeFilter: ['hidden', 'disabled']
+            });
+          });
 
           // Remove hidden items entirely from the array. Just hiding them
           // could cause the overflow button to be rendered without items.
@@ -81,10 +84,6 @@
                 }
               });
             }
-          });
-
-          menubar._buttons.forEach(() => {
-            // Implement the Mutation Observer logic.
           });
         })
       }

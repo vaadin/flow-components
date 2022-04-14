@@ -35,24 +35,6 @@ class MenuBarRootItem extends MenuItem {
         }
     }
 
-    @Override
-    public void setEnabled(boolean enabled) {
-        if (enabled == isEnabled()) {
-            return;
-        }
-        super.setEnabled(enabled);
-        menuBar.resetItemsOnClientSide();
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        if (visible == isVisible()) {
-            return;
-        }
-        super.setVisible(visible);
-        menuBar.resetItemsOnClientSide();
-    }
-
     /**
      * Adds one or more theme names to this item. Multiple theme names can be
      * specified by using multiple parameters.

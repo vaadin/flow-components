@@ -55,6 +55,11 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
      */
     public ContextMenu() {
         getElement().setAttribute("suppress-template-warning", true);
+
+        addAttachListener(event -> {
+            String appId = event.getUI().getInternals().getAppId();
+            initConnector(appId);
+        });
     }
 
     /**
@@ -88,4 +93,8 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
                 MenuItem.class, null);
     }
 
+    private void initConnector(String appId) {
+        getElement().executeJs(
+                "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)", appId);
+    }
 }

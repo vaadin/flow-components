@@ -13,17 +13,16 @@
   }
 
   window.Vaadin.Flow.contextMenuConnector = {
-    initLazy: tryCatchWrapper(() => {
+    initLazy: tryCatchWrapper((appId) => {
       if (contextMenu.$connector) {
         return;
       }
 
       contextMenu.$connector = {
         /**
-         * @param {string} appId
          * @param {string} nodeId
          */
-        assignItems: tryCatchWrapper((appId, nodeId) => {
+        assignItems: tryCatchWrapper((nodeId) => {
           const items = window.Vaadin.Flow.contextMenuConnector.constructItemsTree(
             appId,
             nodeId

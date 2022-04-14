@@ -77,7 +77,8 @@ public class MenuBar extends Component
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {
-            initConnector();
+            String appId = event.getUI().getInternals().getAppId();
+            initConnector(appId);
             resetContent();
         });
     }
@@ -347,9 +348,9 @@ public class MenuBar extends Component
         updateScheduled = true;
     }
 
-    private void initConnector() {
+    private void initConnector(String appId) {
         getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this)");
+                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)", appId);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
