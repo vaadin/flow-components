@@ -333,15 +333,15 @@ public class MenuBar extends Component
 
     void resetContent() {
         menuItemsArrayGenerator.generate();
-        updateButtons();
+        resetItemsOnClientSide();
     }
 
-    void updateButtons() {
+    void resetItemsOnClientSide() {
         if (updateScheduled) {
             return;
         }
         runBeforeClientResponse(ui -> {
-            getElement().executeJs("this.$connector.updateButtons()");
+            getElement().callJsFunction("$connector.assignItems");
             updateScheduled = false;
         });
         updateScheduled = true;

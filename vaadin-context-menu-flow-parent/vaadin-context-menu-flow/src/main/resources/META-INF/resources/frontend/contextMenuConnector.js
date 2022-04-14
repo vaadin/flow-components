@@ -23,7 +23,7 @@
          * @param {string} appId
          * @param {string} nodeId
          */
-        renderItems: tryCatchWrapper((appId, nodeId) => {
+        assignItems: tryCatchWrapper((appId, nodeId) => {
           const items = window.Vaadin.Flow.contextMenuConnector.constructItemsTree(
             appId,
             nodeId
@@ -58,7 +58,7 @@
      * @param {string} appId
      * @param {number} nodeId
      */
-    constructItemsTree: tryCatchWrapper((appId, nodeId) => {
+    constructItemsTree: tryCatchWrapper(function constructItemsTree(appId, nodeId) {
       const container = getContainer(appId, nodeId);
       if (!container) {
         return;

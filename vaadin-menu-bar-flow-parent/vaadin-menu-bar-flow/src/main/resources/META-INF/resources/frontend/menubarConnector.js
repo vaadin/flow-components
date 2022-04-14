@@ -38,20 +38,21 @@
          * @param {string | undefined} appId
          * @param {number | undefined} nodeId
          */
-        renderItems: tryCatchWrapper((appId, nodeId) => {
+        assignItems: tryCatchWrapper((appId, nodeId) => {
           if (!menubar.shadowRoot) {
             // workaround for https://github.com/vaadin/flow/issues/5722
-            setTimeout(() => menubar.$connector.renderItems(appId, nodeId));
+            setTimeout(() => menubar.$connector.assignItems(appId, nodeId));
             return;
           }
 
-          menubar._appId = appId || menubar._appId;
-          menubar._nodeId = nodeId || menubar._nodeId;
+          if (appId && nodeId) {
+            menubar.__cachedItems = window.Vaadin.Flow.contextMenuConnector.constructItemsTree(
+              appId,
+              nodeId
+            );
+          }
 
-          const items = window.Vaadin.Flow.contextMenuConnector.constructItemsTree(
-            menubar._appId,
-            menubar._nodeId
-          );
+          let items = menubar.__cachedItems;
 
           // Remove hidden items entirely from the array. Just hiding them
           // could cause the overflow button to be rendered without items.

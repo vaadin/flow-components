@@ -41,7 +41,7 @@ class MenuBarRootItem extends MenuItem {
             return;
         }
         super.setEnabled(enabled);
-        menuBar.updateButtons();
+        menuBar.resetItemsOnClientSide();
     }
 
     @Override
@@ -50,7 +50,7 @@ class MenuBarRootItem extends MenuItem {
             return;
         }
         super.setVisible(visible);
-        menuBar.resetContent();
+        menuBar.resetItemsOnClientSide();
     }
 
     /**
@@ -66,7 +66,7 @@ class MenuBarRootItem extends MenuItem {
     @Override
     public void addThemeNames(String... themeNames) {
         super.addThemeNames(themeNames);
-        menuBar.updateButtons();
+        menuBar.resetItemsOnClientSide();
     }
 
     /**
@@ -79,6 +79,6 @@ class MenuBarRootItem extends MenuItem {
     @Override
     public void removeThemeNames(String... themeNames) {
         super.removeThemeNames(themeNames);
-        menuBar.updateButtons();
+        menuBar.resetItemsOnClientSide();
     }
 }
