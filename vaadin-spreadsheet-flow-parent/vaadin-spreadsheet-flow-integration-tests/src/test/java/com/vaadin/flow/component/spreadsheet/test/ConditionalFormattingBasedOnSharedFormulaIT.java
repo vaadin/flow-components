@@ -24,7 +24,6 @@ public class ConditionalFormattingBasedOnSharedFormulaIT
                 super.getBaseURL() + "/vaadin-spreadsheet");
         getDriver().get(url);
 
-        createNewSpreadsheet();
         loadFile("conditional_formatting_shared_formula.xlsx");
     }
 

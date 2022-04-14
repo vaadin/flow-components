@@ -185,7 +185,8 @@ public class DemoUIView extends VerticalLayout implements Receiver {
         checkBoxLayout.setSpacing(false);
 
         Button freezePanesButton = new Button("Freeze Pane",
-                e->addWindow(new FreezePaneWindow()));
+                e->new FreezePaneWindow().open());
+        freezePanesButton.setId("freezePane");
 
         hideTop = new Checkbox("hide top bar visibility");
         hideBottom = new Checkbox("hide bottom bar visibility");
@@ -322,10 +323,6 @@ public class DemoUIView extends VerticalLayout implements Receiver {
     		b.setValue(false);
     		b.setEnabled(false);
     	}
-    }
-
-    private void addWindow(FreezePaneWindow freezePaneWindow) {
-        new Dialog(freezePaneWindow).open();
     }
 
     private Button createSaveButton() {
@@ -973,12 +970,15 @@ public class DemoUIView extends VerticalLayout implements Receiver {
 
             final TextField hSplitTF = new TextField(
                     "Horizontal Split Position");
+            hSplitTF.setId("horizontalSplitPosition");
             hSplitTF.setValue("6");
             final TextField vSplitTF = new TextField("Vertical Split Position");
+            vSplitTF.setId("verticalSplitPosition");
             vSplitTF.setValue("6");
             l.add(vSplitTF);
             l.add(hSplitTF);
             Button button = new Button("Submit values");
+            button.setId("submitValues");
             button.addClickListener(event -> {
                 try {
                     int vSprlit = Integer.parseInt(vSplitTF.getValue());

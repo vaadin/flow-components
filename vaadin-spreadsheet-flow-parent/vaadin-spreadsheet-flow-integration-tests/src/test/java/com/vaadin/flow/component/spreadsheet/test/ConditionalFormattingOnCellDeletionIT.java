@@ -16,7 +16,6 @@ public class ConditionalFormattingOnCellDeletionIT extends AbstractSpreadsheetIT
                 super.getBaseURL() + "/vaadin-spreadsheet");
         getDriver().get(url);
 
-        createNewSpreadsheet();
         loadFile("conditional_formatting_with_formula_on_second_sheet.xlsx");
     }
 

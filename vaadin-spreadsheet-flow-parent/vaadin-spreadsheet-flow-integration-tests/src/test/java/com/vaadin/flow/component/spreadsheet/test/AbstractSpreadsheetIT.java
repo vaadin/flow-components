@@ -4,6 +4,7 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.tests.AbstractParallelTest;
 import org.junit.Assert;
 import org.openqa.selenium.By;
@@ -11,41 +12,68 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
+    // Should be COMMAND for macOS
+    private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
     public void selectCell(String address) {
-        // TODO: clean up solution
-        new Actions(getDriver()).moveToElement(getSpreadsheet().getCellAt(address)).click().build()
-                .perform();
+        selectElement(getSpreadsheet().getCellAt(address), false, false);
     }
 
     public void selectCell(String address, boolean ctrl, boolean shift) {
-        // TODO: clean up solution
+        selectElement(getSpreadsheet().getCellAt(address), ctrl, shift);
+    }
+
+    public void selectRow(int row) {
+        selectElement(getSpreadsheet().getRowHeader(row), false, false);
+    }
+
+    public void selectRow(int row, boolean ctrl, boolean shift) {
+        selectElement(getSpreadsheet().getRowHeader(row), ctrl, shift);
+    }
+
+    public void selectColumn(String column) {
+        selectElement(getSpreadsheet().getColumnHeader(column.charAt(0) - 'A' + 1), false, false);
+    }
+
+    public void selectColumn(String column, boolean ctrl, boolean shift) {
+        selectElement(getSpreadsheet().getColumnHeader(column.charAt(0) - 'A' + 1), ctrl, shift);
+    }
+
+    public void selectRegion(String from, String to) {
+        new Actions(getDriver()).clickAndHold(getSpreadsheet().getCellAt(from))
+                .release(getSpreadsheet().getCellAt(to)).perform();
+    }
+
+    private void selectElement(WebElement element, boolean ctrl, boolean shift) {
         if (ctrl) {
-            new Actions(getDriver()).moveToElement(getSpreadsheet().getCellAt(address))
-                    .keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+            new Actions(getDriver()).moveToElement(element)
+                    .keyDown(metaKey)
                     .click()
-                    .keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .keyUp(metaKey)
                     .build().perform();
         } else if (shift) {
-            new Actions(getDriver()).moveToElement(getSpreadsheet().getCellAt(address))
+            new Actions(getDriver()).moveToElement(element)
                     .keyDown(Keys.SHIFT)
                     .click()
                     .keyUp(Keys.SHIFT)
                     .build().perform();
         } else if (ctrl && shift) {
-            new Actions(getDriver()).moveToElement(getSpreadsheet().getCellAt(address))
-                    .keyDown(Keys.SHIFT).keyDown(Keys.SHIFT).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+            new Actions(getDriver()).moveToElement(element)
+                    .keyDown(Keys.SHIFT).keyDown(metaKey)
                     .click()
-                    .keyUp(Keys.SHIFT).keyUp(Keys.SHIFT).keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .keyUp(Keys.SHIFT).keyUp(metaKey)
                     .build().perform();
         } else {
-            selectCell(address);
+            new Actions(getDriver()).moveToElement(element).click().build()
+                    .perform();
         }
     }
 
@@ -61,7 +89,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getCellContent(String address) {
-        return $(SpreadsheetElement.class).first().getCellAt(address).getValue();
+        return getSpreadsheet().getCellAt(address).getValue();
     }
 
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
@@ -98,6 +126,23 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         setSpreadsheet($(SpreadsheetElement.class).first());
     }
 
+    public void addFreezePane() {
+        $("vaadin-button").id("freezePane").click();
+        $("vaadin-button").id("submitValues").click();
+    }
+
+    public void addFreezePane(int horizontalSplitPosition, int verticalSplitPosition) {
+        $("vaadin-button").id("freezePane").click();
+        $(TextFieldElement.class).id("verticalSplitPosition").setValue(String.valueOf(verticalSplitPosition));
+        $(TextFieldElement.class).id("horizontalSplitPosition").setValue(String.valueOf(horizontalSplitPosition));
+        $("vaadin-button").id("submitValues").click();
+    }
+
+    public void setLocale(Locale locale) {
+        ComboBoxElement localeSelect = $(ComboBoxElement.class).id("localeSelect");
+        localeSelect.selectByText(locale.getDisplayName());
+    }
+
     public void loadTestFixture(TestFixtures fixture) {
         $(ComboBoxElement.class).id("fixtureSelect").selectByText(
                 fixture.toString());
@@ -121,6 +166,30 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return findElement(By.cssSelector("input.addressfield"));
     }
 
+    private WebElement getFormulaField() {
+        return getDriver().findElement(By.className("functionfield"));
+    }
+
+    public String getFormulaFieldValue() {
+        return getFormulaField().getAttribute("value");
+    }
+
+    public void insertColumn(String[] values) {
+        for (String value : values) {
+            insertAndRet(value);
+        }
+    }
+
+    private void insertAndRet(CharSequence k) {
+        action(k);
+        action(Keys.RETURN);
+        action(Keys.ENTER);
+    }
+
+    private void action(CharSequence k) {
+        new Actions(getDriver()).sendKeys(k).build().perform();
+    }
+
     public boolean isCellSelected(int col, int row) {
         return getSpreadsheet().getCellAt(row, col)
                 .isCellSelected();
@@ -131,10 +200,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void navigateToCell(String cell) {
-        driver.findElement(By.xpath("//*[@class='addressfield']")).clear();
-        driver.findElement(By.xpath("//*[@class='addressfield']")).sendKeys(
+        getDriver().findElement(By.xpath("//*[@class='addressfield']")).clear();
+        getDriver().findElement(By.xpath("//*[@class='addressfield']")).sendKeys(
                 cell);
-        new Actions(driver).sendKeys(Keys.RETURN).perform();
+        new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
 
     // Context menu helpers
@@ -151,5 +220,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public boolean hasOption (String caption) {
         return getDriver().findElements(By.xpath("//div[@class='popupContent']//*[text()='"+caption+"']")).size()!=0;
+    }
+
+    public List<WebElement> getGroupings() {
+        return getSpreadsheet()
+                .findElements(By.cssSelector(".col-group-pane .grouping.plus"));
     }
 }

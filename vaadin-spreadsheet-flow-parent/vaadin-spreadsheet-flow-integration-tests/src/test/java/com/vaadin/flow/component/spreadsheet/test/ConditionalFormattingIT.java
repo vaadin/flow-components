@@ -13,7 +13,6 @@ public class ConditionalFormattingIT extends AbstractSpreadsheetIT {
                 super.getBaseURL() + "/vaadin-spreadsheet");
         getDriver().get(url);
 
-        createNewSpreadsheet();
         loadFile("conditional_formatting_with_Invalid_formula.xlsx");
     }
 

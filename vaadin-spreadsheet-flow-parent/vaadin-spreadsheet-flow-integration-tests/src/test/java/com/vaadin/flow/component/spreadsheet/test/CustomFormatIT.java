@@ -1,25 +1,21 @@
-package com.vaadin.addon.spreadsheet.test;
+package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-import java.util.Locale;
-
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
-import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import java.util.Locale;
 
-public class CustomFormatTest extends AbstractSpreadsheetTestCase {
+public class CustomFormatIT extends AbstractSpreadsheetIT {
 
-    private SpreadsheetElement spreadSheet;
+    @Before
+    public void init() {
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-spreadsheet");
+        getDriver().get(url);
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        headerPage.loadFile("custom_format.xlsx", this);
-
-        spreadSheet = $(SpreadsheetElement.class).first();
-
+        loadFile("custom_format.xlsx");
         setLocale(Locale.US);
     }
 
@@ -138,16 +134,17 @@ public class CustomFormatTest extends AbstractSpreadsheetTestCase {
 
     private void assertCellFormatAfterLocaleChange(String cellID, String value,
         String expected, Locale locale) {
-        SheetCellElement formatCell = spreadSheet.getCellAt(cellID);
+        SheetCellElement formatCell = getSpreadsheet().getCellAt(cellID);
+        selectCell(cellID);
         formatCell.setValue(value);
         setLocale(locale);
 
         // numbers are right-aligned
-        assertEquals("right", formatCell.getCssValue("text-align"));
-        assertEquals(expected, formatCell.getValue());
+        Assert.assertEquals("right", formatCell.getCssValue("text-align"));
+        Assert.assertEquals(expected, formatCell.getValue());
     }
 
     private void assertCellValue(String cell, String value) {
-        assertEquals(value, spreadSheet.getCellAt(cell).getValue());
+        Assert.assertEquals(value, getSpreadsheet().getCellAt(cell).getValue());
     }
 }

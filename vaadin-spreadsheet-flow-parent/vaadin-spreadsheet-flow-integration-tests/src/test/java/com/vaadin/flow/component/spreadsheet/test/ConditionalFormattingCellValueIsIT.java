@@ -21,7 +21,6 @@ public class ConditionalFormattingCellValueIsIT extends AbstractSpreadsheetIT {
                 super.getBaseURL() + "/vaadin-spreadsheet");
         getDriver().get(url);
 
-        createNewSpreadsheet();
         loadFile("conditional_formatting_cell_is.xlsx");
         selectSheetAt(1);
     }

@@ -19,7 +19,6 @@ public class ConditionalFormattingBasedOnFormulaIT
                 super.getBaseURL() + "/vaadin-spreadsheet");
         getDriver().get(url);
 
-        createNewSpreadsheet();
         loadFile("conditional_formatting_with_formula_on_second_sheet.xlsx");
         selectSheetAt(1);
     }

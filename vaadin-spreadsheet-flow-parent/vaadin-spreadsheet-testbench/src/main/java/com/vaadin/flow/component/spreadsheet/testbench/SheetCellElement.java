@@ -30,7 +30,10 @@ public class SheetCellElement extends TestBenchElement {
      */
     public void setValue(String newValue) {
         if (isNormalCell()) {
-            doubleClick();
+            waitUntil(driver -> {
+                doubleClick();
+                return parent.getCellValueInput().isDisplayed();
+            });
             WebElement cellValueInput = parent.getCellValueInput();
             executeScript("arguments[0].value=''", ((TestBenchElement) cellValueInput).getWrappedElement());
             cellValueInput.sendKeys(newValue);

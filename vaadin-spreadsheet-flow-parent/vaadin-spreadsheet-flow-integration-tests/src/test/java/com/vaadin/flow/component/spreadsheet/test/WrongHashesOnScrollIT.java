@@ -1,14 +1,13 @@
-package com.vaadin.addon.spreadsheet.test;
+package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertNotEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.openqa.selenium.WebElement;
-
-import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.testbench.By;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * The issue we are trying to test has a race condition: when you scroll left
@@ -20,27 +19,32 @@ import com.vaadin.testbench.By;
  * Because it's a race condition, it cannot be tested reliably, we are doing the
  * best here in hope that we catch an issue if there is one.
  */
-public class WrongHashesOnScrollTest extends AbstractSpreadsheetTestCase {
+public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
+
+    @Before
+    public void init() {
+        String url = getBaseURL().replace(super.getBaseURL(),
+                super.getBaseURL() + "/vaadin-spreadsheet");
+        getDriver().get(url);
+    }
 
     @Test
     public void openSpreadsheet_scrollLeftAndRight_thereAreNoHashes()
             throws Exception {
 
-        headerPage.loadFile("wrong_hashes.xlsx", this);
+        loadFile("wrong_hashes.xlsx");
 
-        final SpreadsheetElement element = $(SpreadsheetElement.class).first();
+        getSpreadsheet().scroll(250);
 
-        element.scroll(250);
-
-        element.scrollLeft(1600);
+        getSpreadsheet().scrollLeft(1600);
 
         Thread.sleep(500);
 
-        element.scrollLeft(0);
+        getSpreadsheet().scrollLeft(0);
 
         Thread.sleep(500);
 
-        final List<WebElement> elements = element
+        final List<WebElement> elements = getSpreadsheet()
                 .findElements(By.cssSelector(".cell"));
 
         for (WebElement cell : elements) {
