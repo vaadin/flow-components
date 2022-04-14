@@ -183,6 +183,34 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     }
 
     /**
+     * Constructs a VaadinSplitLayout with the orientation.
+     *
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Orientation orientation) {
+        this();
+        setOrientation(orientation);
+    }
+
+    /**
+     * Constructs a VaadinSplitLayout with the given initial components to set
+     * to the primary and secondary splits and with the orientation.
+     *
+     * @param primaryComponent
+     *            the component set to the primary split
+     * @param secondaryComponent
+     *            the component set to the secondary split
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Component primaryComponent,
+                       Component secondaryComponent, Orientation orientation) {
+        this(primaryComponent, secondaryComponent);
+        setOrientation(orientation);
+    }
+
+    /**
      * Set the orientation of the SplitLayout.
      * <p>
      * Default value is {@link Orientation#HORIZONTAL}.
