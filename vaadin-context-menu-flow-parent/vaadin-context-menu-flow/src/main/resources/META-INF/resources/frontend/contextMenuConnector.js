@@ -25,6 +25,11 @@
       }
 
       contextMenu.$connector = {
+        /**
+         * Generates and assigns the items to the context menu.
+         *
+         * @param {number} nodeId
+         */
         generateItems: tryCatchWrapper((nodeId) => {
           const items = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(
             appId,
