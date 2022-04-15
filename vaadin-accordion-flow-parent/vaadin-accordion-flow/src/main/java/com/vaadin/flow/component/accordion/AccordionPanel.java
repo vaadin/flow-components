@@ -37,6 +37,30 @@ public class AccordionPanel extends Details {
     }
 
     /**
+     * Initializes a new panel using the provided summary.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @see #setSummaryText(String)
+     */
+    public AccordionPanel(String summary) {
+        this();
+        setSummaryText(summary);
+    }
+
+    /**
+     * Initializes a new panel using the provided summary.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @see #setSummary(Component)
+     */
+    public AccordionPanel(Component summary) {
+        this();
+        setSummary(summary);
+    }
+
+    /**
      * Creates a panel with the provided summary text and content.
      *
      * @param summary
@@ -58,5 +82,39 @@ public class AccordionPanel extends Details {
      */
     public AccordionPanel(Component summary, Component content) {
         super(summary, content);
+    }
+
+    /**
+     * Initializes a new panel using the provided summary and content
+     * components.
+     *
+     * @param summary
+     *            the summary text to set.
+     * @param components
+     *            the content components to set.
+     *
+     * @see #setSummaryText(String)
+     * @see #addContent(Component...)
+     */
+    public AccordionPanel(String summary, Component... components) {
+        this(summary);
+        addContent(components);
+    }
+
+    /**
+     * Initializes a new panel using the provided summary and content
+     * components.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @param components
+     *            the content components to set.
+     *
+     * @see #setSummary(Component)
+     * @see #addContent(Component...)
+     */
+    public AccordionPanel(Component summary, Component... components) {
+        this(summary);
+        addContent(components);
     }
 }
