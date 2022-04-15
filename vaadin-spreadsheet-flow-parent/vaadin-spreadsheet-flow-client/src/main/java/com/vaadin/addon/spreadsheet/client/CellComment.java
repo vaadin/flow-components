@@ -76,7 +76,7 @@ public class CellComment extends SpreadsheetOverlay {
         setOwner(owner);
         setAnimationEnabled(false);
         setVisible(false);
-        setZIndex(30);
+        setZIndex(0);
 
         invalidFormula = new VLabel();
         invalidFormula.setVisible(false);
@@ -105,11 +105,11 @@ public class CellComment extends SpreadsheetOverlay {
     }
 
     public void bringForward() {
-        setZIndex(35);
+        setZIndex(1);
     }
 
     public void pushBack() {
-        setZIndex(30);
+        setZIndex(0);
     }
 
     @Override

@@ -27,7 +27,7 @@ public class Cell {
 
     public static final String CELL_COMMENT_TRIANGLE_CLASSNAME = "cell-comment-triangle";
     public static final String CELL_INVALID_FORMULA_CLASSNAME = "cell-invalidformula-triangle";
-    private static final int ZINDEXVALUE = 2;
+    private static final int ZINDEXVALUE = 1;
     private final DivElement element;
     private DivElement cellCommentTriangle;
     private DivElement invalidFormulaTriangle;

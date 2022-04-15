@@ -37,7 +37,10 @@ import com.vaadin.client.ui.VOverlay;
 
 public class SelectionWidget extends Composite {
 
+    private static final int ZINDEXVALUE = 2;
+
     private class SelectionOutlineWidget extends Widget {
+
 
         private static final int eventBits = Event.ONMOUSEDOWN
                 | Event.ONMOUSEMOVE | Event.ONMOUSEUP | Event.TOUCHEVENTS
@@ -613,13 +616,13 @@ public class SelectionWidget extends Composite {
         bottomRight = new SelectionOutlineWidget();
         initWidget(bottomRight);
 
-        bottomRight.setZIndex(8);
+        bottomRight.setZIndex(ZINDEXVALUE);
         bottomRight.addStyleName("bottom-right");
         setVisible(false);
 
         paintBottomRight = new PaintOutlineWidget();
         paintBottomRight.addStyleName("bottom-right");
-        paintBottomRight.setZIndex(9);
+        paintBottomRight.setZIndex(ZINDEXVALUE);
 
         Element bottomRightPane = sheetWidget.getBottomRightPane();
         bottomRight.setSheetElement(bottomRightPane);
@@ -632,12 +635,12 @@ public class SelectionWidget extends Composite {
             bottomLeft = new SelectionOutlineWidget();
             bottomLeft.setSheetElement(sheetWidget.getBottomLeftPane());
             bottomLeft.setVisible(false);
-            bottomLeft.setZIndex(18);
+            bottomLeft.setZIndex(ZINDEXVALUE);
             bottomLeft.addStyleName("bottom-left");
             paintBottomLeft = new PaintOutlineWidget();
             paintBottomLeft.setSheetElement(sheetWidget.getBottomLeftPane());
             paintBottomLeft.setVisible(false);
-            paintBottomLeft.setZIndex(19);
+            paintBottomLeft.setZIndex(ZINDEXVALUE);
             paintBottomLeft.addStyleName("bottom-left");
         } else if (horizontalSplitPosition == 0 && bottomLeft != null) {
             bottomLeft.remove();
@@ -655,12 +658,12 @@ public class SelectionWidget extends Composite {
             topRight = new SelectionOutlineWidget();
             topRight.setSheetElement(sheetWidget.getTopRightPane());
             topRight.setVisible(false);
-            topRight.setZIndex(18);
+            topRight.setZIndex(ZINDEXVALUE);
             topRight.addStyleName("top-right");
             paintTopRight = new PaintOutlineWidget();
             paintTopRight.setSheetElement(sheetWidget.getTopRightPane());
             paintTopRight.setVisible(false);
-            paintTopRight.setZIndex(19);
+            paintTopRight.setZIndex(ZINDEXVALUE);
             paintTopRight.addStyleName("top-left");
         } else if (verticalSplitPosition == 0 && topRight != null) {
             topRight.remove();
@@ -678,12 +681,12 @@ public class SelectionWidget extends Composite {
             topLeft = new SelectionOutlineWidget();
             topLeft.setSheetElement(sheetWidget.getTopLeftPane());
             topLeft.setVisible(false);
-            topLeft.setZIndex(28);
+            topLeft.setZIndex(ZINDEXVALUE);
             topLeft.addStyleName("top-left");
             paintTopLeft = new PaintOutlineWidget();
             paintTopLeft.setSheetElement(sheetWidget.getTopLeftPane());
             paintTopLeft.setVisible(false);
-            paintTopLeft.setZIndex(29);
+            paintTopLeft.setZIndex(ZINDEXVALUE);
             paintTopLeft.addStyleName("top-left");
         } else if (topLeft != null
                 && (verticalSplitPosition == 0 || horizontalSplitPosition == 0)) {

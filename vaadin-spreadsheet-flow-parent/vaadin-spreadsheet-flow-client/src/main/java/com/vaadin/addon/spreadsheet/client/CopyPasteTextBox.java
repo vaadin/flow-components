@@ -80,7 +80,7 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
         this.handler = handler;
 
         getElement().getStyle().setPosition(Position.ABSOLUTE);
-        getElement().getStyle().setZIndex(100);
+        getElement().getStyle().setZIndex(1);
         getElement().getStyle().setLeft(-1000, Unit.PX);
 
         // gets round browser security (field must be 'visible' when copying)

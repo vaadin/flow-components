@@ -223,7 +223,7 @@ v-window-closebox
       clip: rect(0, 0, 0, 0);
       left: .2em;
       top: .2em;
-      z-index: 0;
+      z-index: 1;
       margin: 0; }
       :root .spreadsheetport .v-checkbox > input:focus ~ label:before {
         border-color: #197de1;
@@ -526,7 +526,7 @@ v-window-closebox
   .spreadsheetport .v-window-maximizebox,
   .spreadsheetport .v-window-restorebox {
     position: absolute;
-    z-index: 3;
+    z-index: 1;
     top: 0;
     right: 0;
     box-sizing: border-box;
@@ -685,7 +685,7 @@ v-window-closebox
       position: absolute;
       top: 0;
       width: 100%;
-      z-index: 200; }
+      z-index: 0; }
       .spreadsheetport .v-spreadsheet .functionbar .functionfield,
       .spreadsheetport .v-spreadsheet .functionbar .addressfield {
         -webkit-box-sizing: border-box;
@@ -764,7 +764,7 @@ v-window-closebox
         outline: solid #222222 1px;
         -moz-outline-offset: -2px;
         outline-offset: -2px;
-        z-index: 3; }
+        z-index: 1; }
       .spreadsheetport .v-spreadsheet .sheet .cell > .v-button {
         overflow: hidden;
         text-overflow: ellipsis; }
@@ -773,11 +773,11 @@ v-window-closebox
     .spreadsheetport .v-spreadsheet .sheet div.merged-cell {
       display: block;
       overflow: hidden;
-      z-index: 5 !important; }
+      z-index: 1 !important; }
     .spreadsheetport .v-spreadsheet .sheet div.custom-editor-cell {
       padding: 2px; }
     .spreadsheetport .v-spreadsheet .sheet.bottom-right-pane div.merged-cell {
-      z-index: 5 !important; }
+      z-index: 1 !important; }
     .spreadsheetport .v-spreadsheet .sheet > input[type="text"] {
       border: 0 !important;
       -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
@@ -788,7 +788,7 @@ v-window-closebox
       overflow: hidden;
       padding: 0 !important;
       position: absolute;
-      z-index: 26 !important; }
+      z-index: 1 !important; }
     .spreadsheetport .v-spreadsheet .sheet .floater {
       border-right: 0;
       border-bottom: 0;
@@ -798,10 +798,10 @@ v-window-closebox
       border-right: 0px;
       border-bottom: 0px; }
     .spreadsheetport .v-spreadsheet .top-left-pane div.merged-cell {
-      z-index: 25 !important; }
+      z-index: 1 !important; }
     .spreadsheetport .v-spreadsheet .top-right-pane div.merged-cell,
     .spreadsheetport .v-spreadsheet .bottom-left-pane div.merged-cell {
-      z-index: 15 !important; }
+      z-index: 1 !important; }
     .spreadsheetport .v-spreadsheet .top-left-pane,
     .spreadsheetport .v-spreadsheet .top-right-pane,
     .spreadsheetport .v-spreadsheet .bottom-left-pane {
@@ -821,7 +821,7 @@ v-window-closebox
       height: 100%;
       left: 0;
       padding-bottom: 28px;
-      z-index: 10; }
+      z-index: 0; }
       .spreadsheetport .v-spreadsheet .bottom-left-pane .rh {
         left: 0;
         margin-top: 0 !important; }
@@ -832,7 +832,7 @@ v-window-closebox
     .spreadsheetport .v-spreadsheet .top-left-pane {
       left: 0;
       top: 30px;
-      z-index: 20; }
+      z-index: 0; }
       .spreadsheetport .v-spreadsheet .top-left-pane .ch {
         top: 0;
         margin-left: 50px; }
@@ -848,7 +848,7 @@ v-window-closebox
     .spreadsheetport .v-spreadsheet .top-right-pane {
       top: 30px;
       width: 100%;
-      z-index: 11; }
+      z-index: 0; }
       .spreadsheetport .v-spreadsheet .top-right-pane .ch {
         top: 0;
         margin-left: 0 !important; }
@@ -883,7 +883,7 @@ v-window-closebox
       cursor: e-resize;
       -webkit-touch-callout: none;
       width: 50px;
-      z-index: 29;
+      z-index: 2;
       display: flex;
       justify-content: center;
       vertical-align: middle;
@@ -900,7 +900,7 @@ v-window-closebox
         position: absolute;
         left: 0;
         width: 49px;
-        z-index: 30; }
+        z-index: 2; }
       .spreadsheetport .v-spreadsheet .rh .header-resize-dnd-first {
         top: 0; }
       .spreadsheetport .v-spreadsheet .rh .header-resize-dnd-second {
@@ -924,7 +924,7 @@ v-window-closebox
       height: 27px;
       line-height: 27px;
       -webkit-touch-callout: none;
-      z-index: 29; }
+      z-index: 2; }
       .spreadsheetport .v-spreadsheet .ch.selected-column-header {
         background: #e6edf4 !important;
         border-bottom: 2px solid #63b1ff; }
@@ -936,7 +936,7 @@ v-window-closebox
         position: absolute;
         top: 0;
         width: 3px;
-        z-index: 30; }
+        z-index: 2; }
       .spreadsheetport .v-spreadsheet .ch .header-resize-dnd-first {
         left: 0; }
       .spreadsheetport .v-spreadsheet .ch .header-resize-dnd-second {
@@ -966,7 +966,7 @@ v-window-closebox
       padding: 0;
       visibility: hidden;
       width: 0;
-      z-index: 25;
+      z-index: 2;
       position: absolute; }
     .spreadsheetport .v-spreadsheet.col-resizing .resize-line,
     .spreadsheetport .v-spreadsheet.col-resizing .sheet > div.resize-line {
@@ -1001,7 +1001,7 @@ v-window-closebox
       height: 27px;
       border-bottom: 1px solid #C7C7C7;
       border-right: 1px solid #C7C7C7;
-      z-index: 100; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet .sheet > div.sheet-image {
       background: transparent;
       border: none;
@@ -1010,12 +1010,12 @@ v-window-closebox
       width: auto;
       position: absolute; }
     .spreadsheetport .v-spreadsheet .bottom-right-pane.sheet > div.sheet-image {
-      z-index: 10; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet .top-left-pane > div.sheet-image {
-      z-index: 25; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet .top-right-pane > div.sheet-image,
     .spreadsheetport .v-spreadsheet .bottom-left-pane > div.sheet-image {
-      z-index: 15; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet .sheet .cell-comment-triangle {
       border-color: transparent #FFCF16 transparent transparent;
       border-style: solid;
@@ -1041,7 +1041,7 @@ v-window-closebox
       right: 0;
       top: 0;
       width: 0;
-      z-index: 2; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet .sheet .comment-overlay-line {
       background-color: #A7A7A7 !important;
       border: none !important;
@@ -1052,7 +1052,7 @@ v-window-closebox
       -webkit-transform-origin: 0% 50%;
       -ms-transform-origin: 0% 50%;
       transform-origin: 0% 50%;
-      z-index: 21; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet div.sheet-selection {
       background-color: transparent !important;
       border: none !important;
@@ -1111,7 +1111,7 @@ v-window-closebox
       bottom: 0;
       left: 0;
       overflow: hidden;
-      z-index: 50; }
+      z-index: 1; }
       .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
         background: #fafafa;
         cursor: pointer;
@@ -1119,7 +1119,7 @@ v-window-closebox
         height: 28px;
         position: absolute;
         width: 130px;
-        z-index: 60;
+        z-index: 1;
         left: 0;
         top: 0; }
         .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
@@ -1319,7 +1319,7 @@ v-window-closebox
       position: absolute;
       left: 0;
       width: 100%;
-      z-index: 11;
+      z-index: 1;
       background-color: #fafafa;
       border-bottom: 1px solid #C7C7C7;
       box-sizing: border-box; }
@@ -1369,7 +1369,7 @@ v-window-closebox
       .spreadsheetport .v-spreadsheet .col-group-border .border {
         position: absolute;
         width: 100%;
-        z-index: 15;
+        z-index: 1;
         border-bottom: 1px dotted #C7C7C7;
         margin-top: 20px; }
     .spreadsheetport .v-spreadsheet .row-group-pane,
@@ -1377,7 +1377,7 @@ v-window-closebox
       position: absolute;
       left: 0;
       height: 100%;
-      z-index: 11;
+      z-index: 1;
       background-color: #fafafa;
       border-right: 1px solid #C7C7C7;
       box-sizing: border-box; }
@@ -1425,7 +1425,7 @@ v-window-closebox
       .spreadsheetport .v-spreadsheet .row-group-border .border {
         position: absolute;
         height: 100%;
-        z-index: 15;
+        z-index: 1;
         border-right: 1px dotted #C7C7C7;
         /*margin-top: 20px;*/ }
     .spreadsheetport .v-spreadsheet .expandbutton {
@@ -1450,7 +1450,7 @@ v-window-closebox
     .spreadsheetport .v-spreadsheet .grouping-corner {
       position: absolute;
       left: 0;
-      z-index: 15;
+      z-index: 1;
       border-right: 1px solid #C7C7C7;
       border-bottom: 1px solid #C7C7C7;
       box-sizing: border-box;
@@ -1461,7 +1461,7 @@ v-window-closebox
       border-bottom: 1px solid #C7C7C7;
       border-right: 1px solid #C7C7C7;
       background-color: #fafafa;
-      z-index: 15; }
+      z-index: 1; }
     .spreadsheetport .v-spreadsheet .row-group-summary {
       position: absolute;
       box-sizing: border-box;
@@ -1469,7 +1469,7 @@ v-window-closebox
       border-right: 1px solid #C7C7C7;
       background-color: #fafafa;
       left: 0;
-      z-index: 15; }
+      z-index: 1; }
     .v-ie .spreadsheetport .v-spreadsheet .grouping .expand {
       line-height: 13px; }
   .spreadsheetport .v-spreadsheet-comment-overlay {
