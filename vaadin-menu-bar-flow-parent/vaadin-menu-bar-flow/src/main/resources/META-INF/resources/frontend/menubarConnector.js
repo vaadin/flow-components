@@ -31,8 +31,16 @@
         return;
       }
 
-      const observer = new MutationObserver(() => {
-        menubar.$connector.generateItems();
+      const observer = new MutationObserver((records) => {
+        const hasChangedAttributes = records.some((entry) => {
+          const oldValue = entry.oldValue;
+          const newValue = entry.target.getAttribute(entry.attributeName);
+          return oldValue !== newValue;
+        });
+
+        if (hasChangedAttributes) {
+          menubar.$connector.generateItems();
+        }
       });
 
       menubar.$connector = {
@@ -76,7 +84,8 @@
           // to sync the new attribute values with the corresponding properties in the items array.
           items.forEach((item) => {
             observer.observe(item.component, {
-              attributeFilter: ['hidden', 'disabled']
+              attributeFilter: ['hidden', 'disabled'],
+              attributeOldValue: true
             });
           });
 
