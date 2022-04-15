@@ -163,8 +163,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Convenience constructor to create a time picker with a pre-selected time
-     * , a {@link ValueChangeListener} and a label.
+     * Convenience constructor to create a time picker with a label, a
+     * pre-selected time and a {@link ValueChangeListener}.
      *
      * @param label
      *            the label describing the time picker
