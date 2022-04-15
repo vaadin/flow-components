@@ -1,76 +1,9 @@
-import * as Gestures from "@vaadin/component-base/src/gestures.js";
 (function() {
   const tryCatchWrapper = function(callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu');
   };
 
   window.Vaadin.Flow.contextMenuConnector = {
-    // NOTE: This is for the TARGET component, not for the <vaadin-context-menu> itself
-    init: target =>
-      tryCatchWrapper(function(target) {
-        if (target.$contextMenuConnector) {
-          return;
-        }
-
-        target.$contextMenuConnector = {
-          openOnHandler: tryCatchWrapper(function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.$contextMenuConnector.openEvent = e;
-            let detail = {};
-            if (target.getContextMenuBeforeOpenDetail) {
-              detail = target.getContextMenuBeforeOpenDetail(e);
-            }
-            target.dispatchEvent(
-              new CustomEvent("vaadin-context-menu-before-open", {
-                detail: detail
-              })
-            );
-          }),
-
-          updateOpenOn: tryCatchWrapper(function(eventType) {
-            this.removeListener();
-            this.openOnEventType = eventType;
-
-            customElements.whenDefined("vaadin-context-menu").then(
-              tryCatchWrapper(() => {
-                if (Gestures.gestures[eventType]) {
-                  Gestures.addListener(target, eventType, this.openOnHandler);
-                } else {
-                  target.addEventListener(eventType, this.openOnHandler);
-                }
-              })
-            );
-          }),
-
-          removeListener: tryCatchWrapper(function() {
-            if (this.openOnEventType) {
-              if (Gestures.gestures[this.openOnEventType]) {
-                Gestures.removeListener(
-                  target,
-                  this.openOnEventType,
-                  this.openOnHandler
-                );
-              } else {
-                target.removeEventListener(
-                  this.openOnEventType,
-                  this.openOnHandler
-                );
-              }
-            }
-          }),
-
-          openMenu: tryCatchWrapper(function(contextMenu) {
-            contextMenu.open(this.openEvent);
-          }),
-
-          removeConnector: tryCatchWrapper(function() {
-            this.removeListener();
-            target.$contextMenuConnector = undefined;
-          })
-        };
-      })(target),
-
     generateItems: (menu, appId, nodeId) =>
       tryCatchWrapper(function(menu, appId, nodeId) {
         menu._containerNodeId = nodeId;
