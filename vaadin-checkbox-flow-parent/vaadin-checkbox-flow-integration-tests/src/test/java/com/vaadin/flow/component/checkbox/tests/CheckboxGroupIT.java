@@ -222,6 +222,21 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 .invisibilityOfElementLocated(By.id("helper-component")));
     }
 
+    @Test
+    public void iconRenderer() {
+        WebElement group = findElement(By.id("checkbox-group-icon-renderer"));
+
+        List<WebElement> checkboxes = group
+                .findElements(By.tagName("vaadin-checkbox"));
+
+        WebElement anchor = checkboxes.get(2).findElement(By.tagName("img"));
+
+        Assert.assertEquals("https://vaadin.com/images/vaadin-logo.svg",
+                anchor.getAttribute("src"));
+
+        Assert.assertEquals("Bill", checkboxes.get(2).getText());
+    }
+
     private void verifyGroupInvalid(TestBenchElement group,
             TestBenchElement errorMessage) {
         Assert.assertEquals("Checkbox group is invalid.", true,

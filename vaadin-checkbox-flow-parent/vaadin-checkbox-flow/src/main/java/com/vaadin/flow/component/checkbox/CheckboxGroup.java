@@ -50,6 +50,7 @@ import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -90,6 +91,8 @@ public class CheckboxGroup<T>
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private ComponentRenderer<? extends Component, T> itemRenderer;
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
@@ -195,7 +198,6 @@ public class CheckboxGroup<T>
         public T getItem() {
             return item;
         }
-
     }
 
     /**
@@ -470,6 +472,37 @@ public class CheckboxGroup<T>
                         .contains(item.getItem()));
     }
 
+    /**
+     * Returns the item component renderer.
+     *
+     * @return the item renderer
+     * @see #setRenderer(ComponentRenderer)
+     *
+     * @since 23.1
+     */
+    public ComponentRenderer<? extends Component, T> getItemRenderer() {
+        return itemRenderer;
+    }
+
+    /**
+     * Sets the item renderer for this checkbox group. The renderer is applied
+     * to each item to create a component which represents the item.
+     * <p>
+     * Note: Component acts as a label to the checkbox and clicks on it trigger
+     * the checkbox. Hence interactive components like DatePicker or ComboBox
+     * cannot be used.
+     *
+     * @param renderer
+     *            the item renderer, not {@code null}
+     *
+     * @since 23.1
+     */
+    public void setRenderer(
+            ComponentRenderer<? extends Component, T> renderer) {
+        this.itemRenderer = Objects.requireNonNull(renderer);
+        refreshCheckboxItems();
+    }
+
     @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
@@ -528,8 +561,19 @@ public class CheckboxGroup<T>
         return checkbox;
     }
 
+    private void refreshCheckboxItems() {
+        getCheckboxItems().forEach(this::updateCheckbox);
+    }
+
     private void updateCheckbox(CheckBoxItem<T> checkbox) {
-        checkbox.setLabel(getItemLabelGenerator().apply(checkbox.getItem()));
+        if (itemRenderer == null) {
+            checkbox.setLabel(
+                    getItemLabelGenerator().apply(checkbox.getItem()));
+        } else {
+            checkbox.setLabelComponent(
+                    getItemRenderer().createComponent(checkbox.item));
+        }
+
         checkbox.setValue(getValue().stream().anyMatch(
                 selectedItem -> Objects.equals(getItemId(selectedItem),
                         getItemId(checkbox.getItem()))));

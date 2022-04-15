@@ -9,9 +9,11 @@ import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -63,6 +65,7 @@ public class CheckboxGroupDemoPage extends Div {
         addReadOnlyGroup();
         addComponentWithThemeVariant();
         addHelperCheckboxGroup();
+        addItemIconRenderer();
     }
 
     private void addBasicFeatures() {
@@ -200,6 +203,25 @@ public class CheckboxGroupDemoPage extends Div {
         addCard("CheckboxGroup with helper text and helper component",
                 groupHelperText, clearHelper, groupHelperComponent,
                 clearHelperComponent);
+    }
+
+    private void addItemIconRenderer() {
+        CheckboxGroup<Person> group = new CheckboxGroup<>();
+        group.setItems(new Person(1, "Joe"), new Person(2, "John"),
+                new Person(3, "Bill"));
+        group.setRenderer(new IconRenderer<>(item -> {
+            Image image = new Image("https://vaadin.com/images/vaadin-logo.svg",
+                    "");
+            image.getStyle().set("height", "15px");
+            image.getStyle().set("float", "left");
+            image.getStyle().set("marginRight", "5px");
+            image.getStyle().set("marginTop", "2px");
+            return image;
+        }, Person::getName));
+
+        group.setId("checkbox-group-icon-renderer");
+
+        addCard("Checkbox group with icon renderer", group);
     }
 
     private String toString(Set<String> value) {
