@@ -1,60 +1,102 @@
 (function() {
-  const tryCatchWrapper = function(callback) {
+  function tryCatchWrapper(callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu');
-  };
+  }
+
+  function getContainer(appId, nodeId) {
+    try {
+      return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
+    } catch (error) {
+      console.error("Could not get node %s from app %s", nodeId, appId);
+      console.error(error);
+    }
+  }
 
   window.Vaadin.Flow.contextMenuConnector = {
-    generateItems: (menu, appId, nodeId) =>
-      tryCatchWrapper(function(menu, appId, nodeId) {
-        menu._containerNodeId = nodeId;
+    /**
+     * Initializes the connector for a context menu element.
+     *
+     * @param {HTMLElement} contextMenu
+     * @param {string} appId
+     */
+    initLazy: tryCatchWrapper((contextMenu, appId) => {
+      if (contextMenu.$connector) {
+        return;
+      }
 
-        const getContainer = function(nodeId) {
-          try {
-            return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
-          } catch (error) {
-            console.error("Could not get node %s from app %s", nodeId, appId);
-            console.error(error);
-          }
-        };
+      contextMenu.$connector = {
+        generateItems: tryCatchWrapper((nodeId) => {
+          const items = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(
+            appId,
+            nodeId
+          );
 
-        const getChildItems = function(parent) {
-          const container = getContainer(parent._containerNodeId);
-          const items =
-            container &&
-            Array.from(container.children).map(child => {
-              const item = {
-                  component: child,
-                  checked: child._checked,
-                  theme: child.__theme
-              };
-              if (
-                child.tagName == "VAADIN-CONTEXT-MENU-ITEM" &&
-                child._containerNodeId
-              ) {
-                item.children = getChildItems(child);
-              }
-              child._item = item;
-              return item;
-            });
-          return items;
-        };
+          contextMenu.items = items;
+        })
+      }
+    }),
 
-        const items = getChildItems(menu);
-        menu.items = items;
-      })(menu, appId, nodeId),
+    /**
+     * Generates an items tree compatible with the context-menu web component
+     * by traversing the given Flow DOM tree of context menu item nodes
+     * whose root node is identified by the `nodeId` argument.
+     *
+     * The app id is required to access the store of Flow DOM nodes.
+     *
+     * @param {string} appId
+     * @param {number} nodeId
+     */
+    generateItemsTree: tryCatchWrapper(function generateItemsTree(appId, nodeId) {
+      const container = getContainer(appId, nodeId);
+      if (!container) {
+        return;
+      }
 
-    setChecked: (component, checked) =>
-      tryCatchWrapper(function(component, checked) {
-        if (component._item) {
-          component._item.checked = checked;
+      return Array.from(container.children).map(child => {
+        const item = {
+          component: child,
+          checked: child._checked,
+          theme: child.__theme,
         }
-      })(component, checked),
+        if (
+          child.localName == "vaadin-context-menu-item" &&
+          child._containerNodeId
+        ) {
+          item.children = generateItemsTree(appId, child._containerNodeId);
+        }
+        child._item = item;
+        return item;
+      });
+    }),
 
-    setTheme: (component, theme) =>
-        tryCatchWrapper((component, theme) => {
-            if (component._item) {
-                component._item.theme = theme;
-            }
-        })(component, theme)
+    /**
+     * Sets the checked state for a context menu item.
+     *
+     * This method is supposed to be called when the context menu item is closed,
+     * so there is no need for triggering a re-render eagarly.
+     *
+     * @param {HTMLElement} component
+     * @param {boolean} checked
+     */
+    setChecked: tryCatchWrapper((component, checked) => {
+      if (component._item) {
+        component._item.checked = checked;
+      }
+    }),
+
+    /**
+     * Sets the theme for a context menu item.
+     *
+     * This method is supposed to be called when the context menu item is closed,
+     * so there is no need for triggering a re-render eagarly.
+     *
+     * @param {HTMLElement} component
+     * @param {string | undefined | null} theme
+     */
+    setTheme: tryCatchWrapper((component, theme) => {
+      if (component._item) {
+        component._item.theme = theme;
+      }
+    })
   };
 })();

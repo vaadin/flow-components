@@ -84,7 +84,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         });
 
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
-        addAttachListener(event -> resetContent());
+        addAttachListener(event -> {
+            String appId = event.getUI().getInternals().getAppId();
+            initConnector(appId);
+            resetContent();
+        });
     }
 
     /**
@@ -429,5 +433,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
                     + "'UI::access' or from tests without proper initialization.");
         }
         return ui;
+    }
+
+    private void initConnector(String appId) {
+        getElement().executeJs(
+                "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)", appId);
     }
 }
