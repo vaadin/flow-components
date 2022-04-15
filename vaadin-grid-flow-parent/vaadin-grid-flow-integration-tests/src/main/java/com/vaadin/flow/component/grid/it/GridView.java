@@ -207,7 +207,6 @@ public class GridView extends DemoView {
         createBasicUsage();
         createNoHeaderGrid();
         createCallBackDataProvider();
-        createSingleSelect();
         createMultiSelect();
         createNoneSelect();
         createColumnApiExample();
@@ -320,43 +319,6 @@ public class GridView extends DemoView {
         grid.setId("lazy-loading");
 
         addCard("Grid with lazy loading", grid);
-    }
-
-    private void createSingleSelect() {
-        Div messageDiv = new Div();
-        // begin-source-example
-        // source-example-heading: Grid Single Selection
-        List<Person> people = getItems();
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(people);
-
-        grid.addColumn(Person::getFirstName).setHeader("Name");
-        grid.addColumn(Person::getAge).setHeader("Age");
-
-        grid.asSingleSelect().addValueChangeListener(
-                event -> messageDiv.setText(String.format(
-                        "Selection changed from %s to %s, selection is from client: %s",
-                        event.getOldValue(), event.getValue(),
-                        event.isFromClient())));
-
-        NativeButton toggleSelect = new NativeButton(
-                "Toggle selection of the first person");
-        Person firstPerson = people.get(0);
-        toggleSelect.addClickListener(event -> {
-            GridSelectionModel<Person> selectionModel = grid
-                    .getSelectionModel();
-            if (selectionModel.isSelected(firstPerson)) {
-                selectionModel.deselect(firstPerson);
-            } else {
-                selectionModel.select(firstPerson);
-            }
-        });
-        // end-source-example
-        grid.setId("single-selection");
-        toggleSelect.setId("single-selection-toggle");
-        messageDiv.setId("single-selection-message");
-        addCard("Selection", "Grid Single Selection", grid, toggleSelect,
-                messageDiv);
     }
 
     private void createMultiSelect() {
