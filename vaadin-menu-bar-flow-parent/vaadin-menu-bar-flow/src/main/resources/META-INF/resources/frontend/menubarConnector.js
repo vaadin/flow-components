@@ -31,6 +31,10 @@
         return;
       }
 
+      const observer = new MutationObserver(() => {
+        menubar.$connector.generateItems();
+      });
+
       menubar.$connector = {
         /**
          * Generates and assigns the items to the menu bar.
@@ -65,7 +69,18 @@
           //
           // The items-prop needs to be set even when all items are visible
           // to update the disabled state and re-render buttons.
-          menubar.items = items.filter(item => !item.component.hidden);
+          items = items.filter(item => !item.component.hidden);
+
+          // Observe for hidden and disabled attributes in case they are changed by Flow.
+          // When a change occurs, the observer will re-generate items on top of the existing tree
+          // to sync the new attribute values with the corresponding properties in the items array.
+          items.forEach((item) => {
+            observer.observe(item.component, {
+              attributeFilter: ['hidden', 'disabled']
+            });
+          });
+
+          menubar.items = items;
 
           // Propagate click events from the menu buttons to the item components
           menubar._buttons.forEach(button => {
