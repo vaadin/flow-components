@@ -291,8 +291,10 @@ public class ConnectorBundleLoaderFactory extends Generator {
             boolean isEager = name
                     .equals(ConnectorBundleLoader.EAGER_BUNDLE_NAME);
 
-            // spreadsheet: we need to avoid fragments if we want to use the sso linker
-            isEager = true;
+            // spreadsheet: remove all unused components
+            if (!isEager) {
+                continue;
+            }
 
             w.print("addAsyncBlockLoader(new AsyncBundleLoader(\"");
             w.print(escape(name));
@@ -1123,19 +1125,9 @@ public class ConnectorBundleLoaderFactory extends Generator {
                 ConnectorBundleLoader.EAGER_BUNDLE_NAME, visitors, typeOracle);
         TreeLogger eagerLogger = logger.branch(Type.TRACE,
                 "Populating eager bundle");
-
         // Eager connectors and all RPC interfaces are loaded by default
         eagerBundle.processTypes(eagerLogger,
                 connectorsByLoadStyle.get(LoadStyle.EAGER));
-        eagerBundle.processType(eagerLogger, typeOracle
-                .findType(UnknownComponentConnector.class.getCanonicalName()));
-        eagerBundle.processType(eagerLogger, typeOracle
-                .findType(UnknownExtensionConnector.class.getCanonicalName()));
-        eagerBundle.processSubTypes(eagerLogger,
-                typeOracle.getType(ClientRpc.class.getName()));
-        eagerBundle.processSubTypes(eagerLogger,
-                typeOracle.getType(ServerRpc.class.getName()));
-
         bundles.add(eagerBundle);
 
         ConnectorBundle deferredBundle = new ConnectorBundle(

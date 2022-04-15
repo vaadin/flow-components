@@ -1,32 +1,30 @@
 package com.vaadin.spreadsheet.flowport.gwtexporter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
-import com.vaadin.client.extensions.javascriptmanager.JavaScriptManagerConnector;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.vaadin.client.ui.ui.UIConnector;
-import com.vaadin.shared.ui.Connect;
 
-public class OptimizedConnectorBundleLoaderFactory extends ConnectorBundleLoaderFactory {
+public class OptimizedConnectorBundleLoaderFactory
+        extends ConnectorBundleLoaderFactory {
 
-    private Set<String> eagerConnectors = new HashSet<>();
-    {
-        eagerConnectors.add(UIConnector.class.getName());
-        eagerConnectors.add(SpreadsheetConnector.class.getName());
-        eagerConnectors.add(JavaScriptManagerConnector.class.getName());
-        eagerConnectors.add(JavaScriptManagerConnector.class.getName());
-        eagerConnectors.add(PopupButtonConnector.class.getName());
-    }
+    // spreadsheet does not use any connector, but UIConnector is still needed
+    private List<String> usedConnectors = Arrays
+            .asList(UIConnector.class.getName());
 
     @Override
-    protected Connect.LoadStyle getLoadStyle(JClassType connectorType) {
-        if (eagerConnectors.contains(connectorType.getQualifiedBinaryName())) {
-            return Connect.LoadStyle.EAGER;
-        } else {
-            return Connect.LoadStyle.DEFERRED;
-        }
+    protected Collection<JClassType> getConnectorsForWidgetset(
+            TreeLogger logger, TypeOracle typeOracle)
+            throws UnableToCompleteException {
+        return super.getConnectorsForWidgetset(logger, typeOracle).stream()
+                .filter(c -> usedConnectors
+                        .contains(c.getQualifiedSourceName()))
+                .collect(Collectors.toList());
     }
 }
