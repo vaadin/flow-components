@@ -18,6 +18,7 @@ package com.vaadin.flow.component.dialog;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.html.Span;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
@@ -121,7 +123,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -130,7 +132,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
 
         dialog.addDialogCloseActionListener(event -> {
         });
@@ -154,7 +156,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
     }
 
     @Test
@@ -169,7 +171,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(6, flushInvocations().size());
+        Assert.assertEquals(7, flushInvocations().size());
     }
 
     @Test
@@ -202,7 +204,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -220,7 +222,7 @@ public class DialogTest {
 
         registration.remove();
 
-        assertInvocations(7);
+        assertInvocations(8);
     }
 
     @Test
@@ -375,5 +377,62 @@ public class DialogTest {
         List<PendingJavaScriptInvocation> invocations = flushInvocations();
 
         Assert.assertEquals(expectedInvocations, invocations.size());
+    }
+
+    @Test
+    public void dialogHasStyle() {
+        Dialog dialog = new Dialog();
+        Assert.assertTrue(dialog instanceof HasStyle);
+    }
+
+    @Test
+    public void elementAddedToHeaderOrFooter_elementShouldHaveDialogAsParent() {
+        Dialog dialog = new Dialog();
+        Span content = new Span("content");
+        dialog.getHeader().add(content);
+
+        Assert.assertTrue(content.getParent().isPresent());
+        Assert.assertEquals(content.getParent().get(), dialog);
+
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        dialog.getHeader().add(secondContent, thirdContent);
+
+        Assert.assertTrue(secondContent.getParent().isPresent());
+        Assert.assertEquals(secondContent.getParent().get(), dialog);
+
+        Assert.assertTrue(thirdContent.getParent().isPresent());
+        Assert.assertEquals(thirdContent.getParent().get(), dialog);
+    }
+
+    @Test
+    public void elementRemovedFromHeaderOrFooter_elementShouldNotHaveDialogAsParent() {
+        Dialog dialog = new Dialog();
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        dialog.getHeader().add(content, secondContent, thirdContent);
+
+        dialog.getHeader().remove(content);
+
+        Assert.assertFalse(content.getParent().isPresent());
+
+        dialog.getHeader().remove(secondContent, thirdContent);
+        Assert.assertFalse(secondContent.getParent().isPresent());
+        Assert.assertFalse(thirdContent.getParent().isPresent());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void callAddToHeaderOrFooter_withNull_shouldThrowError() {
+        Dialog dialog = new Dialog();
+        dialog.getHeader().add(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void callAddToHeaderOrFooter_withAnyNullValue_shouldThrowError() {
+        Dialog dialog = new Dialog();
+        dialog.getHeader().add(new Span("content"), null);
     }
 }

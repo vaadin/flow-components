@@ -51,8 +51,9 @@ public class AttributionsPage extends Div {
                 "Setup collapsible enabled", e -> {
                     // Default OSMSource does not allow changing collapsible
                     // settings, so use something else
-                    XYZSource source = new XYZSource(new XYZSource.Options()
-                            .setAttributionsCollapsible(true));
+                    XYZSource.Options options = new XYZSource.Options();
+                    options.setAttributionsCollapsible(true);
+                    XYZSource source = new XYZSource(options);
                     source.setAttributions(testAttributions);
                     ((TileLayer) map.getBackgroundLayer()).setSource(source);
                 });
@@ -62,8 +63,9 @@ public class AttributionsPage extends Div {
                 "Setup collapsible disabled", e -> {
                     // Default OSMSource does not allow changing collapsible
                     // settings, so use something else
-                    XYZSource source = new XYZSource(new XYZSource.Options()
-                            .setAttributionsCollapsible(false));
+                    XYZSource.Options options = new XYZSource.Options();
+                    options.setAttributionsCollapsible(false);
+                    XYZSource source = new XYZSource(options);
                     source.setAttributions(testAttributions);
                     ((TileLayer) map.getBackgroundLayer()).setSource(source);
                 });

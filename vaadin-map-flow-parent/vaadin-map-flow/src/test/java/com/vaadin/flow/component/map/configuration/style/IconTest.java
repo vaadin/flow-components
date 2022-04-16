@@ -8,7 +8,9 @@ public class IconTest {
 
     @Test
     public void defaults() {
-        Icon icon = new Icon(new Icon.Options().setSrc("test"));
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        Icon icon = new Icon(options);
 
         Assert.assertNotNull(icon.getAnchor());
         Assert.assertEquals(0.5, icon.getAnchor().getX(), 0);
@@ -31,17 +33,25 @@ public class IconTest {
         String color = "cornflowerblue";
         String crossOrigin = "customCrossOrigin";
 
-        Icon icon = new Icon(new Icon.Options().setSrc(src).setAnchor(anchor)
-                .setAnchorOrigin(anchorOrigin).setColor(color)
-                .setCrossOrigin(crossOrigin));
+        Icon.Options options = new Icon.Options();
+        options.setOpacity(0.8f);
+        options.setScale(2f);
+        options.setSrc(src);
+        options.setAnchor(anchor);
+        options.setAnchorOrigin(anchorOrigin);
+        options.setColor(color);
+        options.setCrossOrigin(crossOrigin);
+        Icon icon = new Icon(options);
 
+        Assert.assertEquals(0.8, icon.getOpacity(), 0.001);
+        Assert.assertEquals(2, icon.getScale(), 0.001);
+        Assert.assertEquals(src, icon.getSrc());
         Assert.assertNotNull(icon.getAnchor());
         Assert.assertEquals(anchor.getX(), icon.getAnchor().getX(), 0);
         Assert.assertEquals(anchor.getY(), icon.getAnchor().getY(), 0);
         Assert.assertEquals(anchorOrigin, icon.getAnchorOrigin());
         Assert.assertEquals(color, icon.getColor());
         Assert.assertEquals(crossOrigin, icon.getCrossOrigin());
-        Assert.assertEquals(src, icon.getSrc());
     }
 
     @Test
@@ -52,8 +62,11 @@ public class IconTest {
 
     @Test
     public void failsWithBothSourceUrlAndImage() {
-        Assert.assertThrows(IllegalStateException.class,
-                () -> new Icon(new Icon.Options().setSrc("test")
-                        .setImg(Assets.PIN.getResource())));
+        Assert.assertThrows(IllegalStateException.class, () -> {
+            Icon.Options options = new Icon.Options();
+            options.setSrc("test");
+            options.setImg(Assets.PIN.getResource());
+            new Icon(options);
+        });
     }
 }

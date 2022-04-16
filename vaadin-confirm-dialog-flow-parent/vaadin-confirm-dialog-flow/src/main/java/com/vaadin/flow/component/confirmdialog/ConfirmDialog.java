@@ -4,7 +4,7 @@ package com.vaadin.flow.component.confirmdialog;
  * #%L
  * Vaadin Confirm Dialog for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -16,6 +16,7 @@ package com.vaadin.flow.component.confirmdialog;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,19 +31,37 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code <vaadin-confirm-dialog>} element.
+ * Confirm Dialog is a modal Dialog used to confirm user actions.
+ * <p>
+ * Confirm Dialog consists of:<br>
+ * <ul>
+ * <li>Title</li>
+ * <li>Message</li>
+ * <li>Footer</li>
+ * <ul>
+ * <li>“Cancel” button</li>
+ * <li>“Reject” button</li>
+ * <li>“Confirm” button</li>
+ * </ul>
+ * </ul>
+ *
+ * Each Confirm Dialog should have a title and/or message. The “Confirm” button
+ * is shown by default, while the two other buttons are not (they must be
+ * explicitly enabled to be displayed).
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.1")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.1.0-alpha2")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
+@JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 
@@ -124,6 +143,27 @@ public class ConfirmDialog extends Component
 
     public void updateHeight() {
         this.getElement().executeJs("this._setHeight($0)", this.height);
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             ConfirmDialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "ConfirmDialog does not support adding styles to overlay");
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.confirmDialogConnector.initLazy(this)");
     }
 
     private boolean autoAddedToTheUi;

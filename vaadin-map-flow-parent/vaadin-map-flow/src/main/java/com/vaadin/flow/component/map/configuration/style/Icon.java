@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.style;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -162,7 +162,7 @@ public class Icon extends ImageStyle {
         imgSize = options.imgSize;
     }
 
-    public static class Options extends ImageStyle.BaseOptions<Options> {
+    public static class Options extends ImageStyle.Options {
         private Anchor anchor = new Anchor();
         private AnchorOrigin anchorOrigin = AnchorOrigin.TOP_LEFT;
         private String color;
@@ -174,57 +174,50 @@ public class Icon extends ImageStyle {
         /**
          * @see Icon#getAnchor()
          */
-        public Options setAnchor(Anchor anchor) {
+        public void setAnchor(Anchor anchor) {
             this.anchor = anchor;
-            return getThis();
         }
 
         /**
          * @see Icon#getAnchorOrigin()
          */
-        public Options setAnchorOrigin(AnchorOrigin anchorOrigin) {
+        public void setAnchorOrigin(AnchorOrigin anchorOrigin) {
             this.anchorOrigin = anchorOrigin;
-            return getThis();
         }
 
         /**
          * @see Icon#getColor()
          */
-        public Options setColor(String color) {
+        public void setColor(String color) {
             this.color = color;
-            return getThis();
         }
 
         /**
          * @see Icon#getCrossOrigin()
          */
-        public Options setCrossOrigin(String crossOrigin) {
+        public void setCrossOrigin(String crossOrigin) {
             this.crossOrigin = crossOrigin;
-            return getThis();
         }
 
         /**
          * @see Icon#getSrc()
          */
-        public Options setSrc(String src) {
+        public void setSrc(String src) {
             this.src = src;
-            return getThis();
         }
 
         /**
          * @see Icon#getImg()
          */
-        public Options setImg(StreamResource img) {
+        public void setImg(StreamResource img) {
             this.img = img;
-            return getThis();
         }
 
         /**
          * @see Icon#getImgSize()
          */
-        public Options setImgSize(ImageSize imgSize) {
+        public void setImgSize(ImageSize imgSize) {
             this.imgSize = imgSize;
-            return getThis();
         }
     }
 

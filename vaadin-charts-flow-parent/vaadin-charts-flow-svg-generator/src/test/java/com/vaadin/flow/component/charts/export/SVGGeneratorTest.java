@@ -2,7 +2,7 @@
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2021 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -18,8 +18,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -203,6 +206,17 @@ public class SVGGeneratorTest {
                 "enabled-functions.svg");
         String expectedSVG = readUtf8File(expectedResultPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
+    }
+
+    @Test
+    public void exportWithLargeSeries()
+            throws IOException, InterruptedException {
+        Configuration configuration = new Configuration();
+        List<Number> data = IntStream.range(0, 100000).boxed()
+                .collect(Collectors.toList());
+        ListSeries series = new ListSeries(data);
+        configuration.addSeries(series);
+        svgGenerator.generate(configuration);
     }
 
     private Configuration createPieChartConfiguration() {

@@ -70,8 +70,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.0.1")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.1.0-alpha2")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -117,11 +117,111 @@ public class RadioButtonGroup<T>
         return radioButtonGroup.keyMapper.key(model);
     }
 
+    /**
+     * Default constructor. Creates an empty radio button group.
+     */
     public RadioButtonGroup() {
         super(null, null, String.class, RadioButtonGroup::presentationToModel,
                 RadioButtonGroup::modelToPresentation, true);
 
         registerValidation();
+    }
+
+    /**
+     * Creates an empty radio button group with the defined label.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @see #setLabel(String)
+     */
+    public RadioButtonGroup(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a radio button group with the defined label and populated with
+     * the items in the collection.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param items
+     *            the items to be shown in the list of the radio button group
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public RadioButtonGroup(String label, Collection<T> items) {
+        this(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a radio button group with the defined label and populated with
+     * the items in the array.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param items
+     *            the items to be shown in the list of the radio button group
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public RadioButtonGroup(String label, T... items) {
+        this(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a radio button group with a value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public RadioButtonGroup(
+            ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a radio button group with the defined label and a value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public RadioButtonGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a radio button group with the defined label, a value change
+     * listener and populated with the items in the array.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the radio button group
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public RadioButtonGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener,
+            T... items) {
+        this(label, listener);
+        setItems(items);
     }
 
     @Override

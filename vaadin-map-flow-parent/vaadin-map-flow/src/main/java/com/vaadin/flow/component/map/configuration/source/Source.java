@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.source;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -30,7 +30,7 @@ public abstract class Source extends AbstractConfigurationObject {
     private final boolean attributionsCollapsible;
     private final String projection;
 
-    protected Source(BaseOptions<?> options) {
+    protected Source(Options options) {
         Objects.requireNonNull(options);
         this.attributions = options.attributions;
         this.attributionsCollapsible = options.attributionsCollapsible;
@@ -100,40 +100,31 @@ public abstract class Source extends AbstractConfigurationObject {
         return projection;
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>> {
+    protected static abstract class Options {
         private List<String> attributions;
         private boolean attributionsCollapsible = true;
         private String projection;
 
         /**
-         * Extracted to avoid littering unchecked type-casts in all setters
-         */
-        protected T getThis() {
-            return (T) this;
-        }
-
-        /**
          * @see Source#getAttributions()
          */
-        public T setAttributions(List<String> attributions) {
+        public void setAttributions(List<String> attributions) {
             this.attributions = attributions;
-            return getThis();
         }
 
         /**
          * @see Source#isAttributionsCollapsible()
          */
-        public T setAttributionsCollapsible(boolean attributionsCollapsible) {
+        public void setAttributionsCollapsible(
+                boolean attributionsCollapsible) {
             this.attributionsCollapsible = attributionsCollapsible;
-            return getThis();
         }
 
         /**
          * @see Source#getProjection()
          */
-        public T setProjection(String projection) {
+        public void setProjection(String projection) {
             this.projection = projection;
-            return getThis();
         }
     }
 }

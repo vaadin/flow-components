@@ -118,10 +118,10 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "23.0.1")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "23.1.0-alpha2")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinCheckboxGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -288,14 +288,9 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * </p>
      * <p>
      * This property is set to true when the control value is invalid.
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'invalid-changed' event happens.
-     * </p>
      *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }

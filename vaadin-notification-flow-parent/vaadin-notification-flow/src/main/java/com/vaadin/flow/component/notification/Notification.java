@@ -28,12 +28,14 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.shared.Registration;
@@ -44,8 +46,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @JsModule("./flow-component-renderer.js")
+@JsModule("./notificationConnector.js")
 public class Notification extends GeneratedVaadinNotification<Notification>
-        implements HasComponents, HasTheme {
+        implements HasComponents, HasTheme, HasStyle {
 
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
@@ -78,7 +81,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH,;
+        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH;
 
         private final String clientName;
 
@@ -548,5 +551,26 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         deferredJob = new AttachComponentTemplate();
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> deferredJob.accept(ui)));
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.notificationConnector.initLazy(this)");
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             Notification does not support adding styles to card element
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "Notification does not support adding styles to card element");
     }
 }

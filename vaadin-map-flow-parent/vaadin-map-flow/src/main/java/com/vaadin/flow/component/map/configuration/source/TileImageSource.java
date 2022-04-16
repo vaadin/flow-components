@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.source;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -23,7 +23,7 @@ public abstract class TileImageSource extends UrlTileSource {
 
     private final String crossOrigin;
 
-    protected TileImageSource(BaseOptions<?> options) {
+    protected TileImageSource(Options options) {
         super(options);
         this.crossOrigin = options.crossOrigin;
     }
@@ -40,16 +40,14 @@ public abstract class TileImageSource extends UrlTileSource {
         return crossOrigin;
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>>
-            extends UrlTileSource.BaseOptions<T> {
+    protected static abstract class Options extends UrlTileSource.Options {
         private String crossOrigin;
 
         /**
          * @see TileImageSource#getCrossOrigin()
          */
-        public T setCrossOrigin(String crossOrigin) {
+        public void setCrossOrigin(String crossOrigin) {
             this.crossOrigin = crossOrigin;
-            return getThis();
         }
     }
 }

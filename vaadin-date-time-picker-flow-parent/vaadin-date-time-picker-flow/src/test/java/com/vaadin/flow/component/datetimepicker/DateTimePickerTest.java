@@ -16,6 +16,10 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -25,9 +29,12 @@ import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -46,6 +53,30 @@ public class DateTimePickerTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+    }
+
+    @Test
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+        DateTimePicker picker = new DateTimePicker();
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        DateTimePicker picker = new DateTimePicker((LocalDateTime) null);
+        Assert.assertNull(picker.getValue());
+        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void initialValueIsDateTime_valuePropertyHasInitialValue() {
+        DateTimePicker picker = new DateTimePicker(
+                LocalDateTime.of(2018, 4, 25, 13, 45, 10));
+        Assert.assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
+                picker.getValue());
+        Assert.assertEquals("2018-04-25T13:45:10",
+                picker.getElement().getProperty("value"));
     }
 
     @Test
@@ -153,5 +184,29 @@ public class DateTimePickerTest {
         picker.setAutoOpen(true);
         assertTrue("Should be possible to enable auto-open",
                 picker.isAutoOpen());
+    }
+
+    @Test
+    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+        Element element = new Element("vaadin-date-time-picker");
+
+        String value = LocalDateTime.now().toString();
+        element.setProperty("value", value);
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(DateTimePicker.class))
+                .thenAnswer(invocation -> new DateTimePicker());
+
+        DateTimePicker field = Component.from(element, DateTimePicker.class);
+        Assert.assertEquals(value, field.getElement().getProperty("value"));
     }
 }

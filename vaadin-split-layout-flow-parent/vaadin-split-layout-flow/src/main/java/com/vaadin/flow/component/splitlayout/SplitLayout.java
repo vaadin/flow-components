@@ -140,8 +140,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/split-layout", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.0.1")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.1.0-alpha2")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -158,7 +158,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     }
 
     /**
-     * Constructs an empty VaadinSplitLayout.
+     * Constructs an empty SplitLayout.
      */
     public SplitLayout() {
         setOrientation(Orientation.HORIZONTAL);
@@ -167,8 +167,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     }
 
     /**
-     * Constructs a VaadinSplitLayout with the given initial components to set
-     * to the primary and secondary splits.
+     * Constructs a SplitLayout with the given initial components to set to the
+     * primary and secondary splits.
      *
      * @param primaryComponent
      *            the component set to the primary split
@@ -180,6 +180,35 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         this();
         addToPrimary(primaryComponent);
         addToSecondary(secondaryComponent);
+    }
+
+    /**
+     * Constructs a SplitLayout with the orientation.
+     *
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Orientation orientation) {
+        setOrientation(orientation);
+        addAttachListener(
+                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+    }
+
+    /**
+     * Constructs a SplitLayout with the given initial components to set to the
+     * primary and secondary splits and with the orientation.
+     *
+     * @param primaryComponent
+     *            the component set to the primary split
+     * @param secondaryComponent
+     *            the component set to the secondary split
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Component primaryComponent, Component secondaryComponent,
+            Orientation orientation) {
+        this(primaryComponent, secondaryComponent);
+        setOrientation(orientation);
     }
 
     /**

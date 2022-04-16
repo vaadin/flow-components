@@ -50,16 +50,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Server-side component for the <code>vaadin-avatar-group</code> element.
+ * Avatar Group is used to group multiple Avatars together. It can be used, for
+ * example, to show that there are multiple users viewing the same page or for
+ * listing members of a project.
+ * <p>
+ * You can specify the max number of items an Avatar Group should display. Items
+ * that overflow are grouped into a single Avatar that displays the overflow
+ * count. The name of each hidden item is shown on hover in a tooltip. Clicking
+ * the overflow item displays the overflowing avatars and names in a list.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.0.1")
+@NpmPackage(value = "@vaadin/avatar-group", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0-alpha2")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasTheme {
 

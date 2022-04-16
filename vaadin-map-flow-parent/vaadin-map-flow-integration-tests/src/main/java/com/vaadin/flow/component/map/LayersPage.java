@@ -19,9 +19,9 @@ public class LayersPage extends Div {
                 e -> {
                     TileLayer backgroundLayer = (TileLayer) map
                             .getBackgroundLayer();
-                    backgroundLayer
-                            .setSource(new XYZSource(new XYZSource.Options()
-                                    .setUrl("https://example.com")));
+                    XYZSource.Options options = new XYZSource.Options();
+                    options.setUrl("https://example.com");
+                    backgroundLayer.setSource(new XYZSource(options));
                 });
         setCustomSource.setId("set-custom-source");
 

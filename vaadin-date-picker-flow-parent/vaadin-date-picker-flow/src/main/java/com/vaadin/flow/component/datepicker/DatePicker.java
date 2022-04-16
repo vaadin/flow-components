@@ -45,16 +45,22 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component that encapsulates the functionality of the
- * {@code vaadin-date-picker} webcomponent.
+ * Date Picker is an input field that allows the user to enter a date by typing
+ * or by selecting from a calendar overlay.
  * <p>
- * It allows setting and getting {@link LocalDate} objects, setting minimum and
- * maximum date ranges and has internationalization support by using the
- * {@link DatePickerI18n} object.
+ * DatePicker allows setting and getting {@link LocalDate} objects, setting
+ * minimum and maximum date ranges and has internationalization support by using
+ * the {@link DatePickerI18n} object.
+ * <p>
+ * This component allows the date to be entered directly using the keyboard in
+ * the format of the current locale or through the date picker overlay. The
+ * overlay opens when the field is clicked and/or any input is entered when the
+ * field is focused.
  *
+ * @author Vaadin Ltd
  */
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.23.0")
+@NpmPackage(value = "date-fns", version = "2.28.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel {
 

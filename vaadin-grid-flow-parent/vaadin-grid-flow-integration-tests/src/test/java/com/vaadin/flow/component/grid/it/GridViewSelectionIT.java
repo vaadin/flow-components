@@ -15,14 +15,16 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.data.bean.Person;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -38,146 +40,6 @@ public class GridViewSelectionIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-    }
-
-    @Test
-    public void gridAsSingleSelect() {
-        GridElement grid = $(GridElement.class).id("single-selection");
-        scrollToElement(grid);
-
-        WebElement toggleButton = findElement(By.id("single-selection-toggle"));
-        WebElement messageDiv = findElement(By.id("single-selection-message"));
-
-        clickElementWithJs(toggleButton);
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(0), false),
-                messageDiv.getText());
-        Assert.assertTrue("Person 1 was not marked as selected",
-                isRowSelected(grid, 0));
-        clickElementWithJs(toggleButton);
-        Assert.assertEquals(
-                getSelectionMessage(LegacyTestView.items.get(0), null, false),
-                messageDiv.getText());
-        Assert.assertFalse("Person 1 was marked as selected",
-                isRowSelected(grid, 0));
-
-        // should be the cell in the first column's second row
-        clickElementWithJs(getCell(grid, "Person 2"));
-        Assert.assertTrue("Person 2 was not marked as selected",
-                isRowSelected(grid, 1));
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(1), true),
-                messageDiv.getText());
-        clickElementWithJs(getCell(grid, "Person 2"));
-        Assert.assertFalse("Person 2 was marked as selected",
-                isRowSelected(grid, 1));
-
-        clickElementWithJs(getCell(grid, "Person 2"));
-        clickElementWithJs(toggleButton);
-        Assert.assertTrue("Person 1 was not marked as selected",
-                isRowSelected(grid, 0));
-        Assert.assertFalse("Person 2 was marked as selected",
-                isRowSelected(grid, 1));
-        Assert.assertEquals(
-                getSelectionMessage(LegacyTestView.items.get(1),
-                        LegacyTestView.items.get(0), false),
-                messageDiv.getText());
-        clickElementWithJs(toggleButton);
-        Assert.assertFalse("Person 1 was marked as selected",
-                isRowSelected(grid, 0));
-
-        // scroll to bottom
-        scroll(grid, 1000);
-        waitUntilCellHasText(grid, "Person 499");
-        // select item that is not in cache
-        clickElementWithJs(toggleButton);
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(0), false),
-                messageDiv.getText());
-        // scroll back up
-        scroll(grid, 0);
-        Assert.assertTrue("Person 1 was not marked as selected",
-                isRowSelected(grid, 0));
-
-        Assert.assertFalse(
-                getLogEntries(Level.SEVERE).stream().findAny().isPresent());
-    }
-
-    @Test
-    public void gridAsSingleSelectTestBenchAPI() {
-        GridElement grid = $(GridElement.class).id("single-selection");
-        grid.scrollIntoView();
-        GridTHTDElement person2cell = grid.getCell("Person 2");
-        GridTRElement person2row = person2cell.getRowElement();
-
-        WebElement toggleButton = $(TestBenchElement.class)
-                .id("single-selection-toggle");
-        WebElement messageDiv = $(TestBenchElement.class)
-                .id("single-selection-message");
-
-        toggleButton.click();
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(0), false),
-                messageDiv.getText());
-        Assert.assertTrue("Person 1 was not marked as selected",
-                isRowSelected(grid, 0));
-        toggleButton.click();
-        Assert.assertEquals(
-                getSelectionMessage(LegacyTestView.items.get(0), null, false),
-                messageDiv.getText());
-        Assert.assertFalse("Person 1 was marked as selected",
-                isRowSelected(grid, 0));
-
-        person2row.select();
-        Assert.assertTrue("Person 2 was not marked as selected",
-                isRowSelected(grid, 1));
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(1), true),
-                messageDiv.getText());
-
-        // deselect non-selected row
-        grid.getCell("Person 3").getRowElement().deselect(); // NO-OP
-        Assert.assertTrue("Person 2 was not marked as selected",
-                isRowSelected(grid, 1));
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(1), true),
-                messageDiv.getText());
-
-        person2row.deselect();
-        Assert.assertFalse("Person 2 was marked as selected",
-                isRowSelected(grid, 1));
-
-        person2row.select();
-        toggleButton.click();
-        Assert.assertTrue("Person 1 was not marked as selected",
-                isRowSelected(grid, 0));
-        Assert.assertFalse("Person 2 was marked as selected",
-                isRowSelected(grid, 1));
-        Assert.assertEquals(
-                getSelectionMessage(LegacyTestView.items.get(1),
-                        LegacyTestView.items.get(0), false),
-                messageDiv.getText());
-        toggleButton.click();
-        Assert.assertFalse("Person 1 was marked as selected",
-                isRowSelected(grid, 0));
-
-        // scroll to bottom
-        scroll(grid, 1000);
-        waitUntilCellHasText(grid, "Person 499");
-
-        // select item that is not in cache
-        toggleButton.click();
-        Assert.assertEquals(
-                getSelectionMessage(null, LegacyTestView.items.get(0), false),
-                messageDiv.getText());
-
-        // scroll back up
-        scroll(grid, 0);
-        Assert.assertTrue("Person 1 was not marked as selected",
-                isRowSelected(grid, 0));
-
-        Assert.assertFalse(
-                getLogEntries(Level.SEVERE).stream().findAny().isPresent());
     }
 
     @Test
@@ -252,30 +114,6 @@ public class GridViewSelectionIT extends AbstractComponentIT {
     }
 
     /**
-     * Test that aria-multiselectable=false & the selectable children should
-     * have aria-selected=true|false depending on their state
-     */
-    @Test
-    public void gridAriaSelectionAttributesWhenSelectionModeIsSingle() {
-        GridElement grid = $(GridElement.class).id("single-selection");
-        scrollToElement(grid);
-        GridTRElement firstRow = grid.getRow(0);
-        firstRow.select();
-        TestBenchElement table = grid.$("table").first();
-        // table should have aria-multiselectable
-        Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
-        // aria-multiselectable should be set to false
-        Assert.assertFalse(Boolean
-                .parseBoolean(table.getAttribute("aria-multiselectable")));
-
-        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
-        Assert.assertTrue(
-                Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
-        Assert.assertFalse(Boolean
-                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
-    }
-
-    /**
      * Test that aria-multiselectable=true & the selectable children should have
      * aria-selected=true|false depending on their state
      */
@@ -309,15 +147,18 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         Assert.assertFalse(isRowSelected(grid, 1));
     }
 
-    private static String getSelectionMessage(Object oldSelection,
-            Object newSelection, boolean isFromClient) {
+    private static String getSelectionMessage(List<Person> previousSelection,
+            List<Person> newSelection, boolean isFromClient) {
+        List<Person> previousSelectionSorted = previousSelection.stream()
+                .sorted(Comparator.comparingLong(Person::getId))
+                .collect(Collectors.toList());
+        List<Person> newSelectionSorted = newSelection.stream()
+                .sorted(Comparator.comparingLong(Person::getId))
+                .collect(Collectors.toList());
+
         return String.format(
                 "Selection changed from %s to %s, selection is from client: %s",
-                oldSelection, newSelection, isFromClient);
-    }
-
-    private void scroll(GridElement grid, int index) {
-        grid.scrollToRow(index);
+                previousSelectionSorted, newSelectionSorted, isFromClient);
     }
 
     private boolean isRowSelected(GridElement grid, int row) {
@@ -329,23 +170,9 @@ public class GridViewSelectionIT extends AbstractComponentIT {
                 rowIndex -> Assert.assertTrue(isRowSelected(grid, rowIndex)));
     }
 
-    private WebElement getCell(GridElement grid, String text) {
-        return grid.getCell(text);
-    }
-
     private WebElement getCellContent(GridTHTDElement cell) {
         return (WebElement) executeScript(
                 "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
                 cell);
-    }
-
-    private void waitUntilCellHasText(WebElement grid, String text) {
-        waitUntil(driver -> {
-            List<?> cellContentTexts = (List<?>) getCommandExecutor()
-                    .executeScript(
-                            "return Array.from(arguments[0].querySelectorAll('vaadin-grid-cell-content')).map(cell => cell.textContent)",
-                            grid);
-            return cellContentTexts.contains(text);
-        });
     }
 }

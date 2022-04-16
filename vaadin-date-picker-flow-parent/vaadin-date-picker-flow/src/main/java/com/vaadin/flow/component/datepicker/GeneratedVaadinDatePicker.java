@@ -253,10 +253,10 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "23.0.1")
+@NpmPackage(value = "@vaadin/date-picker", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "23.1.0-alpha2")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -1197,8 +1197,13 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
             boolean isInitialValueOptional) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
+        // Only apply initial value if the element does not already have a value
+        // (this can be the case when binding to an existing element from a Lit
+        // template), or if isInitialValueOptional enforces setting the initial
+        // value, which is the case when calling a DatePicker constructor with a
+        // custom initial value.
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
@@ -1217,9 +1222,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     public GeneratedVaadinDatePicker(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setPresentationValue(initialValue);
-        }
+        setPresentationValue(initialValue);
     }
 
     /**
@@ -1247,9 +1250,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
             SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setPresentationValue(initialValue);
-        }
+        setPresentationValue(initialValue);
     }
 
     /**

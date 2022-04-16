@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.source;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -32,7 +32,7 @@ public class XYZSource extends TileImageSource {
         this(new Options());
     }
 
-    public XYZSource(BaseOptions<?> options) {
+    public XYZSource(Options options) {
         super(options);
     }
 
@@ -69,17 +69,13 @@ public class XYZSource extends TileImageSource {
         super.setUrl(url);
     }
 
-    public static abstract class BaseOptions<T extends BaseOptions<T>>
-            extends TileImageSource.BaseOptions<T> {
+    public static class Options extends TileImageSource.Options {
         /**
          * @see XYZSource#getUrl()
          */
         @Override
-        public T setUrl(String url) {
-            return super.setUrl(url);
+        public void setUrl(String url) {
+            super.setUrl(url);
         }
-    }
-
-    public static class Options extends BaseOptions<Options> {
     }
 }

@@ -4,7 +4,7 @@ package com.vaadin.flow.component.login;
  * #%L
  * Login for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@ package com.vaadin.flow.component.login;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Style;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -40,12 +43,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.0.1")
+@NpmPackage(value = "@vaadin/login", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "23.1.0-alpha2")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
-public class LoginOverlay extends AbstractLogin {
+@JsModule("./loginOverlayConnector.js")
+public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
 
@@ -212,4 +216,25 @@ public class LoginOverlay extends AbstractLogin {
         return getElement().getProperty("description");
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             LoginOverlay does not support adding styles to overlay
+     *             wrapper
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "LoginOverlay does not support adding styles to overlay wrapper");
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.loginOverlayConnector.initLazy(this)");
+    }
 }

@@ -191,9 +191,6 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 "Correct error message should be shown after the button clicks",
                 "Field has been set to invalid from server side",
                 errorMessage.getText());
-
-        executeScript("arguments[0].value=['2'];", group);
-        verifyGroupValid(group, errorMessage);
     }
 
     @Test
@@ -223,6 +220,21 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
         waitUntil(ExpectedConditions
                 .invisibilityOfElementLocated(By.id("helper-component")));
+    }
+
+    @Test
+    public void iconRenderer() {
+        WebElement group = findElement(By.id("checkbox-group-icon-renderer"));
+
+        List<WebElement> checkboxes = group
+                .findElements(By.tagName("vaadin-checkbox"));
+
+        WebElement anchor = checkboxes.get(2).findElement(By.tagName("img"));
+
+        Assert.assertEquals("https://vaadin.com/images/vaadin-logo.svg",
+                anchor.getAttribute("src"));
+
+        Assert.assertEquals("Bill", checkboxes.get(2).getText());
     }
 
     private void verifyGroupInvalid(TestBenchElement group,

@@ -65,14 +65,10 @@ public class SplitLayoutView extends Div {
         Label secondLabel = new Label("Second content component");
         Label thirdLabel = new Label("Third content component");
 
-        SplitLayout innerLayout = new SplitLayout();
-        innerLayout.setOrientation(Orientation.VERTICAL);
-        innerLayout.addToPrimary(secondLabel);
-        innerLayout.addToSecondary(thirdLabel);
+        SplitLayout innerLayout = new SplitLayout(secondLabel, thirdLabel,
+                Orientation.VERTICAL);
 
-        SplitLayout layout = new SplitLayout();
-        layout.addToPrimary(firstLabel);
-        layout.addToSecondary(innerLayout);
+        SplitLayout layout = new SplitLayout(firstLabel, innerLayout);
 
         layout.setId("split-layout-combination");
         layout.getPrimaryComponent().setId("first-component");

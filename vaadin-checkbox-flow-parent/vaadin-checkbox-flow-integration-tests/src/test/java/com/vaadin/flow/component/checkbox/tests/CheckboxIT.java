@@ -231,6 +231,26 @@ public class CheckboxIT extends AbstractComponentIT {
                 checkbox.isChecked());
     }
 
+    @Test
+    public void imgCheckbox_clickOnLabel_checkboxIsChecked() {
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("img-component-label-checkbox");
+        checkbox.$("label").first().click();
+
+        Assert.assertTrue("Checkbox should be checked", checkbox.isChecked());
+    }
+
+    @Test
+    public void imgCheckbox_clickOnLabel_checkboxIsCheckedAfterLabelChange() {
+        clickButton("change-img-component-label");
+
+        CheckboxElement checkbox = $(CheckboxElement.class)
+                .id("img-component-label-checkbox");
+        checkbox.$("label").first().click();
+
+        Assert.assertTrue("Checkbox should be checked", checkbox.isChecked());
+    }
+
     private void clickButton(String id) {
         $("button").id(id).click();
     }

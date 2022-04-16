@@ -4,7 +4,7 @@ package com.vaadin.flow.component.gridpro.testbench;
  * #%L
  * Vaadin GridPro Testbench API
  * %%
- * Copyright (C) 2018 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).

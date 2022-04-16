@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.source;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -23,7 +23,7 @@ public abstract class TileSource extends Source {
 
     private final boolean opaque;
 
-    protected TileSource(BaseOptions<?> options) {
+    protected TileSource(Options options) {
         super(options);
         this.opaque = options.opaque;
     }
@@ -42,16 +42,14 @@ public abstract class TileSource extends Source {
         return opaque;
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>>
-            extends Source.BaseOptions<T> {
+    protected static abstract class Options extends Source.Options {
         private boolean opaque = false;
 
         /**
          * @see TileSource#isOpaque()
          */
-        public T setOpaque(boolean opaque) {
+        public void setOpaque(boolean opaque) {
             this.opaque = opaque;
-            return getThis();
         }
     }
 }

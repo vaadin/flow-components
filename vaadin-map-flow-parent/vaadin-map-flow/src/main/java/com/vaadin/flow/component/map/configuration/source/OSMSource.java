@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.source;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -50,20 +50,20 @@ public class OSMSource extends XYZSource {
         return super.isAttributionsCollapsible();
     }
 
-    public static class Options extends XYZSource.BaseOptions<Options> {
+    public static class Options extends XYZSource.Options {
         public Options() {
             setUrl("https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png");
             setAttributionsCollapsible(false);
         }
 
         @Override
-        public Options setAttributionsCollapsible(
+        public void setAttributionsCollapsible(
                 boolean attributionsCollapsible) {
             if (attributionsCollapsible) {
                 throw new IllegalArgumentException(
                         "OSMSource does not allow to collapse attributions");
             }
-            return getThis();
+            super.setAttributionsCollapsible(false);
         }
     }
 }

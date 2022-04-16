@@ -8,7 +8,7 @@ import java.util.Objects;
  * #%L
  * Vaadin App Layout
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
@@ -42,16 +43,25 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component for the {@code <vaadin-app-layout>} element. Provides a
- * quick and easy way to get a common application layout.
+ * App Layout is a component for building common application layouts.
+ * <p>
+ * The layout consists of three sections: a horizontal navigation bar (navbar),
+ * a collapsible navigation drawer (drawer) and a content area. An application’s
+ * main navigation blocks should be positioned in the navbar and/or drawer while
+ * views are rendered in the content area.
+ * <p>
+ * App Layout is responsive and adjusts automatically to fit desktop, tablet,
+ * and mobile screen sizes.
+ *
+ * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.1")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.1.0-alpha2")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
-public class AppLayout extends Component implements RouterLayout {
+public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
             .propertyWithDefault("primarySection",
                     Section.NAVBAR.toWebcomponentValue());

@@ -59,8 +59,12 @@ public class MarkerFeaturePage extends Div {
     }
 
     private static Icon createCustomIcon() {
-        return new Icon(new Icon.Options().setSrc("assets/custom-marker.png")
-                .setColor("blue").setOpacity(0.8f).setScale(2f)
-                .setRotation((float) Math.PI));
+        Icon.Options options = new Icon.Options();
+        options.setSrc("assets/custom-marker.png");
+        options.setColor("blue");
+        options.setOpacity(0.8f);
+        options.setScale(2f);
+        options.setRotation((float) Math.PI);
+        return new Icon(options);
     }
 }

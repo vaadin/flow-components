@@ -4,7 +4,7 @@ package com.vaadin.flow.component.gridpro;
  * #%L
  * Vaadin GridPro
  * %%
- * Copyright (C) 2018 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentEvent;
@@ -48,10 +50,10 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.0.1")
+@NpmPackage(value = "@vaadin/grid-pro", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.1.0-alpha2")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -148,7 +150,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
@@ -669,6 +671,29 @@ public class GridPro<E> extends Grid<E> {
                 }
             };
         }
+    }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(GridProVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(GridProVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(GridProVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(GridProVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 }

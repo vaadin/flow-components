@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Server-side component for the <code>vaadin-button</code> element.
+ * The Button component allows users to perform actions. It comes in several
+ * different style variants, and supports icons in addition to text labels.
  *
  * @author Vaadin Ltd
  */

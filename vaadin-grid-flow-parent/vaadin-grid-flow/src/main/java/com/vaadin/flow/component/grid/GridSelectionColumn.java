@@ -29,7 +29,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-grid-flow-selection-column")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-grid-flow-selection-column.js")
 public class GridSelectionColumn extends Component {
@@ -62,6 +62,16 @@ public class GridSelectionColumn extends Component {
      */
     public void setSelectAllCheckboxState(boolean selectAll) {
         getElement().setProperty("selectAll", selectAll);
+    }
+
+    /**
+     * Sets the indeterminate state of the select all checkbox on the client.
+     *
+     * @param indeterminate
+     *            the new indeterminate state of the select all checkbox
+     */
+    public void setSelectAllCheckboxIndeterminateState(boolean indeterminate) {
+        getElement().setProperty("indeterminate", indeterminate);
     }
 
     /**

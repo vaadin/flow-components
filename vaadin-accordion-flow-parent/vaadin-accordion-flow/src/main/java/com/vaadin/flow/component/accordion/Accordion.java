@@ -35,14 +35,28 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Accordion is a a vertically stacked set of expandable panels. Only one panel
- * can be opened at a time.
+ * Accordion is a vertically stacked set of expandable panels. It reduces
+ * clutter and helps maintain the user’s focus by showing only the relevant
+ * content at a time.
+ * <p>
+ * Accordion consists of stacked panels, each composed of two parts: a summary
+ * and a content area. Only one panel can be expanded at a time.
+ * <p>
+ * The summary is the part that is always visible, and typically describes the
+ * contents, for example, with a title. Clicking on the summary toggles the
+ * content area’s visibility.
+ * <p>
+ * The content area is the collapsible part of a panel. It can contain any
+ * component. When the content area is collapsed, the content is invisible and
+ * inaccessible by keyboard or screen reader.
+ *
+ * @author Vaadin Ltd
  */
 @Tag("vaadin-accordion")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/accordion", version = "23.0.1")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "23.0.1")
+@NpmPackage(value = "@vaadin/accordion", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "23.1.0-alpha2")
 @JsModule("@vaadin/accordion/src/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize, HasStyle {
 

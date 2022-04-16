@@ -4,7 +4,7 @@ package com.vaadin.flow.component.map.configuration.source;
  * #%L
  * Vaadin Map
  * %%
- * Copyright (C) 2022 - 2022 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -34,7 +34,7 @@ public class VectorSource extends Source {
         this(new Options());
     }
 
-    public VectorSource(BaseOptions options) {
+    public VectorSource(Options options) {
         super(options);
     }
 
@@ -63,10 +63,6 @@ public class VectorSource extends Source {
         removeChild(feature);
     }
 
-    protected static class BaseOptions<T extends BaseOptions<T>>
-            extends Source.BaseOptions<T> {
-    }
-
-    public static class Options extends BaseOptions<Options> {
+    public static class Options extends Source.Options {
     }
 }

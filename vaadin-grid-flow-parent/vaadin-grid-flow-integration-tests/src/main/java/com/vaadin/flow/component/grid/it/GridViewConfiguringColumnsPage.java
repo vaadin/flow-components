@@ -49,7 +49,8 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
 
         // Setting a column-key allows fetching the column later
         grid.addColumn(Person::getAge).setHeader("Age").setKey("age");
-        grid.getColumnByKey("age").setResizable(true);
+        Column<Person> ageColumn = grid.getColumnByKey("age");
+        ageColumn.setResizable(true);
 
         NativeButton idColumnVisibility = new NativeButton(
                 "Toggle visibility of the ID column");
@@ -73,6 +74,11 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
                 event -> multiSlection.setSelectionColumnFrozen(
                         !multiSlection.isSelectionColumnFrozen()));
 
+        NativeButton freezeAgeColumnToEnd = new NativeButton(
+                "Toggle frozen to end state of Age column");
+        freezeAgeColumnToEnd.addClickListener(
+                event -> ageColumn.setFrozenToEnd(!ageColumn.isFrozenToEnd()));
+
         RadioButtonGroup<ColumnTextAlign> alignments = new RadioButtonGroup<>();
         alignments.setItems(ColumnTextAlign.values());
         alignments.setLabel("Text alignment for the Age column");
@@ -85,10 +91,12 @@ public class GridViewConfiguringColumnsPage extends LegacyTestView {
         userReordering.setId("toggle-user-reordering");
         freezeIdColumn.setId("toggle-id-column-frozen");
         freezeSelectionColumn.setId("toggle-selection-column-frozen");
+        freezeAgeColumnToEnd.setId("toggle-age-column-frozen-to-end");
         alignments.setId("toggle-text-align");
         addCard("Configuring columns", "Column API example", grid,
                 new VerticalLayout(idColumnVisibility, userReordering,
-                        freezeIdColumn, freezeSelectionColumn, alignments));
+                        freezeIdColumn, freezeSelectionColumn,
+                        freezeAgeColumnToEnd, alignments));
     }
 
     private void createBeanGrid() {

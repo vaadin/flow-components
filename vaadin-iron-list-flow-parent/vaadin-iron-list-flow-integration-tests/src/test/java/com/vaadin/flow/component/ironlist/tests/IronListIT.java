@@ -229,7 +229,7 @@ public class IronListIT extends AbstractComponentIT {
           + "    setTimeout(isPlaceholderVisible, 20);"
           + "  }"
           + "}"
-          + "isPlaceholderVisible();",
+          + "setTimeout(isPlaceholderVisible);",
         //@formatter:on
                 list);
 
