@@ -38,8 +38,6 @@ public class MenuBarVisibilityIT extends AbstractComponentIT {
     toggleMenuBarVisibility.click();
     Assert.assertTrue(menuBar.isDisplayed());
 
-    waitForMutationObserver();
-
     // Check that the menu item is disabled.
     TestBenchElement button = menuBar.getButtons().get(0);
     Assert.assertTrue(button.getPropertyBoolean("disabled"));
@@ -62,15 +60,7 @@ public class MenuBarVisibilityIT extends AbstractComponentIT {
     toggleMenuBarVisibility.click();
     Assert.assertTrue(menuBar.isDisplayed());
 
-    waitForMutationObserver();
-
     // Check that the menu item is visible.
     Assert.assertFalse(menuBar.getButtons().isEmpty());
-  }
-
-  private void waitForMutationObserver() {
-    getCommandExecutor().getDriver().executeAsyncScript(
-            "var callback = arguments[arguments.length - 1];"
-                    + "requestAnimationFrame(callback)");
   }
 }
