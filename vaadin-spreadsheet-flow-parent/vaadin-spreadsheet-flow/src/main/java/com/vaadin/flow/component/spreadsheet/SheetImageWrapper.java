@@ -13,16 +13,13 @@ package com.vaadin.flow.component.spreadsheet;
  * #L%
  */
 
-import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.Serializable;
 
 import org.apache.poi.ss.usermodel.ClientAnchor;
 
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
-import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 
 /**

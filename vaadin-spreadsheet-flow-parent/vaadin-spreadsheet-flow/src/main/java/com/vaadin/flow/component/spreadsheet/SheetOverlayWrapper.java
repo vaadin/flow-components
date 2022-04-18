@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.spreadsheet;
 
-import javax.xml.transform.stream.StreamSource;
 import java.io.Serializable;
 
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
@@ -11,7 +10,6 @@ import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.server.StreamResource;
 
