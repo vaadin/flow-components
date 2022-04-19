@@ -205,13 +205,18 @@ export class VaadinSpreadsheet extends LitElement {
   connectedCallback() {
     super.connectedCallback()
     this.observer && this.observer.observe(this);
-    console.log('connected')
+    // Restore styles in the case widget is reattached, it happens e.g in client router
+    this.styles && this.styles.forEach(e => document.head.appendChild(e));
+    console.log(">> connected", this.id)
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.observer && this.observer.unobserve(this);
-    console.log('disconnected')
+    // Remove styles added to the head by the Widget
+    this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
+    this.styles.forEach(e => document.head.removeChild(e));
+    console.log(">> disconnected", this.id)
   }
 
   updated(_changedProperties) {
