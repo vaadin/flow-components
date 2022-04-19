@@ -62,7 +62,6 @@
 
           // Remove hidden items entirely from the array. Just hiding them
           // could cause the overflow button to be rendered without items.
-          // resetContent needs to be called to make buttons visible again.
           //
           // The items-prop needs to be set even when all items are visible
           // to update the disabled state and re-render buttons.
