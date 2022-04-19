@@ -666,7 +666,7 @@ public class SheetWidget extends Panel {
 
     public void relayoutSheet(boolean triggerRequest) {
         updateSheetStyles();
-        int scrollTop = sheet.getScrollTop();
+        int scrollTop = topFrozenPanelHeight + sheet.getScrollTop();
         int scrollLeft = sheet.getScrollLeft();
         int vScrollDiff = scrollTop - previousScrollTop;
         int hScrollDiff = scrollLeft - previousScrollLeft;
@@ -2925,7 +2925,7 @@ public class SheetWidget extends Panel {
      * handler (if needed).
      */
     private void onSheetScroll() {
-        int scrollTop = sheet.getScrollTop();
+        int scrollTop = topFrozenPanelHeight + sheet.getScrollTop();
         int scrollLeft = sheet.getScrollLeft();
         int vScrollDiff = scrollTop - previousScrollTop;
         int hScrollDiff = scrollLeft - previousScrollLeft;
