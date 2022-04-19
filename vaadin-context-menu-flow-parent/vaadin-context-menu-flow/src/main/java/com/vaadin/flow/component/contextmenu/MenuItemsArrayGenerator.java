@@ -62,11 +62,7 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
             getItems().forEach(this::resetContainers);
 
             int containerNodeId = createNewContainer(menu.getChildren());
-            String appId = ui.getInternals().getAppId();
-
-            ui.getPage().executeJavaScript(
-                    "window.Vaadin.Flow.contextMenuConnector.generateItems($0, $1, $2)",
-                    getElement(), appId, containerNodeId);
+            getElement().callJsFunction("$connector.generateItems", containerNodeId);
 
             updateScheduled = false;
         });

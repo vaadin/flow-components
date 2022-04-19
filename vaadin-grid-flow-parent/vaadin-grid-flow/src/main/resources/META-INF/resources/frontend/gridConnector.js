@@ -1002,7 +1002,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
       };
 
       grid.addEventListener('vaadin-context-menu-before-open', tryCatchWrapper(function(e) {
-        contextMenuListener(grid.$contextMenuConnector.openEvent);
+        contextMenuListener(grid.$contextMenuTargetConnector.openEvent);
       }));
 
       grid.getContextMenuBeforeOpenDetail = tryCatchWrapper(function(event) {
