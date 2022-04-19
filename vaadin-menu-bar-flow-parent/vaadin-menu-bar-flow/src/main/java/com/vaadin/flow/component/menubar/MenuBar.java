@@ -77,7 +77,8 @@ public class MenuBar extends Component
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {
-            initConnector();
+            String appId = event.getUI().getInternals().getAppId();
+            initConnector(appId);
             resetContent();
         });
     }
@@ -341,15 +342,19 @@ public class MenuBar extends Component
             return;
         }
         runBeforeClientResponse(ui -> {
-            getElement().executeJs("this.$connector.updateButtons()");
+            // When calling `generateItems` without providing a node id, it will
+            // use the previously generated items tree, only updating the
+            // disabled and hidden properties of the root items = the menu bar
+            // buttons.
+            getElement().executeJs("this.$connector.generateItems()");
             updateScheduled = false;
         });
         updateScheduled = true;
     }
 
-    private void initConnector() {
+    private void initConnector(String appId) {
         getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this)");
+                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)", appId);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
