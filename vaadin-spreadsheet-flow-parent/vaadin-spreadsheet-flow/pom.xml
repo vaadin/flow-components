@@ -54,6 +54,11 @@
             <version>${vaadin.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
         </dependency>
@@ -76,5 +81,13 @@
             <artifactId>ooxml-schemas</artifactId>
         </dependency>
     </dependencies>
-
+    <build>
+        <resources>
+            <!-- Needed for setting the version in spreadsheet.properties file -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 </project>

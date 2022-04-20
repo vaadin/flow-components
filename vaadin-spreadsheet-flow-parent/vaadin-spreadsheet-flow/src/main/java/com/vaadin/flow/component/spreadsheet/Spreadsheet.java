@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -101,6 +102,8 @@ import com.vaadin.flow.component.spreadsheet.shared.SpreadsheetState;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.shared.URLReference;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.pro.licensechecker.LicenseChecker;
 
 /**
  * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
@@ -115,6 +118,31 @@ import com.vaadin.flow.server.StreamResource;
 @SuppressWarnings("serial")
 public class Spreadsheet extends Component implements HasComponents, HasSize, HasStyle,
         Action.Container, Focusable {
+
+    static {
+        VaadinService service = VaadinService.getCurrent();
+
+        Properties properties = new Properties();
+        try {
+            properties.load(Spreadsheet.class
+                    .getResourceAsStream("spreadsheet.properties"));
+        } catch (Exception e) {
+            Logger.getLogger(Spreadsheet.class.getName()).log(
+                    Level.WARNING, "Unable to read Spreadsheet properties file",
+                    e);
+            throw new ExceptionInInitializerError(e);
+        }
+
+        String version = properties.getProperty("spreadsheet.version");
+
+        if (service != null) {
+            if (service.getDeploymentConfiguration().isProductionMode()) {
+                LicenseChecker.checkLicenseFromStaticBlock("vaadin-spreadhseet-flow",
+                        version);
+            }
+        }
+    }
+
     private SpreadsheetHandlerImpl spreadsheetHandler;
 
     /*
