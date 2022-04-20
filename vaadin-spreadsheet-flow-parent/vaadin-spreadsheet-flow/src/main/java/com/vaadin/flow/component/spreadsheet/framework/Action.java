@@ -85,7 +85,7 @@ public class Action implements Serializable {
      * An Action that implements this interface can be added to an
      * Action.Notifier (or NotifierProxy) via the <code>addAction()</code>
      * -method, which in many cases is easier than implementing the
-     * Action.Handler interface.<br/>
+     * Action.Handler interface.
      *
      */
     @FunctionalInterface

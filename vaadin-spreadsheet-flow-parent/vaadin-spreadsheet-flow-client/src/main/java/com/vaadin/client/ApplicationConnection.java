@@ -231,11 +231,11 @@ public class ApplicationConnection implements HasHandlers {
 
     /**
      * Event triggered when a application is stopped by calling
-     * {@link ApplicationConnection#setApplicationRunning(false)}.
+     * {@link ApplicationConnection#setApplicationRunning(boolean)}.
      *
      * To listen for the event add a {@link ApplicationStoppedHandler} by
      * invoking
-     * {@link ApplicationConnection#addHandler(Type, ApplicationStoppedHandler)}
+     * {@link ApplicationConnection#addHandler(Type, EventHandler)}
      * to the {@link ApplicationConnection}
      *
      * @since 7.1.8
@@ -278,7 +278,7 @@ public class ApplicationConnection implements HasHandlers {
     /**
      * A listener for listening to application stopped events. The listener can
      * be added to a {@link ApplicationConnection} by invoking
-     * {@link ApplicationConnection#addHandler(GwtEvent.Type, ApplicationStoppedHandler)}
+     * {@link ApplicationConnection#addHandler(GwtEvent.Type, EventHandler)}
      *
      * @since 7.1.8
      * @author Vaadin Ltd
@@ -288,7 +288,7 @@ public class ApplicationConnection implements HasHandlers {
         /**
          * Triggered when the {@link ApplicationConnection} marks a previously
          * running application as stopped by invoking
-         * {@link ApplicationConnection#setApplicationRunning(false)}.
+         * {@link ApplicationConnection#setApplicationRunning(boolean)}.
          *
          * @param event
          *            the event triggered by the {@link ApplicationConnection}
@@ -439,7 +439,7 @@ public class ApplicationConnection implements HasHandlers {
 
     /**
      * Starts this application. Don't call this method directly - it's called by
-     * {@link ApplicationConfiguration#startNextApplication()}, which should be
+     * {@link ApplicationConfiguration#startApplication(String)}, which should be
      * called once this application has started (first response received) or
      * failed to start. This ensures that the applications are started in order,
      * to avoid session-id problems.
@@ -1060,7 +1060,7 @@ public class ApplicationConnection implements HasHandlers {
     /**
      * Returns false.
      *
-     * @param paintable
+     * @param widget
      * @return false, always
      * @deprecated As of 7.0, serves no purpose
      */
@@ -1279,7 +1279,7 @@ public class ApplicationConnection implements HasHandlers {
      * @param uri
      *            The uri to which the parameters should be added.
      * @param extraParams
-     *            One or more parameters in the format "a=b" or "c=d&e=f". An
+     *            One or more parameters in the format "a=b" or "c=d&amp;e=f". An
      *            empty string is allowed but will not modify the url.
      * @return The modified URI with the get parameters in extraParams added.
      * @deprecated Use {@link SharedUtil#addGetParameters(String,String)}
