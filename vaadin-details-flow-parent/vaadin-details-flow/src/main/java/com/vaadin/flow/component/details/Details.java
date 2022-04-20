@@ -58,10 +58,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "23.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-details", version = "23.1.0-alpha1")
+@NpmPackage(value = "@vaadin/details", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "23.1.0-alpha2")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle, HasSize {
@@ -75,6 +75,30 @@ public class Details extends Component
     public Details() {
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
+    }
+
+    /**
+     * Initializes a new Details using the provided summary.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @see #setSummaryText(String)
+     */
+    public Details(String summary) {
+        this();
+        setSummaryText(summary);
+    }
+
+    /**
+     * Initializes a new Details using the provided summary.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @see #setSummary(Component)
+     */
+    public Details(Component summary) {
+        this();
+        setSummary(summary);
     }
 
     /**
@@ -109,6 +133,40 @@ public class Details extends Component
         this();
         setSummary(summary);
         setContent(content);
+    }
+
+    /**
+     * Initializes a new Details using the provided summary and content
+     * components.
+     *
+     * @param summary
+     *            the summary text to set.
+     * @param components
+     *            the content components to set.
+     *
+     * @see #setSummaryText(String)
+     * @see #addContent(Component...)
+     */
+    public Details(String summary, Component... components) {
+        this(summary);
+        addContent(components);
+    }
+
+    /**
+     * Initializes a new Details using the provided summary and content
+     * components.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @param components
+     *            the content components to set.
+     *
+     * @see #setSummary(Component)
+     * @see #addContent(Component...)
+     */
+    public Details(Component summary, Component... components) {
+        this(summary);
+        addContent(components);
     }
 
     /**

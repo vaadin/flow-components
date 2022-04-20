@@ -147,6 +147,42 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
+     * Convenience constructor to create a time picker with a pre-selected time
+     * and {@link ValueChangeListener}.
+     *
+     * @param time
+     *            the pre-selected time in the picker
+     * @param listener
+     *            the listener to receive value change events
+     * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     */
+    public TimePicker(LocalTime time,
+            ValueChangeListener<ComponentValueChangeEvent<TimePicker, LocalTime>> listener) {
+        this(time);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Convenience constructor to create a time picker with a label, a
+     * pre-selected time and a {@link ValueChangeListener}.
+     *
+     * @param label
+     *            the label describing the time picker
+     * @param time
+     *            the pre-selected time in the picker
+     * @param listener
+     *            the listener to receive value change events
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     */
+    public TimePicker(String label, LocalTime time,
+            ValueChangeListener<ComponentValueChangeEvent<TimePicker, LocalTime>> listener) {
+        this(time);
+        setLabel(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
      * Sets the label for the time picker.
      *
      * @param label

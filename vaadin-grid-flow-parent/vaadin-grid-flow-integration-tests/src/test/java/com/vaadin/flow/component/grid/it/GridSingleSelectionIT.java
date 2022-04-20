@@ -1,135 +1,130 @@
-/*
- * Copyright 2000-2022 Vaadin Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.vaadin.flow.component.grid.it;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 @TestPath("vaadin-grid/grid-single-selection")
 public class GridSingleSelectionIT extends AbstractComponentIT {
 
-    @Test
-    public void checkDeselectionAllowedByDefault() {
+    private GridElement grid;
+    private TestBenchElement toggleFirstItem;
+    private TestBenchElement toggleLastItem;
+    private TestBenchElement deselectAll;
+    private TestBenchElement selectionLog;
+
+    @Before
+    public void init() {
         open();
+        grid = $(GridElement.class).waitForFirst();
+        toggleFirstItem = $(TestBenchElement.class).id("toggle-first-item");
+        toggleLastItem = $(TestBenchElement.class).id("toggle-last-item");
+        deselectAll = $(TestBenchElement.class).id("deselect-all");
+        selectionLog = $(TestBenchElement.class).id("selection-log");
+    }
 
-        // Ensure that de-selection is allowed by default
-        GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.DESELECT_ALLOWED_GRID_ID);
+    @Test
+    public void selectFirstItem_deselectFirstItem_nothingSelected() {
+        toggleFirstItem.click();
+        Assert.assertEquals("oldValue=null; newValue=0; fromClient=false",
+                selectionLog.getText());
+        Assert.assertTrue(grid.getRow(0).isSelected());
 
-        grid.getRow(1).select();
-        Assert.assertTrue("Row 1 was not selected after selecting it.",
-                grid.getRow(1).isSelected());
+        toggleFirstItem.click();
+        Assert.assertEquals("oldValue=0; newValue=null; fromClient=false",
+                selectionLog.getText());
+        Assert.assertFalse(grid.getRow(0).isSelected());
+    }
 
-        grid.getRow(1).deselect();
-        Assert.assertTrue("Row 1 was still selected after de-selecting it.",
-                !grid.getRow(1).isSelected());
+    @Test
+    public void selectFirstItemFromClient_deselectFirstItemFromClient_nothingSelected() {
+        grid.getCell("0").click();
+        Assert.assertEquals("oldValue=null; newValue=0; fromClient=true",
+                selectionLog.getText());
+        Assert.assertTrue(grid.getRow(0).isSelected());
 
-        // Disable de-selection on the fly and test again
-        $("button").id(GridSingleSelectionPage.DESELECT_ALLOWED_TOGGLE_ID)
-                .click();
+        grid.getCell("0").click();
+        Assert.assertEquals("oldValue=0; newValue=null; fromClient=true",
+                selectionLog.getText());
+        Assert.assertFalse(grid.getRow(0).isSelected());
+    }
 
-        grid.getRow(1).select();
-        Assert.assertTrue("Row 1 was not selected after selecting it.",
-                grid.getRow(1).isSelected());
+    @Test
+    public void selectFirstItem_selectSecondItemFromClient_secondItemSelected() {
+        toggleFirstItem.click();
+        Assert.assertEquals("oldValue=null; newValue=0; fromClient=false",
+                selectionLog.getText());
+        Assert.assertTrue(grid.getRow(0).isSelected());
 
-        grid.getRow(1).deselect();
+        grid.getCell("1").click();
+        Assert.assertEquals("oldValue=0; newValue=1; fromClient=true",
+                selectionLog.getText());
+        Assert.assertFalse(grid.getRow(0).isSelected());
+        Assert.assertTrue(grid.getRow(1).isSelected());
+    }
+
+    @Test
+    public void selectSecondItemFromClient_selectFirstItem_firstItemSelected() {
+        grid.getCell("1").click();
+        Assert.assertEquals("oldValue=null; newValue=1; fromClient=true",
+                selectionLog.getText());
+        Assert.assertTrue(grid.getRow(1).isSelected());
+
+        toggleFirstItem.click();
+        Assert.assertEquals("oldValue=1; newValue=0; fromClient=false",
+                selectionLog.getText());
+        Assert.assertFalse(grid.getRow(1).isSelected());
+        Assert.assertTrue(grid.getRow(0).isSelected());
+    }
+
+    @Test
+    public void selectUncachedItem_itemSelected() {
+        toggleLastItem.click();
+        Assert.assertEquals("oldValue=null; newValue=499; fromClient=false",
+                selectionLog.getText());
+
+        grid.scrollToRow(500);
+        Assert.assertTrue(grid.getRow(499).isSelected());
+    }
+
+    /**
+     * Test that aria-multiselectable=false & the selectable children should
+     * have aria-selected=true|false depending on their state
+     */
+    @Test
+    public void ariaSelectionAttributes() {
+        TestBenchElement table = grid.$("table").first();
+        Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
+        Assert.assertFalse(Boolean
+                .parseBoolean(table.getAttribute("aria-multiselectable")));
+
+        GridTRElement firstRow = grid.getRow(0);
+        firstRow.select();
+        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
         Assert.assertTrue(
-                "Row 1 was deselected even though deselection is not allowed.",
-                grid.getRow(1).isSelected());
+                Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
+
+        GridTRElement secondRow = grid.getRow(1);
+        Assert.assertFalse(
+                Boolean.parseBoolean(secondRow.getAttribute("aria-selected")));
     }
 
+    // Regression test for: https://github.com/vaadin/flow-components/issues/324
     @Test
-    public void checkDeselectionDisallowedInitially() {
-        open();
+    public void deselectAll_clientSideGridHasEmptySelection() {
+        toggleFirstItem.click();
+        deselectAll.click();
 
-        // Ensure that de-selection is not possible when it has been disallowed
-        // initially
-        GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.DESELECT_DISALLOWED_GRID_ID);
-
-        grid.getRow(1).select();
-        Assert.assertTrue("Row 1 was not selected after selecting it.",
-                grid.getRow(1).isSelected());
-
-        grid.getRow(1).deselect();
-        Assert.assertTrue(
-                "Row 1 was deselected even though deselection is not allowed.",
-                grid.getRow(1).isSelected());
-
-        // Enable de-selection on the fly and test again
-        $("button").id(GridSingleSelectionPage.DESELECT_DISALLOWED_TOGGLE_ID)
-                .click();
-
-        grid.getRow(1).select();
-        Assert.assertTrue("Row 1 was not selected after selecting it.",
-                grid.getRow(1).isSelected());
-
-        grid.getRow(1).deselect();
-        Assert.assertTrue("Row 1 was still selected after de-selecting it.",
-                !grid.getRow(1).isSelected());
+        Assert.assertEquals(0, getNumberOfSelectedItemsClientSide(grid));
     }
 
-    @Test
-    public void selectItemAndSetItemsWithDeselectDisallowed() {
-        open();
-
-        // De-selection is not allowed(deselectAllowed is false) and then
-        // setting items for grid
-        GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.ITEMS_GRID);
-
-        grid.getRow(1).select();
-        Assert.assertTrue("Row 1 was selected after selecting it.",
-                grid.getRow(1).isSelected());
-        // Set Items again by clicking the button
-        $("button").id(GridSingleSelectionPage.SET_ITEMS).click();
-        $("button").id(GridSingleSelectionPage.SET_ITEMS).click();
-    }
-
-    @Test
-    public void selectAnotherItemWithDeselectDisallowed() {
-        open();
-
-        // De-selection is not allowed(deselectAllowed is false) and then
-        // setting items for grid
-        GridElement grid = $(GridElement.class)
-                .id(GridSingleSelectionPage.ITEMS_GRID);
-
-        grid.getRow(0).select();
-
-        Assert.assertTrue("Row 1 was selected after selecting it.",
-                grid.getRow(0).isSelected());
-
-        WebElement text1 = findElement(By.id("item1"));
-        Assert.assertTrue("Row 1 is selected", text1.isDisplayed());
-
-        grid.getRow(0).deselect();
-
-        grid.getRow(1).select();
-
-        Assert.assertTrue("Row 2 was selected after selecting it.",
-                grid.getRow(1).isSelected());
-
-        WebElement text2 = findElement(By.id("item2"));
-        Assert.assertTrue("Row 2 is selected", text2.isDisplayed());
+    private long getNumberOfSelectedItemsClientSide(GridElement grid) {
+        return (Long) executeScript("return arguments[0].selectedItems.length",
+                grid);
     }
 }
