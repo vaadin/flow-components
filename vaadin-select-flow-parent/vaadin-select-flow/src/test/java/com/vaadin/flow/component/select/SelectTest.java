@@ -801,6 +801,25 @@ public class SelectTest {
         Assert.assertNull(select.getValue().getId());
     }
 
+    @Test
+    public void setItems_createsLabelValueEventAndItems() {
+        Assert.assertEquals("Invalid number of items", 0,
+                getListBox().getChildren().count());
+
+        AtomicReference<HasValue.ValueChangeEvent> capture = new AtomicReference<>();
+        select = new Select<>("label", capture::set, "foo", "bar", "baz");
+
+        Assert.assertEquals("Invalid number of items", 3,
+                getListBox().getChildren().count());
+
+        validateItem(0, "foo", null, true);
+        validateItem(1, "bar", null, true);
+        validateItem(2, "baz", null, true);
+
+        Assert.assertEquals("Invalid label for select ", "label",
+                select.getElement().getProperty("label"));
+    }
+
     private void validateItem(int index, String textContent, String label,
             boolean enabled) {
         Element item = getListBoxChild(index);
