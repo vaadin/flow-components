@@ -1,15 +1,10 @@
 package com.vaadin.spreadsheet.flowport.gwtexporter.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
-
-import jsinterop.annotations.JsType;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
@@ -20,30 +15,19 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
-import com.vaadin.addon.spreadsheet.client.SheetWidget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetHandler;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
-import com.vaadin.client.ApplicationConfiguration;
 import com.vaadin.client.ApplicationConnection;
-import com.vaadin.client.ConnectorMap;
-import com.vaadin.client.Profiler;
-import com.vaadin.client.ValueMap;
-import com.vaadin.client.WidgetSet;
-import com.vaadin.client.communication.MessageHandler;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.metadata.ConnectorBundleLoader;
 import com.vaadin.client.metadata.TypeDataStore;
-import com.vaadin.shared.annotations.NoLayout;
-import com.vaadin.shared.communication.URLReference;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.ErrorLevel;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
+import jsinterop.annotations.JsType;
 
 /**
  *
@@ -517,18 +501,24 @@ public class SpreadsheetJsApi {
         getState().id = id;
     }
 
+    private String[] serverClasses = new String[0];
+
     public void setClass(String classNames) {
-        if (originalStyles  == null) {
-            originalStyles = spreadsheetWidget.getStyleName();
+        // Server does not remove styles, it updates the entire attribute
+        // with the classes that it manages.
+        // Because the client also uses classes for certain features like
+        // in DisplayGridlines, we store a cache with classes sets by server
+        // for removing it in next iteration.
+
+        // Remove all classes set by server in previous request
+        for (String c : serverClasses) {
+            spreadsheetWidget.removeStyleName(c);
         }
-        List<String> fixedStyles = Arrays.asList(originalStyles != null?originalStyles.split(" "):new String[0]);
-        List<String> oldStyles = Arrays.asList(spreadsheetWidget.getStyleName() != null?spreadsheetWidget.getStyleName().split(" "):new String[0]);
-        List<String> newStyles = Arrays.asList(classNames != null?classNames.split(" "):new String[0]);
-        for (String style : oldStyles) if (!"".equals(style)) {
-            if (!fixedStyles.contains(style) && !newStyles.contains(style)) spreadsheetWidget.removeStyleName(style);
-        }
-        for (String style : newStyles) if (!"".equals(style)) {
-            if (!fixedStyles.contains(style) && !oldStyles.contains(style)) spreadsheetWidget.addStyleName(style);
+        // Cache classes for next time
+        serverClasses = classNames.split(" ");
+        // Set the new classes
+        for (String c : serverClasses) {
+            spreadsheetWidget.addStyleName(c);
         }
     }
 

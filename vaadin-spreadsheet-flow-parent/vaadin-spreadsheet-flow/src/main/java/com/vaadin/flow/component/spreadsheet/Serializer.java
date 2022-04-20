@@ -78,8 +78,8 @@ public class Serializer {
                                 + "#" + b.getState().row
                                 + "#" + b.getState().headerHidden
                                 + "#" + b.getState().sheet
-                                + "#" + b.getState().popupWidth
-                                + "#" + b.getState().popupHeight
+                                + "#" + (b.getState().popupWidth != null ? b.getState().popupWidth : "0")
+                                + "#" + (b.getState().popupHeight != null ? b.getState().popupWidth : "0")
                                 ;
                     } else {
                         return v.toString();
