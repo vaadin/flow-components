@@ -242,6 +242,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         executeScript("arguments[0].disabled=false;"
                 + "arguments[0].querySelector('vaadin-context-menu-item').disabled=false;",
                 button2);
+        button2 = menuBar.getButtons().get(1);
         button2.click();
         assertMessage("");
     }
