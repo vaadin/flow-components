@@ -124,7 +124,7 @@ public class DimensionsIT extends AbstractParallelTest {
     }
 
     private TestBenchElement getContent() {
-        return getOverlay().getPropertyElement("$", "content");
+        return getOverlay().getPropertyElement("$", "overlay");
     }
 
     private TestBenchElement getOverlay() {
