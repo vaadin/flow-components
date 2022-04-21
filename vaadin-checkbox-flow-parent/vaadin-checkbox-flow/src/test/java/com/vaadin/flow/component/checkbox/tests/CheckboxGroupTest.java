@@ -521,6 +521,23 @@ public class CheckboxGroupTest {
                 .get().getId());
     }
 
+    @Test
+    public void setItems_createsLabelValueEventAndItems() {
+        CustomItem first = new CustomItem(1L, "First");
+        CustomItem second = new CustomItem(2L, "Second");
+        CustomItem third = new CustomItem(3L, "Third");
+
+        AtomicReference<HasValue.ValueChangeEvent> capture = new AtomicReference<>();
+        CheckboxGroup<CustomItem> checkboxGroup = new CheckboxGroup<>("label",
+                capture::set, first, second, third);
+
+        Assert.assertEquals("Invalid number of items", 3,
+                checkboxGroup.getChildren().count());
+
+        Assert.assertEquals("Invalid label for checkbox group ", "label",
+                checkboxGroup.getElement().getProperty("label"));
+    }
+
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(
             List<Wrapper> items) {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();

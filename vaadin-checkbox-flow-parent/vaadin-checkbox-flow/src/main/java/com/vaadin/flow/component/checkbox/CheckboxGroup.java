@@ -104,11 +104,113 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    /**
+     * Creates an empty checkbox group
+     */
     public CheckboxGroup() {
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
         registerValidation();
+    }
+
+    /**
+     * Creates an empty checkbox group with the defined label.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @see #setLabel(String)
+     */
+    public CheckboxGroup(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a checkbox group with the defined label and populated with the
+     * items in the collection.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param items
+     *            the items to be shown in the list of the checkbox group
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public CheckboxGroup(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a checkbox group with the defined label and populated with the
+     * items in the array.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param items
+     *            the items to be shown in the list of the checkbox group
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public CheckboxGroup(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a checkbox group with a value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public CheckboxGroup(
+            ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a checkbox group with the defined label and a value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public CheckboxGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a checkbox group with the defined label, a value change
+     * listener and populated with the items in the array.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the checkbox group
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public CheckboxGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener,
+            T... items) {
+        this(label, listener);
+        setItems(items);
     }
 
     @Override
