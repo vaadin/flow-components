@@ -788,7 +788,7 @@ v-window-closebox
       overflow: hidden;
       padding: 0 !important;
       position: absolute;
-      z-index: 1 !important; }
+      z-index: 3 !important; }
     .spreadsheetport .v-spreadsheet .sheet .floater {
       border-right: 0;
       border-bottom: 0;
@@ -1119,7 +1119,7 @@ v-window-closebox
         height: 28px;
         position: absolute;
         width: 130px;
-        z-index: 1;
+        z-index: 3;
         left: 0;
         top: 0; }
         .spreadsheetport .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
