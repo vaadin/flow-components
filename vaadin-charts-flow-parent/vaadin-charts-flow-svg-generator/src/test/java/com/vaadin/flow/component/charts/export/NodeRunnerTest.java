@@ -29,7 +29,7 @@ public class NodeRunnerTest {
     public void findNodeExecutable_globalNodeAndVaadinHomeNode_usesGlobalNode() {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito.mock(FrontendToolsLocator.class);
         // Mock being able to locate global node installation
-        Mockito.when(frontendToolsLocatorMock.tryLocateTool(Mockito.anyString())).thenReturn(Optional.of(new File("/usr/local/bin/node")));
+        Mockito.when(frontendToolsLocatorMock.tryLocateTool(Mockito.matches("node(.exe)?"))).thenReturn(Optional.of(new File("/usr/local/bin/node")));
         // Mock being able to locate node installation in Vaadin home
         Mockito.when(frontendToolsLocatorMock.verifyTool(ArgumentMatchers.argThat(matchesVaadinHomeNode))).thenReturn(true);
 
@@ -43,7 +43,7 @@ public class NodeRunnerTest {
     public void findNodeExecutable_noGlobalNodeAndVaadinHomeNode_usesVaadinHomeNode() {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito.mock(FrontendToolsLocator.class);
         // Mock not being able to locate global node installation
-        Mockito.when(frontendToolsLocatorMock.tryLocateTool(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(frontendToolsLocatorMock.tryLocateTool(Mockito.matches("node(.exe)?"))).thenReturn(Optional.empty());
         // Mock being able to locate node installation in Vaadin home
         Mockito.when(frontendToolsLocatorMock.verifyTool(ArgumentMatchers.argThat(matchesVaadinHomeNode))).thenReturn(true);
 
@@ -57,7 +57,7 @@ public class NodeRunnerTest {
     public void findNodeExecutable_noGlobalNodeAndNoVaadinHomeNode_throwsException() {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito.mock(FrontendToolsLocator.class);
         // Mock not being able to locate any node installation
-        Mockito.when(frontendToolsLocatorMock.tryLocateTool(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(frontendToolsLocatorMock.tryLocateTool(Mockito.matches("node(.exe)?"))).thenReturn(Optional.empty());
         Mockito.when(frontendToolsLocatorMock.verifyTool(ArgumentMatchers.argThat(matchesVaadinHomeNode))).thenReturn(false);
 
         NodeRunner nodeRunner = new NodeRunner(frontendToolsLocatorMock);
