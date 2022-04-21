@@ -144,7 +144,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @param items
      *            the items for the select
      * @see #setItems(Object...)
-     * @deprecated since 23.1 as ...
+     * @deprecated as of 23.1. Please use {@link #setItems(Object[])} instead.
      */
     @Deprecated
     @SafeVarargs
