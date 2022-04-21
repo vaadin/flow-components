@@ -127,15 +127,14 @@ public class CheckboxDemoPage extends Div {
         checkbox.setLabelComponent(vaadinImg);
 
         NativeButton button = new NativeButton("Change label", event -> {
-            Image newImage = new Image("https://vaadin.com/images/vaadin-logo.svg",
-                    "");
+            Image newImage = new Image(
+                    "https://vaadin.com/images/vaadin-logo.svg", "");
             newImage.setWidth("30px");
             checkbox.setLabelComponent(newImage);
         });
         button.setId("change-img-component-label");
 
-        addCard("Checkbox with the image component label", checkbox,
-                button);
+        addCard("Checkbox with the image component label", checkbox, button);
     }
 
     private void addCard(String title, Component... components) {

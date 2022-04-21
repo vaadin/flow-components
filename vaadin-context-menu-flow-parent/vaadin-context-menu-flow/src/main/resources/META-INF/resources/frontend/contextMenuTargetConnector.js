@@ -1,18 +1,18 @@
-import * as Gestures from "@vaadin/component-base/src/gestures.js";
+import * as Gestures from '@vaadin/component-base/src/gestures.js';
 
-(function() {
+(function () {
   function tryCatchWrapper(callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu Target');
-  };
+  }
 
   window.Vaadin.Flow.contextMenuTargetConnector = {
-    init: tryCatchWrapper(function(target) {
+    init: tryCatchWrapper(function (target) {
       if (target.$contextMenuTargetConnector) {
         return;
       }
 
       target.$contextMenuTargetConnector = {
-        openOnHandler: tryCatchWrapper(function(e) {
+        openOnHandler: tryCatchWrapper(function (e) {
           e.preventDefault();
           e.stopPropagation();
           this.$contextMenuTargetConnector.openEvent = e;
@@ -21,17 +21,17 @@ import * as Gestures from "@vaadin/component-base/src/gestures.js";
             detail = target.getContextMenuBeforeOpenDetail(e);
           }
           target.dispatchEvent(
-            new CustomEvent("vaadin-context-menu-before-open", {
+            new CustomEvent('vaadin-context-menu-before-open', {
               detail: detail
             })
           );
         }),
 
-        updateOpenOn: tryCatchWrapper(function(eventType) {
+        updateOpenOn: tryCatchWrapper(function (eventType) {
           this.removeListener();
           this.openOnEventType = eventType;
 
-          customElements.whenDefined("vaadin-context-menu").then(
+          customElements.whenDefined('vaadin-context-menu').then(
             tryCatchWrapper(() => {
               if (Gestures.gestures[eventType]) {
                 Gestures.addListener(target, eventType, this.openOnHandler);
@@ -42,32 +42,25 @@ import * as Gestures from "@vaadin/component-base/src/gestures.js";
           );
         }),
 
-        removeListener: tryCatchWrapper(function() {
+        removeListener: tryCatchWrapper(function () {
           if (this.openOnEventType) {
             if (Gestures.gestures[this.openOnEventType]) {
-              Gestures.removeListener(
-                target,
-                this.openOnEventType,
-                this.openOnHandler
-              );
+              Gestures.removeListener(target, this.openOnEventType, this.openOnHandler);
             } else {
-              target.removeEventListener(
-                this.openOnEventType,
-                this.openOnHandler
-              );
+              target.removeEventListener(this.openOnEventType, this.openOnHandler);
             }
           }
         }),
 
-        openMenu: tryCatchWrapper(function(contextMenu) {
+        openMenu: tryCatchWrapper(function (contextMenu) {
           contextMenu.open(this.openEvent);
         }),
 
-        removeConnector: tryCatchWrapper(function() {
+        removeConnector: tryCatchWrapper(function () {
           this.removeListener();
           target.$contextMenuTargetConnector = undefined;
         })
       };
     })
-  }
+  };
 })();
