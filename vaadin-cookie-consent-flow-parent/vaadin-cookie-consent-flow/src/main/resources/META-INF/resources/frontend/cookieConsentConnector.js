@@ -1,31 +1,33 @@
 (function () {
-    function copyClassName(consent) {
-        const popup = consent._getPopup();
-        if (popup) {
-            popup.className = consent.className;
-        }
+  function copyClassName(consent) {
+    const popup = consent._getPopup();
+    if (popup) {
+      popup.className = consent.className;
     }
+  }
 
-    const observer = new MutationObserver((records) => {
-        records.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                copyClassName(mutation.target);
-            }
-        });
+  const observer = new MutationObserver((records) => {
+    records.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        copyClassName(mutation.target);
+      }
     });
+  });
 
+  window.Vaadin.Flow.cookieConsentConnector = {
+    initLazy: function (consent) {
+      if (consent.$connector) {
+        return;
+      }
 
-    window.Vaadin.Flow.cookieConsentConnector = {
-        initLazy: function (consent) {
-            if (consent.$connector) {
-                return;
-            }
+      consent.$connector = {};
 
-            consent.$connector = {};
+      observer.observe(consent, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
 
-            observer.observe(consent, { attributes: true, attributeFilter: ['class'] });
-
-            copyClassName(consent);
-        }
-    };
+      copyClassName(consent);
+    }
+  };
 })();

@@ -1,5 +1,5 @@
-import { synchronize } from "./synchronization";
-import { createLookup, getLayerForFeature } from "./util";
+import { synchronize } from './synchronization';
+import { createLookup, getLayerForFeature } from './util';
 
 (function () {
   function init(mapElement) {
@@ -24,35 +24,35 @@ import { createLookup, getLayerForFeature } from "./util";
         changedObjects.forEach((change) => {
           // The OL map instance already exists and should not be created by the
           // synchronization mechanism. So we put it into the lookup manually.
-          if (change.type === "ol/Map") {
+          if (change.type === 'ol/Map') {
             this.lookup.put(change.id, mapElement.configuration);
           }
 
           synchronize(change, context);
         });
-      },
+      }
     };
 
-    mapElement.configuration.on("moveend", (_event) => {
+    mapElement.configuration.on('moveend', (_event) => {
       const view = mapElement.configuration.getView();
       const center = view.getCenter();
       const rotation = view.getRotation();
       const zoom = view.getZoom();
       const extent = view.calculateExtent();
 
-      const customEvent = new CustomEvent("map-view-moveend", {
+      const customEvent = new CustomEvent('map-view-moveend', {
         detail: {
           center,
           rotation,
           zoom,
-          extent,
-        },
+          extent
+        }
       });
 
       mapElement.dispatchEvent(customEvent);
     });
 
-    mapElement.configuration.on("singleclick", (event) => {
+    mapElement.configuration.on('singleclick', (event) => {
       const coordinate = event.coordinate;
       // Get the features at the clicked pixel position
       // In case multiple features exist at that position, OpenLayers
@@ -60,27 +60,23 @@ import { createLookup, getLayerForFeature } from "./util";
       // with the front-most feature as the first result, and the
       // back-most feature as the last result
       const pixelCoordinate = event.pixel;
-      const featuresAtPixel =
-        mapElement.configuration.getFeaturesAtPixel(pixelCoordinate);
+      const featuresAtPixel = mapElement.configuration.getFeaturesAtPixel(pixelCoordinate);
       // Create tuples of features and the layer that they are in
       const featuresAndLayers = featuresAtPixel.map((feature) => {
-        const layer = getLayerForFeature(
-          mapElement.configuration.getLayers().getArray(),
-          feature
-        );
+        const layer = getLayerForFeature(mapElement.configuration.getLayers().getArray(), feature);
         return {
           feature,
-          layer,
+          layer
         };
       });
 
       // Map click event
-      const mapClickEvent = new CustomEvent("map-click", {
+      const mapClickEvent = new CustomEvent('map-click', {
         detail: {
           coordinate,
           features: featuresAndLayers,
-          originalEvent: event.originalEvent,
-        },
+          originalEvent: event.originalEvent
+        }
       });
 
       mapElement.dispatchEvent(mapClickEvent);
@@ -89,12 +85,12 @@ import { createLookup, getLayerForFeature } from "./util";
       if (featuresAndLayers.length > 0) {
         // Send a feature click event for the top-level feature
         const featureAndLayer = featuresAndLayers[0];
-        const featureClickEvent = new CustomEvent("map-feature-click", {
+        const featureClickEvent = new CustomEvent('map-feature-click', {
           detail: {
             feature: featureAndLayer.feature,
             layer: featureAndLayer.layer,
-            originalEvent: event.originalEvent,
-          },
+            originalEvent: event.originalEvent
+          }
         });
 
         mapElement.dispatchEvent(featureClickEvent);
@@ -103,6 +99,6 @@ import { createLookup, getLayerForFeature } from "./util";
   }
 
   window.Vaadin.Flow.mapConnector = {
-    init,
+    init
   };
 })();
