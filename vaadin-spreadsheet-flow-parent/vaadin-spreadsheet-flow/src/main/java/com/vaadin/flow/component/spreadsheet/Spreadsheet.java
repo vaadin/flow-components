@@ -38,6 +38,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.converter.AbstractExcelUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -83,7 +84,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -94,16 +94,17 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand;
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
+import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
 import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
-import com.vaadin.flow.component.spreadsheet.shared.SpreadsheetState;
-import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
-import com.vaadin.flow.component.spreadsheet.shared.URLReference;
+import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.pro.licensechecker.LicenseChecker;
+
+import elemental.json.JsonValue;
 
 /**
  * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
@@ -814,11 +815,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-    public void _setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
-        this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
-        setInvalidFormulaErrorMessage(invalidFormulaErrorMessage);
-    }
-
     public void setLockFormatColumns(boolean lockFormatColumns) {
         this.lockFormatColumns = lockFormatColumns;
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
@@ -834,7 +830,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         getElement().setProperty("namedRanges", Serializer.serialize(namedRanges));
     }
 
-
     /*
     CLIENT RPC
      */
@@ -848,24 +843,25 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     @DomEvent("spreadsheet-event")
     public static class SpreadsheetEvent extends ComponentEvent<Spreadsheet> {
 
-        private final String message;
-        private final String payload;
+        private final String type;
+        private final JsonValue data;
 
-        public SpreadsheetEvent(Spreadsheet source, boolean fromClient, @EventData("event.detail.message") String message, @EventData("event.detail.payload") String payload) {
+        public SpreadsheetEvent(Spreadsheet source, boolean fromClient,
+                @EventData("event.detail.type") String type,
+                @EventData("event.detail.data") JsonValue data) {
             super(source, fromClient);
-            this.message = message;
-            this.payload = payload;
+            this.type = type;
+            this.data = data;
         }
 
-        public String getMessage() {
-            return message;
+        public String getType() {
+            return type;
         }
 
-        public String getPayload() {
-            return payload;
+        public JsonValue getData() {
+            return data;
         }
     }
-
 
     /*
     END OF FLOW RELATED STUFF
@@ -962,8 +958,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         }
 
         @Override
-        public void cellsUpdated(ArrayList<CellData> updatedCellData) {
-            getElement().callJsFunction("cellsUpdated", Serializer.serialize(updatedCellData));
+        public void cellsUpdated(ArrayList<CellData> cellData) {
+            getElement().callJsFunction("cellsUpdated", Serializer.serialize(cellData));
         }
 
         @Override
@@ -3667,10 +3663,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      * 
      * Provides package visibility.
      */
-    //@Override
     protected void setResource(String key, StreamResource resource) {
-        //todo: ver que hacemos con esto
-        //super.setResource(key, resource);
         if (resource == null) {
             resources.remove(key);
             getElement().removeAttribute("resource-" + key);
@@ -4774,7 +4767,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     private void registerCustomComponent(PopupButton component) {
-        getElement().setAttribute("popupbuttons", Serializer.serialize(attachedPopupButtons));
+        List<PopupButtonState> popupButtonStates = attachedPopupButtons.stream().map(p -> p.getState()).collect(Collectors.toList());
+        getElement().setProperty("popupbuttons", Serializer.serialize(popupButtonStates));
     }
 
     private void registerCustomComponent(Component component) {
@@ -4785,7 +4779,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     private void unRegisterCustomComponent(PopupButton component) {
-        getElement().setAttribute("popupbuttons", Serializer.serialize(attachedPopupButtons));
+        getElement().removeProperty("popupbuttons");
     }
 
     private void unRegisterCustomComponent(Component component) {

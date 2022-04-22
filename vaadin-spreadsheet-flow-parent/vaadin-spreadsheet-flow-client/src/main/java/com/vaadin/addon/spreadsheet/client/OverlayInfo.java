@@ -15,31 +15,20 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.io.Serializable;
 
+import jsinterop.annotations.JsType;
+
 @SuppressWarnings("serial")
+@JsType
 public class OverlayInfo implements Serializable {
-    public enum Type {
-        IMAGE,
-        COMPONENT
-    };
     
-    public OverlayInfo() {
-    }
-
-    public OverlayInfo(Type t) {
-        type = t;
-    }    
+    public final static String IMAGE = "IMAGE";
+    public final static String COMPONENT = "COMPONENT";
     
-    public Type type = Type.IMAGE;
-
+    public String type = IMAGE;
     public int col;
     public int row;
     public float width;
     public float height;
     public float dy;
     public float dx;
-
-    @Override
-    public String toString() {
-        return type.name() + "#" + col + "#" + row + "#" + width + "#" + height + "#" + dx + "#" + dy;
-    }
 }

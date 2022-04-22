@@ -178,13 +178,13 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setRowH_isCalled() {
-        api.setRowH("0");
+        api.setRowH("[0]");
         assertTrue(Arrays.equals(new float[] { 0 }, sharedState.rowH));
     }
 
     @Test
     public void should_updateState_when_setColW_isCalled() {
-        api.setColW("0");
+        api.setColW("[0]");
         assertArrayEquals(new int[] {0}, sharedState.colW);
     }
 
@@ -208,19 +208,19 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setCellStyleToCSSStyle_isCalled() {
-        api.setCellStyleToCSSStyle("");
+        api.setCellStyleToCSSStyle("{}");
         assertTrue(new HashMap().equals(sharedState.cellStyleToCSSStyle));
     }
 
     @Test
     public void should_updateState_when_setRowIndexToStyleIndex_isCalled() {
-        api.setRowIndexToStyleIndex("");
+        api.setRowIndexToStyleIndex("{}");
         assertTrue(new HashMap().equals(sharedState.rowIndexToStyleIndex));
     }
 
     @Test
     public void should_updateState_when_setColumnIndexToStyleIndex_isCalled() {
-        api.setColumnIndexToStyleIndex("");
+        api.setColumnIndexToStyleIndex("{}");
         assertTrue(new HashMap().equals(sharedState.columnIndexToStyleIndex));
     }
 
@@ -247,7 +247,7 @@ public class SpreadsheetJsApiTest {
     @Test
     public void should_updateState_when_setConditionalFormattingStyles_isCalled() {
         HashMap<Integer, String> value = new HashMap<>();
-        api.setConditionalFormattingStyles("");
+        api.setConditionalFormattingStyles("{}");
         assertEquals(value, sharedState.conditionalFormattingStyles);
     }
 
@@ -292,30 +292,30 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setCellKeysToEditorIdMap_isCalled() {
-        api.setCellKeysToEditorIdMap("");
+        api.setCellKeysToEditorIdMap("{}");
         assertTrue(new HashMap().equals(sharedState.cellKeysToEditorIdMap));
     }
 
     @Test
     public void should_updateState_when_setComponentIDtoCellKeysMap_isCalled() {
-        api.setComponentIDtoCellKeysMap("");
+        api.setComponentIDtoCellKeysMap("{}");
         assertTrue(new HashMap().equals(sharedState.componentIDtoCellKeysMap));
     }
 
     @Test
     public void should_updateState_when_setHyperlinksTooltips_isCalled() {
-        api.setHyperlinksTooltips("");
+        api.setHyperlinksTooltips("{}");
         assertTrue(new HashMap().equals(sharedState.hyperlinksTooltips));
     }
 
     @Test
     public void should_updateState_when_setCellComments_isCalled() {
-        api.setCellComments("");
+        api.setCellComments("{}");
         assertTrue(new HashMap().equals(sharedState.cellComments));
     }
     @Test
     public void should_updateState_when_setCellCommentAuthors_isCalled() {
-        api.setCellCommentAuthors("");
+        api.setCellCommentAuthors("{}");
         assertTrue(new HashMap().equals(sharedState.cellCommentAuthors));
     }
 
@@ -340,7 +340,7 @@ public class SpreadsheetJsApiTest {
 
     @Test
     public void should_updateState_when_setOverlays_isCalled() {
-        api.setOverlays("");
+        api.setOverlays("{}");
         assertTrue(new HashMap().equals(sharedState.overlays));
     }
 

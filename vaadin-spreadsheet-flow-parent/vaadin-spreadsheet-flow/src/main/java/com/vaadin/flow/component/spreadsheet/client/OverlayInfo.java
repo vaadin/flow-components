@@ -37,9 +37,4 @@ public class OverlayInfo implements Serializable {
     public float height;
     public float dy;
     public float dx;
-
-    @Override
-    public String toString() {
-        return type.name() + "#" + col + "#" + row + "#" + width + "#" + height + "#" + dx + "#" + dy;
-    }
 }

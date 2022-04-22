@@ -8,16 +8,21 @@ package com.vaadin.addon.spreadsheet.shared;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
 
 import java.io.Serializable;
 
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsType;
+
 /**
  * Shared state for the grouping feature
  */
+@SuppressWarnings("serial")
+@JsType
 public class GroupingData implements Serializable {
     public int startIndex;
     public int endIndex;
@@ -28,14 +33,17 @@ public class GroupingData implements Serializable {
     public int uniqueIndex;
     public boolean collapsed;
 
+    @JsIgnore
     public GroupingData() {
     }
 
+    @JsIgnore
     public GroupingData(long start, long end, short level, long unique,
             boolean coll) {
         this((int) start, (int) end, (int) level, (int) unique, coll);
     }
 
+    @JsIgnore
     public GroupingData(int start, int end, int level, int unique, boolean coll) {
         startIndex = start;
         endIndex = end;

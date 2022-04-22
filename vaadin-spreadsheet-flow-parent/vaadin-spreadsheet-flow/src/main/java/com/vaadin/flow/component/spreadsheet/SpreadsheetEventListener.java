@@ -1,166 +1,130 @@
 package com.vaadin.flow.component.spreadsheet;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import com.vaadin.flow.component.ComponentEventListener;
 
+import elemental.json.JsonArray;
+
+@SuppressWarnings("serial")
 public class SpreadsheetEventListener implements ComponentEventListener<Spreadsheet.SpreadsheetEvent> {
     private final SpreadsheetHandlerImpl handler;
 
     public SpreadsheetEventListener(SpreadsheetHandlerImpl spreadsheetHandler) {
         this.handler = spreadsheetHandler;
     }
+    private int toInt(JsonArray o, int pos) {
+       return Double.valueOf(o.getNumber(pos)).intValue();
+    }
+    private String toStr(JsonArray o, int pos) {
+        return o.getString(pos);
+    }
+    private boolean toBool(JsonArray o, int pos) {
+        return o.getBoolean(pos);
+    }
+    private HashMap<Integer, Float> toMapFloat(JsonArray o, int pos) {
+        HashMap<Integer, Float> m = new HashMap<>();
+        JsonArray jso = o.getArray(pos);
+        for (int i = 0; i < jso.length() ; i++) {
+            m.put(i, (float)jso.getNumber(i));
+        }
+        return m;
+    }
+    private HashMap<Integer, Integer> toMapInt(JsonArray o, int pos) {
+        HashMap<Integer, Integer> m = new HashMap<>();
+        JsonArray jso = o.getArray(pos);
+        for (int i = 0; i < jso.length() ; i++) {
+            m.put(i, (int)jso.getNumber(i));
+        }
+        return m;
+    }
 
     @Override
     public void onComponentEvent(Spreadsheet.SpreadsheetEvent event) {
-        System.out.println("received " + event.getMessage() + ": " + event.getPayload());
-        List<String> tokens = parse(event.getPayload());
-        if ("onConnectorInit".equals(event.getMessage())) {
+        String type = event.getType();
+        JsonArray pars = (JsonArray)event.getData();
+
+        System.err.println(type + " " + (pars == null ? "null" : pars.toJson()));
+
+        if ("onConnectorInit".equals(type)) {
             handler.onConnectorInit();
-        } else if ("contextMenuOpenOnSelection".equals(event.getMessage())) {
-            handler.contextMenuOpenOnSelection(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("actionOnCurrentSelection".equals(event.getMessage())) {
-            handler.actionOnCurrentSelection(event.getPayload());
-        } else if ("rowHeaderContextMenuOpen".equals(event.getMessage())) {
-            handler.rowHeaderContextMenuOpen(Integer.parseInt(event.getPayload()));
-        } else if ("actionOnRowHeader".equals(event.getMessage())) {
-            handler.actionOnRowHeader(event.getPayload());
-        } else if ("columnHeaderContextMenuOpen".equals(event.getMessage())) {
-            handler.columnHeaderContextMenuOpen(Integer.parseInt(event.getPayload()));
-        } else if ("actionOnColumnHeader".equals(event.getMessage())) {
-            handler.actionOnColumnHeader(event.getPayload());
-        } else if ("onSheetScroll".equals(event.getMessage())) {
-            handler.onSheetScroll(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)));
-        } else if ("sheetAddressChanged".equals(event.getMessage())) {
-            handler.sheetAddressChanged(event.getPayload());
-        } else if ("cellSelected".equals(event.getMessage())) {
-            handler.cellSelected(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Boolean.parseBoolean(tokens.get(2)));
-        } else if ("cellRangeSelected".equals(event.getMessage())) {
-            handler.cellRangeSelected(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)));
-        } else if ("cellAddedToSelectionAndSelected".equals(event.getMessage())) {
-            handler.cellAddedToSelectionAndSelected(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("cellsAddedToRangeSelection".equals(event.getMessage())) {
-            handler.cellsAddedToRangeSelection(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)));
-        } else if ("rowSelected".equals(event.getMessage())) {
-            handler.rowSelected(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("rowAddedToRangeSelection".equals(event.getMessage())) {
-            handler.rowAddedToRangeSelection(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("columnSelected".equals(event.getMessage())) {
-            handler.columnSelected(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("columnAddedToSelection".equals(event.getMessage())) {
-            handler.columnAddedToSelection(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("selectionIncreasePainted".equals(event.getMessage())) {
-            handler.selectionIncreasePainted(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)));
-        } else if ("selectionDecreasePainted".equals(event.getMessage())) {
-            handler.selectionDecreasePainted(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("cellValueEdited".equals(event.getMessage())) {
-            handler.cellValueEdited(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), tokens.get(2));
-        } else if ("sheetSelected".equals(event.getMessage())) {
-            handler.sheetSelected(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)));
-        } else if ("sheetRenamed".equals(event.getMessage())) {
-            handler.sheetRenamed(Integer.parseInt(tokens.get(0)), tokens.get(1));
-        } else if ("sheetCreated".equals(event.getMessage())) {
-            handler.sheetCreated(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("cellRangePainted".equals(event.getMessage())) {
-            handler.cellRangePainted(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)), Integer.parseInt(tokens.get(4)), Integer.parseInt(tokens.get(5)));
-        } else if ("deleteSelectedCells".equals(event.getMessage())) {
+        } else if ("contextMenuOpenOnSelection".equals(type)) {
+            handler.contextMenuOpenOnSelection(toInt(pars, 0), toInt(pars, 1));
+        } else if ("actionOnCurrentSelection".equals(type)) {
+            handler.actionOnCurrentSelection(toStr(pars, 0));
+        } else if ("rowHeaderContextMenuOpen".equals(type)) {
+            handler.rowHeaderContextMenuOpen(toInt(pars, 0));
+        } else if ("actionOnRowHeader".equals(type)) {
+            handler.actionOnRowHeader(toStr(pars, 0));
+        } else if ("columnHeaderContextMenuOpen".equals(type)) {
+            handler.columnHeaderContextMenuOpen(toInt(pars, 0));
+        } else if ("actionOnColumnHeader".equals(type)) {
+            handler.actionOnColumnHeader(toStr(pars, 0));
+        } else if ("onSheetScroll".equals(type)) {
+            handler.onSheetScroll(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+        } else if ("sheetAddressChanged".equals(type)) {
+            handler.sheetAddressChanged(toStr(pars, 0));
+        } else if ("cellSelected".equals(type)) {
+            handler.cellSelected(toInt(pars, 0), toInt(pars, 1), toBool(pars, 2));
+        } else if ("cellRangeSelected".equals(type)) {
+            handler.cellRangeSelected(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+        } else if ("cellAddedToSelectionAndSelected".equals(type)) {
+            handler.cellAddedToSelectionAndSelected(toInt(pars, 0), toInt(pars, 1));
+        } else if ("cellsAddedToRangeSelection".equals(type)) {
+            handler.cellsAddedToRangeSelection(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+        } else if ("rowSelected".equals(type)) {
+            handler.rowSelected(toInt(pars, 0), toInt(pars, 1));
+        } else if ("rowAddedToRangeSelection".equals(type)) {
+            handler.rowAddedToRangeSelection(toInt(pars, 0), toInt(pars, 1));
+        } else if ("columnSelected".equals(type)) {
+            handler.columnSelected(toInt(pars, 0), toInt(pars, 1));
+        } else if ("columnAddedToSelection".equals(type)) {
+            handler.columnAddedToSelection(toInt(pars, 0), toInt(pars, 1));
+        } else if ("selectionIncreasePainted".equals(type)) {
+            handler.selectionIncreasePainted(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+        } else if ("selectionDecreasePainted".equals(type)) {
+            handler.selectionDecreasePainted(toInt(pars, 0), toInt(pars, 1));
+        } else if ("cellValueEdited".equals(type)) {
+            handler.cellValueEdited(toInt(pars, 0), toInt(pars, 1), toStr(pars, 2));
+        } else if ("sheetSelected".equals(type)) {
+            handler.sheetSelected(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2));
+        } else if ("sheetRenamed".equals(type)) {
+            handler.sheetRenamed(toInt(pars, 0), toStr(pars, 1));
+        } else if ("sheetCreated".equals(type)) {
+            handler.sheetCreated(toInt(pars, 0), toInt(pars, 1));
+        } else if ("cellRangePainted".equals(type)) {
+            handler.cellRangePainted(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3), toInt(pars, 4), toInt(pars, 5));
+        } else if ("deleteSelectedCells".equals(type)) {
             handler.deleteSelectedCells();
-        } else if ("linkCellClicked".equals(event.getMessage())) {
-            handler.linkCellClicked(Integer.parseInt(tokens.get(0)), Integer.parseInt(tokens.get(1)));
-        } else if ("rowsResized".equals(event.getMessage())) {
-            handler.rowsResized(parseMapIntegerFloat(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)), Integer.parseInt(tokens.get(4)));
-        } else if ("columnResized".equals(event.getMessage())) {
-            handler.columnResized(parseMapIntegerInteger(tokens.get(0)), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)), Integer.parseInt(tokens.get(3)), Integer.parseInt(tokens.get(4)));
-        } else if ("onRowAutofit".equals(event.getMessage())) {
-            handler.onRowAutofit(Integer.parseInt(tokens.get(0)));
-        } else if ("onColumnAutofit".equals(event.getMessage())) {
-            handler.onColumnAutofit(Integer.parseInt(tokens.get(0)));
-        } else if ("onUndo".equals(event.getMessage())) {
+        } else if ("linkCellClicked".equals(type)) {
+            handler.linkCellClicked(toInt(pars, 0), toInt(pars, 1));
+        } else if ("rowsResized".equals(type)) {
+            handler.rowsResized(toMapFloat(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
+        } else if ("columnResized".equals(type)) {
+            handler.columnResized(toMapInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
+        } else if ("onRowAutofit".equals(type)) {
+            handler.onRowAutofit(toInt(pars, 0));
+        } else if ("onColumnAutofit".equals(type)) {
+            handler.onColumnAutofit(toInt(pars, 0));
+        } else if ("onUndo".equals(type)) {
             handler.onUndo();
-        } else if ("onRedo".equals(event.getMessage())) {
+        } else if ("onRedo".equals(type)) {
             handler.onRedo();
-        } else if ("setCellStyleWidthRatios".equals(event.getMessage())) {
-            handler.setCellStyleWidthRatios(tokens.size() > 0?parseMapIntegerFloat(tokens.get(0)):new HashMap<>());
-        } else if ("protectedCellWriteAttempted".equals(event.getMessage())) {
+        } else if ("setCellStyleWidthRatios".equals(type)) {
+            handler.setCellStyleWidthRatios(toMapFloat(pars, 0));
+        } else if ("protectedCellWriteAttempted".equals(type)) {
             handler.protectedCellWriteAttempted();
-        } else if ("onPaste".equals(event.getMessage())) {
-            handler.onPaste(tokens.get(0));
-        } else if ("clearSelectedCellsOnCut".equals(event.getMessage())) {
+        } else if ("onPaste".equals(type)) {
+            handler.onPaste(toStr(pars, 0));
+        } else if ("clearSelectedCellsOnCut".equals(type)) {
             handler.clearSelectedCellsOnCut();
-        } else if ("updateCellComment".equals(event.getMessage())) {
-            handler.updateCellComment(tokens.get(0), Integer.parseInt(tokens.get(1)), Integer.parseInt(tokens.get(2)));
-        } else if ("groupingCollapsed".equals(event.getMessage())) {
-            handler.setGroupingCollapsed(Boolean.parseBoolean(tokens.get(0)), Integer.parseInt(tokens.get(1)), Boolean.parseBoolean(tokens.get(2)));
-        } else if ("levelHeaderClicked".equals(event.getMessage())) {
-            handler.levelHeaderClicked(Boolean.parseBoolean(tokens.get(0)), Integer.parseInt(tokens.get(1)));
+        } else if ("updateCellComment".equals(type)) {
+            handler.updateCellComment(toStr(pars, 0), toInt(pars, 1), toInt(pars, 2));
+        } else if ("groupingCollapsed".equals(type)) {
+            handler.setGroupingCollapsed(toBool(pars, 0), toInt(pars, 1),toBool(pars, 2));
+        } else if ("levelHeaderClicked".equals(type)) {
+            handler.levelHeaderClicked(toBool(pars, 0), toInt(pars, 1));
         }
-
-    }
-
-    private Map<Integer, Integer> parseMapIntegerInteger(String s) {
-        HashMap<Integer, Integer> m = new HashMap<>();
-        if (s != null) {
-            for (String t : s.split("\\|")) {
-                String[] n = t.split("#");
-                m.put(Integer.parseInt(n[0]), Integer.parseInt(n[1]));
-            }
-        }
-        return m;
-    }
-
-    private HashMap<Integer, Float> parseMapIntegerFloat(String s) {
-        HashMap<Integer, Float> m = new HashMap<>();
-        if (s != null) {
-            for (String t : s.split("\\|")) {
-                String[] n = t.split("#");
-                m.put(Integer.parseInt(n[0]), Float.parseFloat(n[1]));
-            }
-        }
-        return m;
-    }
-
-    private List<String> parse(String payload) {
-        return parse(payload, ',');
-    }
-
-    private List<String> parse(String payload, char separator) {
-        ArrayList<String> tokens = new ArrayList<>();
-        if (payload != null) {
-            int pos = 0;
-            int start = 0;
-            boolean hasNonString = false;
-            boolean insideString = false;
-            boolean escaped = false;
-            while (pos < payload.length()) {
-                if (!escaped && separator == payload.charAt(pos) && !insideString) {
-                    if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1).replaceAll("\\\\", ""));
-                    else tokens.add("");
-                    start = pos + 1;
-                    hasNonString = false;
-                } else if ('"' == payload.charAt(pos)) {
-                    if (!escaped) {
-                        if (insideString) { // end of string
-                            insideString = false;
-                        } else { // start of string
-                            insideString = true;
-                        }
-                    } else {
-                        escaped = false;
-                    }
-                } else if ('\\' == payload.charAt(pos)) {
-                    escaped = true;
-                } else {
-                    if (escaped) escaped = false;
-                    if (!insideString) hasNonString = true;
-                }
-                pos++;
-            }
-            if (pos > start) tokens.add(payload.substring(hasNonString?start:start + 1, hasNonString?pos:pos - 1).replaceAll("\\\\", ""));
-        }
-        return tokens;
     }
 
 }

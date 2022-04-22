@@ -46,6 +46,8 @@ import com.vaadin.client.ui.layout.ElementResizeListener;
 import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.communication.SharedState;
 import com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetServerRpcImpl;
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector

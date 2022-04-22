@@ -8,14 +8,17 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
 
 import com.vaadin.shared.AbstractComponentState;
 
+import jsinterop.annotations.JsType;
+
 @SuppressWarnings("serial")
+@JsType
 public class PopupButtonState extends AbstractComponentState {
 
     /** 1-based */

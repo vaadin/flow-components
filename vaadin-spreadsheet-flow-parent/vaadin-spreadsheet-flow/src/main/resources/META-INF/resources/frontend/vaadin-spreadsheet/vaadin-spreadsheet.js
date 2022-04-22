@@ -27,12 +27,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   static get properties() {
     return {
-
-      //api: {type: Object},
-
-      /*
-      SHARED STATE
-       */
+      /* SHARED STATE */
       dirty: {type: Number},
 
       width: {type: String},
@@ -188,13 +183,6 @@ export class VaadinSpreadsheet extends LitElement {
       }
     `
   };
-
-  /*
-    createRenderRoot() {
-      // Do not use a shadow root
-      return this;
-    }
-  */
 
   render() {
     return html`
@@ -375,10 +363,7 @@ export class VaadinSpreadsheet extends LitElement {
     }
   }
 
-  /*
-  CLIENT SIDE RPC METHODS
-   */
-
+  /* CLIENT SIDE RPC METHODS */
   updateBottomRightCellValues(cellData) { //ArrayList<CellData> cellData) {
     this.api.updateBottomRightCellValues(cellData);
   }
@@ -403,8 +388,8 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.invalidCellAddress();
   }
 
-  showSelectedCell(name, col, row, cellValue, _function, locked, initialSelection) { // String name, int col, int row, String cellValue, boolean function, boolean locked, boolean initialSelection
-    this.api.showSelectedCell(name, col, row, cellValue, _function, locked, initialSelection);
+  showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) { // String name, int col, int row, String cellValue, boolean function, boolean locked, boolean initialSelection
+    this.api.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
   }
 
   showActions(actionDetails) { //ArrayList<SpreadsheetActionDetails> actionDetails) {
@@ -427,16 +412,7 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.editCellComment(col, row);
   }
 
-
-
-
-
-
-
-  /*
-SERVER RPC METHOD CALLBACKS
- */
-
+  /* SERVER RPC METHOD CALLBACKS */
   createCallbacks() {
 
     this.api.setGroupingCollapsedCallback(e => {
@@ -596,16 +572,12 @@ SERVER RPC METHOD CALLBACKS
     });
 
     console.log('vaadin-spreadsheet', 'triggering onConnectorInit');
-    this.dispatchEvent(this.createEvent('onConnectorInit', ""));
-
+    this.dispatchEvent(this.createEvent('onConnectorInit'), []);
   }
 
-  createEvent(msg, e) {
+  createEvent(type, data) {
     return new CustomEvent('spreadsheet-event', {
-      detail: {
-        message: msg,
-        payload: '' + e
-      }
+      detail: {type, data}
     });
   }
 

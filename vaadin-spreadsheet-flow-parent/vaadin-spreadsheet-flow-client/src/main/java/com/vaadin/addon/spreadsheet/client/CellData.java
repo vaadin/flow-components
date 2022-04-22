@@ -15,7 +15,10 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.io.Serializable;
 
+import jsinterop.annotations.JsType;
+
 @SuppressWarnings("serial")
+@JsType
 public class CellData implements Serializable {
 
     public int row;

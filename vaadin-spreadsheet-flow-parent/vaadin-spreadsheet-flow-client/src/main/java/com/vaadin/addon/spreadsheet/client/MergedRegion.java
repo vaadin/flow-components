@@ -15,7 +15,11 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.io.Serializable;
 
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsType;
+
 @SuppressWarnings("serial")
+@JsType
 public class MergedRegion implements Serializable {
     public int id;
     public int col1;
@@ -23,9 +27,11 @@ public class MergedRegion implements Serializable {
     public int row1;
     public int row2;
 
+    @JsIgnore
     public MergedRegion() {
     }
 
+    @JsIgnore
     public MergedRegion(int c1, int r1, int c2, int r2) {
         col1 = c1;
         row1 = r1;
