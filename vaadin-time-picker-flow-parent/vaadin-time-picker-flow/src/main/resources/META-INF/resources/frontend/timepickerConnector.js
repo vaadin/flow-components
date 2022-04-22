@@ -76,23 +76,6 @@ import {
             return timepicker.step && timepicker.step < 1;
           };
 
-          // the web component expects the correct granularity used for the time string,
-          // thus need to format the time object in correct granularity by passing the format options
-          let cachedStep;
-          let cachedOptions;
-          const getTimeFormatOptions = function () {
-            // calculate the format options if none done cached or step has changed
-            if (!cachedOptions || cachedStep !== timepicker.step) {
-              cachedOptions = {
-                hour: 'numeric',
-                minute: 'numeric',
-                second: includeSeconds() ? 'numeric' : undefined
-              };
-              cachedStep = timepicker.step;
-            }
-            return cachedOptions;
-          };
-
           let cachedTimeString;
           let cachedTimeObject;
 
@@ -105,7 +88,13 @@ import {
               timeToBeFormatted.setMinutes(timeObject.minutes);
               timeToBeFormatted.setSeconds(timeObject.seconds !== undefined ? timeObject.seconds : 0);
 
-              let localeTimeString = timeToBeFormatted.toLocaleTimeString(locale, getTimeFormatOptions());
+              // the web component expects the correct granularity used for the time string,
+              // thus need to format the time object in correct granularity by passing the format options
+              let localeTimeString = timeToBeFormatted.toLocaleTimeString(locale, {
+                hour: 'numeric',
+                minute: 'numeric',
+                second: includeSeconds() ? 'numeric' : undefined
+              });
 
               // milliseconds not part of the time format API
               if (includeMilliSeconds()) {
