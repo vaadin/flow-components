@@ -19,9 +19,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,7 +67,6 @@ import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
@@ -212,8 +214,12 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private final ValueProvider<T, String> defaultUniqueKeyProvider = item -> getDataProvider()
-            .getId(item).toString();
+    private final AtomicLong uniqueKeyCounter = new AtomicLong(0);
+    private final Map<Object, Long> objectUniqueKeyMap = new WeakHashMap<>();
+
+    ValueProvider<T, String> defaultUniqueKeyProvider = item -> String.valueOf(
+            objectUniqueKeyMap.computeIfAbsent(getDataProvider().getId(item),
+                    key -> uniqueKeyCounter.getAndIncrement()));
 
     private Registration dataProviderRegistration;
 
