@@ -12,7 +12,7 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {LitElement, html, css, unsafeCSS} from 'lit-element';
+import {LitElement, html, css} from 'lit';
 import { css_gwt, css_valo, Spreadsheet } from 'spreadsheet-export';
 
 /**
