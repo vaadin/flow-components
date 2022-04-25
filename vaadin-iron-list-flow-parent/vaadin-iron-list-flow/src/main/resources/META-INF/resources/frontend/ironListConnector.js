@@ -1,8 +1,8 @@
-import { Debouncer } from "@polymer/polymer/lib/utils/debounce.js";
-import { timeOut } from "@polymer/polymer/lib/utils/async.js";
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 
 window.Vaadin.Flow.ironListConnector = {
-  initLazy: function(list) {
+  initLazy: function (list) {
     // Check whether the connector was already initialized for the Iron list
     if (list.$connector) {
       return;
@@ -15,7 +15,7 @@ window.Vaadin.Flow.ironListConnector = {
     list.$connector = {};
     list.$connector.placeholderItem = { __placeholder: true };
 
-    const updateRequestedItem = function() {
+    const updateRequestedItem = function () {
       /*
        * TODO Iron list seems to do a small index adjustment after scrolling
        * has stopped. This causes a redundant request to be sent to make a
@@ -37,12 +37,8 @@ window.Vaadin.Flow.ironListConnector = {
     };
 
     let requestDebounce;
-    const scheduleUpdateRequest = function() {
-      requestDebounce = Debouncer.debounce(
-        requestDebounce,
-        timeOut.after(10),
-        updateRequestedItem
-      );
+    const scheduleUpdateRequest = function () {
+      requestDebounce = Debouncer.debounce(requestDebounce, timeOut.after(10), updateRequestedItem);
     };
 
     /*
@@ -53,7 +49,7 @@ window.Vaadin.Flow.ironListConnector = {
      * empty.
      */
     const originalAssign = list._assignModels;
-    list._assignModels = function() {
+    list._assignModels = function () {
       const tempItems = [];
       const start = list._virtualStart;
       const count = Math.min(list.items.length, list._physicalCount);
@@ -86,7 +82,7 @@ window.Vaadin.Flow.ironListConnector = {
 
     list.items = [];
 
-    list.$connector.set = function(index, items) {
+    list.$connector.set = function (index, items) {
       for (let i = 0; i < items.length; i++) {
         const itemsIndex = index + i;
         list.items[itemsIndex] = items[i];
@@ -95,7 +91,7 @@ window.Vaadin.Flow.ironListConnector = {
       list._render();
     };
 
-    list.$connector.updateData = function(items) {
+    list.$connector.updateData = function (items) {
       // Find the items by key inside the list update them
       const oldItems = list.items;
       const mapByKey = {};
@@ -111,7 +107,7 @@ window.Vaadin.Flow.ironListConnector = {
         const newItem = mapByKey[oldItem.key];
         if (newItem) {
           list.items[i] = newItem;
-          list.notifyPath("items." + i);
+          list.notifyPath('items.' + i);
           leftToUpdate--;
           if (leftToUpdate == 0) {
             break;
@@ -120,46 +116,46 @@ window.Vaadin.Flow.ironListConnector = {
       }
     };
 
-    list.$connector.clear = function(index, length) {
+    list.$connector.clear = function (index, length) {
       for (let i = 0; i < length; i++) {
         const itemsIndex = index + i;
         delete list.items[itemsIndex];
 
         // Most likely a no-op since the affected index isn't in view
-        list.notifyPath("items." + itemsIndex);
+        list.notifyPath('items.' + itemsIndex);
       }
     };
 
-    list.$connector.updateSize = function(newSize) {
+    list.$connector.updateSize = function (newSize) {
       const delta = newSize - list.items.length;
       if (delta > 0) {
         list.items.length = newSize;
 
-        list.notifySplices("items", [
+        list.notifySplices('items', [
           {
             index: newSize - delta,
             removed: [],
             addedCount: delta,
             object: list.items,
-            type: "splice"
+            type: 'splice'
           }
         ]);
       } else if (delta < 0) {
         const removed = list.items.slice(newSize, list.items.length);
         list.items.splice(newSize);
-        list.notifySplices("items", [
+        list.notifySplices('items', [
           {
             index: newSize,
             removed: removed,
             addedCount: 0,
             object: list.items,
-            type: "splice"
+            type: 'splice'
           }
         ]);
       }
     };
 
-    list.$connector.setPlaceholderItem = function(placeholderItem) {
+    list.$connector.setPlaceholderItem = function (placeholderItem) {
       if (!placeholderItem) {
         placeholderItem = {};
       }
