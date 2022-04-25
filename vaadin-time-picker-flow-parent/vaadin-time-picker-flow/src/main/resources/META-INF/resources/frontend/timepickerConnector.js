@@ -2,7 +2,7 @@ import {
   TEST_PM_TIME,
   formatMilliseconds,
   parseMillisecondsIntoInteger,
-  parseNumbersIntoInteger,
+  parseDigitsIntoInteger,
   getAmString,
   getPmString,
   searchAmPmToken
@@ -126,7 +126,7 @@ import {
               numbersRegExp.lastIndex = 0;
               let hours = numbersRegExp.exec(numbersOnlyTimeString);
               if (hours) {
-                hours = parseNumbersIntoInteger(hours[0].replace(separator, ''));
+                hours = parseDigitsIntoInteger(hours[0].replace(separator, ''));
                 // handle 12 am -> 0
                 // do not do anything if am & pm are not used or if those are the same,
                 // as with locale bg-BG there is always ч. at the end of the time
@@ -152,8 +152,8 @@ import {
                 // the string in [0] from the arrays includes the separator too
                 cachedTimeObject = hours !== undefined && {
                   hours: hours,
-                  minutes: minutes ? parseNumbersIntoInteger(minutes[0].replace(separator, '')) : 0,
-                  seconds: seconds ? parseNumbersIntoInteger(seconds[0].replace(separator, '')) : 0,
+                  minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(separator, '')) : 0,
+                  seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(separator, '')) : 0,
                   milliseconds:
                     minutes && seconds && milliseconds
                       ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', ''))
