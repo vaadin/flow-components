@@ -625,8 +625,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          */
         public void add(Component... components) {
             Objects.requireNonNull(components, "Components should not be null");
-            for (Component component: components) {
-                Objects.requireNonNull(component, "Component to add cannot be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to add cannot be null");
                 root.appendChild(component.getElement());
             }
             if (!isRendererCreated()) {
@@ -646,9 +647,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          */
         public void remove(Component... components) {
             Objects.requireNonNull(components, "Components should not be null");
-            for (Component component :
-                    components) {
-                Objects.requireNonNull(component, "Component to remove cannot be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to remove cannot be null");
                 if (root.equals(component.getElement().getParent())) {
                     root.removeChild(component.getElement());
                 }
@@ -688,9 +689,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          * Sets the renderer function creation state. To avoid making a
          * JavaScript execution to get the information from the client, this is
          * done on the server by setting it to <code>true</code> on
-         * {@link #initRenderer()} and to <code>false</code> when the last child is removed
-         * in {@link #remove(Component...)} or when an auto attached dialog is
-         * closed.
+         * {@link #initRenderer()} and to <code>false</code> when the last child
+         * is removed in {@link #remove(Component...)} or when an auto attached
+         * dialog is closed.
          *
          * @param rendererCreated
          */
