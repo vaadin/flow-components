@@ -14,22 +14,10 @@ public class EventView extends Div {
         Button showDialogButton = new Button("Show dialog", e -> dialog.open());
         showDialogButton.setId("open-dialog");
 
-        ConfirmDialog dialogCloseOnEsc = new ConfirmDialog();
-        dialogCloseOnEsc.setCloseOnEsc(true);
+        Button toggleCloseOnEscButton = new Button("Toggle close on Esc",
+                e -> dialog.setCloseOnEsc(!dialog.isCloseOnEsc()));
+        toggleCloseOnEscButton.setId("toggle-close-on-esc");
 
-        Button showDialogCloseOnEscButton = new Button("Show escape dialog",
-                e -> dialogCloseOnEsc.open());
-        showDialogCloseOnEscButton.setId("open-esc-dialog");
-
-        ConfirmDialog dialogNoCloseOnEsc = new ConfirmDialog();
-        dialogNoCloseOnEsc.setCloseOnEsc(false);
-
-        Button showDialogNoCloseOnEscButton = new Button(
-                "Show no escape dialog", e -> dialogNoCloseOnEsc.open());
-        showDialogNoCloseOnEscButton.setId("open-no-esc-dialog");
-
-        add(dialog, showDialogButton, dialogNoCloseOnEsc,
-                showDialogCloseOnEscButton, dialogNoCloseOnEsc,
-                showDialogNoCloseOnEscButton);
+        add(dialog, showDialogButton, toggleCloseOnEscButton);
     }
 }

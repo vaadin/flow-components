@@ -14,53 +14,66 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-confirm-dialog/events")
 public class EventIT extends AbstractComponentIT {
 
+    static final String DIALOG_OVERLAY_TAG = "vaadin-confirm-dialog-overlay";
+
     private ButtonElement openDialogBtn;
-    private ButtonElement openEscDialogBtn;
-    private ButtonElement openNoEscDialogBtn;
+    private ButtonElement toggleCloseOnEscBtn;
 
     @Before
     public void init() {
         open();
         openDialogBtn = $(ButtonElement.class).id("open-dialog");
-        openEscDialogBtn = $(ButtonElement.class).id("open-esc-dialog");
-        openNoEscDialogBtn = $(ButtonElement.class).id("open-no-esc-dialog");
+        toggleCloseOnEscBtn = $(ButtonElement.class).id("toggle-close-on-esc");
     }
 
     @Test
-    public void testRegularDialog_closeOnEsc() {
+    public void openDialog_closeOnEsc() {
         openDialogBtn.click();
-        waitForElementPresent(By.tagName("vaadin-confirm-dialog-overlay"));
+        checkDialogIsOpened();
 
         closeDialogByEscKey();
 
-        waitForElementNotPresent(By.tagName("vaadin-confirm-dialog-overlay"));
+        checkDialogIsClosed();
 
         Assert.assertFalse("Dialog must be closed after esc key",
-                isElementPresent(By.tagName("vaadin-confirm-dialog-overlay")));
+                isElementPresent(By.tagName(DIALOG_OVERLAY_TAG)));
     }
 
     @Test
-    public void testCloseOnEscDialog_closeOnEsc() {
-        openEscDialogBtn.click();
-        waitForElementPresent(By.tagName("vaadin-confirm-dialog-overlay"));
+    public void openDialog_closeOnEscIsDisallowed() {
+        openDialogBtn.click();
+        checkDialogIsOpened();
 
-        closeDialogByEscKey();
-
-        waitForElementNotPresent(By.tagName("vaadin-confirm-dialog-overlay"));
-
-        Assert.assertFalse("Dialog must be closed after esc key",
-                isElementPresent(By.tagName("vaadin-confirm-dialog-overlay")));
-    }
-
-    @Test
-    public void testNoCloseOnEscDialog_NoCloseOnEsc() {
-        openNoEscDialogBtn.click();
-        waitForElementPresent(By.tagName("vaadin-confirm-dialog-overlay"));
+        toggleCloseOnEscBtn.click();
 
         closeDialogByEscKey();
 
         Assert.assertTrue("Dialog must be open after esc key",
-                isElementPresent(By.tagName("vaadin-confirm-dialog-overlay")));
+                isElementPresent(By.tagName(DIALOG_OVERLAY_TAG)));
+    }
+
+    @Test
+    public void testCloseOnEscDialog_closeOnEscIsRestored() {
+        openDialogBtn.click();
+        checkDialogIsOpened();
+
+        toggleCloseOnEscBtn.click();
+        toggleCloseOnEscBtn.click();
+
+        closeDialogByEscKey();
+
+        checkDialogIsClosed();
+
+        Assert.assertFalse("Dialog must be closed after esc key",
+                isElementPresent(By.tagName(DIALOG_OVERLAY_TAG)));
+    }
+
+    private void checkDialogIsClosed() {
+        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+    }
+
+    private void checkDialogIsOpened() {
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
     private void closeDialogByEscKey() {
