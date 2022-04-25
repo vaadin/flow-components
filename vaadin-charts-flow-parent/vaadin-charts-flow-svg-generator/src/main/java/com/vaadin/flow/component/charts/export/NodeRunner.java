@@ -34,23 +34,30 @@ class NodeRunner {
     }
 
     /**
-     * Returns the absolute file path to a Node.js executable.
-     * First tries to find a global installation, and as a fallback looks for an installation in the Vaadin home directory.
-     * Throws if no Node.js installation could be found.
+     * Returns the absolute file path to a Node.js executable. First tries to
+     * find a global installation, and as a fallback looks for an installation
+     * in the Vaadin home directory. Throws if no Node.js installation could be
+     * found.
+     *
      * @return the absolute path to the Node.js executable
-     * @throws IllegalStateException when no Node.js installation could be found
+     * @throws IllegalStateException
+     *             when no Node.js installation could be found
      */
     String findNodeExecutable() {
         // Try resolve global node installation
-        String nodeExecutableName = FrontendUtils.isWindows() ? "node.exe" : "node";
-        File nodeExecutableFile = frontendToolsLocator.tryLocateTool(nodeExecutableName).orElse(null);
+        String nodeExecutableName = FrontendUtils.isWindows() ? "node.exe"
+                : "node";
+        File nodeExecutableFile = frontendToolsLocator
+                .tryLocateTool(nodeExecutableName).orElse(null);
         if (nodeExecutableFile != null) {
             return nodeExecutableFile.getAbsolutePath();
         }
         // Try resolve installation from Vaadin home
-        // This covers development setups where developers rely on the Node.js installation provided by Flow's frontend toolchain
+        // This covers development setups where developers rely on the Node.js
+        // installation provided by Flow's frontend toolchain
         File vaadinHomeDirectory = FrontendUtils.getVaadinHomeDirectory();
-        nodeExecutableFile = new File(vaadinHomeDirectory, FrontendUtils.isWindows() ? "node/node.exe" : "node/node");
+        nodeExecutableFile = new File(vaadinHomeDirectory,
+                FrontendUtils.isWindows() ? "node/node.exe" : "node/node");
         if (frontendToolsLocator.verifyTool(nodeExecutableFile)) {
             return nodeExecutableFile.getAbsolutePath();
         }
