@@ -134,6 +134,17 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     @Test
+    public void testAMSpaceSensitivity() {
+        assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 A M", "1:00 AM");
+        assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 a m", "1:00 AM");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 A. M.", "1:00 a.m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 a. m.", "1:00 a.m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 A.M.", "1:00 a. m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 a.m.", "1:00 a. m.");
+        assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오 전 1", "오전 1:00");
+    }
+
+    @Test
     public void testPMCaseSensitivity() {
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 PM", "1:00 PM");
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 pm", "1:00 PM");
@@ -142,6 +153,17 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 P. M.", "1:00 p. m.");
         assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 p. m.", "1:00 p. m.");
         assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오후 1", "오후 1:00");
+    }
+
+    @Test
+    public void testPMSpaceSensitivity() {
+        assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 P M", "1:00 PM");
+        assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 p m", "1:00 PM");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 P. M.", "1:00 p.m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 p. m.", "1:00 p.m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 P.M.", "1:00 p. m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 p.m.", "1:00 p. m.");
+        assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오 후 1", "오후 1:00");
     }
 
     public void assertTimeIsParsedCorrectly(Locale locale, String value, String expected) {
