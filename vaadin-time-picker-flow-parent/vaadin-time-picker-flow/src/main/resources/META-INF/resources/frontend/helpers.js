@@ -25,11 +25,11 @@ function escapeRegExp(string) {
 /**
  * Parses eastern arabic number characters to arabic numbers (0-9)
  *
- * @param {string} chars
+ * @param {string} digits
  * @return {string}
  */
-function anyNumberCharToArabicNumberReplacer(chars) {
-  return chars.replace(/[\u0660-\u0669]/g, function (char) {
+function parseEasternArabicDigits(digits) {
+  return digits.replace(/[\u0660-\u0669]/g, function (char) {
     const unicode = '\\u0' + char.charCodeAt(0).toString(16);
     return ARABIC_DIGIT_MAP[unicode];
   });
@@ -111,11 +111,11 @@ export function getAmString(locale) {
 }
 
 /**
- * @param {string} numbers
+ * @param {string} digits
  * @return {number}
  */
-export function parseNumbersIntoInteger(numbers) {
-  return parseInt(anyNumberCharToArabicNumberReplacer(numbers));
+export function parseDigitsIntoInteger(digits) {
+  return parseInt(parseEasternArabicDigits(digits));
 }
 
 /**
@@ -123,7 +123,7 @@ export function parseNumbersIntoInteger(numbers) {
  * @return {number}
  */
 export function parseMillisecondsIntoInteger(milliseconds) {
-  milliseconds = anyNumberCharToArabicNumberReplacer(milliseconds);
+  milliseconds = parseEasternArabicDigits(milliseconds);
   // digits are either .1 .01 or .001 so need to "shift"
   if (milliseconds.length === 1) {
     milliseconds += '00';
