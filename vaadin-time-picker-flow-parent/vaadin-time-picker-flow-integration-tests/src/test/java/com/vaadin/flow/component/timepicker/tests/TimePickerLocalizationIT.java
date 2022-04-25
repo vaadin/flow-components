@@ -126,10 +126,14 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     public void testAMCaseSensitivity() {
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 AM", "1:00 AM");
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 am", "1:00 AM");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 A.M.", "1:00 a.m.");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 a.m.", "1:00 a.m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 A. M.", "1:00 a. m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 a. m.", "1:00 a. m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 A.M.",
+                "1:00 a.m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 a.m.",
+                "1:00 a.m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 A. M.",
+                "1:00 a. m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 a. m.",
+                "1:00 a. m.");
         assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오전 1", "오전 1:00");
     }
 
@@ -137,10 +141,14 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     public void testAMSpaceSensitivity() {
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 A M", "1:00 AM");
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 a m", "1:00 AM");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 A. M.", "1:00 a.m.");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 a. m.", "1:00 a.m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 A.M.", "1:00 a. m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 a.m.", "1:00 a. m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 A. M.",
+                "1:00 a.m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 a. m.",
+                "1:00 a.m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 A.M.",
+                "1:00 a. m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 a.m.",
+                "1:00 a. m.");
         assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오 전 1", "오전 1:00");
     }
 
@@ -148,10 +156,14 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     public void testPMCaseSensitivity() {
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 PM", "1:00 PM");
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 pm", "1:00 PM");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 P.M.", "1:00 p.m.");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 p.m.", "1:00 p.m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 P. M.", "1:00 p. m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 p. m.", "1:00 p. m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 P.M.",
+                "1:00 p.m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 p.m.",
+                "1:00 p.m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 P. M.",
+                "1:00 p. m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 p. m.",
+                "1:00 p. m.");
         assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오후 1", "오후 1:00");
     }
 
@@ -159,17 +171,23 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     public void testPMSpaceSensitivity() {
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 P M", "1:00 PM");
         assertTimeIsParsedCorrectly(new Locale("en", "US"), "1 p m", "1:00 PM");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 P. M.", "1:00 p.m.");
-        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 p. m.", "1:00 p.m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 P.M.", "1:00 p. m.");
-        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 p.m.", "1:00 p. m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 P. M.",
+                "1:00 p.m.");
+        assertTimeIsParsedCorrectly(new Locale("en", "CA"), "1 p. m.",
+                "1:00 p.m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 P.M.",
+                "1:00 p. m.");
+        assertTimeIsParsedCorrectly(new Locale("es", "PA"), "1 p.m.",
+                "1:00 p. m.");
         assertTimeIsParsedCorrectly(new Locale("ko", "KR"), "오 후 1", "오후 1:00");
     }
 
-    public void assertTimeIsParsedCorrectly(Locale locale, String value, String expected) {
+    public void assertTimeIsParsedCorrectly(Locale locale, String value,
+            String expected) {
         selectLocale(locale);
         getTimePickerElement().selectByText(value);
-        Assert.assertEquals(expected, getTimePickerInputValueWithNormalSpaces());
+        Assert.assertEquals(expected,
+                getTimePickerInputValueWithNormalSpaces());
     }
 
     private void runReduceStepTest(Locale locale, String initialValue4PM,
