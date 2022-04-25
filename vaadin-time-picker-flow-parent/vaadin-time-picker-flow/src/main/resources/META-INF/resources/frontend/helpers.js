@@ -18,7 +18,7 @@ const ARABIC_DIGIT_MAP = {
  * @param {string} string
  * @return {string}
  */
- function escapeRegExp(string) {
+function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
