@@ -345,6 +345,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private void removeElementsAtSlot(String slot) {
         getElement().getChildren()
                 .filter(child -> slot.equals(child.getAttribute("slot")))
+                .collect(Collectors.toList())
                 .forEach(Element::removeFromParent);
     }
 
