@@ -49,12 +49,15 @@ class NodeRunner {
         }
         // Try resolve installation from Vaadin home
         // This covers development setups where developers rely on the Node.js installation provided by Flow's frontend toolchain
-        nodeExecutableFile = new File(FrontendUtils.getVaadinHomeDirectory(), FrontendUtils.isWindows() ? "node/node.exe" : "node/node");
+        File vaadinHomeDirectory = FrontendUtils.getVaadinHomeDirectory();
+        nodeExecutableFile = new File(vaadinHomeDirectory, FrontendUtils.isWindows() ? "node/node.exe" : "node/node");
         if (frontendToolsLocator.verifyTool(nodeExecutableFile)) {
             return nodeExecutableFile.getAbsolutePath();
         }
 
-        throw new IllegalStateException("Node not found");
+        throw new IllegalStateException(String.format(
+                "The SVG generator requires a Node.js installation, however none could be found. Searched for a global installation in PATH, and in the Vaadin home directory: %s",
+                vaadinHomeDirectory.getAbsolutePath()));
     }
 
     int runJavascript(String script) throws InterruptedException, IOException {
