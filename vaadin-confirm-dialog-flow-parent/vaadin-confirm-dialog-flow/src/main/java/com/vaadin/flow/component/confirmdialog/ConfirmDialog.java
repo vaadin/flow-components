@@ -620,6 +620,31 @@ public class ConfirmDialog extends Component
         getElement().setProperty("opened", opened);
     }
 
+    /**
+     * Gets whether this dialog can be closed by hitting the esc-key or not.
+     * <p>
+     * By default, the dialog is closable with esc.
+     *
+     * @return {@code true} if this dialog can be closed with the esc-key,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnEsc() {
+        return !getElement().getProperty("noCloseOnEsc", false);
+    }
+
+    /**
+     * Sets whether this dialog can be closed by hitting the esc-key or not.
+     * <p>
+     * By default, the dialog is closable with esc.
+     *
+     * @param closeOnEsc
+     *            {@code true} to enable closing this dialog with the esc-key,
+     *            {@code false} to disable it
+     */
+    public void setCloseOnEsc(boolean closeOnEsc) {
+        getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
     private void setModality(boolean modal) {
         if (isAttached()) {
             getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
