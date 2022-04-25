@@ -127,6 +127,11 @@ public class TreeGridPreloadPage extends VerticalLayout
 
                         return super.fetchChildrenFromBackEnd(query);
                     }
+
+                    @Override
+                    public Object getId(HierarchicalTestBean item) {
+                        return item != null ? item.toString() : "null";
+                    }
                 });
     }
 
