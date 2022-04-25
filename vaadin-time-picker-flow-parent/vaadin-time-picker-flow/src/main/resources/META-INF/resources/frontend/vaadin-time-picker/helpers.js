@@ -1,5 +1,5 @@
 // map from unicode eastern arabic number characters to arabic numbers
-const ARABIC_DIGIT_MAP = {
+const EASTERN_ARABIC_DIGIT_MAP = {
   '\\u0660': '0',
   '\\u0661': '1',
   '\\u0662': '2',
@@ -31,7 +31,7 @@ function escapeRegExp(string) {
 function parseEasternArabicDigits(digits) {
   return digits.replace(/[\u0660-\u0669]/g, function (char) {
     const unicode = '\\u0' + char.charCodeAt(0).toString(16);
-    return ARABIC_DIGIT_MAP[unicode];
+    return EASTERN_ARABIC_DIGIT_MAP[unicode];
   });
 }
 
@@ -40,22 +40,22 @@ function parseEasternArabicDigits(digits) {
  * @param {Date} testTime
  * @return {string}
  */
-function getAmPmString(locale, testTime) {
+function getAmOrPmString(locale, testTime) {
   const testTimeString = testTime.toLocaleTimeString(locale);
+
   // AM/PM string is anything from one letter in eastern arabic to standard two letters,
   // to having space in between, dots ...
   // cannot disqualify whitespace since some locales use a. m. / p. m.
   // TODO when more scripts support is added (than Arabic), need to exclude those numbers too
-  const endWithAmPmRegex = /[^\d\u0660-\u0669]+$/g;
-  let amPmString = testTimeString.match(endWithAmPmRegex);
-  if (!amPmString) {
-    // eg. chinese (and some else too) starts with am/pm
-    amPmString = testTimeString.match(/^[^\d\u0660-\u0669]+/g);
-  }
-  if (amPmString) {
-    amPmString = amPmString[0].trim();
-  }
-  return amPmString;
+  const amOrPmRegExp = /[^\d\u0660-\u0669]/;
+
+  const matches =
+    // In most locales, the time ends with AM/PM:
+    testTimeString.match(new RegExp(`${amOrPmRegExp.source}+$`, 'g')) ||
+    // In some locales, the time starts with AM/PM e.g in Chinese:
+    testTimeString.match(new RegExp(`^${amOrPmRegExp.source}+`, 'g'));
+
+  return matches && matches[0].trim();
 }
 
 /**
@@ -99,7 +99,7 @@ export const TEST_AM_TIME = new Date('August 19, 1975 05:15:30');
  * @return {string}
  */
 export function getPmString(locale) {
-  return getAmPmString(locale, TEST_PM_TIME);
+  return getAmOrPmString(locale, TEST_PM_TIME);
 }
 
 /**
@@ -107,7 +107,7 @@ export function getPmString(locale) {
  * @return {string}
  */
 export function getAmString(locale) {
-  return getAmPmString(locale, TEST_AM_TIME);
+  return getAmOrPmString(locale, TEST_AM_TIME);
 }
 
 /**
