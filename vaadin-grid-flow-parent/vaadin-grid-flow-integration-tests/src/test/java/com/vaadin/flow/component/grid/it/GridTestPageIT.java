@@ -421,7 +421,8 @@ public class GridTestPageIT extends AbstractComponentIT {
 
     @Test
     public void gridWithNoConnector_noExceptions() {
-        executeScript("document.body.appendChild(document.createElement('vaadin-grid'));");
+        executeScript(
+                "document.body.appendChild(document.createElement('vaadin-grid'));");
         checkLogsForErrors();
     }
 
