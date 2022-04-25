@@ -5,7 +5,7 @@ import {
   parseDigitsIntoInteger,
   getAmString,
   getPmString,
-  searchAmPmToken
+  searchAmOrPmToken
 } from './helpers.js';
 
 (function () {
