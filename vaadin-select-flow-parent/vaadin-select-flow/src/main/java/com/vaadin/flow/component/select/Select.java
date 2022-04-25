@@ -143,10 +143,67 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @param items
      *            the items for the select
+     * @see #setItems(Object...)
+     * @deprecated as of 23.1. Please use {@link #setItems(Object[])} instead.
      */
+    @Deprecated
+    @SafeVarargs
     public Select(T... items) {
         this();
 
+        setItems(items);
+    }
+
+    /**
+     * Constructs a select with the initial value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Select(
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a select with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the select
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Select(String label,
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
+        this();
+        setLabel(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a select with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the select
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    @SafeVarargs
+    public Select(String label,
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener,
+            T... items) {
+        this(label, listener);
         setItems(items);
     }
 
@@ -188,7 +245,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
