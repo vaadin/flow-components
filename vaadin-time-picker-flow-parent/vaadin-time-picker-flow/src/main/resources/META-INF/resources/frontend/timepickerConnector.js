@@ -39,7 +39,7 @@
    * @param {string} amPmString
    * @return {string | null}
    */
-  function searchAmPmToken(timeString, amPmString) {
+  function searchAmOrPmToken(timeString, amOrPmString) {
     if (!amPmString) return null;
 
     // Turn `amPmString` into a space-insensitive regexp representation.
