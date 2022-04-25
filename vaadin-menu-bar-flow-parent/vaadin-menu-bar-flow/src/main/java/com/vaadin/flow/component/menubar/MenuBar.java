@@ -354,7 +354,8 @@ public class MenuBar extends Component
 
     private void initConnector(String appId) {
         getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)", appId);
+                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)",
+                appId);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

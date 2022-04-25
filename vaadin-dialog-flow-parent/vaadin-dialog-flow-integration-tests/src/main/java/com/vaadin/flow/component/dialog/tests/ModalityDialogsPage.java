@@ -45,7 +45,8 @@ public class ModalityDialogsPage extends Div {
                 event -> add(modalDialog));
         addModal.setId("add-modal-dialog");
 
-        NativeButton enableCloseOnOutsideClick = new NativeButton("Enable close on outside click",
+        NativeButton enableCloseOnOutsideClick = new NativeButton(
+                "Enable close on outside click",
                 event -> modalDialog.setCloseOnOutsideClick(true));
         enableCloseOnOutsideClick.setId("enable-close-on-outside-click");
 
@@ -61,7 +62,8 @@ public class ModalityDialogsPage extends Div {
                 e -> modalDialog.setVisible(true));
         showModal.setId("show");
 
-        add(openModal, addModal, enableCloseOnOutsideClick, showModal, openNonModal, log, new Hr(), this.log);
+        add(openModal, addModal, enableCloseOnOutsideClick, showModal,
+                openNonModal, log, new Hr(), this.log);
     }
 
     private Dialog setupNonModalDialog() {

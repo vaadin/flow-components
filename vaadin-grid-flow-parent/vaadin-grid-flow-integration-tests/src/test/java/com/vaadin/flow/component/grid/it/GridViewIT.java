@@ -1016,7 +1016,7 @@ public class GridViewIT extends GridViewBase {
     }
 
     private static String getSelectionMessage(List<Person> previousSelection,
-                                              List<Person> newSelection, boolean isFromClient) {
+            List<Person> newSelection, boolean isFromClient) {
         List<Person> previousSelectionSorted = previousSelection.stream()
                 .sorted(Comparator.comparingLong(Person::getId))
                 .collect(Collectors.toList());
