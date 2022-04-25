@@ -38,7 +38,7 @@ function parseEasternArabicDigits(digits) {
 /**
  * @param {string} locale
  * @param {Date} testTime
- * @return {string}
+ * @return {string | null}
  */
 function getAmOrPmString(locale, testTime) {
   const testTimeString = testTime.toLocaleTimeString(locale);
@@ -56,6 +56,24 @@ function getAmOrPmString(locale, testTime) {
     testTimeString.match(new RegExp(`^${amOrPmRegExp.source}+`, 'g'));
 
   return matches && matches[0].trim();
+}
+
+/**
+ * @param {string} locale
+ * @return {string | null}
+ */
+export function getSeparator(locale) {
+  let timeString = TEST_PM_TIME.toLocaleTimeString(locale);
+
+  // Since the next regex picks first non-number-whitespace,
+  // need to discard possible PM from beginning (eg. chinese locale)
+  const pmString = getPmString(locale);
+  if (pmString && timeString.startsWith(pmString)) {
+    timeString = timeString.replace(pmString, '');
+  }
+
+  const matches = timeString.match(/[^\u0660-\u0669\s\d]/);
+  return matches && matches[0];
 }
 
 /**

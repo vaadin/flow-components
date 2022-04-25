@@ -5,6 +5,7 @@ import {
   parseDigitsIntoInteger,
   getAmString,
   getPmString,
+  getSeparator,
   searchAmOrPmToken
 } from './helpers.js';
 
@@ -58,15 +59,7 @@ import {
           const amString = getAmString(locale);
 
           // 2. What is the separator ?
-          let localeTimeString = TEST_PM_TIME.toLocaleTimeString(locale);
-          // since the next regex picks first non-number-whitespace, need to discard possible PM from beginning (eg. chinese locale)
-          if (pmString && localeTimeString.startsWith(pmString)) {
-            localeTimeString = localeTimeString.replace(pmString, '');
-          }
-          const separator = localeTimeString.match(/[^\u0660-\u0669\s\d]/);
-
-          // 3. regexp that allows to find the numbers with optional separator and continuing searching after it
-          const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
+          const separator = getSeparator(locale);
 
           const includeSeconds = function () {
             return timepicker.step && timepicker.step < 60;
@@ -122,8 +115,9 @@ import {
                 .replace(pmToken || '', '')
                 .trim();
 
-              // reset regex to beginning or things can explode when the length of the input changes
-              numbersRegExp.lastIndex = 0;
+              // A regexp that allows to find the numbers with optional separator and continuing searching after it.
+              const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
+
               let hours = numbersRegExp.exec(numbersOnlyTimeString);
               if (hours) {
                 hours = parseDigitsIntoInteger(hours[0].replace(separator, ''));
