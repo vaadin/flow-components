@@ -60,27 +60,27 @@ function getAmPmString(locale, testTime) {
 
 /**
  * Searches for either an AM or PM token in the given time string
- * depending on what is provided in `amPmString`.
+ * depending on what is provided in `amOrPmString`.
  *
  * The search is case and space insensitive.
  *
  * @example
- * `searchAmPmToken('1 P M', 'PM')` => `'P M'`
+ * `searchAmOrPmToken('1 P M', 'PM')` => `'P M'`
  *
  * @example
- * `searchAmPmToken('1 a.m.', 'A. M.')` => `a.m.`
+ * `searchAmOrPmToken('1 a.m.', 'A. M.')` => `a.m.`
  *
  * @param {string} timeString
- * @param {string} amPmString
+ * @param {string} amOrPmString
  * @return {string | null}
  */
-export function searchAmPmToken(timeString, amPmString) {
-  if (!amPmString) return null;
+export function searchAmOrPmToken(timeString, amOrPmString) {
+  if (!amOrPmString) return null;
 
-  // Turn `amPmString` into a space-insensitive regexp representation.
-  const tokenRegExpString = amPmString.split(/\s*/).map(escapeRegExp).join('\\s*');
+  // Create a regexp string for searching for AM/PM without space-sensitivity.
+  const tokenRegExpString = amOrPmString.split(/\s*/).map(escapeRegExp).join('\\s*');
 
-  // Create an actual regexp with the enabled case-insensitivity.
+  // Create a regexp without case-sensitivity.
   const tokenRegExp = new RegExp(tokenRegExpString, 'i');
 
   // Match the regexp against the time string.
