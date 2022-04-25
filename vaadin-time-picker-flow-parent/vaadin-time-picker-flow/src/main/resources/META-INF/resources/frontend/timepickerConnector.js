@@ -45,7 +45,7 @@
     // Turn `amPmString` into a space-insensitive regexp representation.
     const tokenRegExpString = amPmString.split(/\s*/).map(escapeRegExp).join('\\s*');
 
-    // Create an actual regexp with the enabled case-insensitivity.
+    // Create a regexp without case-sensitivity.
     const tokenRegExp = new RegExp(tokenRegExpString, 'i');
 
     // Match the regexp against the time string.
