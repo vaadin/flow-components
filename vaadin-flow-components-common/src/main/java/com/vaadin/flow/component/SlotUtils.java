@@ -69,9 +69,6 @@ public class SlotUtils {
      */
     public static Component getChildInSlot(HasElement parent, String slot) {
         Optional<Element> element = getElementsInSlot(parent, slot).findFirst();
-        if (element.isPresent()) {
-            return element.get().getComponent().get();
-        }
-        return null;
+        return element.flatMap(Element::getComponent).orElse(null);
     }
 }
