@@ -63,7 +63,8 @@ import elemental.json.JsonType;
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.28.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
+        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
+        HasClearButton {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
