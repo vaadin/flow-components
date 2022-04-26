@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.action;
 
+import java.util.logging.Logger;
+
 /*
  * #%L
  * Vaadin Spreadsheet
@@ -77,7 +79,7 @@ public class MergeCellsAction extends SpreadsheetAction {
         try {
             spreadsheet.addMergedRegion(region);
         } catch (IllegalArgumentException iae) {
-            System.out.println(iae.getMessage());
+            Logger.getLogger(this.getClass().getName()).warning(iae.getMessage());
         }
     }
 

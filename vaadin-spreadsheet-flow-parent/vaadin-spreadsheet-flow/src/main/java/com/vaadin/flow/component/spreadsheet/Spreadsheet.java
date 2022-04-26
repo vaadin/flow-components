@@ -119,6 +119,8 @@ import elemental.json.JsonValue;
 public class Spreadsheet extends Component implements HasComponents, HasSize, HasStyle,
         Action.Container, Focusable {
 
+    static Logger logger = Logger.getLogger(Spreadsheet.class.getName());
+
     static {
         VaadinService service = VaadinService.getCurrent();
 
@@ -127,9 +129,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             properties.load(Spreadsheet.class
                     .getResourceAsStream("spreadsheet.properties"));
         } catch (Exception e) {
-            Logger.getLogger(Spreadsheet.class.getName()).log(
-                    Level.WARNING, "Unable to read Spreadsheet properties file",
-                    e);
+            logger.log(Level.WARNING,
+                    "Unable to read Spreadsheet properties file", e);
             throw new ExceptionInInitializerError(e);
         }
 
@@ -1349,7 +1350,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
-        System.out.println("Spreadsheet.registerRpc()");
+        logger.info("Spreadsheet.registerRpc()");
         this.spreadsheetHandler = spreadsheetHandler;
         addListener(SpreadsheetEvent.class, new SpreadsheetEventListener(spreadsheetHandler));
     }

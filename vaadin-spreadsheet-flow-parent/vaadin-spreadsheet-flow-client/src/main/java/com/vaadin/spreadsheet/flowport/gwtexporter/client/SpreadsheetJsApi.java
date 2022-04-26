@@ -32,7 +32,7 @@ import jsinterop.annotations.JsType;
  * this is the public api which we will export to js
  *
  */
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet", name = "Api")
 public class SpreadsheetJsApi {
 
     public SpreadsheetWidget spreadsheetWidget;

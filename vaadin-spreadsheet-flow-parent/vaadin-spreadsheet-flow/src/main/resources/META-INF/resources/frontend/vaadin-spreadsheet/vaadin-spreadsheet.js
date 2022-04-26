@@ -14,7 +14,6 @@
 
 import {LitElement, html, css, unsafeCSS} from 'lit-element';
 import { Spreadsheet } from './spreadsheet-export.js';
-import css_gwt from './spreadsheet-styles-gwt.css';
 import css_valo from './spreadsheet-styles-valo.css';
 
 /**
@@ -27,6 +26,8 @@ export class VaadinSpreadsheet extends LitElement {
 
   static get properties() {
     return {
+      api: {type: Object},
+
       /* SHARED STATE */
       dirty: {type: Number},
 
@@ -195,7 +196,6 @@ export class VaadinSpreadsheet extends LitElement {
     this.observer && this.observer.observe(this);
     // Restore styles in the case widget is reattached, it happens e.g in client router
     this.styles && this.styles.forEach(e => document.head.appendChild(e));
-    console.log(">> connected", this.id)
   }
 
   disconnectedCallback() {
@@ -204,14 +204,12 @@ export class VaadinSpreadsheet extends LitElement {
     // Remove styles added to the head by the Widget
     this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
     this.styles.forEach(e => document.head.removeChild(e));
-    console.log(">> disconnected", this.id)
   }
 
   updated(_changedProperties) {
     super.updated(_changedProperties);
     let initial = false;
     if (!this.api) {
-      this.injectStyle('css_gwt', css_gwt);
       this.injectStyle('css_valo', css_valo);
 
       this.classList.add('spreadsheetport');
@@ -225,9 +223,7 @@ export class VaadinSpreadsheet extends LitElement {
       }
 
       this.api = new Spreadsheet(this);
-      console.log('updated')
       this.createCallbacks();
-      console.log('callbacks created')
 
       this.observer = new ResizeObserver(e => this.api.resize());
       initial = true;
@@ -235,8 +231,6 @@ export class VaadinSpreadsheet extends LitElement {
     let propNames = [];
     let dirty = false;
     _changedProperties.forEach((oldValue, name) => {
-      //console.log(`${name} changed from oldValue: ${oldValue} to:`, this[name]);
-      //this.setAttribute(propName, oldValue, this[propName]);
       let newVal = this[name];
       if ('dirty' == name) {
         dirty = true;
@@ -353,7 +347,7 @@ export class VaadinSpreadsheet extends LitElement {
       } else if ('popupbuttons' == name) {
         this.api.setPopups(newVal);
       } else {
-        console.log('unsupported property ' + name)
+        console.error('<vaadin-spreadsheet> unsupported property received from server' + name);
       }
       propNames.push(name);
     });
@@ -414,7 +408,6 @@ export class VaadinSpreadsheet extends LitElement {
 
   /* SERVER RPC METHOD CALLBACKS */
   createCallbacks() {
-
     this.api.setGroupingCollapsedCallback(e => {
       this.dispatchEvent(this.createEvent('groupingCollapsed', e));
     });
@@ -571,7 +564,6 @@ export class VaadinSpreadsheet extends LitElement {
       this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
     });
 
-    console.log('vaadin-spreadsheet', 'triggering onConnectorInit');
     this.dispatchEvent(this.createEvent('onConnectorInit'), []);
   }
 
@@ -590,7 +582,6 @@ export class VaadinSpreadsheet extends LitElement {
     }
     elm.textContent = style;
   }
-
 }
 
 window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);
