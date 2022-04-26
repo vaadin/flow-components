@@ -13,13 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.timepicker;
+package com.vaadin.flow.component.timepicker.tests;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.component.timepicker.TimePickerVariant;
 
 public class TimePickerVariantTest {
 

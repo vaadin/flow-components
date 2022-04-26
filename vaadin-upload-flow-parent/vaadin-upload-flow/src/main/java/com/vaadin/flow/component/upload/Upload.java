@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
@@ -347,6 +348,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private void removeElementsAtSlot(String slot) {
         getElement().getChildren()
                 .filter(child -> slot.equals(child.getAttribute("slot")))
+                .collect(Collectors.toList())
                 .forEach(Element::removeFromParent);
     }
 
