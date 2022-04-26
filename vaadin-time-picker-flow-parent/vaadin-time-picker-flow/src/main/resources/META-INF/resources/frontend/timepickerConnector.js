@@ -13,6 +13,48 @@
     }
   }
 
+  /**
+   * Escapes the given string so it can be safely used in a regexp.
+   *
+   * @param {string} string
+   * @return {string}
+   */
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
+   * Searches for either an AM or PM token in the given time string
+   * depending on what is provided in `amOrPmString`.
+   *
+   * The search is case and space insensitive.
+   *
+   * @example
+   * `searchAmOrPmToken('1 P M', 'PM')` => `'P M'`
+   *
+   * @example
+   * `searchAmOrPmToken('1 a.m.', 'A. M.')` => `a.m.`
+   *
+   * @param {string} timeString
+   * @param {string} amOrPmString
+   * @return {string | null}
+   */
+  function searchAmOrPmToken(timeString, amOrPmString) {
+    if (!amOrPmString) return null;
+
+    // Create a regexp string for searching for AM/PM without space-sensitivity.
+    const tokenRegExpString = amOrPmString.split(/\s*/).map(escapeRegExp).join('\\s*');
+
+    // Create a regexp without case-sensitivity.
+    const tokenRegExp = new RegExp(tokenRegExpString, 'i');
+
+    // Match the regexp against the time string.
+    const tokenMatches = timeString.match(tokenRegExp);
+    if (tokenMatches) {
+      return tokenMatches[0];
+    }
+  }
+
   window.Vaadin.Flow.timepickerConnector = {
     initLazy: (timepicker) =>
       tryCatchWrapper(function (timepicker) {
@@ -198,9 +240,14 @@
                 return cachedTimeObject;
               }
               if (timeString) {
-                const pm = timeString.search(pmString);
-                const am = timeString.search(amString);
-                let numbersOnlyTimeString = timeString.replace(amString, '').replace(pmString, '').trim();
+                const amToken = searchAmOrPmToken(timeString, amString);
+                const pmToken = searchAmOrPmToken(timeString, pmString);
+
+                const numbersOnlyTimeString = timeString
+                  .replace(amToken || '', '')
+                  .replace(pmToken || '', '')
+                  .trim();
+
                 // reset regex to beginning or things can explode when the length of the input changes
                 numbersRegExp.lastIndex = 0;
                 let hours = numbersRegExp.exec(numbersOnlyTimeString);
@@ -209,11 +256,12 @@
                   // handle 12 am -> 0
                   // do not do anything if am & pm are not used or if those are the same,
                   // as with locale bg-BG there is always ч. at the end of the time
-                  if (pm !== am) {
-                    if (hours === 12 && am !== -1) {
+                  if (amToken !== pmToken) {
+                    if (hours === 12 && amToken) {
                       hours = 0;
-                    } else {
-                      hours += pm !== -1 && hours !== 12 ? 12 : 0;
+                    }
+                    if (hours !== 12 && pmToken) {
+                      hours += 12;
                     }
                   }
                   const minutes = numbersRegExp.exec(numbersOnlyTimeString);
