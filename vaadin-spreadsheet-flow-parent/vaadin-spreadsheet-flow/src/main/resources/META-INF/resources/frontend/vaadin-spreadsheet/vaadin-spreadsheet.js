@@ -212,14 +212,11 @@ export class VaadinSpreadsheet extends LitElement {
     if (!this.api) {
       this.injectStyle('css_valo', css_valo);
 
-      this.classList.add('spreadsheetport');
-
       let overlays = document.getElementById('spreadsheet-overlays');
       if (!overlays) {
         overlays = document.createElement('div');
         overlays.id = 'spreadsheet-overlays';
-        overlays.classList.add('spreadsheetport');
-        document.body.appendChild(overlays);
+        document.body.appendChild(overlays);        
       }
 
       this.api = new Spreadsheet(this);
