@@ -25,7 +25,6 @@
         return;
       }
       menubar.$connector = {
-
         updateButtons: tryCatchWrapper(function () {
           if (!menubar.shadowRoot) {
             // workaround for https://github.com/vaadin/flow/issues/5722
@@ -34,7 +33,7 @@
           }
 
           // Propagate disabled state from items to parent buttons
-          menubar.items.forEach(item => item.disabled = item.component.disabled);
+          menubar.items.forEach((item) => (item.disabled = item.component.disabled));
 
           // Remove hidden items entirely from the array. Just hiding them
           // could cause the overflow button to be rendered without items.
@@ -42,12 +41,12 @@
           //
           // The items-prop needs to be set even when all items are visible
           // to update the disabled state and re-render buttons.
-          menubar.items = menubar.items.filter(item => !item.component.hidden);
+          menubar.items = menubar.items.filter((item) => !item.component.hidden);
 
           // Propagate click events from the menu buttons to the item components
-          menubar._buttons.forEach(button => {
+          menubar._buttons.forEach((button) => {
             if (button.item && button.item.component) {
-              button.addEventListener('click', e => {
+              button.addEventListener('click', (e) => {
                 if (e.composedPath().indexOf(button.item.component) === -1) {
                   button.item.component.click();
                   e.stopPropagation();
