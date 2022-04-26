@@ -61,23 +61,20 @@
           }
 
           if (nodeId) {
-            menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(
-              appId,
-              nodeId
-            )
+            menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
           }
 
           let items = menubar.__generatedItems || [];
 
           // Propagate disabled state from items to parent buttons
-          items.forEach(item => item.disabled = item.component.disabled);
+          items.forEach((item) => (item.disabled = item.component.disabled));
 
           // Remove hidden items entirely from the array. Just hiding them
           // could cause the overflow button to be rendered without items.
           //
           // The items-prop needs to be set even when all items are visible
           // to update the disabled state and re-render buttons.
-          items = items.filter(item => !item.component.hidden);
+          items = items.filter((item) => !item.component.hidden);
 
           // Observe for hidden and disabled attributes in case they are changed by Flow.
           // When a change occurs, the observer will re-generate items on top of the existing tree
@@ -92,9 +89,9 @@
           menubar.items = items;
 
           // Propagate click events from the menu buttons to the item components
-          menubar._buttons.forEach(button => {
+          menubar._buttons.forEach((button) => {
             if (button.item && button.item.component) {
-              button.addEventListener('click', e => {
+              button.addEventListener('click', (e) => {
                 if (e.composedPath().indexOf(button.item.component) === -1) {
                   button.item.component.click();
                   e.stopPropagation();

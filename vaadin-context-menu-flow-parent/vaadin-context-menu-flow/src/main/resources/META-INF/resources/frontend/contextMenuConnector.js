@@ -1,4 +1,4 @@
-(function() {
+(function () {
   function tryCatchWrapper(callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu');
   }
@@ -7,7 +7,7 @@
     try {
       return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
     } catch (error) {
-      console.error("Could not get node %s from app %s", nodeId, appId);
+      console.error('Could not get node %s from app %s', nodeId, appId);
       console.error(error);
     }
   }
@@ -31,14 +31,11 @@
          * @param {number} nodeId
          */
         generateItems: tryCatchWrapper((nodeId) => {
-          const items = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(
-            appId,
-            nodeId
-          );
+          const items = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
 
           contextMenu.items = items;
         })
-      }
+      };
     }),
 
     /**
@@ -57,16 +54,13 @@
         return;
       }
 
-      return Array.from(container.children).map(child => {
+      return Array.from(container.children).map((child) => {
         const item = {
           component: child,
           checked: child._checked,
-          theme: child._theme,
-        }
-        if (
-          child.localName == "vaadin-context-menu-item" &&
-          child._containerNodeId
-        ) {
+          theme: child._theme
+        };
+        if (child.localName == 'vaadin-context-menu-item' && child._containerNodeId) {
           item.children = generateItemsTree(appId, child._containerNodeId);
         }
         child._item = item;

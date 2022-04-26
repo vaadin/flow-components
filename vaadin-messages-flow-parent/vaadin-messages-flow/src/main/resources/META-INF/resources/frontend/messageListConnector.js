@@ -15,19 +15,27 @@
  */
 
 (function () {
-    const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Message List');
-    };
+  const tryCatchWrapper = function (callback) {
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Message List');
+  };
 
-    window.Vaadin.Flow.messageListConnector = {
-        setItems: (list, items, locale) => tryCatchWrapper(function (list, items, locale) {
-            const formatter = new Intl.DateTimeFormat(locale, {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: 'numeric', minute: 'numeric'
-            });
-            list.items = items.map(item => item.time ? Object.assign(item, {
+  window.Vaadin.Flow.messageListConnector = {
+    setItems: (list, items, locale) =>
+      tryCatchWrapper(function (list, items, locale) {
+        const formatter = new Intl.DateTimeFormat(locale, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric'
+        });
+        list.items = items.map((item) =>
+          item.time
+            ? Object.assign(item, {
                 time: formatter.format(new Date(item.time))
-            }) : item);
-        })(list, items, locale)
-    };
+              })
+            : item
+        );
+      })(list, items, locale)
+  };
 })();
