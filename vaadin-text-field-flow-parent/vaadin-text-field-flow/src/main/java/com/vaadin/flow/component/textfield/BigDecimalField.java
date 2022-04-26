@@ -306,6 +306,11 @@ public class BigDecimalField
         super.setAutoselect(autoselect);
     }
 
+    @Override
+    public void setAutofocus(boolean autofocus) {
+        super.setAutofocus(autofocus);
+    }
+
     /**
      * Specify that this control should have input focus when the page loads.
      *
