@@ -50,6 +50,7 @@ import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -91,6 +92,8 @@ public class CheckboxGroup<T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
+    private ComponentRenderer<? extends Component, T> itemRenderer;
+
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
@@ -101,11 +104,113 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    /**
+     * Creates an empty checkbox group
+     */
     public CheckboxGroup() {
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
         registerValidation();
+    }
+
+    /**
+     * Creates an empty checkbox group with the defined label.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @see #setLabel(String)
+     */
+    public CheckboxGroup(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a checkbox group with the defined label and populated with the
+     * items in the collection.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param items
+     *            the items to be shown in the list of the checkbox group
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public CheckboxGroup(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a checkbox group with the defined label and populated with the
+     * items in the array.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param items
+     *            the items to be shown in the list of the checkbox group
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public CheckboxGroup(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a checkbox group with a value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public CheckboxGroup(
+            ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a checkbox group with the defined label and a value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public CheckboxGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a checkbox group with the defined label, a value change
+     * listener and populated with the items in the array.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the checkbox group
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public CheckboxGroup(String label,
+            ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener,
+            T... items) {
+        this(label, listener);
+        setItems(items);
     }
 
     @Override
@@ -195,7 +300,6 @@ public class CheckboxGroup<T>
         public T getItem() {
             return item;
         }
-
     }
 
     /**
@@ -470,6 +574,37 @@ public class CheckboxGroup<T>
                         .contains(item.getItem()));
     }
 
+    /**
+     * Returns the item component renderer.
+     *
+     * @return the item renderer
+     * @see #setRenderer(ComponentRenderer)
+     *
+     * @since 23.1
+     */
+    public ComponentRenderer<? extends Component, T> getItemRenderer() {
+        return itemRenderer;
+    }
+
+    /**
+     * Sets the item renderer for this checkbox group. The renderer is applied
+     * to each item to create a component which represents the item.
+     * <p>
+     * Note: Component acts as a label to the checkbox and clicks on it trigger
+     * the checkbox. Hence interactive components like DatePicker or ComboBox
+     * cannot be used.
+     *
+     * @param renderer
+     *            the item renderer, not {@code null}
+     *
+     * @since 23.1
+     */
+    public void setRenderer(
+            ComponentRenderer<? extends Component, T> renderer) {
+        this.itemRenderer = Objects.requireNonNull(renderer);
+        refreshCheckboxItems();
+    }
+
     @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
@@ -528,8 +663,19 @@ public class CheckboxGroup<T>
         return checkbox;
     }
 
+    private void refreshCheckboxItems() {
+        getCheckboxItems().forEach(this::updateCheckbox);
+    }
+
     private void updateCheckbox(CheckBoxItem<T> checkbox) {
-        checkbox.setLabel(getItemLabelGenerator().apply(checkbox.getItem()));
+        if (itemRenderer == null) {
+            checkbox.setLabel(
+                    getItemLabelGenerator().apply(checkbox.getItem()));
+        } else {
+            checkbox.setLabelComponent(
+                    getItemRenderer().createComponent(checkbox.item));
+        }
+
         checkbox.setValue(getValue().stream().anyMatch(
                 selectedItem -> Objects.equals(getItemId(selectedItem),
                         getItemId(checkbox.getItem()))));

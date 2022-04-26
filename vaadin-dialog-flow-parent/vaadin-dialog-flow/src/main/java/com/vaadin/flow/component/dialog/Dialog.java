@@ -554,7 +554,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Gets the object from which components can be added or removed from the
      * dialog header area. The header is displayed only if there's a
      * {@link #getHeaderTitle()} or at least one component added with
-     * {@link DialogHeaderFooter#add(Component)}.
+     * {@link DialogHeaderFooter#add(Component...)}.
      *
      * @return the header object
      */
@@ -568,7 +568,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Gets the object from which components can be added or removed from the
      * dialog footer area. The footer is displayed only if there's at least one
-     * component added with {@link DialogHeaderFooter#add(Component)}.
+     * component added with {@link DialogHeaderFooter#add(Component...)}.
      *
      * @return the header object
      */
@@ -618,31 +618,41 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         }
 
         /**
-         * Adds the component to the container.
+         * Adds the given components to the container.
          *
-         * @param component
-         *            the component to be added.
+         * @param components
+         *            the components to be added.
          */
-        public void add(Component component) {
-            root.appendChild(component.getElement());
+        public void add(Component... components) {
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to add cannot be null");
+                root.appendChild(component.getElement());
+            }
             if (!isRendererCreated()) {
                 initRenderer();
             }
         }
 
         /**
-         * Removes the component from the container.
+         * Removes the given components from the container.
          *
          * <p>
          * Note that the component needs to be removed from this method in order
          * to guarantee the correct state of the component.
          *
-         * @param component
-         *            the component to be removed.
+         * @param components
+         *            the components to be removed.
          */
-        public void remove(Component component) {
-            if (root.equals(component.getElement().getParent())) {
-                root.removeChild(component.getElement());
+        public void remove(Component... components) {
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to remove cannot be null");
+                if (root.equals(component.getElement().getParent())) {
+                    root.removeChild(component.getElement());
+                }
             }
             if (root.getChildCount() == 0) {
                 dialog.getElement()
@@ -679,9 +689,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          * Sets the renderer function creation state. To avoid making a
          * JavaScript execution to get the information from the client, this is
          * done on the server by setting it to <code>true</code> on
-         * {@link #initRenderer()} and to <code>false</code> when the last child is removed
-         * in {@link #remove(Component)} or when an auto attached dialog is
-         * closed.
+         * {@link #initRenderer()} and to <code>false</code> when the last child
+         * is removed in {@link #remove(Component...)} or when an auto attached
+         * dialog is closed.
          *
          * @param rendererCreated
          */

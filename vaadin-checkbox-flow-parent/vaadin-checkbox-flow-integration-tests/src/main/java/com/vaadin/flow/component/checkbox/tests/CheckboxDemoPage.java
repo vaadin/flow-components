@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -24,6 +25,7 @@ public class CheckboxDemoPage extends Div {
         addAccessibleCheckbox();
         addCheckboxHtmlLabel();
         addCheckboxLazyHtmlLabel();
+        addCheckboxImgComponentLabel();
     }
 
     private void addDefaultCheckbox() {
@@ -114,6 +116,25 @@ public class CheckboxDemoPage extends Div {
 
         addCard("Checkbox with the lazy label that contains HTML markup",
                 checkbox, button);
+    }
+
+    private void addCheckboxImgComponentLabel() {
+        Checkbox checkbox = new Checkbox();
+        Image vaadinImg = new Image("https://vaadin.com/images/vaadin-logo.svg",
+                "");
+        checkbox.setId("img-component-label-checkbox");
+        vaadinImg.setWidth("50px");
+        checkbox.setLabelComponent(vaadinImg);
+
+        NativeButton button = new NativeButton("Change label", event -> {
+            Image newImage = new Image(
+                    "https://vaadin.com/images/vaadin-logo.svg", "");
+            newImage.setWidth("30px");
+            checkbox.setLabelComponent(newImage);
+        });
+        button.setId("change-img-component-label");
+
+        addCard("Checkbox with the image component label", checkbox, button);
     }
 
     private void addCard(String title, Component... components) {

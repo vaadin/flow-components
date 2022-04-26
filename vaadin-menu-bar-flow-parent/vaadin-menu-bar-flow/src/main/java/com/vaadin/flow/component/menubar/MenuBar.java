@@ -51,12 +51,12 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.1.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/menu-bar", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.1.0-alpha3")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 
@@ -78,7 +78,8 @@ public class MenuBar extends Component
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {
-            initConnector();
+            String appId = event.getUI().getInternals().getAppId();
+            initConnector(appId);
             resetContent();
         });
     }
@@ -342,15 +343,20 @@ public class MenuBar extends Component
             return;
         }
         runBeforeClientResponse(ui -> {
-            getElement().executeJs("this.$connector.updateButtons()");
+            // When calling `generateItems` without providing a node id, it will
+            // use the previously generated items tree, only updating the
+            // disabled and hidden properties of the root items = the menu bar
+            // buttons.
+            getElement().executeJs("this.$connector.generateItems()");
             updateScheduled = false;
         });
         updateScheduled = true;
     }
 
-    private void initConnector() {
+    private void initConnector(String appId) {
         getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this)");
+                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)",
+                appId);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
