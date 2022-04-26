@@ -40,7 +40,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.apache.poi.hssf.converter.AbstractExcelUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
@@ -2572,7 +2571,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
         } else {
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             valueManager.clearCellCache(key);
-            cell.setCellType(CellType.FORMULA);
         }
         cell.setCellFormula(formula);
         valueManager.cellUpdated(cell);
@@ -2827,8 +2825,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             LOGGER.log(Level.FINEST, "Poi threw NullPointerException when trying to autofit column", e);
             return;
         }
-        int columnPixelWidth = getColumnAutofitPixelWidth(columnIndex, AbstractExcelUtils
-            .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex)));
+		int columnPixelWidth = getColumnAutofitPixelWidth(columnIndex,
+				(int) activeSheet.getColumnWidthInPixels(columnIndex));
 
         int[] _colW = Arrays.copyOf(getColW(), getColW().length);
         _colW[columnIndex] = columnPixelWidth;
@@ -3416,9 +3414,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             _hiddenColumnIndexes
                     .remove(_hiddenColumnIndexes
                             .indexOf(columnIndex + 1));
-            _colW[columnIndex] = AbstractExcelUtils
-                    .getColumnWidthInPx(getActiveSheet().getColumnWidth(
-                            columnIndex));
+			_colW[columnIndex] = (int) getActiveSheet().getColumnWidthInPixels(columnIndex);
             getCellValueManager().clearCacheForColumn(columnIndex + 1);
             getCellValueManager().loadCellData(firstRow, columnIndex + 1,
                     lastRow, columnIndex + 1);
@@ -4966,8 +4962,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                 continue;
             }
             Integer autofittedWidth = autofittedColumnWidths.get(cr);
-            int currentWidth = AbstractExcelUtils.getColumnWidthInPx(filteredSheet
-                .getColumnWidth(cr.getCol()));
+			int currentWidth = (int) filteredSheet.getColumnWidthInPixels(cr.getCol());
             // only update columns that haven't changed size since the last
             // autofit
             if (currentWidth == autofittedWidth) {

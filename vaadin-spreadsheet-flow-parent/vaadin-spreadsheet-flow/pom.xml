@@ -72,13 +72,14 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.poi</groupId>
-                    <artifactId>poi-ooxml-schemas</artifactId>
+                    <artifactId>poi-ooxml-lite</artifactId>                    
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
+            <!-- Needed for CTFilterColumn -->
             <groupId>org.apache.poi</groupId>
-            <artifactId>ooxml-schemas</artifactId>
+            <artifactId>poi-ooxml-full</artifactId>
         </dependency>
     </dependencies>
     <build>

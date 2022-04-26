@@ -23,7 +23,7 @@ public class PoiTester {
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet();
         Cell cell = getOrCreateCell(sheet, 0, 0);
-        cell.setCellType(CellType.BLANK);
+        cell.setBlank();
 
         CreationHelper factory = wb.getCreationHelper();
         RichTextString str = factory.createRichTextString("comentario!");
