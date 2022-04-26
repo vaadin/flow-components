@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.mixin.HasClearButton;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -50,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
-        HasTheme {
+        HasTheme, HasClearButton {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -609,32 +610,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Deprecated
     public LocalTime getMaxTime() {
         return this.getMax();
-    }
-
-    /**
-     * Sets displaying a clear button in the time picker when it has value.
-     * <p>
-     * The clear button is an icon, which can be clicked to set the time picker
-     * value to {@code null}.
-     *
-     * @param clearButtonVisible
-     *            {@code true} to display the clear button, {@code false} to
-     *            hide it
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
-    }
-
-    /**
-     * Gets whether this time picker displays a clear button when it has value.
-     *
-     * @return {@code true} if this time picker displays a clear button,
-     *         {@code false} otherwise
-     * @see #setClearButtonVisible(boolean)
-     */
-    public boolean isClearButtonVisible() {
-        return super.isClearButtonVisibleBoolean();
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

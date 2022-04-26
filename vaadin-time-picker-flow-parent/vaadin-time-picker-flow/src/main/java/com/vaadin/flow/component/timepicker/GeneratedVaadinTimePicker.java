@@ -652,38 +652,6 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Set to true to display the clear icon which clears the input.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code clearButtonVisible} property from the webcomponent
-     */
-    protected boolean isClearButtonVisibleBoolean() {
-        return getElement().getProperty("clearButtonVisible", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display the clear icon which clears the input.
-     * </p>
-     *
-     * @param clearButtonVisible
-     *            the boolean value to set
-     */
-    protected void setClearButtonVisible(boolean clearButtonVisible) {
-        getElement().setProperty("clearButtonVisible", clearButtonVisible);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * The object used to localize this component. To change the default
      * localization, replace the entire <em>i18n</em> object or just the
      * property you want to modify.
