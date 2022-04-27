@@ -65,7 +65,8 @@ public class GridViewSelectionIT extends AbstractComponentIT {
                 messageDiv.getText());
         assertRowsSelected(grid, 2, 5);
 
-        grid.select(5);
+        WebElement checkbox = getCellContent(grid.getCell(5, 0));
+        checkbox.click();
         Assert.assertTrue(isRowSelected(grid, 5));
         clickElementWithJs(selectBtn);
         assertRowsSelected(grid, 0, 6);
