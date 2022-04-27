@@ -57,18 +57,15 @@ public class GridViewSelectionIT extends AbstractComponentIT {
                 messageDiv.getText());
         assertRowsSelected(grid, 0, 5);
 
-        WebElement checkbox = getCellContent(grid.getCell(0, 0));
-        checkbox.click();
-        checkbox = getCellContent(grid.getCell(1, 0));
-        checkbox.click();
+        grid.deselect(0);
+        grid.deselect(1);
         Assert.assertEquals(
                 getSelectionMessage(LegacyTestView.items.subList(1, 5),
                         LegacyTestView.items.subList(2, 5), true),
                 messageDiv.getText());
         assertRowsSelected(grid, 2, 5);
 
-        checkbox = getCellContent(grid.getCell(5, 0));
-        checkbox.click();
+        grid.select(5);
         Assert.assertTrue(isRowSelected(grid, 5));
         clickElementWithJs(selectBtn);
         assertRowsSelected(grid, 0, 6);
@@ -77,7 +74,7 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         // test the select all button
         grid.findElement(By.id("selectAllCheckbox")).click();
         // deselect 1
-        getCellContent(grid.getCell(0, 0)).click();
+        grid.deselect(0);
         Assert.assertEquals("Select all should have been deselected", false,
                 grid.findElement(By.id("selectAllCheckbox"))
                         .getPropertyBoolean("checked"));
