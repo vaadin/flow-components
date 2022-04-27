@@ -22,6 +22,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -330,8 +331,15 @@ public class GridElement extends TestBenchElement {
      *            the row to select
      */
     public void select(int rowIndex) {
-        select(getRow(rowIndex));
+        WebElement checkbox = getCellContent(grid.getCell(rowIndex, 0));
+        checkbox.click();
     }
+
+    private WebElement getCellContent(GridTHTDElement cell) {
+        return (WebElement) executeScript(
+                "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
+                cell);
+    }    
 
     /**
      * Selects the row.
