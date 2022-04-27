@@ -193,7 +193,7 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets all columns defined for the grid, including any selection checkbox
+     * Gets all columns defined for the grid, including any (fsion checkbox
      * column.
      *
      * @return a list of grid column elements which can be used to refer to the
@@ -331,10 +331,7 @@ public class GridElement extends TestBenchElement {
      *            the row to select
      */
     public void select(int rowIndex) {
-        if (!getRow(rowIndex).isSelected) {
-           WebElement checkbox = getCellContent(grid.getCell(rowIndex, 0));
-           checkbox.click();
-        }
+        select(getRow(rowIndex));
     }
 
     /**
