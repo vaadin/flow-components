@@ -56,7 +56,7 @@ public class SpreadsheetLinker extends SingleScriptLinker {
     /**
      * The customized version of the single script template.
      */
-    private static final String SINGLE_SCRIPT_TEMPLATE_JS = "com/vaadin/component/spreadsheet/client/SpreadsheetLinkerTemplate.js";
+    private static final String SINGLE_SCRIPT_TEMPLATE_JS = "com/vaadin/component/spreadsheet/client/SpreadsheetSingleScriptTemplate.js";
     /**
      * The computeScriptBase implementation which doesn't use document.write. It
      * is taken from {@link CrossSiteIframeLinker}.

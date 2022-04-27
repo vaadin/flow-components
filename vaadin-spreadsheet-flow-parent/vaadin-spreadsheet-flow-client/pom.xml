@@ -17,9 +17,9 @@
     <gwt.style>pretty</gwt.style>
     <gwt.draft.compile>false</gwt.draft.compile>
 
-    <gwt.name>GwtAddonExporter</gwt.name>
+    <gwt.name>SpreadsheetApi</gwt.name>
     <gwt.target>${gwt.name}.html</gwt.target>
-    <gwt.module>com.vaadin.spreadsheet.flowport.gwtexporter.GwtExporter</gwt.module>
+    <gwt.module>com.vaadin.component.spreadsheet.client.SpreadsheetApi</gwt.module>
     <gwt.hostedWebapp>${project.build.directory}/${project.build.finalName}</gwt.hostedWebapp>
 
     <!-- optimizations -->
