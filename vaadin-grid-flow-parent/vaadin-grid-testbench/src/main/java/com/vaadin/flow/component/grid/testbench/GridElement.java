@@ -331,15 +331,11 @@ public class GridElement extends TestBenchElement {
      *            the row to select
      */
     public void select(int rowIndex) {
-        WebElement checkbox = getCellContent(grid.getCell(rowIndex, 0));
-        checkbox.click();
+        if (!getRow(rowIndex).isSelected) {
+           WebElement checkbox = getCellContent(grid.getCell(rowIndex, 0));
+           checkbox.click();
+        }
     }
-
-    private WebElement getCellContent(GridTHTDElement cell) {
-        return (WebElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
-                cell);
-    }    
 
     /**
      * Selects the row.
@@ -351,7 +347,9 @@ public class GridElement extends TestBenchElement {
         if (isMultiselect()) {
             executeScript("arguments[0].selectItem(arguments[1]._item);", this,
                     row);
-        } else {
+            executeScript("arguments[0].$server.select(arguments[1]._item.key)",
+                    this, row);
+    } else {
             setActiveItem(row);
         }
     }
@@ -375,6 +373,8 @@ public class GridElement extends TestBenchElement {
     void deselect(GridTRElement row) {
         if (isMultiselect()) {
             executeScript("arguments[0].deselectItem(arguments[1]._item);",
+                    this, row);
+            executeScript("arguments[0].$server.deselect(arguments[1]._item.key)",
                     this, row);
         } else {
             removeActiveItem(row);
