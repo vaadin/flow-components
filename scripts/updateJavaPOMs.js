@@ -21,7 +21,8 @@ const proComponents = ['board',
                        'crud',
                        'grid-pro',
                        'rich-text-editor',
-                       'map'];
+                       'map',
+                       'spreadsheet'];
 
 function renameComponent(array, name) {
   for(let i = 0; array && i < array.length; i++) {
@@ -109,7 +110,7 @@ async function consolidatePomParent() {
     // add other modules present in original pom
     org.project.modules[0].module.forEach(
       mod => !/(flow|flow-demo|testbench|flow-integration-test)$/.test(mod) && modules.push(mod));
-    
+
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
     const a = mergeProfiles(js.project, org.project);
     js.project.profiles[0].profile = mergeProfiles(js.project, org.project)
