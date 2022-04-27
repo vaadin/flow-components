@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.f
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -193,7 +193,7 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets all columns defined for the grid, including any (fsion checkbox
+     * Gets all columns defined for the grid, including any selection checkbox
      * column.
      *
      * @return a list of grid column elements which can be used to refer to the
