@@ -2,8 +2,8 @@ package com.vaadin.client.communication;
 
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 import com.vaadin.client.ServerConnector;
+import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
 import com.vaadin.shared.communication.ServerRpc;
-import com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetServerRpcImpl;
 
 /**
  * spreadsheet: we override this class to provide our own rpc implementation

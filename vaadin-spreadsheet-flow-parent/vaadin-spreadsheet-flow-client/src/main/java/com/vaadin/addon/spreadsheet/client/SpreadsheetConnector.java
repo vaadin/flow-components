@@ -43,9 +43,10 @@ import com.vaadin.client.ui.ActionOwner;
 import com.vaadin.client.ui.PostLayoutListener;
 import com.vaadin.client.ui.layout.ElementResizeEvent;
 import com.vaadin.client.ui.layout.ElementResizeListener;
+import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
 import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.communication.SharedState;
-import com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetServerRpcImpl;
+
 import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
 import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 
