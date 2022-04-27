@@ -41,19 +41,19 @@ public class TreeGridSelectIT extends AbstractTreeGridIT {
         findElementByText("Selection mode - multi").click();
 
         assertAllRowsDeselected(getTreeGrid());
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().selectAll();
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().expandWithClick(1, 1);
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().deselectAll();
         assertAllRowsDeselected(getTreeGrid());
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().clickSelectAll();
         getTreeGrid().collapseWithClick(2, 1);
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().collapseWithClick(2, 1);
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().deselectAll();
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsDeselected(getTreeGrid());
     }
@@ -68,9 +68,5 @@ public class TreeGridSelectIT extends AbstractTreeGridIT {
         for (int i = 0; i < grid.getRowCount(); i++) {
             assertFalse(grid.getRow(i).isSelected());
         }
-    }
-
-    private void clickSelectAll(TreeGridElement grid) {
-        grid.findElement(By.id("selectAllCheckbox")).click();
     }
 }
