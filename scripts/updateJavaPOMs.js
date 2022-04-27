@@ -60,6 +60,12 @@ function mergeDependencies(prj1, prj2) {
   return [...arr1, ...arr2.filter(a => !arr1.find(b => b.artifactId[0] === a.artifactId[0]))];
 }
 
+function mergeProfiles(prj1, prj2) {
+  const arr1 = prj1 && prj1.profiles && prj1.profiles[0] && prj1.profiles[0].profile || [];
+  const arr2 = prj2 && prj2.profiles && prj2.profiles[0] && prj2.profiles[0].profile || [];
+  return [...arr1, ...arr2.filter(a => !arr1.find(b => b.id[0] === a.id[0]))];
+}
+
 function mergeProperties(props1, props2) {
   const arr1 = (props1 || []).filter(o => typeof o === 'object');
   const arr2 = (props2 || []).filter(o => typeof o === 'object');
@@ -72,8 +78,9 @@ async function consolidate(template, pom, cb) {
 
   await renameBase(tplJs);
 
-  tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
+  tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
 
+  pomJs.project.dependencies = pomJs.project.dependencies || [];
   pomJs.project.dependencies[0] = {dependency: mergeDependencies(tplJs.project, pomJs.project)};
 
   tplJs.project.dependencies = setDependenciesVersion(pomJs.project.dependencies);
@@ -104,6 +111,8 @@ async function consolidatePomParent() {
       mod => !/(flow|flow-demo|testbench|flow-integration-test)$/.test(mod) && modules.push(mod));
     
     renameComponent(js.project.profiles[0].profile[0].modules[0].module, name);
+    const a = mergeProfiles(js.project, org.project);
+    js.project.profiles[0].profile = mergeProfiles(js.project, org.project)
   });
 }
 
@@ -112,6 +121,9 @@ async function consolidatePomFlow() {
   consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
     tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
     tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);
+    if (pomJs.project.build[0].resources) {
+      tplJs.project.build[0].resources =  pomJs.project.build[0].resources;
+    }
   });
 }
 async function consolidatePomTB() {
