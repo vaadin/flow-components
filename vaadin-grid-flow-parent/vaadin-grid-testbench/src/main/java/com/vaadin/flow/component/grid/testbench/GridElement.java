@@ -346,7 +346,7 @@ public class GridElement extends TestBenchElement {
                     row);
             executeScript("arguments[0].$server.select(arguments[1]._item.key)",
                     this, row);
-    } else {
+        } else {
             setActiveItem(row);
         }
     }
@@ -371,7 +371,8 @@ public class GridElement extends TestBenchElement {
         if (isMultiselect()) {
             executeScript("arguments[0].deselectItem(arguments[1]._item);",
                     this, row);
-            executeScript("arguments[0].$server.deselect(arguments[1]._item.key)",
+            executeScript(
+                    "arguments[0].$server.deselect(arguments[1]._item.key)",
                     this, row);
         } else {
             removeActiveItem(row);
