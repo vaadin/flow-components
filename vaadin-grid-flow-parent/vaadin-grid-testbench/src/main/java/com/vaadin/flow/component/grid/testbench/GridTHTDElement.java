@@ -131,7 +131,8 @@ public class GridTHTDElement extends TestBenchElement {
     }
 
     /**
-     * Gets the first child element of the slotted `vaadin-grid-cell-content` element
+     * Gets the first child element of the slotted `vaadin-grid-cell-content`
+     * element
      */
     WebElement getFirstChildElement() {
         return (WebElement) executeScript(
