@@ -395,4 +395,32 @@ public class GridElement extends TestBenchElement {
                 this);
     }
 
+    /**
+     * Select all items of the Grid.
+     */
+    public void selectAll() {
+        CheckboxElement selectAllCheckbox = $(CheckboxElement.class)
+                .id("selectAllCheckbox");
+        if (!selectAllCheckbox.isChecked()) {
+            selectAllCheckbox.click();
+        }
+    }
+
+    /**
+     * Click select all check box
+     */
+    public void clickSelectAll() {
+        CheckboxElement selectAllCheckbox = $(CheckboxElement.class)
+                .id("selectAllCheckbox");
+        selectAllCheckbox.click();
+    }
+
+    /**
+     * Deselect all items of the Grid.
+     */
+    public void deselectAll() {
+        TestBenchElement selectionCol = $("vaadin-grid-flow-selection-column")
+                .first();
+        executeScript("arguments[0].$server.deselectAll()", selectionCol);
+    }
 }
