@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link type="text/css" rel="stylesheet" href="GwtAddonExporter/gwt/standard/standard.css">
+    <link type="text/css" rel="stylesheet" href="GwtAddonExporter.css">
+    <link type="text/css" rel="stylesheet" href="valo.css">
+
+    <style>
+      .spreadsheetport {
+        height: 400px;
+        width: 300px;
+      }
+      #mislot {
+        margin-bottom: 150px;
+      }
+    </style>
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>Web Application Starter Project</title>
+
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    <script type="text/javascript" language="javascript" src="GwtAddonExporter/GwtAddonExporter.cache.js"></script>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body>
+
+  <div id="mislot" class="spreadsheetport"></div>
+
+
+  <script defer>
+
+    var s = new com.vaadin.spreadsheet.flowport.gwtexporter.client.SpreadsheetJsApi(document.getElementById("mislot"));
+
+    function addWidget() {
+    }
+
+    function setCols(cols) {
+      s.setCols(cols);
+    }
+
+    addWidget();
+
+  </script>
+
+  <button onclick="addWidget();">Add widget</button>
+  <button onclick="s.setCols(3);">setCols(3)</button>
+  <button onclick="s.setCols(4);">setCols(4)</button>
+  </body>
+</html>
