@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component;
 
-import static org.junit.Assert.assertEquals;
-
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -38,16 +37,16 @@ public class SlotUtilsTest {
 
         HasElement hasElement = () -> div;
 
-        assertEquals(1,
+        Assert.assertEquals(1,
                 SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
-        assertEquals(1,
+        Assert.assertEquals(1,
                 SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
 
         SlotUtils.clearSlot(hasElement, TEST_SLOT);
 
-        assertEquals(0,
+        Assert.assertEquals(0,
                 SlotUtils.getElementsInSlot(hasElement, TEST_SLOT).count());
-        assertEquals(1,
+        Assert.assertEquals(1,
                 SlotUtils.getElementsInSlot(hasElement, OTHER_SLOT).count());
     }
 
