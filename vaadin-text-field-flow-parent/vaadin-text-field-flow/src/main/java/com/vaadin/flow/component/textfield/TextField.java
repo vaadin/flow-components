@@ -28,7 +28,8 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-text-field} element.
+ * Text Field allows the user to input and edit text. Prefix and suffix
+ * components, such as icons, are also supported.
  *
  * @author Vaadin Ltd
  */

@@ -40,8 +40,10 @@ import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * An input component for selecting time of day, based on
- * {@code vaadin-time-picker} web component.
+ * Time Picker is an input field for entering or selecting a specific time. The
+ * time can be entered directly using a keyboard or by choosing a value from a
+ * set of predefined options presented in an overlay. The overlay opens when the
+ * field is clicked or any input is entered when the field is focused.
  *
  * @author Vaadin Ltd
  */

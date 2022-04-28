@@ -58,7 +58,8 @@ import elemental.json.JsonObject;
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
 /**
- * Server-side component for the {@code <vaadin-grid-pro>} element.
+ * Grid Pro is an extension of the Grid component that provides inline editing
+ * with full keyboard navigation.
  *
  * @author Vaadin Ltd
  *

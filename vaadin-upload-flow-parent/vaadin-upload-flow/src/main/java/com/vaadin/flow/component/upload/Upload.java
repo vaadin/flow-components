@@ -46,7 +46,9 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component for the {@code vaadin-upload} element.
+ * Upload is a component for uploading one or more files. It shows the upload
+ * progression and status of each file. Files can be uploaded using the Upload
+ * button or via drag and drop.
  *
  * @author Vaadin Ltd.
  */

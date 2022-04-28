@@ -45,7 +45,8 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component for the <code>vaadin-menu-bar</code> element.
+ * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu
+ * items can either trigger an action, open a menu, or work as a toggle.
  *
  * @author Vaadin Ltd
  */

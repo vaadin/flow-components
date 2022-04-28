@@ -22,7 +22,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
- * Server-side component for the {@code vaadin-integer-field} element.
+ * IntegerField is an extension of Text Field that only accepts integer numbers.
  *
  * @author Vaadin Ltd.
  */
