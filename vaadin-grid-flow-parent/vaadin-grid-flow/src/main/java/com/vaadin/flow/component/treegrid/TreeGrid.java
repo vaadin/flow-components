@@ -70,7 +70,9 @@ import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
- * A grid component for displaying hierarchical tabular data.
+ * Tree Grid is a component for displaying hierarchical tabular data grouped
+ * into expandable and collapsible nodes. Tree Grid is an extension of the Grid
+ * component and all Grid’s features are available in Tree Grid as well.
  *
  * @param <T>
  *            the grid bean type

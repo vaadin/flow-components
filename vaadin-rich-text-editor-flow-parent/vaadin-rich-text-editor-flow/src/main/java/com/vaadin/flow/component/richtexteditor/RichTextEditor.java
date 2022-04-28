@@ -38,7 +38,9 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 /**
- * Server-side component for the {@code <vaadin-rich-text-editor>} component.
+ * Rich Text Editor is an input field for entering rich text. It allows you to
+ * format and style your text using boldface, italics, headings, lists, images,
+ * links etc.
  * <p>
  * The value of the rich text editor is in
  * <a href="https://github.com/quilljs/delta">Delta</a> format. The

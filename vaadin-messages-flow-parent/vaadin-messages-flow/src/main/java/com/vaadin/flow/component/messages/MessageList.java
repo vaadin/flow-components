@@ -35,9 +35,10 @@ import com.vaadin.flow.internal.JsonUtils;
 import elemental.json.JsonArray;
 
 /**
- * Server-side component for the {@code vaadin-message-list} element. The
- * component displays a list of messages that can be configured with
- * {@link #setItems(Collection)}.
+ * Message List allows you to show a list of messages, for example, a chat log.
+ * You can configure the text content, information about the sender and the time
+ * of sending for each message. The component displays a list of messages that
+ * can be configured with {@link #setItems(Collection)}.
  *
  * @author Vaadin Ltd.
  */
