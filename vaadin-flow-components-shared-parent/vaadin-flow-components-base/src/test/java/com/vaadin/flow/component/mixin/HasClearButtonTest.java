@@ -24,13 +24,17 @@ public class HasClearButtonTest {
     public void changeValue() {
         component.setClearButtonVisible(true);
         Assert.assertTrue(component.isClearButtonVisible());
-        Assert.assertTrue(component.getElement().getProperty("clearButtonVisible", false));
+        Assert.assertTrue(component.getElement()
+                .getProperty("clearButtonVisible", false));
 
         component.setClearButtonVisible(false);
         Assert.assertFalse(component.isClearButtonVisible());
-        Assert.assertFalse(component.getElement().getProperty("clearButtonVisible", false));
+        Assert.assertFalse(component.getElement()
+                .getProperty("clearButtonVisible", false));
     }
 
     @Tag("test")
-    private static class TestComponent extends Component implements HasClearButton {}
+    private static class TestComponent extends Component
+            implements HasClearButton {
+    }
 }
