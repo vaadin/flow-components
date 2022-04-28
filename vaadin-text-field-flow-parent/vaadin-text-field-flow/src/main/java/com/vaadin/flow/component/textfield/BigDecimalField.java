@@ -38,8 +38,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
- * BigDecimalField is an input field for handling decimal numbers with high precision.
- * This field uses {@link BigDecimal} as the server-side value type, and only allows numeric input.
+ * BigDecimalField is an input field for handling decimal numbers with high
+ * precision. This field uses {@link BigDecimal} as the server-side value type,
+ * and only allows numeric input.
  * <p>
  * When setting values from the server-side, the {@code scale} of the provided
  * {@link BigDecimal} is preserved in the presentation format shown to the user,

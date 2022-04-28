@@ -77,7 +77,8 @@ import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
- * Combo Box allows the user to choose a value from a filterable list of options presented in an overlay.
+ * Combo Box allows the user to choose a value from a filterable list of options
+ * presented in an overlay.
  * <p>
  * ComboBox supports lazy loading. This means that when using large data sets,
  * items are requested from the server one "page" at a time when the user
