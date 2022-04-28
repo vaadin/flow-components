@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -42,6 +40,8 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
@@ -54,8 +54,8 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 @SuppressWarnings("serial")
 public class SpreadsheetStyleFactory implements Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(SpreadsheetStyleFactory.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SpreadsheetStyleFactory.class);
 
     /**
      * Styling for cell borders
@@ -862,7 +862,7 @@ public class SpreadsheetStyleFactory implements Serializable {
             }
         } catch (IndexOutOfBoundsException ioobe) {
             // somehow workbook doesn't have all the fonts the cells have???
-            LOGGER.log(Level.WARNING,
+            LOGGER.warn(
                     "Font missing, " + cellStyle.getFontIndexAsInt() + " / "
                             + cellStyle.getClass() + ", " + ioobe.getMessage(),
                     ioobe);

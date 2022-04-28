@@ -16,10 +16,10 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
@@ -36,8 +36,8 @@ import com.vaadin.flow.data.provider.KeyMapper;
 @SuppressWarnings("serial")
 public class ContextMenuManager implements Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(ContextMenuManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ContextMenuManager.class);
 
     private LinkedList<Handler> actionHandlers;
 
@@ -130,7 +130,7 @@ public class ContextMenuManager implements Serializable {
                 spreadsheet.getRpcProxy().showActions(actions);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.FINE, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
         }
     }
 

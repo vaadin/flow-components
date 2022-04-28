@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.spreadsheet.action;
 
-import java.util.logging.Logger;
-
 /*
  * #%L
  * Vaadin Spreadsheet
@@ -19,6 +17,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
@@ -79,7 +78,7 @@ public class MergeCellsAction extends SpreadsheetAction {
         try {
             spreadsheet.addMergedRegion(region);
         } catch (IllegalArgumentException iae) {
-            Logger.getLogger(this.getClass().getName()).warning(iae.getMessage());
+            LoggerFactory.getLogger(this.getClass()).warn(iae.getMessage());
         }
     }
 

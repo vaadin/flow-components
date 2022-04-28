@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFSheetConditionalFormatting;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -63,6 +61,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBooleanProperty;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
 
@@ -80,8 +79,8 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory.BorderStyle
 @SuppressWarnings("serial")
 public class ConditionalFormatter implements Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(ConditionalFormatter.class.getName());
+    private static final org.slf4j.Logger LOGGER = LoggerFactory
+            .getLogger(ConditionalFormatter.class);
 
     /*
      * Slight hack. This style is used when a CF rule defines 'no border', in
@@ -439,23 +438,19 @@ public class ConditionalFormatter implements Serializable {
             return val;
 
         } catch (NoSuchFieldException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation, unable to parse conditional formatting rule",
                     e);
         } catch (SecurityException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation, unable to parse conditional formatting rule",
                     e);
         } catch (IllegalArgumentException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation, unable to parse conditional formatting rule",
                     e);
         } catch (IllegalAccessException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation, unable to parse conditional formatting rule",
                     e);
         } finally {
@@ -657,7 +652,7 @@ public class ConditionalFormatter implements Serializable {
                 return matchesFormula(cell, rule, deltaColumn, deltaRow);
             }
         } catch (NotImplementedException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
             return false;
         }
 
@@ -693,7 +688,7 @@ public class ConditionalFormatter implements Serializable {
         ValueEval eval = getValueEvalFromFormula(booleanFormula, cell, deltaColumn, deltaRow);
         
         if (eval instanceof ErrorEval){
-            LOGGER.log(Level.FINEST, ((ErrorEval) eval).getErrorString(), eval);
+            LOGGER.trace(((ErrorEval) eval).getErrorString(), eval);
         }
         
         if (eval instanceof BoolEval) {
@@ -766,7 +761,7 @@ public class ConditionalFormatter implements Serializable {
         ValueEval eval = getValueEvalFromFormula(formula, cell, deltaColumn, deltaRow);
         
         if (eval instanceof ErrorEval){
-            LOGGER.log(Level.FINEST, ((ErrorEval) eval).getErrorString(), eval);
+            LOGGER.trace(((ErrorEval) eval).getErrorString(), eval);
             return false;
         }
         

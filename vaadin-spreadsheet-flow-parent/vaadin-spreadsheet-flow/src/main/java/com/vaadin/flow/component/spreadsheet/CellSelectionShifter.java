@@ -16,8 +16,6 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +26,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.command.CellShiftValuesCommand;
@@ -47,8 +46,8 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
 @SuppressWarnings("serial")
 public class CellSelectionShifter implements Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(CellSelectionShifter.class.getName());
+    private static final org.slf4j.Logger LOGGER = LoggerFactory
+            .getLogger(CellSelectionShifter.class);
 
     private static final String rowShiftRegex = "[$]?[a-zA-Z]+[$]?\\d+";
     private static final Pattern rowShiftPattern = Pattern
@@ -348,7 +347,7 @@ public class CellSelectionShifter implements Serializable {
                 newCell.setCellFormula(newFormula.toString());
             }
         } catch (Exception e) {
-            LOGGER.log(Level.FINE, e.getMessage(), e);
+            LOGGER.debug(e.getMessage(), e);
             // TODO visualize shifting error
             newCell.setCellFormula(shiftedCell.getCellFormula());
         }

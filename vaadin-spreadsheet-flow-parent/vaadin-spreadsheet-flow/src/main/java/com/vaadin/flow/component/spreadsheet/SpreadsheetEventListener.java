@@ -2,6 +2,9 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ComponentEventListener;
 
 import elemental.json.JsonArray;
@@ -9,6 +12,8 @@ import elemental.json.JsonArray;
 @SuppressWarnings("serial")
 public class SpreadsheetEventListener implements ComponentEventListener<Spreadsheet.SpreadsheetEvent> {
     private final SpreadsheetHandlerImpl handler;
+
+    Logger LOGGER = LoggerFactory.getLogger(SpreadsheetEventListener.class);
 
     public SpreadsheetEventListener(SpreadsheetHandlerImpl spreadsheetHandler) {
         this.handler = spreadsheetHandler;
@@ -44,7 +49,7 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
         String type = event.getType();
         JsonArray pars = (JsonArray)event.getData();
 
-        System.err.println(type + " " + (pars == null ? "null" : pars.toJson()));
+        LOGGER.debug(type + " " + (pars == null ? "null" : pars.toJson()));
 
         if ("onConnectorInit".equals(type)) {
             handler.onConnectorInit();

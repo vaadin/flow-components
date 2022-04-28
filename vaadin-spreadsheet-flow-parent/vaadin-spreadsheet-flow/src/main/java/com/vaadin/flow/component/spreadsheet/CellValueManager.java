@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.hssf.model.InternalSheet;
 import org.apache.poi.hssf.record.RecordBase;
@@ -59,6 +57,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellDeletionHandler;
@@ -77,8 +77,8 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
 @SuppressWarnings("serial")
 public class CellValueManager implements Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(CellValueManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(CellValueManager.class);
 
     /**
      * Pattern to be used to show original values in formula bar
@@ -348,7 +348,7 @@ public class CellValueManager implements Serializable {
 
             handleIsDisplayZeroPreference(cell, cellData);
         } catch (RuntimeException rte) {
-            LOGGER.log(Level.FINEST, rte.getMessage(), rte);
+            LOGGER.trace(rte.getMessage(), rte);
             cellData.value = "#VALUE!";
         }
 
@@ -754,7 +754,7 @@ public class CellValueManager implements Serializable {
                 }
             }
             if (exception != null) {
-                LOGGER.log(Level.FINE,
+                LOGGER.trace(
                         "Failed to parse cell value for cell at col " + col
                                 + " row " + row + " (" + exception.getMessage()
                                 + ")", exception);
@@ -1014,21 +1014,20 @@ public class CellValueManager implements Serializable {
                     cell.setCellValue(Double.parseDouble(value));
                 }
             } catch (ParseException pe) {
-                LOGGER.log(Level.FINEST, "Could not parse String to format, "
+                LOGGER.trace("Could not parse String to format, "
                         + oldFormat.getClass() + ", "
                         + cell.getCellStyle().getDataFormatString() + " : "
                         + pe.getMessage(), pe);
                 try {
                     cell.setCellValue(Double.parseDouble(value));
                 } catch (NumberFormatException nfe) {
-                    LOGGER.log(
-                            Level.FINEST,
+                    LOGGER.trace(
                             "Could not parse String to Double: "
                                     + nfe.getMessage(), nfe);
                     cell.setCellValue(value);
                 }
             } catch (NumberFormatException nfe) {
-                LOGGER.log(Level.FINEST, "Could not parse String to Double: "
+                LOGGER.trace("Could not parse String to Double: "
                         + nfe.getMessage(), nfe);
                 cell.setCellValue(value);
             }
@@ -1088,7 +1087,7 @@ public class CellValueManager implements Serializable {
                         bottomRightData);
             }
         } catch (NullPointerException npe) {
-            LOGGER.log(Level.FINEST, npe.getMessage(), npe);
+            LOGGER.trace(npe.getMessage(), npe);
         }
     }
 
@@ -1408,13 +1407,13 @@ public class CellValueManager implements Serializable {
                 recordField.setAccessible(false);
             }
         } catch (SecurityException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
         } catch (NoSuchFieldException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
         } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
         } catch (IllegalAccessException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
         }
     }
 

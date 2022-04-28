@@ -13,9 +13,6 @@ package com.vaadin.flow.component.spreadsheet;
  * #L%
  */
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.formula.WorkbookEvaluatorProvider;
 import org.apache.poi.ss.formula.eval.StringEval;
@@ -24,6 +21,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.util.CellReference;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.HyperlinkCellClickHandler;
@@ -40,8 +38,8 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.HyperlinkCellClickHandl
 public class DefaultHyperlinkCellClickHandler implements
         HyperlinkCellClickHandler {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(DefaultHyperlinkCellClickHandler.class.getName());
+    private static final org.slf4j.Logger LOGGER = LoggerFactory
+            .getLogger(DefaultHyperlinkCellClickHandler.class);
 
     private final Spreadsheet spreadsheet;
     private HyperlinkOpenStyle openStyle;
@@ -212,7 +210,7 @@ public class DefaultHyperlinkCellClickHandler implements
                 return ((StringEval) value).getStringValue();
             }
         } catch (Exception e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            LOGGER.trace(e.getMessage(), e);
             return "";
         }
         return "";

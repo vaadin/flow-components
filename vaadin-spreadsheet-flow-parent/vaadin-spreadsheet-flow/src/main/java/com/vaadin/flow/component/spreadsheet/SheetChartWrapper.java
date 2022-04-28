@@ -14,11 +14,11 @@ package com.vaadin.flow.component.spreadsheet;
  */
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -39,8 +39,8 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
 public class SheetChartWrapper extends SheetOverlayWrapper implements
         Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(SheetChartWrapper.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SheetChartWrapper.class);
 
     // System property used to override the default ChartCreator implementation
     private static final String CHART_CREATOR_IMPL = "spreadsheet.chart.creator.implementation";
@@ -73,10 +73,9 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
                     setChartCreator((ChartCreator) clazz.newInstance());
                 }
             } catch (Exception e) {
-                LOGGER.log(
-                        Level.WARNING,
+                LOGGER.warn(
                         "Vaadin Spreadsheet: To display charts you need to add the chart integration package and Vaadin Charts to the project");
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                LOGGER.warn(e.getMessage(), e);
             }
         }
     }

@@ -26,9 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFPicture;
@@ -73,7 +72,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
-import com.vaadin.flow.component.spreadsheet.shared.SpreadsheetState;
 
 /**
  * SpreadsheetFactory is an utility class of the Spreadsheet component. It is
@@ -85,8 +83,8 @@ import com.vaadin.flow.component.spreadsheet.shared.SpreadsheetState;
 @SuppressWarnings("serial")
 public class SpreadsheetFactory implements Serializable {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(SpreadsheetFactory.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SpreadsheetFactory.class);
 
     /**
      * Default column width for new sheets in characters
@@ -303,7 +301,7 @@ public class SpreadsheetFactory implements Serializable {
                 ((SXSSFWorkbook) workbook).dispose();
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
         }
         finally {
             if (fos != null) {
@@ -398,7 +396,7 @@ public class SpreadsheetFactory implements Serializable {
             loadGrouping(spreadsheet);
             loadNamedRanges(spreadsheet);
         } catch (NullPointerException npe) {
-            LOGGER.log(Level.WARNING, npe.getMessage(), npe);
+            LOGGER.warn(npe.getMessage(), npe);
         }
         logMemoryUsage();
     }
@@ -854,7 +852,7 @@ public class SpreadsheetFactory implements Serializable {
                     if (overlayWrapper.getAnchor() != null) {
                         spreadsheet.addSheetOverlay(overlayWrapper);
                     } else {
-                        LOGGER.log(Level.FINE, "IMAGE WITHOUT ANCHOR: "
+                        LOGGER.debug("IMAGE WITHOUT ANCHOR: "
                                 + overlayWrapper);
 
                         // FIXME seems like there is a POI bug, images that have
@@ -889,7 +887,7 @@ public class SpreadsheetFactory implements Serializable {
                     pictureData.getMimeType(), pictureData.getData());
             spreadsheet.addSheetOverlay(image);
         } else {
-            LOGGER.log(Level.FINE,
+            LOGGER.debug(
                     "IMAGE WITHOUT ANCHOR: " + pictureData.toString());
         }
     }
@@ -1108,7 +1106,7 @@ public class SpreadsheetFactory implements Serializable {
             runtime.gc();
             long tot = runtime.totalMemory();
             long free = runtime.freeMemory();
-            LOGGER.log(Level.INFO, "Total: " + tot / 1000000 + " Free: " + free
+            LOGGER.info("Total: " + tot / 1000000 + " Free: " + free
                     / 1000000 + " Usage: " + (tot - free) / 1000000);
         }
     }

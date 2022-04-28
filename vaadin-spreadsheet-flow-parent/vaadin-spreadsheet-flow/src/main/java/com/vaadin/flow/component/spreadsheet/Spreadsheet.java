@@ -31,13 +31,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -68,6 +66,8 @@ import org.apache.xmlbeans.impl.values.XmlValueDisconnectedException;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -119,7 +119,7 @@ import elemental.json.JsonValue;
 public class Spreadsheet extends Component implements HasComponents, HasSize, HasStyle,
         Action.Container, Focusable {
 
-    static Logger logger = Logger.getLogger(Spreadsheet.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Spreadsheet.class);
 
     static {
         VaadinService service = VaadinService.getCurrent();
@@ -129,7 +129,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             properties.load(Spreadsheet.class
                     .getResourceAsStream("spreadsheet.properties"));
         } catch (Exception e) {
-            logger.log(Level.WARNING,
+            LOGGER.warn(
                     "Unable to read Spreadsheet properties file", e);
             throw new ExceptionInInitializerError(e);
         }
@@ -881,9 +881,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
      */
     public static final String HIDE_TABSHEET_STYLE = "hidetabsheet";
 
-    private static final Logger LOGGER = Logger.getLogger(Spreadsheet.class
-            .getName());
-
     /**
      * A common formula evaluator for this Spreadsheet
      */
@@ -1350,7 +1347,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
     }
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
-        logger.info("Spreadsheet.registerRpc()");
+        LOGGER.info("Spreadsheet.registerRpc()");
         this.spreadsheetHandler = spreadsheetHandler;
         addListener(SpreadsheetEvent.class, new SpreadsheetEventListener(spreadsheetHandler));
     }
@@ -2823,7 +2820,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
             activeSheet.autoSizeColumn(columnIndex);
         }catch(NullPointerException e) {
             // NullPointerException is being thrown in POI. Catch to prevent breaking the UI.
-            LOGGER.log(Level.FINEST, "Poi threw NullPointerException when trying to autofit column", e);
+            LOGGER.trace( "Poi threw NullPointerException when trying to autofit column", e);
             return;
         }
 		int columnPixelWidth = getColumnAutofitPixelWidth(columnIndex,
@@ -4256,7 +4253,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize, Ha
                                 }
                             }
                         } catch (XmlValueDisconnectedException exc) {
-                            LOGGER.log(Level.FINEST, exc.getMessage(), exc);
+                            LOGGER.trace( exc.getMessage(), exc);
                         }
                     }
                 }

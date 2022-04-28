@@ -15,8 +15,6 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.BorderFormatting;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -36,6 +34,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColor;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDxf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Color converter implementation for the current Excel file type (.xlsx or XSSF
@@ -47,8 +47,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 @SuppressWarnings("serial")
 public class XSSFColorConverter implements ColorConverter {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(XSSFColorConverter.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(XSSFColorConverter.class);
 
     private String defaultBackgroundColor;
     private String defaultColor;
@@ -129,7 +129,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = ColorConverterUtil.toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
-            LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
+            LOGGER.trace(nfe.getMessage() + " " + nfe.getCause(), nfe);
             sb.append(String
                     .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
@@ -181,7 +181,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = ColorConverterUtil.toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
-            LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
+            LOGGER.trace(nfe.getMessage() + " " + nfe.getCause(), nfe);
             sb.append(String
                     .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
@@ -214,23 +214,19 @@ public class XSSFColorConverter implements ColorConverter {
                 break;
             }
         } catch (IllegalArgumentException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } catch (IllegalAccessException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } catch (NoSuchFieldException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } catch (SecurityException e) {
-            LOGGER.log(
-                    Level.SEVERE,
+            LOGGER.error(
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } finally {
@@ -385,7 +381,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = ColorConverterUtil.toRGBA(argb);
             return temp;
         } catch (NumberFormatException nfe) {
-            LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
+            LOGGER.trace(nfe.getMessage() + " " + nfe.getCause(), nfe);
             return String.format("#%02x%02x%02x;", argb[1], argb[2], argb[3]);
         }
     }
@@ -417,7 +413,7 @@ public class XSSFColorConverter implements ColorConverter {
             declaredMethod.setAccessible(true);
             realRule = (CTCfRule) declaredMethod.invoke(rule);
         } catch (Exception e) {
-            LOGGER.fine(e.getMessage());
+            LOGGER.debug(e.getMessage());
         } finally {
             if (declaredMethod != null) {
                 declaredMethod.setAccessible(false);
