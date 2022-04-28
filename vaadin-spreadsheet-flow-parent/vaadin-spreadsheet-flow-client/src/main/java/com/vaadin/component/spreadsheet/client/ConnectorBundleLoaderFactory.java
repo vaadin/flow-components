@@ -288,11 +288,8 @@ public class ConnectorBundleLoaderFactory extends Generator {
             detectBadProperties(bundle, logger);
 
             String name = bundle.getName();
-            boolean isEager = name
-                    .equals(ConnectorBundleLoader.EAGER_BUNDLE_NAME);
-
             // spreadsheet: remove all unused components
-            if (!isEager) {
+            if (!name.equals(ConnectorBundleLoader.EAGER_BUNDLE_NAME)) {
                 continue;
             }
 
@@ -317,11 +314,6 @@ public class ConnectorBundleLoaderFactory extends Generator {
             w.print(TypeDataStore.class.getName());
             w.println(" store) {");
             w.indent();
-
-            if (!isEager) {
-                w.print(GWT.class.getName());
-                w.print(".runAsync(");
-            }
 
             w.println("new %s() {", RunAsyncCallback.class.getName());
             w.indent();
@@ -383,11 +375,7 @@ public class ConnectorBundleLoaderFactory extends Generator {
             w.outdent();
             w.print("}");
 
-            if (isEager) {
-                w.println(".onSuccess();");
-            } else {
-                w.println(");");
-            }
+            w.println(".onSuccess();");
 
             // Close load method
             w.outdent();
@@ -622,10 +610,15 @@ public class ConnectorBundleLoaderFactory extends Generator {
                 int depthDiff = getDepth(type1) - getDepth(type2);
                 if (depthDiff != 0) {
                     return depthDiff;
-                } else {
+                } else if (type1 != null && type2 != null) {
                     // Just something to get a stable compare
                     return type1.getName().compareTo(type2.getName());
+                } else if (type1 == null) {
+                    return 1;
+                } else if (type2 == null) {
+                    return -1;
                 }
+                return 0;
             }
 
             private int getDepth(JClassType type) {

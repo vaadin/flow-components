@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ClassFixtureFactory extends Instantiator<SpreadsheetFixture>
         implements SpreadsheetFixtureFactory {
 
@@ -14,6 +17,9 @@ public class ClassFixtureFactory extends Instantiator<SpreadsheetFixture>
 }
 
 class Instantiator<T> {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(Instantiator.class);
+
     private Class<? extends T> clazz;
 
     public Instantiator(Class<? extends T> clazz) {
@@ -23,10 +29,8 @@ class Instantiator<T> {
     public T getIt() {
         try {
             return clazz.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.info("ERROR creating an instance of " + clazz.getName(), e);
         }
 
         return null;

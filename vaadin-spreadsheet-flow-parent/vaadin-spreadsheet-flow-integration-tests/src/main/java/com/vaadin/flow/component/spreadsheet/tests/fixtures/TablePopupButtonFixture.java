@@ -35,7 +35,7 @@ public class TablePopupButtonFixture implements SpreadsheetFixture {
         });
     }
 
-    public class ItemThing implements Serializable {
+    public static class ItemThing implements Serializable {
         private String value;
 
         ItemThing(String s) {

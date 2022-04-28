@@ -282,7 +282,7 @@ public class XSSFColorConverter implements ColorConverter {
 
         XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
         CTDxf dxf = getXMLColorDataWithReflection(r);
-        if (dxf.isSetFill() && dxf.getFill().isSetPatternFill()
+        if (dxf != null && dxf.isSetFill() && dxf.getFill().isSetPatternFill()
                 && dxf.getFill().getPatternFill().isSetBgColor()) {
             CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
 
@@ -307,6 +307,9 @@ public class XSSFColorConverter implements ColorConverter {
         XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
 
         CTDxf dxf = getXMLColorDataWithReflection(r);
+        if (dxf == null) {
+            return null;
+        }
         CTFont font = dxf.getFont();
 
         if (font.getColorList() == null || font.getColorList().isEmpty()) {
@@ -413,18 +416,17 @@ public class XSSFColorConverter implements ColorConverter {
             declaredMethod = rule.getClass().getDeclaredMethod("getCTCfRule");
             declaredMethod.setAccessible(true);
             realRule = (CTCfRule) declaredMethod.invoke(rule);
+            CTDxf dxf = workbook.getStylesSource().getCTStylesheet().getDxfs()
+                    .getDxfArray((int) realRule.getDxfId());
+            return dxf;
         } catch (Exception e) {
             LOGGER.debug(e.getMessage());
+            return null;
         } finally {
             if (declaredMethod != null) {
                 declaredMethod.setAccessible(false);
             }
         }
-
-        CTDxf dxf = workbook.getStylesSource().getCTStylesheet().getDxfs()
-                .getDxfArray((int) realRule.getDxfId());
-
-        return dxf;
     }
 
 }

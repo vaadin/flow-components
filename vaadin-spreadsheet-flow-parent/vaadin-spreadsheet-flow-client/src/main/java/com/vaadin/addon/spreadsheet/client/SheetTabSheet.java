@@ -337,7 +337,7 @@ public class SheetTabSheet extends Widget {
             tabScrollIndex++;
         }
         container.getStyle().setMarginLeft(tabScrollMargin, Unit.PX);
-        input.getStyle().setWidth(textWidth + 5, Unit.PX);
+        input.getStyle().setWidth(textWidth + 5d, Unit.PX);
         selectedTab.getStyle().setWidth(textWidth, Unit.PX);
     }
 

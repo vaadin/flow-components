@@ -93,10 +93,10 @@ public abstract class SheetOverlayWrapper implements Serializable {
      */
     float getDx1(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
-            return anchor.getDx1() / Units.EMU_PER_PIXEL;
+            return (float) anchor.getDx1() / Units.EMU_PER_PIXEL;
         } else {
             return sheet.getColumnWidthInPixels(anchor.getCol1())
-                    * anchor.getDx1() / 1023;
+                    * anchor.getDx1() / 1023f;
         }
     }
 
@@ -110,10 +110,10 @@ public abstract class SheetOverlayWrapper implements Serializable {
      */
     private float getDx2(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
-            return anchor.getDx2() / Units.EMU_PER_PIXEL;
+            return (float) anchor.getDx2() / Units.EMU_PER_PIXEL;
         } else {
             return sheet.getColumnWidthInPixels(anchor.getCol2())
-                    * anchor.getDx2() / 1023;
+                    * anchor.getDx2() / 1023f;
         }
     }
 
@@ -127,11 +127,11 @@ public abstract class SheetOverlayWrapper implements Serializable {
      */
     float getDy1(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
-            return anchor.getDy1() / Units.EMU_PER_POINT;
+            return (float) anchor.getDy1() / Units.EMU_PER_POINT;
         } else {
             Row row = sheet.getRow(anchor.getRow1());
             return (row == null ? sheet.getDefaultRowHeightInPoints()
-                    : row.getHeightInPoints()) * anchor.getDy1() / 255;
+                    : row.getHeightInPoints()) * anchor.getDy1() / 255f;
         }
     }
 
@@ -145,11 +145,11 @@ public abstract class SheetOverlayWrapper implements Serializable {
      */
     private float getDy2(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
-            return anchor.getDy2() / Units.EMU_PER_POINT;
+            return (float) anchor.getDy2() / Units.EMU_PER_POINT;
         } else {
             Row row = sheet.getRow(anchor.getRow2());
             return (row == null ? sheet.getDefaultRowHeightInPoints()
-                    : row.getHeightInPoints()) * anchor.getDy2() / 255;
+                    : row.getHeightInPoints()) * anchor.getDy2() / 255f;
         }
     }
 

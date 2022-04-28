@@ -23,8 +23,9 @@ public class RpcProxy {
         consoleLog.info("asking for " + rpcInterface.getName());
 
         if (SpreadsheetServerRpc.class.equals(rpcInterface)) {
-            consoleLog.info("Returning " + SpreadsheetServerRpcImpl.class.getName()
-                    + " from fake RpcProxy");
+            consoleLog.info(
+                    "Returning " + SpreadsheetServerRpcImpl.class.getName()
+                            + " from fake RpcProxy");
             return (T) new SpreadsheetServerRpcImpl();
         }
 

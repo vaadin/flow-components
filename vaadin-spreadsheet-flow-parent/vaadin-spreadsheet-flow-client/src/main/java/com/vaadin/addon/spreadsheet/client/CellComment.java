@@ -250,10 +250,11 @@ public class CellComment extends SpreadsheetOverlay {
                 deg = -180;
             }
         }
-        double c = Math.sqrt(a * a + b * b) + 1;
+        double c = Math.sqrt((double) a * a + (double) b * b) + 1d;
         line.getStyle().setWidth(c, Unit.PX);
         line.getStyle().setTop(cellOffsetTop, Unit.PX);
-        line.getStyle().setLeft(cellOffsetLeft + cellOffsetWidth, Unit.PX);
+        line.getStyle().setLeft((double) (cellOffsetLeft + cellOffsetWidth),
+                Unit.PX);
         line.getStyle().setProperty("transform", "rotate(" + deg + "deg)");
         line.getStyle().setProperty("msTransform", "rotate(" + deg + "deg)");
         line.getStyle().setProperty("webkitTransform",
@@ -305,9 +306,9 @@ public class CellComment extends SpreadsheetOverlay {
     }
 
     private void showOrHideSeparator() {
-        if (invalidFormula.isVisible() && (author.isVisible()
-                || label.isVisible()
-                || Display.BLOCK.equals(input.getStyle().getDisplay()))) {
+        if (invalidFormula.isVisible()
+                && (author.isVisible() || label.isVisible() || Display.BLOCK
+                        .getCssName().equals(input.getStyle().getDisplay()))) {
             if (!invalidFormula.getStyleName()
                     .contains(COMMENT_OVERLAY_SEPARATOR_CLASSNAME)) {
                 invalidFormula

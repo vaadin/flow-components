@@ -697,7 +697,7 @@ public class ConditionalFormatter implements Serializable {
         }
 
         if (eval instanceof BoolEval) {
-            return eval == null ? false : ((BoolEval) eval).getBooleanValue();
+            return ((BoolEval) eval).getBooleanValue();
         } else {
             if (eval instanceof NumericValueEval) {
                 return ((NumberEval) eval).getNumberValue() != 0;

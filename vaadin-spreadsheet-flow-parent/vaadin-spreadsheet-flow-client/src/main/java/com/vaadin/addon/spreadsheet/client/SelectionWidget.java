@@ -291,8 +291,8 @@ public class SelectionWidget extends Composite {
         }
 
         private void setWidth(int width) {
-            top.getStyle().setWidth(width + 1, Unit.PX);
-            bottom.getStyle().setWidth(width + 1, Unit.PX);
+            top.getStyle().setWidth(width + 1d, Unit.PX);
+            bottom.getStyle().setWidth(width + 1d, Unit.PX);
         }
 
         private void setHeight(float height) {
@@ -481,9 +481,9 @@ public class SelectionWidget extends Composite {
         }
 
         private void setWidth(int width) {
-            root.getStyle().setWidth(width + 1, Unit.PX);
-            top.getStyle().setWidth(width + 1, Unit.PX);
-            bottom.getStyle().setWidth(width + 1, Unit.PX);
+            root.getStyle().setWidth(width + 1d, Unit.PX);
+            top.getStyle().setWidth(width + 1d, Unit.PX);
+            bottom.getStyle().setWidth(width + 1d, Unit.PX);
         }
 
         private void setHeight(float height) {

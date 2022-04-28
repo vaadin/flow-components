@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
+import com.vaadin.flow.component.spreadsheet.FormulaFormatter;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
@@ -7,6 +8,8 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 public class ValueHandlerFixture implements SpreadsheetFixture {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ValueHandlerFixture.class);
 
     @Override
     public void loadFixture(final Spreadsheet spreadsheet) {
@@ -75,8 +81,7 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
                     try {
                         cell.setCellValue(format.parse(newValue));
                     } catch (ParseException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                        LOGGER.info("ERROR parsing: " + newValue, e);
                     }
                 }
 

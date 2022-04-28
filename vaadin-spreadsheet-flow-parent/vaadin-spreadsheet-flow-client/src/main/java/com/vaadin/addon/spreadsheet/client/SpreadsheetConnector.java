@@ -55,7 +55,8 @@ import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
         implements PostLayoutListener {
 
-    final static Logger consoleLog = Logger.getLogger("spreadsheet SpreadsheetConnector");
+    final static Logger consoleLog = Logger
+            .getLogger("spreadsheet SpreadsheetConnector");
 
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 

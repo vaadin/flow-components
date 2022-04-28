@@ -3897,9 +3897,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                     && customComponents != null) {
                 String componentId = cellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
-                    // todo: ver que hacemos con esto
-                    // if (c.getConnectorId().equals(componentId)) {
-                    if (c.getId().equals(componentId)) {
+                    if (c.getId().orElse("").equals(componentId)) {
+                        // todo: ver que hacemos con esto
+                        // if (c.getConnectorId().equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
                                 getCell(row, col), row, col, this,
                                 getActiveSheet(), c);
@@ -4749,7 +4749,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                         }
                         _componentIDtoCellKeysMap.put(
                                 // todo: revisar
-                                customComponent.getId().get(),
+                                customComponent.getId().orElse(""),
                                 // customComponent.getConnectorId(),
                                 key);
                         newCustomComponents.add(customComponent);
@@ -4770,7 +4770,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                             }
                             _cellKeysToEditorIdMap.put(key,
                                     // todo: revisar
-                                    customEditor.getId().get()
+                                    customEditor.getId().orElse("")
                             // customEditor.getConnectorId()
                             );
                             newCustomComponents.add(customEditor);

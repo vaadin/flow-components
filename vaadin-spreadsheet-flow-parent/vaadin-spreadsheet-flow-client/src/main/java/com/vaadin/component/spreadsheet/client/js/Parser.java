@@ -101,8 +101,7 @@ public class Parser {
 
     private static <T> Set<T> parseSet(String raw,
             Function<Object, T> jsToJava) {
-        List<T> ret = parseArray(raw, jsToJava);
-        return ret == null ? null : new HashSet<T>(ret);
+        return new HashSet<T>(parseArray(raw, jsToJava));
     }
 
     private static <T> ArrayList<T> parseArrayJstype(String raw,

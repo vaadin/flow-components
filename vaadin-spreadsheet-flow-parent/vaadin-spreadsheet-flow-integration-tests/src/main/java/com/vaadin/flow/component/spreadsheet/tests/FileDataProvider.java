@@ -10,8 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
 
 /**
  * Helper class a replacement for Vaadin 7 FilesystemContainer Doesn't support
@@ -50,7 +51,7 @@ class FileDataProvider {
                 }
             });
         } catch (IOException e) {
-            logger.warning("Could not test Excel sheet " + e.getMessage());
+            logger.warn("Could not test Excel sheet " + e.getMessage());
         }
         pathFiles.sort(
                 (File f1, File f2) -> f1.getName().compareTo(f2.getName()));

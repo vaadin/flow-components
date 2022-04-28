@@ -1,5 +1,8 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import com.gargoylesoftware.htmlunit.javascript.host.event.EventTarget;
+import com.google.gwt.core.client.JavaScriptObject;
+
 /*
  * #%L
  * Vaadin Spreadsheet
@@ -59,7 +62,7 @@ public class PopupButtonHeader extends Widget {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (event.getEventTarget().equals(close)) {
+        if (event.getEventTarget().equals((JavaScriptObject) close)) {
             popup.hide();
             sheetWidget.focusSheet();
         } else {

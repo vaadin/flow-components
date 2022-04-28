@@ -138,7 +138,8 @@ public class PopupButton extends Component implements HasComponents {
      */
     public void openPopup() {
         setPopupVisible(true);
-        getRpcProxy(PopupButtonClientRpc.class).openPopup();
+        // todo: when getRpcProxy is implemented
+        // getRpcProxy(PopupButtonClientRpc.class).openPopup();
     }
 
     private PopupButton getRpcProxy(
@@ -152,7 +153,8 @@ public class PopupButton extends Component implements HasComponents {
      */
     public void closePopup() {
         setPopupVisible(false);
-        getRpcProxy(PopupButtonClientRpc.class).closePopup();
+        // todo: when getRpcProxy is implemented
+        // getRpcProxy(PopupButtonClientRpc.class).closePopup();
     }
 
     /**

@@ -30,8 +30,8 @@ public class CellValueFormatter implements Serializable {
 
     public String getScientificNotationStringForNumericCell(double numericValue,
             String formattedValue, float cellWidthRatio, int width) {
-        BigDecimal ratio = new BigDecimal(cellWidthRatio);
-        BigDecimal columnWidth = new BigDecimal(width);
+        BigDecimal ratio = BigDecimal.valueOf(cellWidthRatio);
+        BigDecimal columnWidth = BigDecimal.valueOf(width);
         int numberOfDigits = columnWidth.divide(ratio, RoundingMode.DOWN)
                 .intValue();
         if (numberOfDigits < 2) {

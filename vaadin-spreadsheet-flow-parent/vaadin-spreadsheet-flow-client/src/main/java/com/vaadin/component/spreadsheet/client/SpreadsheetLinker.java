@@ -105,7 +105,7 @@ public class SpreadsheetLinker extends SingleScriptLinker {
         }
 
         @Override
-        public int hashCode() {
+        public int hashCode() { // NOSONAR
             return strongName.hashCode() ^ javaScript.hashCode();
         }
 

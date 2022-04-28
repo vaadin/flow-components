@@ -42,6 +42,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,14 +67,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @Route("vaadin-spreadsheet")
 @PageTitle("Demo")
 public class DemoUIView extends VerticalLayout implements Receiver {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(DemoUIView.class.getName());
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(DemoUIView.class);
+
     private final Div spreadsheetContainer;
 
     VerticalLayout layout = new VerticalLayout();
@@ -132,7 +134,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
         try {
             uri = resource.toURI();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOGGER.warn("Incorrect resource" + resource, e);
         }
         if (uri != null) {
             String excelFilesRegex = ".*\\.xls|.*\\.xlsx|.*\\.xlsm";
@@ -224,7 +226,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
             try {
                 return new FileInputStream(spreadsheet.write("testsheet.xlsx"));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.warn("ERROR reading file testsheet.xlsx", e);
             }
             return null;
         }));
@@ -340,12 +342,8 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                     download.setHref(new StreamResource(previousFile.getName(),
                             () -> null));
                     previousFile.deleteOnExit();
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    LOGGER.warn("ERROR reading file " + previousFile, e);
                 }
             }
         });
@@ -495,12 +493,8 @@ public class DemoUIView extends VerticalLayout implements Receiver {
             download.setEnabled(false);
             gridlines.setValue(spreadsheet.isGridlinesVisible());
             rowColHeadings.setValue(spreadsheet.isRowColHeadingsVisible());
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.warn("ERROR reading file " + file, e);
         }
     }
 
@@ -684,10 +678,8 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                         cell.setCellValue(value);
                         spreadsheet.refreshCells(cell);
                     }
-                } catch (IllegalStateException ise) {
-                    ise.printStackTrace();
-                } catch (NullPointerException npe) {
-                    npe.printStackTrace();
+                } catch (IllegalStateException e) {
+                    LOGGER.warn("ERROR parsing cell " + cell, e);
                 }
             });
             checkBox.addValueChangeListener(event -> {
@@ -696,14 +688,15 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                 Cell cell = spreadsheet.getCell(selectedCellReference.getRow(),
                         selectedCellReference.getCol());
                 try {
-                    Boolean value = checkBox.getValue();
-                    Boolean oldValue = cell.getBooleanCellValue();
+                    boolean value = checkBox.getValue();
+                    boolean oldValue = cell.getBooleanCellValue();
                     if (value != oldValue) {
                         cell.setCellValue(value);
                         spreadsheet.refreshCells(cell);
                     }
                 } catch (IllegalStateException ise) {
-                    ise.printStackTrace();
+                    LOGGER.warn("ERROR getting boolean value of cell " + cell,
+                            ise);
                 }
             });
         }
@@ -784,12 +777,11 @@ public class DemoUIView extends VerticalLayout implements Receiver {
                         pattern = ((ExcelStyleDateFormatter) format)
                                 .toLocalizedPattern();
                     }
-                    try {
-                        // todo: ver que hacemos con esto ((DatePicker)
-                        // customEditor).setDateFormat(pattern);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    // try {
+                    // todo: ver que hacemos con esto ((DatePicker)
+                    // customEditor).setDateFormat(pattern);
+                    // } catch (Exception e) {
+                    // }
                 }
             }
         }
@@ -927,8 +919,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
             FileOutputStream fos = new FileOutputStream(uploadedFile);
             return fos;
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn("ERROR reading file " + filename, e);
         }
         return null;
     }

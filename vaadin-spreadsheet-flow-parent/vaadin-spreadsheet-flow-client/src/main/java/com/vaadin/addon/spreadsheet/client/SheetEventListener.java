@@ -130,6 +130,7 @@ public class SheetEventListener implements EventListener {
         }
 
         if (target.getParentElement().getAttribute("class").contains("sheet")
+                && targetClassName != null
                 && targetClassName.contains("cell")) {
             SheetJsniUtil jsniUtil = widget.getSheetJsniUtil();
             if (jsniUtil.isHeader(targetClassName) == 0) {

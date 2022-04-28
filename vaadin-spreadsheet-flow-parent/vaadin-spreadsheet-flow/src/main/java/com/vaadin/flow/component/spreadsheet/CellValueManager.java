@@ -431,13 +431,13 @@ public class CellValueManager implements Serializable {
         if (r == null) {
             return true;
         }
-        BigDecimal ratio = new BigDecimal(r);
+        BigDecimal ratio = BigDecimal.valueOf(r);
         BigDecimal stringPixels = ratio
-                .multiply(new BigDecimal(value.length()));
+                .multiply(BigDecimal.valueOf(value.length()));
         // The -4 here is for 2px cell left/right padding
         // FIXME We should probably measure this from the actual value since it
         // might be changed in the style
-        BigDecimal columnWidth = new BigDecimal(getCellWidth(cell) - 4);
+        BigDecimal columnWidth = BigDecimal.valueOf(getCellWidth(cell) - 4d);
         return stringPixels.compareTo(columnWidth) <= 0;
     }
 

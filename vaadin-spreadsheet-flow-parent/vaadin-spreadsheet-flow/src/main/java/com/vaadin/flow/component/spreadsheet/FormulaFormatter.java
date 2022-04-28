@@ -21,6 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Converts between a localized formula and a non-localized formula.
  * <p>
@@ -28,6 +31,9 @@ import java.util.Locale;
  * decimal separator, and ',' as the argument separator.
  */
 public class FormulaFormatter implements Serializable {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FormulaFormatter.class);
 
     /*
      * Classes for the intermediary token format
@@ -158,7 +164,7 @@ public class FormulaFormatter implements Serializable {
                     localizedTokens.add(new NumberToken(getDecimalFormat(locale)
                             .format(Double.parseDouble(token.toString()))));
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    LOGGER.info("ERROR parsing token " + token, e);
                     localizedTokens.add(token);
                 }
 
@@ -197,7 +203,7 @@ public class FormulaFormatter implements Serializable {
                             .add(new NumberToken(getDecimalFormat(locale)
                                     .parse(token.toString()).toString()));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    LOGGER.info("ERROR parsing token: " + token, e);
                     unlocalizedTokens.add(token);
                 }
 

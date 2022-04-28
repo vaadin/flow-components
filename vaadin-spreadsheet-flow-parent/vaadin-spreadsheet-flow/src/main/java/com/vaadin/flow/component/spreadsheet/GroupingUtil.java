@@ -22,6 +22,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that contains modified {@link XSSFSheet} methods regarding grouping.
@@ -31,6 +33,9 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRow;
  * @author Thomas Mattsson / Vaadin Ltd.
  */
 class GroupingUtil implements Serializable {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(GroupingUtil.class);
 
     private GroupingUtil() {
     }
@@ -486,16 +491,13 @@ class GroupingUtil implements Serializable {
 
             // method = XSSFSheet.class.getDeclaredMethod(methodname,
             // paramtypes);
-            method.setAccessible(true);
-            return method.invoke(sheet, params);
+            if (method != null) {
+                method.setAccessible(true);
+                return method.invoke(sheet, params);
+            }
 
-            // TODO logger
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.info("Error accessing method: " + method, e);
         } finally {
             if (method != null) {
                 method.setAccessible(false);
@@ -569,12 +571,12 @@ class GroupingUtil implements Serializable {
             XSSFRow r = (XSSFRow) sheet.getActiveSheet().getRow(rowindex);
             if (r == null || r.getCTRow().getOutlineLevel() < level) {
                 // end
-                return rowindex - 1;
+                return rowindex - 1l;
             }
 
             rowindex++;
         }
-        return -1;
+        return -1l;
     }
 
     /**
@@ -595,13 +597,12 @@ class GroupingUtil implements Serializable {
             boolean hasBreak = previous != null
                     && c.getMin() - previous.getMax() > 1;
             if (hasBreak || c.getOutlineLevel() < level) {
-                // end
-                return previous.getMax();
+                break;
             }
             previous = c;
         }
 
         // group ends on last
-        return previous.getMax();
+        return previous == null ? 0 : previous.getMax();
     }
 }

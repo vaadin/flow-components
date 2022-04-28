@@ -50,7 +50,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <resources/>
     </build>
     <profiles>
         <profile>

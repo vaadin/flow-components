@@ -21,19 +21,22 @@ public class SpreadsheetEventListener
     }
 
     private int toInt(JsonArray o, int pos) {
-        return Double.valueOf(o.getNumber(pos)).intValue();
+        return o == null ? 0 : (int) o.getNumber(pos);
     }
 
     private String toStr(JsonArray o, int pos) {
-        return o.getString(pos);
+        return o == null ? null : o.getString(pos);
     }
 
     private boolean toBool(JsonArray o, int pos) {
-        return o.getBoolean(pos);
+        return o == null ? null : o.getBoolean(pos);
     }
 
     private HashMap<Integer, Float> toMapFloat(JsonArray o, int pos) {
         HashMap<Integer, Float> m = new HashMap<>();
+        if (o == null) {
+            return m;
+        }
         JsonArray jso = o.getArray(pos);
         for (int i = 0; i < jso.length(); i++) {
             m.put(i, (float) jso.getNumber(i));
@@ -43,6 +46,9 @@ public class SpreadsheetEventListener
 
     private HashMap<Integer, Integer> toMapInt(JsonArray o, int pos) {
         HashMap<Integer, Integer> m = new HashMap<>();
+        if (o == null) {
+            return m;
+        }
         JsonArray jso = o.getArray(pos);
         for (int i = 0; i < jso.length(); i++) {
             m.put(i, (int) jso.getNumber(i));

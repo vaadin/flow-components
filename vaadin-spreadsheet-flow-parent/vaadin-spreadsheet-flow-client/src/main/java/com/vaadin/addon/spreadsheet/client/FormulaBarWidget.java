@@ -725,6 +725,9 @@ public class FormulaBarWidget extends Composite {
     private void clearPreviousCaretRefBorder() {
         if (lastCaretReference != null) {
             MergedRegion region = parseSingleCellRef(lastCaretReference);
+            if (region == null) {
+                return;
+            }
             int colStart = Math.min(region.col1, region.col2);
             int colEnd = Math.max(region.col1, region.col2);
             int rowStart = Math.min(region.row1, region.row2);
@@ -744,6 +747,9 @@ public class FormulaBarWidget extends Composite {
     private void updateCaretRefBorder(String ref) {
         if (refColors.containsKey(ref)) {
             MergedRegion region = parseSingleCellRef(ref);
+            if (region == null) {
+                return;
+            }
             int colStart = Math.min(region.col1, region.col2);
             int colEnd = Math.max(region.col1, region.col2);
             int rowStart = Math.min(region.row1, region.row2);
