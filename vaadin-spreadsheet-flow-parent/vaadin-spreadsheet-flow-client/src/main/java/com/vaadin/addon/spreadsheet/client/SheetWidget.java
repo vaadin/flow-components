@@ -106,7 +106,7 @@ public class SheetWidget extends Panel {
     private static final String MERGED_REGION_CELL_STYLE = "{ display: none; }";
     private static final String FREEZE_PANEL_OVERFLOW_STYLE = "{ overflow: hidden; }";
 
-    final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
+    final Logger debugConsole = Logger.getLogger("spreadsheet SheetWidget");
 
     Map<CellValueStyleKey, Integer> scrollWidthCache = new HashMap<CellValueStyleKey, Integer>();
 

@@ -343,8 +343,9 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setResources(this, newVal);
       } else if ('popupbuttons' == name) {
         this.api.setPopups(newVal);
+      } else if ('api' == name) {
       } else {
-        console.error('<vaadin-spreadsheet> unsupported property received from server' + name);
+        console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
       }
       propNames.push(name);
     });

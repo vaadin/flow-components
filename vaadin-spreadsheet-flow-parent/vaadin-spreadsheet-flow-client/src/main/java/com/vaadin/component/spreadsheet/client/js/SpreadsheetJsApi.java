@@ -41,15 +41,6 @@ public class SpreadsheetJsApi {
     Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
     Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
     protected ApplicationConnection applicationConnection;
-    private String originalStyles;
-
-    native void consoleLog(String message) /*-{
-      console.log("spreadsheetapi", message );
-    }-*/;
-
-    native void debugger() /*-{
-      debugger;
-    }-*/;
 
     /**
      * receives the element where the widget mut be embedded into, and publishes

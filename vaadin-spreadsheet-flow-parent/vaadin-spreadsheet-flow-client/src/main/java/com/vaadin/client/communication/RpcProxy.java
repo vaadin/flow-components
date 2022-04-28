@@ -1,5 +1,7 @@
 package com.vaadin.client.communication;
 
+import java.util.logging.Logger;
+
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
@@ -10,9 +12,7 @@ import com.vaadin.shared.communication.ServerRpc;
  */
 public class RpcProxy {
 
-    static native void consoleLog(String message) /*-{
-      console.log( "rpcproxy", message );
-  }-*/;
+    final static Logger consoleLog = Logger.getLogger("spreadsheet RpcProxy");
 
     public RpcProxy() {
     }
@@ -20,10 +20,10 @@ public class RpcProxy {
     public static <T extends ServerRpc> T create(Class<T> rpcInterface,
             ServerConnector connector) {
 
-        consoleLog("asking for " + rpcInterface.getName());
+        consoleLog.info("asking for " + rpcInterface.getName());
 
         if (SpreadsheetServerRpc.class.equals(rpcInterface)) {
-            consoleLog("Returning " + SpreadsheetServerRpcImpl.class.getName()
+            consoleLog.info("Returning " + SpreadsheetServerRpcImpl.class.getName()
                     + " from fake RpcProxy");
             return (T) new SpreadsheetServerRpcImpl();
         }

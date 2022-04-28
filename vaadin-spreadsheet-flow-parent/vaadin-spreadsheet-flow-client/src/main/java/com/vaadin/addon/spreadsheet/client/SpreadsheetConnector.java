@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -54,12 +55,12 @@ import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
         implements PostLayoutListener {
 
+    final static Logger consoleLog = Logger.getLogger("spreadsheet SpreadsheetConnector");
+
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            consoleLog("updateFormulaBar(" + possibleName + "," + col + ","
-                    + row + ")");
             getWidget().updateFormulaBar(possibleName, col, row);
         }
 
@@ -134,7 +135,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void updateBottomRightCellValues(ArrayList<CellData> cellData) {
-            consoleLog("updateBottomRightCellValues(" + cellData + ")");
             getWidget().updateBottomRightCellValues(cellData);
         }
 
@@ -285,13 +285,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
-    native void consoleLog(String message) /*-{
-      console.log( "connector", message );
-  }-*/;
-
     @Override
     protected Widget createWidget() {
-        consoleLog("createWidget()");
+        consoleLog.info("createWidget()");
         return GWT.create(SpreadsheetWidget.class);
     }
 
@@ -318,7 +314,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         // in case the component client side is just created, but server side
         // has been existing (like when component has been invisible
-        consoleLog("reload = " + state.reload);
+        consoleLog.fine("onStateChanged reload = " + state.reload);
         if (state.reload || stateChangeEvent.isInitialStateChange()) {
             state.reload = false;
             loadInitialStateDataToWidget(stateChangeEvent);
@@ -359,10 +355,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
-    native void debugger() /*-{
-      debugger;
-  }-*/;
-
     private void loadInitialStateDataToWidget(
             StateChangeEvent stateChangeEvent) {
         // debugger();
@@ -379,7 +371,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private void loadStateChangeDataToWidget(
             StateChangeEvent stateChangeEvent) {
-        consoleLog("loadStateChangeDataToWidget(" + stateChangeEvent + ")");
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
         if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
