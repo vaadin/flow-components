@@ -12,7 +12,7 @@
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>23.0-SNAPSHOT</flow.version>
+        <flow.version>23.1-SNAPSHOT</flow.version>
         <testbench.version>8.0.0</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -41,7 +41,7 @@
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
-        <module>vaadin-flow-components-shared</module>
+        <module>vaadin-flow-components-shared-parent</module>
         <module>vaadin-accordion-flow-parent</module>
         <module>vaadin-avatar-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
