@@ -56,10 +56,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.1.0-alpha4")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
@@ -618,6 +618,31 @@ public class ConfirmDialog extends Component
         }
         setModality(opened);
         getElement().setProperty("opened", opened);
+    }
+
+    /**
+     * Gets whether this dialog can be closed by hitting the esc-key or not.
+     * <p>
+     * By default, the dialog is closable with esc.
+     *
+     * @return {@code true} if this dialog can be closed with the esc-key,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnEsc() {
+        return !getElement().getProperty("noCloseOnEsc", false);
+    }
+
+    /**
+     * Sets whether this dialog can be closed by hitting the esc-key or not.
+     * <p>
+     * By default, the dialog is closable with esc.
+     *
+     * @param closeOnEsc
+     *            {@code true} to enable closing this dialog with the esc-key,
+     *            {@code false} to disable it
+     */
+    public void setCloseOnEsc(boolean closeOnEsc) {
+        getElement().setProperty("noCloseOnEsc", !closeOnEsc);
     }
 
     private void setModality(boolean modal) {
