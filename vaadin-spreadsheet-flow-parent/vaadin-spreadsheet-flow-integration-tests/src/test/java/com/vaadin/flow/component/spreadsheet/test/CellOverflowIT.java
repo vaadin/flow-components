@@ -32,7 +32,6 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(valueToTest, a1.getValue());
     }
 
-
     @Test
     public void verticalOverflowCells_noOverflow() {
         loadWrapTextTest();

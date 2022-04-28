@@ -40,11 +40,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void selectColumn(String column) {
-        selectElement(getSpreadsheet().getColumnHeader(column.charAt(0) - 'A' + 1), false, false);
+        selectElement(
+                getSpreadsheet().getColumnHeader(column.charAt(0) - 'A' + 1),
+                false, false);
     }
 
     public void selectColumn(String column, boolean ctrl, boolean shift) {
-        selectElement(getSpreadsheet().getColumnHeader(column.charAt(0) - 'A' + 1), ctrl, shift);
+        selectElement(
+                getSpreadsheet().getColumnHeader(column.charAt(0) - 'A' + 1),
+                ctrl, shift);
     }
 
     public void selectRegion(String from, String to) {
@@ -52,24 +56,17 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 .release(getSpreadsheet().getCellAt(to)).perform();
     }
 
-    private void selectElement(WebElement element, boolean ctrl, boolean shift) {
+    private void selectElement(WebElement element, boolean ctrl,
+            boolean shift) {
         if (ctrl) {
-            new Actions(getDriver()).moveToElement(element)
-                    .keyDown(metaKey)
-                    .click()
-                    .keyUp(metaKey)
-                    .build().perform();
+            new Actions(getDriver()).moveToElement(element).keyDown(metaKey)
+                    .click().keyUp(metaKey).build().perform();
         } else if (shift) {
-            new Actions(getDriver()).moveToElement(element)
-                    .keyDown(Keys.SHIFT)
-                    .click()
-                    .keyUp(Keys.SHIFT)
-                    .build().perform();
+            new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
+                    .click().keyUp(Keys.SHIFT).build().perform();
         } else if (ctrl && shift) {
-            new Actions(getDriver()).moveToElement(element)
-                    .keyDown(Keys.SHIFT).keyDown(metaKey)
-                    .click()
-                    .keyUp(Keys.SHIFT).keyUp(metaKey)
+            new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
+                    .keyDown(metaKey).click().keyUp(Keys.SHIFT).keyUp(metaKey)
                     .build().perform();
         } else {
             new Actions(getDriver()).moveToElement(element).click().build()
@@ -82,8 +79,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void clickCell(String address) {
-        SheetCellElement cellElement = getSpreadsheet()
-                .getCellAt(address);
+        SheetCellElement cellElement = getSpreadsheet().getCellAt(address);
         new Actions(getDriver()).moveToElement(cellElement).click().build()
                 .perform();
     }
@@ -100,7 +96,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         getSpreadsheet().getCellAt(address).setValue(value);
     }
 
-    public void deleteCellValue(String cellAddress){
+    public void deleteCellValue(String cellAddress) {
         clickCell(cellAddress);
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
     }
@@ -117,7 +113,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void loadFile(String fileName) {
-        ComboBoxElement testSheetSelect = $(ComboBoxElement.class).id("testSheetSelect");
+        ComboBoxElement testSheetSelect = $(ComboBoxElement.class)
+                .id("testSheetSelect");
         testSheetSelect.selectByText(fileName);
 
         WebElement updateBtn = $("vaadin-button").id("update");
@@ -131,26 +128,31 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         $("vaadin-button").id("submitValues").click();
     }
 
-    public void addFreezePane(int horizontalSplitPosition, int verticalSplitPosition) {
+    public void addFreezePane(int horizontalSplitPosition,
+            int verticalSplitPosition) {
         $("vaadin-button").id("freezePane").click();
-        $(TextFieldElement.class).id("verticalSplitPosition").setValue(String.valueOf(verticalSplitPosition));
-        $(TextFieldElement.class).id("horizontalSplitPosition").setValue(String.valueOf(horizontalSplitPosition));
+        $(TextFieldElement.class).id("verticalSplitPosition")
+                .setValue(String.valueOf(verticalSplitPosition));
+        $(TextFieldElement.class).id("horizontalSplitPosition")
+                .setValue(String.valueOf(horizontalSplitPosition));
         $("vaadin-button").id("submitValues").click();
     }
 
     public void setLocale(Locale locale) {
-        ComboBoxElement localeSelect = $(ComboBoxElement.class).id("localeSelect");
+        ComboBoxElement localeSelect = $(ComboBoxElement.class)
+                .id("localeSelect");
         localeSelect.selectByText(locale.getDisplayName());
     }
 
     public void loadTestFixture(TestFixtures fixture) {
-        $(ComboBoxElement.class).id("fixtureSelect").selectByText(
-                fixture.toString());
+        $(ComboBoxElement.class).id("fixtureSelect")
+                .selectByText(fixture.toString());
         $("vaadin-button").id("loadFixtureBtn").click();
 
         // sanity check
         Assert.assertEquals("Fixture not loaded correctly", fixture.toString(),
-                $(ComboBoxElement.class).id("fixtureSelect").getInputElementValue());
+                $(ComboBoxElement.class).id("fixtureSelect")
+                        .getInputElementValue());
     }
 
     public void assertNoErrorIndicatorDetected() {
@@ -191,18 +193,18 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public boolean isCellSelected(int col, int row) {
-        return getSpreadsheet().getCellAt(row, col)
-                .isCellSelected();
+        return getSpreadsheet().getCellAt(row, col).isCellSelected();
     }
 
     public String getCellColor(String address) {
-        return getSpreadsheet().getCellAt(address).getCssValue(BACKGROUND_COLOR);
+        return getSpreadsheet().getCellAt(address)
+                .getCssValue(BACKGROUND_COLOR);
     }
 
     public void navigateToCell(String cell) {
         getDriver().findElement(By.xpath("//*[@class='addressfield']")).clear();
-        getDriver().findElement(By.xpath("//*[@class='addressfield']")).sendKeys(
-                cell);
+        getDriver().findElement(By.xpath("//*[@class='addressfield']"))
+                .sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
 
@@ -210,16 +212,20 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void clickItem(String caption) {
         try {
-            new Actions(getDriver())
-                    .click(getDriver().findElement(By.xpath("//div[@class='popupContent']//*[text()='"+caption+"']")))
+            new Actions(getDriver()).click(getDriver().findElement(
+                    By.xpath("//div[@class='popupContent']//*[text()='"
+                            + caption + "']")))
                     .perform();
         } catch (NoSuchElementException ex) {
-            throw new RuntimeException("Menu item '"+caption+"' not found", ex);
+            throw new RuntimeException("Menu item '" + caption + "' not found",
+                    ex);
         }
     }
 
-    public boolean hasOption (String caption) {
-        return getDriver().findElements(By.xpath("//div[@class='popupContent']//*[text()='"+caption+"']")).size()!=0;
+    public boolean hasOption(String caption) {
+        return getDriver().findElements(By.xpath(
+                "//div[@class='popupContent']//*[text()='" + caption + "']"))
+                .size() != 0;
     }
 
     public List<WebElement> getGroupings() {

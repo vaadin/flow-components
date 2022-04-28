@@ -25,11 +25,10 @@ public class ConditionalFormattingCellValueIsIT extends AbstractSpreadsheetIT {
         selectSheetAt(1);
     }
 
-
     @Test
     public void loadSpreadsheetWithEqualConditionFormattingInB3_MakeConditionFalse_CellB3FilledWhite() {
         setCellValue("B2", STRING_VALUE);
-        setCellValue("B3", "Not"+STRING_VALUE);
+        setCellValue("B3", "Not" + STRING_VALUE);
 
         setCellValue("D2", NUMBER_VALUE);
         setCellValue("D3", DIFFERENT_NUMBER_VALUE);

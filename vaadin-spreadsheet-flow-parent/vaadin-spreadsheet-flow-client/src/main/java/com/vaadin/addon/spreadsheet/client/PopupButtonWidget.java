@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -32,8 +32,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ui.VOverlay;
 
-public class PopupButtonWidget extends FocusWidget implements ClickHandler,
-        HasCloseHandlers<PopupPanel> {
+public class PopupButtonWidget extends FocusWidget
+        implements ClickHandler, HasCloseHandlers<PopupPanel> {
 
     protected static final String BUTTON_CLASSNAME = "popupbutton";
     protected static final String POPUP_OVERLAY_CLASSNAME = "v-spreadsheet-"
@@ -102,7 +102,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * 1-based
-     * 
+     *
      * @return the col
      */
     public int getCol() {
@@ -111,7 +111,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * 1-based
-     * 
+     *
      * @param col
      *            the col to set
      */
@@ -121,7 +121,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * 1-based
-     * 
+     *
      * @return the row
      */
     public int getRow() {
@@ -130,7 +130,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * 1-based
-     * 
+     *
      * @param row
      *            the row to set
      */
@@ -140,7 +140,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * 1-based
-     * 
+     *
      * @param row
      * @param col
      */
@@ -215,7 +215,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * Override the position callback method for the button's popup.
-     * 
+     *
      * @param positionCallback
      *            not null
      */
@@ -227,7 +227,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     /**
      * Returns the position callback method used for the button's popup.
-     * 
+     *
      * @return
      */
     public PositionCallback getPositionCallback() {
@@ -249,7 +249,8 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     @Override
-    public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
+    public HandlerRegistration addCloseHandler(
+            CloseHandler<PopupPanel> handler) {
         return popup.addCloseHandler(handler);
     }
 

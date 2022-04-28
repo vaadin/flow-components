@@ -26,7 +26,8 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("B2");
-        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); //edit mode
+        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); // edit
+                                                                      // mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_RIGHT).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -39,7 +40,8 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("B2");
-        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); //edit mode
+        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); // edit
+                                                                      // mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_LEFT).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -52,7 +54,8 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("B2");
-        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); //edit mode
+        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); // edit
+                                                                      // mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_UP).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -65,7 +68,8 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("B2");
-        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); //edit mode
+        new Actions(getDriver()).sendKeys(Keys.F2).build().perform(); // edit
+                                                                      // mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_DOWN).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -78,7 +82,7 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("A1");
-        getSpreadsheet().getCellAt("B2").doubleClick(); //edit mode
+        getSpreadsheet().getCellAt("B2").doubleClick(); // edit mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_RIGHT).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -91,7 +95,7 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("A1");
-        getSpreadsheet().getCellAt("B2").doubleClick(); //edit mode
+        getSpreadsheet().getCellAt("B2").doubleClick(); // edit mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_LEFT).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -104,7 +108,7 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("A1");
-        getSpreadsheet().getCellAt("B2").doubleClick(); //edit mode
+        getSpreadsheet().getCellAt("B2").doubleClick(); // edit mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_DOWN).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 
@@ -117,7 +121,7 @@ public class CellArrowKeyNavigationIT extends AbstractSpreadsheetIT {
         b2.setValue("123");
 
         selectCell("A1");
-        getSpreadsheet().getCellAt("B2").doubleClick(); //edit mode
+        getSpreadsheet().getCellAt("B2").doubleClick(); // edit mode
         new Actions(getDriver()).sendKeys(Keys.ARROW_UP).build().perform();
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
 

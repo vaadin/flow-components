@@ -62,8 +62,8 @@ public class SpreadsheetActionHandler implements Action.Handler {
                 LinkedList<Action> actions = new LinkedList<Action>();
                 columnActionOwnership = new HashMap<Integer, Column>();
                 for (Column columnHandler : columnHandlers) {
-                    Action[] currentColumnActions = columnHandler.getActions(
-                            cra, spreadsheet);
+                    Action[] currentColumnActions = columnHandler
+                            .getActions(cra, spreadsheet);
                     for (Action action : currentColumnActions) {
                         columnActionOwnership.put(action.hashCode(),
                                 columnHandler);
@@ -113,15 +113,15 @@ public class SpreadsheetActionHandler implements Action.Handler {
             CellRangeAddress cra = (CellRangeAddress) target;
             if (cra.isFullColumnRange()) {
                 if (columnActionOwnership.containsKey(action.hashCode())) {
-                    columnActionOwnership.get(action.hashCode()).handleAction(
-                            action, cra, spreadsheet);
+                    columnActionOwnership.get(action.hashCode())
+                            .handleAction(action, cra, spreadsheet);
                 }
                 return;
             }
             if (cra.isFullRowRange()) {
                 if (rowActionOwnership.containsKey(action.hashCode())) {
-                    rowActionOwnership.get(action.hashCode()).handleAction(
-                            action, cra, spreadsheet);
+                    rowActionOwnership.get(action.hashCode())
+                            .handleAction(action, cra, spreadsheet);
                 }
                 return;
             }
@@ -134,10 +134,10 @@ public class SpreadsheetActionHandler implements Action.Handler {
     public interface Cell {
 
         public Action[] getActions(Spreadsheet.SelectionChangeEvent target,
-                                   Spreadsheet sender);
+                Spreadsheet sender);
 
-        public void handleAction(Action action, Spreadsheet.SelectionChangeEvent sender,
-                Spreadsheet target);
+        public void handleAction(Action action,
+                Spreadsheet.SelectionChangeEvent sender, Spreadsheet target);
     }
 
     public interface Column {

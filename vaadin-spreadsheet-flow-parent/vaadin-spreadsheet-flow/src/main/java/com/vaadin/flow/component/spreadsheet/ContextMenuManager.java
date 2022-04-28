@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -30,7 +30,7 @@ import com.vaadin.flow.data.provider.KeyMapper;
  * ContextMenuManager is an utility class for the Spreadsheet component. This
  * class handles all context menu -related tasks within the Spreadsheet it is
  * tied to.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -49,7 +49,7 @@ public class ContextMenuManager implements Serializable {
 
     /**
      * Constructs a new ContextMenuManager and ties it to the given Spreadsheet.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -59,7 +59,7 @@ public class ContextMenuManager implements Serializable {
 
     /**
      * Adds the given context menu action handler to the target spreadsheet.
-     * 
+     *
      * @param actionHandler
      *            Handler to add
      */
@@ -78,7 +78,7 @@ public class ContextMenuManager implements Serializable {
     /**
      * Removes the given context menu action handler from the target
      * spreadsheet.
-     * 
+     *
      * @param actionHandler
      *            Handler to remove
      */
@@ -95,7 +95,7 @@ public class ContextMenuManager implements Serializable {
     /**
      * Determines if there are currently any action handlers attached to the
      * target Spreadsheet.
-     * 
+     *
      * @return true if action handlers exist, false otherwise
      */
     public boolean hasActionHandlers() {
@@ -105,7 +105,7 @@ public class ContextMenuManager implements Serializable {
     /**
      * This method is called when a context menu event has happened on any cell
      * of the target Spreadsheet.
-     * 
+     *
      * @param row
      *            Row index at context menu target, 1-based
      * @param column
@@ -137,12 +137,13 @@ public class ContextMenuManager implements Serializable {
     /**
      * This method is called when a context menu event has happened on top of a
      * row header.
-     * 
+     *
      * @param rowIndex
      *            Index of the target row, 1-based
      */
     public void onRowHeaderContextMenuOpen(int rowIndex) {
-        ArrayList<SpreadsheetActionDetails> actions = createActionsListForRow(rowIndex);
+        ArrayList<SpreadsheetActionDetails> actions = createActionsListForRow(
+                rowIndex);
         if (!actions.isEmpty()) {
             spreadsheet.getRpcProxy().showActions(actions);
             contextMenuHeaderIndex = rowIndex;
@@ -152,12 +153,13 @@ public class ContextMenuManager implements Serializable {
     /**
      * This method is called when a context menu event has happened on top of a
      * column header.
-     * 
+     *
      * @param columnIndex
      *            Index of the target column, 1-based
      */
     public void onColumnHeaderContextMenuOpen(int columnIndex) {
-        ArrayList<SpreadsheetActionDetails> actions = createActionsListForColumn(columnIndex);
+        ArrayList<SpreadsheetActionDetails> actions = createActionsListForColumn(
+                columnIndex);
         if (!actions.isEmpty()) {
             spreadsheet.getRpcProxy().showActions(actions);
             contextMenuHeaderIndex = columnIndex;
@@ -167,7 +169,7 @@ public class ContextMenuManager implements Serializable {
     /**
      * This method is called when an action has been selected on top of the
      * currently selected cell(s).
-     * 
+     *
      * @param actionKey
      *            Key of the selected action
      */
@@ -182,7 +184,7 @@ public class ContextMenuManager implements Serializable {
     /**
      * This method is called when an action has been selected on top of a row
      * header.
-     * 
+     *
      * @param actionKey
      *            Key of the selected action
      */
@@ -198,7 +200,7 @@ public class ContextMenuManager implements Serializable {
     /**
      * This method is called when an action has been selected on top of a column
      * header.
-     * 
+     *
      * @param actionKey
      *            Key of the selected action
      */
@@ -213,7 +215,7 @@ public class ContextMenuManager implements Serializable {
 
     /**
      * Gets a list of available actions for the current selection.
-     * 
+     *
      * @return List of actions
      */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForSelection() {
@@ -239,7 +241,7 @@ public class ContextMenuManager implements Serializable {
 
     /**
      * Gets a list of available actions for the column at the given index.
-     * 
+     *
      * @param columnIndex
      *            Index of the target column, 1-based
      * @return List of actions
@@ -265,7 +267,7 @@ public class ContextMenuManager implements Serializable {
 
     /**
      * Gets a list of available actions for the row at the given index.
-     * 
+     *
      * @param rowIndex
      *            Index of the target row, 1-based
      * @return List of actions

@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -23,7 +23,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
 
 /**
  * Spreadsheet action for inserting or deleting a comment to a cell.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -42,7 +42,8 @@ public class EditCellCommentAction extends SpreadsheetAction {
                     && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
-                        .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
+                        .getCellComment(
+                                new CellAddress(cr.getRow(), cr.getCol()));
                 if (cellComment != null) {
                     return true;
                 }

@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.command;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -21,7 +21,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
  * Command for changing the height of row(s) or the width of column(s).
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -45,7 +45,7 @@ public class SizeChangeCommand extends SpreadsheetCommand {
 
     /**
      * Returns the type of size change this represents.
-     * 
+     *
      * @return size change type
      */
     public Type getType() {
@@ -55,7 +55,7 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     /**
      * Captures the current row heights or column widths (depending on the type
      * set to this command) for the row/column indexes given.
-     * 
+     *
      * @param indexes
      *            Row /column indexes, 1-based
      */
@@ -87,7 +87,7 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     /**
      * Sets the height/width of the target row/column (found by the given index)
      * to the given value.
-     * 
+     *
      * @param index
      *            row/column index, 0-based
      * @param value
@@ -118,7 +118,7 @@ public class SizeChangeCommand extends SpreadsheetCommand {
 
     /**
      * Returns the current height/width of the target row/column.
-     * 
+     *
      * @param index
      *            row/column index, 0-based
      * @return current height for row OR width for column
@@ -128,14 +128,14 @@ public class SizeChangeCommand extends SpreadsheetCommand {
             if (getSheet().isColumnHidden(index)) {
                 return 0;
             } else {
-				return getSheet().getColumnWidthInPixels(index);
+                return getSheet().getColumnWidthInPixels(index);
             }
         } else if (type == Type.ROW) {
             Row row = getSheet().getRow(index);
             // null rows use default row height
             // null height marks default height
-            return row == null ? null : row.getZeroHeight() ? 0.0F : row
-                    .getHeightInPoints();
+            return row == null ? null
+                    : row.getZeroHeight() ? 0.0F : row.getHeightInPoints();
         }
         return null;
     }

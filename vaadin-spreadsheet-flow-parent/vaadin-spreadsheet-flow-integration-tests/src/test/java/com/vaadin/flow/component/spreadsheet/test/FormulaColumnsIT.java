@@ -46,7 +46,7 @@ public class FormulaColumnsIT extends AbstractSpreadsheetIT {
         selectCell("B1");
         getSpreadsheet().getCellAt("B1").setValue("=COUNT(A1:A4)");
         getSpreadsheet().getCellAt("B2").setValue("=COUNTA(A1:A6)");
-        
+
         // Date strings must be interpreted as numeric
         Assert.assertEquals("2", getSpreadsheet().getCellAt("B1").getValue());
         Assert.assertEquals("5", getSpreadsheet().getCellAt("B2").getValue());
@@ -114,12 +114,16 @@ public class FormulaColumnsIT extends AbstractSpreadsheetIT {
         getSpreadsheet().getCellAt("B5").setValue("=AVERAGE(A1:A10)");
         getSpreadsheet().getCellAt("B6").setValue("=AVERAGE(A1:A2, A4)");
 
-        Assert.assertEquals("31.08", getSpreadsheet().getCellAt("B1").getValue());
+        Assert.assertEquals("31.08",
+                getSpreadsheet().getCellAt("B1").getValue());
         Assert.assertEquals("7", getSpreadsheet().getCellAt("B2").getValue());
         Assert.assertEquals("3", getSpreadsheet().getCellAt("B3").getValue());
-        Assert.assertEquals("19.98", getSpreadsheet().getCellAt("B4").getValue());
-        Assert.assertEquals("4.44", getSpreadsheet().getCellAt("B5").getValue());
-        Assert.assertEquals("2.59", getSpreadsheet().getCellAt("B6").getValue());
+        Assert.assertEquals("19.98",
+                getSpreadsheet().getCellAt("B4").getValue());
+        Assert.assertEquals("4.44",
+                getSpreadsheet().getCellAt("B5").getValue());
+        Assert.assertEquals("2.59",
+                getSpreadsheet().getCellAt("B6").getValue());
     }
 
 }

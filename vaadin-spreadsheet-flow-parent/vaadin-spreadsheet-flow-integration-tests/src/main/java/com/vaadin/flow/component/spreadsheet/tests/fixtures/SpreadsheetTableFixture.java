@@ -21,7 +21,8 @@ public class SpreadsheetTableFixture implements SpreadsheetFixture {
                 spreadsheet.createCell(row, col, row + col);
             }
         }
-        CellRangeAddress range = new CellRangeAddress(1, maxRows, 1, maxColumns);
+        CellRangeAddress range = new CellRangeAddress(1, maxRows, 1,
+                maxColumns);
         SpreadsheetTable table = new SpreadsheetFilterTable(spreadsheet, range);
         spreadsheet.registerTable(table);
         spreadsheet.refreshAllCellValues();

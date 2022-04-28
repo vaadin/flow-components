@@ -6,12 +6,12 @@ import org.apache.poi.ss.util.CellReference;
 
 import java.util.Set;
 
-
 public class CellMergeFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-        Set<CellReference> seletecCells =spreadsheet.getSelectedCellReferences();
+        Set<CellReference> seletecCells = spreadsheet
+                .getSelectedCellReferences();
         if (seletecCells == null || seletecCells.isEmpty()) {
             return;
         }
@@ -36,8 +36,8 @@ public class CellMergeFixture implements SpreadsheetFixture {
             }
         }
 
-        CellRangeAddress cra = new CellRangeAddress(firstRow, lastRow,
-                firstCol, lastCol);
+        CellRangeAddress cra = new CellRangeAddress(firstRow, lastRow, firstCol,
+                lastCol);
         spreadsheet.addMergedRegion(cra);
     }
 }

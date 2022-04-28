@@ -92,18 +92,18 @@ public class SpreadsheetJsApiTest {
         }
     }
 
-
     @Before
     public void before() {
         connector = Mockito.mock(SpreadsheetConnector.class);
         clientRpc = Mockito.mock(SpreadsheetClientRpc.class);
-        String rpcInterfaceId = SpreadsheetClientRpc.class.getName().replaceAll("\\$", ".");
-        when(connector.getRpcImplementations(rpcInterfaceId)).thenReturn(Lists.newArrayList(clientRpc));
-        when(connector.getProtectedRpcProxy(SpreadsheetServerRpc.class)).thenReturn(serverRpc);
+        String rpcInterfaceId = SpreadsheetClientRpc.class.getName()
+                .replaceAll("\\$", ".");
+        when(connector.getRpcImplementations(rpcInterfaceId))
+                .thenReturn(Lists.newArrayList(clientRpc));
+        when(connector.getProtectedRpcProxy(SpreadsheetServerRpc.class))
+                .thenReturn(serverRpc);
         api = new SpreadsheetJsApiHack(connector);
     }
-
-
 
     @Test
     public void should_updateState_when_setRowBufferSize_isCalled() {
@@ -128,7 +128,6 @@ public class SpreadsheetJsApiTest {
         api.setCols(100);
         assertEquals(100, sharedState.cols);
     }
-
 
     @Test
     public void should_updateState_when_setColGroupingData_isCalled() {
@@ -187,7 +186,7 @@ public class SpreadsheetJsApiTest {
     @Test
     public void should_updateState_when_setColW_isCalled() {
         api.setColW("[0]");
-        assertArrayEquals(new int[] {0}, sharedState.colW);
+        assertArrayEquals(new int[] { 0 }, sharedState.colW);
     }
 
     @Test
@@ -225,7 +224,6 @@ public class SpreadsheetJsApiTest {
         api.setColumnIndexToStyleIndex("{}");
         assertTrue(new HashMap().equals(sharedState.columnIndexToStyleIndex));
     }
-
 
     @Test
     public void should_updateState_when_setLockedColumnIndexes_isCalled() {
@@ -285,7 +283,6 @@ public class SpreadsheetJsApiTest {
         assertEquals(true, sharedState.sheetProtected);
     }
 
-
     @Test
     public void should_updateState_when_setWorkbookProtected_isCalled() {
         api.setWorkbookProtected(true);
@@ -315,6 +312,7 @@ public class SpreadsheetJsApiTest {
         api.setCellComments("{}");
         assertTrue(new HashMap().equals(sharedState.cellComments));
     }
+
     @Test
     public void should_updateState_when_setCellCommentAuthors_isCalled() {
         api.setCellCommentAuthors("{}");
@@ -332,7 +330,6 @@ public class SpreadsheetJsApiTest {
         api.setInvalidFormulaCells("");
         assertTrue(new HashSet().equals(sharedState.invalidFormulaCells));
     }
-
 
     @Test
     public void should_updateState_when_setHasActions_isCalled() {
@@ -412,7 +409,7 @@ public class SpreadsheetJsApiTest {
         assertTrue(new ArrayList().equals(sharedState.namedRanges));
     }
 
-    //CLIENT RPC METHODS
+    // CLIENT RPC METHODS
 
     @Test
     public void should_callClientRpc_when_updateBottomRightCellValues_isCalled() {
@@ -427,7 +424,6 @@ public class SpreadsheetJsApiTest {
         api.updateTopLeftCellValues("");
         verify(clientRpc, times(1)).updateTopLeftCellValues(value);
     }
-
 
     @Test
     public void should_callClientRpc_when_updateTopRightCellValues_isCalled() {
@@ -449,7 +445,6 @@ public class SpreadsheetJsApiTest {
         verify(clientRpc, times(1)).updateFormulaBar("a", 1, 2);
     }
 
-
     @Test
     public void should_callClientRpc_when_invalidCellAddress_isCalled() {
         api.invalidCellAddress();
@@ -459,7 +454,8 @@ public class SpreadsheetJsApiTest {
     @Test
     public void should_callClientRpc_when_showSelectedCell_isCalled() {
         api.showSelectedCell("a", 1, 2, "b", true, true, true);
-        verify(clientRpc, times(1)).showSelectedCell("a", 1, 2, "b", true, true, true);
+        verify(clientRpc, times(1)).showSelectedCell("a", 1, 2, "b", true, true,
+                true);
     }
 
     @Test
@@ -472,7 +468,8 @@ public class SpreadsheetJsApiTest {
     @Test
     public void should_callClientRpc_when_setSelectedCellAndRange_isCalled() {
         api.setSelectedCellAndRange("a", 1, 2, 3, 4, 5, 6, true);
-        verify(clientRpc, times(1)).setSelectedCellAndRange("a", 1, 2, 3, 4, 5, 6, true);
+        verify(clientRpc, times(1)).setSelectedCellAndRange("a", 1, 2, 3, 4, 5,
+                6, true);
     }
 
     @Test
@@ -494,321 +491,317 @@ public class SpreadsheetJsApiTest {
         verify(clientRpc, times(1)).editCellComment(1, 2);
     }
 
-    //SERVER RPC METHOD CALLBACKS
-/*
-    @Test
-    public void should_callServerRpcCallback_when_groupingCollapsed_isCalled() {
-        GroupingCollapsedCallback callback = mock(GroupingCollapsedCallback.class);
-        api.setGroupingCollapsedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).setGroupingCollapsed(true, 1, true);
-        verify(callback, times(1)).apply(true, 1, true);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_levelHeaderClicked_isCalled() {
-        LevelHeaderClickedCallback callback = mock(LevelHeaderClickedCallback.class);
-        api.setLevelHeaderClickedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).levelHeaderClicked(true, 2);
-        verify(callback, times(1)).apply(true, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onSheetScroll_isCalled() {
-        OnSheetScrollCallback callback = mock(OnSheetScrollCallback.class);
-        api.setOnSheetScrollCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onSheetScroll(1, 2, 3, 4);
-        verify(callback, times(1)).apply(1, 2, 3, 4);
-    }
-    @Test
-    public void should_callServerRpcCallback_when_sheetAddressChanged_isCalled() {
-        SheetAddressChangedCallback callback = mock(SheetAddressChangedCallback.class);
-        api.setSheetAddressChangedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).sheetAddressChanged("a");
-        verify(callback, times(1)).apply("a");
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_cellSelected_isCalled() {
-        CellSelectedCallback callback = mock(CellSelectedCallback.class);
-        api.setCellSelectedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).cellSelected(1, 2, true);
-        verify(callback, times(1)).apply(1, 2, true);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_cellRangeSelected_isCalled() {
-        CellRangeSelectedCallback callback = mock(CellRangeSelectedCallback.class);
-        api.setCellRangeSelectedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).cellRangeSelected(1, 2, 3, 4);
-        verify(callback, times(1)).apply(1, 2, 3, 4);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_cellAddedToSelectionAndSelected_isCalled() {
-        CellAddedToSelectionAndSelectedCallback callback = mock(CellAddedToSelectionAndSelectedCallback.class);
-        api.setCellAddedToSelectionAndSelectedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).cellAddedToSelectionAndSelected(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_cellsAddedToRangeSelection_isCalled() {
-        CellsAddedToRangeSelectionCallback callback = mock(CellsAddedToRangeSelectionCallback.class);
-        api.setCellsAddedToRangeSelectionCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).cellsAddedToRangeSelection(1, 2, 3, 4);
-        verify(callback, times(1)).apply(1, 2, 3, 4);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_rowSelected_isCalled() {
-        RowSelectedCallback callback = mock(RowSelectedCallback.class);
-        api.setRowSelectedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).rowSelected(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_rowAddedToRangeSelection_isCalled() {
-        RowAddedToRangeSelectionCallback callback = mock(RowAddedToRangeSelectionCallback.class);
-        api.setRowAddedToRangeSelectionCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).rowAddedToRangeSelection(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_columnSelected_isCalled() {
-        ColumnSelectedCallback callback = mock(ColumnSelectedCallback.class);
-        api.setColumnSelectedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).columnSelected(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_columnAddedToSelection_isCalled() {
-        ColumnAddedToSelectionCallback callback = mock(ColumnAddedToSelectionCallback.class);
-        api.setColumnAddedToSelectionCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).columnAddedToSelection(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_selectionIncreasePainted_isCalled() {
-        SelectionIncreasePaintedCallback callback = mock(SelectionIncreasePaintedCallback.class);
-        api.setSelectionIncreasePaintedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).selectionIncreasePainted(1, 2, 3, 4);
-        verify(callback, times(1)).apply(1, 2, 3, 4);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_selectionDecreasePainted_isCalled() {
-        SelectionDecreasePaintedCallback callback = mock(SelectionDecreasePaintedCallback.class);
-        api.setSelectionDecreasePaintedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).selectionDecreasePainted(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_cellValueEdited_isCalled() {
-        CellValueEditedCallback callback = mock(CellValueEditedCallback.class);
-        api.setCellValueEditedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).cellValueEdited(1, 2, "a");
-        verify(callback, times(1)).apply(1, 2, "a");
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_sheetSelected_isCalled() {
-        SheetSelectedCallback callback = mock(SheetSelectedCallback.class);
-        api.setSheetSelectedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).sheetSelected(1, 2, 3);
-        verify(callback, times(1)).apply(1, 2, 3);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_sheetRenamed_isCalled() {
-        SheetRenamedCallback callback = mock(SheetRenamedCallback.class);
-        api.setSheetRenamedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).sheetRenamed(1, "a");
-        verify(callback, times(1)).apply(1, "a");
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_sheetCreated_isCalled() {
-        SheetCreatedCallback callback = mock(SheetCreatedCallback.class);
-        api.setSheetCreatedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).sheetCreated(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_cellRangePainted_isCalled() {
-        CellRangePaintedCallback callback = mock(CellRangePaintedCallback.class);
-        api.setCellRangePaintedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).cellRangePainted(1, 2, 3, 4, 5, 6);
-        verify(callback, times(1)).apply(1, 2, 3, 4, 5, 6);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_deleteSelectedCells_isCalled() {
-        DeleteSelectedCellsCallback callback = mock(DeleteSelectedCellsCallback.class);
-        api.setDeleteSelectedCellsCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).deleteSelectedCells();
-        verify(callback, times(1)).apply();
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_linkCellClicked_isCalled() {
-        LinkCellClickedCallback callback = mock(LinkCellClickedCallback.class);
-        api.setLinkCellClickedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).linkCellClicked(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_rowsResized_isCalled() {
-        RowsResizedCallback callback = mock(RowsResizedCallback.class);
-        api.setRowsResizedCallback(callback);
-        Map<Integer, Float> map = new HashMap<>();
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).rowsResized(map, 1, 2, 3, 4);
-        verify(callback, times(1)).apply(map, 1, 2, 3, 4);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_columnResized_isCalled() {
-        ColumnResizedCallback callback = mock(ColumnResizedCallback.class);
-        api.setColumnResizedCallback(callback);
-        Map<Integer, Integer> map = new HashMap<>();
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).columnResized(map, 1, 2, 3, 4);
-        verify(callback, times(1)).apply(map, 1, 2, 3, 4);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onRowAutofit_isCalled() {
-        OnRowAutofitCallback callback = mock(OnRowAutofitCallback.class);
-        api.setOnRowAutofitCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onRowAutofit(1);
-        verify(callback, times(1)).apply(1);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onColumnAutofit_isCalled() {
-        OnColumnAutofitCallback callback = mock(OnColumnAutofitCallback.class);
-        api.setOnColumnAutofitCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onColumnAutofit(1);
-        verify(callback, times(1)).apply(1);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onUndo_isCalled() {
-        OnUndoCallback callback = mock(OnUndoCallback.class);
-        api.setOnUndoCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onUndo();
-        verify(callback, times(1)).apply();
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onRedo_isCalled() {
-        OnRedoCallback callback = mock(OnRedoCallback.class);
-        api.setOnRedoCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onRedo();
-        verify(callback, times(1)).apply();
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_setCellStyleWidthRatios_isCalled() {
-        SetCellStyleWidthRatiosCallback callback = mock(SetCellStyleWidthRatiosCallback.class);
-        api.setSetCellStyleWidthRatiosCallback(callback);
-        HashMap<Integer, Float> map = new HashMap<>();
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).setCellStyleWidthRatios(map);
-        verify(callback, times(1)).apply(map);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_protectedCellWriteAttempted_isCalled() {
-        ProtectedCellWriteAttemptedCallback callback = mock(ProtectedCellWriteAttemptedCallback.class);
-        api.setProtectedCellWriteAttemptedCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).protectedCellWriteAttempted();
-        verify(callback, times(1)).apply();
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onPaste_isCalled() {
-        OnPasteCallback callback = mock(OnPasteCallback.class);
-        api.setOnPasteCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onPaste("a");
-        verify(callback, times(1)).apply("a");
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_clearSelectedCellsOnCut_isCalled() {
-        ClearSelectedCellsOnCutCallback callback = mock(ClearSelectedCellsOnCutCallback.class);
-        api.setClearSelectedCellsOnCutCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).clearSelectedCellsOnCut();
-        verify(callback, times(1)).apply();
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_updateCellComment_isCalled() {
-        UpdateCellCommentCallback callback = mock(UpdateCellCommentCallback.class);
-        api.setUpdateCellCommentCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).updateCellComment("a", 1, 2);
-        verify(callback, times(1)).apply("a", 1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_onConnectorInit_isCalled() {
-        OnConnectorInitCallback callback = mock(OnConnectorInitCallback.class);
-        api.setOnConnectorInitCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).onConnectorInit();
-        verify(callback, times(1)).apply();
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_contextMenuOpenOnSelection_isCalled() {
-        ContextMenuOpenOnSelectionCallback callback = mock(ContextMenuOpenOnSelectionCallback.class);
-        api.setContextMenuOpenOnSelectionCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).contextMenuOpenOnSelection(1, 2);
-        verify(callback, times(1)).apply(1, 2);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_actionOnCurrentSelection_isCalled() {
-        ActionOnCurrentSelectionCallback callback = mock(ActionOnCurrentSelectionCallback.class);
-        api.setActionOnCurrentSelectionCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).actionOnCurrentSelection("a");
-        verify(callback, times(1)).apply("a");
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_rowHeaderContextMenuOpen_isCalled() {
-        RowHeaderContextMenuOpenCallback callback = mock(RowHeaderContextMenuOpenCallback.class);
-        api.setRowHeaderContextMenuOpenCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).rowHeaderContextMenuOpen(1);
-        verify(callback, times(1)).apply(1);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_actionOnRowHeader_isCalled() {
-        RowHeaderContextMenuOpenCallback callback = mock(RowHeaderContextMenuOpenCallback.class);
-        api.setRowHeaderContextMenuOpenCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).rowHeaderContextMenuOpen(1);
-        verify(callback, times(1)).apply(1);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_columnHeaderContextMenuOpen_isCalled() {
-        ColumnHeaderContextMenuOpenCallback callback = mock(ColumnHeaderContextMenuOpenCallback.class);
-        api.setColumnHeaderContextMenuOpenCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).columnHeaderContextMenuOpen(1);
-        verify(callback, times(1)).apply(1);
-    }
-
-    @Test
-    public void should_callServerRpcCallback_when_actionOnColumnHeader_isCalled() {
-        ActionOnColumnHeaderCallback callback = mock(ActionOnColumnHeaderCallback.class);
-        api.setActionOnColumnHeaderCallback(callback);
-        api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class).actionOnColumnHeader("a");
-        verify(callback, times(1)).apply("a");
-    }
-*/
+    // SERVER RPC METHOD CALLBACKS
+    /*
+     * @Test public void
+     * should_callServerRpcCallback_when_groupingCollapsed_isCalled() {
+     * GroupingCollapsedCallback callback =
+     * mock(GroupingCollapsedCallback.class);
+     * api.setGroupingCollapsedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .setGroupingCollapsed(true, 1, true); verify(callback,
+     * times(1)).apply(true, 1, true); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_levelHeaderClicked_isCalled() {
+     * LevelHeaderClickedCallback callback =
+     * mock(LevelHeaderClickedCallback.class);
+     * api.setLevelHeaderClickedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .levelHeaderClicked(true, 2); verify(callback, times(1)).apply(true, 2);
+     * }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_onSheetScroll_isCalled() {
+     * OnSheetScrollCallback callback = mock(OnSheetScrollCallback.class);
+     * api.setOnSheetScrollCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onSheetScroll(1, 2, 3, 4); verify(callback, times(1)).apply(1, 2, 3, 4);
+     * }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_sheetAddressChanged_isCalled() {
+     * SheetAddressChangedCallback callback =
+     * mock(SheetAddressChangedCallback.class);
+     * api.setSheetAddressChangedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .sheetAddressChanged("a"); verify(callback, times(1)).apply("a"); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_cellSelected_isCalled() {
+     * CellSelectedCallback callback = mock(CellSelectedCallback.class);
+     * api.setCellSelectedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .cellSelected(1, 2, true); verify(callback, times(1)).apply(1, 2, true);
+     * }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_cellRangeSelected_isCalled() {
+     * CellRangeSelectedCallback callback =
+     * mock(CellRangeSelectedCallback.class);
+     * api.setCellRangeSelectedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .cellRangeSelected(1, 2, 3, 4); verify(callback, times(1)).apply(1, 2, 3,
+     * 4); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_cellAddedToSelectionAndSelected_isCalled
+     * () { CellAddedToSelectionAndSelectedCallback callback =
+     * mock(CellAddedToSelectionAndSelectedCallback.class);
+     * api.setCellAddedToSelectionAndSelectedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .cellAddedToSelectionAndSelected(1, 2); verify(callback,
+     * times(1)).apply(1, 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_cellsAddedToRangeSelection_isCalled() {
+     * CellsAddedToRangeSelectionCallback callback =
+     * mock(CellsAddedToRangeSelectionCallback.class);
+     * api.setCellsAddedToRangeSelectionCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .cellsAddedToRangeSelection(1, 2, 3, 4); verify(callback,
+     * times(1)).apply(1, 2, 3, 4); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_rowSelected_isCalled() {
+     * RowSelectedCallback callback = mock(RowSelectedCallback.class);
+     * api.setRowSelectedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .rowSelected(1, 2); verify(callback, times(1)).apply(1, 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_rowAddedToRangeSelection_isCalled() {
+     * RowAddedToRangeSelectionCallback callback =
+     * mock(RowAddedToRangeSelectionCallback.class);
+     * api.setRowAddedToRangeSelectionCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .rowAddedToRangeSelection(1, 2); verify(callback, times(1)).apply(1, 2);
+     * }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_columnSelected_isCalled() {
+     * ColumnSelectedCallback callback = mock(ColumnSelectedCallback.class);
+     * api.setColumnSelectedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .columnSelected(1, 2); verify(callback, times(1)).apply(1, 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_columnAddedToSelection_isCalled() {
+     * ColumnAddedToSelectionCallback callback =
+     * mock(ColumnAddedToSelectionCallback.class);
+     * api.setColumnAddedToSelectionCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .columnAddedToSelection(1, 2); verify(callback, times(1)).apply(1, 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_selectionIncreasePainted_isCalled() {
+     * SelectionIncreasePaintedCallback callback =
+     * mock(SelectionIncreasePaintedCallback.class);
+     * api.setSelectionIncreasePaintedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .selectionIncreasePainted(1, 2, 3, 4); verify(callback,
+     * times(1)).apply(1, 2, 3, 4); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_selectionDecreasePainted_isCalled() {
+     * SelectionDecreasePaintedCallback callback =
+     * mock(SelectionDecreasePaintedCallback.class);
+     * api.setSelectionDecreasePaintedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .selectionDecreasePainted(1, 2); verify(callback, times(1)).apply(1, 2);
+     * }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_cellValueEdited_isCalled() {
+     * CellValueEditedCallback callback = mock(CellValueEditedCallback.class);
+     * api.setCellValueEditedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .cellValueEdited(1, 2, "a"); verify(callback, times(1)).apply(1, 2, "a");
+     * }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_sheetSelected_isCalled() {
+     * SheetSelectedCallback callback = mock(SheetSelectedCallback.class);
+     * api.setSheetSelectedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .sheetSelected(1, 2, 3); verify(callback, times(1)).apply(1, 2, 3); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_sheetRenamed_isCalled() {
+     * SheetRenamedCallback callback = mock(SheetRenamedCallback.class);
+     * api.setSheetRenamedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .sheetRenamed(1, "a"); verify(callback, times(1)).apply(1, "a"); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_sheetCreated_isCalled() {
+     * SheetCreatedCallback callback = mock(SheetCreatedCallback.class);
+     * api.setSheetCreatedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .sheetCreated(1, 2); verify(callback, times(1)).apply(1, 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_cellRangePainted_isCalled() {
+     * CellRangePaintedCallback callback = mock(CellRangePaintedCallback.class);
+     * api.setCellRangePaintedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .cellRangePainted(1, 2, 3, 4, 5, 6); verify(callback, times(1)).apply(1,
+     * 2, 3, 4, 5, 6); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_deleteSelectedCells_isCalled() {
+     * DeleteSelectedCellsCallback callback =
+     * mock(DeleteSelectedCellsCallback.class);
+     * api.setDeleteSelectedCellsCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .deleteSelectedCells(); verify(callback, times(1)).apply(); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_linkCellClicked_isCalled() {
+     * LinkCellClickedCallback callback = mock(LinkCellClickedCallback.class);
+     * api.setLinkCellClickedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .linkCellClicked(1, 2); verify(callback, times(1)).apply(1, 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_rowsResized_isCalled() {
+     * RowsResizedCallback callback = mock(RowsResizedCallback.class);
+     * api.setRowsResizedCallback(callback); Map<Integer, Float> map = new
+     * HashMap<>();
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .rowsResized(map, 1, 2, 3, 4); verify(callback, times(1)).apply(map, 1,
+     * 2, 3, 4); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_columnResized_isCalled() {
+     * ColumnResizedCallback callback = mock(ColumnResizedCallback.class);
+     * api.setColumnResizedCallback(callback); Map<Integer, Integer> map = new
+     * HashMap<>();
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .columnResized(map, 1, 2, 3, 4); verify(callback, times(1)).apply(map, 1,
+     * 2, 3, 4); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_onRowAutofit_isCalled() {
+     * OnRowAutofitCallback callback = mock(OnRowAutofitCallback.class);
+     * api.setOnRowAutofitCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onRowAutofit(1); verify(callback, times(1)).apply(1); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_onColumnAutofit_isCalled() {
+     * OnColumnAutofitCallback callback = mock(OnColumnAutofitCallback.class);
+     * api.setOnColumnAutofitCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onColumnAutofit(1); verify(callback, times(1)).apply(1); }
+     *
+     * @Test public void should_callServerRpcCallback_when_onUndo_isCalled() {
+     * OnUndoCallback callback = mock(OnUndoCallback.class);
+     * api.setOnUndoCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onUndo(); verify(callback, times(1)).apply(); }
+     *
+     * @Test public void should_callServerRpcCallback_when_onRedo_isCalled() {
+     * OnRedoCallback callback = mock(OnRedoCallback.class);
+     * api.setOnRedoCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onRedo(); verify(callback, times(1)).apply(); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_setCellStyleWidthRatios_isCalled() {
+     * SetCellStyleWidthRatiosCallback callback =
+     * mock(SetCellStyleWidthRatiosCallback.class);
+     * api.setSetCellStyleWidthRatiosCallback(callback); HashMap<Integer, Float>
+     * map = new HashMap<>();
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .setCellStyleWidthRatios(map); verify(callback, times(1)).apply(map); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_protectedCellWriteAttempted_isCalled()
+     * { ProtectedCellWriteAttemptedCallback callback =
+     * mock(ProtectedCellWriteAttemptedCallback.class);
+     * api.setProtectedCellWriteAttemptedCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .protectedCellWriteAttempted(); verify(callback, times(1)).apply(); }
+     *
+     * @Test public void should_callServerRpcCallback_when_onPaste_isCalled() {
+     * OnPasteCallback callback = mock(OnPasteCallback.class);
+     * api.setOnPasteCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onPaste("a"); verify(callback, times(1)).apply("a"); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_clearSelectedCellsOnCut_isCalled() {
+     * ClearSelectedCellsOnCutCallback callback =
+     * mock(ClearSelectedCellsOnCutCallback.class);
+     * api.setClearSelectedCellsOnCutCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .clearSelectedCellsOnCut(); verify(callback, times(1)).apply(); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_updateCellComment_isCalled() {
+     * UpdateCellCommentCallback callback =
+     * mock(UpdateCellCommentCallback.class);
+     * api.setUpdateCellCommentCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .updateCellComment("a", 1, 2); verify(callback, times(1)).apply("a", 1,
+     * 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_onConnectorInit_isCalled() {
+     * OnConnectorInitCallback callback = mock(OnConnectorInitCallback.class);
+     * api.setOnConnectorInitCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .onConnectorInit(); verify(callback, times(1)).apply(); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_contextMenuOpenOnSelection_isCalled() {
+     * ContextMenuOpenOnSelectionCallback callback =
+     * mock(ContextMenuOpenOnSelectionCallback.class);
+     * api.setContextMenuOpenOnSelectionCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .contextMenuOpenOnSelection(1, 2); verify(callback, times(1)).apply(1,
+     * 2); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_actionOnCurrentSelection_isCalled() {
+     * ActionOnCurrentSelectionCallback callback =
+     * mock(ActionOnCurrentSelectionCallback.class);
+     * api.setActionOnCurrentSelectionCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .actionOnCurrentSelection("a"); verify(callback, times(1)).apply("a"); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_rowHeaderContextMenuOpen_isCalled() {
+     * RowHeaderContextMenuOpenCallback callback =
+     * mock(RowHeaderContextMenuOpenCallback.class);
+     * api.setRowHeaderContextMenuOpenCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .rowHeaderContextMenuOpen(1); verify(callback, times(1)).apply(1); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_actionOnRowHeader_isCalled() {
+     * RowHeaderContextMenuOpenCallback callback =
+     * mock(RowHeaderContextMenuOpenCallback.class);
+     * api.setRowHeaderContextMenuOpenCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .rowHeaderContextMenuOpen(1); verify(callback, times(1)).apply(1); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_columnHeaderContextMenuOpen_isCalled()
+     * { ColumnHeaderContextMenuOpenCallback callback =
+     * mock(ColumnHeaderContextMenuOpenCallback.class);
+     * api.setColumnHeaderContextMenuOpenCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .columnHeaderContextMenuOpen(1); verify(callback, times(1)).apply(1); }
+     *
+     * @Test public void
+     * should_callServerRpcCallback_when_actionOnColumnHeader_isCalled() {
+     * ActionOnColumnHeaderCallback callback =
+     * mock(ActionOnColumnHeaderCallback.class);
+     * api.setActionOnColumnHeaderCallback(callback);
+     * api.spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class)
+     * .actionOnColumnHeader("a"); verify(callback, times(1)).apply("a"); }
+     */
 
 }

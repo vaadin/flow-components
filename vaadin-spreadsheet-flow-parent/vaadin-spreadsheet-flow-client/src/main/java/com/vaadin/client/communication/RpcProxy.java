@@ -17,17 +17,19 @@ public class RpcProxy {
     public RpcProxy() {
     }
 
-    public static <T extends ServerRpc> T create(Class<T> rpcInterface, ServerConnector connector) {
+    public static <T extends ServerRpc> T create(Class<T> rpcInterface,
+            ServerConnector connector) {
 
         consoleLog("asking for " + rpcInterface.getName());
 
-
         if (SpreadsheetServerRpc.class.equals(rpcInterface)) {
-            consoleLog("Returning " + SpreadsheetServerRpcImpl.class.getName() + " from fake RpcProxy");
+            consoleLog("Returning " + SpreadsheetServerRpcImpl.class.getName()
+                    + " from fake RpcProxy");
             return (T) new SpreadsheetServerRpcImpl();
         }
 
-        throw new IllegalStateException("" + rpcInterface + " is not supported");
+        throw new IllegalStateException(
+                "" + rpcInterface + " is not supported");
     }
 
 }

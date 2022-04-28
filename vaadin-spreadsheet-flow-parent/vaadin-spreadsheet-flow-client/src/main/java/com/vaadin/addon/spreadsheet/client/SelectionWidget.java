@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -40,7 +40,6 @@ public class SelectionWidget extends Composite {
     private static final int ZINDEXVALUE = 2;
 
     private class SelectionOutlineWidget extends Widget {
-
 
         private static final int eventBits = Event.ONMOUSEDOWN
                 | Event.ONMOUSEMOVE | Event.ONMOUSEUP | Event.TOUCHEVENTS
@@ -104,11 +103,11 @@ public class SelectionWidget extends Composite {
 
         void setSquaresVisible(boolean top, boolean right, boolean bottom,
                 boolean left) {
-            topSquareTouchArea.getStyle().setVisibility(
-                    top && !topEdgeHidden ? Visibility.VISIBLE
+            topSquareTouchArea.getStyle()
+                    .setVisibility(top && !topEdgeHidden ? Visibility.VISIBLE
                             : Visibility.HIDDEN);
-            leftSquareTouchArea.getStyle().setVisibility(
-                    left && !leftEdgeHidden ? Visibility.VISIBLE
+            leftSquareTouchArea.getStyle()
+                    .setVisibility(left && !leftEdgeHidden ? Visibility.VISIBLE
                             : Visibility.HIDDEN);
             rightSquareTouchArea.getStyle().setVisibility(
                     right && !rightEdgeHidden ? Visibility.VISIBLE
@@ -342,8 +341,8 @@ public class SelectionWidget extends Composite {
         }
 
         protected void setCornerHidden(boolean hidden) {
-            cornerTouchArea.getStyle().setDisplay(
-                    hidden ? Display.NONE : Display.BLOCK);
+            cornerTouchArea.getStyle()
+                    .setDisplay(hidden ? Display.NONE : Display.BLOCK);
             corner.getStyle().setDisplay(hidden ? Display.NONE : Display.BLOCK);
         }
 
@@ -609,7 +608,8 @@ public class SelectionWidget extends Composite {
     private boolean crossedLeft;
     private boolean crossedDown;
 
-    public SelectionWidget(SheetHandler actionHandler, SheetWidget sheetWidget) {
+    public SelectionWidget(SheetHandler actionHandler,
+            SheetWidget sheetWidget) {
         handler = actionHandler;
         this.sheetWidget = sheetWidget;
         touchMode = sheetWidget.isTouchMode();
@@ -688,8 +688,8 @@ public class SelectionWidget extends Composite {
             paintTopLeft.setVisible(false);
             paintTopLeft.setZIndex(ZINDEXVALUE);
             paintTopLeft.addStyleName("top-left");
-        } else if (topLeft != null
-                && (verticalSplitPosition == 0 || horizontalSplitPosition == 0)) {
+        } else if (topLeft != null && (verticalSplitPosition == 0
+                || horizontalSplitPosition == 0)) {
             topLeft.remove();
             topLeft = null;
             paintTopLeft.remove();
@@ -698,35 +698,39 @@ public class SelectionWidget extends Composite {
     }
 
     private void updateLimits() {
-        bottomRight.setLimits(verticalSplitPosition == 0 ? 0
-                : verticalSplitPosition + 1, 0,
+        bottomRight.setLimits(
+                verticalSplitPosition == 0 ? 0 : verticalSplitPosition + 1, 0,
                 horizontalSplitPosition == 0 ? 0 : horizontalSplitPosition + 1,
                 0);
         if (bottomLeft != null) {
-            bottomLeft.setLimits(verticalSplitPosition == 0 ? 0
-                    : verticalSplitPosition + 1, 0, 0, horizontalSplitPosition);
+            bottomLeft.setLimits(
+                    verticalSplitPosition == 0 ? 0 : verticalSplitPosition + 1,
+                    0, 0, horizontalSplitPosition);
         }
         if (topRight != null) {
             topRight.setLimits(0, verticalSplitPosition,
                     horizontalSplitPosition == 0 ? 0
-                            : horizontalSplitPosition + 1, 0);
+                            : horizontalSplitPosition + 1,
+                    0);
         }
         if (topLeft != null) {
             topLeft.setLimits(0, verticalSplitPosition, 0,
                     horizontalSplitPosition);
         }
-        paintBottomRight.setLimits(verticalSplitPosition == 0 ? 0
-                : verticalSplitPosition + 1, 0,
+        paintBottomRight.setLimits(
+                verticalSplitPosition == 0 ? 0 : verticalSplitPosition + 1, 0,
                 horizontalSplitPosition == 0 ? 0 : horizontalSplitPosition + 1,
                 0);
         if (paintBottomLeft != null) {
-            paintBottomLeft.setLimits(verticalSplitPosition == 0 ? 0
-                    : verticalSplitPosition + 1, 0, 0, horizontalSplitPosition);
+            paintBottomLeft.setLimits(
+                    verticalSplitPosition == 0 ? 0 : verticalSplitPosition + 1,
+                    0, 0, horizontalSplitPosition);
         }
         if (paintTopRight != null) {
             paintTopRight.setLimits(0, verticalSplitPosition,
                     horizontalSplitPosition == 0 ? 0
-                            : horizontalSplitPosition + 1, 0);
+                            : horizontalSplitPosition + 1,
+                    0);
         }
         if (paintTopLeft != null) {
             paintTopLeft.setLimits(0, verticalSplitPosition, 0,
@@ -737,16 +741,19 @@ public class SelectionWidget extends Composite {
     private void setSelectionWidgetSquaresVisible(boolean visible) {
         if (touchMode) {
             boolean top, right, bottom, left;
-            bottom = bottomLeft != null && bottomLeft.width > bottomRight.width ? false
+            bottom = bottomLeft != null && bottomLeft.width > bottomRight.width
+                    ? false
                     : visible;
-            right = topRight != null && topRight.height > bottomRight.height ? false
+            right = topRight != null && topRight.height > bottomRight.height
+                    ? false
                     : visible;
             bottomRight.setSquaresVisible(bottom, right, bottom, right);
             if (bottomLeft != null) {
                 bottom = bottomRight != null
                         && bottomRight.width >= bottomLeft.width ? false
-                        : visible;
-                left = topLeft != null && topLeft.height > bottomLeft.height ? false
+                                : visible;
+                left = topLeft != null && topLeft.height > bottomLeft.height
+                        ? false
                         : visible;
                 bottomLeft.setSquaresVisible(bottom, left, bottom, left);
             }
@@ -755,14 +762,15 @@ public class SelectionWidget extends Composite {
                         : visible;
                 right = bottomRight != null
                         && bottomRight.height >= topRight.height ? false
-                        : visible;
+                                : visible;
                 topRight.setSquaresVisible(top, right, top, right);
             }
             if (topLeft != null) {
-                top = topRight != null && topRight.width >= topLeft.width ? false
+                top = topRight != null && topRight.width >= topLeft.width
+                        ? false
                         : visible;
-                left = bottomLeft != null
-                        && bottomLeft.height >= topLeft.height ? false
+                left = bottomLeft != null && bottomLeft.height >= topLeft.height
+                        ? false
                         : visible;
                 topLeft.setSquaresVisible(top, left, top, left);
             }
@@ -1013,18 +1021,17 @@ public class SelectionWidget extends Composite {
     }
 
     private boolean isPaintVisible() {
-        return paintBottomRight.isVisible() || paintBottomLeft != null
-                && paintBottomLeft.isVisible() || paintTopRight != null
-                && paintTopRight.isVisible() || paintTopLeft != null
-                && paintTopLeft.isVisible();
+        return paintBottomRight.isVisible()
+                || paintBottomLeft != null && paintBottomLeft.isVisible()
+                || paintTopRight != null && paintTopRight.isVisible()
+                || paintTopLeft != null && paintTopLeft.isVisible();
     }
 
     @Override
     public boolean isVisible() {
-        return super.isVisible() || bottomLeft != null
-                && bottomLeft.isVisible() || topRight != null
-                && topRight.isVisible() || topLeft != null
-                && topLeft.isVisible();
+        return super.isVisible() || bottomLeft != null && bottomLeft.isVisible()
+                || topRight != null && topRight.isVisible()
+                || topLeft != null && topLeft.isVisible();
     }
 
     /**
@@ -1097,8 +1104,8 @@ public class SelectionWidget extends Composite {
 
     private void beginPaintingCells(Event event) {
         startCellTopLeft = sheetWidget.isCellRenderedInTopLeftPane(col2, row2);
-        startCellTopRight = sheetWidget
-                .isCellRenderedInTopRightPane(col2, row2);
+        startCellTopRight = sheetWidget.isCellRenderedInTopRightPane(col2,
+                row2);
         startCellBottomLeft = sheetWidget.isCellRenderedInBottomLeftPane(col2,
                 row2);
         crossedDown = !startCellTopLeft && !startCellTopRight;
@@ -1167,8 +1174,8 @@ public class SelectionWidget extends Composite {
 
     private void beginSelectingCells(Event event) {
         startCellTopLeft = sheetWidget.isCellRenderedInTopLeftPane(col2, row2);
-        startCellTopRight = sheetWidget
-                .isCellRenderedInTopRightPane(col2, row2);
+        startCellTopRight = sheetWidget.isCellRenderedInTopRightPane(col2,
+                row2);
         startCellBottomLeft = sheetWidget.isCellRenderedInBottomLeftPane(col2,
                 row2);
         crossedDown = !startCellTopLeft && !startCellTopRight;
@@ -1210,8 +1217,8 @@ public class SelectionWidget extends Composite {
                 xMousePos, true);
         tempRow = closestCellEdgeIndexToCursor(rowHeightsPX, selectionStartRow,
                 yMousePos, true);
-        sheetWidget.getSheetHandler()
-                .onSelectingCellsWithDrag(tempCol, tempRow);
+        sheetWidget.getSheetHandler().onSelectingCellsWithDrag(tempCol,
+                tempRow);
     }
 
     private void stopSelectingCells(Event event) {
@@ -1370,10 +1377,10 @@ public class SelectionWidget extends Composite {
         @Override
         public void run() {
             // Handle scrolling
-            sheetWidget.sheet.setScrollTop(sheetWidget.sheet.getScrollTop()
-                    + deltaY / 2);
-            sheetWidget.sheet.setScrollLeft(sheetWidget.sheet.getScrollLeft()
-                    + deltaX / 2);
+            sheetWidget.sheet.setScrollTop(
+                    sheetWidget.sheet.getScrollTop() + deltaY / 2);
+            sheetWidget.sheet.setScrollLeft(
+                    sheetWidget.sheet.getScrollLeft() + deltaX / 2);
             sheetWidget.onSheetScroll(null);
 
             // Determine selection point
@@ -1426,16 +1433,16 @@ public class SelectionWidget extends Composite {
             if (paintMode) {
                 handleCellShiftOnScroll(selectionPointX, selectionPointY);
             } else {
-                Element target = WidgetUtil.getElementFromPoint(
-                        selectionPointX, selectionPointY);
+                Element target = WidgetUtil.getElementFromPoint(selectionPointX,
+                        selectionPointY);
                 if (target != null) {
                     final String className = target.getAttribute("class");
                     sheetWidget.jsniUtil.parseColRow(className);
                     int col = sheetWidget.jsniUtil.getParsedCol();
                     int row = sheetWidget.jsniUtil.getParsedRow();
                     if (col != 0 && row != 0) {
-                        sheetWidget.getSheetHandler().onSelectingCellsWithDrag(
-                                col, row);
+                        sheetWidget.getSheetHandler()
+                                .onSelectingCellsWithDrag(col, row);
                     }
                 }
             }

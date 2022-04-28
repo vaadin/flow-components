@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -21,10 +21,9 @@ public class MergedCell extends Cell {
 
     @Override
     protected void updateClassName() {
-        getElement().setClassName(
-                SheetWidget.toKey(getCol(), getRow()) + " cell "
-                        + getCellStyle() + " "
-                        + SheetWidget.MERGED_CELL_CLASSNAME);
+        getElement().setClassName(SheetWidget.toKey(getCol(), getRow())
+                + " cell " + getCellStyle() + " "
+                + SheetWidget.MERGED_CELL_CLASSNAME);
     }
 
     @Override

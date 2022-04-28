@@ -19,7 +19,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
         String url = getBaseURL().replace(super.getBaseURL(),
                 super.getBaseURL() + "/vaadin-spreadsheet");
         getDriver().get(url);
-        
+
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.DeletionHandler);
     }
@@ -49,8 +49,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteIndividualCellSucceedsWhenHandlerReturnsTrue() {
         clickCell("B3");
-        getSpreadsheet().getCellAt("B5").click(5, 5,
-                Keys.CONTROL);
+        getSpreadsheet().getCellAt("B5").click(5, 5, Keys.CONTROL);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -63,8 +62,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteIndividualCellFailsWhenHandlerReturnsFalse() {
         clickCell("C3");
-        getSpreadsheet().getCellAt("C5").click(5, 5,
-                Keys.CONTROL);
+        getSpreadsheet().getCellAt("C5").click(5, 5, Keys.CONTROL);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -77,8 +75,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteCellRangeSucceedsWhenHandlerReturnsTrue() {
         clickCell("B6");
-        getSpreadsheet().getCellAt("B8").click(5, 5,
-                Keys.SHIFT);
+        getSpreadsheet().getCellAt("B8").click(5, 5, Keys.SHIFT);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -92,8 +89,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteCellRangeFailsWhenHandlerReturnsFalse() {
         clickCell("C6");
-        getSpreadsheet().getCellAt("C8").click(5, 5,
-                Keys.SHIFT);
+        getSpreadsheet().getCellAt("C8").click(5, 5, Keys.SHIFT);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -108,8 +104,8 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
         List<String> notifications = getNotifications().stream()
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertTrue(String.format(
-                        "Expected any of the notifications to contain the string '%s' but neither of them did. Notifications: '%s'",
-                        expected, notifications),
+                "Expected any of the notifications to contain the string '%s' but neither of them did. Notifications: '%s'",
+                expected, notifications),
                 notifications.stream().anyMatch(
                         notification -> notification.contains(expected)));
     }

@@ -10,7 +10,7 @@ import java.io.Serializable;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -20,7 +20,7 @@ public class MergedRegionUtil {
     public interface MergedRegionContainer extends Serializable {
         /**
          * Gets the merged region starting at the given coordinates.
-         * 
+         *
          * @param column
          *            Column index, 1-based
          * @param row
@@ -31,7 +31,7 @@ public class MergedRegionUtil {
 
         /**
          * Gets the merged region overlapping the given coordinates.
-         * 
+         *
          * @param column
          *            Column index, 1-based
          * @param row
@@ -47,9 +47,9 @@ public class MergedRegionUtil {
      * of the selection are not in "the beginning / middle / end" of a merged
      * cell. Returns the correct increased selection, after taking the merged
      * cells into account.
-     * 
+     *
      * Parameters 1-based.
-     * 
+     *
      * @param container
      * @param topRow
      * @param bottomRow
@@ -73,8 +73,8 @@ public class MergedRegionUtil {
             }
             return mergedRegion;
         } else {
-            MergedRegion merged = container.getMergedRegionStartingFrom(
-                    leftColumn, topRow);
+            MergedRegion merged = container
+                    .getMergedRegionStartingFrom(leftColumn, topRow);
             if (merged != null && merged.col2 >= rightColumn
                     && merged.row2 >= bottomRow) {
                 return merged;
@@ -199,8 +199,8 @@ public class MergedRegionUtil {
             }
             return mergedRegion;
         } else {
-            MergedRegion merged = container.getMergedRegionStartingFrom(
-                    leftColumn, topRow);
+            MergedRegion merged = container
+                    .getMergedRegionStartingFrom(leftColumn, topRow);
             if (merged != null && merged.col2 >= rightColumn
                     && merged.row2 >= bottomRow) {
                 return merged;

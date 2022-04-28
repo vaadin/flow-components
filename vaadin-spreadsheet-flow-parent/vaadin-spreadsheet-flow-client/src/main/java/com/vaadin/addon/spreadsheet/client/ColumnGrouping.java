@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -16,7 +16,7 @@ import com.google.gwt.dom.client.Style.Unit;
 
 /**
  * Class that represents a single column grouping indicator.
- * 
+ *
  * @author Thomas Mattsson / Vaadin LTD
  *
  */

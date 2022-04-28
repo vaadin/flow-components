@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -37,12 +37,12 @@ public interface SpreadsheetClientRpc extends ClientRpc {
 
     void invalidCellAddress();
 
-    void showSelectedCell(String name, int col, int row, String cellValue, boolean formula,
-            boolean locked, boolean initialSelection);
+    void showSelectedCell(String name, int col, int row, String cellValue,
+            boolean formula, boolean locked, boolean initialSelection);
 
     /**
      * The String arrays contain the caption and the icon resource key.
-     * 
+     *
      * @param actionDetails
      */
     void showActions(ArrayList<SpreadsheetActionDetails> actionDetails);
@@ -51,8 +51,8 @@ public interface SpreadsheetClientRpc extends ClientRpc {
      * Updates the selected cell and painted range. Displays the selected cell
      * value. Indexes 1-based.
      */
-    void setSelectedCellAndRange(String name, int col, int row, int c1, int c2, int r1,
-            int r2, boolean scroll);
+    void setSelectedCellAndRange(String name, int col, int row, int c1, int c2,
+            int r1, int r2, boolean scroll);
 
     void cellsUpdated(ArrayList<CellData> updatedCellData);
 

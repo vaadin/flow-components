@@ -12,17 +12,18 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
 /**
- * TODO: to be removed when the bug (https://bz.apache.org/bugzilla/show_bug.cgi?id=60040) is resolved
+ * TODO: to be removed when the bug
+ * (https://bz.apache.org/bugzilla/show_bug.cgi?id=60040) is resolved
  * <p>
  * POI library has two classes {@link org.apache.poi.ss.format.CellFormat} and
- * {@link org.apache.poi.ss.usermodel.DataFormatter} to deal with custom formatting.
- * The implementation is very buggy!
+ * {@link org.apache.poi.ss.usermodel.DataFormatter} to deal with custom
+ * formatting. The implementation is very buggy!
  * <p>
  * This class work around the following bugs:
  * <p>
  * 1) {@link org.apache.poi.ss.format.CellFormat} does not use the Locale info.
- * Therefore cells having three or four part custom format
- * (eg. #.##0,00#;(#.##0,00);"-") are not correctly formatted.
+ * Therefore cells having three or four part custom format (eg.
+ * #.##0,00#;(#.##0,00);"-") are not correctly formatted.
  * <p>
  * 2) If a custom format has only one part and this part is literal (e.g. does
  * not refer to the number being entered), the formatting is not done correctly.
@@ -33,19 +34,21 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
  * CellFormat does okay job for text formatting and literals, but for numbers it
  * fails to consider the locale.
  * <p>
- * DataFormatter can correctly format numbers using the locale, but cannot format
- * text or literals.
+ * DataFormatter can correctly format numbers using the locale, but cannot
+ * format text or literals.
  * <p>
- * This class tries to work around the most use cases by delegating a certain case to
- * one parser or another and changing the format string to be compatible with
- * the parser.
+ * This class tries to work around the most use cases by delegating a certain
+ * case to one parser or another and changing the format string to be compatible
+ * with the parser.
  */
 class CustomDataFormatter extends DataFormatter implements Serializable {
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[0#]+");
 
-    // In a custom format the first part represents a format for positive numbers,
-    // the second for negative numbers, the third for zero and the fourth a plain text
+    // In a custom format the first part represents a format for positive
+    // numbers,
+    // the second for negative numbers, the third for zero and the fourth a
+    // plain text
     private final int POSITIVE_FORMAT_INDEX = 0;
     private final int NEGATIVE_FORMAT_INDEX = 1;
     private final int ZERO_FORMAT_INDEX = 2;
@@ -59,22 +62,22 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
     }
 
     /**
-     * If a cell has a custom format with three or more parts
-     * and it contains a numeric value,
-     * then this method formats it as if it had only one part by
+     * If a cell has a custom format with three or more parts and it contains a
+     * numeric value, then this method formats it as if it had only one part by
      * choosing the format based on the value (i.e. positive, negative or 0).
      * <p>
      * Otherwise use <code>DataFormatter#formatCellValue</code>
      **/
     @Override
-    public String formatCellValue(Cell cell, FormulaEvaluator evaluator, ConditionalFormattingEvaluator cfEvaluator) {
+    public String formatCellValue(Cell cell, FormulaEvaluator evaluator,
+            ConditionalFormattingEvaluator cfEvaluator) {
 
         if (cell == null || cell.getCellStyle() == null) {
             return super.formatCellValue(cell, evaluator, cfEvaluator);
         }
 
         final String dataFormatString = cell.getCellStyle()
-            .getDataFormatString();
+                .getDataFormatString();
 
         if (isGeneralFormat(dataFormatString)) {
             return super.formatCellValue(cell, evaluator, cfEvaluator);
@@ -107,7 +110,7 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
     }
 
     private String formatNumericValueUsingFormatPart(Cell cell, double value,
-        String[] formatParts) {
+            String[] formatParts) {
 
         final String format = getNumericFormat(value, formatParts);
 
@@ -149,10 +152,9 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
     }
 
     /**
-     * Best attempt to check if the format contains numbers that
-     * we are formatting or is purely literal.
-     * Known issue is that it does not consider possible escaped/inside string
-     * characters, but it's a very rare case.
+     * Best attempt to check if the format contains numbers that we are
+     * formatting or is purely literal. Known issue is that it does not consider
+     * possible escaped/inside string characters, but it's a very rare case.
      */
     private boolean isOnlyLiteralFormat(String format) {
         return !NUMBER_PATTERN.matcher(format).find();
@@ -166,7 +168,7 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
      * DataFormatter cannot format strings, but CellFormat can.
      */
     private String formatStringCellValue(Cell cell, String formatString,
-        String[] parts) {
+            String[] parts) {
         if (parts[TEXT_FORMAT_INDEX].isEmpty()) {
             return "";
         }

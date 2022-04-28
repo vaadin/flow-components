@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotEquals;
  * measured, the cell shows fine, otherwise it will display ### for needsMeasure
  * cell, because clientWidth is 0 and Cell.java#updateInnerText thinks the
  * content doesn't fit.
- * 
+ *
  * Because it's a race condition, it cannot be tested reliably, we are doing the
  * best here in hope that we catch an issue if there is one.
  */

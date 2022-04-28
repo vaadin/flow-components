@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -39,13 +39,14 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
-                                            SelectionChangeEvent event) {
+            SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()) {
             if (event.getCellRangeAddresses().size() == 0
                     && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
-                        .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
+                        .getCellComment(
+                                new CellAddress(cr.getRow(), cr.getCol()));
                 if (cellComment != null) {
                     if (cellComment.isVisible()) {
                         setCaption("Hide comment");
@@ -61,16 +62,16 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForHeader(Spreadsheet spreadsheet,
-                                         CellRangeAddress headerRange) {
+            CellRangeAddress headerRange) {
         return false;
     }
 
     @Override
     public void executeActionOnSelection(Spreadsheet spreadsheet,
-                                         SelectionChangeEvent event) {
+            SelectionChangeEvent event) {
         CellReference cr = event.getSelectedCellReference();
-        Comment cellComment = spreadsheet.getActiveSheet().getCellComment(
-        		new CellAddress(cr.getRow(), cr.getCol()));
+        Comment cellComment = spreadsheet.getActiveSheet()
+                .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
         cellComment.setVisible(!cellComment.isVisible());
         Sheet sheet = spreadsheet.getActiveSheet();
         Row row = sheet.getRow(cr.getRow());
@@ -86,7 +87,7 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
 
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
-                                      CellRangeAddress headerRange) {
+            CellRangeAddress headerRange) {
         throw new UnsupportedOperationException(
                 "Hide header action can't be executed against a selection.");
     }

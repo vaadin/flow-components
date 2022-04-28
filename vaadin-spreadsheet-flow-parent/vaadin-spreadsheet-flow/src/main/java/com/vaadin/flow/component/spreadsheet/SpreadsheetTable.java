@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -25,11 +25,11 @@ import org.apache.poi.ss.util.CellReference;
 
 /**
  * Represents a "table" inside a spreadsheet.
- * 
+ *
  * A table is a region ( {@link CellRangeAddress}), that has {@link PopupButton}
  * on the column header cells of the region. In this context the column header
  * cells refer to the cells on the first row of the region.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -44,7 +44,7 @@ public class SpreadsheetTable implements Serializable {
      * Creates a new table for the given spreadsheet component, its active sheet
      * (returned by {@link Spreadsheet#getActiveSheet()}) and the given region.
      * Adds pop-up buttons for table headers (cells in the first row).
-     * 
+     *
      * @param spreadsheet
      *            Target spreadsheet
      * @param tableRegion
@@ -59,7 +59,7 @@ public class SpreadsheetTable implements Serializable {
      * Creates a new table for the given spreadsheet component, sheet and
      * region. If the component is currently displaying the sheet that the table
      * belongs to, pop-up buttons are added to table headers (first row cells).
-     * 
+     *
      * @param spreadsheet
      *            Target spreadsheet
      * @param sheet
@@ -113,7 +113,7 @@ public class SpreadsheetTable implements Serializable {
     /**
      * Returns true if the spreadsheet component is currently displaying the
      * sheet that this table belongs to.
-     * 
+     *
      * @return true if the sheet this table belongs to is active
      */
     public boolean isTableSheetCurrentlyActive() {
@@ -139,7 +139,7 @@ public class SpreadsheetTable implements Serializable {
 
     /**
      * Gets the {@link Sheet} this table belongs to.
-     * 
+     *
      * @return Sheet this table belongs to
      */
     public Sheet getSheet() {
@@ -148,7 +148,7 @@ public class SpreadsheetTable implements Serializable {
 
     /**
      * Gets the {@link Spreadsheet} component this table belongs to.
-     * 
+     *
      * @return Spreadsheet this table belongs to
      */
     public Spreadsheet getSpreadsheet() {
@@ -157,7 +157,7 @@ public class SpreadsheetTable implements Serializable {
 
     /**
      * Gets the full table region, {@link CellRangeAddress} for this table.
-     * 
+     *
      * @return Table region
      */
     public CellRangeAddress getFullTableRegion() {
@@ -167,7 +167,7 @@ public class SpreadsheetTable implements Serializable {
     /**
      * Gets the {@link PopupButton} for the given column. If given column is
      * outside of the table region, <code>null</code> will be returned.
-     * 
+     *
      * @param col
      *            Column index, 0-based
      * @return the {@link PopupButton} contained in the header column of this
@@ -179,7 +179,7 @@ public class SpreadsheetTable implements Serializable {
                 return button;
             }
         }
-        
+
         return null;
     }
 
@@ -188,7 +188,7 @@ public class SpreadsheetTable implements Serializable {
      * {@link CellReference}. If given reference is not a header cell for this
      * table, or is outside of the table region, <code>null</code> will be
      * returned.
-     * 
+     *
      * @param filterCellReference
      *            header cell reference
      * @return Pop-up button from the given cell, or null if not found
@@ -199,7 +199,7 @@ public class SpreadsheetTable implements Serializable {
 
     /**
      * Returns all of the {@link PopupButton}s for this table.
-     * 
+     *
      * @return the pop-up buttons for this table in no specific order.
      */
     public Collection<PopupButton> getPopupButtons() {

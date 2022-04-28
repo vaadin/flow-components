@@ -73,17 +73,16 @@ public class CommentIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void contextClick_on_commentIndicator()
-            throws InterruptedException {
+    public void contextClick_on_commentIndicator() throws InterruptedException {
         loadFile("comment_sheet.xlsx");
 
         SheetCellElement cell = getSpreadsheet().getCellAt(3, 3);
         Assert.assertTrue(cell.hasCommentIndicator());
-        WebElement triangle = cell.findElement(By.className("cell-comment-triangle"));
+        WebElement triangle = cell
+                .findElement(By.className("cell-comment-triangle"));
         new Actions(getDriver()).contextClick(triangle).build().perform();
         Assert.assertFalse(hasOption("Insert comment"));
     }
-
 
     @Test
     public void removeRow_removeRowWithComment_commentIsRemoved() {
@@ -122,8 +121,8 @@ public class CommentIT extends AbstractSpreadsheetIT {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return webDriver.findElements(By
-                        .xpath("//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
+                return webDriver.findElements(By.xpath(
+                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
                                 + " and contains(text(), '" + text + "')]"))
                         .size() > 0;
             }
@@ -134,8 +133,8 @@ public class CommentIT extends AbstractSpreadsheetIT {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return webDriver.findElements(By
-                        .xpath("//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
+                return webDriver.findElements(By.xpath(
+                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
                                 + " and contains(text(), '" + text + "')]"))
                         .size() == 0;
             }

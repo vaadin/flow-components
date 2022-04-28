@@ -40,7 +40,6 @@ public class PoiTester {
         }
         comment.setString(str);
 
-
         cell = getOrCreateCell(sheet, 0, 0);
         System.out.println(cell.getCellComment().getAuthor());
         System.out.println(cell.getCellComment().getString().getString());

@@ -7,7 +7,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 
-
 @SuppressWarnings("serial")
 class MinimizableComponentContainer extends Div {
 
@@ -30,19 +29,19 @@ class MinimizableComponentContainer extends Div {
     private Button createMinimizeButton() {
         final Button minimizeButton = new Button(new Icon(VaadinIcon.MINUS));
 
-        //minimizeButton.setClassName(ValoTheme.BUTTON_LINK);
+        // minimizeButton.setClassName(ValoTheme.BUTTON_LINK);
         minimizeButton.addClassName("minimize-button");
 
         minimizeButton.addClickListener(event -> {
-                content.setVisible(!content.isVisible());
-                if (content.isVisible()) {
-                    minimizeButton.setIcon(new Icon(VaadinIcon.MINUS));
-                } else {
-                    minimizeButton.setIcon(new Icon(VaadinIcon.PLUS));
-                }
+            content.setVisible(!content.isVisible());
+            if (content.isVisible()) {
+                minimizeButton.setIcon(new Icon(VaadinIcon.MINUS));
+            } else {
+                minimizeButton.setIcon(new Icon(VaadinIcon.PLUS));
+            }
 
-                fireMinimizeEvent();
-            });
+            fireMinimizeEvent();
+        });
         return minimizeButton;
     }
 
@@ -59,12 +58,10 @@ class MinimizableComponentContainer extends Div {
     }
 
     public void setContent(Component newContent) {
-        if (content != null)
-        {
+        if (content != null) {
             removeAll();
             add(newContent);
-        }
-        else
+        } else
             add(newContent);
 
         content = newContent;

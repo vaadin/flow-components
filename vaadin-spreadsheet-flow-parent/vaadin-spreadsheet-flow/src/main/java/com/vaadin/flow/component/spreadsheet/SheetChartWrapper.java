@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -27,17 +27,16 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
 
-
 /**
  * SheetChartWrapper is an utility class of the Spreadsheet component. In
  * addition to the chart resource, this wrapper contains the chart's visibility
  * state, position and size.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-public class SheetChartWrapper extends SheetOverlayWrapper implements
-        Serializable {
+public class SheetChartWrapper extends SheetOverlayWrapper
+        implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SheetChartWrapper.class);
@@ -80,8 +79,7 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
         }
     }
 
-    public SheetChartWrapper(XSSFChart chartXml,
-            Spreadsheet spreadsheet) {
+    public SheetChartWrapper(XSSFChart chartXml, Spreadsheet spreadsheet) {
         super(chartXml.getGraphicFrame().getAnchor());
 
         this.chartXml = chartXml;
@@ -98,13 +96,13 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
             if (chartCreator != null) {
                 content = chartCreator.createChart(chartXml, spreadsheet);
             } else {
-                Label label = new Label(INTEGRATION_MISSING_TEXT); //, HTML);
+                Label label = new Label(INTEGRATION_MISSING_TEXT); // , HTML);
                 label.addClassName("overlay-content");
                 content = new Div(label);
             }
 
             wrapper.setContent(content);
-            ((HasSize)content).setSizeFull();
+            ((HasSize) content).setSizeFull();
         }
     }
 
@@ -121,7 +119,7 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
     public String getId() {
         if (wrapper != null && wrapper.isAttached()) {
             connectorId = wrapper.getId().orElse("");
-            //connectorId = wrapper.getConnectorId();
+            // connectorId = wrapper.getConnectorId();
         }
 
         return connectorId;

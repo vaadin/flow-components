@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -27,10 +27,10 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRow;
  * Class that contains modified {@link XSSFSheet} methods regarding grouping.
  * The public methods here are entrypoints, other methods are copied only if
  * they needed changes.
- * 
+ *
  * @author Thomas Mattsson / Vaadin Ltd.
  */
-class GroupingUtil implements Serializable{
+class GroupingUtil implements Serializable {
 
     private GroupingUtil() {
     }
@@ -121,8 +121,8 @@ class GroupingUtil implements Serializable{
      * Replaces {@link XSSFSheet#isRowGroupCollapsed(XSSFSheet, int)}, which
      * doesn't account for intermediary levels being collapsed or not.
      */
-    private static boolean isRowGroupOrParentCollapsed(XSSFSheet sheet,
-            int row, int originalLevel) {
+    private static boolean isRowGroupOrParentCollapsed(XSSFSheet sheet, int row,
+            int originalLevel) {
 
         int level = sheet.getRow(row).getCTRow().getOutlineLevel();
 
@@ -194,7 +194,8 @@ class GroupingUtil implements Serializable{
     }
 
     @SuppressWarnings("deprecation")
-    private static boolean isColumnGroupHiddenByParent(XSSFSheet sheet, int idx) {
+    private static boolean isColumnGroupHiddenByParent(XSSFSheet sheet,
+            int idx) {
         CTCols cols = sheet.getCTWorksheet().getColsArray(0);
         // Look out outline details of end
         int endLevel = 0;
@@ -235,7 +236,8 @@ class GroupingUtil implements Serializable{
         return startHidden;
     }
 
-    private static int findStartOfRowOutlineGroup(XSSFSheet sheet, int rowIndex) {
+    private static int findStartOfRowOutlineGroup(XSSFSheet sheet,
+            int rowIndex) {
         // Find the start of the group.
         short level = sheet.getRow(rowIndex).getCTRow().getOutlineLevel();
         int currentRow = rowIndex;
@@ -349,15 +351,14 @@ class GroupingUtil implements Serializable{
 
         /** START */
         // Hide all the columns until the end of the group
-        int lastColMax = (Integer) callSheetMethod(
-                "setGroupHidden",
-                sheet,
-                new Object[] { groupStartColInfoIx, col.getOutlineLevel(), true });
+        int lastColMax = (Integer) callSheetMethod("setGroupHidden", sheet,
+                new Object[] { groupStartColInfoIx, col.getOutlineLevel(),
+                        true });
         /** END */
 
         // write collapse field
-        callSheetMethod("setColumn", sheet, new Object[] { lastColMax + 1, 0,
-                null, null, Boolean.TRUE });
+        callSheetMethod("setColumn", sheet,
+                new Object[] { lastColMax + 1, 0, null, null, Boolean.TRUE });
     }
 
     public static short expandColumn(XSSFSheet sheet, int columnIndex) {
@@ -470,8 +471,8 @@ class GroupingUtil implements Serializable{
 
         Class<?>[] paramtypes = new Class[params.length];
         for (int i = 0; i < params.length; i++) {
-            paramtypes[i] = params[i] == null ? Object.class : params[i]
-                    .getClass();
+            paramtypes[i] = params[i] == null ? Object.class
+                    : params[i].getClass();
         }
 
         Method method = null;
@@ -528,8 +529,8 @@ class GroupingUtil implements Serializable{
      *         <code>start</code> might have a level that is higher than we
      *         want). 0-based.
      */
-    public static long findUniqueRowIndex(Spreadsheet sheet, int start,
-            int end, int lastlevel) {
+    public static long findUniqueRowIndex(Spreadsheet sheet, int start, int end,
+            int lastlevel) {
         for (int i = start; i <= end; i++) {
 
             XSSFRow current = (XSSFRow) sheet.getActiveSheet().getRow(i);

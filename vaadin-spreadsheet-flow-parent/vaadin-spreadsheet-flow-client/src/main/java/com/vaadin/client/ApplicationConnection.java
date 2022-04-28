@@ -234,9 +234,8 @@ public class ApplicationConnection implements HasHandlers {
      * {@link ApplicationConnection#setApplicationRunning(boolean)}.
      *
      * To listen for the event add a {@link ApplicationStoppedHandler} by
-     * invoking
-     * {@link ApplicationConnection#addHandler(Type, EventHandler)}
-     * to the {@link ApplicationConnection}
+     * invoking {@link ApplicationConnection#addHandler(Type, EventHandler)} to
+     * the {@link ApplicationConnection}
      *
      * @since 7.1.8
      * @author Vaadin Ltd
@@ -439,8 +438,8 @@ public class ApplicationConnection implements HasHandlers {
 
     /**
      * Starts this application. Don't call this method directly - it's called by
-     * {@link ApplicationConfiguration#startApplication(String)}, which should be
-     * called once this application has started (first response received) or
+     * {@link ApplicationConfiguration#startApplication(String)}, which should
+     * be called once this application has started (first response received) or
      * failed to start. This ensures that the applications are started in order,
      * to avoid session-id problems.
      *
@@ -1279,8 +1278,8 @@ public class ApplicationConnection implements HasHandlers {
      * @param uri
      *            The uri to which the parameters should be added.
      * @param extraParams
-     *            One or more parameters in the format "a=b" or "c=d&amp;e=f". An
-     *            empty string is allowed but will not modify the url.
+     *            One or more parameters in the format "a=b" or "c=d&amp;e=f".
+     *            An empty string is allowed but will not modify the url.
      * @return The modified URI with the get parameters in extraParams added.
      * @deprecated Use {@link SharedUtil#addGetParameters(String,String)}
      *             instead

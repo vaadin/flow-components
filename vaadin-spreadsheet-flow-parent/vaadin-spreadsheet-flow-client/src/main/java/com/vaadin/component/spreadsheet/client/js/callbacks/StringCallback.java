@@ -4,5 +4,4 @@ import java.util.function.Consumer;
 
 public interface StringCallback extends Consumer<String> {
 
-
 }

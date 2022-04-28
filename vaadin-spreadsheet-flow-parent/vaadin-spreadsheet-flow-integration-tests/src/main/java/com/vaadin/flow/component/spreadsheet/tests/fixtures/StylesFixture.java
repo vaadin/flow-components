@@ -91,9 +91,8 @@ public class StylesFixture implements SpreadsheetFixture {
         cellStyle.setAlignment(HorizontalAlignment.RIGHT);
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
-        c = spreadsheet
-                .createCell(7, 1,
-                        "center aligned text that should overflow by default to other cells");
+        c = spreadsheet.createCell(7, 1,
+                "center aligned text that should overflow by default to other cells");
         cellStyle = wb.createCellStyle();
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         c.setCellStyle(cellStyle);

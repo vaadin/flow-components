@@ -81,11 +81,13 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
         cellRangeSelectedCallback = callback;
     }
 
-    public void setCellAddedToSelectionAndSelectedCallback(Consumer<String> callback) {
+    public void setCellAddedToSelectionAndSelectedCallback(
+            Consumer<String> callback) {
         cellAddedToSelectionAndSelected = callback;
     }
 
-    public void setCellsAddedToRangeSelectionCallback(Consumer<String> callback) {
+    public void setCellsAddedToRangeSelectionCallback(
+            Consumer<String> callback) {
         cellsAddedToRangeSelectionCallback = callback;
     }
 
@@ -108,7 +110,6 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     public void setSelectionIncreasePaintedCallback(Consumer<String> callback) {
         selectionIncreasePaintedCallback = callback;
     }
-
 
     public void setSelectionDecreasePaintedCallback(Consumer<String> callback) {
         selectionDecreasePaintedCallback = callback;
@@ -190,7 +191,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
         callbackForOnConnectorInit = callback;
     }
 
-    public void setContextMenuOpenOnSelectionCallback(Consumer<String> callback) {
+    public void setContextMenuOpenOnSelectionCallback(
+            Consumer<String> callback) {
         contextMenuOpenOnSelectionCallback = callback;
     }
 
@@ -198,7 +200,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
         actionOnCurrentSelectionCallback = callback;
     }
 
-    public void setRowHeaderContextMenuOpenCallback(Consumer<Integer> callback) {
+    public void setRowHeaderContextMenuOpenCallback(
+            Consumer<Integer> callback) {
         rowHeaderContextMenuOpenCallback = callback;
     }
 
@@ -206,7 +209,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
         actionOnRowHeaderCallback = callback;
     }
 
-    public void setColumnHeaderContextMenuOpenCallback(Consumer<Integer> callback) {
+    public void setColumnHeaderContextMenuOpenCallback(
+            Consumer<Integer> callback) {
         columnHeaderContextMenuOpenCallback = callback;
     }
 
@@ -214,7 +218,7 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
         actionOnColumnHeaderCallback = callback;
     }
 
-    private native void call(Object fnc, Object ...args) /*-{
+    private native void call(Object fnc, Object... args) /*-{
       if (!fnc) {
           return;
       }
@@ -242,7 +246,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void setGroupingCollapsed(boolean cols, int colIndex, boolean collapsed) {
+    public void setGroupingCollapsed(boolean cols, int colIndex,
+            boolean collapsed) {
         call(groupingCollapsedCallback, cols, colIndex, collapsed);
     }
 
@@ -252,7 +257,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void onSheetScroll(int firstRow, int firstColumn, int lastRow, int lastColumn) {
+    public void onSheetScroll(int firstRow, int firstColumn, int lastRow,
+            int lastColumn) {
         call(onSheetScrollCallback, firstRow, firstColumn, lastRow, lastColumn);
     }
 
@@ -262,7 +268,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void cellSelected(int row, int column, boolean oldSelectionRangeDiscarded) {
+    public void cellSelected(int row, int column,
+            boolean oldSelectionRangeDiscarded) {
         call(cellSelectedCallback, row, column, oldSelectionRangeDiscarded);
 
     }
@@ -279,8 +286,9 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void cellsAddedToRangeSelection(int row1, int col1, int row2, int col2) {
-        call(cellsAddedToRangeSelectionCallback,row1, col1, row2 , col2);
+    public void cellsAddedToRangeSelection(int row1, int col1, int row2,
+            int col2) {
+        call(cellsAddedToRangeSelectionCallback, row1, col1, row2, col2);
     }
 
     @Override
@@ -334,8 +342,10 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void cellRangePainted(int selectedCellRow, int selectedCellColumn, int row1, int col1, int row2, int col2) {
-        call(cellRangePaintedCallback, selectedCellRow, selectedCellColumn, row1, col1, row2, col2);
+    public void cellRangePainted(int selectedCellRow, int selectedCellColumn,
+            int row1, int col1, int row2, int col2) {
+        call(cellRangePaintedCallback, selectedCellRow, selectedCellColumn,
+                row1, col1, row2, col2);
     }
 
     @Override
@@ -345,17 +355,21 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
 
     @Override
     public void linkCellClicked(int row, int column) {
-        call(linkCellClickedCallback,row, column);
+        call(linkCellClickedCallback, row, column);
     }
 
     @Override
-    public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1, int row2, int col2) {
-        call(rowsResizedCallback, toJsFloatArr(newRowSizes), row1, col1, row2, col2);
+    public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
+            int row2, int col2) {
+        call(rowsResizedCallback, toJsFloatArr(newRowSizes), row1, col1, row2,
+                col2);
     }
 
     @Override
-    public void columnResized(Map<Integer, Integer> newColumnSizes, int row1, int col1, int row2, int col2) {
-        call(columnResizedCallback, toJsIntArr(newColumnSizes), row1, col1, row2, col2);
+    public void columnResized(Map<Integer, Integer> newColumnSizes, int row1,
+            int col1, int row2, int col2) {
+        call(columnResizedCallback, toJsIntArr(newColumnSizes), row1, col1,
+                row2, col2);
     }
 
     @Override
@@ -379,8 +393,10 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void setCellStyleWidthRatios(HashMap<Integer, Float> cellStyleWidthRatioMap) {
-        call(setCellStyleWidthRatiosCallback, toJsFloatArr(cellStyleWidthRatioMap));
+    public void setCellStyleWidthRatios(
+            HashMap<Integer, Float> cellStyleWidthRatioMap) {
+        call(setCellStyleWidthRatiosCallback,
+                toJsFloatArr(cellStyleWidthRatioMap));
     }
 
     @Override

@@ -21,7 +21,8 @@ public class UngroupingIT extends AbstractSpreadsheetIT {
      * Ticket 599#
      */
     @Test
-    public void grouping_expandColumnGroup_groupingElementsHaveCorrectValues() throws Exception {
+    public void grouping_expandColumnGroup_groupingElementsHaveCorrectValues()
+            throws Exception {
         loadFile("ungrouping_cellUpdating.xlsx");
         List<WebElement> groupings = getGroupings();
         groupings.get(1).click();

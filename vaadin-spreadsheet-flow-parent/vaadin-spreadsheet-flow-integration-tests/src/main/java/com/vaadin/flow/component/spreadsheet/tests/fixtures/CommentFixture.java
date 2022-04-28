@@ -7,12 +7,12 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
-
 public class CommentFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-        Drawing<?> drawing = spreadsheet.getActiveSheet().createDrawingPatriarch();
+        Drawing<?> drawing = spreadsheet.getActiveSheet()
+                .createDrawingPatriarch();
         CreationHelper factory = spreadsheet.getActiveSheet().getWorkbook()
                 .getCreationHelper();
 

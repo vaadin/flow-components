@@ -43,14 +43,14 @@ public class ValueHandlerIT extends AbstractSpreadsheetIT {
     @Ignore("Fails in all the browsers in framework Spreadsheet")
     public void testDateFormat() {
         selectCell("C2");
-        getSpreadsheet().getCellAt("C2").setValue(
-                dateTS(2000, GregorianCalendar.MARCH, 14));
+        getSpreadsheet().getCellAt("C2")
+                .setValue(dateTS(2000, GregorianCalendar.MARCH, 14));
         selectCell("A1");
         Assert.assertEquals("14-Mar-00", getCellContent("C2"));
         Assert.assertEquals("15-Mar-00", getCellContent("C3"));
 
-        getSpreadsheet().getCellAt("C2").setValue(
-                dateTS(2005, GregorianCalendar.APRIL, 30));
+        getSpreadsheet().getCellAt("C2")
+                .setValue(dateTS(2005, GregorianCalendar.APRIL, 30));
         selectCell("A1");
         Assert.assertEquals("30-Apr-05", getCellContent("C2"));
         Assert.assertEquals("1-May-05", getCellContent("C3"));

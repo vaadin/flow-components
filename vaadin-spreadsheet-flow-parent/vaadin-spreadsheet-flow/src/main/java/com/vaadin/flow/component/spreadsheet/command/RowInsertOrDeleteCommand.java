@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.command;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -31,7 +31,8 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
     private boolean wasDeleted = false;
     private RowData rowData;
 
-    public RowInsertOrDeleteCommand(Spreadsheet spreadsheet, CellRangeAddress headerRange) {
+    public RowInsertOrDeleteCommand(Spreadsheet spreadsheet,
+            CellRangeAddress headerRange) {
         super(spreadsheet);
         row = headerRange.getFirstRow();
         rowData = new RowData(spreadsheet);
@@ -39,7 +40,7 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
 
     @Override
     public void execute() {
-        if(wasDeleted) {
+        if (wasDeleted) {
             insertNewRow();
         } else {
             deleteRow();
@@ -59,8 +60,7 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
     public void insertNewRow() {
         wasDeleted = false;
         int rows = spreadsheet.getRows();
-        spreadsheet.shiftRows(row, (rows - 1), 1, true,
-                true);
+        spreadsheet.shiftRows(row, (rows - 1), 1, true, true);
         spreadsheet.setMaxRows(rows + 1);
         restoreOldCellValues();
         spreadsheet.refreshAllCellValues();
@@ -74,8 +74,7 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
             // if removed last row, just delete it and make sheet smaller
             spreadsheet.deleteRows(row, row);
         } else {
-            spreadsheet.shiftRows(row + 1, (rows - 1), -1, true,
-                    true);
+            spreadsheet.shiftRows(row + 1, (rows - 1), -1, true, true);
         }
         spreadsheet.setMaxRows(rows - 1);
     }
@@ -103,6 +102,5 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
             }
         }
     }
-
 
 }

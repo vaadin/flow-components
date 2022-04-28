@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -19,7 +19,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import com.vaadin.flow.component.Component;
-
 
 /**
  * Defines an interface for having custom components inside the
@@ -48,7 +47,7 @@ import com.vaadin.flow.component.Component;
  * <p>
  * The {@link #getCustomComponentForCell(Cell, int, int, Spreadsheet, Sheet)} is
  * called first
- * 
+ *
  * @author Vaadin Ltd.
  */
 public interface SpreadsheetComponentFactory extends Serializable {
@@ -69,7 +68,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * <p>
      * For merged regions, this method is only called for the first cell of the
      * merged region.
-     * 
+     *
      * @param cell
      *            Cell that should display the component or <code>null</code> if
      *            the cell doesn't yet exist inside POI
@@ -86,7 +85,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *         displayed when the cell is not selected.
      */
     public Component getCustomComponentForCell(Cell cell, int rowIndex,
-                                               int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
+            int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
 
     /**
      * Should return the custom component that is displayed in the cell when it
@@ -108,7 +107,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * <p>
      * For merged regions, this method is only called for the first cell of the
      * merged region.
-     * 
+     *
      * @param cell
      *            Cell that should display the custom editor or
      *            <code>null</code> if the cell doesn't yet exist inside POI
@@ -125,7 +124,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *         used.
      */
     public Component getCustomEditorForCell(Cell cell, int rowIndex,
-                                            int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
+            int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
 
     /**
      * This method is called when a cell with a custom editor is displayed (the
@@ -135,7 +134,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * <p>
      * Note that the Spreadsheet component doesn't automatically update the Cell
      * value if it has a custom editor.
-     * 
+     *
      * @param cell
      *            The cell that has the editor, might be <code>null</code> if
      *            the cell doesn't exist it the POI model
@@ -151,6 +150,6 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *            The component that is displayed inside the cell
      */
     public void onCustomEditorDisplayed(Cell cell, int rowIndex,
-                                        int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
-                                        Component customEditor);
+            int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
+            Component customEditor);
 }

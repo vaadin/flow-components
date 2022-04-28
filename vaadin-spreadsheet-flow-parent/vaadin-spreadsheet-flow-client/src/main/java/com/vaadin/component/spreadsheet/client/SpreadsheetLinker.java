@@ -203,8 +203,9 @@ public class SpreadsheetLinker extends SingleScriptLinker {
 
         // Export in JS the java class with the exported spreadsheet API
         JsType ann = SpreadsheetJsApi.class.getAnnotation(JsType.class);
-        String api = ann.namespace() + "." + ann.name(); 
-        out.print("\n\nlet Spreadsheet = " + api + ";\n\nexport { Spreadsheet };\n");
+        String api = ann.namespace() + "." + ann.name();
+        out.print("\n\nlet Spreadsheet = " + api
+                + ";\n\nexport { Spreadsheet };\n");
 
         return emitString(logger, out.toString(),
                 getJsFilename(context, result));

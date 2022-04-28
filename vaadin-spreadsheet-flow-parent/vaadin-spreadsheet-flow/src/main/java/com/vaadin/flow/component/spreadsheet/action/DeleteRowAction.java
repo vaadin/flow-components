@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -21,7 +21,7 @@ import com.vaadin.flow.component.spreadsheet.command.RowInsertOrDeleteCommand;
 
 /**
  * Spreadsheet action for deleting a single row.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -60,7 +60,8 @@ public class DeleteRowAction extends SpreadsheetAction {
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
             CellRangeAddress headerRange) {
-        RowInsertOrDeleteCommand command = new RowInsertOrDeleteCommand(spreadsheet, headerRange);
+        RowInsertOrDeleteCommand command = new RowInsertOrDeleteCommand(
+                spreadsheet, headerRange);
         command.deleteRow();
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
     }

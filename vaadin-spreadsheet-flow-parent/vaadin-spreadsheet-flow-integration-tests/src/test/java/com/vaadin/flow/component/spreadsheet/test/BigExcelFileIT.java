@@ -14,7 +14,8 @@ public class BigExcelFileIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void openSpreadsheet_fromExcelFileWith_100_000_Rows_theContentIsRendered() throws Exception {
+    public void openSpreadsheet_fromExcelFileWith_100_000_Rows_theContentIsRendered()
+            throws Exception {
         loadFile("100_000_rows.xlsx");
 
         Assert.assertEquals("File opened", getCellContent("A1"));

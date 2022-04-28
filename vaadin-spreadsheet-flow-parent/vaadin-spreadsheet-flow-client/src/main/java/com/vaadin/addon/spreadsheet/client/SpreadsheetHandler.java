@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -55,7 +55,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * Complete row selected. New selected cell is at firstColumnIndex:row.
-     * 
+     *
      * @param row
      *            the row that was selected
      * @param firstColumnIndex
@@ -67,7 +67,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
     /**
      * Complete row added to previous range selection. New selected cell is at
      * firstColumnIndex:row.
-     * 
+     *
      * @param row
      *            the row that was selected
      * @param firstColumnIndex
@@ -78,7 +78,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * Complete column selected. New selected cell is at column:firstRowIndex.
-     * 
+     *
      * @param column
      *            the column that was selected
      * @param firstRowIndex
@@ -90,7 +90,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
     /**
      * Complete column added to previous range selection. New selected cell is
      * at column:firstRowIndex.
-     * 
+     *
      * @param firstRowIndex
      *            row index for the selected cell (top most)
      * @param column
@@ -102,7 +102,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
     /**
      * The new selection that was painted from the old. Values and formulas
      * should be painted to the new selection.
-     * 
+     *
      * @param r1
      *            new selection top, 1-based
      * @param c1
@@ -118,7 +118,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
     /**
      * The existing selection has been painted inwards meaning that the painted
      * selection cells should be cleared.
-     * 
+     *
      * @param row
      *            topmost cell index where the clearing starts, 1-based
      * @param col
@@ -130,7 +130,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
     public void cellValueEdited(int row, int col, String value);
 
     /**
-     * 
+     *
      * @param sheetIndex
      *            0-based
      * @param scrollTop
@@ -139,7 +139,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
     public void sheetSelected(int sheetIndex, int scrollLeft, int scrollTop);
 
     /**
-     * 
+     *
      * @param sheetIndex
      *            0-based
      * @param newName
@@ -148,7 +148,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * Sheet is created as the last sheet
-     * 
+     *
      * @param scrollTop
      * @param scrollLeft
      */
@@ -156,7 +156,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * Cell range selected by painting
-     * 
+     *
      * @param selectedCellRow
      * @param selectedCellColumn
      * @param row1
@@ -176,7 +176,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * A cell containing a hyperlink has been clicked.
-     * 
+     *
      * @param row
      *            1-based
      * @param column
@@ -186,7 +186,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * Rows resized with header drag and drop. Indexes 1-based.
-     * 
+     *
      * @param newRowSizes
      *            row index and new size (converted pt)
      * @param row1
@@ -194,12 +194,12 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * @param row2
      * @param col2
      */
-    public void rowsResized(Map<Integer, Float> newRowSizes, int row1,
-            int col1, int row2, int col2);
+    public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
+            int row2, int col2);
 
     /**
      * Columns resized with drag and drop. Indexes 1-based.
-     * 
+     *
      * @param row1
      * @param col1
      * @param row2
@@ -214,13 +214,13 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * Row autofit with double click on the row header resizing area.
      *
      * @param rowIndex
-     *     1-based
+     *            1-based
      */
     public void onRowAutofit(int rowIndex);
 
     /**
      * Column autofit with double click on the column header resizing area.
-     * 
+     *
      * @param columnIndex
      *            1-based
      */
@@ -246,7 +246,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * Client pasted text at current selection.
-     * 
+     *
      * @param text
      */
     public void onPaste(String text);

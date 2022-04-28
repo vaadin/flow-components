@@ -10,7 +10,8 @@ public class Scheduler {
     }
 
     public static Scheduler get() {
-        if (_instance == null) _instance = new Scheduler();
+        if (_instance == null)
+            _instance = new Scheduler();
         return _instance;
     }
 

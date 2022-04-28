@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**

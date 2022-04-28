@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class ConditionalFormattingBasedOnFormulaIT
-    extends AbstractSpreadsheetIT {
+        extends AbstractSpreadsheetIT {
 
     private static final String VALUE = "'Fooooooooooooooooooooooooo";
     private static final String FALSE_CONDITION_COLOR = "rgba(255, 255, 255, 1)";
@@ -26,7 +26,7 @@ public class ConditionalFormattingBasedOnFormulaIT
     @Test
     public void loadSpreadsheetWithConditionalFormattingInA2_MakeConditionFalse_CellA2FilledWhite() {
         setCellValue("A1", VALUE);
-        setCellValue("A2", "Not"+VALUE);
+        setCellValue("A2", "Not" + VALUE);
         assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
     }
 
@@ -36,16 +36,19 @@ public class ConditionalFormattingBasedOnFormulaIT
         setCellValue("A2", VALUE);
         assertEquals(TRUE_CONDITION_COLOR, getCellColor("A2"));
     }
-    
+
     @Test
-    public void loadSpreadsheetWithConditionalFormattingRulesInRow10_EvaluateFormatting_CheckColorOfCells(){
+    public void loadSpreadsheetWithConditionalFormattingRulesInRow10_EvaluateFormatting_CheckColorOfCells() {
         String a10WithConditionEqualsToOne = getCellColor("A10");
         String b10WithConditionEqualsToZero = getCellColor("B10");
         String c10WithConditionGreaterOfZero = getCellColor("C10");
         String d10WithConditionLowerOfZero = getCellColor("D10");
-        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR, a10WithConditionEqualsToOne);
+        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
+                a10WithConditionEqualsToOne);
         assertEquals(FALSE_CONDITION_COLOR, b10WithConditionEqualsToZero);
-        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR, c10WithConditionGreaterOfZero);
-        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR, d10WithConditionLowerOfZero);
+        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
+                c10WithConditionGreaterOfZero);
+        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
+                d10WithConditionLowerOfZero);
     }
 }

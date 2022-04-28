@@ -15,7 +15,8 @@ public class ZeroCellAsBlankIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void zeroCellAsBlank_loadSheetWithSettingOn_zeroExpected() throws Exception {
+    public void zeroCellAsBlank_loadSheetWithSettingOn_zeroExpected()
+            throws Exception {
         loadFile("show-zero-cells.xlsx");
 
         selectSheetAt(0);
@@ -27,7 +28,8 @@ public class ZeroCellAsBlankIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void zeroCellAsBlank_loadSheetWithSettingOn_emptyExpected() throws Exception {
+    public void zeroCellAsBlank_loadSheetWithSettingOn_emptyExpected()
+            throws Exception {
         loadFile("show-zero-cells.xlsx");
 
         selectSheetAt(1);

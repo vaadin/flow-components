@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -201,11 +201,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
         initWidget(sheetWidget);
 
-        //There is a bug in CssLayout/VerticalLayout.
-        //If a component calls setVisible(false) another component in the layout
-        //next to it is detached and then attached to the layout and the scroll
-        //position is reset. We need to store the scroll position on detach and
-        //then set on attach event.
+        // There is a bug in CssLayout/VerticalLayout.
+        // If a component calls setVisible(false) another component in the
+        // layout
+        // next to it is detached and then attached to the layout and the scroll
+        // position is reset. We need to store the scroll position on detach and
+        // then set on attach event.
         sheetWidget.addAttachHandler(new AttachEvent.Handler() {
             int leftScrollPosition = 0;
             int topScrollPosition = 0;
@@ -213,7 +214,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             @Override
             public void onAttachOrDetach(AttachEvent attachEvent) {
                 if (attachEvent.isAttached()) {
-                    sheetWidget.setScrollPosition(leftScrollPosition, topScrollPosition);
+                    sheetWidget.setScrollPosition(leftScrollPosition,
+                            topScrollPosition);
                 } else {
                     leftScrollPosition = sheetWidget.getSheetScrollLeft();
                     topScrollPosition = sheetWidget.getSheetScrollTop();
@@ -397,7 +399,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return sheetContextMenuHandler != null;
     }
 
-    public void showCellCustomComponents(HashMap<String, Widget> customWidgetMap) {
+    public void showCellCustomComponents(
+            HashMap<String, Widget> customWidgetMap) {
         sheetWidget.showCustomWidgets(customWidgetMap);
     }
 
@@ -452,11 +455,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * the currently selected cell.
      */
     public void loadSelectedCellEditor() {
-        if (!sheetWidget.isSelectedCellCustomized()
-                && !cellLocked
-                && customEditorFactory != null
-                && customEditorFactory.hasCustomEditor(sheetWidget
-                        .getSelectedCellKey())) {
+        if (!sheetWidget.isSelectedCellCustomized() && !cellLocked
+                && customEditorFactory != null && customEditorFactory
+                        .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
             Widget customEditor = customEditorFactory
                     .getCustomEditor(sheetWidget.getSelectedCellKey());
             if (customEditor != null) {
@@ -491,7 +492,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.removeSheetOverlay(key);
     }
 
-    public void updateMergedRegions(final ArrayList<MergedRegion> mergedRegions) {
+    public void updateMergedRegions(
+            final ArrayList<MergedRegion> mergedRegions) {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
             @Override
@@ -503,8 +505,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     while (i < mergedRegions.size()) {
                         MergedRegion newMergedRegion = mergedRegions.get(i);
                         sheetWidget.addMergedRegion(newMergedRegion);
-                        Cell cell = sheetWidget.getCell(
-                                newMergedRegion.col1, newMergedRegion.row1);
+                        Cell cell = sheetWidget.getCell(newMergedRegion.col1,
+                                newMergedRegion.row1);
                         if (cell != null) {
                             // initial display only used single column width,
                             // re-calculate with merged width
@@ -577,9 +579,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public void onCellClick(int column, int row, String value,
-            boolean shiftKey, boolean metaOrCtrlKey,
-            boolean updateToActionHandler) {
+    public void onCellClick(int column, int row, String value, boolean shiftKey,
+            boolean metaOrCtrlKey, boolean updateToActionHandler) {
         doCommitIfEditing();
         if (column == 0 || row == 0) {
             return;
@@ -699,8 +700,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     selectionHandler.setColBeforeMergedCell(cell.col1);
                     selectionHandler.setRowBeforeMergedCell(cell.row1);
                 } else {
-                    sheetWidget
-                            .updateSelectionOutline(column, column, row, row);
+                    sheetWidget.updateSelectionOutline(column, column, row,
+                            row);
                     sheetWidget.updateSelectedCellStyles(column, column, row,
                             row, true);
                 }
@@ -727,8 +728,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 formulaBarWidget.setCellFormulaValue(formulaValue);
                 sheetWidget.updateInputValue("=" + formulaValue);
             } else {
-                formulaBarWidget.setCellPlainValue(sheetWidget
-                        .getOriginalCellValue(column, row));
+                formulaBarWidget.setCellPlainValue(
+                        sheetWidget.getOriginalCellValue(column, row));
             }
         }
         cellLocked = sheetWidget.isCellLocked(column, row);
@@ -742,15 +743,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             formulaBarWidget.setSelectedCellAddress(name);
         } else {
             formulaBarWidget
-                .setSelectedCellAddress(createCellAddress(column, row));
+                    .setSelectedCellAddress(createCellAddress(column, row));
         }
     }
 
     @Override
     public void onRowHeaderClick(int row, boolean shiftPressed,
             boolean metaOrCrtlPressed) {
-        int firstColumnIndex = sheetWidget.hasFrozenColumns() ? 1 : sheetWidget
-                .getLeftVisibleColumnIndex();
+        int firstColumnIndex = sheetWidget.hasFrozenColumns() ? 1
+                : sheetWidget.getLeftVisibleColumnIndex();
         doCommitIfEditing();
         if (!shiftPressed) {
             updateSelectedCellValues(firstColumnIndex, row);
@@ -814,8 +815,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void onColumnHeaderClick(int column, boolean shiftPressed,
             boolean metaOrCrtlPressed) {
         doCommitIfEditing();
-        int firstRowIndex = sheetWidget.hasFrozenRows() ? 1 : sheetWidget
-                .getTopVisibleRowIndex();
+        int firstRowIndex = sheetWidget.hasFrozenRows() ? 1
+                : sheetWidget.getTopVisibleRowIndex();
         if (!shiftPressed) {
             updateSelectedCellValues(column, firstRowIndex);
         }
@@ -854,8 +855,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             sheetWidget.swapCellSelection(column, firstRowIndex);
             selectionHandler.newSelectedCellSet();
             // add the selection styles
-            sheetWidget
-                    .updateSelectedCellStyles(column, column, 1, rows, false);
+            sheetWidget.updateSelectedCellStyles(column, column, 1, rows,
+                    false);
             spreadsheetHandler.columnAddedToSelection(firstRowIndex, column);
         } else {
             if (!sheetWidget.isCoherentSelection()) {
@@ -891,8 +892,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         } else if (inlineEditing || formulaBarEditing) {
             cancelDeferredCommit = true;
             final String editedValue = formulaBarWidget.getFormulaFieldValue();
-            spreadsheetHandler.cellValueEdited(
-                    sheetWidget.getSelectedCellRow(),
+            spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellRow(),
                     sheetWidget.getSelectedCellColumn(), editedValue);
             cellEditingDone(editedValue, true);
         } else if (customCellEditorDisplayed) {
@@ -965,9 +965,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void onFinishedSelectingCellsWithDrag(int col1, int col2, int row1,
             int row2) {
-        if (col1 == 0 || col2 == 0 || row1 == 0 || row2 == 0 || col1 == col2
-                && row1 == row2 && col1 == sheetWidget.getSelectedCellColumn()
-                && row1 == sheetWidget.getSelectedCellRow()) {
+        if (col1 == 0 || col2 == 0 || row1 == 0 || row2 == 0
+                || col1 == col2 && row1 == row2
+                        && col1 == sheetWidget.getSelectedCellColumn()
+                        && row1 == sheetWidget.getSelectedCellRow()) {
             return;
         }
 
@@ -1001,9 +1002,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     sheetWidget.getSelectedCellColumn(), selectedRegion.row1,
                     selectedRegion.col1, selectedRegion.row2,
                     selectedRegion.col2);
-            formulaBarWidget.setSelectedCellAddress(createCellAddress(
-                    sheetWidget.getSelectedCellColumn(),
-                    sheetWidget.getSelectedCellRow()));
+            formulaBarWidget.setSelectedCellAddress(
+                    createCellAddress(sheetWidget.getSelectedCellColumn(),
+                            sheetWidget.getSelectedCellRow()));
             selectionHandler.newSelectedCellSet();
             startDelayedSendingTimer();
         }
@@ -1041,7 +1042,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
-    /* This is only for when focus is changed from formula field to inline input */
+    /*
+     * This is only for when focus is changed from formula field to inline input
+     */
     @Override
     public void onCellInputFocus() {
         if (!inlineEditing && !formulaBarWidget.isEditingFormula()) {
@@ -1102,7 +1105,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         // KeyCodes.ENTER and the char code 13, whereas other such non-character
         // keys here have no char codes. Enter key must be detected here to
         // start editing a cell.
-        if ((event.getCharCode() == 0 && event.getKeyCode() != KeyCodes.KEY_SPACE)
+        if ((event.getCharCode() == 0
+                && event.getKeyCode() != KeyCodes.KEY_SPACE)
                 || event.getCharCode() == 13) {
             switch (event.getKeyCode()) {
             case KeyCodes.KEY_BACKSPACE:
@@ -1166,8 +1170,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     } else {
                         if (sheetWidget.getSelectionLeftCol() != sheetWidget
                                 .getSelectionRightCol()
-                                || sheetWidget.getSelectionTopRow() != sheetWidget
-                                        .getSelectionBottomRow()) {
+                                || sheetWidget
+                                        .getSelectionTopRow() != sheetWidget
+                                                .getSelectionBottomRow()) {
                             if (event.getShiftKey()) {
                                 selectionHandler.moveSelectionUp(false);
                             } else {
@@ -1241,8 +1246,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     private boolean isSelectedCellHidden() {
-        return hiddenColumnIndexes
-                .contains(sheetWidget.getSelectedCellColumn())
+        return hiddenColumnIndexes.contains(sheetWidget.getSelectedCellColumn())
                 || hiddenRowIndexes.contains(sheetWidget.getSelectedCellRow());
     }
 
@@ -1268,8 +1272,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             okToSendCellProtectRpc = false;
 
             ServerConnector connector = Util.findConnectorFor(this);
-            SpreadsheetServerRpc rpc = RpcProxy.create(
-                    SpreadsheetServerRpc.class, connector);
+            SpreadsheetServerRpc rpc = RpcProxy
+                    .create(SpreadsheetServerRpc.class, connector);
 
             rpc.protectedCellWriteAttempted();
         }
@@ -1344,8 +1348,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onSelectionIncreasePainted(int c1, int c2, int r1, int r2) {
-        MergedRegion evenedRegion = MergedRegionUtil.findIncreasingSelection(
-                mergedRegionContainer, r1, r2, c1, c2);
+        MergedRegion evenedRegion = MergedRegionUtil
+                .findIncreasingSelection(mergedRegionContainer, r1, r2, c1, c2);
         // discard painted area if merged cells don't align
         if (evenedRegion.col1 == c1 && evenedRegion.col2 == c2
                 && evenedRegion.row1 == r1 && evenedRegion.row2 == r2) {
@@ -1839,14 +1843,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public boolean isColumnHidden(int columnIndex) {
-        return (hiddenColumnIndexes == null ? false : hiddenColumnIndexes
-                .contains(columnIndex));
+        return (hiddenColumnIndexes == null ? false
+                : hiddenColumnIndexes.contains(columnIndex));
     }
 
     @Override
     public boolean isRowHidden(int rowIndex) {
-        return (hiddenRowIndexes == null ? false : hiddenRowIndexes
-                .contains(rowIndex));
+        return (hiddenRowIndexes == null ? false
+                : hiddenRowIndexes.contains(rowIndex));
     }
 
     @Override
@@ -1927,17 +1931,19 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
-    public void selectCell(String name, int col, int row, String value, boolean formula,
-            boolean locked, boolean initialSelection) {
+    public void selectCell(String name, int col, int row, String value,
+            boolean formula, boolean locked, boolean initialSelection) {
         selectionHandler.selectCell(name, col, row, value, formula, locked,
                 initialSelection);
     }
 
-    public void selectCellRange(String name, int selectedCellColumn, int selectedCellRow,
-            int firstColumn, int lastColumn, int firstRow, int lastRow, boolean scroll) {
-        
-        selectionHandler.selectCellRange(name, selectedCellColumn, selectedCellRow,
-                firstColumn, lastColumn, firstRow, lastRow, scroll);
+    public void selectCellRange(String name, int selectedCellColumn,
+            int selectedCellRow, int firstColumn, int lastColumn, int firstRow,
+            int lastRow, boolean scroll) {
+
+        selectionHandler.selectCellRange(name, selectedCellColumn,
+                selectedCellRow, firstColumn, lastColumn, firstRow, lastRow,
+                scroll);
     }
 
     public void refreshCellStyles() {
@@ -2067,7 +2073,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void setRowGroupingInversed(boolean inversed) {
         sheetWidget.setRowGroupingInversed(inversed);
     }
-    
+
     public void setNamedRanges(List<String> namedRanges) {
         formulaBarWidget.setNamedRanges(namedRanges);
     }

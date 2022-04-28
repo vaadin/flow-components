@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -158,7 +158,8 @@ public class SheetTabSheet extends Widget {
                                 if (tabScrollIndex == 0) {
                                     tabScrollMargin = 0;
                                 } else {
-                                    tabScrollMargin += getTabWidth(tabScrollIndex);
+                                    tabScrollMargin += getTabWidth(
+                                            tabScrollIndex);
                                 }
                                 container.getStyle().setMarginLeft(
                                         tabScrollMargin, Unit.PX);
@@ -233,8 +234,8 @@ public class SheetTabSheet extends Widget {
                         case KeyCodes.KEY_ESCAPE:
                             editing = false;
                             input.removeFromParent();
-                            Element element = (Element) tabs.get(
-                                    selectedTabIndex).cast();
+                            Element element = (Element) tabs
+                                    .get(selectedTabIndex).cast();
                             element.getStyle().clearWidth();
                             setTabName(element, cachedSheetName);
                             handler.onSheetRenameCancel();
@@ -349,7 +350,8 @@ public class SheetTabSheet extends Widget {
         if (validateSheetName(value) && !cachedSheetName.equals(value)) {
             for (int i = 0; i < tabs.length(); i++) {
                 // value cannot be the same as with another sheet
-                if (value.equals(((Element) tabs.get(i).cast()).getInnerText())) {
+                if (value.equals(
+                        ((Element) tabs.get(i).cast()).getInnerText())) {
                     setTabName(selectedTab, cachedSheetName);
                     return;
                 }
@@ -474,8 +476,8 @@ public class SheetTabSheet extends Widget {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
-        addNewSheet.getStyle().setDisplay(
-                readOnly ? Display.NONE : Display.INLINE_BLOCK);
+        addNewSheet.getStyle()
+                .setDisplay(readOnly ? Display.NONE : Display.INLINE_BLOCK);
     }
 
     public void setFirstVisibleTab(int firstVisibleTab) {
@@ -512,14 +514,17 @@ public class SheetTabSheet extends Widget {
             scrollEnd.addClassName(HIDDEN);
         }
     }
-    
+
     /**
      * Set the tab inner text and title to the given name value
+     *
      * @param tab
-     * @param name to use
+     * @param name
+     *            to use
      */
     private void setTabName(Element tab, String name) {
-        if (tab == null) return;
+        if (tab == null)
+            return;
         tab.setInnerText(name);
         tab.setTitle(name);
     }

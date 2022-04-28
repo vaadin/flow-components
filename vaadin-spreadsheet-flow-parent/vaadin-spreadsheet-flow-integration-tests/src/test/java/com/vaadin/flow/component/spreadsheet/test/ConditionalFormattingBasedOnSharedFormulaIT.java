@@ -10,12 +10,13 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 public class ConditionalFormattingBasedOnSharedFormulaIT
-    extends AbstractSpreadsheetIT {
-    
+        extends AbstractSpreadsheetIT {
+
     private static final String FALSE_CONDITION_COLOR = "rgba(255, 255, 255, 1)";
     private static final String TRUE_CONDITION_COLOR = "rgba(255, 0, 0, 1)";
-    
-    private static final Set<String> cellWithTrueCondition = Sets.newHashSet("A2", "A3", "A4", "D1", "D3");
+
+    private static final Set<String> cellWithTrueCondition = Sets
+            .newHashSet("A2", "A3", "A4", "D1", "D3");
     private static final Set<String> cellWithFormattingCondition = getCells();
 
     @Before
@@ -40,12 +41,12 @@ public class ConditionalFormattingBasedOnSharedFormulaIT
     }
 
     private static Set<String> getCells() {
-        Set<String> firstCellRange = Sets.newHashSet("A1","A2");
-        Set<String> secondCellRange = Sets.newHashSet("A3","A4","B3","B4");
+        Set<String> firstCellRange = Sets.newHashSet("A1", "A2");
+        Set<String> secondCellRange = Sets.newHashSet("A3", "A4", "B3", "B4");
         Set<String> thirdCellRange = new HashSet<String>();
-        for (int i=1; i<=5; i++){
-            for (String column : new String[]{"D","E","F","G"}){
-                thirdCellRange.add(column+i);
+        for (int i = 1; i <= 5; i++) {
+            for (String column : new String[] { "D", "E", "F", "G" }) {
+                thirdCellRange.add(column + i);
             }
         }
 

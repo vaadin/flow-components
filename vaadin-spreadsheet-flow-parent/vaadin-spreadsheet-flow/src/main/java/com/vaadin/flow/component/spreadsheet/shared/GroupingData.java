@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.shared;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -36,7 +36,8 @@ public class GroupingData implements Serializable {
         this((int) start, (int) end, (int) level, (int) unique, coll);
     }
 
-    public GroupingData(int start, int end, int level, int unique, boolean coll) {
+    public GroupingData(int start, int end, int level, int unique,
+            boolean coll) {
         startIndex = start;
         endIndex = end;
         this.level = level;

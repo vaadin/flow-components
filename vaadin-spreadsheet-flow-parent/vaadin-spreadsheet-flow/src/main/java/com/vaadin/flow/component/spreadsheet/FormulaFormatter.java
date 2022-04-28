@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -155,17 +155,16 @@ public class FormulaFormatter implements Serializable {
         for (FormulaToken token : tokens) {
             if (token instanceof NumberToken) {
                 try {
-                    localizedTokens.add(new NumberToken(
-                            getDecimalFormat(locale).format(
-                                    Double.parseDouble(token.toString()))));
+                    localizedTokens.add(new NumberToken(getDecimalFormat(locale)
+                            .format(Double.parseDouble(token.toString()))));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                     localizedTokens.add(token);
                 }
 
             } else if (token instanceof SeparatorToken) {
-                localizedTokens.add(new SeparatorToken(
-                        getParameterSeparator(locale)));
+                localizedTokens
+                        .add(new SeparatorToken(getParameterSeparator(locale)));
 
             } else {
                 localizedTokens.add(token);
@@ -194,16 +193,17 @@ public class FormulaFormatter implements Serializable {
         for (FormulaToken token : tokens) {
             if (token instanceof NumberToken) {
                 try {
-                    unlocalizedTokens.add(new NumberToken(getDecimalFormat(
-                            locale).parse(token.toString()).toString()));
+                    unlocalizedTokens
+                            .add(new NumberToken(getDecimalFormat(locale)
+                                    .parse(token.toString()).toString()));
                 } catch (ParseException e) {
                     e.printStackTrace();
                     unlocalizedTokens.add(token);
                 }
 
             } else if (token instanceof SeparatorToken) {
-                unlocalizedTokens.add(new SeparatorToken(
-                        getParameterSeparator(null)));
+                unlocalizedTokens
+                        .add(new SeparatorToken(getParameterSeparator(null)));
 
             } else {
                 unlocalizedTokens.add(token);
@@ -236,7 +236,8 @@ public class FormulaFormatter implements Serializable {
                 if (!inString && isNumberChar(current, from)) {
                     numberBuilder.append(current);
 
-                } else if (current == getParameterSeparator(from) && !inString) {
+                } else if (current == getParameterSeparator(from)
+                        && !inString) {
                     tokens.add(new SeparatorToken(current));
 
                 } else if (current == '"') {
@@ -270,8 +271,8 @@ public class FormulaFormatter implements Serializable {
      * that grouping separators (e.g. for thousands) are not considered.
      */
     protected boolean isNumberChar(Character current, Locale locale) {
-        return current != null
-                && (Character.isDigit(current) || getCurrentDecimalSeparator(locale) == current);
+        return current != null && (Character.isDigit(current)
+                || getCurrentDecimalSeparator(locale) == current);
     }
 
     protected DecimalFormat getDecimalFormat(Locale locale) {

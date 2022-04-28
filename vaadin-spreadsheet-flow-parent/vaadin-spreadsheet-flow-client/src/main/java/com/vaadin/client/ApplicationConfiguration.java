@@ -437,15 +437,17 @@ public class ApplicationConfiguration implements EntryPoint {
 
     /*
      * Takes in a JSON String and evals it.
+     *
      * @param JSON String that you trust
+     *
      * @return JavaScriptObject that you can cast to an Overlay Type
      */
-    public static <T extends JavaScriptObject> T parseJson(String jsonStr)
-    {
+    public static <T extends JavaScriptObject> T parseJson(String jsonStr) {
         return JsonUtils.safeEval(jsonStr);
     }
 
-    private static native JsoConfiguration init(String appId, JsoConfiguration jsoConfiguration, Element rootElement)
+    private static native JsoConfiguration init(String appId,
+            JsoConfiguration jsoConfiguration, Element rootElement)
     /*-{
         if (!$wnd.vaadin) {
             $wnd.vaadin = {};
@@ -471,7 +473,6 @@ public class ApplicationConfiguration implements EntryPoint {
 
         $wnd.vaadin.gwtStatsEvents = false;
      }-*/;
-
 
     private void loadFromJson(String appId, String json, Element rootElement) {
         JsoConfiguration jsoConfiguration = parseJson(json);
@@ -514,9 +515,10 @@ public class ApplicationConfiguration implements EntryPoint {
         standalone = jsoConfiguration
                 .getConfigBoolean("standalone") == Boolean.TRUE;
 
-        //spreadsheet
-        if (false) heartbeatInterval = jsoConfiguration
-                .getConfigInteger("heartbeatInterval");
+        // spreadsheet
+        if (false)
+            heartbeatInterval = jsoConfiguration
+                    .getConfigInteger("heartbeatInterval");
 
         communicationError = jsoConfiguration.getConfigError("comErrMsg");
         authorizationError = jsoConfiguration.getConfigError("authErrMsg");
@@ -563,8 +565,6 @@ public class ApplicationConfiguration implements EntryPoint {
         return $wnd.vaadin.getApp(appId);
      }-*/;
 
-
-
     public static ApplicationConfiguration getConfigFromDOM(String appId) {
         ApplicationConfiguration conf = new ApplicationConfiguration();
         conf.setAppId(appId);
@@ -572,8 +572,9 @@ public class ApplicationConfiguration implements EntryPoint {
         return conf;
     }
 
-    //spreadsheet
-    public static ApplicationConfiguration getConfigFromJson(String appId, String json, Element rootElement) {
+    // spreadsheet
+    public static ApplicationConfiguration getConfigFromJson(String appId,
+            String json, Element rootElement) {
         ApplicationConfiguration conf = new ApplicationConfiguration();
         conf.setAppId(appId);
         conf.loadFromJson(appId, json, rootElement);

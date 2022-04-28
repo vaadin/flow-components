@@ -58,13 +58,15 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            consoleLog("updateFormulaBar(" + possibleName + "," + col + "," + row + ")");
+            consoleLog("updateFormulaBar(" + possibleName + "," + col + ","
+                    + row + ")");
             getWidget().updateFormulaBar(possibleName, col, row);
         }
 
         @Override
-        public void showSelectedCell(String name, int col, int row, String value,
-                boolean formula, boolean locked, boolean initialSelection) {
+        public void showSelectedCell(String name, int col, int row,
+                String value, boolean formula, boolean locked,
+                boolean initialSelection) {
             getWidget().selectCell(name, col, row, value, formula, locked,
                     initialSelection);
         }
@@ -108,7 +110,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 public Action[] getActions() {
                     List<Action> actions = new ArrayList<Action>();
                     SpreadsheetWidget widget = getWidget();
-                    SpreadsheetServerRpc rpcProxy = getRpcProxy(SpreadsheetServerRpc.class);
+                    SpreadsheetServerRpc rpcProxy = getRpcProxy(
+                            SpreadsheetServerRpc.class);
                     for (SpreadsheetActionDetails actionDetail : actionDetails) {
                         SpreadsheetAction spreadsheetAction = new SpreadsheetAction(
                                 this, rpcProxy, actionDetail.key,
@@ -124,8 +127,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
 
         @Override
-        public void setSelectedCellAndRange(String name, int col, int row, int c1, int c2,
-                int r1, int r2, boolean scroll) {
+        public void setSelectedCellAndRange(String name, int col, int row,
+                int c1, int c2, int r1, int r2, boolean scroll) {
             getWidget().selectCellRange(name, col, row, c1, c2, r1, r2, scroll);
         }
 
@@ -187,7 +190,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
 
-    //spreadsheet: we need the server side proxy
+    // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
         return getRpcProxy(rpcInterface);
     }
@@ -211,12 +214,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         });
 
         serverRPC = new SpreadsheetServerRpcImpl();
-        getWidget().setSpreadsheetHandler(
-                getRpcProxy(SpreadsheetServerRpc.class));
+        getWidget()
+                .setSpreadsheetHandler(getRpcProxy(SpreadsheetServerRpc.class));
         getWidget().setSheetContextMenuHandler(new SheetContextMenuHandler() {
 
             @Override
-            public void cellContextMenu(NativeEvent event, int column, int row) {
+            public void cellContextMenu(NativeEvent event, int column,
+                    int row) {
                 if (getState().hasActions) {
                     latestCellContextMenuEvent = event;
                     latestHeaderContextMenuEvent = null;
@@ -248,8 +252,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             }
         });
         // Prevent context menu on context menu
-        contextMenuHandler = getConnection().getContextMenu().addDomHandler(
-                new ContextMenuHandler() {
+        contextMenuHandler = getConnection().getContextMenu()
+                .addDomHandler(new ContextMenuHandler() {
 
                     @Override
                     public void onContextMenu(ContextMenuEvent event) {
@@ -258,20 +262,19 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     }
                 }, ContextMenuEvent.getType());
 
-
-        //spreadsheet: no layout manager there
-        if (false) getLayoutManager().addElementResizeListener(getWidget().getElement(),
-                elementResizeListener);
+        // spreadsheet: no layout manager there
+        if (false)
+            getLayoutManager().addElementResizeListener(
+                    getWidget().getElement(), elementResizeListener);
         getRpcProxy(SpreadsheetServerRpc.class).onConnectorInit();
     }
-
 
     @Override
     public void onUnregister() {
         super.onUnregister();
         getWidget().clearSpreadsheet(true);
-        getLayoutManager().removeElementResizeListener(
-                getWidget().getElement(), elementResizeListener);
+        getLayoutManager().removeElementResizeListener(getWidget().getElement(),
+                elementResizeListener);
         if (currentOverlays != null) {
             currentOverlays.clear();
         }
@@ -309,8 +312,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     @Override
     public void onStateChanged(final StateChangeEvent stateChangeEvent) {
-        //spreadsheet: do not want to bubble this
-        //super.onStateChanged(stateChangeEvent);
+        // spreadsheet: do not want to bubble this
+        // super.onStateChanged(stateChangeEvent);
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
         // in case the component client side is just created, but server side
@@ -360,9 +363,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
       debugger;
   }-*/;
 
-
-    private void loadInitialStateDataToWidget(StateChangeEvent stateChangeEvent) {
-        //debugger();
+    private void loadInitialStateDataToWidget(
+            StateChangeEvent stateChangeEvent) {
+        // debugger();
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();
@@ -374,7 +377,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     }
 
-    private void loadStateChangeDataToWidget(StateChangeEvent stateChangeEvent) {
+    private void loadStateChangeDataToWidget(
+            StateChangeEvent stateChangeEvent) {
         consoleLog("loadStateChangeDataToWidget(" + stateChangeEvent + ")");
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
@@ -400,7 +404,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
-            widget.setCellComments(state.cellComments, state.cellCommentAuthors);
+            widget.setCellComments(state.cellComments,
+                    state.cellCommentAuthors);
         }
         if (stateChangeEvent.hasPropertyChanged("visibleCellComments")) {
             setupVisibleCellComments();
@@ -417,8 +422,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     }
 
     private void overlaysChange() {
-        Map<String, OverlayInfo> overlayInfos = getState().overlays == null ? Collections
-                .<String, OverlayInfo> emptyMap() : getState().overlays;
+        Map<String, OverlayInfo> overlayInfos = getState().overlays == null
+                ? Collections.<String, OverlayInfo> emptyMap()
+                : getState().overlays;
 
         removeOldOverlays(overlayInfos.keySet());
 
@@ -440,7 +446,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private void addOverlay(String id, OverlayInfo overlayInfo) {
         switch (overlayInfo.type) {
         case IMAGE:
-            getWidget().addOverlay(id, new Image(getResourceUrl(id)), overlayInfo);
+            getWidget().addOverlay(id, new Image(getResourceUrl(id)),
+                    overlayInfo);
             break;
         case COMPONENT:
             for (ComponentConnector c : getChildComponents()) {
@@ -528,7 +535,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     }
 
     @Override
-    public void onConnectorHierarchyChange(ConnectorHierarchyChangeEvent event) {
+    public void onConnectorHierarchyChange(
+            ConnectorHierarchyChangeEvent event) {
         // remove old popup buttons
         List<ComponentConnector> oldChildren = event.getOldChildren();
 

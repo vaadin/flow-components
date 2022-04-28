@@ -10,7 +10,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 import elemental.json.JsonArray;
 
 @SuppressWarnings("serial")
-public class SpreadsheetEventListener implements ComponentEventListener<Spreadsheet.SpreadsheetEvent> {
+public class SpreadsheetEventListener
+        implements ComponentEventListener<Spreadsheet.SpreadsheetEvent> {
     private final SpreadsheetHandlerImpl handler;
 
     Logger LOGGER = LoggerFactory.getLogger(SpreadsheetEventListener.class);
@@ -18,28 +19,33 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
     public SpreadsheetEventListener(SpreadsheetHandlerImpl spreadsheetHandler) {
         this.handler = spreadsheetHandler;
     }
+
     private int toInt(JsonArray o, int pos) {
-       return Double.valueOf(o.getNumber(pos)).intValue();
+        return Double.valueOf(o.getNumber(pos)).intValue();
     }
+
     private String toStr(JsonArray o, int pos) {
         return o.getString(pos);
     }
+
     private boolean toBool(JsonArray o, int pos) {
         return o.getBoolean(pos);
     }
+
     private HashMap<Integer, Float> toMapFloat(JsonArray o, int pos) {
         HashMap<Integer, Float> m = new HashMap<>();
         JsonArray jso = o.getArray(pos);
-        for (int i = 0; i < jso.length() ; i++) {
-            m.put(i, (float)jso.getNumber(i));
+        for (int i = 0; i < jso.length(); i++) {
+            m.put(i, (float) jso.getNumber(i));
         }
         return m;
     }
+
     private HashMap<Integer, Integer> toMapInt(JsonArray o, int pos) {
         HashMap<Integer, Integer> m = new HashMap<>();
         JsonArray jso = o.getArray(pos);
-        for (int i = 0; i < jso.length() ; i++) {
-            m.put(i, (int)jso.getNumber(i));
+        for (int i = 0; i < jso.length(); i++) {
+            m.put(i, (int) jso.getNumber(i));
         }
         return m;
     }
@@ -47,7 +53,7 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
     @Override
     public void onComponentEvent(Spreadsheet.SpreadsheetEvent event) {
         String type = event.getType();
-        JsonArray pars = (JsonArray)event.getData();
+        JsonArray pars = (JsonArray) event.getData();
 
         LOGGER.debug(type + " " + (pars == null ? "null" : pars.toJson()));
 
@@ -66,17 +72,22 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
         } else if ("actionOnColumnHeader".equals(type)) {
             handler.actionOnColumnHeader(toStr(pars, 0));
         } else if ("onSheetScroll".equals(type)) {
-            handler.onSheetScroll(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+            handler.onSheetScroll(toInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3));
         } else if ("sheetAddressChanged".equals(type)) {
             handler.sheetAddressChanged(toStr(pars, 0));
         } else if ("cellSelected".equals(type)) {
-            handler.cellSelected(toInt(pars, 0), toInt(pars, 1), toBool(pars, 2));
+            handler.cellSelected(toInt(pars, 0), toInt(pars, 1),
+                    toBool(pars, 2));
         } else if ("cellRangeSelected".equals(type)) {
-            handler.cellRangeSelected(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+            handler.cellRangeSelected(toInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3));
         } else if ("cellAddedToSelectionAndSelected".equals(type)) {
-            handler.cellAddedToSelectionAndSelected(toInt(pars, 0), toInt(pars, 1));
+            handler.cellAddedToSelectionAndSelected(toInt(pars, 0),
+                    toInt(pars, 1));
         } else if ("cellsAddedToRangeSelection".equals(type)) {
-            handler.cellsAddedToRangeSelection(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+            handler.cellsAddedToRangeSelection(toInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3));
         } else if ("rowSelected".equals(type)) {
             handler.rowSelected(toInt(pars, 0), toInt(pars, 1));
         } else if ("rowAddedToRangeSelection".equals(type)) {
@@ -86,27 +97,34 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
         } else if ("columnAddedToSelection".equals(type)) {
             handler.columnAddedToSelection(toInt(pars, 0), toInt(pars, 1));
         } else if ("selectionIncreasePainted".equals(type)) {
-            handler.selectionIncreasePainted(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3));
+            handler.selectionIncreasePainted(toInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3));
         } else if ("selectionDecreasePainted".equals(type)) {
             handler.selectionDecreasePainted(toInt(pars, 0), toInt(pars, 1));
         } else if ("cellValueEdited".equals(type)) {
-            handler.cellValueEdited(toInt(pars, 0), toInt(pars, 1), toStr(pars, 2));
+            handler.cellValueEdited(toInt(pars, 0), toInt(pars, 1),
+                    toStr(pars, 2));
         } else if ("sheetSelected".equals(type)) {
-            handler.sheetSelected(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2));
+            handler.sheetSelected(toInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2));
         } else if ("sheetRenamed".equals(type)) {
             handler.sheetRenamed(toInt(pars, 0), toStr(pars, 1));
         } else if ("sheetCreated".equals(type)) {
             handler.sheetCreated(toInt(pars, 0), toInt(pars, 1));
         } else if ("cellRangePainted".equals(type)) {
-            handler.cellRangePainted(toInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3), toInt(pars, 4), toInt(pars, 5));
+            handler.cellRangePainted(toInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3), toInt(pars, 4),
+                    toInt(pars, 5));
         } else if ("deleteSelectedCells".equals(type)) {
             handler.deleteSelectedCells();
         } else if ("linkCellClicked".equals(type)) {
             handler.linkCellClicked(toInt(pars, 0), toInt(pars, 1));
         } else if ("rowsResized".equals(type)) {
-            handler.rowsResized(toMapFloat(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
+            handler.rowsResized(toMapFloat(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
         } else if ("columnResized".equals(type)) {
-            handler.columnResized(toMapInt(pars, 0), toInt(pars, 1), toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
+            handler.columnResized(toMapInt(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
         } else if ("onRowAutofit".equals(type)) {
             handler.onRowAutofit(toInt(pars, 0));
         } else if ("onColumnAutofit".equals(type)) {
@@ -124,9 +142,11 @@ public class SpreadsheetEventListener implements ComponentEventListener<Spreadsh
         } else if ("clearSelectedCellsOnCut".equals(type)) {
             handler.clearSelectedCellsOnCut();
         } else if ("updateCellComment".equals(type)) {
-            handler.updateCellComment(toStr(pars, 0), toInt(pars, 1), toInt(pars, 2));
+            handler.updateCellComment(toStr(pars, 0), toInt(pars, 1),
+                    toInt(pars, 2));
         } else if ("groupingCollapsed".equals(type)) {
-            handler.setGroupingCollapsed(toBool(pars, 0), toInt(pars, 1),toBool(pars, 2));
+            handler.setGroupingCollapsed(toBool(pars, 0), toInt(pars, 1),
+                    toBool(pars, 2));
         } else if ("levelHeaderClicked".equals(type)) {
             handler.levelHeaderClicked(toBool(pars, 0), toInt(pars, 1));
         }

@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -25,10 +25,10 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
 
 /**
  * Spreadsheet action for inserting a new SpreadsheetTable.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
- * 
+ *
  */
 @SuppressWarnings("serial")
 public class InsertTableAction extends SpreadsheetAction {
@@ -50,7 +50,8 @@ public class InsertTableAction extends SpreadsheetAction {
             // check that the table doesn't contain a table that intersects with
             // the current selection
             for (SpreadsheetTable table : tablesForActiveSheet) {
-                if (CellRangeUtil.intersect(cra, table.getFullTableRegion()) != CellRangeUtil.NO_INTERSECTION) {
+                if (CellRangeUtil.intersect(cra, table
+                        .getFullTableRegion()) != CellRangeUtil.NO_INTERSECTION) {
                     return false;
                 }
             }
@@ -72,8 +73,8 @@ public class InsertTableAction extends SpreadsheetAction {
     public void executeActionOnSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
         SpreadsheetFilterTable table = new SpreadsheetFilterTable(spreadsheet,
-                spreadsheet.getActiveSheet(), event.getCellRangeAddresses()
-                        .get(0));
+                spreadsheet.getActiveSheet(),
+                event.getCellRangeAddresses().get(0));
         spreadsheet.registerTable(table);
     }
 

@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -34,7 +34,8 @@ public abstract class GroupingWidget extends FlowPanel {
     public static final String CONTRACT_SIGN = "&#x2212;";
 
     public interface GroupingHandler {
-        void setGroupingCollapsed(boolean cols, int colIndex, boolean collapsed);
+        void setGroupingCollapsed(boolean cols, int colIndex,
+                boolean collapsed);
 
         void levelHeaderClicked(boolean cols, int level);
     }

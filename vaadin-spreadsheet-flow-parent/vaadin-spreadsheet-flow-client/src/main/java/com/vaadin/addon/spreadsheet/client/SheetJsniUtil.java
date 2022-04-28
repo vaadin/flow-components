@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -114,7 +114,7 @@ public class SheetJsniUtil {
     public native int replaceSelector(StyleElement stylesheet, String selector,
             int ruleindex)
     /*-{
-        var oldSelector = stylesheet.sheet.cssRules[ruleindex].selectorText;        
+        var oldSelector = stylesheet.sheet.cssRules[ruleindex].selectorText;
         var cssText = stylesheet.sheet.cssRules[ruleindex].cssText.replace(oldSelector, selector);
         stylesheet.sheet.deleteRule(ruleindex);
         return stylesheet.sheet.insertRule(cssText, ruleindex);
@@ -123,7 +123,7 @@ public class SheetJsniUtil {
     /** Clears the rules starting from the given index */
     public native void clearCSSRules(StyleElement stylesheet)
     /*-{
-        var rules = stylesheet.sheet.cssRules? stylesheet.sheet.cssRules : stylesheet.sheet.rules;        
+        var rules = stylesheet.sheet.cssRules? stylesheet.sheet.cssRules : stylesheet.sheet.rules;
         while ( rules.length > 0 ) {
             if (stylesheet.sheet.deleteRule) {
                 stylesheet.sheet.deleteRule(0);
@@ -134,7 +134,8 @@ public class SheetJsniUtil {
     }-*/;
 
     /** Gets all Overlay rules */
-    public native String[] getOverlayRules(StyleElement stylesheet, String[] overlaySelectors)
+    public native String[] getOverlayRules(StyleElement stylesheet,
+            String[] overlaySelectors)
     /*-{
         var overlayRules = [];
         var rules = stylesheet.sheet.cssRules ? stylesheet.sheet.cssRules : stylesheet.sheet.rules;

@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-
 public class PopupButtonFixture implements SpreadsheetFixture {
 
     private static final List<String> VALUES = Arrays.asList(new String[] {
@@ -27,8 +26,8 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             }
             List<String> values = new ArrayList<>(VALUES);
             CellReference ref = event.getSelectedCellReference();
-            CellReference newRef = new CellReference(ref.getRow(), ref
-                    .getCol());
+            CellReference newRef = new CellReference(ref.getRow(),
+                    ref.getCol());
             DataValidationButton popupButton = new DataValidationButton(
                     spreadsheet, values);
             popupButton.setUp();
@@ -41,9 +40,10 @@ public class PopupButtonFixture implements SpreadsheetFixture {
 class DataValidationButton extends PopupButton {
     private final CellListSelectComponent cellListSelectComponent;
 
-    public DataValidationButton(Spreadsheet parent,Collection<String> values) {
+    public DataValidationButton(Spreadsheet parent, Collection<String> values) {
         super();
-        cellListSelectComponent = new CellListSelectComponent(values, this,parent);
+        cellListSelectComponent = new CellListSelectComponent(values, this,
+                parent);
     }
 
     public void setUp() {
@@ -60,8 +60,7 @@ class CellListSelectComponent extends CustomField<String> {
     private Collection<String> values;
 
     public CellListSelectComponent(Collection<String> values,
-                                   DataValidationButton context,
-                                   Spreadsheet sheet) {
+            DataValidationButton context, Spreadsheet sheet) {
         super();
         this.values = values;
         listSelect = new ComboBox<>();
@@ -69,7 +68,8 @@ class CellListSelectComponent extends CustomField<String> {
             CellListSelectComponent.this.setValue(event.getValue());
             Cell cell = sheet.getCell(context.getRow(), context.getColumn());
             if (cell == null) {
-                cell = sheet.createCell(context.getRow(), context.getColumn(), event.getValue());
+                cell = sheet.createCell(context.getRow(), context.getColumn(),
+                        event.getValue());
             }
             sheet.refreshCells(cell);
             context.closePopup();

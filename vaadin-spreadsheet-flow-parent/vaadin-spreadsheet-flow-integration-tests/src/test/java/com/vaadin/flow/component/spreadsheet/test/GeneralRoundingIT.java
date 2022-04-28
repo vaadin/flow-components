@@ -34,8 +34,8 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
 
         String cellAfterResize = getSpreadsheet().getCellAt("A7").getValue();
 
-        Assert.assertTrue("Number not shortened", cellAfterResize.length() <
-                cellBeforeResize.length());
+        Assert.assertTrue("Number not shortened",
+                cellAfterResize.length() < cellBeforeResize.length());
         Assert.assertFalse(cellAfterResize.contains(","));
         Assert.assertFalse(cellAfterResize.contains("−"));
         Assert.assertFalse(cellAfterResize.contains("#"));
@@ -55,8 +55,8 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
 
         String cellAfterResize = getSpreadsheet().getCellAt("A7").getValue();
 
-        Assert.assertTrue("Number not shortened", cellAfterResize.length() <
-                cellBeforeResize.length());
+        Assert.assertTrue("Number not shortened",
+                cellAfterResize.length() < cellBeforeResize.length());
         Assert.assertFalse(cellAfterResize.contains(","));
         Assert.assertFalse(cellAfterResize.contains("−"));
         Assert.assertFalse(cellAfterResize.contains("#"));
@@ -64,7 +64,7 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
 
     @Test
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleUS_negativeNumbersRoundedCorrectly() {
-        assertEquals("Check US locale",Locale.US.toString(),"en_US");
+        assertEquals("Check US locale", Locale.US.toString(), "en_US");
         setLocale(Locale.US);
 
         loadFile("negative_general_round.xlsx");
@@ -78,8 +78,8 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
 
         String cellAfterResize = getSpreadsheet().getCellAt("A7").getValue();
 
-        Assert.assertTrue("Number not shortened", cellAfterResize.length() <
-                cellBeforeResize.length());
+        Assert.assertTrue("Number not shortened",
+                cellAfterResize.length() < cellBeforeResize.length());
         Assert.assertFalse(cellAfterResize.contains(","));
         Assert.assertTrue(cellAfterResize.contains("-"));
         Assert.assertFalse(cellAfterResize.contains("#"));
@@ -101,8 +101,8 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
         String cellAfterResize = getSpreadsheet().getCellAt("A7").getValue();
 
         // TODO: fix shortening the number in Finnish locale
-        Assert.assertTrue("Number not shortened", cellAfterResize.length() <
-                cellBeforeResize.length());
+        Assert.assertTrue("Number not shortened",
+                cellAfterResize.length() < cellBeforeResize.length());
         Assert.assertFalse(cellAfterResize.contains("."));
         Assert.assertTrue(cellAfterResize.contains("−"));
         Assert.assertFalse(cellAfterResize.contains("#"));

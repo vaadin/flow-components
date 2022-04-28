@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -21,7 +21,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
 
 /**
  * Spreadsheet action for showing hidden columns or rows.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -53,8 +53,8 @@ public class UnHideHeadersAction extends SpreadsheetAction {
                         unhideHeaderIndex = index - 1;
                         return true;
                     } else if (activeSheet.isColumnHidden(index + 1)) {
-                        setCaption("Unhide column "
-                                + getColumnHeader(index + 2));
+                        setCaption(
+                                "Unhide column " + getColumnHeader(index + 2));
                         unhideHeaderIndex = index + 1;
                         return true;
                     }

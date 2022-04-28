@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -41,7 +41,8 @@ public interface SheetHandler extends GroupingHandler {
 
     void onSelectionDecreasePainted(int colEdgeIndex, int rowEdgeIndex);
 
-    void onFinishedSelectingCellsWithDrag(int col1, int col2, int row1, int row2);
+    void onFinishedSelectingCellsWithDrag(int col1, int col2, int row1,
+            int row2);
 
     void onSelectingCellsWithDrag(int parsedCol, int parsedRow);
 
@@ -189,7 +190,7 @@ public interface SheetHandler extends GroupingHandler {
 
     /**
      * @param rowIndex
-     *     1-based
+     *            1-based
      */
     void onRowHeaderDoubleClick(int rowIndex);
 
@@ -224,7 +225,8 @@ public interface SheetHandler extends GroupingHandler {
 
     void onUndoPress();
 
-    void setCellStyleWidthRatios(HashMap<Integer, Float> cellStyleWidthRatioMap);
+    void setCellStyleWidthRatios(
+            HashMap<Integer, Float> cellStyleWidthRatioMap);
 
     /**
      * Called when user pastes something inside the sheet.

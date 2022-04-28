@@ -59,7 +59,7 @@ public class SpreadsheetJsApi {
      */
     public SpreadsheetJsApi(Element element) {
         if (element != null) {
-           init(element);
+            init(element);
         }
     }
 
@@ -74,7 +74,8 @@ public class SpreadsheetJsApi {
         spreadsheetWidget = spreadsheetConnector.getWidget();
 
         // esto es para evitar el bundle
-        TypeDataStore.get().setClass(spreadsheetConnector.getClass().getName(), SpreadsheetConnector.class);
+        TypeDataStore.get().setClass(spreadsheetConnector.getClass().getName(),
+                SpreadsheetConnector.class);
 
         RootPanel.getForElement(element).add(spreadsheetWidget);
     }
@@ -85,101 +86,112 @@ public class SpreadsheetJsApi {
         }
     }
 
-    private void delegateToWidget(SpreadsheetConnector connector, StateChangeEvent sce) {
-        for (String propertyName : new String[] {
-        "rowBufferSize",
-        "columnBufferSize",
-        "rows",
-        "cols",
-        "colGroupingData",
-        "rowGroupingData",
-        "colGroupingMax",
-        "rowGroupingMax",
-        "colGroupingInversed",
-        "rowGroupingInversed",
-        "defRowH",
-        "defColW",
-        "rowH",
-        "colW",
-        "cellStyleToCSSStyle",
-        "rowIndexToStyleIndex",
-        "columnIndexToStyleIndex",
-        "lockedColumnIndexes",
-        "lockedRowIndexes",
-        "shiftedCellBorderStyles",
-        "conditionalFormattingStyles",
-        "hiddenColumnIndexes",
-        "hiddenRowIndexes",
-        "verticalScrollPositions",
-        "horizontalScrollPositions",
-        "workbookProtected",
-        "hyperlinksTooltips",
-        "displayGridlines",
-        "displayRowColHeadings",
-        "verticalSplitPosition",
-        "horizontalSplitPosition",
-        "infoLabelValue",
-        "invalidFormulaErrorMessage",
-        "lockFormatColumns",
-        "lockFormatRows",
-                "namedRanges",
+    private void delegateToWidget(SpreadsheetConnector connector,
+            StateChangeEvent sce) {
+        for (String propertyName : new String[] { "rowBufferSize",
+                "columnBufferSize", "rows", "cols", "colGroupingData",
+                "rowGroupingData", "colGroupingMax", "rowGroupingMax",
+                "colGroupingInversed", "rowGroupingInversed", "defRowH",
+                "defColW", "rowH", "colW", "cellStyleToCSSStyle",
+                "rowIndexToStyleIndex", "columnIndexToStyleIndex",
+                "lockedColumnIndexes", "lockedRowIndexes",
+                "shiftedCellBorderStyles", "conditionalFormattingStyles",
+                "hiddenColumnIndexes", "hiddenRowIndexes",
+                "verticalScrollPositions", "horizontalScrollPositions",
+                "workbookProtected", "hyperlinksTooltips", "displayGridlines",
+                "displayRowColHeadings", "verticalSplitPosition",
+                "horizontalSplitPosition", "infoLabelValue",
+                "invalidFormulaErrorMessage", "lockFormatColumns",
+                "lockFormatRows", "namedRanges",
 
-            "height",
-                "width",
-                "description",
-                "descriptionContentMode",
-                "caption",
-                "styles",
-                "id",
-                "primaryStyleName",
-                "errorMessage",
-                "captionAsHtml",
-                "tabIndex",
-                "enabled"
-        }) {
-            if (sce.isInitialStateChange() || sce.hasPropertyChanged(propertyName)) {
+                "height", "width", "description", "descriptionContentMode",
+                "caption", "styles", "id", "primaryStyleName", "errorMessage",
+                "captionAsHtml", "tabIndex", "enabled" }) {
+            if (sce.isInitialStateChange()
+                    || sce.hasPropertyChanged(propertyName)) {
                 SpreadsheetWidget w = connector.getWidget();
                 SpreadsheetState s = getState();
-                if ("rowBufferSize".equals(propertyName)) w.setRowBufferSize(s.rowBufferSize);
-                if ("columnBufferSize".equals(propertyName)) w.setColumnBufferSize(s.columnBufferSize);
-                if ("rows".equals(propertyName)) w.setRows(s.rows);
-                if ("cols".equals(propertyName)) w.setCols(s.cols);
-                if ("colGroupingData".equals(propertyName)) w.setColGroupingData(s.colGroupingData);
-                if ("rowGroupingData".equals(propertyName)) w.setRowGroupingData(s.rowGroupingData);
-                if ("colGroupingMax".equals(propertyName)) w.setColGroupingMax(s.colGroupingMax);
-                if ("rowGroupingMax".equals(propertyName)) w.setRowGroupingMax(s.rowGroupingMax);
-                if ("colGroupingInversed".equals(propertyName)) w.setColGroupingInversed(s.colGroupingInversed);
-                if ("rowGroupingInversed".equals(propertyName)) w.setRowGroupingInversed(s.rowGroupingInversed);
-                if ("defRowH".equals(propertyName)) w.setDefRowH(s.defRowH);
-                if ("defColW".equals(propertyName)) w.setDefColW(s.defColW);
-                if ("rowH".equals(propertyName)) w.setRowH(s.rowH);
-                if ("colW".equals(propertyName)) w.setColW(s.colW);
-                if ("cellStyleToCSSStyle".equals(propertyName)) w.setCellStyleToCSSStyle(s.cellStyleToCSSStyle);
-                if ("rowIndexToStyleIndex".equals(propertyName)) w.setRowIndexToStyleIndex(s.rowIndexToStyleIndex);
-                if ("columnIndexToStyleIndex".equals(propertyName)) w.setColumnIndexToStyleIndex(s.columnIndexToStyleIndex);
-                if ("lockedColumnIndexes".equals(propertyName)) w.setLockedColumnIndexes(s.lockedColumnIndexes);
-                if ("lockedRowIndexes".equals(propertyName)) w.setLockedRowIndexes(s.lockedRowIndexes);
-                if ("shiftedCellBorderStyles".equals(propertyName)) w.setShiftedCellBorderStyles(s.shiftedCellBorderStyles);
-                if ("conditionalFormattingStyles".equals(propertyName)) w.setConditionalFormattingStyles(s.conditionalFormattingStyles);
-                if ("hiddenColumnIndexes".equals(propertyName)) w.setHiddenColumnIndexes(s.hiddenColumnIndexes);
-                if ("hiddenRowIndexes".equals(propertyName)) w.setHiddenRowIndexes(s.hiddenRowIndexes);
-                if ("verticalScrollPositions".equals(propertyName)) w.setVerticalScrollPositions(s.verticalScrollPositions);
-                if ("horizontalScrollPositions".equals(propertyName)) w.setHorizontalScrollPositions(s.horizontalScrollPositions);
-                if ("workbookProtected".equals(propertyName)) w.setWorkbookProtected(s.workbookProtected);
-                if ("hyperlinksTooltips".equals(propertyName)) w.setHyperlinksTooltips(s.hyperlinksTooltips);
-                if ("displayGridlines".equals(propertyName)) w.setDisplayGridlines(s.displayGridlines);
-                if ("displayRowColHeadings".equals(propertyName)) w.setDisplayRowColHeadings(s.displayRowColHeadings);
-                if ("verticalSplitPosition".equals(propertyName)) w.setVerticalSplitPosition(s.verticalSplitPosition);
-                if ("horizontalSplitPosition".equals(propertyName)) w.setHorizontalSplitPosition(s.horizontalSplitPosition);
-                if ("infoLabelValue".equals(propertyName)) w.setInfoLabelValue(s.infoLabelValue);
-                if ("invalidFormulaErrorMessage".equals(propertyName)) w.setInvalidFormulaErrorMessage(s.invalidFormulaErrorMessage);
-                if ("lockFormatColumns".equals(propertyName)) w.setLockFormatColumns(s.lockFormatColumns);
-                if ("lockFormatRows".equals(propertyName)) w.setLockFormatRows(s.lockFormatRows);
-                if ("namedRanges".equals(propertyName)) w.setNamedRanges(s.namedRanges);
+                if ("rowBufferSize".equals(propertyName))
+                    w.setRowBufferSize(s.rowBufferSize);
+                if ("columnBufferSize".equals(propertyName))
+                    w.setColumnBufferSize(s.columnBufferSize);
+                if ("rows".equals(propertyName))
+                    w.setRows(s.rows);
+                if ("cols".equals(propertyName))
+                    w.setCols(s.cols);
+                if ("colGroupingData".equals(propertyName))
+                    w.setColGroupingData(s.colGroupingData);
+                if ("rowGroupingData".equals(propertyName))
+                    w.setRowGroupingData(s.rowGroupingData);
+                if ("colGroupingMax".equals(propertyName))
+                    w.setColGroupingMax(s.colGroupingMax);
+                if ("rowGroupingMax".equals(propertyName))
+                    w.setRowGroupingMax(s.rowGroupingMax);
+                if ("colGroupingInversed".equals(propertyName))
+                    w.setColGroupingInversed(s.colGroupingInversed);
+                if ("rowGroupingInversed".equals(propertyName))
+                    w.setRowGroupingInversed(s.rowGroupingInversed);
+                if ("defRowH".equals(propertyName))
+                    w.setDefRowH(s.defRowH);
+                if ("defColW".equals(propertyName))
+                    w.setDefColW(s.defColW);
+                if ("rowH".equals(propertyName))
+                    w.setRowH(s.rowH);
+                if ("colW".equals(propertyName))
+                    w.setColW(s.colW);
+                if ("cellStyleToCSSStyle".equals(propertyName))
+                    w.setCellStyleToCSSStyle(s.cellStyleToCSSStyle);
+                if ("rowIndexToStyleIndex".equals(propertyName))
+                    w.setRowIndexToStyleIndex(s.rowIndexToStyleIndex);
+                if ("columnIndexToStyleIndex".equals(propertyName))
+                    w.setColumnIndexToStyleIndex(s.columnIndexToStyleIndex);
+                if ("lockedColumnIndexes".equals(propertyName))
+                    w.setLockedColumnIndexes(s.lockedColumnIndexes);
+                if ("lockedRowIndexes".equals(propertyName))
+                    w.setLockedRowIndexes(s.lockedRowIndexes);
+                if ("shiftedCellBorderStyles".equals(propertyName))
+                    w.setShiftedCellBorderStyles(s.shiftedCellBorderStyles);
+                if ("conditionalFormattingStyles".equals(propertyName))
+                    w.setConditionalFormattingStyles(
+                            s.conditionalFormattingStyles);
+                if ("hiddenColumnIndexes".equals(propertyName))
+                    w.setHiddenColumnIndexes(s.hiddenColumnIndexes);
+                if ("hiddenRowIndexes".equals(propertyName))
+                    w.setHiddenRowIndexes(s.hiddenRowIndexes);
+                if ("verticalScrollPositions".equals(propertyName))
+                    w.setVerticalScrollPositions(s.verticalScrollPositions);
+                if ("horizontalScrollPositions".equals(propertyName))
+                    w.setHorizontalScrollPositions(s.horizontalScrollPositions);
+                if ("workbookProtected".equals(propertyName))
+                    w.setWorkbookProtected(s.workbookProtected);
+                if ("hyperlinksTooltips".equals(propertyName))
+                    w.setHyperlinksTooltips(s.hyperlinksTooltips);
+                if ("displayGridlines".equals(propertyName))
+                    w.setDisplayGridlines(s.displayGridlines);
+                if ("displayRowColHeadings".equals(propertyName))
+                    w.setDisplayRowColHeadings(s.displayRowColHeadings);
+                if ("verticalSplitPosition".equals(propertyName))
+                    w.setVerticalSplitPosition(s.verticalSplitPosition);
+                if ("horizontalSplitPosition".equals(propertyName))
+                    w.setHorizontalSplitPosition(s.horizontalSplitPosition);
+                if ("infoLabelValue".equals(propertyName))
+                    w.setInfoLabelValue(s.infoLabelValue);
+                if ("invalidFormulaErrorMessage".equals(propertyName))
+                    w.setInvalidFormulaErrorMessage(
+                            s.invalidFormulaErrorMessage);
+                if ("lockFormatColumns".equals(propertyName))
+                    w.setLockFormatColumns(s.lockFormatColumns);
+                if ("lockFormatRows".equals(propertyName))
+                    w.setLockFormatRows(s.lockFormatRows);
+                if ("namedRanges".equals(propertyName))
+                    w.setNamedRanges(s.namedRanges);
 
-                if ("height".equals(propertyName)) w.setHeight(s.height);
-                if ("width".equals(propertyName)) w.setWidth(s.width);
-                if ("id".equals(propertyName)) w.setId(s.id);
+                if ("height".equals(propertyName))
+                    w.setHeight(s.height);
+                if ("width".equals(propertyName))
+                    w.setWidth(s.width);
+                if ("id".equals(propertyName))
+                    w.setId(s.id);
             }
         }
     }
@@ -196,22 +208,25 @@ public class SpreadsheetJsApi {
 
     public void relayout() {
         Scheduler.get().scheduleDeferred(() -> {
-            //spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
+            // spreadsheetWidget.getSheetWidget().ensureCustomStyleTagsAreInTheRightShadowRoot();
             spreadsheetWidget.relayoutSheet();
         });
     }
 
     private SpreadsheetServerRpcImpl getServerRpcInstance() {
-        return (SpreadsheetServerRpcImpl) spreadsheetConnector.getProtectedRpcProxy(SpreadsheetServerRpc.class);
+        return (SpreadsheetServerRpcImpl) spreadsheetConnector
+                .getProtectedRpcProxy(SpreadsheetServerRpc.class);
     }
 
     private SpreadsheetClientRpc getClientRpcInstance() {
-        String rpcInterfaceId = SpreadsheetClientRpc.class.getName().replaceAll("\\$", ".");
-        return (SpreadsheetClientRpc) spreadsheetConnector.getRpcImplementations(rpcInterfaceId).iterator().next();
+        String rpcInterfaceId = SpreadsheetClientRpc.class.getName()
+                .replaceAll("\\$", ".");
+        return (SpreadsheetClientRpc) spreadsheetConnector
+                .getRpcImplementations(rpcInterfaceId).iterator().next();
     }
 
     /*
-    SHARED STATE
+     * SHARED STATE
      */
     protected SpreadsheetState getState() {
         return spreadsheetConnector.getState();
@@ -234,11 +249,13 @@ public class SpreadsheetJsApi {
     }
 
     public void setColGroupingData(String colGroupingData) {
-        getState().colGroupingData = Parser.parseListOfGroupingData(colGroupingData);
+        getState().colGroupingData = Parser
+                .parseListOfGroupingData(colGroupingData);
     }
 
     public void setRowGroupingData(String rowGroupingData) {
-        getState().rowGroupingData = Parser.parseListOfGroupingData(rowGroupingData);
+        getState().rowGroupingData = Parser
+                .parseListOfGroupingData(rowGroupingData);
     }
 
     public void setColGroupingMax(int colGroupingMax) {
@@ -286,19 +303,23 @@ public class SpreadsheetJsApi {
     }
 
     public void setCellStyleToCSSStyle(String cellStyleToCSSStyle) {
-        getState().cellStyleToCSSStyle = Parser.parseMapIntegerString(cellStyleToCSSStyle);
+        getState().cellStyleToCSSStyle = Parser
+                .parseMapIntegerString(cellStyleToCSSStyle);
     }
 
     public void setRowIndexToStyleIndex(String rowIndexToStyleIndex) {
-        getState().rowIndexToStyleIndex = Parser.parseMapIntegerInteger(rowIndexToStyleIndex);
+        getState().rowIndexToStyleIndex = Parser
+                .parseMapIntegerInteger(rowIndexToStyleIndex);
     }
 
     public void setColumnIndexToStyleIndex(String columnIndexToStyleIndex) {
-        getState().columnIndexToStyleIndex = Parser.parseMapIntegerInteger(columnIndexToStyleIndex);
+        getState().columnIndexToStyleIndex = Parser
+                .parseMapIntegerInteger(columnIndexToStyleIndex);
     }
 
     public void setLockedColumnIndexes(String lockedColumnIndexes) {
-        getState().lockedColumnIndexes = Parser.parseSetInteger(lockedColumnIndexes);
+        getState().lockedColumnIndexes = Parser
+                .parseSetInteger(lockedColumnIndexes);
     }
 
     public void setLockedRowIndexes(String lockedRowIndexes) {
@@ -306,27 +327,34 @@ public class SpreadsheetJsApi {
     }
 
     public void setShiftedCellBorderStyles(String shiftedCellBorderStyles) {
-        getState().shiftedCellBorderStyles = Parser.parseArraylistString(shiftedCellBorderStyles);
+        getState().shiftedCellBorderStyles = Parser
+                .parseArraylistString(shiftedCellBorderStyles);
     }
 
-    public void setConditionalFormattingStyles(String conditionalFormattingStyles) {
-        getState().conditionalFormattingStyles = Parser.parseMapIntegerString(conditionalFormattingStyles);
+    public void setConditionalFormattingStyles(
+            String conditionalFormattingStyles) {
+        getState().conditionalFormattingStyles = Parser
+                .parseMapIntegerString(conditionalFormattingStyles);
     }
 
     public void setHiddenColumnIndexes(String hiddenColumnIndexes) {
-        getState().hiddenColumnIndexes = Parser.parseArraylistInteger(hiddenColumnIndexes);
+        getState().hiddenColumnIndexes = Parser
+                .parseArraylistInteger(hiddenColumnIndexes);
     }
 
     public void setHiddenRowIndexes(String hiddenRowIndexes) {
-        getState().hiddenRowIndexes = Parser.parseArraylistInteger(hiddenRowIndexes);
+        getState().hiddenRowIndexes = Parser
+                .parseArraylistInteger(hiddenRowIndexes);
     }
 
     public void setVerticalScrollPositions(String verticalScrollPositions) {
-        getState().verticalScrollPositions = Parser.parseArrayInt(verticalScrollPositions);
+        getState().verticalScrollPositions = Parser
+                .parseArrayInt(verticalScrollPositions);
     }
 
     public void setHorizontalScrollPositions(String horizontalScrollPositions) {
-        getState().horizontalScrollPositions = Parser.parseArrayInt(horizontalScrollPositions);
+        getState().horizontalScrollPositions = Parser
+                .parseArrayInt(horizontalScrollPositions);
     }
 
     public void setSheetProtected(boolean sheetProtected) {
@@ -338,15 +366,18 @@ public class SpreadsheetJsApi {
     }
 
     public void setCellKeysToEditorIdMap(String cellKeysToEditorIdMap) {
-        getState().cellKeysToEditorIdMap = Parser.parseMapStringString(cellKeysToEditorIdMap);
+        getState().cellKeysToEditorIdMap = Parser
+                .parseMapStringString(cellKeysToEditorIdMap);
     }
 
     public void setComponentIDtoCellKeysMap(String componentIDtoCellKeysMap) {
-        getState().componentIDtoCellKeysMap = Parser.parseMapStringString(componentIDtoCellKeysMap);
+        getState().componentIDtoCellKeysMap = Parser
+                .parseMapStringString(componentIDtoCellKeysMap);
     }
 
     public void setHyperlinksTooltips(String hyperlinksTooltips) {
-        getState().hyperlinksTooltips = Parser.parseMapStringString(hyperlinksTooltips);
+        getState().hyperlinksTooltips = Parser
+                .parseMapStringString(hyperlinksTooltips);
     }
 
     public void setCellComments(String cellCommentsJson) {
@@ -354,15 +385,18 @@ public class SpreadsheetJsApi {
     }
 
     public void setCellCommentAuthors(String cellCommentAuthors) {
-        getState().cellCommentAuthors = Parser.parseMapStringString(cellCommentAuthors);
+        getState().cellCommentAuthors = Parser
+                .parseMapStringString(cellCommentAuthors);
     }
 
     public void setVisibleCellComments(String visibleCellComments) {
-        getState().visibleCellComments = Parser.parseArraylistString(visibleCellComments);
+        getState().visibleCellComments = Parser
+                .parseArraylistString(visibleCellComments);
     }
 
     public void setInvalidFormulaCells(String invalidFormulaCells) {
-        getState().invalidFormulaCells = Parser.parseSetString(invalidFormulaCells);
+        getState().invalidFormulaCells = Parser
+                .parseSetString(invalidFormulaCells);
     }
 
     public void setHasActions(boolean hasActions) {
@@ -401,7 +435,8 @@ public class SpreadsheetJsApi {
         getState().workbookChangeToggle = workbookChangeToggle;
     }
 
-    public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
+    public void setInvalidFormulaErrorMessage(
+            String invalidFormulaErrorMessage) {
         getState().invalidFormulaErrorMessage = invalidFormulaErrorMessage;
     }
 
@@ -462,7 +497,9 @@ public class SpreadsheetJsApi {
                 widget.setCol(state.col);
                 widget.setRow(state.row);
                 widget.setPopupHeaderHidden(state.headerHidden);
-                widget.setSheetWidget(spreadsheetWidget.getSheetWidget(), DivElement.as(spreadsheetWidget.getSheetWidget().getElement()));
+                widget.setSheetWidget(spreadsheetWidget.getSheetWidget(),
+                        DivElement.as(spreadsheetWidget.getSheetWidget()
+                                .getElement()));
                 widget.setPopupWidth(state.popupWidth);
                 widget.setPopupHeight(state.popupHeight);
                 spreadsheetWidget.addPopupButton(widget);
@@ -472,13 +509,16 @@ public class SpreadsheetJsApi {
 
     public void setResources(Element element, String resources) {
         ArrayList<String> l = Parser.parseArraylistString(resources);
-        l.forEach(k -> spreadsheetConnector.getConnection().setResource(k, element.getAttribute("resource-" + k)));
+        l.forEach(k -> spreadsheetConnector.getConnection().setResource(k,
+                element.getAttribute("resource-" + k)));
     }
 
     public void notifyStateChanges(String[] propNames, boolean initial) {
         JsonObject stateJson = Json.createObject();
-        for (String propName : propNames) stateJson.put(propName, "");
-        StateChangeEvent event = new StateChangeEvent(spreadsheetConnector, stateJson, initial);
+        for (String propName : propNames)
+            stateJson.put(propName, "");
+        StateChangeEvent event = new StateChangeEvent(spreadsheetConnector,
+                stateJson, initial);
         delegateToWidget(spreadsheetConnector, event);
         spreadsheetConnector.onStateChanged(event);
     }
@@ -486,19 +526,23 @@ public class SpreadsheetJsApi {
     /* CLIENT RPC METHODS */
 
     public void updateBottomRightCellValues(String cellData) {
-        getClientRpcInstance().updateBottomRightCellValues(Parser.parseArraylistOfCellData(cellData));
+        getClientRpcInstance().updateBottomRightCellValues(
+                Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateTopLeftCellValues(String cellData) {
-        getClientRpcInstance().updateTopLeftCellValues(Parser.parseArraylistOfCellData(cellData));
+        getClientRpcInstance().updateTopLeftCellValues(
+                Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateTopRightCellValues(String cellData) {
-        getClientRpcInstance().updateTopRightCellValues(Parser.parseArraylistOfCellData(cellData));
+        getClientRpcInstance().updateTopRightCellValues(
+                Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateBottomLeftCellValues(String cellData) {
-        getClientRpcInstance().updateBottomLeftCellValues(Parser.parseArraylistOfCellData(cellData));
+        getClientRpcInstance().updateBottomLeftCellValues(
+                Parser.parseArraylistOfCellData(cellData));
     }
 
     public void updateFormulaBar(String possibleName, int col, int row) {
@@ -509,20 +553,27 @@ public class SpreadsheetJsApi {
         getClientRpcInstance().invalidCellAddress();
     }
 
-    public void showSelectedCell(String name, int col, int row, String cellValue, boolean formula, boolean locked, boolean initialSelection) {
-        getClientRpcInstance().showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
+    public void showSelectedCell(String name, int col, int row,
+            String cellValue, boolean formula, boolean locked,
+            boolean initialSelection) {
+        getClientRpcInstance().showSelectedCell(name, col, row, cellValue,
+                formula, locked, initialSelection);
     }
 
     public void showActions(String actionDetails) {
-        getClientRpcInstance().showActions(Parser.parseArraylistSpreadsheetActionDetails(actionDetails));
+        getClientRpcInstance().showActions(
+                Parser.parseArraylistSpreadsheetActionDetails(actionDetails));
     }
 
-    public void setSelectedCellAndRange(String name, int col, int row, int c1, int c2, int r1, int r2, boolean scroll) {
-        getClientRpcInstance().setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
+    public void setSelectedCellAndRange(String name, int col, int row, int c1,
+            int c2, int r1, int r2, boolean scroll) {
+        getClientRpcInstance().setSelectedCellAndRange(name, col, row, c1, c2,
+                r1, r2, scroll);
     }
 
     public void cellsUpdated(String cellData) {
-        getClientRpcInstance().cellsUpdated(Parser.parseArraylistOfCellData(cellData));
+        getClientRpcInstance()
+                .cellsUpdated(Parser.parseArraylistOfCellData(cellData));
     }
 
     public void refreshCellStyles() {
@@ -541,7 +592,7 @@ public class SpreadsheetJsApi {
     }
 
     /*
-    SERVER RPC METHOD CALLBACKS
+     * SERVER RPC METHOD CALLBACKS
      */
     public void setGroupingCollapsedCallback(Consumer<String> callback) {
         getServerRpcInstance().setGroupingCollapsedCallback(callback);
@@ -567,11 +618,14 @@ public class SpreadsheetJsApi {
         getServerRpcInstance().setCellRangeSelectedCallback(callback);
     }
 
-    public void setCellAddedToSelectionAndSelectedCallback(Consumer<String> callback) {
-        getServerRpcInstance().setCellAddedToSelectionAndSelectedCallback(callback);
+    public void setCellAddedToSelectionAndSelectedCallback(
+            Consumer<String> callback) {
+        getServerRpcInstance()
+                .setCellAddedToSelectionAndSelectedCallback(callback);
     }
 
-    public void setCellsAddedToRangeSelectionCallback(Consumer<String> callback) {
+    public void setCellsAddedToRangeSelectionCallback(
+            Consumer<String> callback) {
         getServerRpcInstance().setCellsAddedToRangeSelectionCallback(callback);
     }
 
@@ -594,7 +648,6 @@ public class SpreadsheetJsApi {
     public void setSelectionIncreasePaintedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSelectionIncreasePaintedCallback(callback);
     }
-
 
     public void setSelectionDecreasePaintedCallback(Consumer<String> callback) {
         getServerRpcInstance().setSelectionDecreasePaintedCallback(callback);
@@ -676,7 +729,8 @@ public class SpreadsheetJsApi {
         getServerRpcInstance().setOnConnectorInitCallback(callback);
     }
 
-    public void setContextMenuOpenOnSelectionCallback(Consumer<String> callback) {
+    public void setContextMenuOpenOnSelectionCallback(
+            Consumer<String> callback) {
         getServerRpcInstance().setContextMenuOpenOnSelectionCallback(callback);
     }
 
@@ -684,7 +738,8 @@ public class SpreadsheetJsApi {
         getServerRpcInstance().setActionOnCurrentSelectionCallback(callback);
     }
 
-    public void setRowHeaderContextMenuOpenCallback(Consumer<Integer> callback) {
+    public void setRowHeaderContextMenuOpenCallback(
+            Consumer<Integer> callback) {
         getServerRpcInstance().setRowHeaderContextMenuOpenCallback(callback);
     }
 
@@ -692,14 +747,14 @@ public class SpreadsheetJsApi {
         getServerRpcInstance().setActionOnRowHeaderCallback(callback);
     }
 
-    public void setColumnHeaderContextMenuOpenCallback(Consumer<Integer> callback) {
+    public void setColumnHeaderContextMenuOpenCallback(
+            Consumer<Integer> callback) {
         getServerRpcInstance().setColumnHeaderContextMenuOpenCallback(callback);
     }
 
     public void setActionOnColumnHeaderCallback(Consumer<String> callback) {
         getServerRpcInstance().setActionOnColumnHeaderCallback(callback);
     }
-
 
     public void load() {
         spreadsheetWidget.load();

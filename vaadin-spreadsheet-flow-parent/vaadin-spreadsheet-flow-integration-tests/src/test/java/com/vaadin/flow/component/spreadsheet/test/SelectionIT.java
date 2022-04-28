@@ -175,8 +175,7 @@ public class SelectionIT extends AbstractSpreadsheetIT {
     }
 
     private void assertCellSelected(String cell) {
-        assertTrue(getSpreadsheet().getCellAt(cell)
-                .isCellSelected());
+        assertTrue(getSpreadsheet().getCellAt(cell).isCellSelected());
     }
 
     private void assertRowSelected(String row) {

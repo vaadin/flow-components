@@ -6,7 +6,6 @@ import org.apache.poi.ss.util.CellReference;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ColumnToggleFixture implements SpreadsheetFixture {
 
     @Override

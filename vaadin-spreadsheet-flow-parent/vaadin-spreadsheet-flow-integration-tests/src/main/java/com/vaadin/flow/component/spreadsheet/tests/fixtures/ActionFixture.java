@@ -7,7 +7,6 @@ import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetHelper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-
 public class ActionFixture implements SpreadsheetFixture {
 
     @Override
@@ -18,9 +17,10 @@ public class ActionFixture implements SpreadsheetFixture {
         handler.addCellHandler(new SpreadsheetActionHandler.Cell() {
             @Override
             public void handleAction(Action action,
-                                     Spreadsheet.SelectionChangeEvent sender, Spreadsheet target) {
-                SpreadsheetHelper helper = new SpreadsheetHelper(sender
-                        .getSpreadsheet());
+                    Spreadsheet.SelectionChangeEvent sender,
+                    Spreadsheet target) {
+                SpreadsheetHelper helper = new SpreadsheetHelper(
+                        sender.getSpreadsheet());
 
                 for (Cell cell : helper.selectedCell(sender).values()) {
                     doubleValue(cell);
@@ -31,8 +31,9 @@ public class ActionFixture implements SpreadsheetFixture {
             }
 
             @Override
-            public Action[] getActions(Spreadsheet.SelectionChangeEvent selection,
-                                       Spreadsheet sender) {
+            public Action[] getActions(
+                    Spreadsheet.SelectionChangeEvent selection,
+                    Spreadsheet sender) {
                 return new Action[] { new Action("Double cell values"), };
             }
 
@@ -44,9 +45,10 @@ public class ActionFixture implements SpreadsheetFixture {
         handler.addCellHandler(new SpreadsheetActionHandler.Cell() {
             @Override
             public void handleAction(Action action,
-                                     Spreadsheet.SelectionChangeEvent sender, Spreadsheet target) {
-                SpreadsheetHelper helper = new SpreadsheetHelper(sender
-                        .getSpreadsheet());
+                    Spreadsheet.SelectionChangeEvent sender,
+                    Spreadsheet target) {
+                SpreadsheetHelper helper = new SpreadsheetHelper(
+                        sender.getSpreadsheet());
 
                 for (Cell cell : helper.selectedCell(sender).values()) {
                     cell.setCellValue(42);
@@ -57,7 +59,7 @@ public class ActionFixture implements SpreadsheetFixture {
 
             @Override
             public Action[] getActions(Spreadsheet.SelectionChangeEvent target,
-                                       Spreadsheet sender) {
+                    Spreadsheet sender) {
                 return new Action[] { new Action("Number"), };
             }
         });
@@ -67,10 +69,10 @@ public class ActionFixture implements SpreadsheetFixture {
             public void handleAction(Action action, CellRangeAddress sender,
                     Spreadsheet target) {
                 SpreadsheetHelper helper = new SpreadsheetHelper(target);
-                helper.retrieveCell(2, sender.getFirstColumn()).setCellValue(
-                        "first column");
-                helper.retrieveCell(3, sender.getFirstColumn()).setCellValue(
-                        "last column");
+                helper.retrieveCell(2, sender.getFirstColumn())
+                        .setCellValue("first column");
+                helper.retrieveCell(3, sender.getFirstColumn())
+                        .setCellValue("last column");
 
                 target.refreshAllCellValues();
             }

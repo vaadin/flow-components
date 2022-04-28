@@ -10,7 +10,7 @@ import org.openqa.selenium.WebElement;
 /**
  * This class represents one cell within the currently active sheet of a
  * Spreadsheet.
- * 
+ *
  * @author Vaadin Ltd.
  */
 public class SheetCellElement extends TestBenchElement {
@@ -22,9 +22,9 @@ public class SheetCellElement extends TestBenchElement {
      * values to cells containing custom editors. To set values to custom
      * editors, you should directly set the value to the custom editor which is
      * a child of this element.
-     * 
+     *
      * Note: Calling this method will set the current selection to this cell.
-     * 
+     *
      * @param newValue
      *            Value to set.
      */
@@ -35,7 +35,8 @@ public class SheetCellElement extends TestBenchElement {
                 return parent.getCellValueInput().isDisplayed();
             });
             WebElement cellValueInput = parent.getCellValueInput();
-            executeScript("arguments[0].value=''", ((TestBenchElement) cellValueInput).getWrappedElement());
+            executeScript("arguments[0].value=''",
+                    ((TestBenchElement) cellValueInput).getWrappedElement());
             cellValueInput.sendKeys(newValue);
             cellValueInput.sendKeys(Keys.TAB);
             getCommandExecutor().waitForVaadin();
@@ -44,7 +45,7 @@ public class SheetCellElement extends TestBenchElement {
 
     /**
      * Gets the current value of this cell as a string.
-     * 
+     *
      * @return Current value
      */
     public String getValue() {
@@ -53,7 +54,7 @@ public class SheetCellElement extends TestBenchElement {
 
     /**
      * Finds out if this cell is selected.
-     * 
+     *
      * @return True if cell selected, false otherwise.
      */
     public boolean isCellSelected() {
@@ -63,20 +64,21 @@ public class SheetCellElement extends TestBenchElement {
     /**
      * Determines if this cell is normal in the sense that it uses the default
      * in-line editor for editing the cell value.
-     * 
+     *
      * @return true if this cell uses the normal in-line editor, false if this
      *         cell has e.g. a custom editor component.
      */
     public boolean isNormalCell() {
         List<WebElement> children = findElements(By.xpath(".//*"));
-        // might have an inner div for example when content is overflowing, cell has a comment
+        // might have an inner div for example when content is overflowing, cell
+        // has a comment
         // or cell contains an invalid formula
         return noneOfTheElementsIsWidget(children);
     }
 
     private boolean noneOfTheElementsIsWidget(List<WebElement> children) {
-        for(WebElement e : children) {
-            if(e.getAttribute("class").contains("v-widget")) {
+        for (WebElement e : children) {
+            if (e.getAttribute("class").contains("v-widget")) {
                 return false;
             }
         }
@@ -118,7 +120,8 @@ public class SheetCellElement extends TestBenchElement {
      * @return true if this cell has a invalid formula indicator
      */
     public boolean hasInvalidFormulaIndicator() {
-        List<WebElement> indicators = findElements(By.className("cell-invalidformula-triangle"));
+        List<WebElement> indicators = findElements(
+                By.className("cell-invalidformula-triangle"));
         return !indicators.isEmpty();
     }
 
@@ -128,7 +131,8 @@ public class SheetCellElement extends TestBenchElement {
      * @return true if this cell has a comment indicator
      */
     public boolean hasCommentIndicator() {
-        List<WebElement> indicators = findElements(By.className("cell-comment-triangle"));
+        List<WebElement> indicators = findElements(
+                By.className("cell-comment-triangle"));
         return !indicators.isEmpty();
     }
 

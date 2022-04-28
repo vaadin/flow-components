@@ -44,7 +44,8 @@ public class GroupingData implements Serializable {
     }
 
     @JsIgnore
-    public GroupingData(int start, int end, int level, int unique, boolean coll) {
+    public GroupingData(int start, int end, int level, int unique,
+            boolean coll) {
         startIndex = start;
         endIndex = end;
         this.level = level;

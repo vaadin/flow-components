@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.command;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -19,7 +19,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
  * Abstract base class for Spreadsheet commands.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -30,7 +30,7 @@ public abstract class SpreadsheetCommand implements Command {
 
     /**
      * Creates a new command targeting the given spreadsheet.
-     * 
+     *
      * @param spreadsheet
      *            The target spreadsheet
      */
@@ -41,7 +41,7 @@ public abstract class SpreadsheetCommand implements Command {
 
     /**
      * Returns the currently active sheet.
-     * 
+     *
      * @return active sheet
      */
     protected Sheet getSheet() {

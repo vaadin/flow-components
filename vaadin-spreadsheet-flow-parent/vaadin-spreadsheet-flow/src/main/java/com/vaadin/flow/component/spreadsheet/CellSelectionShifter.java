@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -35,12 +35,12 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
 /**
  * CellSelectionShifter is an utility class for Spreadsheet which handles cell
  * shift events.
- * 
+ *
  * Shifting is an Excel term and means the situation where the user has selected
  * one or more cells, and grabs the bottom right hand square of the selected
  * area to extend or curtail the selection and fill the new area with values
  * determined from the existing values.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -60,7 +60,7 @@ public class CellSelectionShifter implements Serializable {
 
     /**
      * Creates a new CellShifter and ties it to the given Spreadsheet
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -71,7 +71,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * This method will be called when the user does a "shift" that increases
      * the amount of selected cells.
-     * 
+     *
      * @param r1
      *            Index of the starting row, 1-based
      * @param c1
@@ -85,9 +85,8 @@ public class CellSelectionShifter implements Serializable {
         final CellRangeAddress paintedCellRange = spreadsheet
                 .getCellSelectionManager().getSelectedCellRange();
         if (paintedCellRange != null) {
-            if (spreadsheet.isRangeEditable(paintedCellRange)
-                    && spreadsheet.isRangeEditable(r1 - 1, c1 - 1, r2 - 1,
-                            c2 - 1)) {
+            if (spreadsheet.isRangeEditable(paintedCellRange) && spreadsheet
+                    .isRangeEditable(r1 - 1, c1 - 1, r2 - 1, c2 - 1)) {
                 CellRangeAddress changedCellRangeAddress = null;
                 // store values
                 CellValueCommand command = new CellShiftValuesCommand(
@@ -144,7 +143,8 @@ public class CellSelectionShifter implements Serializable {
 
     private void fireCellValueChangeEvent(CellRangeAddress region) {
         Set<CellReference> cells = new HashSet<CellReference>();
-        for (int x = region.getFirstColumn(); x <= region.getLastColumn(); x++) {
+        for (int x = region.getFirstColumn(); x <= region
+                .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
                 cells.add(new CellReference(y, x));
             }
@@ -158,7 +158,7 @@ public class CellSelectionShifter implements Serializable {
      * bottom right hand square of the selected area to extend or curtail the
      * selection and fill the new area with values determined from the existing
      * values.
-     * 
+     *
      * @param shiftedCell
      *            Source cell
      * @param newCell
@@ -176,8 +176,8 @@ public class CellSelectionShifter implements Serializable {
                 || shiftedCell.getCellType() == CellType.BLANK) {
             newCell.setBlank();
         }
-        spreadsheet.getSpreadsheetStyleFactory()
-                .cellStyleUpdated(newCell, true);
+        spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(newCell,
+                true);
         switch (shiftedCell.getCellType()) {
         case FORMULA:
             shiftFormula(shiftedCell, newCell);
@@ -210,7 +210,7 @@ public class CellSelectionShifter implements Serializable {
      * Set's cell value for the newCell. It will be the same as shiftedCell
      * unless sequenceIncrement is not null, in that case the last digits are
      * replaced
-     * 
+     *
      * @param shiftedCell
      *            Source cell
      * @param newCell
@@ -229,8 +229,8 @@ public class CellSelectionShifter implements Serializable {
                 dif = newCell.getRowIndex() - shiftedCell.getRowIndex();
             }
 
-            Matcher matcher = stringSequencePattern.matcher(shiftedCell
-                    .getStringCellValue());
+            Matcher matcher = stringSequencePattern
+                    .matcher(shiftedCell.getStringCellValue());
             if (matcher.find()) {
                 String base = shiftedCell.getStringCellValue().substring(0,
                         matcher.start());
@@ -250,7 +250,7 @@ public class CellSelectionShifter implements Serializable {
      * Set's cell value for the newCell. It will be the same as shiftedCell
      * unless sequenceIncrement is not null, in that case the value changes
      * depending on sequenceIncrement and cell distance
-     * 
+     *
      * @param shiftedCell
      *            Source cell
      * @param newCell
@@ -278,7 +278,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * Set's cell value for the newCell. It will be the same as shiftedCell with
      * updated references.
-     * 
+     *
      * @param shiftedCell
      *            Source cell
      * @param newCell
@@ -290,8 +290,8 @@ public class CellSelectionShifter implements Serializable {
                 // shift column indexes
                 int collDiff = newCell.getColumnIndex()
                         - shiftedCell.getColumnIndex();
-                Matcher matcher = rowShiftPattern.matcher(shiftedCell
-                        .getCellFormula());
+                Matcher matcher = rowShiftPattern
+                        .matcher(shiftedCell.getCellFormula());
                 String originalFormula = shiftedCell.getCellFormula();
                 StringBuilder newFormula = new StringBuilder();
                 int lastEnd = 0;
@@ -299,8 +299,8 @@ public class CellSelectionShifter implements Serializable {
                     String s = matcher.group();
                     String replacement;
                     if (!s.startsWith("$")) {
-                        String oldIndexString = s
-                                .replaceAll("[$]{0,1}\\d+", "");
+                        String oldIndexString = s.replaceAll("[$]{0,1}\\d+",
+                                "");
 
                         int columnIndex = SpreadsheetUtil
                                 .getColHeaderIndex(oldIndexString);
@@ -320,8 +320,8 @@ public class CellSelectionShifter implements Serializable {
                 newCell.setCellFormula(newFormula.toString());
             } else { // shift row indexes
                 int rowDiff = newCell.getRowIndex() - shiftedCell.getRowIndex();
-                Matcher matcher = rowShiftPattern.matcher(shiftedCell
-                        .getCellFormula());
+                Matcher matcher = rowShiftPattern
+                        .matcher(shiftedCell.getCellFormula());
                 String originalFormula = shiftedCell.getCellFormula();
                 StringBuilder newFormula = new StringBuilder();
                 int lastEnd = 0;
@@ -358,7 +358,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * This method will be called when the user does a "shift" that decreases
      * the amount of selected cells.
-     * 
+     *
      * @param r
      *            Row index of the new last selected row, 1-based
      * @param c
@@ -393,7 +393,8 @@ public class CellSelectionShifter implements Serializable {
                             .createCorrectCellRangeAddress(
                                     paintedCellRange.getFirstRow() + 1,
                                     paintedCellRange.getFirstColumn() + 1,
-                                    r - 1, paintedCellRange.getLastColumn() + 1);
+                                    r - 1,
+                                    paintedCellRange.getLastColumn() + 1);
                 }
                 if (newPaintedCellRange != null) {
                     CellReference selectedCellReference = spreadsheet
@@ -434,8 +435,8 @@ public class CellSelectionShifter implements Serializable {
         int c1 = paintedCellRange.getFirstColumn() + 1;
         int c2 = paintedCellRange.getLastColumn() + 1;
         Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
         for (int shiftedRowIndex = r1; shiftedRowIndex <= r2; shiftedRowIndex++) {
             final Row shiftedRow = activeSheet.getRow(shiftedRowIndex - 1);
             int newRowIndex = r2 + 1 + (shiftedRowIndex - r1);
@@ -446,8 +447,8 @@ public class CellSelectionShifter implements Serializable {
                         newRow = activeSheet.createRow(newRowIndex - 1);
                     }
                     for (int c = c1; c <= c2; c++) {
-                        Double sequenceIncrement = getColumnSequenceIncrement(
-                                c, r1, r2);
+                        Double sequenceIncrement = getColumnSequenceIncrement(c,
+                                r1, r2);
                         Cell shiftedCell = shiftedRow.getCell(c - 1);
                         Cell newCell = newRow.getCell(c - 1);
                         if (shiftedCell != null) {
@@ -482,8 +483,8 @@ public class CellSelectionShifter implements Serializable {
         int c1 = paintedCellRange.getFirstColumn() + 1;
         int c2 = paintedCellRange.getLastColumn() + 1;
         Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
         for (int shiftedRowIndex = r1; shiftedRowIndex <= r2; shiftedRowIndex++) {
             final Row shiftedRow = activeSheet.getRow(shiftedRowIndex - 1);
             int newRowIndex = r1 - 1 - (shiftedRowIndex - r1);
@@ -494,8 +495,8 @@ public class CellSelectionShifter implements Serializable {
                         newRow = activeSheet.createRow(newRowIndex - 1);
                     }
                     for (int c = c1; c <= c2; c++) {
-                        Double sequenceIncrement = getColumnSequenceIncrement(
-                                c, r1, r2);
+                        Double sequenceIncrement = getColumnSequenceIncrement(c,
+                                r1, r2);
                         Cell shiftedCell = shiftedRow.getCell(c - 1);
                         Cell newCell = newRow.getCell(c - 1);
                         if (shiftedCell != null) {
@@ -530,8 +531,8 @@ public class CellSelectionShifter implements Serializable {
         int c1 = paintedCellRange.getFirstColumn() + 1;
         int c2 = paintedCellRange.getLastColumn() + 1;
         Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
         for (int rIndex = r1; rIndex <= r2; rIndex++) {
             final Row row = activeSheet.getRow(rIndex - 1);
             if (row != null) {
@@ -572,8 +573,8 @@ public class CellSelectionShifter implements Serializable {
         int c1 = paintedCellRange.getFirstColumn() + 1;
         int c2 = paintedCellRange.getLastColumn() + 1;
         Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
         for (int rIndex = r1; rIndex <= r2; rIndex++) {
             final Row row = activeSheet.getRow(rIndex - 1);
             if (row != null) {
@@ -608,7 +609,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * Returns the increment between all consecutive cells in row with rIndex
      * from column c1 to column c2
-     * 
+     *
      * @param rIndex
      *            Row index for the sequence recognition, 1-based
      * @param c1
@@ -620,16 +621,18 @@ public class CellSelectionShifter implements Serializable {
     private Double getRowSequenceIncrement(int rIndex, int c1, int c2) {
         Double result = null;
         Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
         final Row row = activeSheet.getRow(rIndex - 1);
         if (row != null) {
             Cell firstCell = row.getCell(c1 - 1);
             if (firstCell != null) {
                 if (firstCell.getCellType() == CellType.STRING) {
-                    return getSequenceIncrement(getRowStringValues(row, c1, c2));
+                    return getSequenceIncrement(
+                            getRowStringValues(row, c1, c2));
                 } else if (firstCell.getCellType() == CellType.NUMERIC) {
-                    return getSequenceIncrement(getRowNumericValues(row, c1, c2));
+                    return getSequenceIncrement(
+                            getRowNumericValues(row, c1, c2));
                 }
             }
         }
@@ -641,7 +644,7 @@ public class CellSelectionShifter implements Serializable {
      * r1 to row r2 in activeSheet until first non String cell or null value
      * Used by
      * {@link CellSelectionShifter#getColumnSequenceIncrement(int, int, int)}
-     * 
+     *
      * @param activeSheet
      *            Sheet where the cells are going to be taken from
      * @param columnIndex
@@ -678,7 +681,7 @@ public class CellSelectionShifter implements Serializable {
      * r1 to row r2 in activeSheet until first non numeric cell or null value
      * Used by
      * {@link CellSelectionShifter#getColumnSequenceIncrement(int, int, int)}
-     * 
+     *
      * @param activeSheet
      *            Sheet where the cells are goint to be taken from
      * @param columnIndex
@@ -714,7 +717,7 @@ public class CellSelectionShifter implements Serializable {
      * Returns an array with String values in row from column c1 to column c2
      * until first non String cell or null value. Used by
      * {@link CellSelectionShifter#getRowSequenceIncrement(int, int, int)}
-     * 
+     *
      * @param row
      *            Row where the cells are going to be taken from
      * @param c1
@@ -741,7 +744,7 @@ public class CellSelectionShifter implements Serializable {
      * Returns an array with Double values in row from column c1 to column c2
      * until first non Numeric cell or null value. Used by
      * {@link CellSelectionShifter#getRowSequenceIncrement(int, int, int)}
-     * 
+     *
      * @param row
      *            Row where the cells are going to be taken from
      * @param c1
@@ -768,7 +771,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * Returns the increment between all consecutive elements of values
      * parameter or null if there isn't
-     * 
+     *
      * @param values
      *            Double values to be considered for the sequence recognition
      * @return common difference or null
@@ -794,7 +797,7 @@ public class CellSelectionShifter implements Serializable {
      * Returns the increment between all consecutive elements of values
      * parameter or null if there isn't. Also checks that all elements have the
      * same constant String before the digits
-     * 
+     *
      * @param values
      *            String values to be considered for the sequence recognition
      * @return common difference or null
@@ -847,10 +850,10 @@ public class CellSelectionShifter implements Serializable {
     /**
      * Returns the increment between all consecutive cells in column with cIndex
      * from row r1 to row r2
-     * 
+     *
      * @param cIndex
      *            Column index for the sequence recognition, 1-based
-     * 
+     *
      * @param r1
      *            First row of the column to be considered, 1-based
      * @param r2
@@ -860,15 +863,15 @@ public class CellSelectionShifter implements Serializable {
     private Double getColumnSequenceIncrement(int cIndex, int r1, int r2) {
         Double result = null;
         Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
         final Row row = activeSheet.getRow(r1 - 1);
         if (row != null) {
             Cell firstCell = row.getCell(cIndex - 1);
             if (firstCell != null) {
                 if (firstCell.getCellType() == CellType.STRING) {
-                    return getSequenceIncrement(getColumnStringValues(
-                            activeSheet, cIndex, r1, r2));
+                    return getSequenceIncrement(
+                            getColumnStringValues(activeSheet, cIndex, r1, r2));
                 } else if (firstCell.getCellType() == CellType.NUMERIC) {
                     return getSequenceIncrement(getColumnNumericValues(
                             activeSheet, cIndex, r1, r2));

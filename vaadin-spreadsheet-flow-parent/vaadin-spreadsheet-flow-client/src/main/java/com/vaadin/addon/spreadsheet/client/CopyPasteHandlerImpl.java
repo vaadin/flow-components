@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -20,7 +20,7 @@ import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
  * {@link SpreadsheetWidget} together; copy operations are put into this class,
  * because we have the necessary info available. paste is delegated to
  * server-side.
- * 
+ *
  * @author Thomas Mattsson / Vaadin Ltd.
  *
  */

@@ -5,7 +5,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ConditionalFormattingOnCellDeletionIT extends AbstractSpreadsheetIT {
+public class ConditionalFormattingOnCellDeletionIT
+        extends AbstractSpreadsheetIT {
 
     private static final String FALSE_CONDITION_COLOR = "rgba(255, 255, 255, 1)";
     private static final String TRUE_CONDITION_COLOR = "rgba(255, 0, 0, 1)";

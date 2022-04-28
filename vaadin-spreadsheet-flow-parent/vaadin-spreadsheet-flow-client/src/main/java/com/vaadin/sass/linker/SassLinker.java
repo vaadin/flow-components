@@ -30,9 +30,9 @@ import com.google.gwt.core.ext.linker.Shardable;
 @Shardable
 public class SassLinker extends AbstractLinker {
 
-	@Override
-	public String getDescription() {
-		return "Fake SassLinker for spreadsheet";
-	}
+    @Override
+    public String getDescription() {
+        return "Fake SassLinker for spreadsheet";
+    }
 
 }

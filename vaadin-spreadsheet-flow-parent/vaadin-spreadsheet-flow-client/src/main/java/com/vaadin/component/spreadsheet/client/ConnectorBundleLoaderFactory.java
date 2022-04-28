@@ -1170,13 +1170,13 @@ public class ConnectorBundleLoaderFactory extends Generator {
      * class.
      *
      * @param logger
-     *                   the logger to which information can be logged
+     *            the logger to which information can be logged
      * @param typeOracle
-     *                   the type oracle that can be used for finding types
+     *            the type oracle that can be used for finding types
      * @return a collection of all the connector types that should be included
      *         in the widgetset
      * @throws UnableToCompleteException
-     *                                   if the operation fails
+     *             if the operation fails
      */
     protected Collection<JClassType> getConnectorsForWidgetset(
             TreeLogger logger, TypeOracle typeOracle)
@@ -1264,7 +1264,7 @@ public class ConnectorBundleLoaderFactory extends Generator {
 
     private Collection<TypeVisitor> getVisitors(TypeOracle oracle)
             throws NotFoundException {
-        List<TypeVisitor> visitors = Arrays.<TypeVisitor>asList(
+        List<TypeVisitor> visitors = Arrays.<TypeVisitor> asList(
                 new ConnectorInitVisitor(), new StateInitVisitor(),
                 new WidgetInitVisitor(), new RendererVisitor(),
                 new ClientRpcVisitor(), new ServerRpcVisitor(),

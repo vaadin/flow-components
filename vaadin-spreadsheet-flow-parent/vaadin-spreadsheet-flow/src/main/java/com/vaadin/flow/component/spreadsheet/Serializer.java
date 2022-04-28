@@ -16,7 +16,9 @@ class Serializer {
         try {
             return value == null ? "" : objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            System.err.println(">>>> Exception when serializating to JSON\n value: " + value + "\n message:" + e.getMessage());
+            System.err.println(
+                    ">>>> Exception when serializating to JSON\n value: "
+                            + value + "\n message:" + e.getMessage());
             e.printStackTrace();
             return null;
         }

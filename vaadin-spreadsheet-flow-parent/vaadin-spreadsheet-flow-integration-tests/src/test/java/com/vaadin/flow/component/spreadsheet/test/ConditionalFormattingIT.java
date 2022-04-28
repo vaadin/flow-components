@@ -19,7 +19,8 @@ public class ConditionalFormattingIT extends AbstractSpreadsheetIT {
     @Test
     public void unsupportedFormula_parse_noAffectCondtionalFormat() {
         String value = "rgba(255, 235, 156, 1)";
-        assertEquals(value, getSpreadsheet().getCellAt("B1").getCssValue("background-color"));
+        assertEquals(value, getSpreadsheet().getCellAt("B1")
+                .getCssValue("background-color"));
     }
 
     @Test

@@ -31,9 +31,9 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
 
         selectCell("A1");
 
-        WebElement selectionCorner = getSpreadsheet().findElement(
-                By.className("sheet-selection")).findElement(
-                By.className("s-corner"));
+        WebElement selectionCorner = getSpreadsheet()
+                .findElement(By.className("sheet-selection"))
+                .findElement(By.className("s-corner"));
         // drag corner element of the selected cell to the target cell
         new Actions(driver).dragAndDrop(selectionCorner, target).perform();
 
@@ -63,20 +63,16 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
 
     private void undo() {
         // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver())
-                .keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("z")
-                .keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
-                .build().perform();
+        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                .perform();
     }
 
     private void redo() {
         // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver())
-                .keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("y")
-                .keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
-                .build().perform();
+        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                .perform();
     }
 
 }

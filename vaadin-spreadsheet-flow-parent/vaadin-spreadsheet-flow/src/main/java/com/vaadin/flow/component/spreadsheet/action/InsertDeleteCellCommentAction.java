@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -43,13 +43,14 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
-                                            SelectionChangeEvent event) {
+            SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()) {
             if (event.getCellRangeAddresses().size() == 0
                     && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
-                        .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
+                        .getCellComment(
+                                new CellAddress(cr.getRow(), cr.getCol()));
                 if (cellComment == null) {
                     setCaption("Insert comment");
                 } else {
@@ -63,13 +64,13 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForHeader(Spreadsheet spreadsheet,
-                                         CellRangeAddress headerRange) {
+            CellRangeAddress headerRange) {
         return false;
     }
 
     @Override
     public void executeActionOnSelection(Spreadsheet spreadsheet,
-                                         SelectionChangeEvent event) {
+            SelectionChangeEvent event) {
         Sheet sheet = spreadsheet.getActiveSheet();
         CellReference cr = event.getSelectedCellReference();
         boolean cellCreated = false, rowCreated = false, commentEdited = false;
@@ -104,7 +105,7 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
     }
 
     private void createCellComment(Spreadsheet spreadsheet, Sheet sheet,
-                                   Cell cell, CellReference cellRef) {
+            Cell cell, CellReference cellRef) {
         CreationHelper factory = sheet.getWorkbook().getCreationHelper();
         Drawing<?> drawing = sheet.createDrawingPatriarch();
 
@@ -136,7 +137,7 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
-                                      CellRangeAddress headerRange) {
+            CellRangeAddress headerRange) {
         throw new UnsupportedOperationException(
                 "Cell comment actions can't be executed against a header range.");
     }

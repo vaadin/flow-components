@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -28,7 +28,7 @@ import java.util.Set;
  * <p>
  * When a filter been has updated (by server side or user actions),
  * {@link SpreadsheetFilterTable#onFiltersUpdated()} should be called.
- * 
+ *
  * @author Vaadin Ltd.
  */
 public interface SpreadsheetFilter extends Serializable {
@@ -42,7 +42,7 @@ public interface SpreadsheetFilter extends Serializable {
     /**
      * Returns the rows that should be filtered by this filter. In other words
      * the returned set of rows will be hidden from the table.
-     * 
+     *
      * @return Row indexes of the filtered rows, 0-based
      */
     public Set<Integer> getFilteredRows();

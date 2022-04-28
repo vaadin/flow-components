@@ -22,8 +22,7 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
     @Test
     public void testSingleCell() {
         loadTestFixture(TestFixtures.Action);
-        SheetCellElement b2 = getSpreadsheet().getCellAt(
-                "B2");
+        SheetCellElement b2 = getSpreadsheet().getCellAt("B2");
         b2.click();
 
         b2.contextClick();
@@ -45,10 +44,10 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         selectCell("A1");
 
         selectCell("B2");
-        SheetCellElement c3 = getSpreadsheet().getCellAt(
-                "C3");
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND).click(c3)
-                .keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).contextClick(c3).build().perform();
+        SheetCellElement c3 = getSpreadsheet().getCellAt("C3");
+        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                .click(c3).keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                .contextClick(c3).build().perform();
         clickItem("Double cell values");
 
         selectCell("A1");
@@ -67,8 +66,7 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         getSpreadsheet().getColumnHeader(3).contextClick();
         clickItem("Column action");
 
-        Assert.assertEquals("first column",
-                getCellContent("C3"));
+        Assert.assertEquals("first column", getCellContent("C3"));
         Assert.assertEquals("last column", getCellContent("C4"));
     }
 }

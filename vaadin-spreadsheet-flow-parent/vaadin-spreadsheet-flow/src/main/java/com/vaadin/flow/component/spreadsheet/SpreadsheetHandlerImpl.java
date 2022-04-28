@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -89,15 +89,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void cellAddedToSelectionAndSelected(int row, int column) {
-        spreadsheet.getCellSelectionManager().onCellAddToSelectionAndSelected(
-                row, column);
+        spreadsheet.getCellSelectionManager()
+                .onCellAddToSelectionAndSelected(row, column);
     }
 
     @Override
     public void cellsAddedToRangeSelection(int row1, int col1, int row2,
             int col2) {
-        spreadsheet.getCellSelectionManager().onCellsAddedToRangeSelection(
-                row1, col1, row2, col2);
+        spreadsheet.getCellSelectionManager().onCellsAddedToRangeSelection(row1,
+                col1, row2, col2);
     }
 
     @Override
@@ -120,8 +120,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void columnAddedToSelection(int firstRowIndex, int column) {
-        spreadsheet.getCellSelectionManager().onColumnAddedToSelection(
-                firstRowIndex, column);
+        spreadsheet.getCellSelectionManager()
+                .onColumnAddedToSelection(firstRowIndex, column);
     }
 
     /* the actual selected cell hasn't changed */
@@ -180,14 +180,14 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void columnHeaderContextMenuOpen(int columnIndex) {
-        spreadsheet.getContextMenuManager().onColumnHeaderContextMenuOpen(
-                columnIndex);
+        spreadsheet.getContextMenuManager()
+                .onColumnHeaderContextMenuOpen(columnIndex);
     }
 
     @Override
     public void actionOnCurrentSelection(String actionKey) {
-        spreadsheet.getContextMenuManager().onActionOnCurrentSelection(
-                actionKey);
+        spreadsheet.getContextMenuManager()
+                .onActionOnCurrentSelection(actionKey);
     }
 
     @Override
@@ -201,8 +201,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void rowsResized(Map<Integer, Float> newRowSizes, int row1,
-            int col1, int row2, int col2) {
+    public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
+            int row2, int col2) {
         spreadsheet.onRowResized(newRowSizes, row1, col1, row2, col2);
     }
 
@@ -235,8 +235,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void setCellStyleWidthRatios(
             HashMap<Integer, Float> cellStyleWidthRatioMap) {
-        spreadsheet.getCellValueManager().onCellStyleWidthRatioUpdate(
-                cellStyleWidthRatioMap);
+        spreadsheet.getCellValueManager()
+                .onCellStyleWidthRatioUpdate(cellStyleWidthRatioMap);
     }
 
     @Override
@@ -292,7 +292,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
         CellValueCommand command = new CellValueCommand(spreadsheet);
         CellRangeAddress affectedRange = new CellRangeAddress(rowIndex,
-                rowIndex + pasteHeight - 1, colIndex, colIndex + pasteWidth - 1);
+                rowIndex + pasteHeight - 1, colIndex,
+                colIndex + pasteWidth - 1);
         command.captureCellRangeValues(affectedRange);
 
         for (int i = 0; i < pasteHeight; i++) {
@@ -322,22 +323,24 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 }
 
                 spreadsheet.getCellValueManager().markCellForUpdate(cell);
-                spreadsheet.getCellValueManager().getFormulaEvaluator().notifyUpdateCell(cell);
+                spreadsheet.getCellValueManager().getFormulaEvaluator()
+                        .notifyUpdateCell(cell);
             }
         }
 
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         spreadsheet.updateMarkedCells();
         // re-set selection to copied area
-        spreadsheet.setSelectionRange(rowIndex, colIndex, rowIndex
-                + pasteHeight - 1, colIndex + pasteWidth - 1);
+        spreadsheet.setSelectionRange(rowIndex, colIndex,
+                rowIndex + pasteHeight - 1, colIndex + pasteWidth - 1);
 
         fireCellValueChangeEvent(affectedRange);
     }
 
     private void fireCellValueChangeEvent(CellRangeAddress region) {
         Set<CellReference> cells = new HashSet<CellReference>();
-        for (int x = region.getFirstColumn(); x <= region.getLastColumn(); x++) {
+        for (int x = region.getFirstColumn(); x <= region
+                .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
                 cells.add(new CellReference(y, x));
             }
@@ -357,7 +360,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
      * E.g.<br/>
      * "1\t2" - {"1","2"}<br/>
      * "\t\t" - {"","",""}<br/>
-     * 
+     *
      * @param line
      *            input
      * @return output string parts split at tabs
@@ -415,7 +418,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 .getCellSelectionManager().getCellRangeAddresses();
         for (CellRangeAddress a : cellRangeAddresses) {
             for (int row = a.getFirstRow(); row <= a.getLastRow(); row++) {
-                for (int col = a.getFirstColumn(); col <= a.getLastColumn(); col++) {
+                for (int col = a.getFirstColumn(); col <= a
+                        .getLastColumn(); col++) {
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell != null) {
                         if (spreadsheet.isCellLocked(cell)) {
@@ -461,10 +465,12 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     public void updateCellComment(String text, int col, int row) {
         CreationHelper factory = spreadsheet.getWorkbook().getCreationHelper();
         RichTextString str = factory.createRichTextString(text);
-        Cell cell = getOrCreateCell(spreadsheet.getActiveSheet(), row - 1, col - 1); //poi is 0 based, but spreadsheet is 1 based
+        Cell cell = getOrCreateCell(spreadsheet.getActiveSheet(), row - 1,
+                col - 1); // poi is 0 based, but spreadsheet is 1 based
         Comment comment = cell.getCellComment();
         if (comment == null) {
-            Drawing<?> drawingPatriarch = spreadsheet.getActiveSheet().createDrawingPatriarch();
+            Drawing<?> drawingPatriarch = spreadsheet.getActiveSheet()
+                    .createDrawingPatriarch();
             ClientAnchor anchor = factory.createClientAnchor();
             anchor.setCol1(cell.getColumnIndex());
             anchor.setCol2(cell.getColumnIndex());

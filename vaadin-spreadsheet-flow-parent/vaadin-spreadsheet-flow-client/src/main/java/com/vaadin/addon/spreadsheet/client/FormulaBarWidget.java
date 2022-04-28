@@ -8,7 +8,7 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -198,10 +198,10 @@ public class FormulaBarWidget extends Composite {
                 return;
             }
         }
-        
+
         namedRangeBox.setSelectedIndex(0);
     }
-    
+
     /**
      * Removes all keyboard selection variables, clears paint
      */
@@ -278,8 +278,8 @@ public class FormulaBarWidget extends Composite {
             }
         });
 
-        Event.sinkEvents(addressField.getElement(), Event.ONKEYUP
-                | Event.FOCUSEVENTS);
+        Event.sinkEvents(addressField.getElement(),
+                Event.ONKEYUP | Event.FOCUSEVENTS);
         Event.setEventListener(addressField.getElement(), new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
@@ -305,8 +305,8 @@ public class FormulaBarWidget extends Composite {
                 }
             }
         });
-        Event.sinkEvents(formulaField.getElement(), Event.KEYEVENTS
-                | Event.FOCUSEVENTS | Event.ONMOUSEUP);
+        Event.sinkEvents(formulaField.getElement(),
+                Event.KEYEVENTS | Event.FOCUSEVENTS | Event.ONMOUSEUP);
         Event.setEventListener(formulaField.getElement(), new EventListener() {
 
             @Override
@@ -360,8 +360,7 @@ public class FormulaBarWidget extends Composite {
     }
 
     private void submitAddressValue() {
-        handler.onAddressEntered(addressField.getValue()
-                .replaceAll(" ", ""));
+        handler.onAddressEntered(addressField.getValue().replaceAll(" ", ""));
     }
 
     /**
@@ -550,7 +549,8 @@ public class FormulaBarWidget extends Composite {
 
             @Override
             public void execute() {
-                if (currentEditor != null && currentEditor.getValue().isEmpty()) {
+                if (currentEditor != null
+                        && currentEditor.getValue().isEmpty()) {
 
                     if (currentEditor == inlineEditor) {
                         stopInlineEdit();
@@ -750,8 +750,8 @@ public class FormulaBarWidget extends Composite {
             int rowEnd = Math.max(region.row1, region.row2);
 
             if (colEnd > 20000) {
-                Logger.getLogger(getClass().getSimpleName()).fine(
-                        "invalid column index, halting parse");
+                Logger.getLogger(getClass().getSimpleName())
+                        .fine("invalid column index, halting parse");
                 return;
             }
 
@@ -942,8 +942,8 @@ public class FormulaBarWidget extends Composite {
         rowEnd = Math.max(region.row1, region.row2);
 
         if (colEnd > 20000) {
-            Logger.getLogger(getClass().getSimpleName()).fine(
-                    "invalid column index, halting parse");
+            Logger.getLogger(getClass().getSimpleName())
+                    .fine("invalid column index, halting parse");
             return;
         }
 
@@ -1182,7 +1182,7 @@ public class FormulaBarWidget extends Composite {
             for (String name : namedRanges) {
                 namedRangeBox.addItem(name);
             }
-            
+
             trySelectNamedRangeBoxValue(addressField.getValue());
         } else {
             setNamedRangeBoxVisible(false);
@@ -1211,10 +1211,6 @@ public class FormulaBarWidget extends Composite {
     }
 
     public boolean hasLightFocus() {
-        return !inlineEdit
-                || (inlineEdit
-                && !inFullFocus
-                && !editingFormula
-        );
+        return !inlineEdit || (inlineEdit && !inFullFocus && !editingFormula);
     }
 }

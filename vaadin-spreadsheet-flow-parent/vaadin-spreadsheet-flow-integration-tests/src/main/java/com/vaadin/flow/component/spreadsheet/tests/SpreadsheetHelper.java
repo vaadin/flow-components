@@ -9,7 +9,6 @@ import org.apache.poi.ss.util.CellReference;
 
 import java.util.HashMap;
 
-
 public class SpreadsheetHelper {
 
     private Spreadsheet spreadsheet;
@@ -34,7 +33,8 @@ public class SpreadsheetHelper {
         return cell;
     }
 
-    public HashMap<String, Cell> selectedCell(Spreadsheet.SelectionChangeEvent event) {
+    public HashMap<String, Cell> selectedCell(
+            Spreadsheet.SelectionChangeEvent event) {
 
         CellMap cells = new CellMap();
 

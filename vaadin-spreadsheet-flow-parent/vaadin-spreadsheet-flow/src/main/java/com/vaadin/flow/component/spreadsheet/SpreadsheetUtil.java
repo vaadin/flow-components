@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -44,7 +44,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
  * Utility class for miscellaneous Spreadsheet operations.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -63,7 +63,7 @@ public class SpreadsheetUtil implements Serializable {
     /**
      * Translates cell coordinates to a cell key used to identify cells in the
      * server-client communication.
-     * 
+     *
      * @param col
      *            Column index, 1-based
      * @param row
@@ -77,7 +77,7 @@ public class SpreadsheetUtil implements Serializable {
     /**
      * Translates cell coordinates from the given Cell object to a cell key used
      * to identify cells in the server-client communication.
-     * 
+     *
      * @param cell
      *            Cell to fetch the coordinates from
      * @return Cell key
@@ -88,7 +88,7 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Determines whether the given cell contains a date or not.
-     * 
+     *
      * @param cell
      *            Cell to examine
      * @return true if the cell contains a date
@@ -98,14 +98,16 @@ public class SpreadsheetUtil implements Serializable {
                 && DateUtil.isCellDateFormatted(cell);
     }
 
-    public static CellReference relativeToAbsolute(Spreadsheet sheet, CellReference cell) {
+    public static CellReference relativeToAbsolute(Spreadsheet sheet,
+            CellReference cell) {
         String sheetName = sheet.getActiveSheet().getSheetName();
-        return new CellReference(sheetName, cell.getRow(), cell
-                .getCol(), true, true);
+        return new CellReference(sheetName, cell.getRow(), cell.getCol(), true,
+                true);
     }
+
     /**
      * Generates the column header for column with the given index
-     * 
+     *
      * @param columnIndex
      *            Index of column, 1-based
      * @return Generated column header
@@ -121,7 +123,7 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Returns the column index for the column with the given header.
-     * 
+     *
      * @param header
      *            Column header
      * @return Index of column, 1-based
@@ -138,7 +140,7 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Determines whether the given cell is within the given range.
-     * 
+     *
      * @param cellReference
      *            Target cell reference
      * @param cellRange
@@ -155,7 +157,7 @@ public class SpreadsheetUtil implements Serializable {
      * Returns the POI index of the first visible sheet (not hidden or very
      * hidden). If no sheets are visible, returns 0. This is not be possible at
      * least in Excel, but unfortunately POI allows it.
-     * 
+     *
      * @param workbook
      *            Workbook to get the sheets from
      * @return Index of the first visible sheet, 0-based
@@ -172,7 +174,7 @@ public class SpreadsheetUtil implements Serializable {
     /**
      * Returns the number of visible sheets (not hidden or very hidden) in the
      * given Workbook.
-     * 
+     *
      * @param workbook
      *            Workbook to get the sheets from
      * @return Number of visible sheets
@@ -189,7 +191,7 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Returns the column index for the given Cell key.
-     * 
+     *
      * @param key
      *            Cell key
      * @return Column index of cell, 1-based
@@ -202,7 +204,7 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Returns the row index for the given Cell key.
-     * 
+     *
      * @param key
      *            Cell key
      * @return Row index of cell, 1-based
@@ -217,13 +219,14 @@ public class SpreadsheetUtil implements Serializable {
     /**
      * Converts pixel units to Excel width units (one Excel width unit is
      * 1/256th of a character width)
-     * 
+     *
      * @param pxs
      *            Pixel value to convert
      * @return Value in Excel width units
      */
     static short pixel2WidthUnits(int pxs) {
-        short widthUnits = (short) (EXCEL_COLUMN_WIDTH_FACTOR * (pxs / UNIT_OFFSET_LENGTH));
+        short widthUnits = (short) (EXCEL_COLUMN_WIDTH_FACTOR
+                * (pxs / UNIT_OFFSET_LENGTH));
 
         widthUnits += UNIT_OFFSET_MAP[(pxs % UNIT_OFFSET_LENGTH)];
 
@@ -233,13 +236,14 @@ public class SpreadsheetUtil implements Serializable {
     /**
      * Gets the default column width for new sheets in pixels. The calculation
      * is done using POI.
-     * 
+     *
      * @return Default column width in PX
      */
     static int getDefaultColumnWidthInPx() {
-		// Formula taken from XSSFSheet.getColumnWidthInPixels
-		return (int) (SpreadsheetFactory.DEFAULT_COL_WIDTH_UNITS * EXCEL_COLUMN_WIDTH_FACTOR / 256.0
-				* Units.DEFAULT_CHARACTER_WIDTH);
+        // Formula taken from XSSFSheet.getColumnWidthInPixels
+        return (int) (SpreadsheetFactory.DEFAULT_COL_WIDTH_UNITS
+                * EXCEL_COLUMN_WIDTH_FACTOR / 256.0
+                * Units.DEFAULT_CHARACTER_WIDTH);
     }
 
     /**
@@ -247,7 +251,7 @@ public class SpreadsheetUtil implements Serializable {
      * the String ends with the '%' character, and the rest can be parsed to a
      * number.
      * <p>
-     * 
+     *
      * @param cellContent
      *            The string to be parsed
      * @param locale
@@ -355,8 +359,8 @@ public class SpreadsheetUtil implements Serializable {
                 // (e.g. 4.2e2 has 3 digits, but is invalid).
                 if (groupingIndex != -1) {
                     try {
-                        String sub = trimmedContent.substring(trimmedContent
-                                .length() - 4);
+                        String sub = trimmedContent
+                                .substring(trimmedContent.length() - 4);
                         if (sub.toLowerCase().contains("e")) {
                             noDecButCorrect = false;
                         }
@@ -406,15 +410,15 @@ public class SpreadsheetUtil implements Serializable {
     }
 
     /**
-     * Determine if the given cell content should be displayed with a
-     * leading quote in both cell editor and formula bar
+     * Determine if the given cell content should be displayed with a leading
+     * quote in both cell editor and formula bar
      * <p>
      *
      * @param cell
-     *     The cell to be checked
+     *            The cell to be checked
      * @return true if the cell contains a string with the "quotePrefix" style
-     *         set. Note that for Excel 97 file format, returns true for
-     *         every string.
+     *         set. Note that for Excel 97 file format, returns true for every
+     *         string.
      */
     public static boolean needsLeadingQuote(Cell cell) {
         if (cell.getCellType() != CellType.STRING) {
@@ -446,7 +450,7 @@ public class SpreadsheetUtil implements Serializable {
     /**
      * evaluate the formula (which may just be a single cell or range string)
      * and find the bounding rectangle for the referenced cells.
-     * 
+     *
      * @param formula
      * @param spreadsheet
      * @param includeHiddenCells
@@ -472,7 +476,7 @@ public class SpreadsheetUtil implements Serializable {
      * This function returns all the cells that the given formula references.
      * You can optionally filter out all the hidden rows from the list honoring
      * filtering of charts based on SpreadsheetTable filter settings.
-     * 
+     *
      * @param formula
      *            The formula to find referenced cells for
      * @param spreadsheet
@@ -480,7 +484,7 @@ public class SpreadsheetUtil implements Serializable {
      * @param includeHiddenCells
      *            <code>true</code> to include cells residing in hidden rows or
      *            columns, <code>false</code> to omit them
-     * 
+     *
      */
     public static List<CellReference> getAllReferencedCells(String formula,
             Spreadsheet spreadsheet, boolean includeHiddenCells) {

@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Color converter implementation for the current Excel file type (.xlsx or XSSF
  * in POI terms).
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -130,8 +130,8 @@ public class XSSFColorConverter implements ColorConverter {
             sb.append(temp);
         } catch (NumberFormatException nfe) {
             LOGGER.trace(nfe.getMessage() + " " + nfe.getCause(), nfe);
-            sb.append(String
-                    .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
+            sb.append(
+                    String.format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
 
         return sb.toString();
@@ -158,8 +158,8 @@ public class XSSFColorConverter implements ColorConverter {
 
         byte[] argb;
         if (color.isSetTheme()) {
-            XSSFColor themeColor = workbook.getTheme().getThemeColor(
-                    (int) color.getTheme());
+            XSSFColor themeColor = workbook.getTheme()
+                    .getThemeColor((int) color.getTheme());
             argb = themeColor.getARGB();
         } else {
             argb = color.getRgb();
@@ -182,8 +182,8 @@ public class XSSFColorConverter implements ColorConverter {
             sb.append(temp);
         } catch (NumberFormatException nfe) {
             LOGGER.trace(nfe.getMessage() + " " + nfe.getCause(), nfe);
-            sb.append(String
-                    .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
+            sb.append(
+                    String.format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
 
         return sb.toString();
@@ -317,8 +317,8 @@ public class XSSFColorConverter implements ColorConverter {
         CTColor ctColor = font.getColorList().get(0);
 
         if (ctColor.isSetTheme()) {
-            XSSFColor themeColor = workbook.getTheme().getThemeColor(
-                    (int) ctColor.getTheme());
+            XSSFColor themeColor = workbook.getTheme()
+                    .getThemeColor((int) ctColor.getTheme());
 
             return styleColor(themeColor, ctColor.getTint());
         } else {
@@ -365,7 +365,8 @@ public class XSSFColorConverter implements ColorConverter {
             return null;
         }
 
-        // pulls color directly, or from an indexed color (custom, default, or theme) if set
+        // pulls color directly, or from an indexed color (custom, default, or
+        // theme) if set
         byte[] argb = color.getARGB();
         if (argb == null) {
             return null;
@@ -398,7 +399,7 @@ public class XSSFColorConverter implements ColorConverter {
 
     /**
      * XSSF doesn't have an API to get this value, so brute force it is..
-     * 
+     *
      * @param rule
      *            The rule that has color data defined
      * @return OpenXML data format that contains the real defined styles

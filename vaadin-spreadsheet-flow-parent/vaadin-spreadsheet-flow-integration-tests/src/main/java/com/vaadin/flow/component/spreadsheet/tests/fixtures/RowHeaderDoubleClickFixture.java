@@ -8,16 +8,16 @@ public class RowHeaderDoubleClickFixture implements SpreadsheetFixture {
     public void loadFixture(final Spreadsheet spreadsheet) {
 
         spreadsheet.addRowHeaderDoubleClickListener(
-            new Spreadsheet.RowHeaderDoubleClickListener() {
-                @Override
-                public void onRowHeaderDoubleClick(
-                    Spreadsheet.RowHeaderDoubleClickEvent event) {
+                new Spreadsheet.RowHeaderDoubleClickListener() {
+                    @Override
+                    public void onRowHeaderDoubleClick(
+                            Spreadsheet.RowHeaderDoubleClickEvent event) {
 
-                    Cell cell = spreadsheet.createCell(event.getRowIndex(), 0,
-                        "Double-click on row header");
+                        Cell cell = spreadsheet.createCell(event.getRowIndex(),
+                                0, "Double-click on row header");
 
-                    spreadsheet.refreshCells(cell);
-                }
-            });
+                        spreadsheet.refreshCells(cell);
+                    }
+                });
     }
 }

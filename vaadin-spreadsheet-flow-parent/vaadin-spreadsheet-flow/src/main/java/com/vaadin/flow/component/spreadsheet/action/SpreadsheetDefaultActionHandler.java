@@ -8,7 +8,7 @@ package com.vaadin.flow.component.spreadsheet.action;
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -25,10 +25,10 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
 /**
  * Default action handler for Spreadsheet actions. By default this handler adds
  * all available actions to the Spreadsheet.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
- * 
+ *
  */
 @SuppressWarnings("serial")
 public class SpreadsheetDefaultActionHandler implements Action.Handler {
@@ -52,7 +52,7 @@ public class SpreadsheetDefaultActionHandler implements Action.Handler {
 
     /**
      * Adds the given SpreadsheetAction to this handler.
-     * 
+     *
      * @param action
      *            SpreadsheetAction to add
      */
@@ -62,7 +62,7 @@ public class SpreadsheetDefaultActionHandler implements Action.Handler {
 
     /**
      * Removes the given SpreadsheetAction from this handler.
-     * 
+     *
      * @param action
      *            SpreadsheetAction to remove
      * @return true if the action was present in this handler, false otherwise

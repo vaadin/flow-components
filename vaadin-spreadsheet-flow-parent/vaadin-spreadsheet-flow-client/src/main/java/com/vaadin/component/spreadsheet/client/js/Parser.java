@@ -26,7 +26,7 @@ public class Parser {
         return parseArrayJstype(raw, PopupButtonState::new);
     }
 
-    public static List<GroupingData> parseListOfGroupingData(String raw){
+    public static List<GroupingData> parseListOfGroupingData(String raw) {
         return parseArrayJstype(raw, GroupingData::new);
     }
 
@@ -39,11 +39,11 @@ public class Parser {
     }
 
     public static HashMap<Integer, Integer> parseMapIntegerInteger(String raw) {
-        return parseMap(raw, Integer::valueOf, o -> (int)toDouble(o));
+        return parseMap(raw, Integer::valueOf, o -> (int) toDouble(o));
     }
 
     public static Set<Integer> parseSetInteger(String raw) {
-        return parseSet(raw, o -> (int)toDouble(o));
+        return parseSet(raw, o -> (int) toDouble(o));
     }
 
     public static ArrayList<String> parseArraylistString(String raw) {
@@ -51,18 +51,20 @@ public class Parser {
     }
 
     public static ArrayList<Integer> parseArraylistInteger(String raw) {
-        return parseArray(raw, o -> (int)toDouble(o));
+        return parseArray(raw, o -> (int) toDouble(o));
     }
 
     public static int[] parseArrayInt(String raw) {
-        return parseArrayListDouble(raw).stream().mapToInt(Double::intValue).toArray();
+        return parseArrayListDouble(raw).stream().mapToInt(Double::intValue)
+                .toArray();
     }
 
     public static float[] parseArrayFloat(String raw) {
-        double[] arr = parseArrayListDouble(raw).stream().mapToDouble(Double::doubleValue).toArray();
-        float [] ret = new float[arr.length];
+        double[] arr = parseArrayListDouble(raw).stream()
+                .mapToDouble(Double::doubleValue).toArray();
+        float[] ret = new float[arr.length];
         for (int i = 0; i < arr.length; i++) {
-            ret[i] = (float)arr[i];
+            ret[i] = (float) arr[i];
         }
         return ret;
     }
@@ -79,7 +81,8 @@ public class Parser {
         return parseSet(raw, Object::toString);
     }
 
-    public static HashMap<String, OverlayInfo> parseMapStringOverlayInfo(String raw) {
+    public static HashMap<String, OverlayInfo> parseMapStringOverlayInfo(
+            String raw) {
         return parseMapStringJstype(raw, () -> new OverlayInfo());
     }
 
@@ -91,16 +94,19 @@ public class Parser {
         return parseArrayJstype(raw, () -> new CellData());
     }
 
-    public static ArrayList<SpreadsheetActionDetails> parseArraylistSpreadsheetActionDetails(String raw) {
+    public static ArrayList<SpreadsheetActionDetails> parseArraylistSpreadsheetActionDetails(
+            String raw) {
         return parseArrayJstype(raw, () -> new SpreadsheetActionDetails());
     }
 
-    private static <T> Set<T> parseSet(String raw, Function<Object, T> jsToJava) {
+    private static <T> Set<T> parseSet(String raw,
+            Function<Object, T> jsToJava) {
         List<T> ret = parseArray(raw, jsToJava);
         return ret == null ? null : new HashSet<T>(ret);
     }
 
-    private static <T> ArrayList<T> parseArrayJstype(String raw, Supplier<T> constructor) {
+    private static <T> ArrayList<T> parseArrayJstype(String raw,
+            Supplier<T> constructor) {
         return parseArray(raw, jsBean -> {
             T javaBean = constructor.get();
             copyJsToJava(jsBean, javaBean);
@@ -108,7 +114,8 @@ public class Parser {
         });
     }
 
-    private static <T> ArrayList<T> parseArray(String raw, Function<Object, T> jsToJava) {
+    private static <T> ArrayList<T> parseArray(String raw,
+            Function<Object, T> jsToJava) {
         ArrayList<T> javaArr = new ArrayList<>();
         if (raw == null || raw.isEmpty() || "null".equals(raw)) {
             return javaArr;
@@ -121,7 +128,8 @@ public class Parser {
         return javaArr;
     }
 
-    private static <T> HashMap<String, T> parseMapStringJstype(String raw, Supplier<T> constructor) {
+    private static <T> HashMap<String, T> parseMapStringJstype(String raw,
+            Supplier<T> constructor) {
         return parseMap(raw, Object::toString, jsBean -> {
             T javaBean = constructor.get();
             copyJsToJava(jsBean, javaBean);
@@ -129,7 +137,8 @@ public class Parser {
         });
     }
 
-    private static <I, T> HashMap<I, T> parseMap(String raw, Function<String, I> strToKey, Function<Object, T> jsToJava) {
+    private static <I, T> HashMap<I, T> parseMap(String raw,
+            Function<String, I> strToKey, Function<Object, T> jsToJava) {
         if (raw == null || raw.isEmpty() || "null".equals(raw)) {
             return null;
         }
@@ -146,8 +155,9 @@ public class Parser {
     private native static void copyJsToJava(Object j, Object o) /*-{
       Object.assign(o, j);
     }-*/;
-    
+
     private static double toDouble(Object o) {
-        return o instanceof JsonValue ? ((JsonValue)o).asNumber() : Double.parseDouble(o.toString());
+        return o instanceof JsonValue ? ((JsonValue) o).asNumber()
+                : Double.parseDouble(o.toString());
     }
 }

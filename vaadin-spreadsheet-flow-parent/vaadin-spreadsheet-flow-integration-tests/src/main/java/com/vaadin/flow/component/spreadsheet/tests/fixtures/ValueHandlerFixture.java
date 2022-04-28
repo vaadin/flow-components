@@ -120,9 +120,9 @@ class MultiplexerCellValueHandler implements Spreadsheet.CellValueHandler {
             return true;
         }
 
-        return handlerFactories.get(rowIndex + ":" + colIndex)
-                .cellValueUpdated(cell, sheet, colIndex, rowIndex, newValue,
-                        formulaEvaluator, formatter, conditionalFormattingEvaluator);
+        return handlerFactories.get(rowIndex + ":" + colIndex).cellValueUpdated(
+                cell, sheet, colIndex, rowIndex, newValue, formulaEvaluator,
+                formatter, conditionalFormattingEvaluator);
     }
 
 }
