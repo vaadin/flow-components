@@ -132,7 +132,72 @@ import elemental.json.JsonValue;
 import org.slf4j.LoggerFactory;
 
 /**
- * Server-side component for the {@code <vaadin-grid>} element.
+ * Grid is a component for showing tabular data. A basic Grid uses plain text to
+ * display information in rows and columns. However, rich content can be used to
+ * provide additional information in a more legible fashion using component
+ * renderers or Lit renderers. The Grid supports the following features.
+ * <p>
+ * Dynamic Height:<br>
+ * Grid has a default height of 400 pixels. It becomes scrollable when its items
+ * overflow the allocated space. In addition to setting any fixed or relative
+ * value, the height of a grid can be set by the number of items in the dataset,
+ * meaning that the grid will grow and shrink based on the row count.
+ * <p>
+ * Selection:<br>
+ * Grid selection is not enabled by default. Grid supports single and
+ * multi-select. The former allows the user to select exactly one item while the
+ * latter enables multiple items to be selected. In single selection mode, the
+ * user can select and deselect rows by clicking anywhere on the row. In
+ * multi-select mode, the user can use a checkbox column to select and deselect
+ * rows.
+ * <p>
+ * Columns:<br>
+ * Column alignment, freezing (fixed position), grouping, headers & footers,
+ * visibility, and width can be configured. Users can be allowed to resize and
+ * reorder columns.
+ * <p>
+ * Sorting:<br>
+ * Any column can be made sortable. Enable sorting to allow the user to sort
+ * items alphabetically, numerically, by date, etc. You can also sort columns
+ * that contain rich and/or custom content by defining which property to sort
+ * by. For example, you can have a column containing a person’s profile picture,
+ * name and email sorted by the person’s last name. Sorting helps users find and
+ * analyze the data, so it’s generally recommended to enable it for all
+ * applicable columns, except in cases where the order of items is an essential
+ * part of the data itself (such as prioritized lists).
+ * <p>
+ * Filtering:<br>
+ * Filtering allows the user to quickly find a specific item or subset of items.
+ * You can add filters to Grid columns or use external filter fields.
+ * <p>
+ * Item Details:<br>
+ * Item Details are expandable content areas that can be displayed below the
+ * regular content of a row, used to display more information about an item. By
+ * default, an item’s details are toggled by clicking on the item’s row. The
+ * default toggle behavior can be replaced by programmatically toggling the
+ * details visibility, for example, from a button click.
+ * <p>
+ * Context Menu:<br>
+ * You can use Context Menu to provide shortcuts to the user. It appears on
+ * right (default) or left click. In a mobile browser, a long press opens the
+ * menu.
+ * <p>
+ * Drag and Drop:<br>
+ * Grid supports drag and drop, for example to reorder rows and to drag rows
+ * between grids.
+ * <p>
+ * Inline Editing:<br>
+ * Grid can be configured to allow inline editing. Editing can be either
+ * buffered and non-buffered. Buffered means changes must be explicitly
+ * committed, while non-buffered automatically commit changes on blur (when a
+ * field loses focus).
+ * <p>
+ * Styling Rows and Columns:<br>
+ * You can style individual cells based on the data, for example, to highlight
+ * changes or important information.
+ * <p>
+ * Cell Focus:<br>
+ * Cells can be focused by clicking on a cell or with the keyboard.
  *
  * @author Vaadin Ltd
  *
