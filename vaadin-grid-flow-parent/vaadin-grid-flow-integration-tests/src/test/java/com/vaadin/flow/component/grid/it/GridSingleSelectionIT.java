@@ -43,12 +43,12 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
 
     @Test
     public void selectFirstItemFromClient_deselectFirstItemFromClient_nothingSelected() {
-        grid.getCell("0").click();
+        grid.select(0);
         Assert.assertEquals("oldValue=null; newValue=0; fromClient=true",
                 selectionLog.getText());
         Assert.assertTrue(grid.getRow(0).isSelected());
 
-        grid.getCell("0").click();
+        grid.deselect(0);
         Assert.assertEquals("oldValue=0; newValue=null; fromClient=true",
                 selectionLog.getText());
         Assert.assertFalse(grid.getRow(0).isSelected());
@@ -61,7 +61,7 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
                 selectionLog.getText());
         Assert.assertTrue(grid.getRow(0).isSelected());
 
-        grid.getCell("1").click();
+        grid.select(1);
         Assert.assertEquals("oldValue=0; newValue=1; fromClient=true",
                 selectionLog.getText());
         Assert.assertFalse(grid.getRow(0).isSelected());
@@ -70,7 +70,7 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
 
     @Test
     public void selectSecondItemFromClient_selectFirstItem_firstItemSelected() {
-        grid.getCell("1").click();
+        grid.select(1);
         Assert.assertEquals("oldValue=null; newValue=1; fromClient=true",
                 selectionLog.getText());
         Assert.assertTrue(grid.getRow(1).isSelected());

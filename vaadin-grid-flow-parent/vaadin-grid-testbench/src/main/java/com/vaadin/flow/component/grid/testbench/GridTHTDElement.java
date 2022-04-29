@@ -21,6 +21,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 
 import com.vaadin.testbench.TestBenchElement;
+import org.openqa.selenium.WebElement;
 
 /**
  * A TestBench element representing a <code>&lt;td&gt;</code> or
@@ -126,6 +127,16 @@ public class GridTHTDElement extends TestBenchElement {
     public SearchContext getContext() {
         return (SearchContext) executeScript(
                 "return arguments[0].firstElementChild.assignedNodes()[0];",
+                this);
+    }
+
+    /**
+     * Gets the first child element of the slotted `vaadin-grid-cell-content`
+     * element
+     */
+    WebElement getFirstChildElement() {
+        return (WebElement) executeScript(
+                "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
                 this);
     }
 }
