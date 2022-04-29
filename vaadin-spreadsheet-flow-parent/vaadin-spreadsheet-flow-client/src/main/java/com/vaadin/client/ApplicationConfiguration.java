@@ -1,0 +1,921 @@
+/*
+ * Copyright (C) 2013 - 2022 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.client;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.logging.client.LogConfiguration;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
+import com.vaadin.client.debug.internal.ErrorNotificationHandler;
+import com.vaadin.client.debug.internal.HierarchySection;
+import com.vaadin.client.debug.internal.InfoSection;
+import com.vaadin.client.debug.internal.LogSection;
+import com.vaadin.client.debug.internal.NetworkSection;
+import com.vaadin.client.debug.internal.ProfilerSection;
+import com.vaadin.client.debug.internal.Section;
+import com.vaadin.client.debug.internal.TestBenchSection;
+import com.vaadin.client.debug.internal.VDebugWindow;
+import com.vaadin.client.debug.internal.theme.DebugWindowStyles;
+import com.vaadin.client.event.PointerEventSupport;
+import com.vaadin.client.metadata.NoDataException;
+import com.vaadin.client.metadata.TypeData;
+import com.vaadin.client.ui.UnknownComponentConnector;
+import com.vaadin.client.ui.UnknownExtensionConnector;
+import com.vaadin.client.ui.ui.UIConnector;
+import com.vaadin.shared.ApplicationConstants;
+import com.vaadin.shared.ui.ui.UIConstants;
+
+public class ApplicationConfiguration implements EntryPoint {
+
+    /**
+     * Helper class for reading configuration options from the bootstap
+     * javascript
+     *
+     * @since 7.0
+     */
+    private static class JsoConfiguration extends JavaScriptObject {
+        protected JsoConfiguration() {
+            // JSO Constructor
+        }
+
+        /**
+         * Reads a configuration parameter as a string. Please note that the
+         * javascript value of the parameter should also be a string, or else an
+         * undefined exception may be thrown.
+         *
+         * @param name
+         *            name of the configuration parameter
+         * @return value of the configuration parameter, or <code>null</code> if
+         *         not defined
+         */
+        private native String getConfigString(String name)
+        /*-{
+            var value = this.getConfig(name);
+            if (value === null || value === undefined) {
+                return null;
+            } else {
+                return value +"";
+            }
+        }-*/;
+
+        /**
+         * Reads a configuration parameter as a boolean object. Please note that
+         * the javascript value of the parameter should also be a boolean, or
+         * else an undefined exception may be thrown.
+         *
+         * @param name
+         *            name of the configuration parameter
+         * @return boolean value of the configuration parameter, or
+         *         <code>null</code> if no value is defined
+         */
+        private native Boolean getConfigBoolean(String name)
+        /*-{
+            var value = this.getConfig(name);
+            if (value === null || value === undefined) {
+                return null;
+            } else {
+                 // $entry not needed as function is not exported
+                return @java.lang.Boolean::valueOf(Z)(value);
+            }
+        }-*/;
+
+        /**
+         * Reads a configuration parameter as an integer object. Please note
+         * that the javascript value of the parameter should also be an integer,
+         * or else an undefined exception may be thrown.
+         *
+         * @param name
+         *            name of the configuration parameter
+         * @return integer value of the configuration parameter, or
+         *         <code>null</code> if no value is defined
+         */
+        private native Integer getConfigInteger(String name)
+        /*-{
+            var value = this.getConfig(name);
+            if (value === null || value === undefined) {
+                return null;
+            } else {
+                 // $entry not needed as function is not exported
+                return @java.lang.Integer::valueOf(I)(value);
+            }
+        }-*/;
+
+        /**
+         * Reads a configuration parameter as an {@link ErrorMessage} object.
+         * Please note that the javascript value of the parameter should also be
+         * an object with appropriate fields, or else an undefined exception may
+         * be thrown when calling this method or when calling methods on the
+         * returned object.
+         *
+         * @param name
+         *            name of the configuration parameter
+         * @return error message with the given name, or <code>null</code> if no
+         *         value is defined
+         */
+        private native ErrorMessage getConfigError(String name)
+        /*-{
+            return this.getConfig(name);
+        }-*/;
+
+        /**
+         * Reads a configuration parameter as an {@link Element} object. Please
+         * note that the javascript value of the parameter should also be an
+         * Element object, or else an undefined exception may be thrown when
+         * calling this method or methods on the returned object.
+         *
+         * @param name
+         *            name of the configuration parameter
+         * @return element for the configuration parameter, or <code>null</code>
+         *         if no value is defined
+         * @since 8.4
+         */
+        private native Element getConfigElement(String name)
+        /*-{
+            return this.getConfig(name);
+        }-*/;
+
+        /**
+         * Returns a native javascript object containing version information
+         * from the server.
+         *
+         * @return a javascript object with the version information
+         */
+        private native JavaScriptObject getVersionInfoJSObject()
+        /*-{
+            return this.getConfig("versionInfo");
+        }-*/;
+
+        /**
+         * Gets the version of the Vaadin framework used on the server.
+         *
+         * @return a string with the version
+         *
+         * @see com.vaadin.server.VaadinServlet
+         */
+        private native String getVaadinVersion()
+        /*-{
+            return this.getConfig("versionInfo").vaadinVersion;
+        }-*/;
+
+        /**
+         * Gets the version of the Atmosphere framework.
+         *
+         * @return a string with the version
+         *
+         * @see org.atmosphere.util
+         */
+        private native String getAtmosphereVersion()
+        /*-{
+            return this.getConfig("versionInfo").atmosphereVersion;
+        }-*/;
+
+        /**
+         * Gets the JS version used in the Atmosphere framework.
+         *
+         * @return a string with the version
+         */
+        private native String getAtmosphereJSVersion()
+        /*-{
+            if ($wnd.vaadinPush && $wnd.vaadinPush.atmosphere) {
+                return $wnd.vaadinPush.atmosphere.version;
+            } else {
+                return null;
+            }
+        }-*/;
+
+        private native String getUIDL()
+        /*-{
+           return this.getConfig("uidl");
+         }-*/;
+    }
+
+    /**
+     * Wraps a native javascript object containing fields for an error message.
+     *
+     * @since 7.0
+     */
+    public static final class ErrorMessage extends JavaScriptObject {
+
+        protected ErrorMessage() {
+            // JSO constructor
+        }
+
+        public final native String getCaption()
+        /*-{
+            return this.caption;
+        }-*/;
+
+        public final native String getMessage()
+        /*-{
+            return this.message;
+        }-*/;
+
+        public final native String getUrl()
+        /*-{
+            return this.url;
+        }-*/;
+    }
+
+    private static WidgetSet widgetSet = GWT.create(WidgetSet.class);
+
+    private String id;
+    /**
+     * The URL to the VAADIN directory containing themes and widgetsets. Should
+     * always end with a slash (/).
+     */
+    private String vaadinDirUrl;
+    private String frontendUrl;
+    private String serviceUrl;
+    private String contextRootUrl;
+    private int uiId;
+    private boolean standalone;
+    private ErrorMessage communicationError;
+    private ErrorMessage authorizationError;
+    private ErrorMessage sessionExpiredError;
+    private int heartbeatInterval;
+
+    private Map<Integer, String> unknownComponents;
+
+    private Map<Integer, Class<? extends ServerConnector>> classes = new HashMap<>();
+
+    private boolean widgetsetVersionSent = false;
+    private static boolean moduleLoaded = false;
+
+    static// TODO consider to make this hashmap per application
+    List<Command> callbacks = new LinkedList<>();
+
+    private static int dependenciesLoading;
+
+    private static List<ApplicationConnection> runningApplications = new ArrayList<>();
+
+    private Map<Integer, Integer> componentInheritanceMap = new HashMap<>();
+    private Map<Integer, String> tagToServerSideClassName = new HashMap<>();
+
+    private Element rootElement;
+
+    /**
+     * Checks whether path info in requests to the server-side service should be
+     * in a request parameter (named <code>v-resourcePath</code>) or appended to
+     * the end of the service URL.
+     *
+     * @see #getServiceUrl()
+     *
+     * @return <code>true</code> if path info should be a request parameter;
+     *         <code>false</code> if the path info goes after the service URL
+     */
+    public boolean useServiceUrlPathParam() {
+        return getServiceUrlParameterName() != null;
+    }
+
+    /**
+     * Return the name of the parameter used to to send data to the service url.
+     * This method should only be called if {@link #useServiceUrlPathParam()} is
+     * true.
+     *
+     * @since 7.1.6
+     * @return The parameter name, by default <code>v-resourcePath</code>
+     */
+    public String getServiceUrlParameterName() {
+        return getJsoConfiguration(id).getConfigString(
+                ApplicationConstants.SERVICE_URL_PARAMETER_NAME);
+    }
+
+    public String getRootPanelId() {
+        return id;
+    }
+
+    /**
+     * Gets the URL to the server-side VaadinService. If
+     * {@link #useServiceUrlPathParam()} return <code>true</code>, the requested
+     * path info should be in the <code>v-resourcePath</code> query parameter;
+     * else the path info should be appended to the end of the URL.
+     *
+     * @see #useServiceUrlPathParam()
+     *
+     * @return the URL to the server-side service as a string
+     */
+    public String getServiceUrl() {
+        return serviceUrl;
+    }
+
+    /**
+     * Gets the URL to the context root of the web application.
+     *
+     * @return the URL to the server-side context root as a string
+     *
+     * @since 8.0.3
+     */
+    public String getContextRootUrl() {
+        return contextRootUrl;
+    }
+
+    /**
+     * @return the theme name used when initializing the application
+     * @deprecated as of 7.3. Use {@link UIConnector#getActiveTheme()} to get
+     *             the theme currently in use
+     */
+    @Deprecated
+    public String getThemeName() {
+        return getJsoConfiguration(id).getConfigString("theme");
+    }
+
+    /**
+     * Gets the URL of the VAADIN directory on the server.
+     *
+     * @return the URL of the VAADIN directory
+     */
+    public String getVaadinDirUrl() {
+        return vaadinDirUrl;
+    }
+
+    /**
+     * Gets the URL of the that the {@literal frontend://} protocol should
+     * resolve to.
+     *
+     * @return the URL of the frontend protocol
+     * @since 8.1
+     */
+    public String getFrontendUrl() {
+        return frontendUrl;
+    }
+
+    public void setAppId(String appId) {
+        id = appId;
+    }
+
+    /**
+     * Gets the initial UIDL from the DOM, if it was provided during the init
+     * process.
+     *
+     * @return
+     */
+    public String getUIDL() {
+        return getJsoConfiguration(id).getUIDL();
+    }
+
+    /**
+     * @return true if the application is served by std. Vaadin servlet and is
+     *         considered to be the only or main content of the host page.
+     */
+    public boolean isStandalone() {
+        return standalone;
+    }
+
+    /**
+     * Gets the UI id of the server-side UI associated with this client-side
+     * instance. The UI id should be included in every request originating from
+     * this instance in order to associate the request with the right UI
+     * instance on the server.
+     *
+     * @return the UI id
+     */
+    public int getUIId() {
+        return uiId;
+    }
+
+    /**
+     * @return The interval in seconds between heartbeat requests, or a
+     *         non-positive number if heartbeat is disabled.
+     */
+    public int getHeartbeatInterval() {
+        return heartbeatInterval;
+    }
+
+    public JavaScriptObject getVersionInfoJSObject() {
+        return getJsoConfiguration(id).getVersionInfoJSObject();
+    }
+
+    public ErrorMessage getCommunicationError() {
+        return communicationError;
+    }
+
+    public ErrorMessage getAuthorizationError() {
+        return authorizationError;
+    }
+
+    public ErrorMessage getSessionExpiredError() {
+        return sessionExpiredError;
+    }
+
+    /**
+     * Reads the configuration values defined by the bootstrap javascript.
+     */
+    private void loadFromDOM() {
+        JsoConfiguration jsoConfiguration = getJsoConfiguration(id);
+        load(jsoConfiguration);
+    }
+
+    /*
+     * Takes in a JSON String and evals it.
+     *
+     * @param JSON String that you trust
+     *
+     * @return JavaScriptObject that you can cast to an Overlay Type
+     */
+    public static <T extends JavaScriptObject> T parseJson(String jsonStr) {
+        return JsonUtils.safeEval(jsonStr);
+    }
+
+    private static native JsoConfiguration init(String appId,
+            JsoConfiguration jsoConfiguration, Element rootElement)
+    /*-{
+        if (!$wnd.vaadin) {
+            $wnd.vaadin = {};
+        }
+        if (!$wnd.vaadin.getApp) {
+            $wnd.vaadin.getApp = function() {
+                return jsoConfiguration;
+            }
+        }
+        jsoConfiguration.getConfig = function(name) {
+            return this[name];
+        }
+
+        jsoConfiguration.rootElement = rootElement;
+
+        jsoConfiguration.versionInfo = {
+            vaadinVersion: '8.0.0'
+        };
+
+        jsoConfiguration.theme = 'valo';
+
+        $wnd.vaadin.clients = {};
+
+        $wnd.vaadin.gwtStatsEvents = false;
+     }-*/;
+
+    private void loadFromJson(String appId, String json, Element rootElement) {
+        JsoConfiguration jsoConfiguration = parseJson(json);
+        init(appId, jsoConfiguration, rootElement);
+        load(jsoConfiguration);
+    }
+
+    private void load(JsoConfiguration jsoConfiguration) {
+        serviceUrl = jsoConfiguration
+                .getConfigString(ApplicationConstants.SERVICE_URL);
+        if (serviceUrl == null || serviceUrl.isEmpty()) {
+            /*
+             * Use the current url without query parameters and fragment as the
+             * default value.
+             */
+            serviceUrl = Window.Location.getHref().replaceFirst("[?#].*", "");
+        } else {
+            /*
+             * Resolve potentially relative URLs to ensure they point to the
+             * desired locations even if the base URL of the page changes later
+             * (e.g. with pushState)
+             */
+            serviceUrl = WidgetUtil.getAbsoluteUrl(serviceUrl);
+        }
+        // Ensure there's an ending slash (to make appending e.g. UIDL work)
+        if (!useServiceUrlPathParam() && !serviceUrl.endsWith("/")) {
+            serviceUrl += '/';
+        }
+
+        contextRootUrl = jsoConfiguration
+                .getConfigString(ApplicationConstants.CONTEXT_ROOT_URL);
+        vaadinDirUrl = WidgetUtil.getAbsoluteUrl(jsoConfiguration
+                .getConfigString(ApplicationConstants.VAADIN_DIR_URL));
+        frontendUrl = WidgetUtil.getAbsoluteUrl(jsoConfiguration
+                .getConfigString(ApplicationConstants.FRONTEND_URL));
+        uiId = jsoConfiguration.getConfigInteger(UIConstants.UI_ID_PARAMETER)
+                .intValue();
+
+        // null -> false
+        standalone = jsoConfiguration
+                .getConfigBoolean("standalone") == Boolean.TRUE;
+
+        // spreadsheet
+        if (false)
+            heartbeatInterval = jsoConfiguration
+                    .getConfigInteger("heartbeatInterval");
+
+        communicationError = jsoConfiguration.getConfigError("comErrMsg");
+        authorizationError = jsoConfiguration.getConfigError("authErrMsg");
+        sessionExpiredError = jsoConfiguration.getConfigError("sessExpMsg");
+
+        rootElement = jsoConfiguration.getConfigElement("rootElement");
+    }
+
+    /**
+     * Starts the application with a given id by reading the configuration
+     * options stored by the bootstrap javascript.
+     *
+     * @param applicationId
+     *            id of the application to load, this is also the id of the html
+     *            element into which the application should be rendered.
+     */
+    public static void startApplication(final String applicationId) {
+        Scheduler.get().scheduleDeferred(() -> {
+            Profiler.enter("ApplicationConfiguration.startApplication");
+            ApplicationConfiguration appConf = getConfigFromDOM(applicationId);
+            ApplicationConnection a = GWT.create(ApplicationConnection.class);
+            a.init(widgetSet, appConf);
+            runningApplications.add(a);
+            Profiler.leave("ApplicationConfiguration.startApplication");
+
+            a.start();
+        });
+    }
+
+    public static List<ApplicationConnection> getRunningApplications() {
+        return runningApplications;
+    }
+
+    /**
+     * Gets the configuration object for a specific application from the
+     * bootstrap javascript.
+     *
+     * @param appId
+     *            the id of the application to get configuration data for
+     * @return a native javascript object containing the configuration data
+     */
+    private static native JsoConfiguration getJsoConfiguration(String appId)
+    /*-{
+        return $wnd.vaadin.getApp(appId);
+     }-*/;
+
+    public static ApplicationConfiguration getConfigFromDOM(String appId) {
+        ApplicationConfiguration conf = new ApplicationConfiguration();
+        conf.setAppId(appId);
+        conf.loadFromDOM();
+        return conf;
+    }
+
+    // spreadsheet
+    public static ApplicationConfiguration getConfigFromJson(String appId,
+            String json, Element rootElement) {
+        ApplicationConfiguration conf = new ApplicationConfiguration();
+        conf.setAppId(appId);
+        conf.loadFromJson(appId, json, rootElement);
+        return conf;
+    }
+
+    public String getServletVersion() {
+        return getJsoConfiguration(id).getVaadinVersion();
+    }
+
+    /**
+     * Return Atmosphere version.
+     *
+     * @since 7.4
+     *
+     * @return Atmosphere version.
+     */
+    public String getAtmosphereVersion() {
+        return getJsoConfiguration(id).getAtmosphereVersion();
+    }
+
+    /**
+     * Return Atmosphere JS version.
+     *
+     * @since 7.4
+     *
+     * @return Atmosphere JS version.
+     */
+    public String getAtmosphereJSVersion() {
+        return getJsoConfiguration(id).getAtmosphereJSVersion();
+    }
+
+    public Class<? extends ServerConnector> getConnectorClassByEncodedTag(
+            int tag) {
+        Class<? extends ServerConnector> type = classes.get(tag);
+        if (type == null && !classes.containsKey(tag)) {
+            // Initialize if not already loaded
+            Integer currentTag = Integer.valueOf(tag);
+            while (type == null && currentTag != null) {
+                String serverSideClassNameForTag = getServerSideClassNameForTag(
+                        currentTag);
+                if (TypeData.hasIdentifier(serverSideClassNameForTag)) {
+                    try {
+                        type = (Class<? extends ServerConnector>) TypeData
+                                .getClass(serverSideClassNameForTag);
+                    } catch (NoDataException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                currentTag = getParentTag(currentTag.intValue());
+            }
+            if (type == null) {
+                if (isExtensionType(tag)) {
+                    type = UnknownExtensionConnector.class;
+                } else {
+                    type = UnknownComponentConnector.class;
+                }
+                if (unknownComponents == null) {
+                    unknownComponents = new HashMap<>();
+                }
+                unknownComponents.put(tag, getServerSideClassNameForTag(tag));
+            }
+            classes.put(tag, type);
+        }
+        return type;
+    }
+
+    private boolean isExtensionType(int tag) {
+        Integer currentTag = Integer.valueOf(tag);
+        while (currentTag != null) {
+            String serverSideClassNameForTag = getServerSideClassNameForTag(
+                    currentTag);
+            if ("com.vaadin.server.AbstractExtension"
+                    .equals(serverSideClassNameForTag)) {
+                return true;
+            }
+            currentTag = getParentTag(currentTag.intValue());
+        }
+        return false;
+    }
+
+    public void addComponentInheritanceInfo(ValueMap valueMap) {
+        JsArrayString keyArray = valueMap.getKeyArray();
+        for (int i = 0; i < keyArray.length(); i++) {
+            String key = keyArray.get(i);
+            int value = valueMap.getInt(key);
+            componentInheritanceMap.put(Integer.parseInt(key), value);
+        }
+    }
+
+    public void addComponentMappings(ValueMap valueMap, WidgetSet widgetSet) {
+        JsArrayString keyArray = valueMap.getKeyArray();
+        for (int i = 0; i < keyArray.length(); i++) {
+            String key = keyArray.get(i).intern();
+            int value = valueMap.getInt(key);
+            tagToServerSideClassName.put(value, key);
+        }
+
+        for (int i = 0; i < keyArray.length(); i++) {
+            String key = keyArray.get(i).intern();
+            int value = valueMap.getInt(key);
+            widgetSet.ensureConnectorLoaded(value, this);
+        }
+    }
+
+    /**
+     * Returns all tags for given class. Tags are used in
+     * {@link ApplicationConfiguration} to keep track of different classes and
+     * their hierarchy
+     *
+     * @since 7.2
+     * @param classname
+     *            name of class which tags we want
+     * @return Integer array of tags pointing to this classname
+     */
+    public Integer[] getTagsForServerSideClassName(String classname) {
+        List<Integer> tags = new ArrayList<>();
+
+        for (Map.Entry<Integer, String> entry : tagToServerSideClassName
+                .entrySet()) {
+            if (classname.equals(entry.getValue())) {
+                tags.add(entry.getKey());
+            }
+        }
+
+        Integer[] out = new Integer[tags.size()];
+        return tags.toArray(out);
+    }
+
+    public Integer getParentTag(int tag) {
+        return componentInheritanceMap.get(tag);
+    }
+
+    public String getServerSideClassNameForTag(Integer tag) {
+        return tagToServerSideClassName.get(tag);
+    }
+
+    String getUnknownServerClassNameByTag(int tag) {
+        if (unknownComponents != null) {
+            String className = unknownComponents.get(tag);
+            if (className == null) {
+                className = "unknown class with id " + tag;
+            }
+            return className;
+        }
+        return null;
+    }
+
+    /**
+     * Runs the given command when all pending dependencies have been loaded, or
+     * immediately if no dependencies are being loaded.
+     *
+     * @since 7.6
+     * @param command
+     *            the command to run
+     */
+    public static void runWhenDependenciesLoaded(Command command) {
+        if (dependenciesLoading == 0) {
+            command.execute();
+        } else {
+            callbacks.add(command);
+        }
+    }
+
+    static void startDependencyLoading() {
+        dependenciesLoading++;
+    }
+
+    static void endDependencyLoading() {
+        dependenciesLoading--;
+        if (dependenciesLoading == 0 && !callbacks.isEmpty()) {
+            for (Command cmd : callbacks) {
+                cmd.execute();
+            }
+            callbacks.clear();
+        }
+    }
+
+    private boolean vaadinBootstrapLoaded() {
+        Element window = ScriptInjector.TOP_WINDOW.cast();
+        return window.getPropertyJSO("vaadin") != null;
+    }
+
+    @Override
+    public void onModuleLoad() {
+        // Spreadsheet does not need anything from bootstrap
+    }
+
+    private static void initDebugWindow() {
+        /*
+         * XXX Lots of implementation details here right now. This should be
+         * cleared up when an API for extending the debug window is implemented.
+         */
+        VDebugWindow window = VDebugWindow.get();
+
+        if (LogConfiguration.loggingIsEnabled()) {
+            window.addSection((Section) GWT.create(LogSection.class));
+        }
+        window.addSection((Section) GWT.create(InfoSection.class));
+        window.addSection((Section) GWT.create(HierarchySection.class));
+        window.addSection((Section) GWT.create(NetworkSection.class));
+        window.addSection((Section) GWT.create(TestBenchSection.class));
+        if (Profiler.isEnabled()) {
+            window.addSection((Section) GWT.create(ProfilerSection.class));
+        }
+
+        if (isQuietDebugMode()) {
+            window.close();
+        } else {
+            DebugWindowStyles dws = GWT.create(DebugWindowStyles.class);
+            dws.css().ensureInjected();
+
+            window.init();
+        }
+
+        // Connect to the legacy API
+        VConsole.setImplementation(window);
+
+        Handler errorNotificationHandler = GWT
+                .create(ErrorNotificationHandler.class);
+        Logger.getLogger("").addHandler(errorNotificationHandler);
+    }
+
+    /**
+     * Fix to iOS6 failing when comparing with 0 directly after the kind of
+     * comparison done by GWT when a double or float is cast to an int. Forcing
+     * another trivial operation (other than a compare to 0) after the dangerous
+     * comparison makes the issue go away. See #10460.
+     */
+    private static native void enableIOS6castFix()
+    /*-{
+          Math.max = function(a,b) {return (a > b === 1 < 2)? a : b}
+          Math.min = function(a,b) {return (a < b === 1 < 2)? a : b}
+    }-*/;
+
+    /**
+     * Make Metro versions of IE suggest switching to the desktop when
+     * window.prompt is called.
+     */
+    private static native void enableIEPromptFix()
+    /*-{
+        var prompt = $wnd.prompt;
+        $wnd.prompt = function () {
+            var result = prompt.apply($wnd, Array.prototype.slice.call(arguments));
+            if (result === undefined) {
+                // force the browser to suggest desktop mode
+                showModalDialog();
+                return null;
+            } else {
+                return result;
+            }
+        };
+    }-*/;
+
+    /**
+     * Registers that callback that the bootstrap javascript uses to start
+     * applications once the widgetset is loaded and all required information is
+     * available.
+     *
+     * @param widgetsetName
+     *            the name of this widgetset
+     */
+    public static native void registerCallback(String widgetsetName)
+    /*-{
+        var callbackHandler = $entry(@com.vaadin.client.ApplicationConfiguration::startApplication(Ljava/lang/String;));
+        $wnd.vaadin.registerWidgetset(widgetsetName, callbackHandler);
+    }-*/;
+
+    /**
+     * Checks if client side is in debug mode. Practically this is invoked by
+     * adding ?debug parameter to URI. Please note that debug mode is always
+     * disabled if production mode is enabled, but disabling production mode
+     * does not automatically enable debug mode.
+     *
+     * @see #isProductionMode()
+     *
+     * @return true if client side is currently been debugged
+     */
+    public static boolean isDebugMode() {
+        return isDebugAvailable()
+                && Window.Location.getParameter("debug") != null;
+    }
+
+    /**
+     * Checks if production mode is enabled. When production mode is enabled,
+     * client-side logging is disabled. There may also be other performance
+     * optimizations.
+     *
+     * @since 7.1.2
+     * @return <code>true</code> if production mode is enabled; otherwise
+     *         <code>false</code>.
+     */
+    public static boolean isProductionMode() {
+        return !isDebugAvailable();
+    }
+
+    private static native boolean isDebugAvailable()
+    /*-{
+        //spreadsheet: $wnd.vaadin does not exist at this point
+        return false && $wnd.vaadin.debug;
+    }-*/;
+
+    /**
+     * Checks whether debug logging should be quiet.
+     *
+     * @return <code>true</code> if debug logging should be quiet
+     */
+    public static boolean isQuietDebugMode() {
+        String debugParameter = Window.Location.getParameter("debug");
+        return isDebugAvailable() && debugParameter != null
+                && debugParameter.startsWith("q");
+    }
+
+    /**
+     * Checks whether the widget set version has been sent to the server. It is
+     * sent in the first UIDL request.
+     *
+     * @return <code>true</code> if browser information has already been sent
+     */
+    public boolean isWidgetsetVersionSent() {
+        return widgetsetVersionSent;
+    }
+
+    /**
+     * Registers that the widget set version has been sent to the server.
+     */
+    public void setWidgetsetVersionSent() {
+        widgetsetVersionSent = true;
+    }
+
+    private static final Logger getLogger() {
+        return Logger.getLogger(ApplicationConfiguration.class.getName());
+    }
+
+    /**
+     * Get the root element instance used for this application.
+     *
+     * @return registered root element
+     * @since 8.4
+     */
+    public Element getRootElement() {
+        return rootElement;
+    }
+}
