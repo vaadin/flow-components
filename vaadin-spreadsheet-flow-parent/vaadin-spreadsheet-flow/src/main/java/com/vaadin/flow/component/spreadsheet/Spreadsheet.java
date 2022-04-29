@@ -1249,10 +1249,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private final Map<Integer, HashSet<String>> invalidFormulas = new HashMap<Integer, HashSet<String>>();
 
-    private String srcUri;
-
-    private boolean defaultColWidthSet, defaultRowHeightSet;
-
     /**
      * Container for merged regions for the currently active sheet.
      */
@@ -1360,7 +1356,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     public Spreadsheet(File file) throws IOException {
         init();
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
-        srcUri = file.toURI().toString();
     }
 
     /**
@@ -2798,7 +2793,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                             + widthPX);
         }
         setDefColW(widthPX);
-        defaultColWidthSet = true;
     }
 
     /**
@@ -2827,7 +2821,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         }
         getActiveSheet().setDefaultRowHeightInPoints(heightPT);
         setDefRowH(heightPT);
-        defaultRowHeightSet = true;
     }
 
     /**
@@ -3570,7 +3563,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
      */
     public void read(File file) throws IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
-        srcUri = file.toURI().toString();
     }
 
     /**
@@ -3585,7 +3577,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
      */
     public void read(InputStream inputStream) throws IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
-        srcUri = null;
     }
 
     /**
@@ -5840,135 +5831,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
      */
     public void reset() {
         SpreadsheetFactory.loadNewXLSXSpreadsheet(this);
-        srcUri = null;
     }
 
-    /* Attribute names for declarative format support. */
-    private static final String ATTR_ACTIVE_SHEET = "active-sheet-index";
-    private static final String ATTR_DEFAULT_COL_WIDTH = "default-column-width";
-    private static final String ATTR_DEFAULT_COL_COUNT = "default-column-count";
-    private static final String ATTR_DEFAULT_ROW_COUNT = "default-row-count";
-    private static final String ATTR_DEFAULT_ROW_HEIGHT = "default-row-height";
-    private static final String ATTR_NO_GRIDLINES = "no-gridlines";
-    private static final String ATTR_NO_HEADINGS = "no-headings";
-    private static final String ATTR_NO_FUNCTION_BAR = "no-function-bar";
-    private static final String ATTR_NO_SHEET_SELECTION_BAR = "no-sheetselection-bar";
-    private static final String ATTR_SRC = "src";
     private CommentAuthorProvider commentAuthorProvider;
-
-    // todo: todo lo relacionado con el designer ya no hace falta?
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#readDesign(org.jsoup.nodes.Element,
-     * com.vaadin.ui.declarative.DesignContext)
-     */
-    /*
-     * @Override public void readDesign(Element design, DesignContext
-     * designContext) { super.readDesign(design, designContext);
-     *
-     * Attributes attr = design.attributes();
-     *
-     * if (attr.hasKey(ATTR_SRC)) { String src =
-     * DesignAttributeHandler.readAttribute(ATTR_SRC, attr, String.class); try {
-     * URL url = new URL(src); read(url.openStream()); srcUri = src; } catch
-     * (MalformedURLException e) { LOGGER.log(Level.SEVERE,
-     * "Failed to parse the provided URI.", e); } catch (IOException e) {
-     * LOGGER.log(Level.SEVERE, "Failed to read Excel file from provided URI.",
-     * e); } } if (attr.hasKey(ATTR_DEFAULT_COL_COUNT)) { Integer colCount =
-     * DesignAttributeHandler.readAttribute( ATTR_DEFAULT_COL_COUNT, attr,
-     * Integer.class); setDefaultColumnCount(colCount); } if
-     * (attr.hasKey(ATTR_DEFAULT_COL_WIDTH)) { Integer colWidth =
-     * DesignAttributeHandler.readAttribute( ATTR_DEFAULT_COL_WIDTH, attr,
-     * Integer.class); setDefaultColumnWidth(colWidth); } if
-     * (attr.hasKey(ATTR_DEFAULT_ROW_COUNT)) { Integer rowCount =
-     * DesignAttributeHandler.readAttribute( ATTR_DEFAULT_ROW_COUNT, attr,
-     * Integer.class); setDefaultRowCount(rowCount); } if
-     * (attr.hasKey(ATTR_DEFAULT_ROW_HEIGHT)) { Float rowHeight =
-     * DesignAttributeHandler.readAttribute( ATTR_DEFAULT_ROW_HEIGHT, attr,
-     * Float.class); setDefaultRowHeight(rowHeight); } if
-     * (attr.hasKey(ATTR_ACTIVE_SHEET)) { Integer activeSheet =
-     * DesignAttributeHandler.readAttribute( ATTR_ACTIVE_SHEET, attr,
-     * Integer.class); setActiveSheetIndex(activeSheet); } if
-     * (attr.hasKey(ATTR_NO_GRIDLINES)) { Boolean noGridlines =
-     * DesignAttributeHandler.readAttribute( ATTR_NO_GRIDLINES, attr,
-     * Boolean.class); setGridlinesVisible(!noGridlines); } if
-     * (attr.hasKey(ATTR_NO_HEADINGS)) { Boolean noHeadings =
-     * DesignAttributeHandler.readAttribute( ATTR_NO_HEADINGS, attr,
-     * Boolean.class); setRowColHeadingsVisible(!noHeadings); } if
-     * (attr.hasKey(ATTR_NO_FUNCTION_BAR)) { Boolean hidden =
-     * DesignAttributeHandler.readAttribute( ATTR_NO_FUNCTION_BAR, attr,
-     * Boolean.class); setFunctionBarVisible(!hidden); } if
-     * (attr.hasKey(ATTR_NO_SHEET_SELECTION_BAR)) { Boolean hidden =
-     * DesignAttributeHandler.readAttribute( ATTR_NO_SHEET_SELECTION_BAR, attr,
-     * Boolean.class); setSheetSelectionBarVisible(!hidden); } }
-     */
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#getCustomAttributes()
-     */
-    /*
-     * @Override protected Collection<String> getCustomAttributes() {
-     * Collection<String> result = super.getCustomAttributes();
-     * result.add(ATTR_ACTIVE_SHEET); result.add(ATTR_DEFAULT_COL_COUNT);
-     * result.add(ATTR_DEFAULT_COL_WIDTH); result.add(ATTR_DEFAULT_ROW_COUNT);
-     * result.add(ATTR_DEFAULT_ROW_HEIGHT); result.add(ATTR_NO_GRIDLINES);
-     * result.add(ATTR_NO_HEADINGS); result.add(ATTR_NO_FUNCTION_BAR);
-     * result.add(ATTR_NO_SHEET_SELECTION_BAR); result.add(ATTR_SRC); return
-     * result; }
-     */
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#writeDesign(org.jsoup.nodes.Element,
-     * com.vaadin.ui.declarative.DesignContext)
-     */
-    /*
-     * @Override public void writeDesign(Element design, DesignContext
-     * designContext) { super.writeDesign(design, designContext);
-     *
-     * Attributes attr = design.attributes();
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_NO_GRIDLINES, attr,
-     * !isGridlinesVisible(), false, Boolean.class, designContext);
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_NO_HEADINGS, attr,
-     * !isRowColHeadingsVisible(), false, Boolean.class, designContext);
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_NO_FUNCTION_BAR, attr,
-     * !isFunctionBarVisible(), false, Boolean.class, designContext);
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_NO_SHEET_SELECTION_BAR, attr,
-     * !isSheetSelectionBarVisible(), false, Boolean.class, designContext);
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_ACTIVE_SHEET, attr,
-     * getActiveSheetIndex(), 0, Integer.class, designContext);
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_COL_COUNT, attr,
-     * getDefaultColumnCount(), SpreadsheetFactory.DEFAULT_COLUMNS,
-     * Integer.class, designContext);
-     *
-     * DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_ROW_COUNT, attr,
-     * getDefaultRowCount(), SpreadsheetFactory.DEFAULT_ROWS, Integer.class,
-     * designContext);
-     *
-     * if (defaultColWidthSet) {
-     * DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_COL_WIDTH, attr,
-     * getDefaultColumnWidth(), SpreadsheetUtil.getDefaultColumnWidthInPx(),
-     * Integer.class, designContext); }
-     *
-     * if (defaultRowHeightSet) {
-     * DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_ROW_HEIGHT, attr,
-     * getDefaultRowHeight(), SpreadsheetFactory.DEFAULT_ROW_HEIGHT_POINTS,
-     * Float.class, designContext); }
-     *
-     * if (srcUri != null) { DesignAttributeHandler.writeAttribute(ATTR_SRC,
-     * attr, srcUri, null, String.class, designContext); } }
-     */
 
     /**
      * Returns the formatting string that is used when a user enters percentages
