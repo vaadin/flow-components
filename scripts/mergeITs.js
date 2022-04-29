@@ -182,6 +182,12 @@ async function createInitListener() {
   copyFileSync(`${templateDir}/index.html`, `${targetFolder}/index.html`);
 }
 
+// Use feature flag properties file that enables all experimental components
+function copyFeatureFlags() {
+  const resourcesFolder = `${itFolder}/src/main/resources`
+  copyFileSync(`${templateDir}/vaadin-featureflags.properties`, `${resourcesFolder}`);
+}
+
 // Copy components sources from master to the merged integration-tests module
 // At the same time does some source-code changes to adapt them to the new module
 async function copySources() {
@@ -216,6 +222,7 @@ async function main() {
   await copySources();
   await createFrontendIndex();
   await createPom();
+  copyFeatureFlags();
 }
 
 main();
