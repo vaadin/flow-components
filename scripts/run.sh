@@ -15,7 +15,7 @@ jettyrun="jetty:run -Dvaadin.pnpm.enable"
 
 ## List all modules and ask for one to the user
 askModule() {
-  [ -z "$modules" ] && modules=`cat pom.xml | grep 'module>vaadin.*parent</module' | sed -e 's,.*<module>,,g' | sed -e 's,-flow-parent.*,,g' | sort | cat -n -`
+  [ -z "$modules" ] && modules=`cat pom.xml | grep 'module>vaadin.*flow-parent</module' | sed -e 's,.*<module>,,g' | sed -e 's,-flow-parent.*,,g' | sort | cat -n -`
   max=`echo "$modules" | wc -l`
   printf "\nList of Modules\n$modules\nType the number of component:  "
   read module
