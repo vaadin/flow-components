@@ -99,18 +99,15 @@ public class GridViewIT extends GridViewBase {
                 messageDiv.getText());
         assertRowsSelected(grid, 0, 5);
 
-        WebElement checkbox = getCellContent(grid.getCell(0, 0));
-        checkbox.click();
-        checkbox = getCellContent(grid.getCell(1, 0));
-        checkbox.click();
+        grid.deselect(0);
+        grid.deselect(1);
         Assert.assertEquals(
                 getSelectionMessage(GridView.items.subList(1, 5),
                         GridView.items.subList(2, 5), true),
                 messageDiv.getText());
         assertRowsSelected(grid, 2, 5);
 
-        checkbox = getCellContent(grid.getCell(5, 0));
-        checkbox.click();
+        grid.select(5);
         Assert.assertTrue(isRowSelected(grid, 5));
         clickElementWithJs(selectBtn);
         assertRowsSelected(grid, 0, 6);
