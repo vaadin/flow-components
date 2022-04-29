@@ -105,8 +105,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (getTarget() != null) {
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
-            getTarget().getElement()
-                    .callJsFunction("$contextMenuTargetConnector.removeConnector");
+            getTarget().getElement().callJsFunction(
+                    "$contextMenuTargetConnector.removeConnector");
             if (isTargetJsPending()) {
                 targetJsRegistration.cancelExecution();
                 targetJsRegistration = null;
@@ -408,8 +408,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         if (shouldOpenMenu) {
             addContextMenuToUi();
-            target.getElement().callJsFunction("$contextMenuTargetConnector.openMenu",
-                    getElement());
+            target.getElement().callJsFunction(
+                    "$contextMenuTargetConnector.openMenu", getElement());
         }
     }
 
@@ -437,6 +437,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private void initConnector(String appId) {
         getElement().executeJs(
-                "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)", appId);
+                "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)",
+                appId);
     }
 }

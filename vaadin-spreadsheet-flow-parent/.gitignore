@@ -1,0 +1,37 @@
+bin
+target
+integration-tests
+pom.xml.bak
+*rebel.xml
+
+# Eclipse
+.project
+.settings
+.classpath
+*.iml
+
+# Idea files
+.idea/
+*.iml
+.npmrc
+
+.vscode
+types.d.ts
+tsconfig.json
+webpack.*
+node_modules
+.driver
+package*json
+pnpm*
+.pnpm*
+error-screenshots
+
+**/frontend/generated
+**/frontend/index.html
+
+*.DS_Store
+vaadin-spreadsheet/errors
+*/styles.css
+*styles.css
+
+spreadsheet-export.js

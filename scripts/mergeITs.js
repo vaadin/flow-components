@@ -31,7 +31,7 @@ async function computeModules() {
   } else {
     // Read modules from the parent pom.xml
     const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`pom.xml`, 'utf8'));
-    modules = parentJs.project.modules[0].module.filter(m => !/shared/.test(m)).filter(m => !/demo-helpers/.test(m));
+    modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/demo-helpers/.test(m));
   }
 }
 
@@ -120,14 +120,16 @@ function copyFileSync(source, target, replaceCall) {
   if (fs.existsSync(targetFile)) {
     console.log(`Overriding ${targetFile}`);
   }
-  // fs.copyFileSync(source, targetFile);
-  let content = fs.readFileSync(source, 'utf8');
-  // remove CR in windows
-  if (/\.(java)$/.test(source)) {
+
+  if (/\.(java|html|js|ts)$/.test(source)) {
+    let content = fs.readFileSync(source, 'utf8');
+    // remove CR in windows
     content = content.replace('\r', '');
+    [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
+    targetFile && content && fs.writeFileSync(targetFile, content, 'utf8');
+  } else {
+    fs.copyFileSync(source, targetFile);
   }
-  [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
-  targetFile && content && fs.writeFileSync(targetFile, content, 'utf8');
 }
 
 // copy recursively a folder without failing, and reusing already created folders in target

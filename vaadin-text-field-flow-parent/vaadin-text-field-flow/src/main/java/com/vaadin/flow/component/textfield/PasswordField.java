@@ -29,7 +29,9 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-password-field} element.
+ * Password Field is an input field for entering passwords. The input is masked
+ * by default. On mobile devices the last typed letter is shown for a brief
+ * moment. The masking can be toggled using an optional reveal button.
  *
  * @author Vaadin Ltd.
  */

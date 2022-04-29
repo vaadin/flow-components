@@ -27,21 +27,25 @@ public class MenuBarVisibilityPage extends Div {
         MenuBar menuBar = new MenuBar();
         MenuItem menuItem = menuBar.addItem("Item");
 
-        NativeButton toggleMenuBarVisibility = new NativeButton("Toggle menu bar visibility", (event) -> {
-            menuBar.setVisible(!menuBar.isVisible());
-        });
+        NativeButton toggleMenuBarVisibility = new NativeButton(
+                "Toggle menu bar visibility", (event) -> {
+                    menuBar.setVisible(!menuBar.isVisible());
+                });
         toggleMenuBarVisibility.setId("toggle-menu-bar-visibility");
 
-        NativeButton toggleMenuItemVisibility = new NativeButton("Toggle menu item visibility", (event) -> {
-            menuItem.setVisible(!menuItem.isVisible());
-        });
+        NativeButton toggleMenuItemVisibility = new NativeButton(
+                "Toggle menu item visibility", (event) -> {
+                    menuItem.setVisible(!menuItem.isVisible());
+                });
         toggleMenuItemVisibility.setId("toggle-menu-item-visibility");
 
-        NativeButton toggleMenuItemEnabled = new NativeButton("Toggle menu item enabled", (event) -> {
-            menuItem.setEnabled(!menuItem.isEnabled());
-        });
+        NativeButton toggleMenuItemEnabled = new NativeButton(
+                "Toggle menu item enabled", (event) -> {
+                    menuItem.setEnabled(!menuItem.isEnabled());
+                });
         toggleMenuItemEnabled.setId("toggle-menu-item-enabled");
 
-        add(menuBar, toggleMenuBarVisibility, toggleMenuItemVisibility, toggleMenuItemEnabled);
+        add(menuBar, toggleMenuBarVisibility, toggleMenuItemVisibility,
+                toggleMenuItemEnabled);
     }
 }

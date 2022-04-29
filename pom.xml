@@ -12,7 +12,7 @@
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>23.0-SNAPSHOT</flow.version>
+        <flow.version>23.1-SNAPSHOT</flow.version>
         <testbench.version>8.0.0</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -36,12 +36,17 @@
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
+
+        <!-- spreadsheet -->
+        <poi.version>5.2.2</poi.version>
+        <gwt.version>2.9.0</gwt.version>
+        <framework.version>8.14.3</framework.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-material-theme-flow-parent</module>
-        <module>vaadin-flow-components-shared</module>
+        <module>vaadin-flow-components-shared-parent</module>
         <module>vaadin-accordion-flow-parent</module>
         <module>vaadin-avatar-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
@@ -81,6 +86,7 @@
         <module>vaadin-grid-pro-flow-parent</module>
         <module>vaadin-map-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
+        <module>vaadin-spreadsheet-flow-parent</module>
     </modules>
     <profiles>
         <profile>
@@ -184,7 +190,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -235,10 +241,10 @@
 
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
-                          -includeresource.resources: -src/main/resources
+                  includeresource.resources: -src/main/resources
 
                           //if profile war is used in demos
-                          -fixupmessages: "Classes found in the wrong directory";is:=warning
+                  fixupmessages: "Classes found in the wrong directory";is:=warning
 
                           ]]></bnd>
                     </configuration>
@@ -573,7 +579,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.5.0</version>
+                <version>4.5.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -588,6 +594,56 @@
                 <version>${testbench.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-full</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+              </dependency>
+              <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+              </dependency>
+              <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+              </dependency>
+
+              <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-client</artifactId>
+                <version>${framework.version}</version>
+              </dependency>
+              <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-client-compiler</artifactId>
+                <version>${framework.version}</version>
+              </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

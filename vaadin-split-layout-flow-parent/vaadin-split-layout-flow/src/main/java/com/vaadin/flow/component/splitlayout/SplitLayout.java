@@ -28,17 +28,8 @@ import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * <p>
- * {@code SplitLayout} is a component based on the {@code vaadin-split-layout}
- * Polymer element implementing a split layout for two content elements with a
- * draggable splitter between them. DOM Example:
- * </p>
- * <code>
- * &lt;vaadin-split-layout&gt;<br>
- * &lt;div&gt;First content element&lt;/div&gt;<br>
- * &lt;div&gt;Second content element&lt;/div&gt;<br>
- * &lt;/vaadin-split-layout&gt;
- * </code>
+ * Split Layout is a component with two content areas and a draggable split
+ * handle between them.
  * <h3>Horizontal and Vertical Layouts</h3>
  * <p>
  * By default, the split's orientation is horizontal, meaning that the content
@@ -140,8 +131,8 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/split-layout", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.1.0-alpha4")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 

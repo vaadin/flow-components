@@ -21,12 +21,14 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Server-side component for the {@code vaadin-progress-bar} element.
+ * Progress Bar shows the completion status of a task or process. The progress
+ * can be determinate or indeterminate. Use Progress Bar to show an ongoing
+ * process that takes a noticeable time to finish.
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/progress-bar", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/progress-bar", version = "23.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "23.1.0-alpha4")
 public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
         implements HasSize {
 

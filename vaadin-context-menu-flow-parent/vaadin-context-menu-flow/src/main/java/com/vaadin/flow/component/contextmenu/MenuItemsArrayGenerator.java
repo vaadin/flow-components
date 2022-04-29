@@ -62,7 +62,8 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
             getItems().forEach(this::resetContainers);
 
             int containerNodeId = createNewContainer(menu.getChildren());
-            getElement().callJsFunction("$connector.generateItems", containerNodeId);
+            getElement().callJsFunction("$connector.generateItems",
+                    containerNodeId);
 
             updateScheduled = false;
         });

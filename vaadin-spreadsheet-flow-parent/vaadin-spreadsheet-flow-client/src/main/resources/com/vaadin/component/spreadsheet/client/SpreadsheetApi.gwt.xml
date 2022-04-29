@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='SpreadsheetApi'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User' />
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+<!--   <inherits name='com.google.gwt.user.theme.standard.Standard' /> -->
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+  <!-- Other module inherits                                      -->
+
+  <!-- Inherit DefaultWidgetSet -->
+  <inherits name="com.vaadin.DefaultWidgetSet" />
+
+  <inherits name="com.vaadin.addon.spreadsheet.Widgetset" />
+<!--   <stylesheet src="addons/spreadsheet/spreadsheet.css"/> -->
+
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='com.vaadin.component.spreadsheet.client.js.SpreadsheetEntryPoint' />
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='js' />
+
+  <!-- Generator for connectors -->
+  <generate-with
+          class="com.vaadin.component.spreadsheet.client.SpreadsheetConnectorBundleLoaderFactory">
+    <when-type-assignable
+            class="com.vaadin.client.metadata.ConnectorBundleLoader" />
+  </generate-with>
+
+
+  <!-- Use custom single script linker without document.write, doens't work with SDM and GWT unit tests -->
+  <define-linker name="humlinker" class="com.vaadin.component.spreadsheet.client.SpreadsheetLinker" />
+  <add-linker name="humlinker" />
+
+  <!--
+    The value gecko1_8 is used for Firefox 3 and later and safari is used
+    for webkit based browsers including Google Chrome.
+  -->
+  <set-property name="user.agent" value="gecko1_8,safari"/>
+  <set-configuration-property name="devModeRedirectEnabled" value="true" />
+
+</module>

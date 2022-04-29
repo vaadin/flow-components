@@ -45,17 +45,18 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component for the <code>vaadin-menu-bar</code> element.
+ * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu
+ * items can either trigger an action, open a menu, or work as a toggle.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/menu-bar", version = "23.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.1.0-alpha4")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 
@@ -354,7 +355,8 @@ public class MenuBar extends Component
 
     private void initConnector(String appId) {
         getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)", appId);
+                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)",
+                appId);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

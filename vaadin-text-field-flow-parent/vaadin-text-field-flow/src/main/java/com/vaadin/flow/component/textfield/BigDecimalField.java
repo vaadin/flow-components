@@ -38,11 +38,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
- * Server-side component for the {@code vaadin-big-decimal-field} element. This
- * field uses {@link BigDecimal} as the server-side value type, which allows
- * handling decimal numbers with high precision. The component also prevents
- * users from entering characters which can't be used in a decimal number, such
- * as alphabets.
+ * BigDecimalField is an input field for handling decimal numbers with high
+ * precision. This field uses {@link BigDecimal} as the server-side value type,
+ * and only allows numeric input.
  * <p>
  * When setting values from the server-side, the {@code scale} of the provided
  * {@link BigDecimal} is preserved in the presentation format shown to the user,
@@ -51,7 +49,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField

@@ -28,7 +28,9 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-text-area} element.
+ * Text Area is an input field component for multi-line text input. Text Area is
+ * typically used for descriptions, comments, and other longer free-form
+ * content.
  *
  * @author Vaadin Ltd.
  */
