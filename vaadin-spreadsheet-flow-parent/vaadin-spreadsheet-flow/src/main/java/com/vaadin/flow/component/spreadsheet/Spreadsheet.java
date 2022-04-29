@@ -216,41 +216,27 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     // spreadsheetState
 
-    // @DelegateToWidget
     private int rowBufferSize = 200;
 
-    // @DelegateToWidget
     private int columnBufferSize = 200;
 
-    // @DelegateToWidget
     private int rows;
 
-    // @DelegateToWidget
     private int cols;
 
-    // @DelegateToWidget
     private List<GroupingData> colGroupingData;
-    // @DelegateToWidget
     private List<GroupingData> rowGroupingData;
 
-    // @DelegateToWidget
     private int colGroupingMax;
-    // @DelegateToWidget
     private int rowGroupingMax;
 
-    // @DelegateToWidget
     private boolean colGroupingInversed;
-    // @DelegateToWidget
     private boolean rowGroupingInversed;
 
-    // @DelegateToWidget
     private float defRowH;
-    // @DelegateToWidget
     private int defColW;
 
-    // @DelegateToWidget
     private float[] rowH;
-    // @DelegateToWidget
     private int[] colW;
 
     /** should the sheet be reloaded on client side */
@@ -261,43 +247,31 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private String[] sheetNames = null;
 
-    // @DelegateToWidget
     protected HashMap<Integer, String> cellStyleToCSSStyle = null;
-    // @DelegateToWidget
     private HashMap<Integer, Integer> rowIndexToStyleIndex = null;
-    // @DelegateToWidget
     private HashMap<Integer, Integer> columnIndexToStyleIndex = null;
-    // @DelegateToWidget
     private Set<Integer> lockedColumnIndexes = null;
-    // @DelegateToWidget
     private Set<Integer> lockedRowIndexes = null;
 
-    // @DelegateToWidget
     private ArrayList<String> shiftedCellBorderStyles = null;
 
     /**
      * All conditional formatting styles for this sheet.
      */
-    // @DelegateToWidget
     private HashMap<Integer, String> conditionalFormattingStyles = null;
 
     /** 1-based */
-    // @DelegateToWidget
     private ArrayList<Integer> hiddenColumnIndexes = null;
 
     /** 1-based */
-    // @DelegateToWidget
     private ArrayList<Integer> hiddenRowIndexes = null;
 
-    // @DelegateToWidget
     private int[] verticalScrollPositions;
 
-    // @DelegateToWidget
     private int[] horizontalScrollPositions;
 
     private boolean sheetProtected;
 
-    // @DelegateToWidget
     private boolean workbookProtected;
 
     private HashMap<String, String> cellKeysToEditorIdMap;
@@ -305,7 +279,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     private HashMap<String, String> componentIDtoCellKeysMap;
 
     // Cell CSS key to link tooltip (usually same as address)
-    // @DelegateToWidget
     private HashMap<String, String> hyperlinksTooltips;
 
     private HashMap<String, String> cellComments;
@@ -321,32 +294,23 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private ArrayList<MergedRegion> mergedRegions;
 
-    // @DelegateToWidget
     private boolean displayGridlines = true;
 
-    // @DelegateToWidget
     private boolean displayRowColHeadings = true;
 
-    // @DelegateToWidget
     private int verticalSplitPosition = 0;
-    // @DelegateToWidget
     private int horizontalSplitPosition = 0;
 
-    // @DelegateToWidget
     private String infoLabelValue;
 
     private boolean workbookChangeToggle;
 
-    // @DelegateToWidget
     private String invalidFormulaErrorMessage = "Invalid formula";
 
-    // @DelegateToWidget
     private boolean lockFormatColumns = true;
 
-    // @DelegateToWidget
     private boolean lockFormatRows = true;
 
-    // @DelegateToWidget
     private List<String> namedRanges;
 
     public String getDescription() {
