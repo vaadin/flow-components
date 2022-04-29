@@ -31,6 +31,36 @@ import com.vaadin.testbench.elementsbase.Element;
 public class ComboBoxElement extends TestBenchElement
         implements HasLabel, HasSelectByText, HasHelper {
 
+    /**
+     * Clears the value of the combobox.
+     */
+    @Override
+    public void clear() {
+        setValue(null);
+    }
+
+    /**
+     * Sets the property "value" as a string.
+     * <p>
+     *
+     * @param value
+     *            the value to set
+     */
+    protected void setValue(String value) {
+        setProperty("value", value);
+    }
+
+    /**
+     * Gets the property "value" as a string.
+     * <p>
+     *
+     * @return the value of the combobox or an empty string if no value is
+     *         selected
+     */
+    protected String getValue() {
+        return getPropertyString("value");
+    }
+
     @Override
     public void selectByText(String text) {
         setFilter(text);
