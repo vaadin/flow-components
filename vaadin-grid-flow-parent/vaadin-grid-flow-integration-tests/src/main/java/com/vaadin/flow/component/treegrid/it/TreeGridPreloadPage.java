@@ -30,7 +30,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
-import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Location;
@@ -172,7 +172,7 @@ public class TreeGridPreloadPage extends VerticalLayout
         grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
         grid.addColumn(HierarchicalTestBean::getIndex)
                 .setHeader("Index on level");
-        grid.addColumn(LitRenderer.of("${index}")).setHeader("Index");
+        grid.addColumn(TemplateRenderer.of("[[index]]")).setHeader("Index");
 
         add(grid);
         add(requestCountLayout);

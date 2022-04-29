@@ -398,7 +398,7 @@
             // that may no longer be visible
             ensureSubCacheQueue = [];
             // Eliminate flickering on eager fetch mode
-            grid.requestContentUpdate();
+            grid._assignModels();
           } else {
             treePageCallbacks[parentUniqueKey][page] = callback;
 
