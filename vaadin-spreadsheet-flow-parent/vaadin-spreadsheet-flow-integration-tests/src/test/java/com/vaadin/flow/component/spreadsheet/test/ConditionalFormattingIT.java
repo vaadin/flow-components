@@ -9,9 +9,7 @@ public class ConditionalFormattingIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-spreadsheet");
-        getDriver().get(url);
+        getDriver().get(getBaseURL());
 
         loadFile("conditional_formatting_with_Invalid_formula.xlsx");
     }
