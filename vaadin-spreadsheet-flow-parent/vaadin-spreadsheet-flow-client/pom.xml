@@ -30,6 +30,9 @@
 
     <!-- set to true to get soyc report -->
     <gwt.report>false</gwt.report>
+
+    <!-- Do not deploy to maven repos -->
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <dependencyManagement>
@@ -96,15 +99,6 @@
           </includes>
         </configuration>
       </plugin>
-      <!-- Do not deploy to maven repos -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-            <skip>true</skip>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
