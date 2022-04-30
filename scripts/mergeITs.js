@@ -111,13 +111,21 @@ async function createPom() {
 // copy a file
 function copyFileSync(source, target, replaceCall) {
   var targetFile = target;
-  //if target is a directory a new file with the same name will be created
+  // if target is a directory a new file with the same name will be created
   if (fs.existsSync(target)) {
     if (fs.lstatSync(target).isDirectory()) {
       targetFile = path.join(target, path.basename(source));
     }
   }
   if (fs.existsSync(targetFile)) {
+    // When file exists we can merge both or override depending on the type
+    if (/.properties$/.test(source)) {
+      let content = fs.readFileSync(source, 'utf8');
+      content += fs.readFileSync(targetFile, 'utf8');
+      fs.writeFileSync(targetFile, content, 'utf8');
+      console.log(`Merging ${targetFile}`);
+      return;
+    }
     console.log(`Overriding ${targetFile}`);
   }
 
@@ -182,12 +190,6 @@ async function createInitListener() {
   copyFileSync(`${templateDir}/index.html`, `${targetFolder}/index.html`);
 }
 
-// Use feature flag properties file that enables all experimental components
-function copyFeatureFlags() {
-  const resourcesFolder = `${itFolder}/src/main/resources`
-  copyFileSync(`${templateDir}/vaadin-featureflags.properties`, `${resourcesFolder}`);
-}
-
 // Copy components sources from master to the merged integration-tests module
 // At the same time does some source-code changes to adapt them to the new module
 async function copySources() {
@@ -222,7 +224,6 @@ async function main() {
   await copySources();
   await createFrontendIndex();
   await createPom();
-  copyFeatureFlags();
 }
 
 main();
