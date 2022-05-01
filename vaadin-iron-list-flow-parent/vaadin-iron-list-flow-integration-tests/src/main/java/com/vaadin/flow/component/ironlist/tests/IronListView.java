@@ -377,9 +377,12 @@ public class IronListView extends Div {
 
     private List<String> getLordOfTheRingsCharacters() {
         Set<String> characters = new HashSet<>();
-
         Faker instance = Faker.instance(new SecureRandom());
-        for (int i = 0; i < 100; i++) {
+
+        // Returned size of the list is random, but never shorter than 25 and
+        // larger than 30.
+        // Let limit it to 20 in order to avoid flakiness in tests
+        for (int i = 0; i < 100 && characters.size() < 20; i++) {
             characters.add(instance.lordOfTheRings().character());
         }
 
