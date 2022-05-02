@@ -204,7 +204,7 @@ else
   if [ "$nfailed" -gt 0 ]
   then
       ## Give a second try to failed tests
-      tcLog "There were $nfailed failed IT classes in first round."
+      tcLog "There were $nfailed failed IT classes in first round. (error=$error)"
       echo "$failedMethods"
 
       rerunFailed=$nfailed
@@ -217,8 +217,11 @@ else
         echo $cmd
         $cmd
         error=$?
-        tcLog "Re-Run exited with code $error"
         saveFailedTests run-2
+
+        tcLog "There where $nfailed failed IT classes in second round. (error=$error)"
+        echo "$failedMethods"
+
         tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried, $nfailed failed), ignored: $nskipped"
       else
         tcStatus $error "(IT1)Test failed: $nfailed" "(IT1)Tests passed: $ncompleted (more than 15 failed), ignored: $nskipped"
