@@ -11,9 +11,7 @@ public class CustomFormatIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-spreadsheet");
-        getDriver().get(url);
+        getDriver().get(getBaseURL());
 
         loadFile("custom_format.xlsx");
         setLocale(Locale.US);

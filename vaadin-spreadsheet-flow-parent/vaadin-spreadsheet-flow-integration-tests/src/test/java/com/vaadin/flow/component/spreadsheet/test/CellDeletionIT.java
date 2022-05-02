@@ -16,9 +16,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-spreadsheet");
-        getDriver().get(url);
+        getDriver().get(getBaseURL());
 
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.DeletionHandler);
