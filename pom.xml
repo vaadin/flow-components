@@ -40,7 +40,7 @@
         <!-- spreadsheet -->
         <poi.version>5.2.2</poi.version>
         <gwt.version>2.9.0</gwt.version>
-        <framework.version>8.14.3</framework.version>
+        <framework.version>8.15.1</framework.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
