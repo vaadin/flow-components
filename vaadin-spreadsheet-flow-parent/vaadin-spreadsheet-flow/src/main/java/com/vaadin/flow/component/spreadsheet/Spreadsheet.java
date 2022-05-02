@@ -943,6 +943,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         public void showSelectedCell(String name, int col, int row,
                 String cellValue, boolean function, boolean locked,
                 boolean initialSelection) {
+            selectionManager.onCellSelected(row, col, initialSelection);
             getElement().callJsFunction("showSelectedCell", name, col, row,
                     cellValue, function, locked, initialSelection);
         }
