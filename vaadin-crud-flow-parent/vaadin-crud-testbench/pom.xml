@@ -35,7 +35,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-confirm-dialog-testbench</artifactId>
             <version>${project.version}</version>
-        </dependency>        
+        </dependency>
     </dependencies>
     <build>
         <plugins>
