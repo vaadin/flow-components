@@ -1,61 +1,20 @@
-
-@-webkit-keyframes valo-animate-in-fade {
-  0% {
-    opacity: 0; } }
-
-@-moz-keyframes valo-animate-in-fade {
-  0% {
-    opacity: 0; } }
-
 @keyframes valo-animate-in-fade {
   0% {
-    opacity: 0; } }
-
-@-webkit-keyframes valo-animate-out-fade {
-  100% {
-    opacity: 0; } }
-
-@-moz-keyframes valo-animate-out-fade {
-  100% {
     opacity: 0; } }
 
 @keyframes valo-animate-out-fade {
   100% {
     opacity: 0; } }
 
-
-@-webkit-keyframes valo-overlay-animate-in {
-  0% {
-    -webkit-transform: translatey(-4px);
-    -moz-transform: translatey(-4px);
-    -ms-transform: translatey(-4px);
-    -o-transform: translatey(-4px);
-    transform: translatey(-4px);
-    opacity: 0; } }
-
-@-moz-keyframes valo-overlay-animate-in {
-  0% {
-    -webkit-transform: translatey(-4px);
-    -moz-transform: translatey(-4px);
-    -ms-transform: translatey(-4px);
-    -o-transform: translatey(-4px);
-    transform: translatey(-4px);
-    opacity: 0; } }
-
 @keyframes valo-overlay-animate-in {
   0% {
-    -webkit-transform: translatey(-4px);
-    -moz-transform: translatey(-4px);
-    -ms-transform: translatey(-4px);
-    -o-transform: translatey(-4px);
-    transform: translatey(-4px);
+    transform: translateY(-4px);
     opacity: 0; } }
 
   vaadin-spreadsheet .v-disabled {
     cursor: default !important; }
   #spreadsheet-overlays .v-tooltip {
     background-color: rgba(50, 50, 50, 0.9);
-    -webkit-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     color: white;
     padding: 5px 9px;
@@ -108,20 +67,13 @@
     border-radius: 4px;
     background-color: white;
     color: #474747;
-    -webkit-box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     -webkit-backface-visibility: hidden;
-    -moz-backface-visibility: hidden;
-    -ms-backface-visibility: hidden;
     backface-visibility: hidden;
     padding: 4px 4px; }
     #spreadsheet-overlays .v-contextmenu[class*="animate-in"] {
-      -webkit-animation: valo-overlay-animate-in 120ms;
-      -moz-animation: valo-overlay-animate-in 120ms;
       animation: valo-overlay-animate-in 120ms; }
     #spreadsheet-overlays .v-contextmenu[class*="animate-out"] {
-      -webkit-animation: valo-animate-out-fade 120ms;
-      -moz-animation: valo-animate-out-fade 120ms;
       animation: valo-animate-out-fade 120ms; }
     #spreadsheet-overlays .v-contextmenu table {
       border-spacing: 0; }
@@ -152,7 +104,6 @@
       min-width: 1em; }
   #spreadsheet-overlays .v-contextmenu .gwt-MenuItem-selected {
     background-color: #197de1;
-    background-image: -webkit-linear-gradient(top, #1b87e3 2%, #166ed6 98%);
     background-image: linear-gradient(to bottom,#1b87e3 2%, #166ed6 98%);
     color: #ecf2f8;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05); }
@@ -191,8 +142,6 @@
     vaadin-spreadsheet .v-spreadsheet .sheet > div {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none; }
     vaadin-spreadsheet .v-spreadsheet.row-resizing,
     vaadin-spreadsheet .v-spreadsheet.row-resizing div {
@@ -213,8 +162,6 @@
       z-index: 0; }
       vaadin-spreadsheet .v-spreadsheet .functionbar .functionfield,
       vaadin-spreadsheet .v-spreadsheet .functionbar .addressfield {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
         box-sizing: border-box;
         font-size: 14px;
         height: 100%;
@@ -237,8 +184,6 @@
         height: 100%;
         opacity: 0; }
       vaadin-spreadsheet .v-spreadsheet .functionbar .fixed-left-panel {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
         box-sizing: border-box;
         float: left;
         width: 176px;
@@ -246,8 +191,6 @@
         border-right: 1px solid #C7C7C7;
         background: #fafafa; }
       vaadin-spreadsheet .v-spreadsheet .functionbar .adjusting-right-panel {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
         box-sizing: border-box;
         overflow: hidden;
         padding-right: 5px;
@@ -272,8 +215,6 @@
       bottom: 28px;
       position: absolute; }
     vaadin-spreadsheet .v-spreadsheet .sheet .cell {
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
       box-sizing: border-box;
       background-color: white;
       border-right: 1px solid #C7C7C7;
@@ -287,7 +228,6 @@
       line-height: normal; }
       vaadin-spreadsheet .v-spreadsheet .sheet .cell.selected-cell-highlight {
         outline: solid #222222 1px;
-        -moz-outline-offset: -2px;
         outline-offset: -2px;
         z-index: 1; }
       vaadin-spreadsheet .v-spreadsheet .sheet .cell > .v-button {
@@ -305,7 +245,6 @@
       z-index: 1 !important; }
     vaadin-spreadsheet .v-spreadsheet .sheet > input[type="text"] {
       border: 0 !important;
-      -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
       box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
       cursor: text;
       display: block !important;
@@ -330,8 +269,6 @@
     vaadin-spreadsheet .v-spreadsheet .top-left-pane,
     vaadin-spreadsheet .v-spreadsheet .top-right-pane,
     vaadin-spreadsheet .v-spreadsheet .bottom-left-pane {
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
       box-sizing: border-box;
       border-right: 1px solid #6a6a6a;
       border-bottom: 1px solid #6a6a6a;
@@ -397,12 +334,8 @@
       position: absolute;
       text-align: center; }
     vaadin-spreadsheet .v-spreadsheet .rh {
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
       box-sizing: border-box;
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none;
       border-right: 1px solid #C7C7C7;
       cursor: e-resize;
@@ -435,14 +368,9 @@
         border-bottom: 1px solid #C7C7C7; }
     vaadin-spreadsheet .v-spreadsheet .ch {
       background-color: #fafafa;
-      background-image: -webkit-linear-gradient(top, #fafafa 2%, #f0f0f0 98%);
       background-image: linear-gradient(to bottom,#fafafa 2%, #f0f0f0 98%);
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
       box-sizing: border-box;
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none;
       border-bottom: 1px solid #C7C7C7;
       cursor: s-resize;
@@ -514,10 +442,7 @@
       margin-top: -1px; }
     vaadin-spreadsheet .v-spreadsheet .corner {
       background-color: #fafafa;
-      background-image: -webkit-linear-gradient(top, #fafafa 2%, #f0f0f0 98%);
       background-image: linear-gradient(to bottom,#fafafa 2%, #f0f0f0 98%);
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
       box-sizing: border-box;
       cursor: default;
       top: 30px;
@@ -574,8 +499,6 @@
       height: 1px;
       padding: 0;
       position: absolute;
-      -webkit-transform-origin: 0% 50%;
-      -ms-transform-origin: 0% 50%;
       transform-origin: 0% 50%;
       z-index: 1; }
     vaadin-spreadsheet .v-spreadsheet div.sheet-selection {
@@ -686,8 +609,6 @@
             color: #d6d6d6;
             cursor: default; }
       vaadin-spreadsheet .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
-        -webkit-transition: margin-left 200ms;
-        -moz-transition: margin-left 200ms;
         transition: margin-left 200ms;
         display: inline-block;
         left: 130px;
@@ -767,8 +688,6 @@
     vaadin-spreadsheet .v-spreadsheet .sheet-tabsheet div {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none; }
     vaadin-spreadsheet .v-spreadsheet .sheet div div.popupbutton {
       padding: 0;
@@ -1002,29 +921,20 @@
     border-radius: 4px;
     background-color: white;
     color: #474747;
-    -webkit-box-shadow: 0 4px 10px 0 rgba(7, 4, 4, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     -webkit-backface-visibility: hidden;
-    -moz-backface-visibility: hidden;
-    -ms-backface-visibility: hidden;
     backface-visibility: hidden;
     padding: 7px;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
     user-select: text; }
     #spreadsheet-overlays .v-spreadsheet-comment-overlay[class*="animate-in"] {
-      -webkit-animation: valo-overlay-animate-in 120ms;
-      -moz-animation: valo-overlay-animate-in 120ms;
       animation: valo-overlay-animate-in 120ms; }
     #spreadsheet-overlays .v-spreadsheet-comment-overlay[class*="animate-out"] {
-      -webkit-animation: valo-animate-out-fade 120ms;
-      -moz-animation: valo-animate-out-fade 120ms;
       animation: valo-animate-out-fade 120ms; }
     #spreadsheet-overlays .v-spreadsheet-comment-overlay .popupContent {
-      overflow: visible; 
+      overflow: visible;
       z-index: 2;}
     #spreadsheet-overlays .v-spreadsheet-comment-overlay .comment-overlay-author {
       padding-bottom: 7px;
@@ -1058,19 +968,12 @@
     border-radius: 4px;
     background-color: white;
     color: #474747;
-    -webkit-box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     -webkit-backface-visibility: hidden;
-    -moz-backface-visibility: hidden;
-    -ms-backface-visibility: hidden;
     backface-visibility: hidden; }
     #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay[class*="animate-in"] {
-      -webkit-animation: valo-overlay-animate-in 120ms;
-      -moz-animation: valo-overlay-animate-in 120ms;
       animation: valo-overlay-animate-in 120ms; }
     #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay[class*="animate-out"] {
-      -webkit-animation: valo-animate-out-fade 120ms;
-      -moz-animation: valo-animate-out-fade 120ms;
       animation: valo-animate-out-fade 120ms; }
     #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay .v-panel.spreadsheet-item-filter-layout {
       background-color: transparent;
@@ -1114,9 +1017,6 @@
       height: auto;
       padding: 0; }
       vaadin-spreadsheet .sheet-image > .v-csslayout .v-button-minimize-button::after {
-        -webkit-box-shadow: none;
-        -moz-shadow: none;
-        -ms-shadow: none;
         box-shadow: none; }
       vaadin-spreadsheet .sheet-image > .v-csslayout .v-button-minimize-button .v-button-caption {
         display: none; }
