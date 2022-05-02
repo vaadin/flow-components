@@ -379,10 +379,9 @@ public class IronListView extends Div {
         Set<String> characters = new HashSet<>();
         Faker instance = Faker.instance(new SecureRandom());
 
-        // Returned size of the list is random, but never shorter than 25 and
-        // larger than 30.
-        // Let limit it to 20 in order to avoid flakiness in tests
-        for (int i = 0; i < 100 && characters.size() < 20; i++) {
+        // We need to return a fixed size of characters.
+        // 20 is ok, since in database there are only 30 distinct names
+        while (characters.size() < 20) {
             characters.add(instance.lordOfTheRings().character());
         }
 

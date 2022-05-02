@@ -210,13 +210,12 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     private void verifyContentRendered(String content) {
         waitUntil(c -> {
             try {
-                for (;;) {
-                    WebElement el = findElement(
-                            By.tagName("vaadin-dialog-overlay"));
-                    if (el.isDisplayed() && el.getText().contains(content)) {
-                        return true;
-                    }
+                WebElement el = findElement(
+                        By.tagName("vaadin-dialog-overlay"));
+                if (el.isDisplayed() && el.getText().contains(content)) {
+                    return true;
                 }
+                return false;
             } catch (StaleElementReferenceException
                     | NoSuchElementException e) {
                 return false;

@@ -121,7 +121,7 @@ function copyFileSync(source, target, replaceCall) {
     // When file exists we can merge both or override depending on the type
     if (/.properties$/.test(source)) {
       let content = fs.readFileSync(source, 'utf8');
-      content += fs.readFileSync(targetFile, 'utf8');
+      content += '\n' + fs.readFileSync(targetFile, 'utf8');
       fs.writeFileSync(targetFile, content, 'utf8');
       console.log(`Merging ${targetFile}`);
       return;
