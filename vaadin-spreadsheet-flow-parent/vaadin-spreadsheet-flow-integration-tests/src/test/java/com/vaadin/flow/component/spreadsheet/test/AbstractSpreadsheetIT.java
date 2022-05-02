@@ -232,4 +232,9 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return getSpreadsheet()
                 .findElements(By.cssSelector(".col-group-pane .grouping.plus"));
     }
+
+    @Override
+    protected String getBaseURL() {
+        return super.getBaseURL() + "/vaadin-spreadsheet";
+    }
 }
