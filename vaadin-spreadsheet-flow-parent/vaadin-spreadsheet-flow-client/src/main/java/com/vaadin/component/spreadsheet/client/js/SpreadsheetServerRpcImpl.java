@@ -2,223 +2,233 @@ package com.vaadin.component.spreadsheet.client.js;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
-import jsinterop.annotations.JsType;
+import jsinterop.annotations.JsFunction;
 
 @SuppressWarnings("serial")
-@JsType
 public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
 
-    private Runnable callbackForOnConnectorInit;
-    private Consumer<String> groupingCollapsedCallback;
-    private Consumer<String> levelHeaderClickedCallback;
-    private Consumer<String> onSheetScrollCallback;
-    private Consumer<String> sheetAddressChangedCallback;
-    private Consumer<String> cellSelectedCallback;
-    private Consumer<String> cellRangeSelectedCallback;
-    private Consumer<String> cellAddedToSelectionAndSelected;
-    private Consumer<String> cellsAddedToRangeSelectionCallback;
-    private Consumer<String> rowSelectedCallback;
-    private Consumer<String> rowAddedToRangeSelectionCallback;
-    private Consumer<String> columnSelectedCallback;
-    private Consumer<String> columnAddedToSelectionCallback;
-    private Consumer<String> selectionIncreasePaintedCallback;
-    private Consumer<String> selectionDecreasePaintedCallback;
-    private Consumer<String> cellValueEditedCallback;
-    private Consumer<String> sheetSelectedCallback;
-    private Consumer<String> sheetRenamedCallback;
-    private Consumer<String> sheetCreatedCallback;
-    private Consumer<String> cellRangePaintedCallback;
-    private Consumer<String> deleteSelectedCellsCallback;
-    private Consumer<String> linkCellClickedCallback;
-    private Consumer<String> rowsResizedCallback;
-    private Consumer<String> columnResizedCallback;
-    private Consumer<Integer> onRowAutofitCallback;
-    private Consumer<Integer> onColumnAutofitCallback;
-    private Runnable onUndoCallback;
-    private Runnable onRedoCallback;
-    private Consumer<String> setCellStyleWidthRatiosCallback;
-    private Runnable protectedCellWriteAttemptedCallback;
-    private Consumer<String> onPasteCallback;
-    private Runnable clearSelectedCellsOnCutCallback;
-    private Consumer<String> updateCellCommentCallback;
-    private Consumer<String> contextMenuOpenOnSelectionCallback;
-    private Consumer<String> actionOnCurrentSelectionCallback;
-    private Consumer<Integer> rowHeaderContextMenuOpenCallback;
-    private Consumer<String> actionOnRowHeaderCallback;
-    private Consumer<Integer> columnHeaderContextMenuOpenCallback;
-    private Consumer<String> actionOnColumnHeaderCallback;
+    @FunctionalInterface
+    @JsFunction
+    public interface JsConsumer<T> {
+        void accept(T t);
+    }
+
+    private JsConsumer<Void> callbackForOnConnectorInit;
+    private JsConsumer<String> groupingCollapsedCallback;
+    private JsConsumer<String> levelHeaderClickedCallback;
+    private JsConsumer<String> onSheetScrollCallback;
+    private JsConsumer<String> sheetAddressChangedCallback;
+    private JsConsumer<String> cellSelectedCallback;
+    private JsConsumer<String> cellRangeSelectedCallback;
+    private JsConsumer<String> cellAddedToSelectionAndSelected;
+    private JsConsumer<String> cellsAddedToRangeSelectionCallback;
+    private JsConsumer<String> rowSelectedCallback;
+    private JsConsumer<String> rowAddedToRangeSelectionCallback;
+    private JsConsumer<String> columnSelectedCallback;
+    private JsConsumer<String> columnAddedToSelectionCallback;
+    private JsConsumer<String> selectionIncreasePaintedCallback;
+    private JsConsumer<String> selectionDecreasePaintedCallback;
+    private JsConsumer<String> cellValueEditedCallback;
+    private JsConsumer<String> sheetSelectedCallback;
+    private JsConsumer<String> sheetRenamedCallback;
+    private JsConsumer<String> sheetCreatedCallback;
+    private JsConsumer<String> cellRangePaintedCallback;
+    private JsConsumer<String> deleteSelectedCellsCallback;
+    private JsConsumer<String> linkCellClickedCallback;
+    private JsConsumer<String> rowsResizedCallback;
+    private JsConsumer<String> columnResizedCallback;
+    private JsConsumer<Integer> onRowAutofitCallback;
+    private JsConsumer<Integer> onColumnAutofitCallback;
+    private JsConsumer<Void> onUndoCallback;
+    private JsConsumer<Void> onRedoCallback;
+    private JsConsumer<String> setCellStyleWidthRatiosCallback;
+    private JsConsumer<Void> protectedCellWriteAttemptedCallback;
+    private JsConsumer<String> onPasteCallback;
+    private JsConsumer<Void> clearSelectedCellsOnCutCallback;
+    private JsConsumer<String> updateCellCommentCallback;
+    private JsConsumer<String> contextMenuOpenOnSelectionCallback;
+    private JsConsumer<String> actionOnCurrentSelectionCallback;
+    private JsConsumer<Integer> rowHeaderContextMenuOpenCallback;
+    private JsConsumer<String> actionOnRowHeaderCallback;
+    private JsConsumer<Integer> columnHeaderContextMenuOpenCallback;
+    private JsConsumer<String> actionOnColumnHeaderCallback;
 
     public SpreadsheetServerRpcImpl() {
     }
 
-    public void setGroupingCollapsedCallback(Consumer<String> callback) {
+    public void setGroupingCollapsedCallback(JsConsumer<String> callback) {
         groupingCollapsedCallback = callback;
     }
 
-    public void setLevelHeaderClickedCallback(Consumer<String> callback) {
+    public void setLevelHeaderClickedCallback(JsConsumer<String> callback) {
         levelHeaderClickedCallback = callback;
     }
 
-    public void setOnSheetScrollCallback(Consumer<String> callback) {
+    public void setOnSheetScrollCallback(JsConsumer<String> callback) {
         onSheetScrollCallback = callback;
     }
 
-    public void setSheetAddressChangedCallback(Consumer<String> callback) {
+    public void setSheetAddressChangedCallback(JsConsumer<String> callback) {
         sheetAddressChangedCallback = callback;
     }
 
-    public void setCellSelectedCallback(Consumer<String> callback) {
+    public void setCellSelectedCallback(JsConsumer<String> callback) {
         cellSelectedCallback = callback;
     }
 
-    public void setCellRangeSelectedCallback(Consumer<String> callback) {
+    public void setCellRangeSelectedCallback(JsConsumer<String> callback) {
         cellRangeSelectedCallback = callback;
     }
 
     public void setCellAddedToSelectionAndSelectedCallback(
-            Consumer<String> callback) {
+            JsConsumer<String> callback) {
         cellAddedToSelectionAndSelected = callback;
     }
 
     public void setCellsAddedToRangeSelectionCallback(
-            Consumer<String> callback) {
+            JsConsumer<String> callback) {
         cellsAddedToRangeSelectionCallback = callback;
     }
 
-    public void setRowSelectedCallback(Consumer<String> callback) {
+    public void setRowSelectedCallback(JsConsumer<String> callback) {
         rowSelectedCallback = callback;
     }
 
-    public void setRowAddedToRangeSelectionCallback(Consumer<String> callback) {
+    public void setRowAddedToRangeSelectionCallback(
+            JsConsumer<String> callback) {
         rowAddedToRangeSelectionCallback = callback;
     }
 
-    public void setColumnSelectedCallback(Consumer<String> callback) {
+    public void setColumnSelectedCallback(JsConsumer<String> callback) {
         columnSelectedCallback = callback;
     }
 
-    public void setColumnAddedToSelectionCallback(Consumer<String> callback) {
+    public void setColumnAddedToSelectionCallback(JsConsumer<String> callback) {
         columnAddedToSelectionCallback = callback;
     }
 
-    public void setSelectionIncreasePaintedCallback(Consumer<String> callback) {
+    public void setSelectionIncreasePaintedCallback(
+            JsConsumer<String> callback) {
         selectionIncreasePaintedCallback = callback;
     }
 
-    public void setSelectionDecreasePaintedCallback(Consumer<String> callback) {
+    public void setSelectionDecreasePaintedCallback(
+            JsConsumer<String> callback) {
         selectionDecreasePaintedCallback = callback;
     }
 
-    public void setCellValueEditedCallback(Consumer<String> callback) {
+    public void setCellValueEditedCallback(JsConsumer<String> callback) {
         cellValueEditedCallback = callback;
     }
 
-    public void setSheetSelectedCallback(Consumer<String> callback) {
+    public void setSheetSelectedCallback(JsConsumer<String> callback) {
         sheetSelectedCallback = callback;
     }
 
-    public void setSheetRenamedCallback(Consumer<String> callback) {
+    public void setSheetRenamedCallback(JsConsumer<String> callback) {
         sheetRenamedCallback = callback;
     }
 
-    public void setSheetCreatedCallback(Consumer<String> callback) {
+    public void setSheetCreatedCallback(JsConsumer<String> callback) {
         sheetCreatedCallback = callback;
     }
 
-    public void setCellRangePaintedCallback(Consumer<String> callback) {
+    public void setCellRangePaintedCallback(JsConsumer<String> callback) {
         cellRangePaintedCallback = callback;
     }
 
-    public void setDeleteSelectedCellsCallback(Consumer<String> callback) {
+    public void setDeleteSelectedCellsCallback(JsConsumer<String> callback) {
         deleteSelectedCellsCallback = callback;
     }
 
-    public void setLinkCellClickedCallback(Consumer<String> callback) {
+    public void setLinkCellClickedCallback(JsConsumer<String> callback) {
         linkCellClickedCallback = callback;
     }
 
-    public void setRowsResizedCallback(Consumer<String> callback) {
+    public void setRowsResizedCallback(JsConsumer<String> callback) {
         rowsResizedCallback = callback;
     }
 
-    public void setColumnResizedCallback(Consumer<String> callback) {
+    public void setColumnResizedCallback(JsConsumer<String> callback) {
         columnResizedCallback = callback;
     }
 
-    public void setOnRowAutofitCallback(Consumer<Integer> callback) {
+    public void setOnRowAutofitCallback(JsConsumer<Integer> callback) {
         onRowAutofitCallback = callback;
     }
 
-    public void setOnColumnAutofitCallback(Consumer<Integer> callback) {
+    public void setOnColumnAutofitCallback(JsConsumer<Integer> callback) {
         onColumnAutofitCallback = callback;
     }
 
-    public void setOnUndoCallback(Runnable callback) {
+    public void setOnUndoCallback(JsConsumer<Void> callback) {
         onUndoCallback = callback;
     }
 
-    public void setOnRedoCallback(Runnable callback) {
+    public void setOnRedoCallback(JsConsumer<Void> callback) {
         onRedoCallback = callback;
     }
 
-    public void setSetCellStyleWidthRatiosCallback(Consumer<String> callback) {
+    public void setSetCellStyleWidthRatiosCallback(
+            JsConsumer<String> callback) {
         setCellStyleWidthRatiosCallback = callback;
     }
 
-    public void setProtectedCellWriteAttemptedCallback(Runnable callback) {
+    public void setProtectedCellWriteAttemptedCallback(
+            JsConsumer<Void> callback) {
         protectedCellWriteAttemptedCallback = callback;
     }
 
-    public void setOnPasteCallback(Consumer<String> callback) {
+    public void setOnPasteCallback(JsConsumer<String> callback) {
         onPasteCallback = callback;
     }
 
-    public void setClearSelectedCellsOnCutCallback(Runnable callback) {
+    public void setClearSelectedCellsOnCutCallback(JsConsumer<Void> callback) {
         clearSelectedCellsOnCutCallback = callback;
     }
 
-    public void setUpdateCellCommentCallback(Consumer<String> callback) {
+    public void setUpdateCellCommentCallback(JsConsumer<String> callback) {
         updateCellCommentCallback = callback;
     }
 
-    public void setOnConnectorInitCallback(Runnable callback) {
+    public void setOnConnectorInitCallback(JsConsumer<Void> callback) {
         callbackForOnConnectorInit = callback;
     }
 
     public void setContextMenuOpenOnSelectionCallback(
-            Consumer<String> callback) {
+            JsConsumer<String> callback) {
         contextMenuOpenOnSelectionCallback = callback;
     }
 
-    public void setActionOnCurrentSelectionCallback(Consumer<String> callback) {
+    public void setActionOnCurrentSelectionCallback(
+            JsConsumer<String> callback) {
         actionOnCurrentSelectionCallback = callback;
     }
 
     public void setRowHeaderContextMenuOpenCallback(
-            Consumer<Integer> callback) {
+            JsConsumer<Integer> callback) {
         rowHeaderContextMenuOpenCallback = callback;
     }
 
-    public void setActionOnRowHeaderCallback(Consumer<String> callback) {
+    public void setActionOnRowHeaderCallback(JsConsumer<String> callback) {
         actionOnRowHeaderCallback = callback;
     }
 
     public void setColumnHeaderContextMenuOpenCallback(
-            Consumer<Integer> callback) {
+            JsConsumer<Integer> callback) {
         columnHeaderContextMenuOpenCallback = callback;
     }
 
-    public void setActionOnColumnHeaderCallback(Consumer<String> callback) {
+    public void setActionOnColumnHeaderCallback(JsConsumer<String> callback) {
         actionOnColumnHeaderCallback = callback;
     }
 
-    private native void call(Object fnc, Object... args) /*-{
+    private native void call(JsConsumer<?> fnc, Object... args) /*-{
       if (!fnc) {
           return;
       }
