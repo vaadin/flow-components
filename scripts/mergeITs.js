@@ -111,13 +111,21 @@ async function createPom() {
 // copy a file
 function copyFileSync(source, target, replaceCall) {
   var targetFile = target;
-  //if target is a directory a new file with the same name will be created
+  // if target is a directory a new file with the same name will be created
   if (fs.existsSync(target)) {
     if (fs.lstatSync(target).isDirectory()) {
       targetFile = path.join(target, path.basename(source));
     }
   }
   if (fs.existsSync(targetFile)) {
+    // When file exists we can merge both or override depending on the type
+    if (/.properties$/.test(source)) {
+      let content = fs.readFileSync(source, 'utf8');
+      content += '\n' + fs.readFileSync(targetFile, 'utf8');
+      fs.writeFileSync(targetFile, content, 'utf8');
+      console.log(`Merging ${targetFile}`);
+      return;
+    }
     console.log(`Overriding ${targetFile}`);
   }
 

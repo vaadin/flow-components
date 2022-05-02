@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-dialog/header-footer")
@@ -33,9 +35,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     public void closedDialog_headerTitleIsSet_titleRendered() {
         clickButton(ADD_HEADER_TITLE_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.HEADER_TITLE);
+        verifyContentRendered(DialogHeaderFooterPage.HEADER_TITLE);
     }
 
     @Test
@@ -45,7 +46,7 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         clickButton(MOVE_BUTTONS_BUTTON);
         clickButton(ADD_HEADER_TITLE_BUTTON);
 
-        assertDialogContains(DialogHeaderFooterPage.HEADER_TITLE);
+        verifyContentRendered(DialogHeaderFooterPage.HEADER_TITLE);
     }
 
     @Test
@@ -54,7 +55,6 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         clickButton(OPEN_DIALOG_BUTTON);
         verifyDialogOpened();
         clickButton(MOVE_BUTTONS_BUTTON);
-
         clickButton(REMOVE_HEADER_TITLE_BUTTON);
 
         assertDialogNotContains(DialogHeaderFooterPage.HEADER_TITLE);
@@ -64,9 +64,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     public void closedDialog_headerRendererIsSet_contentIsRendered() {
         clickButton(ADD_HEADER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.HEADER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.HEADER_CONTENT);
     }
 
     @Test
@@ -74,9 +73,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         clickButton(ATTACH_DIALOG_BUTTON);
         clickButton(ADD_HEADER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.HEADER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.HEADER_CONTENT);
     }
 
     @Test
@@ -86,9 +84,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         verifyDialogOpened();
         clickButton(CLOSE_DIALOG_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.HEADER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.HEADER_CONTENT);
     }
 
     @Test
@@ -99,9 +96,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         verifyDialogOpened();
         clickButton(CLOSE_DIALOG_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.HEADER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.HEADER_CONTENT);
     }
 
     @Test
@@ -131,9 +127,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     public void closedDialog_footerRendererIsSet_contentIsRendered() {
         clickButton(ADD_FOOTER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.FOOTER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.FOOTER_CONTENT);
     }
 
     @Test
@@ -141,9 +136,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         clickButton(ATTACH_DIALOG_BUTTON);
         clickButton(ADD_FOOTER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.FOOTER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.FOOTER_CONTENT);
     }
 
     @Test
@@ -153,9 +147,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         verifyDialogOpened();
         clickButton(CLOSE_DIALOG_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.FOOTER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.FOOTER_CONTENT);
     }
 
     @Test
@@ -166,9 +159,8 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         verifyDialogOpened();
         clickButton(CLOSE_DIALOG_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
-        verifyDialogOpened();
 
-        assertDialogContains(DialogHeaderFooterPage.FOOTER_CONTENT);
+        verifyContentRendered(DialogHeaderFooterPage.FOOTER_CONTENT);
     }
 
     @Test
@@ -211,7 +203,24 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     }
 
     private void verifyDialogOpened() {
-        waitForElementPresent(By.tagName("vaadin-dialog-overlay"));
+        waitForElementPresent(
+                By.cssSelector("vaadin-dialog-overlay div button"));
+    }
+
+    private void verifyContentRendered(String content) {
+        waitUntil(c -> {
+            try {
+                WebElement el = findElement(
+                        By.tagName("vaadin-dialog-overlay"));
+                if (el.isDisplayed() && el.getText().contains(content)) {
+                    return true;
+                }
+                return false;
+            } catch (StaleElementReferenceException
+                    | NoSuchElementException e) {
+                return false;
+            }
+        });
     }
 
     private WebElement getOverlayElement() {
