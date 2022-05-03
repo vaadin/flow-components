@@ -31,8 +31,6 @@
     <!-- set to true to get soyc report -->
     <gwt.report>false</gwt.report>
 
-    <!-- Do not deploy to maven repos -->
-    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <dependencyManagement>
@@ -170,6 +168,7 @@
           </execution>
         </executions>
       </plugin>
+      <!-- Do not deploy to maven repos -->
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -177,7 +176,6 @@
            <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
         </configuration>
       </plugin>
-      
 
     </plugins>
   </build>
