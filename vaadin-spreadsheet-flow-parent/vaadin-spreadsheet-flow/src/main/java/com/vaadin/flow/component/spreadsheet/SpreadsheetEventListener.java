@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 
 import elemental.json.JsonArray;
+import elemental.json.JsonNumber;
+import elemental.json.JsonValue;
 
 @SuppressWarnings("serial")
 public class SpreadsheetEventListener
@@ -32,6 +34,10 @@ public class SpreadsheetEventListener
         return o == null ? null : o.getBoolean(pos);
     }
 
+    private double toNumber(JsonValue v) {
+        return (v instanceof JsonNumber) ? ((JsonNumber) v).asNumber() : 0;
+    }
+
     private HashMap<Integer, Float> toMapFloat(JsonArray o, int pos) {
         HashMap<Integer, Float> m = new HashMap<>();
         if (o == null) {
@@ -39,7 +45,7 @@ public class SpreadsheetEventListener
         }
         JsonArray jso = o.getArray(pos);
         for (int i = 0; i < jso.length(); i++) {
-            m.put(i, (float) jso.getNumber(i));
+            m.put(i, (float) toNumber(jso.get(i)));
         }
         return m;
     }
@@ -51,7 +57,7 @@ public class SpreadsheetEventListener
         }
         JsonArray jso = o.getArray(pos);
         for (int i = 0; i < jso.length(); i++) {
-            m.put(i, (int) jso.getNumber(i));
+            m.put(i, (int) toNumber(jso.get(i)));
         }
         return m;
     }
