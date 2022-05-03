@@ -31,8 +31,6 @@
     <!-- set to true to get soyc report -->
     <gwt.report>false</gwt.report>
 
-    <!-- Do not deploy to maven repos -->
-    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <dependencyManagement>
@@ -137,7 +135,7 @@
           <gen>${project.build.directory}/gen</gen>
           <workDir>target</workDir>
         </configuration>
-    </plugin>
+      </plugin>
 
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
@@ -149,27 +147,35 @@
           <stopWait>5</stopWait>
           <stopKey>foo</stopKey>
         </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>3.1.0</version>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <configuration>
-                <target>
-                    <copy
-                      file="${project.build.directory}/${project.build.finalName}/${gwt.name}/${gwt.name}.cache.js"
-                      tofile="${basedir}/../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/spreadsheet-export.js">
-                    </copy>
-                </target>
-              </configuration>
-              <goals>
-                <goal>run</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                  <copy
+                    file="${project.build.directory}/${project.build.finalName}/${gwt.name}/${gwt.name}.cache.js"
+                    tofile="${basedir}/../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/spreadsheet-export.js">
+                  </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Do not deploy to maven repos -->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <configuration>
+           <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+        </configuration>
+      </plugin>
 
     </plugins>
   </build>
