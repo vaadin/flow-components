@@ -178,6 +178,8 @@ public class TreeGridPreloadPage extends VerticalLayout
         grid.addColumn(HierarchicalTestBean::getIndex)
                 .setHeader("Index on level");
         grid.addColumn(LitRenderer.of("${index}")).setHeader("Index");
+        grid.setUniqueKeyDataGenerator("key",
+                item -> item != null ? item.getId() : "null");
 
         add(grid);
         add(requestCountLayout);
