@@ -16,7 +16,7 @@
 
 package com.vaadin.flow.component.textfield;
 
-import com.vaadin.flow.component.mixin.HasClearButton;
+import com.vaadin.flow.component.HasClearButton;
 import java.math.BigDecimal;
 import java.util.Objects;
 

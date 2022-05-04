@@ -1,7 +1,5 @@
-package com.vaadin.flow.component.mixin;
+package com.vaadin.flow.component;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Tag;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
