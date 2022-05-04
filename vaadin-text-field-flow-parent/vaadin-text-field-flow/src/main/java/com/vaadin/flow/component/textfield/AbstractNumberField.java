@@ -16,12 +16,12 @@
 
 package com.vaadin.flow.component.textfield;
 
-import com.vaadin.flow.component.HasClearButton;
 import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
