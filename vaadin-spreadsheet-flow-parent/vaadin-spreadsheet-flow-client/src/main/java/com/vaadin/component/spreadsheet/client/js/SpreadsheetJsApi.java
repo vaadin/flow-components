@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
@@ -20,8 +19,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
 import com.vaadin.client.ApplicationConnection;
 import com.vaadin.client.communication.StateChangeEvent;
-import com.vaadin.client.metadata.ConnectorBundleLoader;
-import com.vaadin.client.metadata.TypeDataStore;
+import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl.JsConsumer;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -35,16 +33,15 @@ import jsinterop.annotations.JsType;
 @JsType(namespace = "Vaadin.Spreadsheet", name = "Api")
 public class SpreadsheetJsApi {
 
-    public SpreadsheetWidget spreadsheetWidget;
+    private SpreadsheetWidget spreadsheetWidget;
     protected SpreadsheetConnector spreadsheetConnector;
-    Map<String, PopupButtonWidget> popupButtonWidgets = new HashMap<>();
-    Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
-    Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
-    protected ApplicationConnection applicationConnection;
+    private Map<String, PopupButtonWidget> popupButtonWidgets = new HashMap<>();
+    private Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
+    private Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
 
     /**
-     * receives the element where the widget mut be embedded into, and publishes
-     * the methods which can be used from js
+     * receives the element where the widget must be embedded into, and
+     * publishes the methods which can be used from JS
      *
      * @param element
      */
@@ -55,19 +52,9 @@ public class SpreadsheetJsApi {
     }
 
     private void init(Element element) {
-        // Only support eager connectors for now
-        ConnectorBundleLoader.get()
-                .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
-
-        applicationConnection = new ApplicationConnection();
         spreadsheetConnector = new SpreadsheetConnector();
         spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
-
-        // esto es para evitar el bundle
-        TypeDataStore.get().setClass(spreadsheetConnector.getClass().getName(),
-                SpreadsheetConnector.class);
-
         RootPanel.getForElement(element).add(spreadsheetWidget);
     }
 
@@ -585,165 +572,171 @@ public class SpreadsheetJsApi {
     /*
      * SERVER RPC METHOD CALLBACKS
      */
-    public void setGroupingCollapsedCallback(Consumer<String> callback) {
+    public void setGroupingCollapsedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setGroupingCollapsedCallback(callback);
     }
 
-    public void setLevelHeaderClickedCallback(Consumer<String> callback) {
+    public void setLevelHeaderClickedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setLevelHeaderClickedCallback(callback);
     }
 
-    public void setOnSheetScrollCallback(Consumer<String> callback) {
+    public void setOnSheetScrollCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setOnSheetScrollCallback(callback);
     }
 
-    public void setSheetAddressChangedCallback(Consumer<String> callback) {
+    public void setSheetAddressChangedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setSheetAddressChangedCallback(callback);
     }
 
-    public void setCellSelectedCallback(Consumer<String> callback) {
+    public void setCellSelectedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setCellSelectedCallback(callback);
     }
 
-    public void setCellRangeSelectedCallback(Consumer<String> callback) {
+    public void setCellRangeSelectedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setCellRangeSelectedCallback(callback);
     }
 
     public void setCellAddedToSelectionAndSelectedCallback(
-            Consumer<String> callback) {
+            JsConsumer<String> callback) {
         getServerRpcInstance()
                 .setCellAddedToSelectionAndSelectedCallback(callback);
     }
 
     public void setCellsAddedToRangeSelectionCallback(
-            Consumer<String> callback) {
+            JsConsumer<String> callback) {
         getServerRpcInstance().setCellsAddedToRangeSelectionCallback(callback);
     }
 
-    public void setRowSelectedCallback(Consumer<String> callback) {
+    public void setRowSelectedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setRowSelectedCallback(callback);
     }
 
-    public void setRowAddedToRangeSelectionCallback(Consumer<String> callback) {
+    public void setRowAddedToRangeSelectionCallback(
+            JsConsumer<String> callback) {
         getServerRpcInstance().setRowAddedToRangeSelectionCallback(callback);
     }
 
-    public void setColumnSelectedCallback(Consumer<String> callback) {
+    public void setColumnSelectedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setColumnSelectedCallback(callback);
     }
 
-    public void setColumnAddedToSelectionCallback(Consumer<String> callback) {
+    public void setColumnAddedToSelectionCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setColumnAddedToSelectionCallback(callback);
     }
 
-    public void setSelectionIncreasePaintedCallback(Consumer<String> callback) {
+    public void setSelectionIncreasePaintedCallback(
+            JsConsumer<String> callback) {
         getServerRpcInstance().setSelectionIncreasePaintedCallback(callback);
     }
 
-    public void setSelectionDecreasePaintedCallback(Consumer<String> callback) {
+    public void setSelectionDecreasePaintedCallback(
+            JsConsumer<String> callback) {
         getServerRpcInstance().setSelectionDecreasePaintedCallback(callback);
     }
 
-    public void setCellValueEditedCallback(Consumer<String> callback) {
+    public void setCellValueEditedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setCellValueEditedCallback(callback);
     }
 
-    public void setSheetSelectedCallback(Consumer<String> callback) {
+    public void setSheetSelectedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setSheetSelectedCallback(callback);
     }
 
-    public void setSheetRenamedCallback(Consumer<String> callback) {
+    public void setSheetRenamedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setSheetRenamedCallback(callback);
     }
 
-    public void setSheetCreatedCallback(Consumer<String> callback) {
+    public void setSheetCreatedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setSheetCreatedCallback(callback);
     }
 
-    public void setCellRangePaintedCallback(Consumer<String> callback) {
+    public void setCellRangePaintedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setCellRangePaintedCallback(callback);
     }
 
-    public void setDeleteSelectedCellsCallback(Consumer<String> callback) {
+    public void setDeleteSelectedCellsCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setDeleteSelectedCellsCallback(callback);
     }
 
-    public void setLinkCellClickedCallback(Consumer<String> callback) {
+    public void setLinkCellClickedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setLinkCellClickedCallback(callback);
     }
 
-    public void setRowsResizedCallback(Consumer<String> callback) {
+    public void setRowsResizedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setRowsResizedCallback(callback);
     }
 
-    public void setColumnResizedCallback(Consumer<String> callback) {
+    public void setColumnResizedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setColumnResizedCallback(callback);
     }
 
-    public void setOnRowAutofitCallback(Consumer<Integer> callback) {
+    public void setOnRowAutofitCallback(JsConsumer<Integer> callback) {
         getServerRpcInstance().setOnRowAutofitCallback(callback);
     }
 
-    public void setOnColumnAutofitCallback(Consumer<Integer> callback) {
+    public void setOnColumnAutofitCallback(JsConsumer<Integer> callback) {
         getServerRpcInstance().setOnColumnAutofitCallback(callback);
     }
 
-    public void setOnUndoCallback(Runnable callback) {
+    public void setOnUndoCallback(JsConsumer<Void> callback) {
         getServerRpcInstance().setOnUndoCallback(callback);
     }
 
-    public void setOnRedoCallback(Runnable callback) {
+    public void setOnRedoCallback(JsConsumer<Void> callback) {
         getServerRpcInstance().setOnRedoCallback(callback);
     }
 
-    public void setSetCellStyleWidthRatiosCallback(Consumer<String> callback) {
+    public void setSetCellStyleWidthRatiosCallback(
+            JsConsumer<String> callback) {
         getServerRpcInstance().setSetCellStyleWidthRatiosCallback(callback);
     }
 
-    public void setProtectedCellWriteAttemptedCallback(Runnable callback) {
+    public void setProtectedCellWriteAttemptedCallback(
+            JsConsumer<Void> callback) {
         getServerRpcInstance().setProtectedCellWriteAttemptedCallback(callback);
     }
 
-    public void setOnPasteCallback(Consumer<String> callback) {
+    public void setOnPasteCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setOnPasteCallback(callback);
     }
 
-    public void setClearSelectedCellsOnCutCallback(Runnable callback) {
+    public void setClearSelectedCellsOnCutCallback(JsConsumer<Void> callback) {
         getServerRpcInstance().setClearSelectedCellsOnCutCallback(callback);
     }
 
-    public void setUpdateCellCommentCallback(Consumer<String> callback) {
+    public void setUpdateCellCommentCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setUpdateCellCommentCallback(callback);
     }
 
-    public void setOnConnectorInitCallback(Runnable callback) {
+    public void setOnConnectorInitCallback(JsConsumer<Void> callback) {
         getServerRpcInstance().setOnConnectorInitCallback(callback);
     }
 
     public void setContextMenuOpenOnSelectionCallback(
-            Consumer<String> callback) {
+            JsConsumer<String> callback) {
         getServerRpcInstance().setContextMenuOpenOnSelectionCallback(callback);
     }
 
-    public void setActionOnCurrentSelectionCallback(Consumer<String> callback) {
+    public void setActionOnCurrentSelectionCallback(
+            JsConsumer<String> callback) {
         getServerRpcInstance().setActionOnCurrentSelectionCallback(callback);
     }
 
     public void setRowHeaderContextMenuOpenCallback(
-            Consumer<Integer> callback) {
+            JsConsumer<Integer> callback) {
         getServerRpcInstance().setRowHeaderContextMenuOpenCallback(callback);
     }
 
-    public void setActionOnRowHeaderCallback(Consumer<String> callback) {
+    public void setActionOnRowHeaderCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setActionOnRowHeaderCallback(callback);
     }
 
     public void setColumnHeaderContextMenuOpenCallback(
-            Consumer<Integer> callback) {
+            JsConsumer<Integer> callback) {
         getServerRpcInstance().setColumnHeaderContextMenuOpenCallback(callback);
     }
 
-    public void setActionOnColumnHeaderCallback(Consumer<String> callback) {
+    public void setActionOnColumnHeaderCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setActionOnColumnHeaderCallback(callback);
     }
 
