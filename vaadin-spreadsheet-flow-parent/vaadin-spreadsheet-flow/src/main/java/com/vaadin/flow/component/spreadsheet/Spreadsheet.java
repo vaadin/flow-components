@@ -139,7 +139,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         if (service != null) {
             if (service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
-                        "vaadin-spreadhseet-flow", version);
+                        "vaadin-spreadsheet-flow", version);
             }
         }
     }
