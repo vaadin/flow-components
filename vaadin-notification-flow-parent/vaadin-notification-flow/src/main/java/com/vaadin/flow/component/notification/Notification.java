@@ -41,7 +41,8 @@ import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the <code>vaadin-notification</code> element.
+ * Notifications are used to provide feedback to the user. They communicate
+ * information about activities, processes, and events in the application.
  *
  * @author Vaadin Ltd
  */

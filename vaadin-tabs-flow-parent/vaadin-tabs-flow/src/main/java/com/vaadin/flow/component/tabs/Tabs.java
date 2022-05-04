@@ -32,7 +32,10 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code vaadin-tabs} element.
+ * Tabs are used to organize and group content into sections that the user can
+ * navigate between. Use Tabs when you want to allow in-place navigation within
+ * a certain part of the UI, instead of showing everything at once or forcing
+ * the user to navigate between different views.
  * <p>
  * {@link Tab} components can be added to this component with the
  * {@link #add(Tab...)} method or the {@link #Tabs(Tab...)} constructor. The Tab

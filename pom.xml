@@ -36,6 +36,11 @@
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
+
+        <!-- spreadsheet -->
+        <poi.version>5.2.2</poi.version>
+        <gwt.version>2.9.0</gwt.version>
+        <framework.version>8.15.1</framework.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
@@ -81,10 +86,11 @@
         <module>vaadin-grid-pro-flow-parent</module>
         <module>vaadin-map-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
+        <module>vaadin-spreadsheet-flow-parent</module>
     </modules>
     <profiles>
         <profile>
-            <id>default</id>
+            <id>merged-it</id>
             <activation>
                 <property>
                     <name>run-it</name>
@@ -93,6 +99,37 @@
             <modules>
                 <module>integration-tests</module>
             </modules>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <!-- Enable production mode when running merged ITs -->
+                        <plugin>
+                            <groupId>org.eclipse.jetty</groupId>
+                            <artifactId>jetty-maven-plugin</artifactId>
+                            <configuration>
+                                <systemProperties>
+                                    <systemProperty>
+                                        <name>vaadin.productionMode</name>
+                                        <value>true</value>
+                                    </systemProperty>
+                                </systemProperties>
+                            </configuration>
+                        </plugin>
+                        <!-- Build frontend bundle for running merged ITs -->
+                        <plugin>
+                            <groupId>com.vaadin</groupId>
+                            <artifactId>flow-maven-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>build-frontend</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
         </profile>
     </profiles>
     <repositories>
@@ -204,10 +241,10 @@
 
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
-                          -includeresource.resources: -src/main/resources
+                  includeresource.resources: -src/main/resources
 
                           //if profile war is used in demos
-                          -fixupmessages: "Classes found in the wrong directory";is:=warning
+                  fixupmessages: "Classes found in the wrong directory";is:=warning
 
                           ]]></bnd>
                     </configuration>
@@ -239,7 +276,7 @@
                             </systemProperty>
                             <systemProperty>
                                 <name>vaadin.productionMode</name>
-                                <value>true</value>
+                                <value>false</value>
                             </systemProperty>
                             <systemProperty>
                                 <name>vaadin.reuseDevServer</name>
@@ -374,7 +411,6 @@
                         <execution>
                             <goals>
                                 <goal>prepare-frontend</goal>
-                                <goal>build-frontend</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -558,6 +594,56 @@
                 <version>${testbench.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-full</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+              </dependency>
+              <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+              </dependency>
+              <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+              </dependency>
+
+              <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-client</artifactId>
+                <version>${framework.version}</version>
+              </dependency>
+              <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-client-compiler</artifactId>
+                <version>${framework.version}</version>
+              </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

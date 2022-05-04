@@ -32,17 +32,23 @@ import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code vaadin-message-input} element. The
- * component displays a text-area to input a message and a button to send it.
+ * Message Input allows users to author and send messages. The component
+ * displays a text-area to input a message and a button to send it. The user can
+ * send the message with one of the following actions:
+ * <ul>
+ * <li>by pressing Enter (use Shift + Enter to add a new line)</li>
+ * <li>by clicking the “send” button.</li>
+ * </ul>
+ * Use the {@link MessageList} component to show messages that users have sent.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-input")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "23.1.0-alpha4")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.1.0-alpha4")
+@NpmPackage(value = "@vaadin/message-input", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.1.0-beta1")
 public class MessageInput extends Component
         implements HasSize, HasStyle, HasEnabled {
 

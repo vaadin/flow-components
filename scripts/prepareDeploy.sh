@@ -106,14 +106,17 @@ fi
 
 echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile=$profile"
 ## '.' points to the root project, 'vaadin-flow-components-shared-parent' has the common dependencies for components
-build=.,vaadin-flow-components-shared-parent,vaadin-flow-components-shared-parent/vaadin-flow-components-base
+build=.,vaadin-flow-components-shared-parent,vaadin-flow-components-shared-parent/vaadin-flow-components-base,vaadin-flow-components-shared-parent/vaadin-flow-components-test-util
 for i in $modules
 do
-  [ -d "$i" -o -d "$i-flow-parent" ] \
-    && build=$build,$i-flow-parent,$i-flow-parent/$i-flow \
-    && [ -d "$i-flow-parent/$i-testbench" ] && build=$build,$i-flow-parent/$i-testbench \
-    && [ -d "$i-flow-parent/$i-flow-demo" ] && build=$build,$i-flow-parent/$i-flow-demo \
-    && [ -d "$i-flow-parent/$i-flow-svg-generator" ] && build=$build,$i-flow-parent/$i-flow-svg-generator
+  if [ -d "$i" -o -d "$i-flow-parent" ]
+  then
+    build="$build,$i-flow-parent,$i-flow-parent/$i-flow"
+    [ -d "$i-flow-parent/$i-testbench" ] && build="$build,$i-flow-parent/$i-testbench"
+    [ -d "$i-flow-parent/$i-flow-demo" ] && build="$build,$i-flow-parent/$i-flow-demo"
+    [ -d "$i-flow-parent/$i-flow-svg-generator" ] && build="$build,$i-flow-parent/$i-flow-svg-generator"
+    [ -d "$i-flow-parent/$i-flow-client" ] && build="$build,$i-flow-parent/$i-flow-client"
+  fi
 done
 
 ## Inform TC about computed parameters
