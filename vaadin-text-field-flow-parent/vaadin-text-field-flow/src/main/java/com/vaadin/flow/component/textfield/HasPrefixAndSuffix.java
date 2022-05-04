@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.SlotUtils;
 
 /**
  * Mixin interface for text-field components that have prefix and suffix slots
@@ -38,7 +39,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      *            prefix component
      */
     default void setPrefixComponent(Component component) {
-        SlotHelpers.clearSlot(this, "prefix");
+        SlotUtils.clearSlot(this, "prefix");
 
         if (component != null) {
             component.getElement().setAttribute("slot", "prefix");
@@ -54,7 +55,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      * @see #setPrefixComponent(Component)
      */
     default Component getPrefixComponent() {
-        return SlotHelpers.getChildInSlot(this, "prefix");
+        return SlotUtils.getChildInSlot(this, "prefix");
     }
 
     /**
@@ -69,7 +70,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      *            suffix component
      */
     default void setSuffixComponent(Component component) {
-        SlotHelpers.clearSlot(this, "suffix");
+        SlotUtils.clearSlot(this, "suffix");
 
         if (component != null) {
             component.getElement().setAttribute("slot", "suffix");
@@ -85,6 +86,6 @@ public interface HasPrefixAndSuffix extends HasElement {
      * @see #setPrefixComponent(Component)
      */
     default Component getSuffixComponent() {
-        return SlotHelpers.getChildInSlot(this, "suffix");
+        return SlotUtils.getChildInSlot(this, "suffix");
     }
 }

@@ -13,10 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield;
+package com.vaadin.flow.component;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.dom.Element;
 
 import java.util.Optional;
@@ -24,11 +22,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Helper methods for handling child elements inside slots.
+ * Util methods for handling child elements inside slots.
  *
  * @author Vaadin Ltd
  */
-class SlotHelpers {
+public class SlotUtils {
 
     /**
      * Gets all the child elements of the parent that are in the specified slot.
@@ -71,9 +69,6 @@ class SlotHelpers {
      */
     public static Component getChildInSlot(HasElement parent, String slot) {
         Optional<Element> element = getElementsInSlot(parent, slot).findFirst();
-        if (element.isPresent()) {
-            return element.get().getComponent().get();
-        }
-        return null;
+        return element.flatMap(Element::getComponent).orElse(null);
     }
 }
