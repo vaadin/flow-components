@@ -810,38 +810,6 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Set to true to display the clear icon which clears the input.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code clearButtonVisible} property from the webcomponent
-     */
-    protected boolean isClearButtonVisibleBoolean() {
-        return getElement().getProperty("clearButtonVisible", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display the clear icon which clears the input.
-     * </p>
-     *
-     * @param clearButtonVisible
-     *            the boolean value to set
-     */
-    protected void setClearButtonVisible(boolean clearButtonVisible) {
-        getElement().setProperty("clearButtonVisible", clearButtonVisible);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * The error message to display when the input is invalid.
      * <p>
      * This property is not synchronized automatically from the client side, so
