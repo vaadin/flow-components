@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components-testbench</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
