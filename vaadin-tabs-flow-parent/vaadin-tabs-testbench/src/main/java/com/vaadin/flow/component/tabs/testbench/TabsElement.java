@@ -81,7 +81,7 @@ public class TabsElement extends TestBenchElement {
      *
      * @param text
      *            the text to look for in the tabs
-     * @return the index of tthe first tab element which matches the given text
+     * @return the index of the first tab element which matches the given text
      *         or -1 if no match was found
      */
     public int getTab(String text) {
