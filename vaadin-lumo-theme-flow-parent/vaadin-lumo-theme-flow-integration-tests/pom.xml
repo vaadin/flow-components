@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-lumo-theme-flow-parent</artifactId>
-        <version>23.1-SNAPSHOT</version>
+        <version>23.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-lumo-theme-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -41,11 +41,6 @@
             <version>${flow.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server-production-mode</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.36</version>
@@ -58,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-flow-components-shared</artifactId>
+            <artifactId>vaadin-flow-components-test-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

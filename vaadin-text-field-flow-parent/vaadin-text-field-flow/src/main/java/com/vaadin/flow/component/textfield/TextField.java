@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -28,15 +29,16 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-text-field} element.
+ * Text Field allows the user to input and edit text. Prefix and suffix
+ * components, such as icons, are also supported.
  *
  * @author Vaadin Ltd
  */
 public class TextField extends GeneratedVaadinTextField<TextField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
-        HasLabel {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasClearButton {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -286,29 +288,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     public void setAutoselect(boolean autoselect) {
         super.setAutoselect(autoselect);
-    }
-
-    /**
-     * Gets the visibility state of the button which clears the text field.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isClearButtonVisible() {
-        return isClearButtonVisibleBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the clear button which clears the text
-     * field.
-     *
-     * @param clearButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
     }
 
     @Override

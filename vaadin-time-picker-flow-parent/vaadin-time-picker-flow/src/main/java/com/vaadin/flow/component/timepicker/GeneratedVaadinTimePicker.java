@@ -124,10 +124,10 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "23.1.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.1.0-alpha2")
+@NpmPackage(value = "@vaadin/time-picker", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.1.0-beta1")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -645,38 +645,6 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      */
     protected void setStep(double step) {
         getElement().setProperty("step", step);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display the clear icon which clears the input.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code clearButtonVisible} property from the webcomponent
-     */
-    protected boolean isClearButtonVisibleBoolean() {
-        return getElement().getProperty("clearButtonVisible", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display the clear icon which clears the input.
-     * </p>
-     *
-     * @param clearButtonVisible
-     *            the boolean value to set
-     */
-    protected void setClearButtonVisible(boolean clearButtonVisible) {
-        getElement().setProperty("clearButtonVisible", clearButtonVisible);
     }
 
     /**

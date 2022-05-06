@@ -40,11 +40,7 @@ window.Vaadin.Flow.virtualListConnector = {
     };
 
     const scheduleUpdateRequest = function () {
-      list.__requestDebounce = Debouncer.debounce(
-        list.__requestDebounce,
-        timeOut.after(50),
-        updateRequestedItem
-      );
+      list.__requestDebounce = Debouncer.debounce(list.__requestDebounce, timeOut.after(50), updateRequestedItem);
     };
 
     requestAnimationFrame(() => updateRequestedItem);
@@ -63,16 +59,19 @@ window.Vaadin.Flow.virtualListConnector = {
         root.__virtualListIndex = model.index;
 
         if (model.item === undefined) {
-          originalRenderer.call(list, root, list, {...model, item: list.$connector.placeholderItem});
+          originalRenderer.call(list, root, list, {
+            ...model,
+            item: list.$connector.placeholderItem
+          });
         } else {
           originalRenderer.call(list, root, list, model);
         }
 
         /*
-        * Check if we need to do anything once things have settled down.
-        * This method is called multiple times in sequence for the same user
-        * action, but we only want to do the check once.
-        */
+         * Check if we need to do anything once things have settled down.
+         * This method is called multiple times in sequence for the same user
+         * action, but we only want to do the check once.
+         */
         scheduleUpdateRequest();
       };
       renderer.__virtualListConnectorPatched = true;
@@ -119,5 +118,5 @@ window.Vaadin.Flow.virtualListConnector = {
       placeholderItem.__placeholder = true;
       list.$connector.placeholderItem = placeholderItem;
     };
-  },
+  }
 };

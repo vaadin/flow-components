@@ -64,14 +64,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A customizable drop-down select component similar to a native browser select.
- * <p>
- * This is a server side Java integration for {@code <vaadin-select>} web
- * component.
- * <p>
- * For usage examples, see
- * <a href="https://vaadin.com/components/vaadin-select/java-examples">the demo
- * in vaadin.com</a>.
+ * Select allows users to choose a single value from a list of options presented
+ * in an overlay. The dropdown can be opened with a click, up/down arrow keys,
+ * or by typing the initial character for one of the options.
  *
  * @param <T>
  *            the type of the items for the select
@@ -143,10 +138,67 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @param items
      *            the items for the select
+     * @see #setItems(Object...)
+     * @deprecated as of 23.1. Please use {@link #setItems(Object[])} instead.
      */
+    @Deprecated
+    @SafeVarargs
     public Select(T... items) {
         this();
 
+        setItems(items);
+    }
+
+    /**
+     * Constructs a select with the initial value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Select(
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a select with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the select
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public Select(String label,
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
+        this();
+        setLabel(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a select with the initial label text and value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the select
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    @SafeVarargs
+    public Select(String label,
+            ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener,
+            T... items) {
+        this(label, listener);
         setItems(items);
     }
 
@@ -188,7 +240,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
