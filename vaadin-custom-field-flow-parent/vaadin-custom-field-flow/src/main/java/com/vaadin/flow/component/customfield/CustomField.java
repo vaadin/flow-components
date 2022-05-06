@@ -76,6 +76,13 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         super(defaultValue);
         // Force a value update when the change event generated
         getElement().addEventListener("change", e -> this.updateValue());
+        addValueChangeListener(event -> {
+            if (event.getValue() != null && !event.getValue().isEmpty()) {
+                getElement().setAttribute("has-value", true);
+            } else {
+                getElement().removeAttribute("has-value");
+            }
+        });
     }
 
     /**
